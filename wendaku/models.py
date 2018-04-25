@@ -1,0 +1,72 @@
+from django.db import models
+
+# Create your models here.
+
+
+# 角色表
+class Role(models.Model):
+    name = models.CharField(verbose_name="角色名称", max_length=32)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "角色表"
+
+    def __str__(self):
+        return "%s" % self.name
+
+
+# 用户信息表
+class UserProfile(models.Model):
+
+    status_choices = (
+        (1, "启用"),
+        (2, "未启用"),
+    )
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=1)
+    password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
+    username = models.CharField(verbose_name="姓名", max_length=32)
+
+    role = models.ForeignKey("Role", verbose_name="角色", null=True, blank=True)
+
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
+    oper_user = models.ForeignKey("self", verbose_name="操作人", related_name="u_user", null=True, blank=True)
+
+    token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
+
+    def __str__(self):
+        return self.username
+
+
+# 科室表
+class Keshi(models.Model):
+    name = models.CharField(verbose_name="名称", max_length=64)
+    pid = models.ForeignKey('self', null=True, blank=True, verbose_name="父级id")
+    oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+
+# 词类表
+class CiLei(models.Model):
+    name = models.CharField(verbose_name="名称", max_length=64)
+    oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+
+# 答案类型表
+class DaAnLeiXing(models.Model):
+    name = models.CharField(verbose_name="名称", max_length=64)
+    oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+
+# 答案库表
+class DaAnKu(models.Model):
+    content = models.TextField(verbose_name="答案")
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    shenhe_date = models.DateField(verbose_name="审核时间", null=True, blank=True)
+    oper_user = models.ForeignKey("UserProfile", verbose_name="审核人", null=True, blank=True)
+    daochu_num = models.SmallIntegerField(verbose_name="导出次数", default=0)
+
+    cilei = models.ForeignKey('CiLei', verbose_name="词类")
+    daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型")
