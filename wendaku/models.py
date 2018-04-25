@@ -10,6 +10,7 @@ class Role(models.Model):
 
     class Meta:
         verbose_name_plural = "角色表"
+        app_label = "wendaku"
 
     def __str__(self):
         return "%s" % self.name
@@ -37,6 +38,9 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.username
 
+    class Meta:
+        app_label = "wendaku"
+
 
 # 科室表
 class Keshi(models.Model):
@@ -45,6 +49,9 @@ class Keshi(models.Model):
     oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    class Meta:
+        app_label = "wendaku"
+
 
 # 词类表
 class CiLei(models.Model):
@@ -52,12 +59,18 @@ class CiLei(models.Model):
     oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    class Meta:
+        app_label = "wendaku"
+
 
 # 答案类型表
 class DaAnLeiXing(models.Model):
     name = models.CharField(verbose_name="名称", max_length=64)
     oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        app_label = "wendaku"
 
 
 # 答案库表
@@ -70,3 +83,6 @@ class DaAnKu(models.Model):
 
     cilei = models.ForeignKey('CiLei', verbose_name="词类")
     daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型")
+
+    class Meta:
+        app_label = "wendaku"

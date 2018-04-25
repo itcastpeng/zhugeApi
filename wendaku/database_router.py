@@ -3,7 +3,6 @@
 # Author:zhangcong
 # Email:zc_92@sina.com
 
-# -*- coding: utf-8 -*-
 from django.conf import settings
 
 DATABASE_MAPPING = settings.DATABASE_APPS_MAPPING
@@ -45,7 +44,6 @@ class DatabaseAppsRouter(object):
                 return False
         return None
 
-    # for Django 1.4 - Django 1.6
     def allow_syncdb(self, db, model):
         """Make sure that apps only appear in the related database."""
 
@@ -55,9 +53,11 @@ class DatabaseAppsRouter(object):
             return False
         return None
 
-    # Django 1.7 - Django 1.11
-    def allow_migrate(self, db, app_label, model_name=None, **hints):
-        print(db, app_label, model_name, hints)
+    def allow_migrate(self, db, app_label, model=None, **hints):
+        """
+        Make sure the auth app only appears in the 'auth_db'
+        database.
+        """
         if db in DATABASE_MAPPING.values():
             return DATABASE_MAPPING.get(app_label) == db
         elif app_label in DATABASE_MAPPING:
