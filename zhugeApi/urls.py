@@ -20,5 +20,5 @@ import wendaku
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
-    url(r'^wenku/', include('wendaku.urls')),
+    url(r'^wendaku/', include('wendaku.urls')),
 ]
