@@ -44,16 +44,25 @@ def role_oper(request, oper_type, o_id):
                 response.msg = "角色名已存在"
 
         elif oper_type == "delete":
-            models.Role.objects.filter(id=o_id).delete()
-            response.code = 200
-            response.msg = "删除成功"
+            role_objs = models.Role.objects.filter(id=o_id)
+            if role_objs:
+                role_objs.delete()
+                response.code = 200
+                response.msg = "删除成功"
+            else:
+                response.code = 302
+                response.msg = '用户ID不存在'
 
         elif oper_type == "update":
             name = request.POST.get('name')
-            models.Role.objects.filter(id=o_id).update(name=name)
-            response.code = 200
-            response.msg = "修改成功"
-
+            role_update = models.Role.objects.filter(id=o_id)
+            if role_update:
+                role_update.update(name=name)
+                response.code = 200
+                response.msg = "修改成功"
+            else:
+                response.code = 302
+                response.msg = '用户ID不存在'
     else:
         response.code = 402
         response.msg = "请求异常"

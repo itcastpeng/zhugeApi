@@ -12,7 +12,6 @@ class UserForm(forms.Form):
             'required': "用户名不能为空"
         }
     )
-
     password = forms.CharField(
         required=True,
         error_messages={
@@ -23,8 +22,13 @@ class UserForm(forms.Form):
         required=True,
         error_messages={
             'required': '角色不能为空'
-        }
-    )
+        })
+    oper_user_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': '操作人不能为空'
+        })
+
     # 查询用户名判断是否存在
     def clean_username(self):
         username = self.data['username']
@@ -64,6 +68,7 @@ class UserUpdateForm(forms.Form):
             'required': '角色不能为空'
         }
     )
+
     # 判断用户名是否存在
     def clean_username(self):
         username = self.data['username']
