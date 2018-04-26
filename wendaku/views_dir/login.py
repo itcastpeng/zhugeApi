@@ -13,15 +13,17 @@ def login(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
     print(username, account.str_encrypt(password))
+    # 查询数据库
     userprofile_objs = models.UserProfile.objects.filter(
         username=username,
+        # md5加密 密码
         password=account.str_encrypt(password),
         status=1
     )
 
     if userprofile_objs:
+        # 如果有数据 查询第一条对象
         userprofile_obj = userprofile_objs[0]
-
         # 如果没有token 则生成 token
         if not userprofile_obj.token:
             token = account.get_token(account.str_encrypt(password))
