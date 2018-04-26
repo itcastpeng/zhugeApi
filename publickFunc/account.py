@@ -21,3 +21,26 @@ def get_token(pwd):
     return token
 
 
+# 装饰器 判断token 是否正确
+def is_token(func):
+    def inner(request, *args, **kwargs):
+        # return redirect("/statics/err_page/wzwhz.html")
+        request.GET.get('token')
+        if not is_login:
+            return redirect("/account/login/")
+        return func(request, *args, **kwargs)
+    return inner
+
+
+
+
+
+
+
+
+
+
+
+
+
+
