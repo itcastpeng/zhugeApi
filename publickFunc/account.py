@@ -36,7 +36,7 @@ def is_token(table_obj):
             if objs:
                 obj = objs[0]
                 if str_encrypt(timestamp + obj.token) == rand_str:
-                    print("登录成功")
+                    print("已经登录")
                     flag = True
                 else:
                     flag = False
