@@ -2,6 +2,10 @@
 import hashlib
 import time
 
+from django.http import JsonResponse
+from publickFunc import Response
+
+
 # 用户输入的密码加密
 def str_encrypt(pwd):
     """
@@ -22,18 +26,32 @@ def get_token(pwd):
 
 
 # 装饰器 判断token 是否正确
-def is_token(func):
-    def inner(request, *args, **kwargs):
-        # return redirect("/statics/err_page/wzwhz.html")
-        request.GET.get('token')
-        if not is_login:
-            return redirect("/account/login/")
-        return func(request, *args, **kwargs)
-    return inner
+def is_token(table_obj):
+    def is_token_decorator(func):
+        def inner(request, *args, **kwargs):
+            rand_str = request.GET.get('rand_str')
+            timestamp = request.GET.get('timestamp', '')
+            user_id = request.GET.get('user_id')
+            objs = table_obj.objects.filter(id=user_id)
+            if objs:
+                obj = objs[0]
+                if str_encrypt(timestamp + obj.token) == rand_str:
+                    print("登录成功")
+                    flag = True
+                else:
+                    flag = False
+            else:
+                flag = False
 
+            if not flag:
+                response = Response.ResponseObj()
+                response.code = 400
+                response.msg = "token异常"
+                return JsonResponse(response.__dict__)
+            return func(request, *args, **kwargs)
+        return inner
 
-
-
+    return is_token_decorator
 
 
 

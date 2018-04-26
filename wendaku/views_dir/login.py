@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 
+
 @csrf_exempt
 def login(request):
     response = Response.ResponseObj()
@@ -36,13 +37,15 @@ def login(request):
         time.time()
         response.data = {
             'token': token,
+            'user_id': userprofile_obj.id,
             'set_avator': userprofile_obj.set_avator
         }
 
         userprofile_obj.last_login_date = datetime.datetime.now()
         userprofile_obj.save()
     else:
-        print("登录失败")
+        response.code = 401
+        response.msg = "账号或密码错误"
 
     return JsonResponse(response.__dict__)
 
