@@ -34,6 +34,7 @@ class UserProfile(models.Model):
     oper_user = models.ForeignKey("self", verbose_name="操作人", related_name="u_user", null=True, blank=True)
 
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
+    set_avator = models.CharField(verbose_name="头像图片地址", max_length=128, default='statics/imgs/setAvator.jpg')
 
     def __str__(self):
         return self.username
