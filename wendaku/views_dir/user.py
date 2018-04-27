@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 
-from wendaku.forms.user import UserForm, UserUpdateForm
+from wendaku.forms.user_verify import UserAddForm, UserUpdateForm,UserSelectForm
 import json
 
 
@@ -17,40 +17,44 @@ import json
 def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        current_page = int(request.GET.get('current_page', 1))
-        length = int(request.GET.get('length', 10))
-        start_line = (current_page - 1) * length
-        stop_line = start_line + length
-        # 链表查询   查询所有
+        forms_obj = UserSelectForm(request.GET)
+        if forms_obj.is_valid():
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+            order = request.GET.get('order', '-create_date')
+            start_line = (current_page - 1) * length
+            stop_line = start_line + length
+            # 链表查询   查询所有
+            user_data = []
+            userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').all().order_by(order)
 
-        userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').all()[start_line:stop_line]
-        user_data = []
-        for obj in userprofile_objs:
-            #  如果有oper_user字段 等于本身名字
-            if obj.oper_user:
-                oper_user_username = obj.oper_user.username
-            else:
-                oper_user_username = ''
-            # print('oper_user_username -->', oper_user_username)
-            #  将查询出来的数据 加入列表
-            user_data.append({
-                'user_id': obj.id,
-                'username': obj.username,
-                'role': obj.role.name,
-                'create_date': obj.create_date,
-                'last_login_date': obj.last_login_date,
-                'oper_user': oper_user_username,
-            })
-            #  查询成功 返回200 状态码
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {
-                'user_data': user_data
-            }
-    else:
-        response.code = 402
-        response.msg = "请求异常"
-        response.data = {'':''}
+            for obj in userprofile_objs[start_line:stop_line]:
+                #  如果有oper_user字段 等于本身名字
+                if obj.oper_user:
+                    oper_user_username = obj.oper_user.username
+                else:
+                    oper_user_username = ''
+                # print('oper_user_username -->', oper_user_username)
+                #  将查询出来的数据 加入列表
+                user_data.append({
+                    'id': obj.id,
+                    'username': obj.username,
+                    'role': obj.role.name,
+                    'create_date': obj.create_date,
+                    'last_login_date': obj.last_login_date,
+                    'oper_user': oper_user_username,
+                })
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'user_data': user_data
+                }
+        else:
+            response.code = 402
+            response.msg = "请求异常"
+            response.data = json.loads(forms_obj.errors.as_json())
     return JsonResponse(response.__dict__)
 
 
@@ -62,8 +66,15 @@ def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
+            form_data = {
+                'user_id': o_id,
+                'oper_user_id':request.GET.get('user_id'),
+                'username': request.POST.get('username'),
+                'role_id': request.POST.get('role_id'),
+                'password':request.POST.get('password')
+            }
             #  创建 form验证 实例（参数默认转成字典）
-            forms_obj = UserForm(request.POST)
+            forms_obj = UserAddForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
                 # print(forms_obj.cleaned_data)
