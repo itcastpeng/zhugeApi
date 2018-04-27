@@ -4,7 +4,7 @@ from publickFunc import Response
 from publickFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from wendaku.forms.daan_verifyleixing import DaanAddForm, DaanUpdateForm, DaanSelectForm
+from wendaku.forms.daan_leixing_verify import DaanAddForm, DaanUpdateForm, DaanSelectForm
 import time
 import datetime
 import json
