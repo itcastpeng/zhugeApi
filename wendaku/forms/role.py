@@ -20,7 +20,7 @@ class RoleForm(forms.Form):
         })
 
     # 查询用户名判断是否存在
-    def clean_username(self):
+    def clean_name(self):
         name = self.data['name']
         objs = models.Role.objects.filter(
             name=name,
