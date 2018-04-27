@@ -13,8 +13,8 @@ def role(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
-        current_page = request.GET.get('current_page', 1)
-        length = request.GET.get('length',10)
+        current_page = int(request.GET.get('current_page', 1))
+        length = int(request.GET.get('length', 10))
         start_line = (current_page - 1) * length
         stop_line = start_line + length
 
