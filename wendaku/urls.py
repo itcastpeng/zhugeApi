@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from wendaku.views_dir import login, role, user
+from wendaku.views_dir import login, role, user,keshi
 
 urlpatterns = [
     # url(r'^wenku/', include('wendaku.urls')),
@@ -12,5 +12,9 @@ urlpatterns = [
 
     # 用户操作
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)', user.user_oper),
-    url(r'^user', user.user)
+    url(r'^user', user.user),
+
+    # 科室操作
+    url(r'^keshi/(?P<oper_type>\w+)/(?P<o_id>\d+)', keshi.keshi_role_oper),
+    url(r'^keshi', keshi.keshi),
 ]

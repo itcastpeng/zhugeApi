@@ -17,11 +17,12 @@ import json
 def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        current_page = request.GET.get('current_page', 1)
-        length = request.GET.get('length', 10)
+        current_page = int(request.GET.get('current_page', 1))
+        length = int(request.GET.get('length', 10))
         start_line = (current_page - 1) * length
         stop_line = start_line + length
         # 链表查询   查询所有
+
         userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').all()[start_line:stop_line]
         user_data = []
         for obj in userprofile_objs:
@@ -67,8 +68,8 @@ def user_oper(request, oper_type, o_id):
                 print("验证通过")
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
-                # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                models.UserProfile.objects.create(**forms_obj.cleaned_data)
+                print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
+                # models.UserProfile.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
             else:
