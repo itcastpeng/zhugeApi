@@ -89,16 +89,17 @@ class RoleSelectForm(forms.Form):
             'required': "页显示数量类型错误"
         }
     )
+
     def clean_current_page(self):
         if 'current_page' not in self.data:
             current_page = 1
         else:
-            current_page = self.data['current_page']
+            current_page = int(self.data['current_page'])
         return current_page
 
     def clean_length(self):
-        if 'clean_length' not in self.data:
-            clean_length = 10
+        if 'length' not in self.data:
+            length = 10
         else:
-            clean_length = self.data['clean_length']
-        return clean_length
+            length = int(self.data['length'])
+        return length
