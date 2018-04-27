@@ -4,9 +4,10 @@ from publickFunc import Response
 from publickFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from wendaku.forms.role import RoleForm, RoleUpdateForm
 import time
 import datetime
-
+import json
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def role(request):
@@ -50,19 +51,20 @@ def role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
-            name = request.POST.get('name')
-            user_id = request.GET.get('user_id')
-            role_objs = models.Role.objects.filter(name=name)
-            if not role_objs:
-                models.Role.objects.create(
-                    name=name,
-                    oper_user_id=user_id
-                )
+            role_data = {
+                'name' : request.POST.get('name'),
+                'oper_user_id':request.POST.get('oper_user_id')
+            }
+            forms_obj = RoleForm(role_data)
+            if forms_obj.is_valid():
+                models.Role.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
             else:
-                response.code = 300
-                response.msg = "角色名已存在"
+                print("验证不通过")
+                # print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
             role_objs = models.Role.objects.filter(id=o_id)
@@ -75,15 +77,21 @@ def role_oper(request, oper_type, o_id):
                 response.msg = '用户ID不存在'
 
         elif oper_type == "update":
-            name = request.POST.get('name')
             role_update = models.Role.objects.filter(id=o_id)
             if role_update:
-                role_update.update(name=name)
-                response.code = 200
-                response.msg = "修改成功"
-            else:
-                response.code = 302
-                response.msg = '用户ID不存在'
+                role_data_update = {
+                    'name':request.POST.get('name'),
+                    'oper_user_id': request.POST.get('oper_user_id')
+                }
+                forms_obj = RoleForm(role_data_update)
+                if forms_obj.is_valid():
+                    name = forms_obj.cleaned_data['name']
+                    role_update.update(name=name)
+                    response.code = 200
+                    response.msg = "修改成功"
+                else:
+                    response.code = 302
+                    response.msg = '用户ID不存在'
     else:
         response.code = 402
         response.msg = "请求异常"

@@ -17,11 +17,12 @@ import json
 def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        current_page = request.GET.get('current_page', 1)
-        length = request.GET.get('length', 10)
+        current_page = int(request.GET.get('current_page', 1))
+        length = int(request.GET.get('length', 10))
         start_line = (current_page - 1) * length
         stop_line = start_line + length
         # 链表查询   查询所有
+
         userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').all()[start_line:stop_line]
         user_data = []
         for obj in userprofile_objs:
