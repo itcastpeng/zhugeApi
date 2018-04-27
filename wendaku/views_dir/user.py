@@ -68,8 +68,8 @@ def user_oper(request, oper_type, o_id):
                 print("验证通过")
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
-                print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                # models.UserProfile.objects.create(**forms_obj.cleaned_data)
+                # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
+                models.UserProfile.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
             else:

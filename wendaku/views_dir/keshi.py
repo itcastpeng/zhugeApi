@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
+import json
 from wendaku.forms.keshi import KeshiForm,KeshiUpdateForm
 @csrf_exempt
 @account.is_token(models.UserProfile)
@@ -59,7 +60,7 @@ def keshi_role_oper(request, oper_type, o_id):
                 response.msg = "添加成功"
             else:
                 response.code = 300
-                response.msg = "科室名已存在"
+                response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
             role_objs = models.Keshi.objects.filter(id=o_id)
