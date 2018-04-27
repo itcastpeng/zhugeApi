@@ -17,13 +17,23 @@ def role(request):
         length = request.GET.get('length',10)
         start_line = (current_page - 1) * length
         stop_line = start_line + length
-        # print(start_line, length)
-        role_data = models.Role.objects.select_related('oper_user').all().values('id', 'name','create_date','oper_user__username')[start_line: stop_line]
-        # print(role_data)
+
+        # 获取所有数据
+        role_objs = models.Role.objects.select_related('oper_user').all()
+        role_data = []
+
+        # 获取第几页的数据
+        for role_obj in role_objs[start_line: stop_line]:
+            role_data.append({
+                'id': role_obj.id,
+                'name': role_obj.name,
+                'create_date': role_obj.create_date,
+                'oper_user__username': role_obj.oper_user.username,
+            })
         response.code = 200
         response.data = {
             'role_data': list(role_data),
-            'data_count':len(role_data)
+            'data_count': role_objs.count()
         }
         return JsonResponse(response.__dict__)
 
