@@ -46,6 +46,7 @@ def user(request):
         else:
             response.code = 402
             response.msg = "请求异常"
+            response.data = {'':''}
         return JsonResponse(response.__dict__)
 
 

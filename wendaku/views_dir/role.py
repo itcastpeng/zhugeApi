@@ -14,7 +14,7 @@ def role(request):
     response = Response.ResponseObj()
     if request.method == "GET":
 
-        role_data = models.Role.objects.values('id', 'name')
+        role_data = models.Role.objects.select_related('oper_user').values('id', 'name','create_date','oper_user__username')
         print(role_data)
         response.code = 200
         response.data = {
