@@ -19,7 +19,7 @@ def role(request):
         stop_line = start_line + length
         # print(start_line, length)
         role_data = models.Role.objects.select_related('oper_user').all().values('id', 'name','create_date','oper_user__username')[start_line: stop_line]
-        print(role_data)
+        # print(role_data)
         response.code = 200
         response.data = {
             'role_data': list(role_data),
@@ -39,9 +39,13 @@ def role_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             name = request.POST.get('name')
+            user_id = request.GET.get('user_id')
             role_objs = models.Role.objects.filter(name=name)
             if not role_objs:
-                models.Role.objects.create(name=name)
+                models.Role.objects.create(
+                    name=name,
+                    oper_user_id=user_id
+                )
                 response.code = 200
                 response.msg = "添加成功"
             else:
