@@ -15,11 +15,13 @@ def role(request):
         # 获取参数 页数 默认1
         current_page = int(request.GET.get('current_page', 1))
         length = int(request.GET.get('length', 10))
+        order = request.GET.get('order', '-create_date')
+
         start_line = (current_page - 1) * length
         stop_line = start_line + length
 
         # 获取所有数据
-        role_objs = models.Role.objects.select_related('oper_user').all()
+        role_objs = models.Role.objects.select_related('oper_user').all().order_by(order)
         role_data = []
 
         # 获取第几页的数据
