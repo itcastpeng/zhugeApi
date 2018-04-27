@@ -24,7 +24,7 @@ class UserForm(forms.Form):
             'required': '角色不能为空'
         })
     oper_user_id = forms.IntegerField(
-        required=False,
+        required=True,
         error_messages={
             'required': '操作人不能为空'
         })
