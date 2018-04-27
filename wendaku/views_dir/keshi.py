@@ -7,30 +7,42 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 import json
-from wendaku.forms.keshi import KeshiForm,KeshiUpdateForm
+from wendaku.forms.keshi_verify import KeshiAddForm,KeshiUpdateForm,KeshiSelectForm
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def keshi(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        # 获取参数 页数 默认1
-        current_page = int(request.GET.get('current_page', 1))
-        length = int(request.GET.get('length', 10))
-        start_line = (current_page - 1) * length
-        stop_line = start_line + length
-        # print(start_line, length)
-        role_data = models.Keshi.objects.select_related('Keshi').all().values('id', 'name','create_date','oper_user__username')[start_line: stop_line]
-        # print(role_data)
-        response.code = 200
-        response.data = {
-            'role_data': list(role_data),
-            'data_count':len(role_data)
-        }
-        return JsonResponse(response.__dict__)
+        forms_obj = KeshiSelectForm(request.GET)
+        if forms_obj.is_valid():
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            order = request.GET.get('order', '-create_date')
+            start_line = (current_page - 1) * length
+            stop_line = start_line + length
+            keshi_data = []
+            keshiprofile_objs = models.Keshi.objects.select_related('Keshi','UserProfile').all().order_by(order)
+            print(keshiprofile_objs)
+            for  keshi_objs in keshiprofile_objs[start_line: stop_line]:
 
+                keshi_data.append({
+                    'id': keshi_objs.id,
+                    'name': keshi_objs.name,
+                    'create_date': keshi_objs.create_date,
+                    'pid_id':keshi_objs.pid_id
+                    # 'oper_user__username': keshi_objs.oper_user.username,
+                })
+                print(keshi_data)
+                response.code = 200
+                response.data = {
+                    'role_data': list(keshi_objs),
+                    'data_count':len(keshi_objs)
+                }
     else:
         response.code = 402
         response.msg = "请求异常"
+    return JsonResponse(response.__dict__)
+
 
 
 @csrf_exempt
@@ -40,20 +52,19 @@ def keshi_role_oper(request, oper_type, o_id):
     oper_user_id = request.GET.get('user_id')
     pid_id = request.POST.get('pid_id')
     name = request.POST.get('name')
+
     if request.method == "POST":
         if oper_type == "add":
-            # print('request.POST-->',request.POST)
             form_data = {
                 'oper_user_id': oper_user_id,
                 'pid_id': pid_id,
                 'name':name,
             }
-            forms_obj = KeshiForm(form_data)
-            print('form_data-->',form_data)
+            forms_obj = KeshiAddForm(form_data)
             if forms_obj.is_valid():
                 # models.Keshi.objects.create(name=name,oper_user_id=user_id,pid_id=user_id)
 
-                print("forms_obj.cleaned_data --> ", forms_obj.cleaned_data)
+                # print("forms_obj.cleaned_data --> ", forms_obj.cleaned_data)
                 models.Keshi.objects.create(**forms_obj.cleaned_data)
 
                 response.code = 200
@@ -78,7 +89,7 @@ def keshi_role_oper(request, oper_type, o_id):
                     form_data = {
                         'user_id': o_id,
                         'name': request.POST.get('name'),
-                        'oper_user_id': request.POST.get('oper_user_id'),
+                        'oper_user_id': request.GET.get('user_id'),
                         'pid_id':request.POST.get('pid_id')
                     }
                     print(form_data)
