@@ -55,7 +55,7 @@ def role_oper(request, oper_type, o_id):
         if oper_type == "add":
             role_data = {
                 'name' : request.POST.get('name'),
-                'oper_user_id':request.POST.get('oper_user_id')
+                'oper_user_id':request.GET.get('user_id')
             }
             forms_obj = RoleAddForm(role_data)
             if forms_obj.is_valid():
@@ -91,8 +91,9 @@ def role_oper(request, oper_type, o_id):
                 role_id = forms_obj.cleaned_data['role_id']
                 objs = models.Role.objects.filter(
                     id=role_id
+                ).update(
+                    name=name
                 )
-                objs.update(name=name)
                 response.code = 200
                 response.msg = "修改成功"
             else:
