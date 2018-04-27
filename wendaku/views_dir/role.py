@@ -7,18 +7,23 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 
-
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def role(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-
-        role_data = models.Role.objects.select_related('oper_user').values('id', 'name','create_date','oper_user__username')
+        # 获取参数 页数 默认1
+        current_page = request.GET.get('current_page', 1)
+        length = request.GET.get('length',10)
+        start_line = (current_page - 1) * length
+        stop_line = start_line + length
+        # print(start_line, length)
+        role_data = models.Role.objects.select_related('oper_user').all().values('id', 'name','create_date','oper_user__username')[start_line: stop_line]
         print(role_data)
         response.code = 200
         response.data = {
-            'role_data': list(role_data)
+            'role_data': list(role_data),
+            'data_count':len(role_data)
         }
         return JsonResponse(response.__dict__)
 
