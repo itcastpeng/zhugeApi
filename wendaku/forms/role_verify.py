@@ -66,16 +66,6 @@ class RoleUpdateForm(forms.Form):
             return name
 
 
-
-
-
-
-
-
-
-
-
-
 # 判断是否是数字
 class RoleSelectForm(forms.Form):
     current_page =forms.IntegerField(

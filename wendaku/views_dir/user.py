@@ -6,10 +6,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
-
+from publickFunc.condition_com import conditionCom
 from wendaku.forms.user_verify import UserAddForm, UserUpdateForm,UserSelectForm
 import json
-
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -25,9 +24,20 @@ def user(request):
             order = request.GET.get('order', '-create_date')
             start_line = (current_page - 1) * length
             stop_line = start_line + length
+            field_dict = {
+                'id': '',
+                'username': '__contains',
+                'role__name': '__contains',
+                'create_date': '',
+                'last_login_date': '',
+                'oper_user__username': '__contains',
+            }
+            q = conditionCom(request, field_dict)
+            print('q -->', q)
+            userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').filter(q).order_by(order)
+
             # 链表查询   查询所有
             user_data = []
-            userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').all().order_by(order)
 
             for obj in userprofile_objs[start_line:stop_line]:
                 #  如果有oper_user字段 等于本身名字
@@ -40,7 +50,7 @@ def user(request):
                 user_data.append({
                     'id': obj.id,
                     'username': obj.username,
-                    'role_name': obj.role.name,
+                    'role__name': obj.role.name,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
                     'oper_user__username': oper_user_username,
@@ -49,8 +59,7 @@ def user(request):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'user_data': user_data,
-                    'data_count': userprofile_objs.count()
+                    'user_data': user_data
                 }
         else:
             response.code = 402
@@ -68,6 +77,7 @@ def user_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
+                'user_id': o_id,
                 'oper_user_id':request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
@@ -92,10 +102,14 @@ def user_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             # 删除 ID
-            models.UserProfile.objects.filter(id=o_id).delete()
-            response.code = 200
-            response.msg = "删除成功"
-
+            user_objs = models.UserProfile.objects.filter(id=o_id)
+            if user_objs:
+                user_objs.delete()
+                response.code = 200
+                response.msg = "删除成功"
+            else:
+                response.code = 302
+                response.msg = '用户ID不存在'
         elif oper_type == "update":
             # 获取ID 用户名 及 角色
             form_data = {
@@ -116,11 +130,16 @@ def user_oper(request, oper_type, o_id):
                     id = user_id
                 )
                 #  更新 数据
-                user_obj.update(username=username,role_id=role_id)
-                print(user_obj)
+                if user_obj:
+                    user_obj.update(
+                        username=username, role_id=role_id
+                    )
+                    response.code = 200
+                    response.msg = "修改成功"
+                else:
+                    response.code = 303
+                    response.msg = json.loads(forms_obj.errors.as_json())
 
-                response.code = 200
-                response.msg = "修改成功"
             else:
                 print("验证不通过")
                 # print(forms_obj.errors)
