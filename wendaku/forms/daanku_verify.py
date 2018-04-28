@@ -4,7 +4,7 @@ from wendaku import models
 from publickFunc import account
 import datetime
 
-# 添加角色信息
+# 添加答案信息
 class DaankuAddForm(forms.Form):
     content = forms.CharField(
         required=True,
@@ -17,19 +17,19 @@ class DaankuAddForm(forms.Form):
         error_messages={
             'required': '审核人不能为空'
         })
-    cilei = forms.IntegerField(
-        required=True,
+    cilei_id = forms.IntegerField(
+        required=False,
         error_messages={
             'required': '词类不能为空'
         }
     )
-    keshi = forms.IntegerField(
+    keshi_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': '科室不能为空'
         }
     )
-    daan_leixing = forms.IntegerField(
+    daan_leixing_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': '答案类型不能为空'
@@ -49,18 +49,18 @@ class DaankuAddForm(forms.Form):
     #         return name
 
 
-# 更新用户信息
+# 更新答案信息
 class DaankuUpdateForm(forms.Form):
     role_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '类型ID不能为空'
+            'required': '答案ID不能为空'
         }
     )
-    name = forms.CharField(
+    content = forms.CharField(
         required=True,
         error_messages={
-            'required': '类型不能为空'
+            'required': '答案不能为空'
         }
     )
     oper_user_id = forms.IntegerField(
@@ -70,16 +70,16 @@ class DaankuUpdateForm(forms.Form):
         }
     )
     # 判断角色是否存在
-    def clean_name(self):
-        role_id = self.data['role_id']
-        name = self.data['name']
-        objs = models.CiLei.objects.filter(
-            name=name,
-        ).exclude(id=role_id)
-        if objs:
-            self.add_error('name', '答案类型已存在')
-        else:
-            return name
+    # def clean_name(self):
+    #     role_id = self.data['role_id']
+    #     name = self.data['name']
+    #     objs = models.CiLei.objects.filter(
+    #         name=name,
+    #     ).exclude(id=role_id)
+    #     if objs:
+    #         self.add_error('name', '答案类型已存在')
+    #     else:
+    #         return name
 
 
 # 判断是否是数字
