@@ -78,9 +78,9 @@ class DaAnKu(models.Model):
     shenhe_date = models.DateField(verbose_name="审核时间", null=True, blank=True)
     oper_user = models.ForeignKey("UserProfile", verbose_name="审核人", null=True, blank=True)
     daochu_num = models.SmallIntegerField(verbose_name="导出次数", default=0)
-    cilei = models.ForeignKey('CiLei', verbose_name="词类")
-    keshi = models.ForeignKey('Keshi', verbose_name="科室")
-    daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型")
+    cilei = models.ForeignKey('CiLei', verbose_name="词类",null=True, blank=True)
+    keshi = models.ForeignKey('Keshi', verbose_name="科室",null=True, blank=True)
+    daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型",null=True, blank=True)
 
     class Meta:
         app_label = "wendaku"
