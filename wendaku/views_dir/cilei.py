@@ -60,13 +60,10 @@ def cilei_oper(request, oper_type, o_id):
             print(role_data)
             forms_obj = CileiAddForm(role_data)
             if forms_obj.is_valid():
-                # print(444444444)
                 models.CiLei.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
             else:
-                # print("验证不通过")
-                # print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 

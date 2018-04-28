@@ -59,18 +59,21 @@ def daanku_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             role_data = {
+                # 审核人
                 'oper_user_id':request.GET.get('user_id'),
+                # 答案
                 'content' : request.POST.get('content'),
-                'oper_user':request.POST.get('oper_user'),
-                'daochu_num':request.POST.het('daochu_num'),
-                'cilei':request.POST.het('cilei'),
-                'keshi':request.POST.het('keshi'),
-                'daan_leixing':request.POST.het('daan_leixing'),
+                # 词类
+                'cilei_id':request.POST.get('cilei_id'),
+                # 科室
+                'keshi_id':request.GET.get('user_id'),
+                # 答案类型
+                'daan_leixing_id':request.POST.get('daan_leixing_id'),
             }
-            print(role_data)
             forms_obj = DaankuAddForm(role_data)
             if forms_obj.is_valid():
-                models.DaAnLeiXing.objects.create(**forms_obj.cleaned_data)
+                print('forms_obj.forms_obj -->',forms_obj.cleaned_data)
+                models.DaAnKu.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
             else:
@@ -78,30 +81,29 @@ def daanku_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            role_objs = models.DaAnLeiXing.objects.filter(id=o_id)
+            role_objs = models.DaAnKu.objects.filter(id=o_id)
             if role_objs:
                 role_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
             else:
                 response.code = 302
-                response.msg = '本词不存在'
+                response.msg = '答案不存在'
 
         elif oper_type == "update":
             form_data = {
                 'role_id': o_id,
-                'name': request.POST.get('name'),
+                'content': request.POST.get('content'),
                 'oper_user_id': request.GET.get('user_id'),
             }
-
             forms_obj = DaankuUpdateForm(form_data)
             if forms_obj.is_valid():
-                name = forms_obj.cleaned_data['name']
+                content = forms_obj.cleaned_data['content']
                 role_id = forms_obj.cleaned_data['role_id']
-                models.DaAnLeiXing.objects.filter(
+                models.DaAnKu.objects.filter(
                     id=role_id
                 ).update(
-                    name=name
+                    content=content
                 )
                 response.code = 200
                 response.msg = "修改成功"
