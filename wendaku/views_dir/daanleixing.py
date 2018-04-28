@@ -106,8 +106,8 @@ def daan_oper(request, oper_type, o_id):
                 else:
                     response.code = 303
                     response.msg = json.loads(forms_obj.errors.as_json())
-    else:
-        response.code = 402
-        response.msg = "请求异常"
+        else:
+            response.code = 402
+            response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)

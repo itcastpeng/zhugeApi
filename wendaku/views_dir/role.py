@@ -23,7 +23,7 @@ def role(request):
 
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+            # print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
 
             field_dict = {
