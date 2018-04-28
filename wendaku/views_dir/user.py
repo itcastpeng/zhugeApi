@@ -50,10 +50,12 @@ def user(request):
                 user_data.append({
                     'id': obj.id,
                     'username': obj.username,
-                    'role__name': obj.role.name,
+                    'role_name': obj.role.name,
+                    'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
                     'oper_user__username': oper_user_username,
+                    'status': obj.get_status_display()
                 })
                 #  查询成功 返回200 状态码
                 response.code = 200

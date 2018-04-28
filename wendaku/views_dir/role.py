@@ -25,8 +25,6 @@ def role(request):
             length = forms_obj.cleaned_data['length']
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
-            start_line = (current_page - 1) * length
-            stop_line = start_line + length
 
             field_dict = {
                 'id': '',
@@ -38,13 +36,20 @@ def role(request):
             print('q -->', q)
 
             role_objs = models.Role.objects.select_related('oper_user').filter(q).order_by(order)
+
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                role_objs = role_objs[start_line: stop_line]
+
             # 获取所有数据
             role_data = []
             # 获取第几页的数据
-            for role_obj in role_objs[start_line: stop_line]:
+            for role_obj in role_objs:
                 role_data.append({
                     'id': role_obj.id,
                     'name': role_obj.name,
+                    'role_id': role_obj.id,
                     'create_date': role_obj.create_date,
                     'oper_user__username': role_obj.oper_user.username,
                 })
