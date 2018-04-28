@@ -13,7 +13,7 @@ class DaankuAddForm(forms.Form):
         }
     )
     oper_user_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': '审核人不能为空'
         })
@@ -24,13 +24,13 @@ class DaankuAddForm(forms.Form):
         }
     )
     keshi_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': '科室不能为空'
         }
     )
     daan_leixing_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': '答案类型不能为空'
         }
@@ -64,7 +64,7 @@ class DaankuUpdateForm(forms.Form):
         }
     )
     oper_user_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': '操作人不能为空'
         }
