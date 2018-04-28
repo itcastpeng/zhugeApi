@@ -5,8 +5,7 @@ from publickFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from wendaku.forms.daanku_verify import DaankuAddForm, DaankuUpdateForm, DaankuSelectForm
-import time
-import datetime
+from publickFunc.condition_com import conditionCom
 import json
 
 # 数据的展示
@@ -24,8 +23,19 @@ def daanku(request):
             order = request.GET.get('order', '-create_date')
             start_line = (current_page - 1) * length
             stop_line = start_line + length
+            field_dict = {
+                'id': '',
+                'content': '',
+                'create_date': '',
+                'oper_user__username': '__contains',
+                'shenhe_date': '',
+                'cilei__name': '__contains',
+                'keshi_name': '__contains',
+                'daan_leiixng': ''
+            }
+            q = conditionCom(request, field_dict)
             # 获取所有数据
-            role_objs = models.DaAnKu.objects.select_related('oper_user','cilei','keshi','daan_leixing').all().order_by(order)
+            role_objs = models.DaAnKu.objects.select_related('oper_user','cilei','keshi','daan_leixing').filter(q).order_by(order)
             role_data = []
 
             # 获取第几页的数据
@@ -103,16 +113,18 @@ def daanku_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 content = forms_obj.cleaned_data['content']
                 role_id = forms_obj.cleaned_data['role_id']
-                models.DaAnKu.objects.filter(
+                daanku_objs = models.DaAnKu.objects.filter(
                     id=role_id
-                ).update(
-                    content=content
                 )
-                response.code = 200
-                response.msg = "修改成功"
-            else:
-                response.code = 302
-                response.msg = json.loads(forms_obj.errors.as_json())
+                if daanku_objs:
+                    daanku_objs.update(
+                        content=content
+                    )
+                    response.code = 200
+                    response.msg = "修改成功"
+                else:
+                    response.code = 303
+                    response.msg = json.loads(forms_obj.errors.as_json())
     else:
         response.code = 402
         response.msg = "请求异常"

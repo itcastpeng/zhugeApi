@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 import json
+from publickFunc.condition_com import conditionCom
 from wendaku.forms.keshi_verify import KeshiAddForm,KeshiUpdateForm,KeshiSelectForm
 @csrf_exempt
 @account.is_token(models.UserProfile)
@@ -20,24 +21,33 @@ def keshi(request):
             order = request.GET.get('order', '-create_date')
             start_line = (current_page - 1) * length
             stop_line = start_line + length
-            keshi_data = []
-            keshiprofile_objs = models.Keshi.objects.select_related('Keshi','UserProfile').all().order_by(order)
-            print(keshiprofile_objs)
-            for  keshi_objs in keshiprofile_objs[start_line: stop_line]:
 
+            field_dict = {
+                'id': '',
+                'name': '__contains',
+                'create_date': '',
+                'pid_id': '',
+                'oper_user__username': '',
+            }
+            q = conditionCom(request, field_dict)
+            print('q -->', q)
+            keshi_data = []
+            keshiprofile_objs = models.Keshi.objects.select_related('pid','oper_user').filter(q).order_by(order)
+
+            for  keshi_objs in keshiprofile_objs[start_line: stop_line]:
                 keshi_data.append({
                     'id': keshi_objs.id,
                     'name': keshi_objs.name,
                     'create_date': keshi_objs.create_date,
-                    'pid_id':keshi_objs.pid_id
-                    # 'oper_user__username': keshi_objs.oper_user.username,
+                    'pid_id':keshi_objs.pid_id,
+                    'oper_user__username': keshi_objs.oper_user.username,
                 })
-                print(keshi_data)
-                response.code = 200
-                response.data = {
-                    'role_data': list(keshi_objs),
-                    'data_count':len(keshi_objs)
-                }
+            print('keshi_data -->',keshi_data)
+            response.code = 200
+            response.data = {
+                'role_data': list(keshi_data),
+                'data_count': len(keshi_data),
+            }
     else:
         response.code = 402
         response.msg = "请求异常"
@@ -92,24 +102,25 @@ def keshi_role_oper(request, oper_type, o_id):
                         'oper_user_id': request.GET.get('user_id'),
                         'pid_id':request.POST.get('pid_id')
                     }
-                    print(form_data)
                     forms_obj = KeshiUpdateForm(form_data)
                     if forms_obj.is_valid():
                         user_id = forms_obj.cleaned_data['user_id']
                         name = forms_obj.cleaned_data['name']
                         oper_user_id = forms_obj.cleaned_data['oper_user_id']
                         #  查询数据库  用户id
-                        user_obj = models.Keshi.objects.filter(
+                        user_objs = models.Keshi.objects.filter(
                             id=user_id
                         )
-                        #  更新 数据
-                        user_obj.update(name=name)
-
-                        response.code = 200
-                        response.msg = "修改成功"
-                    else:
-                        response.code = 302
-                        response.msg = '用户ID不存在'
+                        if user_objs:
+                            user_objs.update(
+                                name=name,oper_user_id=oper_user_id
+                            )
+                            response.code = 200
+                            response.msg = "修改成功"
+                        else:
+                            response.code = 303
+                            response.msg = json.loads(forms_obj.errors.as_json())
+                            print(response.msg)
         else:
             response.code = 402
             response.msg = "请求异常"

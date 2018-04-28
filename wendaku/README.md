@@ -46,188 +46,539 @@ password    是        获取密码
 - 查询角色
 
 ```
-查询角色
-```
+请求方法：GET
+请求URL: http://127.0.0.1:8000/wendaku/role?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
 
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "", "data": {"data_count": 13, "role_data": [{"create_date": "2018-04-27T19:03:17", "oper_user__username": "\u8d75\u6b23\u9e4f", "id": 17, "name": "\u5eb7\u6865o "}, {"create_date": "2018-04-27T15:20:23", "oper_user__username": "\u8d75\u6b23\u9e4f", "id": 16, "name": "\u5eb7\u6865"}]}, "code": 200}
+
+    "msg":"",
+    "data":{                                                                 # 返回数据 无内容为空 
+        "data_count":13,                                                     # 数据总数
+        "role_data":[
+            {
+                "create_date":"2018-04-27T19:03:17",                         # 创建时间1
+                "oper_user__username":"赵欣鹏",                              # 操作人1
+                "id":17,                                                     # 角色1 ID
+                "name":"康桥o "                                              # 角色1 名字
+            },
+            {
+                "create_date":"2018-04-27T15:20:23",                         # 创建时间2    
+                "oper_user__username":"赵欣鹏",                              # 操作人2
+                "id":16,                                                     # 角色2 ID
+                "name":"康桥"                                                # 角色2 名字
+            }
+        ]
+    },
+    "code":200                                                               # 异常状态码
+}
+    错误情况:
+        {"msg": "token\u5f02\u5e38", "data": {}, "code": 400}      
+                 
+        {
+    "msg":"token异常",                                                        # 状态说明
+    "data":{                                                                  # 返回数据 无内容为空 
+
+    },
+    "code":400                                                                # 状态码
+}
+        
+```
 - 增加角色
 
 ```
-增加角色
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/role/add/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正常情况：
+        {"msg": "\u6dfb\u52a0\u6210\u529f", "data": {}, "code": 200}
+        
+        {
+    "msg":"添加成功",                                                         # 状态说明 
+    "data":{                                                                 # 返回数据 无内容为空 
+
+    },
+    "code":200                                                               # 状态码
+}
+
+    错误情况：
+        {"msg": {"name": [{"message": "\u89d2\u8272\u540d\u4e0d\u80fd\u4e3a\u7a7a", "code": "required"}]}, "data": {}, "code": 301}
+        
+        {
+    {
+    "msg":"token异常",                                                       # 状态说明
+    "data":{                                                                 # 返回数据 无内容为空 
+
+    },
+    "code":400                                                               # 状态码
+}
 
 ```
 
 - 删除角色
 
 ```
-删除角色
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/role/delete/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正常情况：
+        {"msg": "\u5220\u9664\u6210\u529f", "data": {}, "code": 200}
+    
+        {
+    "msg":"删除成功",                                                          # 状态说明
+    "data":{                                                                  # 返回数据 无内容为空 
+
+    },
+    "code":200                                                                # 状态码
+}
+
+    错误情况：
+        {"msg": "\u89d2\u8272ID\u4e0d\u5b58\u5728", "data": {}, "code": 302}
+    
+        {
+    "msg":"角色ID不存在",                                                      # 状态说明
+    "data":{                                                                  # 返回数据 无内容为空 
+
+    },
+    "code":302                                                                # 状态码
+}
 ```
 
 - 修改角色
 
 ```
-修改角色
-```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/role/update/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u4fee\u6539\u6210\u529f", "data": {}, "code": 200}
+      
+        {   
+    "msg":"修改成功",                                                          # 状态说明                   
+    "data":{                                                                  # 返回数据 无内容为空   
+
+    },
+    "code":200                                                                 # 状态码
+}
+    
+    错误情况：
+        {"msg": {"name": [{"message": "\u89d2\u8272\u5df2\u5b58\u5728", "code": ""}]}, "data": {}, "code": 302}
+        
+        {
+    "msg":{
+        "name":[
+            {
+                "message":"角色已存在",                                         # 状态说明
+                "code":""                                                       
+            }
+        ]
+    },
+    "data":{                                                                   # 返回数据 无内容为空   
+
+    },
+    "code":302                                                                 # 状态码
+}
 
 
-```
-查询全部角色信息
-    请求方法：GET
-    请求URL:http://127.0.0.1:8000/wendaku/role?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID
-    
-    请求参数:
-    参数名    是否必须    参数描述
-    无           0           0
-    
-    获取参数：
-    参数名    是否必须    参数描述
-    id         是         角色的id 
-    name       是         角色的名字
-    
-    返回结果：
-        正确情况：
-            {"data": {"role_data": [{"id": 1, "name": "\u8d85\u7ea7\u7ba1\u7406\u5458"}, {"id": 2, "name": "\u7ba1\u7406\u545811"}]}, "code": 200, "msg": ""}
-            
-            {
-            "data": {"role_data":                                   # 所有数据
-            [{"id": 1,                                              # 角色1 ID
-             "name": "\u8d85\u7ea7\u7ba1\u7406\u5458"},             # 角色1 名字
-             {"id": 2, "name": "\u7ba1\u7406\u545811"}]},           # 角色2 ID
-             "code": 200,                                           # 角色2 名字
-             "msg": ""}                                             # 提示信息
-        错误情况:
-            {
-            "code": 400,                                            # 状态码
-            "data": {},                                             # 返回数据
-            "msg": "token\u5f02\u5e38"                              # 提示信息
-            }
-
-
-角色的增删改
-    请求方法：POST
-    请求URL:http://127.0.0.1:8000/wendaku/add/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID
-    
-    ID 为用户ID
-    请求URL:http://127.0.0.1:8000/wendaku/delete/ID?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID  
-    请求URL:http://127.0.0.1:8000/wendaku/update/ID?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID 
-    
-    请求参数:
-    参数名    是否必须    参数描述
-    oper_type    是      请求增删改的条件
-    id           是      用户的唯一id
-    name         是      用户名需要更新操作
-    
-    获取参数：
-    参数名    是否必须    参数描述
-    id         是         角色的id 
-    name       是         角色的名字
-    
-    返回结果：
-        正确情况：
-            增：
-            {"code": 200, "data": {}, "msg": "\u6dfb\u52a0\u6210\u529f"}
-                
-            {
-                "code": 200,                                                # 状态码  
-                "data": {},                                                 # 返回数据
-                "msg": "\u6dfb\u52a0\u6210\u529f"                           # 提示信息
-            }
-            删：
-            {"code": 200, "data": {}, "msg": "\u5220\u9664\u6210\u529f"}
-            
-            {
-                "code": 200,                                                # 状态码 
-                "data": {},                                                 # 返回数据
-                "msg": "\u5220\u9664\u6210\u529f"                           # 提示信息
-            }
-            改：
-            {"code": 200, "msg": "\u4fee\u6539\u6210\u529f", "data": {}}
-            
-            {
-                "code": 200,                                                # 状态码 
-                "msg": "\u4fee\u6539\u6210\u529f",                          # 提示信息
-                "data": {}                                                  # 返回数据
-            }
-            
-        错误情况:
-            增：
-            {"code": 300, "data": {}, "msg": "\u89d2\u8272\u540d\u5df2\u5b58\u5728"}
-            
-            {
-                "code": 300,                                                # 状态码 
-                "data": {},                                                 # 返回数据
-                "msg": "\u89d2\u8272\u540d\u5df2\u5b58\u5728"               # 提示信息
-            }
-            
-            删：
-            {"code": 302, "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728", "data": {}}
-            
-            {
-                "code": 302,                                                # 状态码
-                "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728",                  # 提示信息
-                "data": {}                                                  # 返回数据
-            }
-            改：
-            {"code": 302, "data": {}, "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728"}
-            
-            {
-                "code": 302,                                                # 状态码 
-                "data": {},                                                 # 返回数据
-                "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728"                   # 提示信息
-            }
 ```
 ### 用户管理
+
+- 增加用户
+
 ```
-用户的查询展示
-请求方法：GET
-请求URL:http://127.0.0.1:8000/wendaku/user
-
-请求参数:
-参数名    是否必须    参数描述
-无           0           0
-
-获取参数：
-参数名    是否必须    参数描述
-id         是         角色的id 
-name       是         角色的名字
-
-返回结果：
-    正确情况：
-        状态码：   200
-        data：'role_data': list(role_data)
-    错误情况:
-        状态码：   200
-        message： 请求异常
-
-
 请求方法：POST
-请求URL:http://127.0.0.1:8000/wendaku/role/(num)
+请求URL: http://127.0.0.1:8000/wendaku/user/add/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
 
 请求参数:
-参数名    是否必须    参数描述
-id           是      用户的唯一id
-name         是      用户名需要更新操作
-
-获取参数：
-参数名    是否必须    参数描述
-id         是         角色的id 
-name       是         角色的名字
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
 
 返回结果：
     正确情况：
-        状态码：   200
-        message：添加/删除/修改 -- 成功
-    错误情况:
-        状态码：   300/402
-        message： 用户名已存在/请求异常
+        {"msg": "\u6dfb\u52a0\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"添加成功",                                                           # 状态说明
+    "code":200,                                                                # 状态码
+    "data":{                                                                   # 返回数据 无内容为空 
+
+    }
+}
+    
+    错误情况：
+        {"msg": {"username": [{"message": "\u7528\u6237\u540d\u5df2\u5b58\u5728", "code": ""}], "password": [{"message": "\u5bc6\u7801\u4e0d\u80fd\u4e3a\u7a7a", "code": "required"}]}, "code": 301, "data": {}}
+        
+       {
+    "msg":{
+        "password":[
+            {
+                "message":"密码不能为空",                                       # 状态说明
+                "code":"required"   
+            }
+        ]
+    },
+    "code":301,                                                                # 状态码 
+    "data":{                                                                   # 返回数据 无内容为空 
+
+    }
+}
+
 ```
+
+- 删除用户
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/user/delete/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u5220\u9664\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"删除成功",                                                           # 状态说明
+    "code":200,                                                                # 状态码
+    "data":{                                                                   # 返回数据 无内容为空 
+
+    }
+}
+    
+    错误情况：
+        {"data": {}, "code": 302, "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728"}
+    
+        {
+    "data":{                                                                  # 返回数据 无内容为空 
+
+    },
+    "code":302,                                                               # 状态码
+    "msg":"用户ID不存在"                                                      # 状态说明
+}
+```
+
+- 修改用户
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/user/update/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u4fee\u6539\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"修改成功",                                                       # 状态说明
+    "code":200,                                                             # 状态码
+    "data":{                                                                # 返回数据，无内容为空
+
+    }
+}
+    
+    错误情况：
+        {"data": {}, "code": 301, "msg": {"role_id": [{"message": "\u89d2\u8272\u4e0d\u80fd\u4e3a\u7a7a", "code": "required"}]}}
+
+        {
+    "data":{
+
+    },
+    "code":301,                                                              # 状态码                                                      
+    "msg":{
+        "role_id":[
+            {
+                "message":"角色不能为空",                                     # 状态说明
+                "code":"required"
+            }
+        ]
+    }
+}
+
+```
+
+### 科室管理
+
+- 增加科室
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/keshi/add/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u6dfb\u52a0\u6210\u529f", "data": {}, "code": 200}
+        
+        {
+    "msg":"添加成功",                                                         # 状态说明
+    "data":{                                                                 # 返回数据，无内容为空
+
+    },
+    "code":200                                                               # 状态码
+}
+
+    错误情况：
+    {"msg": {"pid_id": [{"message": "\u7236\u7ea7ID\u4e0d\u80fd\u4e3a\u7a7a", "code": "required"}]}, "data": {}, "code": 300}
+
+        {
+    "msg":{
+        "pid_id":[                                                          # 父级的ID
+            {
+                "message":"父级ID不能为空",                                  # 状态说明
+                "code":"required"
+            }
+        ]
+    },
+    "data":{                                                                # 返回数据，无内容为空
+
+    },
+    "code":300                                                              # 状态码
+}
+
+```
+
+- 删除科室
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/keshi/delete/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u5220\u9664\u6210\u529f", "data": {}, "code": 200}
+        
+        {
+    "msg":"添加成功",                                                         # 状态说明
+    "data":{                                                                 # 返回数据，无内容为空
+
+    },
+    "code":200                                                               # 状态码
+}
+
+    错误情况：
+        {"msg": "\u7528\u6237ID\u4e0d\u5b58\u5728", "data": {}, "code": 302}
+        
+        {
+    "msg":"用户ID不存在",                                                    # 状态说明
+    "data":{                                                                # 返回数据，无内容为空
+
+    },
+    "code":302                                                              # 状态码
+}
+
+```
+
+- 修改科室
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/keshi/update/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u4fee\u6539\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"修改成功",                                                       # 状态说明
+    "code":200,                                                            # 状态码
+    "data":{                                                               # 返回数据，无内容为空
+
+    }
+}
+    
+    错误情况：
+        {"code": 400, "msg": "token\u5f02\u5e38", "data": {}}
+    
+        {
+    "code":400,                                                            # 状态码
+    "msg":"token异常",                                                     # 状态说明
+    "data":{                                                               # 返回数据，无内容为空
+
+    }
+}
+```
+
+### 词类管理
+
+- 增加词类
+
+```\
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/keshi/update/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+            {"msg": "\u6dfb\u52a0\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"添加成功",                                                       # 状态说明
+    "code":200,                                                            # 状态码
+    "data":{                                                               # 返回数据，无内容为空
+
+    }
+}
+    错误情况：
+        {"code": 301, "msg": {"name": [{"message": "\u8bcd\u540d\u4e0d\u80fd\u4e3a\u7a7a", "code": "required"}]}, "data": {}}
+
+        {
+    "code":301,                                                            # 状态码
+    "msg":{
+        "name":[
+            {
+                "message":"词名不能为空",                                   # 状态说明
+                "code":"required"                                           
+            }
+        ]
+    },
+    "data":{                                                               # 返回数据,无内容为空
+
+    }
+}
+    
+```
+
+- 删除词类
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/keshi/update/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\\u5220\u9664\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"删除成功",                                                       # 状态说明
+    "code":200,                                                            # 状态码
+    "data":{                                                               # 返回数据，无内容为空
+
+    }
+}
+    错误情况：
+        {"code": 302, "msg": "\u672c\u8bcd\u4e0d\u5b58\u5728", "data": {}}
+        
+        {
+    "code":302,                                                            # 状态码
+    "msg":"本词不存在",                                                     # 状态说明
+    "data":{                                                               # 返回数据，无内容为空
+
+    }
+}
+```
+
+- 修改词类
+
+```
+请求方法：POST
+请求URL: http://127.0.0.1:8000/wendaku/keshi/update/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+
+返回结果：
+    正确情况：
+        {"msg": "\u4fee\u6539\u6210\u529f", "code": 200, "data": {}}
+        
+        {
+    "msg":"修改成功",                                                       # 状态说明
+    "code":200,                                                            # 状态码
+    "data":{                                                               # 返回数据，无内容为空
+
+    }
+}
+    错误情况：
+    
+```
+
+
+
+
+
+
+
 
 
 ## api 返回值说明
+
 ```
 200 正常
+
 300 角色名已存在
 301 数据类型验证失败
-302 用户ID不存在
+302 对应ID不存在
+303 form 验证错误
+
 401 账号密码错误
 402 请求方式异常 例如应该使用 POST 请求的使用的是 GET 请求
 
