@@ -40,16 +40,17 @@ def user(request):
                 user_data.append({
                     'id': obj.id,
                     'username': obj.username,
-                    'role': obj.role.name,
+                    'role_name': obj.role.name,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
-                    'oper_user': oper_user_username,
+                    'oper_user__username': oper_user_username,
                 })
                 #  查询成功 返回200 状态码
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'user_data': user_data
+                    'user_data': user_data,
+                    'data_count': userprofile_objs.count()
                 }
         else:
             response.code = 402
@@ -67,7 +68,6 @@ def user_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
-                'user_id': o_id,
                 'oper_user_id':request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
