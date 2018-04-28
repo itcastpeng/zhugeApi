@@ -8,6 +8,8 @@ from wendaku.forms.daanku_verify import DaankuAddForm, DaankuUpdateForm, DaankuS
 import time
 import datetime
 import json
+
+# 数据的展示
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def daanku(request):
@@ -52,6 +54,7 @@ def daanku(request):
         response.msg = "请求异常"
 
 
+#  增删改
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def daanku_oper(request, oper_type, o_id):

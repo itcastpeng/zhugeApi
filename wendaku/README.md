@@ -1,6 +1,6 @@
 ## api 说明文档
 
-- 公共参数（登录后所有api都需要加的参数）
+### 公共参数（登录后所有api都需要加的参数）
 ```
 ?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID
 请求方法：GET
@@ -10,7 +10,7 @@ rand_str    是        md5(timestamp + token)
 timestamp   是        时间戳   python获取方式: str(int(time.time() * 1000))   js 获取方式 new Date().getTime().toString();  
 user_id     是        当前登录用户ID
 ```
-- 登录功能
+### 登录功能
 ```
 请求方法：POST
 请求URL:http://127.0.0.1:8000/wendaku/login
@@ -42,7 +42,7 @@ password    是        获取密码
             "msg": "\u8d26\u53f7\u6216\u5bc6\u7801\u9519\u8bef" # 提示信息
             }
 ```
-- 角色管理
+### 角色管理
 ```
 查询全部角色信息
     请求方法：GET
@@ -101,17 +101,17 @@ password    是        获取密码
             {"code": 200, "data": {}, "msg": "\u6dfb\u52a0\u6210\u529f"}
                 
             {
-                "code": 200,                                        # 状态码  
-                "data": {},                                         # 返回数据
-                "msg": "\u6dfb\u52a0\u6210\u529f"                   # 提示信息
+                "code": 200,                                                # 状态码  
+                "data": {},                                                 # 返回数据
+                "msg": "\u6dfb\u52a0\u6210\u529f"                           # 提示信息
             }
             删：
             {"code": 200, "data": {}, "msg": "\u5220\u9664\u6210\u529f"}
             
             {
-                "code": 200,                                               # 状态码 
-                "data": {},                                                # 返回数据
-                "msg": "\u5220\u9664\u6210\u529f"                          # 提示信息
+                "code": 200,                                                # 状态码 
+                "data": {},                                                 # 返回数据
+                "msg": "\u5220\u9664\u6210\u529f"                           # 提示信息
             }
             改：
             {"code": 200, "msg": "\u4fee\u6539\u6210\u529f", "data": {}}
@@ -127,9 +127,9 @@ password    是        获取密码
             {"code": 300, "data": {}, "msg": "\u89d2\u8272\u540d\u5df2\u5b58\u5728"}
             
             {
-                "code": 300,                                                 # 状态码 
-                "data": {},                                                  # 返回数据
-                "msg": "\u89d2\u8272\u540d\u5df2\u5b58\u5728"                # 提示信息
+                "code": 300,                                                # 状态码 
+                "data": {},                                                 # 返回数据
+                "msg": "\u89d2\u8272\u540d\u5df2\u5b58\u5728"               # 提示信息
             }
             
             删：
@@ -144,12 +144,12 @@ password    是        获取密码
             {"code": 302, "data": {}, "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728"}
             
             {
-                "code": 302,                                        # 状态码 
-                "data": {},                                         # 返回数据
-                "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728"           # 提示信息
+                "code": 302,                                                # 状态码 
+                "data": {},                                                 # 返回数据
+                "msg": "\u7528\u6237ID\u4e0d\u5b58\u5728"                   # 提示信息
             }
 ```
-- 用户管理
+### 用户管理
 ```
 用户的查询展示
 请求方法：GET
