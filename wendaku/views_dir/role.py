@@ -36,6 +36,7 @@ def role(request):
             print('q -->', q)
 
             role_objs = models.Role.objects.select_related('oper_user').filter(q).order_by(order)
+            count = role_objs.count()
 
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -56,7 +57,7 @@ def role(request):
             response.code = 200
             response.data = {
                 'role_data': list(role_data),
-                'data_count': role_objs.count() ,
+                'data_count': count,
             }
         return JsonResponse(response.__dict__)
 
