@@ -71,21 +71,26 @@ def daanku_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
+            data = request.POST.get('data')
             role_data = {
-                # 审核人
-                'oper_user_id':request.GET.get('user_id'),
+                # # 审核人
+                # 'oper_user_id':request.GET.get('user_id'),
                 # 答案
-                'content' : request.POST.get('content'),
-                # 词类
-                'cilei_id':request.POST.get('cilei_id'),
-                # 科室
-                'keshi_id':request.GET.get('user_id'),
-                # 答案类型
-                'daan_leixing_id':request.POST.get('daan_leixing_id'),
+                'content' : data,
+                # # 词类
+                # 'cilei_id':request.POST.get('cilei_id'),
+                # # 科室
+                # 'keshi_id':request.POST.get('keshi_id'),
+                # # 答案类型
+                # 'daan_leixing_id':request.POST.get('daan_leixing_id'),
             }
             forms_obj = DaankuAddForm(role_data)
             if forms_obj.is_valid():
-                print('forms_obj.forms_obj -->',forms_obj.cleaned_data)
+            # data_list = request.POST.get('data_list')
+            # for data in data_list:
+
+
+            # print('forms_obj.forms_obj -->',forms_obj.cleaned_data)
                 models.DaAnKu.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
