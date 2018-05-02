@@ -45,7 +45,7 @@ def cilei(request):
                 })
             response.code = 200
             response.data = {
-                'role_data': list(role_data),
+                'data': list(role_data),
                 'data_count': role_objs.count()
             }
         return JsonResponse(response.__dict__)
