@@ -35,6 +35,7 @@ def user(request):
             q = conditionCom(request, field_dict)
             print('q -->', q)
             userprofile_objs = models.UserProfile.objects.select_related('role', 'oper_user').filter(q).order_by(order)
+            count = userprofile_objs.count()
 
             # 链表查询   查询所有
             user_data = []
@@ -61,7 +62,8 @@ def user(request):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'user_data': user_data
+                    'user_data': user_data,
+                    'data_count': count,
                 }
         else:
             response.code = 402
