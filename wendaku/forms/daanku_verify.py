@@ -12,29 +12,29 @@ class DaankuAddForm(forms.Form):
             'required': "答案不能为空"
         }
     )
-    oper_user_id = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': '审核人不能为空'
-        })
-    cilei_id = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': '词类不能为空'
-        }
-    )
-    keshi_id = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': '科室不能为空'
-        }
-    )
-    daan_leixing_id = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': '答案类型不能为空'
-        }
-    )
+    # oper_user_id = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'required': '审核人'
+    #     })
+    # cilei_id = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'required': '词类'
+    #     }
+    # )
+    # keshi_id = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'required': '科室'
+    #     }
+    # )
+    # daan_leixing_id = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'required': '答案'
+    #     }
+    # )
 
     # 查询用户名判断是否存在
     # def clean_name(self):
