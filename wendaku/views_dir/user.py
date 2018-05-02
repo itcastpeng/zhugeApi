@@ -62,7 +62,7 @@ def user(request):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'user_data': user_data,
+                    'data': user_data,
                     'data_count': count,
                 }
         else:
