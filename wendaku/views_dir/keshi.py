@@ -34,20 +34,34 @@ def keshi(request):
             q = conditionCom(request, field_dict)
             print('q -->', q)
             keshi_data = []
-            keshiprofile_objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
+            keshi_objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
 
-            for keshi_objs in keshiprofile_objs[start_line: stop_line]:
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                keshi_objs = keshi_objs[start_line: stop_line]
+
+            for keshi_obj in keshi_objs:
+
+                if keshi_obj.pid:
+                    pid__name = keshi_obj.pid.name
+                    pid_id = keshi_obj.pid.id
+                else:
+                    pid__name = ""
+                    pid_id = ""
+
                 keshi_data.append({
-                    'id': keshi_objs.id,
-                    'name': keshi_objs.name,
-                    'create_date': keshi_objs.create_date,
-                    'pid__name': keshi_objs.pid.name,
-                    'oper_user__username': keshi_objs.oper_user.username,
+                    'id': keshi_obj.id,
+                    'name': keshi_obj.name,
+                    'create_date': keshi_obj.create_date,
+                    'pid__name': pid__name,
+                    'pid_id': pid_id,
+                    'oper_user__username': keshi_obj.oper_user.username,
                 })
             print('keshi_data -->', keshi_data)
             response.code = 200
             response.data = {
-                'role_data': list(keshi_data),
+                'data': list(keshi_data),
                 'data_count': len(keshi_data),
             }
     else:
