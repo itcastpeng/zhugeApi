@@ -23,7 +23,6 @@ def role(request):
 
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            # print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
 
             field_dict = {
@@ -35,28 +34,28 @@ def role(request):
             q = conditionCom(request, field_dict)
             print('q -->', q)
 
-            role_objs = models.Role.objects.select_related('oper_user').filter(q).order_by(order)
-            count = role_objs.count()
+            objs = models.Role.objects.select_related('oper_user').filter(q).order_by(order)
+            count = objs.count()
 
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                role_objs = role_objs[start_line: stop_line]
+                objs = objs[start_line: stop_line]
 
             # 获取所有数据
-            role_data = []
+            ret_data = []
             # 获取第几页的数据
-            for role_obj in role_objs:
-                role_data.append({
-                    'id': role_obj.id,
-                    'name': role_obj.name,
-                    'role_id': role_obj.id,
-                    'create_date': role_obj.create_date,
-                    'oper_user__username': role_obj.oper_user.username,
+            for obj in objs:
+                ret_data.append({
+                    'id': obj.id,
+                    'name': obj.name,
+                    'role_id': obj.id,
+                    'create_date': obj.create_date,
+                    'oper_user__username': obj.oper_user.username,
                 })
             response.code = 200
             response.data = {
-                'data': list(role_data),
+                'ret_data': ret_data,
                 'data_count': count,
             }
         return JsonResponse(response.__dict__)

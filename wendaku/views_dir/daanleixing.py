@@ -7,9 +7,11 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from wendaku.forms.daan_leixing_verify import DaanAddForm, DaanUpdateForm, DaanSelectForm
 from publickFunc.condition_com import conditionCom
 import json
+
+
 @csrf_exempt
 @account.is_token(models.UserProfile)
-def daan(request):
+def daanleixing(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
@@ -20,8 +22,6 @@ def daan(request):
             length = forms_obj.cleaned_data['length']
             # print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
-            start_line = (current_page - 1) * length
-            stop_line = start_line + length
             field_dict = {
                 'id': '',
                 'name': '__contains',
@@ -30,21 +30,28 @@ def daan(request):
             }
             q = conditionCom(request, field_dict)
             # 获取所有数据
-            role_objs = models.DaAnLeiXing.objects.select_related('oper_user').filter(q).order_by(order)
-            role_data = []
+            objs = models.DaAnLeiXing.objects.select_related('oper_user').filter(q).order_by(order)
+            count = objs.count()
+
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
+
+            ret_data = []
 
             # 获取第几页的数据
-            for role_obj in role_objs[start_line: stop_line]:
-                role_data.append({
-                    'id': role_obj.id,
-                    'name': role_obj.name,
-                    'create_date': role_obj.create_date,
-                    'oper_user__username': role_obj.oper_user.username,
+            for obj in objs:
+                ret_data.append({
+                    'id': obj.id,
+                    'name': obj.name,
+                    'create_date': obj.create_date,
+                    'oper_user__username': obj.oper_user.username,
                 })
             response.code = 200
             response.data = {
-                'role_data': list(role_data),
-                'data_count': role_objs.count()
+                'ret_data': ret_data,
+                'data_count': count
             }
         return JsonResponse(response.__dict__)
 
@@ -55,13 +62,13 @@ def daan(request):
 
 @csrf_exempt
 @account.is_token(models.UserProfile)
-def daan_oper(request, oper_type, o_id):
+def daanleixing_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
             role_data = {
-                'name' : request.POST.get('name'),
-                'oper_user_id':request.GET.get('user_id')
+                'name': request.POST.get('name'),
+                'oper_user_id': request.GET.get('user_id')
             }
             print(role_data)
             forms_obj = DaanAddForm(role_data)

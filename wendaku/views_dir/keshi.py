@@ -21,8 +21,6 @@ def keshi(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')
-            start_line = (current_page - 1) * length
-            stop_line = start_line + length
 
             field_dict = {
                 'id': '',
@@ -33,36 +31,38 @@ def keshi(request):
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            keshi_data = []
-            keshi_objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
+
+            ret_data = []
+            objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
+            count = objs.count()
 
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                keshi_objs = keshi_objs[start_line: stop_line]
+                objs = objs[start_line: stop_line]
 
-            for keshi_obj in keshi_objs:
+            for obj in objs:
 
-                if keshi_obj.pid:
-                    pid__name = keshi_obj.pid.name
-                    pid_id = keshi_obj.pid.id
+                if obj.pid:
+                    pid__name = obj.pid.name
+                    pid_id = obj.pid.id
                 else:
                     pid__name = ""
                     pid_id = ""
 
-                keshi_data.append({
-                    'id': keshi_obj.id,
-                    'name': keshi_obj.name,
-                    'create_date': keshi_obj.create_date,
+                ret_data.append({
+                    'id': obj.id,
+                    'name': obj.name,
+                    'create_date': obj.create_date,
                     'pid__name': pid__name,
                     'pid_id': pid_id,
-                    'oper_user__username': keshi_obj.oper_user.username,
+                    'oper_user__username': obj.oper_user.username,
                 })
-            print('keshi_data -->', keshi_data)
+            print('ret_data -->', ret_data)
             response.code = 200
             response.data = {
-                'data': list(keshi_data),
-                'data_count': len(keshi_data),
+                'ret_data': list(ret_data),
+                'data_count': count
             }
     else:
         response.code = 402

@@ -8,21 +8,22 @@ from wendaku.forms.daanku_verify import DaankuAddForm, DaankuUpdateForm, DaankuS
 from publickFunc.condition_com import conditionCom
 import json
 
+
 # 数据的展示
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def daanku(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        # 获取参数 页数 默认1
+        # 获取参数 页数 默认
         forms_obj = DaankuSelectForm(request.GET)
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             # print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+
             order = request.GET.get('order', '-create_date')
-            start_line = (current_page - 1) * length
-            stop_line = start_line + length
+
             field_dict = {
                 'id': '',
                 'content': '',
@@ -35,27 +36,34 @@ def daanku(request):
             }
             q = conditionCom(request, field_dict)
             # 获取所有数据
-            role_objs = models.DaAnKu.objects.select_related('oper_user','cilei','keshi','daan_leixing').filter(q).order_by(order)
-            role_data = []
+            objs = models.DaAnKu.objects.select_related('oper_user','cilei','keshi','daan_leixing').filter(q).order_by(order)
+            count = objs.count()
+
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
+
+            ret_data = []
 
             # 获取第几页的数据
-            for role_obj in role_objs[start_line: stop_line]:
-                role_data.append({
-                    'id': role_obj.id,
-                    'content': role_obj.content,
-                    'create_date': role_obj.create_date,
-                    'oper_user__username': role_obj.oper_user.username,
-                    'shenhe_date':role_obj.shenhe_date,
-                    'cilei__name':role_obj.cilei.name,
-                    'keshi_name':role_obj.keshi.name,
-                    'daan_leiixng':role_obj.daan_leixing.name
+            for obj in objs:
+                ret_data.append({
+                    'id': obj.id,
+                    'content': obj.content,
+                    'create_date': obj.create_date,
+                    'oper_user__username': obj.oper_user.username,
+                    'shenhe_date':obj.shenhe_date,
+                    'cilei__name':obj.cilei.name,
+                    'keshi_name':obj.keshi.name,
+                    'daan_leiixng':obj.daan_leixing.name
 
                 })
-                print(role_obj)
+
             response.code = 200
             response.data = {
-                'role_data': list(role_data),
-                'data_count': role_objs.count()
+                'ret_data': ret_data,
+                'data_count': count
             }
         return JsonResponse(response.__dict__)
 
