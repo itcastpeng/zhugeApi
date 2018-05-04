@@ -36,8 +36,8 @@ class KeshiAddForm(forms.Form):
 
 # 更新用户信息
 class KeshiUpdateForm(forms.Form):
-    user_id = forms.IntegerField(
-        required=True,
+    o_id = forms.IntegerField(
+        required=False,
         error_messages={
             'required': "用户id不能为空"
         }
@@ -51,7 +51,7 @@ class KeshiUpdateForm(forms.Form):
     )
 
     pid_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': '父级ID不能为空'
         })
