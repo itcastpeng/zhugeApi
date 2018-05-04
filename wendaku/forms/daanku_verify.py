@@ -51,10 +51,10 @@ class DaankuAddForm(forms.Form):
 
 # 更新答案信息
 class DaankuUpdateForm(forms.Form):
-    role_id = forms.IntegerField(
+    tid = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '答案ID不能为空'
+            'required': '任务id不能为空'
         }
     )
     content = forms.CharField(
@@ -63,12 +63,42 @@ class DaankuUpdateForm(forms.Form):
             'required': '答案不能为空'
         }
     )
+
+    cilei_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '词类名称不能为空'
+        }
+    )
+
+    daan_leixing_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '答案类型不能为空'
+        }
+    )
+
+    keshi_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '科室不能为空'
+        }
+    )
+
     oper_user_id = forms.IntegerField(
         required=False,
         error_messages={
             'required': '操作人不能为空'
         }
     )
+
+    def clean_content(self):
+        content = self.data['content']
+        if "{muban}" in content:
+            return content
+        else:
+            self.add_error('content', '答案中未发现 {muban} 模板标记')
+
     # 判断角色是否存在
     # def clean_name(self):
     #     role_id = self.data['role_id']

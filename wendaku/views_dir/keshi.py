@@ -11,6 +11,10 @@ from publickFunc.condition_com import conditionCom
 from wendaku.forms.keshi_verify import KeshiAddForm, KeshiUpdateForm, KeshiSelectForm
 
 
+# def getData(ret_data, pid_id):
+#     models.Keshi.objects.filter(pid_id=pid_id)
+
+
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def keshi(request):
@@ -42,7 +46,6 @@ def keshi(request):
                 objs = objs[start_line: stop_line]
 
             for obj in objs:
-
                 if obj.pid:
                     pid__name = obj.pid.name
                     pid_id = obj.pid.id

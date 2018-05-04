@@ -36,7 +36,8 @@ def daanku(request):
             }
             q = conditionCom(request, field_dict)
             # 获取所有数据
-            objs = models.DaAnKu.objects.select_related('oper_user','cilei','keshi','daan_leixing').filter(q).order_by(order)
+            objs = models.DaAnKu.objects.select_related('oper_user', 'cilei', 'keshi', 'daan_leixing').filter(
+                q).order_by(order)
             count = objs.count()
 
             if length != 0:
@@ -48,15 +49,37 @@ def daanku(request):
 
             # 获取第几页的数据
             for obj in objs:
+
+                cilei_name = ''
+                cilei_id = ''
+                keshi_name = ''
+                keshi_id = ''
+                daan_leixing_name = ''
+                daan_leixing_id = ''
+                if obj.cilei:
+                    cilei_name = obj.cilei.name
+                    cilei_id = obj.cilei.id
+
+                if obj.keshi:
+                    keshi_name = obj.keshi.name
+                    keshi_id = obj.keshi.id
+
+                if obj.daan_leixing:
+                    daan_leixing_name = obj.daan_leixing.name
+                    daan_leixing_id = obj.daan_leixing.id
+
                 ret_data.append({
                     'id': obj.id,
                     'content': obj.content,
                     'create_date': obj.create_date,
                     'oper_user__username': obj.oper_user.username,
-                    'shenhe_date':obj.shenhe_date,
-                    'cilei__name':obj.cilei.name,
-                    'keshi_name':obj.keshi.name,
-                    'daan_leiixng':obj.daan_leixing.name
+                    'update_date': obj.update_date,
+                    'cilei_id': cilei_id,
+                    'cilei__name': cilei_name,
+                    'keshi_id': keshi_id,
+                    'keshi_name': keshi_name,
+                    'daan_leixing_id': daan_leixing_id,
+                    'daan_leixing_name': daan_leixing_name
 
                 })
 
@@ -85,7 +108,7 @@ def daanku_oper(request, oper_type, o_id):
                 # # 审核人
                 # 'oper_user_id':request.GET.get('user_id'),
                 # 答案
-                'content' : data,
+                'content': data,
                 # # 词类
                 # 'cilei_id':request.POST.get('cilei_id'),
                 # # 科室
@@ -95,11 +118,10 @@ def daanku_oper(request, oper_type, o_id):
             }
             forms_obj = DaankuAddForm(role_data)
             if forms_obj.is_valid():
-            # data_list = request.POST.get('data_list')
-            # for data in data_list:
+                # data_list = request.POST.get('data_list')
+                # for data in data_list:
 
-
-            # print('forms_obj.forms_obj -->',forms_obj.cleaned_data)
+                # print('forms_obj.forms_obj -->',forms_obj.cleaned_data)
                 models.DaAnKu.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
@@ -108,9 +130,10 @@ def daanku_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            role_objs = models.DaAnKu.objects.filter(id=o_id)
-            if role_objs:
-                role_objs.delete()
+            print('o_id -->', o_id)
+            objs = models.DaAnKu.objects.filter(id=o_id)
+            if objs:
+                objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
             else:
@@ -119,26 +142,38 @@ def daanku_oper(request, oper_type, o_id):
 
         elif oper_type == "update":
             form_data = {
-                'role_id': o_id,
+                'tid': o_id,
                 'content': request.POST.get('content'),
+                'cilei_id': request.POST.get('cilei_id'),
+                'daan_leixing_id': request.POST.get('daan_leixing_id'),
+                'keshi_id': request.POST.get('keshi_id'),
                 'oper_user_id': request.GET.get('user_id'),
             }
             forms_obj = DaankuUpdateForm(form_data)
             if forms_obj.is_valid():
                 content = forms_obj.cleaned_data['content']
-                role_id = forms_obj.cleaned_data['role_id']
+                tid = forms_obj.cleaned_data['tid']
+                cilei_id = forms_obj.cleaned_data['cilei_id']
+                daan_leixing_id = forms_obj.cleaned_data['daan_leixing_id']
+                keshi_id = forms_obj.cleaned_data['keshi_id']
                 daanku_objs = models.DaAnKu.objects.filter(
-                    id=role_id
+                    id=tid
                 )
                 if daanku_objs:
                     daanku_objs.update(
-                        content=content
+                        content=content,
+                        cilei_id=cilei_id,
+                        daan_leixing_id=daan_leixing_id,
+                        keshi_id=keshi_id
                     )
                     response.code = 200
                     response.msg = "修改成功"
                 else:
-                    response.code = 303
-                    response.msg = json.loads(forms_obj.errors.as_json())
+                    response.code = 302
+                    response.msg = "操作id不存在"
+            else:
+                response.code = 303
+                response.msg = json.loads(forms_obj.errors.as_json())
     else:
         response.code = 402
         response.msg = "请求异常"
