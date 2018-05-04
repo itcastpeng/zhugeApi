@@ -4,6 +4,7 @@ from wendaku import models
 from publickFunc import account
 import datetime
 
+
 # 添加角色信息
 class CileiAddForm(forms.Form):
     name = forms.CharField(
@@ -68,11 +69,13 @@ class CileiUpdateForm(forms.Form):
 
 # 判断是否是数字
 class CileiSelectForm(forms.Form):
-    current_page =forms.IntegerField(
-        required = False,
-        error_messages = {
-        'required': "页码数据类型错误"
-    })
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        }
+    )
+
     length = forms.IntegerField(
         required=False,
         error_messages={
@@ -86,10 +89,3 @@ class CileiSelectForm(forms.Form):
         else:
             current_page = int(self.data['current_page'])
         return current_page
-
-    def clean_length(self):
-        if 'length' not in self.data:
-            length = 10
-        else:
-            length = int(self.data['length'])
-        return length

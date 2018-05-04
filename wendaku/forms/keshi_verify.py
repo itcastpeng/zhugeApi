@@ -97,10 +97,3 @@ class KeshiSelectForm(forms.Form):
         else:
             current_page = int(self.data['current_page'])
         return current_page
-
-    def clean_length(self):
-        if 'clean_length' not in self.data:
-            clean_length = 10
-        else:
-            clean_length = int(self.data['clean_length'])
-        return clean_length

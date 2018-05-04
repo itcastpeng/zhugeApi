@@ -40,6 +40,7 @@ def keshi(request):
             objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
             count = objs.count()
 
+            print("length -->", type(length), length)
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
