@@ -56,6 +56,7 @@ def daanku(request):
                 keshi_id = ''
                 daan_leixing_name = ''
                 daan_leixing_id = ''
+                oper_user__username = ''
                 if obj.cilei:
                     cilei_name = obj.cilei.name
                     cilei_id = obj.cilei.id
@@ -68,11 +69,14 @@ def daanku(request):
                     daan_leixing_name = obj.daan_leixing.name
                     daan_leixing_id = obj.daan_leixing.id
 
+                if obj.oper_user:
+                    oper_user__username = obj.oper_user.username
+
                 ret_data.append({
                     'id': obj.id,
                     'content': obj.content,
                     'create_date': obj.create_date,
-                    'oper_user__username': obj.oper_user.username,
+                    'oper_user__username': oper_user__username,
                     'update_date': obj.update_date,
                     'cilei_id': cilei_id,
                     'cilei__name': cilei_name,
@@ -105,7 +109,7 @@ def daanku_oper(request, oper_type, o_id):
             data = request.POST.get('data')
             role_data = {
                 # # 审核人
-                # 'oper_user_id':request.GET.get('user_id'),
+                'oper_user_id':request.GET.get('user_id'),
                 # 答案
                 'content': data,
                 # # 词类
