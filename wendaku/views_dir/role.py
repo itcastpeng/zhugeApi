@@ -46,12 +46,17 @@ def role(request):
             ret_data = []
             # 获取第几页的数据
             for obj in objs:
+
+                oper_user__username = ''
+                if obj.oper_user:
+                    oper_user__username = obj.oper_user.username
+
                 ret_data.append({
                     'id': obj.id,
                     'name': obj.name,
                     'role_id': obj.id,
                     'create_date': obj.create_date,
-                    'oper_user__username': obj.oper_user.username,
+                    'oper_user__username': oper_user__username,
                 })
             response.code = 200
             response.data = {

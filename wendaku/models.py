@@ -7,7 +7,7 @@ from django.db import models
 class Role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=False, blank=False,
+    oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=True, blank=True,
                                   related_name='role_oper_user')
 
     class Meta:
