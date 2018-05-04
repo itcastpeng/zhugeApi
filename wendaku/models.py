@@ -1,12 +1,14 @@
 from django.db import models
 
+
 # Create your models here.
 
 # 角色表
 class Role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    oper_user = models.ForeignKey('UserProfile',verbose_name='操作人',null=False,blank=False, related_name='role_oper_user')
+    oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=False, blank=False,
+                                  related_name='role_oper_user')
 
     class Meta:
         verbose_name_plural = "角色表"
@@ -18,7 +20,6 @@ class Role(models.Model):
 
 # 用户信息表
 class UserProfile(models.Model):
-
     status_choices = (
         (1, "启用"),
         (2, "未启用"),
@@ -44,6 +45,7 @@ class UserProfile(models.Model):
 class Keshi(models.Model):
     name = models.CharField(verbose_name="名称", max_length=64)
     pid = models.ForeignKey('self', null=True, blank=True, verbose_name="父级id")
+    priority = models.SmallIntegerField(verbose_name="优先级", default=0)
     oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -75,12 +77,14 @@ class DaAnLeiXing(models.Model):
 class DaAnKu(models.Model):
     content = models.TextField(verbose_name="答案")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    shenhe_date = models.DateField(verbose_name="审核时间", null=True, blank=True)
+    # shenhe_date = models.DateField(verbose_name="审核时间", null=True, blank=True)
+    update_date = models.DateField(verbose_name="修改时间", null=True, blank=True)
     oper_user = models.ForeignKey("UserProfile", verbose_name="审核人", null=True, blank=True)
     daochu_num = models.SmallIntegerField(verbose_name="导出次数", default=0)
-    cilei = models.ForeignKey('CiLei', verbose_name="词类",null=True, blank=True)
-    keshi = models.ForeignKey('Keshi', verbose_name="科室",null=True, blank=True)
-    daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型",null=True, blank=True)
+
+    cilei = models.ForeignKey('CiLei', verbose_name="词类", null=True, blank=True)
+    keshi = models.ForeignKey('Keshi', verbose_name="科室", null=True, blank=True)
+    daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型", null=True, blank=True)
 
     class Meta:
         app_label = "wendaku"
