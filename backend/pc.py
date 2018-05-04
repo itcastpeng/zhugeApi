@@ -8,23 +8,31 @@ import requests
 import random
 
 class Zhidao:
-	def __init__(self,urldome):
+	# 初始化文件
+	def __init__(self, gjc):
+		self.gjc = gjc
 		self.dr = webdriver.Chrome('./plugin/chromedriver_2.36.exe')
 		self.dr.maximize_window()  # 全屏
 		self.url = 'https://zhidao.baidu.com'
 		self.data_list = []
-		self.rand = random.randint(2,7)
-		self.urldome = urldome
+		# self.rand = random.randint(2,7)
+
+	@property
+	def rand(self):
+		return random.randint(2,7)
 
 	# 获取页面数据并判断
 	# 获取输入框 输入内容
 	def data_url(self):
-		self.dr.find_element_by_id('kw').send_keys('武汉哪家鼻甲肥大医院治疗效果最好')
-		# sleep(self.rand)
+		self.dr.find_element_by_id('kw').send_keys(self.gjc)
+		sleep(self.rand)
 		self.dr.find_element_by_id('search-btn').click()
 		self.unit()
+		data_list = self.get_save()
+		content_list = self.get_url_data(data_list)
+		self.get_data(content_list)
 
-	# 获取url 返回url链接
+	# 获取url 返回所有url链接
 	def get_save(self):
 		sleep(self.rand)
 		data_list = self.data_list
@@ -50,7 +58,7 @@ class Zhidao:
 
 	# 请求获取到的url返回答案
 	def get_url_data(self,data_list):
-		print('获取答案')
+		# print('获取答案')
 		temp = []
 		for url in data_list:
 			self.dr.get(url)
@@ -68,17 +76,17 @@ class Zhidao:
 					p_tag = div.find_all('p')
 					if span:
 						for span_tag in span:
-							text_data = span_tag.get_text()
+							text_data = span_tag.get_text().strip()
 							if len(text_data) > 30:
 								temp.append(text_data)
 					if pre:
 						for pre_tag in pre:
-							text_data = pre_tag.get_text()
+							text_data = pre_tag.get_text().strip()
 							if len(text_data) > 30:
 								temp.append(text_data)
 					if p_tag:
 						for tag in p_tag:
-							text_data = tag.get_text()
+							text_data = tag.get_text().strip()
 							if len(text_data)> 30:
 								temp.append(text_data)
 
@@ -86,14 +94,14 @@ class Zhidao:
 				print(e)
 		return temp
 
-
+	# 密码加密 请求参数
 	def str_encrypt(self,pwd):
 		pwd = str(pwd)
 		hash = hashlib.md5()
 		hash.update(pwd.encode())
 		return hash.hexdigest()
 
-		# 获取答案 并返回api
+	# 获取答案 并返回api
 	def get_data(self,temp):
 		token = '4e0398e4d4bad913e24c1d0d60cc9170'
 		timestamp = str(int(time.time()))
@@ -108,9 +116,10 @@ class Zhidao:
 			data = {
 				'data':teme
 			}
-			url = 'http://{}/wendaku/daanku/add/0'.format(self.urldome)
+			url = 'http://127.0.0.1:8000/wendaku/daanku/add/0'
 			ret = requests.post(url,params=params, data=data)
-			print(ret.text)
+			# print(ret.text)
+
 	# 定位窗口句柄
 	def unit(self):
 		# 定位到当前窗口句柄
@@ -130,17 +139,22 @@ class Zhidao:
 
 	# 启动
 	def run(self):
+
 		self.dr.get(self.url)
-		# self.dr.implicitly_wait(10)  # 隐式等待30秒
 		self.data_url()
-		data_list = self.get_save()
-		temp = self.get_url_data(data_list)
-		self.get_data(temp)
+		# self.dr.implicitly_wait(10)  # 隐式等待30秒
+
 
 if __name__ == '__main__':
-	if sys.argv[1]:
-		urldome = sys.argv[1]
-	else:
-		urldome = '127.0.0.1:8000'
-	zhidao = Zhidao(urldome)
-	zhidao.run()
+	# if sys.argv[1]:
+	# 	urldome = sys.argv[1]
+	# else:
+	# 	u	rldome = '127.0.0.1:8000'
+	gjc_list = []
+	with open('./wen.txt')as file_obj:
+		for line in file_obj:
+			gjc = line.strip()
+			zhidao = Zhidao(gjc)
+
+			zhidao.run()
+
