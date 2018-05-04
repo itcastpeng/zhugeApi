@@ -126,6 +126,7 @@ def keshi_role_oper(request, oper_type, o_id):
                     o_id = forms_obj.cleaned_data['o_id']
                     name = forms_obj.cleaned_data['name']
                     oper_user_id = forms_obj.cleaned_data['oper_user_id']
+                    pid_id = forms_obj.cleaned_data['pid_id']
                     print("o_id -->", o_id)
                     #  查询数据库  用户id
                     user_objs = models.Keshi.objects.filter(
@@ -133,7 +134,9 @@ def keshi_role_oper(request, oper_type, o_id):
                     )
                     if user_objs:
                         user_objs.update(
-                            name=name, oper_user_id=oper_user_id
+                            name=name,
+                            oper_user_id=oper_user_id,
+                            pid_id=pid_id
                         )
                         response.code = 200
                         response.msg = "修改成功"
