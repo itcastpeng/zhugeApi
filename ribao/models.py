@@ -2,12 +2,11 @@ from django.db import models
 
 # Create your models here.
 
-
 # 角色表
-class Role(models.Model):
+class RibaoRole(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=True, blank=True,
+    oper_user = models.ForeignKey('RibaoUserProfile', verbose_name='操作人', null=True, blank=True,
     related_name='role_oper_user')
 
     class Meta:
@@ -19,7 +18,7 @@ class Role(models.Model):
 
 
 # 用户信息表
-class UserProfile(models.Model):
+class RibaoUserProfile(models.Model):
     status_choices = (
         (1, "启用"),
         (2, "未启用"),
@@ -27,7 +26,7 @@ class UserProfile(models.Model):
     status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=1)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     username = models.CharField(verbose_name="姓名", max_length=32)
-    role = models.ForeignKey("Role", verbose_name="角色", null=True, blank=True)
+    role = models.ForeignKey("RibaoRole", verbose_name="角色", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
     oper_user = models.ForeignKey("self", verbose_name="操作人", related_name="u_user", null=True, blank=True)
@@ -39,3 +38,58 @@ class UserProfile(models.Model):
 
     class Meta:
         app_label = "ribao"
+
+
+
+# 项目管理表
+    class RibaoProjectManage(models.Model):
+        project_name = models.CharField(verbose_name='项目名称',max_length=32)
+        person_people = models.CharField(verbose_name='开发负责人',max_length=64)
+        def __str__(self):
+            return self.project_name
+
+        class Meta:
+            app_label = 'ribao'
+
+
+# 任务管理表
+    class RibaoTaskManage(models.Model):
+        task_name = models.CharField(verbose_name='任务名称',max_length=64)
+        detail = models.CharField(verbose_name="任务详情", max_length=128, null=True, blank=True)
+        belog_task = models.ForeignKey('RibaoProjectManage',verbose_name="归属名称", max_length=32)
+        issuer = models.CharField( verbose_name="发布人",max_length=32)
+        director = models.CharField( verbose_name="开发负责人",max_length=32)
+        create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+        estimated_time = models.DateTimeField(verbose_name="预计完成时间", null=True, blank=True)
+        boor_urgent = models.BooleanField(verbose_name="是否加急",default=False)
+
+        def __str__(self):
+            return self.task_name
+
+        class Meta:
+            app_label = 'ribao'
+
+    # 任务日志管理表
+    class RibaoTaskLog(models.Model):
+        belog_log = models.ForeignKey('RibaoTaskManage',verbose_name='本日志属于哪个任务',max_length=265)
+        oper_user = models.ForeignKey("RibaoUserProfile", verbose_name="操作人", related_name="x_user", null=True, blank=True)
+        create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+        def __str__(self):
+            return self.belog_log
+
+        class Meta:
+            app_label = 'ribao'
+
+
+
+
+
+
+
+
+
+
+
+
+
