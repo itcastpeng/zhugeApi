@@ -3,6 +3,24 @@ from django.db import models
 
 # Create your models here.
 
+# 权限表
+class QuanXian(models.Model):
+    path = models.CharField(verbose_name="访问路径", max_length=64)
+    icon = models.CharField(verbose_name="图标", max_length=64)
+    title = models.CharField(verbose_name="功能名称", max_length=64)
+    pid = models.ForeignKey('self', verbose_name="父级id", null=True, blank=True)
+    order_num = models.SmallIntegerField(verbose_name="按照该字段的大小排序")
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=True, blank=True,
+                                  related_name='quanxian_oper_user')
+
+    component = models.CharField(verbose_name="vue 文件路径", max_length=64, null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = "角色表"
+        app_label = "wendaku"
+
+
 # 角色表
 class Role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
