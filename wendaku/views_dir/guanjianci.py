@@ -120,6 +120,7 @@ def guanjianci_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     print('进入')
     if request.method == "POST":
+        print(11111)
         if oper_type == "add":
             form_data = {
                 'o_id': o_id,
@@ -195,9 +196,32 @@ def guanjianci_oper(request, oper_type, o_id):
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == 'update_status':
+            objs = models.GuanJianCi.objects.filter(id = o_id)
+            if objs:
+                objs.update(
+                    status = 1
+                )
+                response.code = 200
+                response.msg = '修改成功'
+            else:
+                response.code = 302
+                response.msg = '对应ID不存在'
     else:
-        response.code = 402
-        response.msg = "请求异常"
+        if oper_type == "get_once":
+            objs = models_obj.objects.filter(status=2)
+            if objs:
+                obj = objs[0]
+                response.code = 200
+                response.msg = "关键词已发送"
+                response.data = {
+                    'o_id':obj.id,
+                    'content':obj.content,
+                }
+            else:
+                response.code = 403
+                response.msg = '无任务'
+
 
     return JsonResponse(response.__dict__)
 
