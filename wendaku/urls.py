@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from wendaku.views_dir import login, role, user, keshi, cilei, daanleixing, daanku, quanxian
+from wendaku.views_dir import login, role, user, keshi, cilei, daanleixing, daanku, quanxian,guanjianci
 
 urlpatterns = [
     # url(r'^wenku/', include('wendaku.urls')),
@@ -33,4 +33,8 @@ urlpatterns = [
     # 答案库操作
     url(r'^daanku/(?P<oper_type>\w+)/(?P<o_id>\d+)', daanku.daanku_oper),
     url(r'^daanku', daanku.daanku),
+
+    # 问题库操作
+    url(r'^guanjianci/(?P<oper_type>\w+)/(?P<o_id>\d+)', guanjianci.guanjianci_oper),
+    url(r'^guanjianci', guanjianci.guanjianci),
 ]
