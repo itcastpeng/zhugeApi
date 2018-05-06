@@ -106,6 +106,7 @@ def daanku_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
+            print('开始入库')
             data = request.POST.get('data')
             role_data = {
                 # # 审核人
