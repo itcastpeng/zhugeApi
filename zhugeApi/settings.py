@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'wendaku',
-    'corsheaders'
+    'ribao',
 ]
 
 MIDDLEWARE = [
@@ -120,6 +121,15 @@ DATABASES = {
         'PORT': '3306',
         'USER': 'wendaku',
         'PASSWORD': 'wendaku'
+    },
+
+    'ribao': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ribao',
+        'HOST': 'ribao',
+        'PORT': '3306',
+        'USER': 'ribao',
+        'PASSWORD': 'ribao'
     }
 }
 
@@ -128,6 +138,7 @@ DATABASE_APPS_MAPPING = {
     # example:
     #'app_name':'database_name',
     'wendaku': 'wendaku',
+    'ribao': 'ribao',
 }
 
 
