@@ -12,7 +12,7 @@ class QuanXian(models.Model):
     order_num = models.SmallIntegerField(verbose_name="按照该字段的大小排序")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=True, blank=True,
-                                  related_name='quanxian_oper_user')
+    related_name='quanxian_oper_user')
 
     component = models.CharField(verbose_name="vue 文件路径", max_length=64, null=True, blank=True)
 
@@ -26,7 +26,7 @@ class Role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=True, blank=True,
-                                  related_name='role_oper_user')
+    related_name='role_oper_user')
 
     class Meta:
         verbose_name_plural = "角色表"
@@ -103,6 +103,20 @@ class DaAnKu(models.Model):
     cilei = models.ForeignKey('CiLei', verbose_name="词类", null=True, blank=True)
     keshi = models.ForeignKey('Keshi', verbose_name="科室", null=True, blank=True)
     daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型", null=True, blank=True)
+
+    class Meta:
+        app_label = "wendaku"
+
+
+# 问题表
+class GuanJianCi(models.Model):
+    status_choices = (
+        (1, "已使用"),
+        (2, "未使用"),
+    )
+    content = models.TextField(verbose_name="关键词")
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="使用状态", default=2)
+    oper_user = models.ForeignKey("UserProfile", verbose_name="操作人", null=True, blank=True)
 
     class Meta:
         app_label = "wendaku"
