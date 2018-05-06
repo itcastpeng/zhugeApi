@@ -4,6 +4,7 @@ from wendaku import models
 from publickFunc import account
 import datetime
 
+
 # 添加用户信息
 class UserAddForm(forms.Form):
     username = forms.CharField(
@@ -85,9 +86,9 @@ class UserUpdateForm(forms.Form):
 
 # 判断是否是数字
 class UserSelectForm(forms.Form):
-    current_page =forms.IntegerField(
-        required = False,
-        error_messages = {
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
             'invalid': "页码数据类型错误",
         }
     )
@@ -105,9 +106,3 @@ class UserSelectForm(forms.Form):
             current_page = int(self.data['current_page'])
         return current_page
 
-    def clean_length(self):
-        if 'clean_length' not in self.data:
-            clean_length = 10
-        else:
-            clean_length = int(self.data['clean_length'])
-        return clean_length

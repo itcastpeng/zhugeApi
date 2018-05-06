@@ -40,6 +40,7 @@ def keshi(request):
             objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
             count = objs.count()
 
+            print("length -->", type(length), length)
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
@@ -115,30 +116,37 @@ def keshi_role_oper(request, oper_type, o_id):
             role_update = models.Keshi.objects.filter(id=o_id)
             if role_update:
                 form_data = {
-                    'user_id': o_id,
+                    'o_id': o_id,
                     'name': request.POST.get('name'),
                     'oper_user_id': request.GET.get('user_id'),
                     'pid_id': request.POST.get('pid_id')
                 }
                 forms_obj = KeshiUpdateForm(form_data)
                 if forms_obj.is_valid():
-                    user_id = forms_obj.cleaned_data['user_id']
+                    o_id = forms_obj.cleaned_data['o_id']
                     name = forms_obj.cleaned_data['name']
                     oper_user_id = forms_obj.cleaned_data['oper_user_id']
+                    pid_id = forms_obj.cleaned_data['pid_id']
+                    print("o_id -->", o_id)
                     #  查询数据库  用户id
                     user_objs = models.Keshi.objects.filter(
-                        id=user_id
+                        id=o_id
                     )
                     if user_objs:
                         user_objs.update(
-                            name=name, oper_user_id=oper_user_id
+                            name=name,
+                            oper_user_id=oper_user_id,
+                            pid_id=pid_id
                         )
                         response.code = 200
                         response.msg = "修改成功"
                     else:
-                        response.code = 303
-                        response.msg = json.loads(forms_obj.errors.as_json())
-                        print(response.msg)
+                        response.code = 302
+                        response.msg = "操作 id 不存在"
+                else:
+                    response.code = 303
+                    response.msg = json.loads(forms_obj.errors.as_json())
+                    print(response.msg)
         else:
             response.code = 402
             response.msg = "请求异常"

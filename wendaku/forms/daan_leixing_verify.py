@@ -4,6 +4,7 @@ from wendaku import models
 from publickFunc import account
 import datetime
 
+
 # 添加角色信息
 class DaanAddForm(forms.Form):
     name = forms.CharField(
@@ -21,7 +22,7 @@ class DaanAddForm(forms.Form):
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
-        print('name  -->',name)
+        print('name  -->', name)
         objs = models.DaAnLeiXing.objects.filter(
             name=name
         )
@@ -51,6 +52,7 @@ class DaanUpdateForm(forms.Form):
             'required': '操作人不能为空'
         }
     )
+
     # 判断角色是否存在
     def clean_name(self):
         role_id = self.data['role_id']
@@ -66,11 +68,11 @@ class DaanUpdateForm(forms.Form):
 
 # 判断是否是数字
 class DaanSelectForm(forms.Form):
-    current_page =forms.IntegerField(
-        required = False,
-        error_messages = {
-        'required': "页码数据类型错误"
-    })
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        })
     length = forms.IntegerField(
         required=False,
         error_messages={
@@ -84,10 +86,3 @@ class DaanSelectForm(forms.Form):
         else:
             current_page = int(self.data['current_page'])
         return current_page
-
-    def clean_length(self):
-        if 'length' not in self.data:
-            length = 10
-        else:
-            length = int(self.data['length'])
-        return length

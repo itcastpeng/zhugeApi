@@ -4,6 +4,7 @@ from wendaku import models
 from publickFunc import account
 import datetime
 
+
 # 添加答案信息
 class DaankuAddForm(forms.Form):
     content = forms.CharField(
@@ -114,11 +115,13 @@ class DaankuUpdateForm(forms.Form):
 
 # 判断是否是数字
 class DaankuSelectForm(forms.Form):
-    current_page =forms.IntegerField(
-        required = False,
-        error_messages = {
-        'required': "页码数据类型错误"
-    })
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        }
+    )
+
     length = forms.IntegerField(
         required=False,
         error_messages={
@@ -132,10 +135,3 @@ class DaankuSelectForm(forms.Form):
         else:
             current_page = int(self.data['current_page'])
         return current_page
-
-    def clean_length(self):
-        if 'length' not in self.data:
-            length = 10
-        else:
-            length = int(self.data['length'])
-        return length

@@ -1,10 +1,14 @@
 from django.conf.urls import url
 
-from wendaku.views_dir import login, role, user,keshi,cilei,daanleixing,daanku
+from wendaku.views_dir import login, role, user, keshi, cilei, daanleixing, daanku, quanxian
 
 urlpatterns = [
     # url(r'^wenku/', include('wendaku.urls')),
     url(r'^login$', login.login),
+
+    # 权限操作
+    url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)', quanxian.quanxian_oper),
+    url(r'^quanxian', quanxian.quanxian),
 
     # 角色操作
     url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)', role.role_oper),
