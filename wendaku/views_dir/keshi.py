@@ -15,6 +15,58 @@ from wendaku.forms.keshi_verify import KeshiAddForm, KeshiUpdateForm, KeshiSelec
 #     models.Keshi.objects.filter(pid_id=pid_id)
 
 
+# 获取排序后的权限数据
+def get_paixu_data(models_obj, level=1, pid=None):
+    objs = models_obj.objects.select_related('pid')
+    if not pid:
+        objs = objs.filter(pid=None).order_by('id')
+    else:
+        objs = objs.filter(pid_id=pid).order_by('id')
+
+    result_data_list = []
+    result_data_tree = []
+    for obj in objs:
+        oper_user_username = ''
+        pid_id = ''
+        pid__name = ''
+
+        #  如果有oper_user字段 等于本身名字
+        if obj.oper_user:
+            oper_user_username = obj.oper_user.username
+
+        if obj.pid:
+            pid_id = obj.pid.id
+            pid__name = obj.pid.name
+
+        current_data = {
+            'id': obj.id,
+            'name': obj.name,
+            'create_date': obj.create_date,
+            'pid__name': pid__name,
+            'pid_id': pid_id,
+            'oper_user__username': oper_user_username,
+            'level': level,
+        }
+
+        result_data_list.append(current_data)
+
+        children_result_data_list, result_data_tree_children = get_paixu_data(models_obj, level + 1, pid=obj.id)
+        print('result_data_listresult_data_list -->', result_data_list)
+        result_data_list.extend(children_result_data_list)
+
+        current_data['children'] = result_data_tree_children
+        current_data['expand'] = True
+        if current_data['level'] > 1:
+            num = (level - 1) * 4 + 1
+            current_data['name'] = '|' + '-' * num + ' ' + current_data['name']
+
+        result_data_tree.append(current_data)
+
+        print('result_data_list -->', result_data_list)
+        print('result_data_tree -->', result_data_tree)
+
+    return result_data_list, result_data_tree
+
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def keshi(request):
@@ -63,10 +115,14 @@ def keshi(request):
                     'oper_user__username': obj.oper_user.username,
                 })
             print('ret_data -->', ret_data)
+
+            result_data_list, result_data_tree = get_paixu_data(models.Keshi)
+            print(result_data_list)
             response.code = 200
             response.data = {
                 'ret_data': list(ret_data),
-                'data_count': count
+                'data_count': count,
+                'result_data_list': result_data_list
             }
     else:
         response.code = 402
