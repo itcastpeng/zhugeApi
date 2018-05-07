@@ -159,11 +159,16 @@ def keshi_role_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            role_objs = models.Keshi.objects.filter(id=o_id)
-            if role_objs:
-                role_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+            objs = models.Keshi.objects.filter(id=o_id)
+            if objs:
+                obj = objs[0]
+                if models.Keshi.objects.filter(pid_id=obj.id):
+                    response.code = 304
+                    response.msg = "含有子级数据,请先删除或转移子级数据"
+                else:
+                    objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
                 response.code = 302
                 response.msg = '用户ID不存在'
