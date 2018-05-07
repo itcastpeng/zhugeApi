@@ -96,7 +96,7 @@ class DaAnKu(models.Model):
     content = models.TextField(verbose_name="答案")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # shenhe_date = models.DateField(verbose_name="审核时间", null=True, blank=True)
-    update_date = models.DateField(verbose_name="修改时间", null=True, blank=True)
+    update_date = models.DateTimeField(verbose_name="修改时间", null=True, blank=True)
     oper_user = models.ForeignKey("UserProfile", verbose_name="审核人", null=True, blank=True)
     daochu_num = models.SmallIntegerField(verbose_name="导出次数", default=0)
 
@@ -106,6 +106,11 @@ class DaAnKu(models.Model):
 
     class Meta:
         app_label = "wendaku"
+
+
+# 答案库临时表
+class DaAnKuTemp(models.Model):
+    content = models.TextField(verbose_name="答案")
 
 
 # 问题表

@@ -72,57 +72,57 @@ def get_paixu_data(models_obj, level=1, pid=None):
 def keshi(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        forms_obj = KeshiSelectForm(request.GET)
-        if forms_obj.is_valid():
-            current_page = forms_obj.cleaned_data['current_page']
-            length = forms_obj.cleaned_data['length']
-            order = request.GET.get('order', '-create_date')
-
-            field_dict = {
-                'id': '',
-                'name': '__contains',
-                'create_date': '',
-                'pid_id': '',
-                'oper_user__username': '',
-            }
-            q = conditionCom(request, field_dict)
-            print('q -->', q)
-
-            ret_data = []
-            objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
-            count = objs.count()
-
-            print("length -->", type(length), length)
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
-
-            for obj in objs:
-                if obj.pid:
-                    pid__name = obj.pid.name
-                    pid_id = obj.pid.id
-                else:
-                    pid__name = ""
-                    pid_id = ""
-
-                ret_data.append({
-                    'id': obj.id,
-                    'name': obj.name,
-                    'create_date': obj.create_date,
-                    'pid__name': pid__name,
-                    'pid_id': pid_id,
-                    'oper_user__username': obj.oper_user.username,
-                })
-            print('ret_data -->', ret_data)
+        # forms_obj = KeshiSelectForm(request.GET)
+        # if forms_obj.is_valid():
+        #     current_page = forms_obj.cleaned_data['current_page']
+        #     length = forms_obj.cleaned_data['length']
+        #     order = request.GET.get('order', '-create_date')
+        #
+        #     field_dict = {
+        #         'id': '',
+        #         'name': '__contains',
+        #         'create_date': '',
+        #         'pid_id': '',
+        #         'oper_user__username': '',
+        #     }
+        #     q = conditionCom(request, field_dict)
+        #     print('q -->', q)
+        #
+        #     ret_data = []
+        #     objs = models.Keshi.objects.select_related('pid', 'oper_user').filter(q).order_by(order)
+        #     count = objs.count()
+        #
+        #     print("length -->", type(length), length)
+        #     if length != 0:
+        #         start_line = (current_page - 1) * length
+        #         stop_line = start_line + length
+        #         objs = objs[start_line: stop_line]
+        #
+        #     for obj in objs:
+        #         if obj.pid:
+        #             pid__name = obj.pid.name
+        #             pid_id = obj.pid.id
+        #         else:
+        #             pid__name = ""
+        #             pid_id = ""
+        #
+        #         ret_data.append({
+        #             'id': obj.id,
+        #             'name': obj.name,
+        #             'create_date': obj.create_date,
+        #             'pid__name': pid__name,
+        #             'pid_id': pid_id,
+        #             'oper_user__username': obj.oper_user.username,
+        #         })
+        #     print('ret_data -->', ret_data)
 
             result_data_list, result_data_tree = get_paixu_data(models.Keshi)
             print(result_data_list)
             response.code = 200
             response.data = {
-                'ret_data': list(ret_data),
-                'data_count': count,
-                'result_data_list': result_data_list
+                'ret_data': result_data_list,
+                # 'data_count': count,
+                'result_data_tree': result_data_tree
             }
     else:
         response.code = 402
@@ -159,11 +159,16 @@ def keshi_role_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            role_objs = models.Keshi.objects.filter(id=o_id)
-            if role_objs:
-                role_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+            objs = models.Keshi.objects.filter(id=o_id)
+            if objs:
+                obj = objs[0]
+                if models.Keshi.objects.filter(pid_id=obj.id):
+                    response.code = 304
+                    response.msg = "含有子级数据,请先删除或转移子级数据"
+                else:
+                    objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
                 response.code = 302
                 response.msg = '用户ID不存在'

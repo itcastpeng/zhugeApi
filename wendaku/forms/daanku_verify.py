@@ -37,17 +37,17 @@ class DaankuAddForm(forms.Form):
     #     }
     # )
 
-    # 查询用户名判断是否存在
-    # def clean_name(self):
-    #     name = self.data['name']
-    #     print('name  -->',name)
-    #     objs = models.DaAnLeiXing.objects.filter(
-    #         name=name
-    #     )
-    #     if objs:
-    #         self.add_error('name', '词名已存在')
-    #     else:
-    #         return name
+    # 查询答案是否存在
+    def clean_content(self):
+        content = self.data['content']
+        objs = models.DaAnKuTemp.objects.filter(
+            content=content
+        )
+        if objs:
+            self.add_error('content', '答案已存在')
+        else:
+            models.DaAnKuTemp.objects.create(content=content)
+            return content
 
 
 # 更新答案信息
@@ -87,7 +87,7 @@ class DaankuUpdateForm(forms.Form):
     )
 
     oper_user_id = forms.IntegerField(
-        required=False,
+        required=True,
         error_messages={
             'required': '操作人不能为空'
         }
@@ -95,10 +95,10 @@ class DaankuUpdateForm(forms.Form):
 
     def clean_content(self):
         content = self.data['content']
-        if "{muban}" in content:
+        if "{" in content and '}' in content:
             return content
         else:
-            self.add_error('content', '答案中未发现 {muban} 模板标记')
+            self.add_error('content', '答案中未发现模板标记')
 
     # 判断角色是否存在
     # def clean_name(self):
