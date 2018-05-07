@@ -18,9 +18,9 @@ user_id     是        当前登录用户ID
 请求URL:http://127.0.0.1:8000/wendaku/login
 
 请求参数:
-参数名    是否必须    参数描述
-username    是        获取用户名
-password    是        获取密码
+参数名     请求方式    是否必须    参数描述
+username     post       是        获取用户名
+password     post       是        获取密码
 
 返回结果：
     正确情况：
@@ -54,10 +54,10 @@ password    是        获取密码
 请求URL: http://127.0.0.1:8000/wendaku/role?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
 
 请求参数:
-参数名             是否必须    参数描述
-rand_str            是         参考顶部公共参数说明
-timestamp           是         参考顶部公共参数说明
-user_id             是         参考顶部公共参数说明
+参数名     请求方式        是否必须            参数描述
+rand_str   （get,post）      是         参考顶部公共参数说明
+timestamp  （get,post）      是         参考顶部公共参数说明
+user_id    （get,post）      是         参考顶部公共参数说明
 
 返回结果：
     正确情况：
