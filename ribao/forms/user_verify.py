@@ -1,6 +1,6 @@
 from django import forms
 
-from wendaku import models
+from ribao import models
 from publickFunc import account
 import datetime
 
@@ -34,7 +34,7 @@ class AddForm(forms.Form):
     def clean_username(self):
         username = self.data['username']
         # print(username)
-        objs = models.UserProfile.objects.filter(
+        objs = models.RibaoUserProfile.objects.filter(
             username=username,
         )
         if objs:
@@ -75,7 +75,7 @@ class UpdateForm(forms.Form):
         username = self.data['username']
         user_id = self.data['user_id']
         print(username)
-        objs = models.UserProfile.objects.filter(
+        objs = models.RibaoUserProfile.objects.filter(
             username=username,
         ).exclude(id=user_id)
         if objs:

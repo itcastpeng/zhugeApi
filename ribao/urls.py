@@ -11,4 +11,9 @@ urlpatterns = [
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)', user.user_oper),
     url(r'^user', user.user),
 
+
+    # 角色操作
+    url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)', role.role_oper),
+    url(r'^role', role.role),
+
 ]

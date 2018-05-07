@@ -1,6 +1,6 @@
 from django import forms
 
-from wendaku import models
+from ribao import models
 from publickFunc import account
 import datetime
 
@@ -23,7 +23,7 @@ class AddForm(forms.Form):
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
-        objs = models.Role.objects.filter(
+        objs = models.RibaoRole.objects.filter(
             name=name,
         )
         if objs:
@@ -58,7 +58,7 @@ class UpdateForm(forms.Form):
     def clean_name(self):
         role_id = self.data['role_id']
         name = self.data['name']
-        objs = models.Role.objects.filter(
+        objs = models.RibaoRole.objects.filter(
             name=name,
         ).exclude(id=role_id)
         if objs:
