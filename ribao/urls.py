@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from ribao.views_dir import login, role, user,renwuguanli,xiangmuguanli
+from ribao.views_dir import login, role, user,renwuguanli,xiangmuguanli,renwurizhi
 
 urlpatterns = [
 
@@ -25,4 +25,7 @@ urlpatterns = [
     url(r'^renwuguanli/(?P<oper_type>\w+)/(?P<o_id>\d+)', renwuguanli.renwuguanli_oper),
     url(r'^renwuguanli', renwuguanli.renwuguanli),
 
+    # 任务日志操作
+    url(r'^renwurizhi/(?P<oper_type>\w+)/(?P<o_id>\d+)', renwurizhi.renwurizhi_oper),
+    url(r'^renwurizhi', renwurizhi.renwurizhi),
 ]

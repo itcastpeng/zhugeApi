@@ -68,15 +68,10 @@ class RibaoTaskManage(models.Model):
 
     # 任务日志管理表
 class RibaoTaskLog(models.Model):
-    status = {
-        (1,'一'),
-        (2,'二'),
-        (3,'三'),
 
-    }
 
     belog_log = models.ForeignKey('RibaoTaskManage',verbose_name='本日志属于哪个任务',max_length=265)
-    log_status = models.CharField(verbose_name='当前项目状态',max_length=64,choices=status,default=1)
+    log_status = models.CharField(verbose_name='当前项目状态',max_length=64)
     oper_user = models.ForeignKey("RibaoUserProfile", verbose_name="操作人", related_name="x_user", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建日志时间", auto_now_add=True)
 

@@ -43,7 +43,7 @@ class AddForm(forms.Form):
     #         return name
 
 
-# 更新用户信息
+# 更新任务信息
 class UpdateForm(forms.Form):
     o_id = forms.IntegerField(
         required=True,
@@ -69,7 +69,7 @@ class UpdateForm(forms.Form):
             'required': '发布人类型异常'
         }
     )
-    # 判断角色是否存在
+    # 判断任务是否存在
     # def clean_name(self):
     #     role_id = self.data['role_id']
     #     name = self.data['name']

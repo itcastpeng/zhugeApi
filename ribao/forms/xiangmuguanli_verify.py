@@ -5,7 +5,7 @@ from publickFunc import account
 import datetime
 
 
-# 添加角色信息
+# 添加项目信息
 class AddForm(forms.Form):
     # print('添加角色')
     project_name = forms.CharField(
@@ -19,7 +19,7 @@ class AddForm(forms.Form):
         error_messages={
             'required': '责任开发人不能为空'
         })
-    # 查询用户名判断是否存在
+    # 查询项目名判断是否存在
     def clean_name(self):
         name = self.data['project_name']
         objs = models.Role.objects.filter(
@@ -31,7 +31,7 @@ class AddForm(forms.Form):
             return name
 
 
-# 更新用户信息
+# 更新项目信息
 class UpdateForm(forms.Form):
     project_name = forms.CharField(
         required=True,
