@@ -87,7 +87,7 @@ class DaankuUpdateForm(forms.Form):
     )
 
     oper_user_id = forms.IntegerField(
-        required=False,
+        required=True,
         error_messages={
             'required': '操作人不能为空'
         }

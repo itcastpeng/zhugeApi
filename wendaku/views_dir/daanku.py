@@ -156,6 +156,7 @@ def daanku_oper(request, oper_type, o_id):
             }
             forms_obj = DaankuUpdateForm(form_data)
             if forms_obj.is_valid():
+                oper_user_id = forms_obj.cleaned_data['oper_user_id']
                 content = forms_obj.cleaned_data['content']
                 tid = forms_obj.cleaned_data['tid']
                 cilei_id = forms_obj.cleaned_data['cilei_id']
@@ -170,7 +171,8 @@ def daanku_oper(request, oper_type, o_id):
                         cilei_id=cilei_id,
                         daan_leixing_id=daan_leixing_id,
                         keshi_id=keshi_id,
-                        update_date=datetime.datetime.now()
+                        update_date=datetime.datetime.now(),
+                        oper_user_id=oper_user_id
                     )
                     response.code = 200
                     response.msg = "修改成功"
