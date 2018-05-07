@@ -4,21 +4,19 @@ from ribao import models
 from publickFunc import account
 import datetime
 
-
 # 添加任务名称
 class AddForm(forms.Form):
     task_name = forms.CharField(
         required=True,
         error_messages={
             'required': "任务名称不能为空"
-        }
-    )
-    belog_task = forms.CharField(
+        })
+    belog_task_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': '归属项目不能为空'
         })
-    director = forms.CharField(
+    director_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': '开发负责人不能为空'
@@ -28,8 +26,12 @@ class AddForm(forms.Form):
         error_messages={
             'required': '是否加急类型错误'
         })
-
-    # # 查询用户名判断是否存在
+    issuer = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '发布人不能为空'
+        })
+    # 查询用户名判断是否存在
     # def clean_name(self):
     #     name = self.data['name']
     #     objs = models.RibaoRole.objects.filter(

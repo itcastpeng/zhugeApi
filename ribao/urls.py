@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from ribao.views_dir import login, role, user,task
+from ribao.views_dir import login, role, user,renwuguanli,xiangmuguanli
 
 urlpatterns = [
 
@@ -17,12 +17,12 @@ urlpatterns = [
     url(r'^role', role.role),
 
 
-    # 任务管理操作
-    url(r'^task/(?P<oper_type>\w+)/(?P<o_id>\d+)', task.task_oper),
-    url(r'^task', task.task),
-
     # 项目管理操作
-    # url(r'^project/(?P<oper_type>\w+)/(?P<o_id>\d+)', project.project_oper),
-    # url(r'^project', project.project),
+    url(r'^xiangmuguanli/(?P<oper_type>\w+)/(?P<o_id>\d+)', xiangmuguanli.xiangmuguanli_oper),
+    url(r'^xiangmuguanli', xiangmuguanli.xiangmuguanli),
+
+    # 任务管理操作
+    url(r'^renwuguanli/(?P<oper_type>\w+)/(?P<o_id>\d+)', renwuguanli.renwuguanli_oper),
+    url(r'^renwuguanli', renwuguanli.renwuguanli),
 
 ]
