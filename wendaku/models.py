@@ -108,6 +108,11 @@ class DaAnKu(models.Model):
         app_label = "wendaku"
 
 
+# 答案库临时表
+class DaAnKuTemp(models.Model):
+    content = models.TextField(verbose_name="答案")
+
+
 # 问题表
 class GuanJianCi(models.Model):
     status_choices = (
