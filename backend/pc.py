@@ -170,31 +170,31 @@ if __name__ == '__main__':
     # 	urldome = sys.argv[1]
     # else:
     # 	u	rldome = '127.0.0.1:8000'
-    token = '4e0398e4d4bad913e24c1d0d60cc9170'
-    timestamp = str(int(time.time()))
-    params = {
-        'user_id': 1,
-        'timestamp': timestamp,
-        'rand_str': str_encrypt(timestamp + token)
-    }
-    # 请求api获取 关键词
-    # url = 'http://127.0.0.1:8000/wendaku/guanjianci/get_once/0'
-    url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/get_once/0'
-    # 发送带有id参数的请求
-    ret = requests.get(url, params=params)
-    # 请求后的参数需要json转换
-    ret_json = ret.json()
-    print(ret_json)
-    response_code = ret_json['code']
-    if response_code == 200:
-        content = ret_json['data']['content']
-        o_id = ret_json['data']['o_id']
-        print(
-            'content -->',content
-        )
-        zhidao = Zhidao(content,params)
-        zhidao.run()
-        # 返回api 更改状态
-        get_status(o_id, params)
-    else:
-        pass
+    while True:
+        token = '4e0398e4d4bad913e24c1d0d60cc9170'
+        timestamp = str(int(time.time()))
+        params = {
+            'user_id': 1,
+            'timestamp': timestamp,
+            'rand_str': str_encrypt(timestamp + token)
+        }
+        # 请求api获取 关键词
+        # url = 'http://127.0.0.1:8000/wendaku/guanjianci/get_once/0'
+        url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/get_once/0'
+        # 发送带有id参数的请求
+        ret = requests.get(url, params=params)
+        ret_json = ret.json()
+        # 请求后的参数需要json转换
+        print(ret_json)
+        if ret :
+            response_code = ret_json['code']
+            if response_code == 200:
+                content = ret_json['data']['content']
+                o_id = ret_json['data']['o_id']
+                zhidao = Zhidao(content,params)
+                zhidao.run()
+                # 返回api 更改状态
+                get_status(o_id, params)
+        else:
+            break
+
