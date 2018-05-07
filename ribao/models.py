@@ -58,7 +58,7 @@ class RibaoTaskManage(models.Model):
     detail = models.CharField(verbose_name="任务详情", max_length=128, null=True, blank=True)
     belog_task = models.ForeignKey('RibaoProjectManage',verbose_name="归属名称", max_length=32)
     issuer = models.CharField( verbose_name="发布人",max_length=32)
-    director = models.CharField( verbose_name="开发负责人",max_length=32)
+    director = models.ForeignKey('RibaoProjectManage', verbose_name="开发负责人",max_length=32,related_name='person')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     estimated_time = models.DateTimeField(verbose_name="预计完成时间", null=True, blank=True)
     boor_urgent = models.BooleanField(verbose_name="是否加急",default=False)
