@@ -95,7 +95,7 @@ class DaankuUpdateForm(forms.Form):
 
     def clean_content(self):
         content = self.data['content']
-        if "{" not in content or '}' not in content:
+        if "{" in content and '}' in content:
             return content
         else:
             self.add_error('content', '答案中未发现模板标记')
