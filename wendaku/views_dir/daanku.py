@@ -27,10 +27,13 @@ def daanku(request):
 
             field_dict = {
                 'id': '',
-                'content': '',
+                'content': '__contains',
                 'create_date': '',
                 'oper_user__username': '__contains',
                 'shenhe_date': '',
+                'cilei_id': '',
+                'keshi_id': '',
+                'daan_leixing_id': '',
                 'cilei__name': '__contains',
                 'keshi_name': '__contains',
                 'daan_leiixng': ''
@@ -172,7 +175,8 @@ def daanku_oper(request, oper_type, o_id):
                         daan_leixing_id=daan_leixing_id,
                         keshi_id=keshi_id,
                         update_date=datetime.datetime.now(),
-                        oper_user_id=oper_user_id
+                        oper_user_id=oper_user_id,
+                        is_update=True
                     )
                     response.code = 200
                     response.msg = "修改成功"
