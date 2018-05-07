@@ -39,7 +39,6 @@ def xiangmuguanli(request):
             # 获取所有数据
             ret_data = []
             # # 获取第几页的数据
-            print(objs)
             for obj in objs:
                 ret_data.append({
                     'id': obj.id,

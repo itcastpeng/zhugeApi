@@ -45,37 +45,41 @@ class AddForm(forms.Form):
 
 # 更新用户信息
 class UpdateForm(forms.Form):
-    role_id = forms.IntegerField(
+    o_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '角色ID不能为空'
+            'required': '任务ID不能为空'
         }
     )
-
-    name = forms.CharField(
-        required=True,
+    task_name = forms.CharField(
+        required=False,
         error_messages={
-            'required': '角色名不能为空'
+            'required': '任务名不能为空'
         }
     )
-    oper_user_id = forms.IntegerField(
-        required=True,
+    director = forms.IntegerField(
+        required=False,
         error_messages={
-            'required': '操作人不能为空'
+            'required': '开发负责人类型错误'
         }
     )
-
+    issuer = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': '发布人类型异常'
+        }
+    )
     # 判断角色是否存在
-    def clean_name(self):
-        role_id = self.data['role_id']
-        name = self.data['name']
-        objs = models.RibaoRole.objects.filter(
-            name=name,
-        ).exclude(id=role_id)
-        if objs:
-            self.add_error('name', '角色已存在')
-        else:
-            return name
+    # def clean_name(self):
+    #     role_id = self.data['role_id']
+    #     name = self.data['name']
+    #     objs = models.RibaoRole.objects.filter(
+    #         name=name,
+    #     ).exclude(id=role_id)
+    #     if objs:
+    #         self.add_error('name', '角色已存在')
+    #     else:
+    #         return name
 
 
 # 判断是否是数字
