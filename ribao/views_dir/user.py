@@ -24,7 +24,7 @@ def user(request):
             field_dict = {
                 'id': '',
                 'username': '__contains',
-                'role__name': '__contains',
+                'role_id': '__contains',
                 'create_date': '',
                 'last_login_date': '',
                 'oper_user__username': '__contains',

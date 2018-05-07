@@ -20,40 +20,39 @@ def renwurizhi(request):
             print('current_page -->',current_page)
             length = forms_obj.cleaned_data['length']
             print('length-->',length)
-            order = request.GET.get('order', '-person_people')
+            order = request.GET.get('order', '-id')
 
             field_dict = {
                 'id': '',
-                'project_name': '__contains',
-                'person_people_username': '__contains',
+                'belog_log': '',
+                'log_status': '',
+                'oper_user__username':'__contains',
+                'create_date':'',
             }
             q = conditionCom(request, field_dict)
-            objs = models.RibaoProjectManage.objects.select_related('person_people').filter(q).order_by(order)
+            objs = models.RibaoTaskLog.objects.select_related('belog_log','oper_user').filter(q).order_by(order)
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-
             # 获取所有数据
             ret_data = []
             # # 获取第几页的数据
             for obj in objs:
                 ret_data.append({
                     'id': obj.id,
-                    'project_name': obj.project_name,
-                    'person_people': obj.person_people.username,
-                })
-            print(ret_data)
-            print(ret_data)
+                    'belog_log': obj.belog_log.task_name,
+                    'log_status': obj.log_status,
+                    'oper_user__username':obj.oper_user.username,
+                    'create_date':obj.create_date,
+                    })
             response.code = 200
             response.data = {
                 'ret_data': ret_data,
                 'data_count': count,
             }
-
         return JsonResponse(response.__dict__)
-
     else:
         response.code = 402
         response.msg = "请求异常"
