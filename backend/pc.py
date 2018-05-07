@@ -159,7 +159,8 @@ class Zhidao:
 
 # 请求api 修改状态
 def get_status(o_id, params):
-    url = 'http://127.0.0.1:8000/wendaku/guanjianci/update_status/{}'.format(o_id)
+    # url = 'http://127.0.0.1:8000/wendaku/guanjianci/update_status/{}'.format(o_id)
+    url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/update_status/{}'.format(o_id)
     requests.post(url, params=params)
 
 
@@ -176,11 +177,13 @@ if __name__ == '__main__':
         'rand_str': str_encrypt(timestamp + token)
     }
     # 请求api获取 关键词
-    url = 'http://127.0.0.1:8000/wendaku/guanjianci/get_once/0'
+    # url = 'http://127.0.0.1:8000/wendaku/guanjianci/get_once/0'
+    url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/get_once/0'
     # 发送带有id参数的请求
     ret = requests.get(url, params=params)
     # 请求后的参数需要json转换
     ret_json = ret.json()
+    print(ret_json)
     response_code = ret_json['code']
     if response_code == 200:
         content = ret_json['data']['content']
