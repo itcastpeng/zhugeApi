@@ -96,29 +96,30 @@ class Zhidao:
                         for span_tag in span:
                             text_data = span_tag.get_text().strip()
                             if len(text_data) > 30:
-                                temps.append(text_data)
+                                self.get_data(text_data)
+                                # temps.append(text_data)
                     if pre:
                         for pre_tag in pre:
                             text_data = pre_tag.get_text().strip()
                             if len(text_data) > 30:
-                                temps.append(text_data)
+                                self.get_data(text_data)
+                                # temps.append(text_data)
                     if p_tag:
                         for tag in p_tag:
                             text_data = tag.get_text().strip()
                             if len(text_data) > 30:
-                                temps.append(text_data)
+                                self.get_data(text_data)
+                                # temps.append(text_data)
 
             except Exception as e:
                 print(e)
-        return temps
+        # return temps
 
 
     # 获取答案 并返回api
-    def get_data(self, temps):
-        for teme in temps:
-            print('temp --- >',teme)
+    def get_data(self, text_data):
             data = {
-                'data': teme
+                'data': text_data
             }
             url = 'http://127.0.0.1:8000/wendaku/daanku/add/0'
             # url = 'http://api.zhugeyingxiao.com/wendaku/daanku/add/0'
