@@ -42,52 +42,52 @@ class RibaoUserProfile(models.Model):
 
 
 # 项目管理表
-    class RibaoProjectManage(models.Model):
-        project_name = models.CharField(verbose_name='项目名称',max_length=32)
-        person_people = models.CharField(verbose_name='开发负责人',max_length=64)
-        def __str__(self):
-            return self.project_name
+class RibaoProjectManage(models.Model):
+    project_name = models.CharField(verbose_name='项目名称',max_length=32)
+    person_people = models.CharField(verbose_name='开发负责人',max_length=64)
+    def __str__(self):
+        return self.project_name
 
-        class Meta:
-            app_label = 'ribao'
+    class Meta:
+        app_label = 'ribao'
 
 
 # 任务管理表
-    class RibaoTaskManage(models.Model):
-        task_name = models.CharField(verbose_name='任务名称',max_length=64)
-        detail = models.CharField(verbose_name="任务详情", max_length=128, null=True, blank=True)
-        belog_task = models.ForeignKey('RibaoProjectManage',verbose_name="归属名称", max_length=32)
-        issuer = models.CharField( verbose_name="发布人",max_length=32)
-        director = models.CharField( verbose_name="开发负责人",max_length=32)
-        create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-        estimated_time = models.DateTimeField(verbose_name="预计完成时间", null=True, blank=True)
-        boor_urgent = models.BooleanField(verbose_name="是否加急",default=False)
+class RibaoTaskManage(models.Model):
+    task_name = models.CharField(verbose_name='任务名称',max_length=64)
+    detail = models.CharField(verbose_name="任务详情", max_length=128, null=True, blank=True)
+    belog_task = models.ForeignKey('RibaoProjectManage',verbose_name="归属名称", max_length=32)
+    issuer = models.CharField( verbose_name="发布人",max_length=32)
+    director = models.CharField( verbose_name="开发负责人",max_length=32)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    estimated_time = models.DateTimeField(verbose_name="预计完成时间", null=True, blank=True)
+    boor_urgent = models.BooleanField(verbose_name="是否加急",default=False)
 
-        def __str__(self):
-            return self.task_name
+    def __str__(self):
+        return self.task_name
 
-        class Meta:
-            app_label = 'ribao'
+    class Meta:
+        app_label = 'ribao'
 
     # 任务日志管理表
-    class RibaoTaskLog(models.Model):
-        status = {
-            (1,'一'),
-            (2,'二'),
-            (3,'三'),
+class RibaoTaskLog(models.Model):
+    status = {
+        (1,'一'),
+        (2,'二'),
+        (3,'三'),
 
-        }
+    }
 
-        belog_log = models.ForeignKey('RibaoTaskManage',verbose_name='本日志属于哪个任务',max_length=265)
-        log_status = models.CharField(verbose_name='当前项目状态',max_length=64,choices=status,default=1)
-        oper_user = models.ForeignKey("RibaoUserProfile", verbose_name="操作人", related_name="x_user", null=True, blank=True)
-        create_date = models.DateTimeField(verbose_name="创建日志时间", auto_now_add=True)
+    belog_log = models.ForeignKey('RibaoTaskManage',verbose_name='本日志属于哪个任务',max_length=265)
+    log_status = models.CharField(verbose_name='当前项目状态',max_length=64,choices=status,default=1)
+    oper_user = models.ForeignKey("RibaoUserProfile", verbose_name="操作人", related_name="x_user", null=True, blank=True)
+    create_date = models.DateTimeField(verbose_name="创建日志时间", auto_now_add=True)
 
-        def __str__(self):
-            return self.belog_log
+    def __str__(self):
+        return self.belog_log
 
-        class Meta:
-            app_label = 'ribao'
+    class Meta:
+        app_label = 'ribao'
 
 
 
