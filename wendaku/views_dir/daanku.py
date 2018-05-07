@@ -34,11 +34,14 @@ def daanku(request):
                 'cilei_id': '',
                 'keshi_id': '',
                 'daan_leixing_id': '',
+                'is_update': '',
                 'cilei__name': '__contains',
                 'keshi_name': '__contains',
                 'daan_leiixng': ''
             }
             q = conditionCom(request, field_dict)
+            print('q -->', q)
+
             # 获取所有数据
             objs = models.DaAnKu.objects.select_related('oper_user', 'cilei', 'keshi', 'daan_leixing').filter(
                 q).order_by(order)
