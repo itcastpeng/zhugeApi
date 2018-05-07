@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from wendaku.forms.daanku_verify import DaankuAddForm, DaankuUpdateForm, DaankuSelectForm
 from publickFunc.condition_com import conditionCom
 import json
+import datetime
 
 
 # 数据的展示
@@ -168,7 +169,8 @@ def daanku_oper(request, oper_type, o_id):
                         content=content,
                         cilei_id=cilei_id,
                         daan_leixing_id=daan_leixing_id,
-                        keshi_id=keshi_id
+                        keshi_id=keshi_id,
+                        update_date=datetime.datetime.now()
                     )
                     response.code = 200
                     response.msg = "修改成功"
