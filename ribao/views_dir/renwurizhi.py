@@ -96,18 +96,19 @@ def renwurizhi_oper(request, oper_type, o_id):
             form_data = {
                 'o_id':request.GET.get('o_id'),
                 'oper_user_id': request.GET.get('user_id'),
-                # 'log_status':request.POST.get('log_status')
+                'log_status':request.POST.get('log_status')
+
             }
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
-                oper_user_id = forms_obj.cleaned_data['oper_user_id']
+                log_status = forms_obj.cleaned_data['log_status']
                 pro_id = o_id
                 proj_objs = models.RibaoTaskLog.objects.filter(
                     id=pro_id
                 )
                 if proj_objs:
                     proj_objs.update(
-                        oper_user_id=oper_user_id
+                        log_status=log_status
                     )
                     response.code = 200
                     response.msg = "修改成功"

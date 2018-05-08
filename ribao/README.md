@@ -2,12 +2,12 @@
 ### 数据库使用说明
 多数据库参考文档 https://blog.csdn.net/songfreeman/article/details/70229839
 
+### 项目名称-------> 日报
 
 ### app 说明
-ribao       日报
-
 
 ### 公共参数（登录后所有api都需要加的参数）
+
 ```
 请求参数:
 参数名      传参方式      是否必须    参数描述
@@ -18,9 +18,10 @@ user_id      get            是        当前登录用户ID
 
 
 ###登录中心
+
 ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/role/add/0
+请求URL: http://127.0.0.1:8000/ribao/login
 请求参数:
 参数名      传参方式    是否必须      参数描述
 username     post         是      要登录的用户名
@@ -63,7 +64,6 @@ password     post         是      登录使用的密码
 username        post         是         要增加的用户名字
 password        post         是         要增加的密码 
 role_id         post         是         该用户的角色
-oper_user_id    post         是         创建该用户的操作人
 
 正确结果：
 {
@@ -83,10 +83,9 @@ oper_user_id    post         是         创建该用户的操作人
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
-user_id         get          是         公共参数（详见置顶）
 username        post         是         要修改的用户名 
 role_id         post         是         要修改用户的角色
-ID              get          是         要修改哪个用户ID
+ID              url          是         要修改哪个用户ID
 
 正确结果：
 {
@@ -102,11 +101,11 @@ ID              get          是         要修改哪个用户ID
 
 ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/user/delete/ID --删除功能 
+请求URL: http://127.0.0.1:8000/ribao/user/delete/ID
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
-ID              get          是         要删除的用户ID
+ID              url          是         要删除的用户ID
 
 正确结果：
 {
@@ -121,7 +120,7 @@ ID              get          是         要删除的用户ID
 
 ```
 请求方法：GET    
-请求URL: http://127.0.0.1:8000/ribao/user/user  
+请求URL: http://127.0.0.1:8000/ribao/user  
 
 请求参数：
 参数名             传参方式      是否必须      参数描述
@@ -135,7 +134,7 @@ oper_user__username get            否       模糊匹配操作人
 ###角色管理
 
  - 添加
-   
+ 
 ```
 请求方法：POST
 请求URL: http://127.0.0.1:8000/ribao/role/add/0  
@@ -143,7 +142,6 @@ oper_user__username get            否       模糊匹配操作人
 请求参数:
 参数名         传参方式      是否必须      参数描述
 name            post           是        添加的角色名
-oper_user_id    post           是        该角色的操作人 
 
 正确结果：
 {
@@ -159,13 +157,12 @@ oper_user_id    post           是        该角色的操作人
 
 ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/role/update/role_id 
+请求URL: http://127.0.0.1:8000/ribao/role/update/ID 
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
-role_id         get           是         要修改的角色ID
+ID              url           是         要修改的ID
 name            post          是         要修改的角色名 
-oper_user_id    get           是         操作人ID
 
 正确结果：
 {
@@ -201,7 +198,7 @@ ID              get          是         要删除的用户ID
  
  ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/role/delete/ID 
+请求URL: http://127.0.0.1:8000/ribao/role
 
 请求参数
 参数名            传参方式      是否必须      参数描述
@@ -215,7 +212,7 @@ oper_user__username get            否       模糊匹配操作人
 ###项目管理
 
  - 添加
-   
+
 ```
 请求方法：POST
 请求URL: http://127.0.0.1:8000/ribao/xiangmuguanli/add/0  
@@ -280,7 +277,7 @@ ID              get          是         要删除的用户ID
  
  ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/xiangmuguanli/xiangmuguanli
+请求URL: http://127.0.0.1:8000/ribao/xiangmuguanli
 
 请求参数：
 参数名                 传参方式      是否必须      参数描述
@@ -292,7 +289,7 @@ person_people_username   get            否        模糊匹配责任开发人
 ###任务管理
 
  - 添加
-   
+ 
 ```
 请求方法：POST
 请求URL: http://127.0.0.1:8000/ribao/renwuguanli/add/0  
@@ -303,7 +300,6 @@ task_name           post           是             任务名称
 belog_task_id       post           是             归属项目(此任务归哪个项目)    
 director_id         post           是             责任开发人
 boor_urgent         post           是             是否加急
-issuer              get            是             发布人
 
 正确结果：
 {
@@ -319,11 +315,11 @@ issuer              get            是             发布人
 
 ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/renwuguanli/update/o_id 
+请求URL: http://127.0.0.1:8000/ribao/renwuguanli/update/ID 
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
-o_id             get           是         要修改的任务ID
+ID               url           是         要修改的任务ID
 task_name        post          是         要修改的项目名称
 director         post          否         责任开发人
 issuer           post          否         任务发布人
@@ -346,7 +342,7 @@ issuer           post          否         任务发布人
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
-ID              get          是         要删除的用户ID
+ID              url          是         要删除的用户ID
 
 正确结果：
 {
@@ -357,11 +353,12 @@ ID              get          是         要删除的用户ID
     "msg":"删除成功"
 }
 ```
+
  - 查询
  
 ```
 请求方法：GET
-请求URL: http://127.0.0.1:8000/ribao/renwuguanli/renwuguanli
+请求URL: http://127.0.0.1:8000/ribao/renwuguanli
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
@@ -387,7 +384,6 @@ create_date       get           否       查询创建时间
 参数名            传参方式       是否必须          参数描述
 belog_log_id       post           是              归属日志(此日志归哪个项目)   
 log_status         post           是              当前状态    
-oper_user_id       post           是              操作人
 
 正确结果：
 {
@@ -403,12 +399,11 @@ oper_user_id       post           是              操作人
 
 ```
 请求方法：POST
-请求URL: http://127.0.0.1:8000/ribao/renwurizhi/update/o_id 
+请求URL: http://127.0.0.1:8000/ribao/renwurizhi/update/ID 
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
-oper_user_id    post           是       要修改的操作人
-
+log_status      post           是      修改项目日志状态    
 正确结果：
 {
     "code":200,
@@ -443,7 +438,7 @@ ID              get          是         要删除的用户ID
  
 ```
 请求方法：GET
-请求URL: http://127.0.0.1:8000/ribao/renwurizhi/renwurizhi
+请求URL: http://127.0.0.1:8000/ribao/renwurizhi
 
 请求参数：
 参数名                  传参方式      是否必须      参数描述

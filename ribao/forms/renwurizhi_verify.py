@@ -37,7 +37,7 @@ class AddForm(forms.Form):
 
 # 更新用户信息
 class UpdateForm(forms.Form):
-    oper_user_id = forms.CharField(
+    log_status = forms.CharField(
         required=True,
         error_messages={
             'required': "操作人不能为空"
