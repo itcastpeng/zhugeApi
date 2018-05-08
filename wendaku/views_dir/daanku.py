@@ -33,6 +33,7 @@ def daanku(request):
                 'shenhe_date': '',
                 'cilei_id': '',
                 'keshi_id': '',
+                'oper_user_id': '',
                 'daan_leixing_id': '',
                 'is_update': '',
                 'cilei__name': '__contains',
