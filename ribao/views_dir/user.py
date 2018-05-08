@@ -26,6 +26,7 @@ def user(request):
                 'username': '__contains',
                 'role_id': '__contains',
                 'create_date': '',
+                'status': '',
                 'last_login_date': '',
                 'oper_user__username': '__contains',
             }

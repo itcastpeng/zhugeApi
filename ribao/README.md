@@ -97,7 +97,7 @@ ID              url          是         要修改哪个用户ID
 }
 ```
 
- - 删除
+- 删除
 
 ```
 请求方法：POST
@@ -116,6 +116,7 @@ ID              url          是         要删除的用户ID
     "msg":"删除成功"
 }
 ```
+
 - 查询
 
 ```
@@ -128,6 +129,9 @@ username            get            否       模糊匹配用户名
 role_id             get            否       模糊匹配角色ID
 create_date         get            否       查询创建时间
 oper_user__username get            否       模糊匹配操作人
+current_page        get            否       获取几页
+length              get            是       获取几条数据
+status              get            否       获取状态 1：已启用 2：未启用
 
 正确结果：
 {
@@ -135,26 +139,26 @@ oper_user__username get            否       模糊匹配操作人
         "data_count":3,
         "ret_data":[
             {
-                "create_date":"2018-05-07T21:11:31",
-                "username":"lihanjie",
-                "oper_user__username":"李汉杰",
-                "status":"启用",
-                "id":8,
-                "role_id":1,
-                "role_name":"sadf",
-                "last_login_date":"2018-05-07T21:36:00"
+                "create_date":"2018-05-07T21:11:31",                            创建时间
+                "username":"lihanjie",                                          用户名
+                "oper_user__username":"李汉杰",                                 操作人
+                "status":"启用",                                                启用状态
+                "id":8,                                                         用户ID
+                "role_id":1,                                                    角色ID
+                "role_name":"sadf",                                             角色名
+                "last_login_date":"2018-05-07T21:36:00"                         最后登录时间
             }
         ]
     },
-    "code":200,
-    "msg":"查询成功"
+    "code":200,                                                                 状态码200 成功
+    "msg":"查询成功"                                                            响应信息
 }
 ```
 
 
 ### 角色管理
 
- - 添加
+- 添加
  
 ```
 请求方法：POST
@@ -195,7 +199,7 @@ name            post          是         要修改的角色名
 }
 ```
 
- - 删除 
+- 删除 
 
 ```
 请求方法：POST
@@ -215,7 +219,7 @@ ID              get          是         要删除的用户ID
 }
 ```
 
- - 查询
+- 查询
  
  ```
 请求方法：POST
@@ -223,6 +227,8 @@ ID              get          是         要删除的用户ID
 
 请求参数
 参数名            传参方式      是否必须      参数描述
+length              get            是       获取几条数据
+current_page        get            否       获取几页
 name                get            否       模糊匹配角色名 
 create_date         get            否       查询创建时间
 oper_user__username get            否       模糊匹配操作人
@@ -233,23 +239,23 @@ oper_user__username get            否       模糊匹配操作人
         "data_count":1,
         "ret_data":[
             {
-                "id":1,
-                "create_date":"2018-05-07T08:45:55",
-                "oper_user__username":"",
-                "name":"sadf",
-                "role_id":1
+                "id":1,                                                         角色ID
+                "create_date":"2018-05-07T08:45:55",                            创建时间
+                "oper_user__username":"",                                       操作人
+                "name":"sadf",                                                  角色名称
+                "role_id":1                                                     user_id(公共参数)
             }
         ]
     },
-    "code":200,
-    "msg":""
+    "code":200,                                                                 状态码 200 成功
+    "msg":""                                                                    响应信息
 }
 ```
 
 
 ### 项目管理
 
- - 添加
+- 添加
 
 ```
 请求方法：POST
@@ -291,7 +297,7 @@ project_name     post          是         要修改的项目名称
 }
 ```
 
- - 删除 
+- 删除 
 
 ```
 请求方法：POST
@@ -311,7 +317,7 @@ ID              get          是         要删除的用户ID
 }
 ```
 
- - 查询
+- 查询
  
  ```
 请求方法：POST
@@ -319,6 +325,8 @@ ID              get          是         要删除的用户ID
 
 请求参数：
 参数名                 传参方式      是否必须      参数描述
+length                   get            是       获取几条数据
+current_page             get            否       获取几页
 project_name             get            否        模糊匹配项目名称
 person_people_username   get            否        模糊匹配责任开发人
 
@@ -328,9 +336,9 @@ person_people_username   get            否        模糊匹配责任开发人
         "data_count":4,
         "ret_data":[
             {
-                "id":3,
-                "project_name":"afhvas",
-                "person_people":"赵欣鹏"
+                "id":3,                                                         项目管理ID
+                "project_name":"afhvas",                                        项目名称
+                "person_people":"赵欣鹏"                                        该项目责任人
             }
         ]
     },
@@ -342,7 +350,7 @@ person_people_username   get            否        模糊匹配责任开发人
 
 ### 任务管理
 
- - 添加
+- 添加
  
 ```
 请求方法：POST
@@ -388,7 +396,7 @@ issuer           post          否         任务发布人
 }
 ```
 
- - 删除 
+- 删除 
 
 ```
 请求方法：POST
@@ -408,7 +416,7 @@ ID              url          是         要删除的用户ID
 }
 ```
 
- - 查询
+- 查询
  
 ```
 请求方法：GET
@@ -416,13 +424,15 @@ ID              url          是         要删除的用户ID
 
 请求参数：
 参数名         传参方式      是否必须      参数描述
+length           get            是       获取几条数据   
+current_page     get            否       获取几页
 task_name         get           否       模糊匹配任务名
 detail            get           否       查询任务详情
 belog_task        get           否       模糊匹配归属名    
 director          get           否       模糊匹配责任开发人    
 issuer            get           否       查询发布人    
+create_date       get           否       查询创建时间 
 boor_urgent       get           否       查询是否加急    
-create_date       get           否       查询创建时间    
 
 正确结果：
 {
@@ -430,15 +440,15 @@ create_date       get           否       查询创建时间
         "data_count":6,
         "ret_data":[
             {
-                "task_name":"fesrgesr",
-                "belog_task":"afhvas",
-                "director":"赵欣鹏",
-                "estimated_time":null,
-                "id":14,
-                "boor_urgent":true,
-                "create_date":"2018-05-07T15:04:56",
-                "detail":null,
-                "issuer":"1"
+                "task_name":"fesrgesr",                                         任务名称
+                "belog_task":"afhvas",                                          归属名称
+                "director":"赵欣鹏",                                            本项目开发负责人
+                "estimated_time":null,                                          预计完成时间  
+                "id":14,                                                        任务ID
+                "boor_urgent":true                                              是否加急 True是 False否,
+                "create_date":"2018-05-07T15:04:56",                            创建时间
+                "detail":null,                                                  任务详情
+                "issuer":"1"                                                    发布人
             }
         ]
     },
@@ -450,7 +460,7 @@ create_date       get           否       查询创建时间
 
 ### 任务日志
 
- - 添加
+- 添加
    
 ```
 请求方法：POST
@@ -490,7 +500,7 @@ log_status      post           是      修改项目日志状态
 }
 ```
 
- - 删除 
+- 删除 
 
 ```
 请求方法：POST
@@ -510,7 +520,7 @@ ID              get          是         要删除的用户ID
 }
 ```
 
- - 查询
+- 查询
  
 ```
 请求方法：GET
@@ -518,6 +528,8 @@ ID              get          是         要删除的用户ID
 
 请求参数：
 参数名                  传参方式      是否必须      参数描述
+length                    get           是        获取几条数据
+current_page              get           否        获取几页
 belog_log                 get           否        查询该日志属于哪个任务
 log_status                get           否        查询当前项目状态
 oper_user__username       get           否        模糊匹配操作人
@@ -529,11 +541,11 @@ create_date               get           否        查询创建日志时间
         "data_count":3,
         "ret_data":[
             {
-                "id":5,
-                "log_status":"y8hpo",
-                "belog_log":"fs gseg g",
-                "oper_user__username":"赵欣鹏",
-                "create_date":"2018-05-07T17:33:22"
+                "id":5,                                                         任务日志ID
+                "log_status":"y8hpo",                                           项目当前状态
+                "belog_log":"fs gseg g",                                        当前日志属于哪个任务
+                "oper_user__username":"赵欣鹏",                                 操作人
+                "create_date":"2018-05-07T17:33:22"                             创建时间
             }
         ]
     },
@@ -541,3 +553,22 @@ create_date               get           否        查询创建日志时间
     "msg":""
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
