@@ -128,6 +128,27 @@ username            get            否       模糊匹配用户名
 role_id             get            否       模糊匹配角色ID
 create_date         get            否       查询创建时间
 oper_user__username get            否       模糊匹配操作人
+
+正确结果：
+{
+    "data":{
+        "data_count":3,
+        "ret_data":[
+            {
+                "create_date":"2018-05-07T21:11:31",
+                "username":"lihanjie",
+                "oper_user__username":"李汉杰",
+                "status":"启用",
+                "id":8,
+                "role_id":1,
+                "role_name":"sadf",
+                "last_login_date":"2018-05-07T21:36:00"
+            }
+        ]
+    },
+    "code":200,
+    "msg":"查询成功"
+}
 ```
 
 
@@ -206,6 +227,23 @@ name                get            否       模糊匹配角色名
 create_date         get            否       查询创建时间
 oper_user__username get            否       模糊匹配操作人
 
+正确结果：
+{
+    "data":{
+        "data_count":1,
+        "ret_data":[
+            {
+                "id":1,
+                "create_date":"2018-05-07T08:45:55",
+                "oper_user__username":"",
+                "name":"sadf",
+                "role_id":1
+            }
+        ]
+    },
+    "code":200,
+    "msg":""
+}
 ```
 
 
@@ -283,6 +321,22 @@ ID              get          是         要删除的用户ID
 参数名                 传参方式      是否必须      参数描述
 project_name             get            否        模糊匹配项目名称
 person_people_username   get            否        模糊匹配责任开发人
+
+正确结果：
+{
+    "data":{
+        "data_count":4,
+        "ret_data":[
+            {
+                "id":3,
+                "project_name":"afhvas",
+                "person_people":"赵欣鹏"
+            }
+        ]
+    },
+    "code":200,
+    "msg":""
+}
 ```
 
 
@@ -369,6 +423,28 @@ director          get           否       模糊匹配责任开发人
 issuer            get           否       查询发布人    
 boor_urgent       get           否       查询是否加急    
 create_date       get           否       查询创建时间    
+
+正确结果：
+{
+    "data":{
+        "data_count":6,
+        "ret_data":[
+            {
+                "task_name":"fesrgesr",
+                "belog_task":"afhvas",
+                "director":"赵欣鹏",
+                "estimated_time":null,
+                "id":14,
+                "boor_urgent":true,
+                "create_date":"2018-05-07T15:04:56",
+                "detail":null,
+                "issuer":"1"
+            }
+        ]
+    },
+    "code":200,
+    "msg":""
+}
 ```     
 
 
@@ -446,4 +522,22 @@ belog_log                 get           否        查询该日志属于哪个�
 log_status                get           否        查询当前项目状态
 oper_user__username       get           否        模糊匹配操作人
 create_date               get           否        查询创建日志时间
+
+正确结果：
+{
+    "data":{
+        "data_count":3,
+        "ret_data":[
+            {
+                "id":5,
+                "log_status":"y8hpo",
+                "belog_log":"fs gseg g",
+                "oper_user__username":"赵欣鹏",
+                "create_date":"2018-05-07T17:33:22"
+            }
+        ]
+    },
+    "code":200,
+    "msg":""
+}
 ```
