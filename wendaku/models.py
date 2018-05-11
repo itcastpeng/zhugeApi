@@ -104,6 +104,8 @@ class DaAnKu(models.Model):
     keshi = models.ForeignKey('Keshi', verbose_name="科室", null=True, blank=True)
     daan_leixing = models.ForeignKey('DaAnLeiXing', verbose_name="答案类型", null=True, blank=True)
 
+
+
     class Meta:
         app_label = "wendaku"
 
