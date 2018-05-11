@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'deb!gj80!pstwg39(sxl4#e2t+m1&)j&kx2nh10u5s_low*%vw'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -40,13 +38,14 @@ INSTALLED_APPS = [
     'corsheaders',
     'wendaku',
     'ribao',
+    'zhugedanao'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -105,7 +104,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'zhugeApi.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
@@ -130,17 +128,26 @@ DATABASES = {
         'PORT': '3306',
         'USER': 'ribao',
         'PASSWORD': 'ribao'
+    },
+    'zhugedanao': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zhugedanao',
+        'HOST': 'zhugedanao',
+        'PORT': '3306',
+        'USER': 'zhugedanao',
+        'PASSWORD': 'zhugedanao'
     }
 }
 
 DATABASE_ROUTERS = ['wendaku.database_router.DatabaseAppsRouter']
 DATABASE_APPS_MAPPING = {
     # example:
-    #'app_name':'database_name',
+    # 'app_name':'database_name',
     'wendaku': 'wendaku',
     'ribao': 'ribao',
-}
+    'zhugedanao': 'zhugedanao',
 
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -159,7 +166,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -180,7 +186,6 @@ USE_L10N = True
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Shanghai'
 USE_TZ = False
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/

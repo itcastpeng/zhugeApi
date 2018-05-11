@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
+    url(r'^', include('zhugedanao.urls')),
     url(r'^wendaku/', include('wendaku.urls')),
     url(r'^ribao/', include('ribao.urls')),
 
