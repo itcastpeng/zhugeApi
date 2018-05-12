@@ -183,9 +183,10 @@ if __name__ == '__main__':
         url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/get_once/0'
         # 发送带有id参数的请求
         ret = requests.get(url, params=params)
+        # print(ret.text)
         ret_json = ret.json()
         # 请求后的参数需要json转换
-        print(ret_json)
+        print('ret_json -- >',ret_json)
         if ret :
             response_code = ret_json['code']
             if response_code == 200:
