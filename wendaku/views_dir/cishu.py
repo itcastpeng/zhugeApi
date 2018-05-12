@@ -9,6 +9,8 @@ from publickFunc.condition_com import conditionCom
 import json
 import datetime
 
+from django.db.models import Q
+
 
 # 数据的展示
 @csrf_exempt
@@ -16,23 +18,19 @@ import datetime
 def cishu(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        objs = models.DaAnKu.objects.filter(oper_user_id__isnull=False).values(
+        is_today = request.GET.get('is_today', False)
+        q = Q()
+        q.add(Q(**{'oper_user_id__isnull': False}), Q.AND)
+        if is_today:
+            q.add(Q(**{'update_date__gte': datetime.datetime.now().strftime('%Y-%m-%d')}), Q.AND)
+        objs = models.DaAnKu.objects.filter(q).values(
             'oper_user__username',
             'oper_user_id',
             'update_date'
         ).annotate(Count('id'))
-        """
-        {
-            1: {
-                '2018-05-11': 10,
-                # '2018-05-12': 12,
-            },   
-        }
-        """
 
         data_dict = {}
         for obj in objs:
-            # print('type(obj) --> ',obj)
 
             oper_user_id = obj['oper_user_id']
             count = obj['id__count']
@@ -53,7 +51,7 @@ def cishu(request):
                 # print('不在')
                 data_dict[oper_user_id] = {
                     update_date :[username,count]
-                    }
+                }
         print('data_dict--->',data_dict)
 
         response.code = 200
