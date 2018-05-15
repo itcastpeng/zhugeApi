@@ -8,11 +8,10 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from publickFunc.condition_com import conditionCom
 import json
 import datetime
-
 from django.db.models import Q
 
 
-# 数据的展示
+# 问答库数据的展示
 @csrf_exempt
 @account.is_token(models.UserProfile)
 def cishu(request):
@@ -31,7 +30,6 @@ def cishu(request):
 
         data_dict = {}
         for obj in objs:
-
             oper_user_id = obj['oper_user_id']
             count = obj['id__count']
             username = obj['oper_user__username']
@@ -56,7 +54,6 @@ def cishu(request):
 
         response.code = 200
         response.data = data_dict
-
 
     else:
         response.code = 402

@@ -163,7 +163,16 @@ def get_status(o_id, params):
     # url = 'http://127.0.0.1:8000/wendaku/guanjianci/update_status/{}'.format(o_id)
     url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/update_status/{}'.format(o_id)
     requests.post(url, params=params)
-
+# vps 签到
+def vpsServerQiandao():
+    print("开始签到")
+    params_data = {
+        "vpsName": "sh.cncmcc.com:3117",
+        "task_name": "指定关键词爬取(赵欣鹏测试机)",
+        "area": "上海市"
+    }
+    ret = requests.get("http://119.90.40.16:8603/api/vpsServer", params=params_data)
+    print(ret.text)
 
 if __name__ == '__main__':
     # if sys.argv[1]:
@@ -171,6 +180,7 @@ if __name__ == '__main__':
     # else:
     # 	u	rldome = '127.0.0.1:8000'
     while True:
+        vpsServerQiandao()
         token = '4e0398e4d4bad913e24c1d0d60cc9170'
         timestamp = str(int(time.time()))
         params = {
@@ -182,6 +192,7 @@ if __name__ == '__main__':
         # url = 'http://127.0.0.1:8000/wendaku/guanjianci/get_once/0'
         url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/get_once/0'
         # 发送带有id参数的请求
+        sleep(2)
         ret = requests.get(url, params=params)
         # print(ret.text)
         ret_json = ret.json()
