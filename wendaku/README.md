@@ -1098,14 +1098,13 @@ ID                  是         要修改答案的ID（写在url里）
 
 ```
 请求方法：POST
-请求URL：http://127.0.0.1:8000/wendaku/daanku/batch_delete/ID?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+请求URL：http://127.0.0.1:8000/wendaku/daanku/batch_delete/0?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
 请求参数:
 参数名             是否必须    参数描述
 rand_str            是         参考顶部公共参数说明
 timestamp           是         参考顶部公共参数说明
 user_id             是         参考顶部公共参数说明
-ID                  是         要删除的ID号(要放在url中) 
-list_ids            是         要删除的所有ID号(字符串类型)
+list_ids            是         要删除的所有ID号(字符串类型) 如要删除ID为1, 2, 3的数据：list_ids = '1,2,3'
                      
 返回结果：
     正确情况：
