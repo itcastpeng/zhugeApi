@@ -1094,7 +1094,42 @@ ID                  是         要修改答案的ID（写在url里）
 }
 ```
 
+- 批量删除答案 
 
+```
+请求方法：POST
+请求URL：http://127.0.0.1:8000/wendaku/daanku/batch_delete/ID?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
+请求参数:
+参数名             是否必须    参数描述
+rand_str            是         参考顶部公共参数说明
+timestamp           是         参考顶部公共参数说明
+user_id             是         参考顶部公共参数说明
+ID                  是         要删除的ID号(要放在url中) 
+list_ids            是         要删除的所有ID号(字符串类型)
+                     
+返回结果：
+    正确情况：
+       {"code": 200, "data": {}, "msg": "\u5220\u9664\u6210\u529f"}
+        
+        {
+    "msg":"删除成功",                                                      # 状态说明
+    "data":{                                                               # 返回数据，无数据为空
+
+    },
+    "code":200                                                             # 状态码
+}
+
+    错误情况：
+        {"code": 400, "data": {}, "msg": "token\u5f02\u5e38"}
+      
+        {
+    "code":400,                                                            # 状态码
+    "data":{                                                               # 返回数据，无数据为空
+
+    },
+    "msg":"token异常"                                                      # 状态说明
+} 
+```
 
 ## api 返回值说明
 
