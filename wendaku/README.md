@@ -1020,6 +1020,7 @@ content             是         答案内容 （必填字段）
 ```
 
 - 删除答案
+
 ```
 请求方法：POST
 请求URL: http://127.0.0.1:8000/wendaku/daanku/delete/ID?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID&order
