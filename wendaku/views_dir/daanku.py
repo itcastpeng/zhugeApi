@@ -190,6 +190,21 @@ def daanku_oper(request, oper_type, o_id):
             else:
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'batch_delete':
+            # 获取多个id值(字符串类型)
+            list_ids = request.POST.get('list_ids')
+            # 切割出每个字符
+            list_id = list_ids.split(',')
+            id_list = []
+            # 遍历添加到列表
+            for p_id in list_id:
+                id_list.append(p_id)
+            # 查询id是否在这个列表
+            models.DaAnKu.objects.filter(id__in=id_list).delete()
+            response.code=200
+            response.msg='删除成功'
+
     else:
         response.code = 402
         response.msg = "请求异常"
