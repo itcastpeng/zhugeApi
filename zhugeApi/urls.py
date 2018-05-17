@@ -19,5 +19,7 @@ urlpatterns = [
     url(r'^', include('zhugedanao.urls')),
     url(r'^wendaku/', include('wendaku.urls')),
     url(r'^ribao/', include('ribao.urls')),
+    url(r'^zhugeproject/', include('zhugeproject.urls',namespace='zhugeproject')),
+
 
 ]

@@ -13,7 +13,8 @@ def login(request):
     response = Response.ResponseObj()
     username = request.POST.get('username')
     password = request.POST.get('password')
-    print(username, account.str_encrypt(password))
+    print('username, account.str_encrypt(password)',username, account.str_encrypt(password))
+
     # 查询数据库
     userprofile_objs = models.UserProfile.objects.filter(
         username=username,

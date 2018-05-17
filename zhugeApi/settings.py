@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'wendaku',
     'ribao',
-    'zhugedanao'
+    'zhugedanao',
+    'zhugeproject'
 ]
 
 MIDDLEWARE = [
@@ -136,7 +137,15 @@ DATABASES = {
         'PORT': '3306',
         'USER': 'zhugedanao',
         'PASSWORD': 'zhugedanao'
-    }
+    },
+    'zhugeproject': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'zhugeproject',
+            'HOST': 'zhugeproject',
+            'PORT': '3306',
+            'USER': 'zhugeproject',
+            'PASSWORD': 'zhugeproject'
+        }
 }
 
 DATABASE_ROUTERS = ['wendaku.database_router.DatabaseAppsRouter']
@@ -146,6 +155,7 @@ DATABASE_APPS_MAPPING = {
     'wendaku': 'wendaku',
     'ribao': 'ribao',
     'zhugedanao': 'zhugedanao',
+    'zhugeproject':'zhugeproject',
 
 }
 
