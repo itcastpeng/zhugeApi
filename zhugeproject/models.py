@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 
 # 用户表
 class ProjectUserProfile(models.Model):
@@ -22,15 +20,21 @@ class ProjectUserProfile(models.Model):
 class ProjectQuanXian(models.Model):
     quanxian_name = models.CharField(verbose_name='权限名称',max_length=64)
     path = models.CharField(verbose_name="权限URL", max_length=64)
+    create_time = models.DateField(verbose_name='创建时间',null=True,blank=True)
 
     class Meta:
         app_label = "zhugeproject"
+
+# 多对多 权限对角色
+class ProjectRoleQuanxian(models.Model):
+    quanxian = models.ForeignKey('ProjectQuanXian',verbose_name='权限',null=True,blank=True)
+    role = models.ForeignKey('ProjectRole',verbose_name='角色',null=True,blank=True)
 
 # 角色表
 class ProjectRole(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    # is_remark = models.TextField(verbose_name='权限描述', max_length=256, null=True, blank=True)
+
 
     class Meta:
         verbose_name_plural = "角色表"
@@ -39,11 +43,21 @@ class ProjectRole(models.Model):
     def __str__(self):
         return "%s" % self.name
 
+# 多对多  用户对产品/项目
+class Chanpin_User(models.Model):
+    projectuserprofile = models.ForeignKey(to='ProjectUserProfile',verbose_name='用户')
+    projectsystem = models.ForeignKey(to='ProjectSystem',verbose_name='产品/项目')
+
+    choies_status = (
+        (1,'正常'),
+        (2,'非正常')
+    )
+    xiangmu_status = models.BooleanField(verbose_name='状态',choices=choies_status,default=1)
+
 # 产品/项目表
 class ProjectSystem(models.Model):
-    item_name = models.CharField(verbose_name='产品/项目名',max_length=32)
-    # 哪个技术部
-    is_section = models.CharField(verbose_name='责任技术部',default='诸葛',max_length=32)
+    name = models.CharField(verbose_name='产品/项目名',max_length=32)
+
     choices_status = (
         (1,'开发阶段'),
         (2,'修复阶段'),
@@ -60,10 +74,9 @@ class ProjectSystem(models.Model):
 
 #  功能表
 class ProjectFunction(models.Model):
-    item_name =  models.CharField(verbose_name='产品/项目名',max_length=32)
+    item_name =  models.ForeignKey('ProjectSystem',verbose_name='产品/项目名',max_length=32)
     create_time = models.DateField(verbose_name='创建时间',auto_now_add=True)
-    oper_user = models.ForeignKey('ProjectUserProfile',verbose_name='创建人',null=True, blank=True)
-    is_function = models.CharField(verbose_name='什么功能',max_length=128,null=True, blank=True)
+    name = models.CharField(verbose_name='功能名称',max_length=128,null=True, blank = True)
 
     class Meta:
         app_label = "zhugeproject"
@@ -71,9 +84,9 @@ class ProjectFunction(models.Model):
 # 工作日志表
 class ProjectWork_Log(models.Model):
     name = models.ForeignKey('ProjectUserProfile',verbose_name='创建日志的人',null=True, blank=True)
-    create_time = models.DateField(verbose_name='创建时间',auto_now_add=True)
-    is_remark = models.TextField(verbose_name='日志备注',max_length=256,null=True, blank=True)
-    is_system = models.ForeignKey('ProjectSystem',verbose_name='属于哪个项目',null=True, blank=True)
+    create_time = models.DateTimeField(verbose_name='创建时间',auto_now_add=True)
+    remark = models.TextField(verbose_name='日志备注',max_length=256,null=True, blank=True)
+    is_system = models.ForeignKey('ProjectFunction',verbose_name='属于哪个功能',null=True, blank=True)
 
     class Meta:
         app_label = "zhugeproject"
@@ -81,7 +94,7 @@ class ProjectWork_Log(models.Model):
 # 需求表(BUG)表
 class ProjectNeed_Demand(models.Model):
     demand_user = models.ForeignKey('ProjectUserProfile',verbose_name='需求人')
-    is_system = models.ForeignKey('ProjectSystem', verbose_name='属于哪个项目')
+    is_system = models.ForeignKey('ProjectFunction', verbose_name='属于哪个功能')
     create_time = models.DateField(verbose_name='创建时间', auto_now_add=True)
     is_remark = models.TextField(verbose_name='需求简介', max_length=256, null=True, blank=True)
 
@@ -92,8 +105,8 @@ class ProjectNeed_Demand(models.Model):
 # 需求log日志
 class ProjectDemand_Log(models.Model):
     name = models.ForeignKey('ProjectUserProfile', verbose_name='创建日志的人', null=True, blank=True)
-    create_time = models.DateField(verbose_name='创建时间', auto_now_add=True)
-    is_system = models.ForeignKey('ProjectSystem', verbose_name='属于哪个项目', null=True, blank=True)
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    is_system = models.ForeignKey('ProjectNeed_Demand', verbose_name='属于哪个需求', null=True, blank=True)
     is_remark = models.TextField(verbose_name='日志备注', max_length=256, null=True, blank=True)
 
     class Meta:

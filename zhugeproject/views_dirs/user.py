@@ -7,14 +7,14 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publickFunc.condition_com import conditionCom
-from zhugeproject.forms.projectuser_verify import AddForm, UpdateForm, SelectForm
+from zhugeproject.forms.user_verify import AddForm, UpdateForm, SelectForm
 import json
 
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
 @account.is_token(models.ProjectUserProfile)
-def user_profile(request):
+def user_select(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -73,9 +73,8 @@ def user_profile(request):
 #  csrf  token验证
 @csrf_exempt
 @account.is_token(models.ProjectUserProfile)
-def user_operate(request, oper_type, o_id):
+def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-    print(111111111111111111111)
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
@@ -87,16 +86,30 @@ def user_operate(request, oper_type, o_id):
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
-                print("验证通过")
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
                 print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
                 models.ProjectUserProfile.objects.create(**forms_obj.cleaned_data)
+                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                user_id = request.GET.get('user_id')
+                models.ProjectWork_Log.objects.create(
+                    name_id=user_id,
+                    create_time=now_time,
+                    remark='xx在xx时间添加了一个用户'
+                )
                 response.code = 200
                 response.msg = "添加成功"
             else:
                 print("验证不通过")
                 # print(forms_obj.errors)
+                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                user_id = request.GET.get('user_id')
+                models.ProjectWork_Log.objects.create(
+                    name_id=user_id,
+                    create_time=now_time,
+                    remark='xx在xx时间添加用户验证未通过'
+                )
+
                 response.code = 301
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
@@ -108,7 +121,22 @@ def user_operate(request, oper_type, o_id):
                 user_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
+                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                user_id = request.GET.get('user_id')
+                models.ProjectWork_Log.objects.create(
+                    name_id=user_id,
+                    create_time=now_time,
+                    remark='xx在xx时间删除一个用户'
+                )
+
             else:
+                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                user_id = request.GET.get('user_id')
+                models.ProjectWork_Log.objects.create(
+                    name_id=user_id,
+                    create_time=now_time,
+                    remark='xx在xx时间删除用户验证未通过'
+                )
                 response.code = 302
                 response.msg = '用户ID不存在'
 
@@ -138,12 +166,30 @@ def user_operate(request, oper_type, o_id):
                     )
                     response.code = 200
                     response.msg = "修改成功"
+                    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                    user_id = request.GET.get('user_id')
+                    models.ProjectWork_Log.objects.create(
+                        name_id=user_id,
+                        create_time=now_time,
+                        remark='xx在xx时间修改一个用户')
                 else:
+                    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                    user_id = request.GET.get('user_id')
+                    models.ProjectWork_Log.objects.create(
+                    name_id=user_id,
+                    create_time=now_time,
+                    remark='xx在xx时间修改用户失败未找到ID')
                     response.code = 303
                     response.msg = json.loads(forms_obj.errors.as_json())
 
             else:
                 print("验证不通过")
+                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+                user_id = request.GET.get('user_id')
+                models.ProjectWork_Log.objects.create(
+                    name_id=user_id,
+                    create_time=now_time,
+                    remark='xx在xx时间FORM验证失败')
                 # print(forms_obj.errors)
                 response.code = 301
                 # print(forms_obj.errors.as_json())
@@ -151,6 +197,13 @@ def user_operate(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
+        print("验证不通过")
+        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        user_id = request.GET.get('user_id')
+        models.ProjectWork_Log.objects.create(
+            name_id=user_id,
+            create_time=now_time,
+            remark='xx在xx时间请求操作用户失败')
         response.code = 402
         response.msg = "请求异常"
 
