@@ -1,18 +1,29 @@
 from zhugeproject import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 from zhugeproject.forms.user_verify import AddForm, UpdateForm, SelectForm
 import json
-from zhugeproject.publick import xuqiu_or_gongneng_log
+from zhugeproject.public import insert_log
+
+models_userprofile_name = 'project_userprofile'
+models_userprofile_obj = getattr(models, models_userprofile_name)
+
+# 权限表中对应的id
+quanxian_id = 5
+
+insert_oper_type_id = 1
+delete_oper_type_id = 2
+update_oper_type_id = 3
+select_oper_type_id = 4
 
 
-# cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.ProjectUserProfile)
-def user_select(request):
+@account.is_token(models_userprofile_obj)
+def user(request):
+    user_id = request.GET.get('user_id')
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -29,28 +40,35 @@ def user_select(request):
                 'last_login_date': '',
             }
             q = conditionCom(request, field_dict)
-            objs = models.ProjectUserProfile.objects.select_related('role').filter(q).order_by(order)
+            objs = models_userprofile_obj.objects.select_related('role').filter(q).order_by(order)
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-            # # 返回的数据
+
+            # 返回的数据
             ret_data = []
             for obj in objs:
+                print(dir(obj))
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,
                     'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
+                    'status': obj.get_status_display(),
                 })
-                response.code = 200
-                response.msg = '查询成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count,
-                }
+
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+            }
+
+            # 记录日志
+            insert_log.caozuo(user_id, quanxian_id, select_oper_type_id, '查询')
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -61,52 +79,55 @@ def user_select(request):
 #  增删改 用户表
 #  csrf  token验证
 @csrf_exempt
-@account.is_token(models.ProjectUserProfile)
+@account.is_token(models_userprofile_obj)
 def user_oper(request, oper_type, o_id):
+    user_id = request.GET.get('user_id')
+
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
-            user_id = request.GET.get('user_id')
-            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             form_data = {
-                'o_id': o_id,
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
                 'password': request.POST.get('password')
             }
-            #  创建 form验证 实例（参数默认转成字典）
+            # form 验证
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
-                models.ProjectUserProfile.objects.create(**forms_obj.cleaned_data)
-                # 加入log
-                remark='{}添加新用户：{}'.format(username_log,form_data['username'])
-                xuqiu_or_gongneng_log.gongneng_log(request,remark)
+                user_obj = models_userprofile_obj.objects.create(**forms_obj.cleaned_data)
+
+                # 记录日志
+                remark = '添加 [{}]   ID: [{}]'.format(user_obj.username, user_obj.id)
+                insert_log.caozuo(user_id, quanxian_id, insert_oper_type_id, remark)
+
                 response.code = 200
                 response.msg = "添加成功"
             else:
-                remark = '{}添加新用户:{},FORM验证未通过'.format(username_log,form_data['username'])
-                xuqiu_or_gongneng_log.gongneng_log(request, remark)
                 response.code = 301
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            user_id = request.GET.get('user_id')
-            username_log = models.ProjectUserProfile.objects.get(id=user_id)
+            username_log = models_userprofile_obj.objects.get(id=user_id)
             # 删除 ID
-            user_objs = models.ProjectUserProfile.objects.filter(id=o_id)
+            user_objs = models_userprofile_obj.objects.filter(id=o_id)
             if user_objs:
-                for obj in user_objs:
-                    name = obj.username
-                    remark='{}删除用户:{}成功,ID为{}'.format(username_log,name,o_id)
-                    xuqiu_or_gongneng_log.gongneng_log(request, remark)
+                user_obj = user_objs[0]
+
+                oper_user_obj = models.project_userprofile.objects.get(id=user_id)
+                if oper_user_obj == user_obj:
+                    response.code = 303
+                    response.msg = "该数据不允许删除"
+                else:
+                    # 记录日志
+                    remark = '将 [{}] 删除   ID: [{}]'.format(user_obj.username, o_id)
+                    insert_log.caozuo(user_id, quanxian_id, delete_oper_type_id, remark)
+
                     user_objs.delete()
                     response.code = 200
                     response.msg = "删除成功"
 
             else:
-                remark='{}删除用户ID失败,用户ID不存在'.format(username_log,o_id)
-                xuqiu_or_gongneng_log.gongneng_log(request, remark)
                 response.code = 302
                 response.msg = '用户ID不存在'
 
@@ -116,49 +137,39 @@ def user_oper(request, oper_type, o_id):
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
             }
-            user_id = request.GET.get('user_id')
-            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
                 print(forms_obj.cleaned_data)
-                user_id = forms_obj.cleaned_data['user_id']
                 username = forms_obj.cleaned_data['username']
                 role_id = forms_obj.cleaned_data['role_id']
-                user_obj = models.ProjectUserProfile.objects.filter(
-                    id=user_id
+                user_objs = models_userprofile_obj.objects.filter(
+                    id=o_id
                 )
 
-                if user_obj:
-                    user_obj.update(
-                        username=username, role_id=role_id
-                    )
-                    remark='{}修改用户:{},ID:{}'.format(username_log,username,o_id)
-                    xuqiu_or_gongneng_log.gongneng_log(request, remark)
+                if user_objs:
+                    user_obj = user_objs[0]
+
+                    # 记录日志
+                    remark = '将 [{}] 修改为 [{}]   ID: [{}]'.format(json.dumps(form_data), json.dumps(forms_obj.cleaned_data), o_id)
+                    insert_log.caozuo(user_id, quanxian_id, update_oper_type_id, remark)
+
+                    user_obj.username = username
+                    user_obj.role_id = role_id
+                    user_obj.save()
 
                     response.code = 200
                     response.msg = "修改成功"
 
                 else:
-                    remark='{}修改用户:{}失败ID不存在,ID为:{}'.format(username_log,username,o_id)
-                    xuqiu_or_gongneng_log.gongneng_log(request, remark)
-
-                    response.code = 303
+                    response.code = 302
                     response.msg = '修改ID不存在'
 
             else:
-                remark='{}修改用户ID为{}FORM验证失败'.format(username_log,o_id)
-                xuqiu_or_gongneng_log.gongneng_log(request, remark)
-
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
-        user_id = request.GET.get('user_id')
-        username_log = models.ProjectUserProfile.objects.get(id=user_id)
-        remark='{}请求操作用户失败请求异常'.format(username_log)
-        xuqiu_or_gongneng_log.gongneng_log(request, remark)
-
         response.code = 402
         response.msg = "请求异常"
 

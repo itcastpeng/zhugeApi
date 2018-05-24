@@ -1,10 +1,10 @@
 from ribao import models
-from publickFunc import Response, account
+from publicFunc import Response, account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ribao.forms.renwuguanli_verify import AddForm, UpdateForm, SelectForm
 import json
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 
 
 @csrf_exempt

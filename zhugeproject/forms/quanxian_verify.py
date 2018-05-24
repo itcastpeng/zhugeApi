@@ -1,7 +1,7 @@
 from django import forms
 
 from zhugeproject import models
-from publickFunc import account
+from publicFunc import account
 
 
 # 添加权限信息

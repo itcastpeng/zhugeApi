@@ -1,7 +1,7 @@
 from django import forms
 
 from zhugeproject import models
-from publickFunc import account
+from publicFunc import account
 import datetime
 
 
@@ -18,7 +18,7 @@ class AddForm(forms.Form):
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
-        objs = models.ProjectRole.objects.filter(
+        objs = models.project_role.objects.filter(
             name=name,
         )
         if objs:
@@ -43,12 +43,11 @@ class UpdateForm(forms.Form):
         }
     )
 
-
     # 判断角色是否存在
     def clean_name(self):
         o_id = self.data['o_id']
         name = self.data['name']
-        objs = models.ProjectRole.objects.filter(
+        objs = models.project_role.objects.filter(
             name=name,
         ).exclude(id=o_id)
         if objs:

@@ -5,7 +5,7 @@ import time
 from django.http import JsonResponse
 from django.shortcuts import redirect,render
 
-from publickFunc import Response
+from publicFunc import Response
 
 
 # 用户输入的密码加密

@@ -156,7 +156,6 @@ DATABASE_APPS_MAPPING = {
     'ribao': 'ribao',
     'zhugedanao': 'zhugedanao',
     'zhugeproject':'zhugeproject',
-
 }
 
 # Password validation
