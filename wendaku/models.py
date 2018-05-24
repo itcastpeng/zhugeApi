@@ -13,12 +13,20 @@ class QuanXian(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     oper_user = models.ForeignKey('UserProfile', verbose_name='操作人', null=True, blank=True,
     related_name='quanxian_oper_user')
-
     component = models.CharField(verbose_name="vue 文件路径", max_length=64, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "角色表"
         app_label = "wendaku"
+
+
+
+class RoleToQuanXian(models.Model):
+    role = models.ForeignKey('Role',verbose_name='角色ID')
+    quanxian = models.ForeignKey('QuanXian',verbose_name='权限ID' )
+
+    class Meta:
+        unique_together = ('role','quanxian')
 
 
 # 角色表

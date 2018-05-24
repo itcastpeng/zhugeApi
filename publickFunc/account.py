@@ -3,6 +3,8 @@ import hashlib
 import time
 
 from django.http import JsonResponse
+from django.shortcuts import redirect,render
+
 from publickFunc import Response
 
 
@@ -23,6 +25,10 @@ def get_token(pwd):
     tmp_str = str(int(time.time()*1000)) + pwd
     token = str_encrypt(tmp_str)
     return token
+
+
+
+
 
 
 # 装饰器 判断token 是否正确
