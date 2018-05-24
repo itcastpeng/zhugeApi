@@ -1,16 +1,10 @@
-from django.shortcuts import render, HttpResponse, redirect, HttpResponsePermanentRedirect
 from django.http import JsonResponse
 from bson.objectid import ObjectId
 from django.views.decorators.csrf import csrf_exempt
-import datetime
-import random
-from django.db.models import Q
-from django.db.models import Count
-import re
-import json
 from publickFunc import Response, account
+from zhugeproject.publick import xuqiu_or_gongneng_log
 from zhugeproject import models
-from django.http import HttpResponse
+
 
 @csrf_exempt
 def login(request):
@@ -18,6 +12,7 @@ def login(request):
     username = request.POST.get('username')
     pwd = request.POST.get('password')
     user_id = request.GET.get('user_id')
+    username_log = models.ProjectUserProfile.objects.get(id=user_id)
     print('username -- pwd ---->',username,pwd)
     user_obj = models.ProjectUserProfile.objects.filter(username=username,password=account.str_encrypt(pwd))
     if user_obj:
@@ -25,13 +20,8 @@ def login(request):
         if not token:
             token = str(ObjectId())
             user_obj.update(token=token)
-        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-        print('user_id -->',user_id,now_time)
-        models.ProjectWork_Log.objects.create(
-            name_id=user_id,
-            create_time=now_time,
-            remark='xx在xx时间登陆了'
-        )
+        remark = '{}登录了,'.format(username_log)
+        xuqiu_or_gongneng_log.gongneng_log(request, remark)
         response.code = 200
         response.msg = '登陆成功'
         response.data = {

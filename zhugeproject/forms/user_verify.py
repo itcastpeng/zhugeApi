@@ -71,7 +71,7 @@ class UpdateForm(forms.Form):
         print(username)
         objs = models.ProjectUserProfile.objects.filter(
             username=username,
-        ).exclude(id=user_id)
+        )
         if objs:
             self.add_error('username', '用户名已存在')
         else:

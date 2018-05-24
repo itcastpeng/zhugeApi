@@ -53,25 +53,12 @@ class UpdateForm(forms.Form):
         }
     )
 
-    quanxian_name = forms.IntegerField(
+    quanxian_name = forms.CharField(
         required=True,
         error_messages={
-            'required': '角色不能为空'
+            'required': '权限名字不能为空'
         }
     )
-
-    # 判断用户名是否存在
-    def clean_username(self):
-        username = self.data['username']
-        user_id = self.data['user_id']
-        print(username)
-        objs = models.ProjectUserProfile.objects.filter(
-            username=username,
-        ).exclude(id=user_id)
-        if objs:
-            self.add_error('username', '用户名已存在')
-        else:
-            return username
 
 
 # 判断是否是数字

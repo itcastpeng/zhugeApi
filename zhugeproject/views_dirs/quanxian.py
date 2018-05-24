@@ -1,15 +1,12 @@
-from django.shortcuts import render
 from zhugeproject import models
 from publickFunc import Response
 from publickFunc import account
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
+from django.views.decorators.csrf import csrf_exempt
 from publickFunc.condition_com import conditionCom
 from zhugeproject.forms.quanxian_verify import AddForm, UpdateForm ,SelectForm
 import json
-import copy
+from zhugeproject.publick import xuqiu_or_gongneng_log
 
 models_name = 'ProjectQuanXian'
 models_obj = getattr(models, models_name)
@@ -75,8 +72,9 @@ def quanxian_select(request):
 def quanxian_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
-
         if oper_type == "add":
+            user_id = request.GET.get('user_id')
+            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             form_data = {
                 'o_id': o_id,
                 'path': request.POST.get('path'),
@@ -88,56 +86,37 @@ def quanxian_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 del forms_obj.cleaned_data['o_id']
                 print('forms_obj.cleaned_data-->', forms_obj.cleaned_data)
-                models_obj.objects.create(**forms_obj.cleaned_data)
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectWork_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    remark='xx在xx时间增加了一个权限'
-                )
+                models_obj.objects.filter(**forms_obj.cleaned_data)
+
+                remark = '{}添加新权限：{}'.format(username_log, form_data['quanxian_name'])
+                xuqiu_or_gongneng_log.gongneng_log(request, remark)
                 response.code = 200
                 response.msg = "添加成功"
+
             else:
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectWork_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    remark='xx在xx时间增加权限FORM验证失败'
-                )
-                # print(forms_obj.errors)
+                remark = '{}添加新权限:{},FORM验证未通过'.format(username_log, form_data['quanxian_name'])
+                xuqiu_or_gongneng_log.gongneng_log(request, remark)
+
                 response.code = 301
-                # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
+            user_id = request.GET.get('user_id')
+            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             # 删除 ID
             objs = models_obj.objects.filter(id=o_id)
             if objs:
-                # obj = objs[0]
-                # if models_obj.objects.filter(pid_id=obj.id):
-                #     response.code = 304
-                #     response.msg = "含有子级数据,请先删除或转移子级数据"
-
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectWork_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    remark='xx在xx时间删除权限成功'
-                )
-                objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                for obj in objs:
+                    name = obj.quanxian_name
+                    remark = '{}删除权限:{}成功,ID为{}'.format(username_log, name, o_id)
+                    xuqiu_or_gongneng_log.gongneng_log(request, remark)
+                    objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectWork_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    remark='xx在xx时间删除权限失败用户ID不存在'
-                )
+                remark = '{}删除权限ID失败:{},用户ID不存在'.format(username_log, o_id)
+                xuqiu_or_gongneng_log.gongneng_log(request, remark)
+
                 response.code = 302
                 response.msg = '用户ID不存在'
 
@@ -149,11 +128,12 @@ def quanxian_oper(request, oper_type, o_id):
                 'path': request.POST.get('path'),
                 'quanxian_name': request.POST.get('quanxian_name'),
             }
+            user_id = request.GET.get('user_id')
+            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             print('form_data --> ', form_data)
 
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
-                print("验证通过")
                 print(forms_obj.cleaned_data)
                 o_id = forms_obj.cleaned_data['o_id']
                 quanxian_name = forms_obj.cleaned_data['quanxian_name']
@@ -170,50 +150,31 @@ def quanxian_oper(request, oper_type, o_id):
                         path=path,
 
                     )
-                    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                    user_id = request.GET.get('user_id')
-                    models.ProjectWork_Log.objects.create(
-                        name_id=user_id,
-                        create_time=now_time,
-                        remark='xx在xx时间修改权限成功'
-                    )
+                    remark = '{}修改权限{},ID:{}'.format(username_log, quanxian_name, o_id)
+                    xuqiu_or_gongneng_log.gongneng_log(request, remark)
+
                     response.code = 200
                     response.msg = "修改成功"
                 else:
-                    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                    user_id = request.GET.get('user_id')
-                    models.ProjectWork_Log.objects.create(
-                        name_id=user_id,
-                        create_time=now_time,
+                    remark = '{}修改权限{}失败ID不存在,ID为:{}'.format(username_log, quanxian_name, o_id)
+                    xuqiu_or_gongneng_log.gongneng_log(request, remark)
 
-                        remark='xx在xx时间修改权限失败用户ID不存在'
-                    )
-                    response.code = 302
-                    response.msg = '用户ID不存在'
+                    response.code = 303
+                    response.msg = '修改ID不存在'
 
             else:
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectWork_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    remark='xx在xx时间修改权限FORM验证失败'
-                )
-                print("验证不通过")
-                # print(forms_obj.errors)
+                remark = '{}修改权限ID为{}FORM验证失败'.format(username_log, o_id)
+                xuqiu_or_gongneng_log.gongneng_log(request, remark)
+
                 response.code = 301
-                # print(forms_obj.errors.as_json())
-                #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
-        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         user_id = request.GET.get('user_id')
-        models.ProjectWork_Log.objects.create(
-            name_id=user_id,
-            create_time=now_time,
-            remark='xx在xx时间操作权限请求异常'
-        )
+        username_log = models.ProjectUserProfile.objects.get(id=user_id)
+        remark = '{}请求操作权限失败请求异常'.format(username_log)
+        xuqiu_or_gongneng_log.gongneng_log(request, remark)
+
         response.code = 402
         response.msg = "请求异常"
 

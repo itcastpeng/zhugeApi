@@ -1,8 +1,9 @@
 from django.conf.urls import url
 
-from ribao.views_dir import login, role, user,renwuguanli,xiangmuguanli,renwurizhi
+from zhugedanao.views_dir import login
 
 urlpatterns = [
 
+    url(r'^w_login',login.w_login)
 
 ]

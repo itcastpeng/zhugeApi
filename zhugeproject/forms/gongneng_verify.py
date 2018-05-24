@@ -9,13 +9,12 @@ class AddForm(forms.Form):
             'required': "产品名不能为空"
         }
     )
-    # oper_user_id = forms.CharField(
-    #     required=True,
-    #     error_messages={
-    #         'required': "创建人不能为空"
-    #     }
-    # )
-
+    name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "功能不能为空"
+        }
+    )
 
 # 更新项目信息
 class UpdateForm(forms.Form):
@@ -25,7 +24,12 @@ class UpdateForm(forms.Form):
             'required': "产品名不能为空"
         }
     )
-
+    name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "功能不能为空"
+        }
+    )
 
 
 # 判断是否是数字

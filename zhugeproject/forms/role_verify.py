@@ -27,12 +27,12 @@ class AddForm(forms.Form):
             return name
 
 
-# 更新用户信息
+# 更新角色信息
 class UpdateForm(forms.Form):
-    role_id = forms.IntegerField(
+    o_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '角色ID不能为空'
+            'required': 'ID不能为空'
         }
     )
 
@@ -42,20 +42,15 @@ class UpdateForm(forms.Form):
             'required': '角色名不能为空'
         }
     )
-    oper_user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '操作人不能为空'
-        }
-    )
+
 
     # 判断角色是否存在
     def clean_name(self):
-        role_id = self.data['role_id']
+        o_id = self.data['o_id']
         name = self.data['name']
         objs = models.ProjectRole.objects.filter(
             name=name,
-        ).exclude(id=role_id)
+        ).exclude(id=o_id)
         if objs:
             self.add_error('name', '角色已存在')
         else:

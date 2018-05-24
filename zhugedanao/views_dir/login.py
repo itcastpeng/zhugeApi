@@ -2,7 +2,7 @@ from django.shortcuts import render
 from ribao import models
 from publickFunc import Response
 from publickFunc import account
-from django.http import JsonResponse
+from django.http import JsonResponse ,HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
@@ -50,4 +50,13 @@ def login(request):
         response.msg = "账号或密码错误"
 
     return JsonResponse(response.__dict__)
+
+
+
+
+def w_login(request):
+    code = request.GET.get('code')
+    print('code --- > ', code)
+    return HttpResponse('kjdasfnjkngdsgkfusngjkds')
+
 

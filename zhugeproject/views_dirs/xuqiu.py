@@ -1,14 +1,12 @@
-from django.shortcuts import render
 from zhugeproject import models
 from publickFunc import Response
 from publickFunc import account
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
+from django.views.decorators.csrf import csrf_exempt
 from publickFunc.condition_com import conditionCom
 from zhugeproject.forms.xuqiu_verify import AddForm, UpdateForm, SelectForm
 import json
+from zhugeproject.publick import xuqiu_or_gongneng_log
 
 
 # cerf  token验证 需求展示模块
@@ -76,6 +74,8 @@ def xuqiu_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
+            user_id = request.GET.get('user_id')
+            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             form_data = {
                 'o_id': o_id,
                 'demand_user_id': request.POST.get('demand_user_id'),
@@ -83,63 +83,39 @@ def xuqiu_oper(request, oper_type, o_id):
                 'is_remark': request.POST.get('is_remark')
             }
             #  创建 form验证 实例（参数默认转成字典）
-            print('进入')
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
-                print('验证通过')
                 print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                add_xuqiu = models.ProjectNeed_Demand.objects.create(**forms_obj.cleaned_data)
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                # print('xxxxxxxxxxxxx->>>>',user_id,now_time,add_xuqiu.id)
-                models.ProjectDemand_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    is_system_id=add_xuqiu.id,
-                    is_remark='xx在xx时间添加了一个需求',
-                )
+                models.ProjectNeed_Demand.objects.create(**forms_obj.cleaned_data)
+                remark = '{}添加新需求：{}}'.format(username_log, form_data['is_remark'])
+                xuqiu_or_gongneng_log.xuqiu_log(request, remark)
                 response.code = 200
                 response.msg = "添加成功"
             else:
-                # print(forms_obj.errors)
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectDemand_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    # is_system_id=add_xuqiu.id,
-                    is_remark='xx在xx时间添加需求FORM验证失败',
-                )
+                remark = '{}添加新需求:{},FORM验证未通过'.format(username_log, form_data['is_remark'])
+                xuqiu_or_gongneng_log.xuqiu_log(request, remark)
+
                 response.code = 301
-                # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
+            user_id = request.GET.get('user_id')
+            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             xuqiu_objs = models.ProjectNeed_Demand.objects.filter(id=o_id)
             if xuqiu_objs:
-                # print('xuqiu_objs --- >',xuqiu_objs[0].id)
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectDemand_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    is_system_id=xuqiu_objs[0].id,
-                    is_remark='xx在xx时间删除需求成功',
-                )
-                xuqiu_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                for obj in xuqiu_objs:
+                    name = obj.is_remark
+                    remark = '{}删除需求:{}成功,ID为{}'.format(username_log, name, o_id)
+                    xuqiu_or_gongneng_log.xuqiu_log(request, remark)
+                    xuqiu_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectDemand_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    # is_system_id=xuqiu_objs[0].id,
-                    is_remark='xx在xx时间删除需求失败用户ID不存在',
-                )
+                remark = '{}删除需求ID失败:{},用户ID不存在'.format(username_log, o_id)
+                xuqiu_or_gongneng_log.xuqiu_log(request, remark)
+
                 response.code = 302
-                response.msg = '用户ID不存在'
+                response.msg = '需求ID不存在'
 
         elif oper_type == "update":
             form_data = {
@@ -148,10 +124,11 @@ def xuqiu_oper(request, oper_type, o_id):
                 'is_system_id': request.POST.get('is_system_id'),
                 'is_remark':request.POST.get('is_remark')
             }
+            user_id = request.GET.get('user_id')
+            username_log = models.ProjectUserProfile.objects.get(id=user_id)
             print('form_data -  - -- > ',form_data)
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
-                print("验证通过")
                 print('forms_obj.cleaned_data 0- - - > ',forms_obj.cleaned_data)
                 demand_user_id = forms_obj.cleaned_data['demand_user_id']
                 is_system_id = forms_obj.cleaned_data['is_system_id']
@@ -160,7 +137,6 @@ def xuqiu_oper(request, oper_type, o_id):
                 user_obj = models.ProjectNeed_Demand.objects.filter(
                     id=o_id
                 )
-                print('------------->',demand_user_id,is_system_id)
                 #  更新 数据
                 if user_obj:
                     user_obj.update(
@@ -168,53 +144,33 @@ def xuqiu_oper(request, oper_type, o_id):
                         is_system_id=is_system_id,
                         is_remark=is_remark
                     )
-                    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                    user_id = request.GET.get('user_id')
-                    models.ProjectDemand_Log.objects.create(
-                        name_id=user_id,
-                        create_time=now_time,
-                        # is_system_id=user_obj.id,
-                        is_remark='xx在xx时间修改需求成功',
-                    )
+                    remark = '{}修改需求{},ID:{}'.format(username_log, forms_obj.data['is_remark'], o_id)
+                    xuqiu_or_gongneng_log.xuqiu_log(request, remark)
+
                     response.code = 200
                     response.msg = "修改成功"
 
 
                 else:
-                    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                    user_id = request.GET.get('user_id')
-                    models.ProjectDemand_Log.objects.create(
-                        name_id=user_id,
-                        create_time=now_time,
-                        # is_system_id=user_obj.id,
-                        is_remark='xx在xx时间修改需求失败ID不存在',
-                    )
+                    remark = '{}修改需求{}失败ID不存在,ID为:{}'.format(username_log, forms_obj.data['is_remark'], o_id)
+                    xuqiu_or_gongneng_log.xuqiu_log(request, remark)
+
                     response.code = 303
                     response.msg = '修改ID不存在'
 
             else:
-                now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-                user_id = request.GET.get('user_id')
-                models.ProjectDemand_Log.objects.create(
-                    name_id=user_id,
-                    create_time=now_time,
-                    # is_system_id=user_obj.id,
-                    is_remark='xx在xx时间修改需求失败FORM验证失败',
-                )
+                remark = '{}修改需求ID为{}FORM验证失败'.format(username_log, o_id)
+                xuqiu_or_gongneng_log.xuqiu_log(request, remark)
 
-                print("验证不通过")
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
-        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         user_id = request.GET.get('user_id')
-        models.ProjectDemand_Log.objects.create(
-            name_id=user_id,
-            create_time=now_time,
-            is_remark='xx在xx时间修改需求失败请求异常',
-        )
-        print("验证不通过")
+        username_log = models.ProjectUserProfile.objects.get(id=user_id)
+        remark = '{}请求操作需求失败请求异常'.format(username_log)
+        xuqiu_or_gongneng_log.gongneng_log(request, remark)
+
         response.code = 402
         response.msg = "请求异常"
 
