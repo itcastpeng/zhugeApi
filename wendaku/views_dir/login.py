@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from wendaku import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
@@ -13,7 +13,11 @@ def login(request):
     response = Response.ResponseObj()
     username = request.POST.get('username')
     password = request.POST.get('password')
+<<<<<<< HEAD
     print(username, account.str_encrypt(password))
+=======
+    print('username, account.str_encrypt(password)',username, account.str_encrypt(password))
+>>>>>>> upstream/dev
 
     # 查询数据库
     userprofile_objs = models.UserProfile.objects.filter(

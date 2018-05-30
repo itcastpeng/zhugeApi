@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from ribao import models
-from publickFunc import Response
-from publickFunc import account
+from zhugeproject import models
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
@@ -10,14 +10,13 @@ import datetime
 
 @csrf_exempt
 def login(request):
-    # 返回状态及数据（封装）
     response = Response.ResponseObj()
     username = request.POST.get('username')
     password = request.POST.get('password')
-    # 输出加密后的密码
-    print(username, account.str_encrypt(password))
+    print('username, account.str_encrypt(password)',username, account.str_encrypt(password))
+
     # 查询数据库
-    userprofile_objs = models.RibaoUserProfile.objects.filter(
+    userprofile_objs = models.project_userprofile.objects.filter(
         username=username,
         # md5加密 密码
         password=account.str_encrypt(password),

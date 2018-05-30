@@ -3,7 +3,9 @@ import hashlib
 import time
 
 from django.http import JsonResponse
-from publickFunc import Response
+from django.shortcuts import redirect,render
+
+from publicFunc import Response
 
 
 # 用户输入的密码加密
@@ -23,6 +25,10 @@ def get_token(pwd):
     tmp_str = str(int(time.time()*1000)) + pwd
     token = str_encrypt(tmp_str)
     return token
+
+
+
+
 
 
 # 装饰器 判断token 是否正确

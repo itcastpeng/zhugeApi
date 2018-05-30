@@ -1,7 +1,7 @@
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 from wendaku import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from wendaku.forms.guanjianci_verify import AddForm, UpdateForm,SelectForm

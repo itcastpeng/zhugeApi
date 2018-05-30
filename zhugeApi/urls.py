@@ -21,5 +21,12 @@ urlpatterns = [
     url(r'^', include('zhugedanao.urls')),
     url(r'^wendaku/', include('wendaku.urls')),
     url(r'^ribao/', include('ribao.urls')),
+<<<<<<< HEAD
     url(r'^zhugeleida/', include('zhugeleida.urls')),
+=======
+    url(r'^zhugeproject/', include('zhugeproject.urls',namespace='zhugeproject')),
+    url(r'^zhugedanao/', include('zhugedanao.urls',namespace='zhugedanao')),
+
+
+>>>>>>> upstream/dev
 ]

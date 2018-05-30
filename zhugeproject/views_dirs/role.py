@@ -1,105 +1,131 @@
-from ribao import models
-from publickFunc import Response
-from publickFunc import account
+from zhugeproject import models
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from ribao.forms.role_verify import AddForm, UpdateForm, SelectForm
+from zhugeproject.forms.role_verify import AddForm, UpdateForm, SelectForm
 import json
+from zhugeproject.public import insert_log
+from publicFunc.condition_com import conditionCom
 
-from publickFunc.condition_com import conditionCom
+models_userprofile_name = 'project_userprofile'
+models_userprofile_obj = getattr(models, models_userprofile_name)
+
+models_role_name = 'project_role'
+models_role_obj = getattr(models, models_role_name)
+
+# 权限表中对应的id
+quanxian_id = 4
+
+insert_oper_type_id = 1
+delete_oper_type_id = 2
+update_oper_type_id = 3
+select_oper_type_id = 4
+
 
 @csrf_exempt
-@account.is_token(models.RibaoUserProfile)
+@account.is_token(models_userprofile_obj)
 def role(request):
+    user_id = request.GET.get('user_id')
+
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
-
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')
-
             field_dict = {
                 'id': '',
                 'name': '__contains',
                 'create_date': '',
-                'oper_user__username': '',
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-
-            objs = models.RibaoRole.objects.select_related('oper_user').filter(q).order_by(order)
+            objs = models_role_obj.objects.filter(q).order_by(order)
             count = objs.count()
-
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-
             # 获取所有数据
             ret_data = []
             # 获取第几页的数据
             for obj in objs:
-
-                oper_user__username = ''
-                if obj.oper_user:
-                    oper_user__username = obj.oper_user.username
-
                 ret_data.append({
                     'id': obj.id,
                     'name': obj.name,
                     'role_id': obj.id,
                     'create_date': obj.create_date,
-                    'oper_user__username': oper_user__username,
                 })
             response.code = 200
             response.data = {
                 'ret_data': ret_data,
                 'data_count': count,
             }
-        return JsonResponse(response.__dict__)
 
+            # 记录日志
+            insert_log.caozuo(user_id, quanxian_id, select_oper_type_id, '查询')
+
+        return JsonResponse(response.__dict__)
     else:
         response.code = 402
         response.msg = "请求异常"
 
 
 @csrf_exempt
-@account.is_token(models.RibaoUserProfile)
+@account.is_token(models_userprofile_obj)
 def role_oper(request, oper_type, o_id):
+    user_id = request.GET.get('user_id')
+
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
+            role_name = request.POST.get('name')
             role_data = {
-                'name' : request.POST.get('name'),
-                'oper_user_id':request.GET.get('user_id')
+                'name': role_name,
             }
             forms_obj = AddForm(role_data)
             if forms_obj.is_valid():
-                models.RibaoRole.objects.create(**forms_obj.cleaned_data)
+                role_obj = models_role_obj.objects.create(**forms_obj.cleaned_data)
+
+                # 记录日志
+                remark = '添加 [{}]   ID: [{}]'.format(role_name, role_obj.id)
+                insert_log.caozuo(user_id, quanxian_id, insert_oper_type_id, remark)
+
                 response.code = 200
                 response.msg = "添加成功"
             else:
-                # print("验证不通过")
-                # print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            role_objs = models.RibaoRole.objects.filter(id=o_id)
+            role_objs = models_role_obj.objects.filter(id=o_id)
             if role_objs:
-                role_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                role_obj = role_objs[0]
+
+                # 判断当前操作用户的角色是否是要删除的角色
+                user_obj = models.project_userprofile.objects.get(id=user_id)
+                if user_obj.role == role_obj:
+                    response.code = 303
+                    response.msg = "该数据不允许删除"
+                else:
+                    # 记录日志
+                    remark = '将 [{}] 删除   ID: [{}]'.format(role_obj.name, o_id)
+                    insert_log.caozuo(user_id, quanxian_id, delete_oper_type_id, remark)
+
+                    role_objs.delete()
+
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
                 response.code = 302
                 response.msg = '角色ID不存在'
 
         elif oper_type == "update":
             form_data = {
-                'role_id': o_id,
+                'o_id': o_id,
                 'name': request.POST.get('name'),
                 'oper_user_id': request.GET.get('user_id'),
             }
@@ -107,22 +133,27 @@ def role_oper(request, oper_type, o_id):
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
                 name = forms_obj.cleaned_data['name']
-                role_id = forms_obj.cleaned_data['role_id']
-                print(role_id)
-                role_objs = models.RibaoRole.objects.filter(
-                    id=role_id
+                o_id = forms_obj.cleaned_data['o_id']
+                role_objs = models_role_obj.objects.filter(
+                    id=o_id
                 )
                 if role_objs:
-                    role_objs.update(
-                        name=name
-                    )
+                    role_obj = role_objs[0]
+
+                    # 记录日志
+                    remark = '将 [{}] 修改为 [{}]   ID: [{}]'.format(json.dumps(form_data), json.dumps(forms_obj.cleaned_data), o_id)
+                    insert_log.caozuo(user_id, quanxian_id, update_oper_type_id, remark)
+
+                    role_obj.name = name
+                    role_obj.save()
+
                     response.code = 200
                     response.msg = "修改成功"
                 else:
                     response.code = 302
                     response.msg = '角色ID不存在'
             else:
-                response.code = 303
+                response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
     else:
         response.code = 402

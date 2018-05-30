@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from wendaku import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from wendaku.forms.cilei_verify import CileiAddForm, CileiUpdateForm, CileiSelectForm
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 import json
 @csrf_exempt
 @account.is_token(models.UserProfile)

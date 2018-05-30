@@ -1,18 +1,29 @@
-from django.shortcuts import render
-from ribao import models
-from publickFunc import Response
-from publickFunc import account
+from zhugeproject import models
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from publickFunc.condition_com import conditionCom
-from ribao.forms.user_verify import AddForm, UpdateForm, SelectForm
+from publicFunc.condition_com import conditionCom
+from zhugeproject.forms.user_verify import AddForm, UpdateForm, SelectForm
 import json
+from zhugeproject.public import insert_log
+
+models_userprofile_name = 'project_userprofile'
+models_userprofile_obj = getattr(models, models_userprofile_name)
+
+# 权限表中对应的id
+quanxian_id = 5
+
+insert_oper_type_id = 1
+delete_oper_type_id = 2
+update_oper_type_id = 3
+select_oper_type_id = 4
 
 
-# cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.RibaoUserProfile)
+@account.is_token(models_userprofile_obj)
 def user(request):
+    user_id = request.GET.get('user_id')
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -24,17 +35,13 @@ def user(request):
             field_dict = {
                 'id': '',
                 'username': '__contains',
-                'role_id': '__contains',
+                'role__name': '__contains',
                 'create_date': '',
-                'status': '',
                 'last_login_date': '',
-                'oper_user__username': '__contains',
             }
             q = conditionCom(request, field_dict)
-            print('q -->', q)
-            objs = models.RibaoUserProfile.objects.select_related('role', 'oper_user').filter(q).order_by(order)
+            objs = models_userprofile_obj.objects.select_related('role').filter(q).order_by(order)
             count = objs.count()
-
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
@@ -42,32 +49,26 @@ def user(request):
 
             # 返回的数据
             ret_data = []
-
             for obj in objs:
-                #  如果有oper_user字段 等于本身名字
-                if obj.oper_user:
-                    oper_user_username = obj.oper_user.username
-                else:
-                    oper_user_username = ''
-                # print('oper_user_username -->', oper_user_username)
-                #  将查询出来的数据 加入列表
+                print(dir(obj))
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,
-                    'role_name': obj.role.name,
                     'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
-                    'oper_user__username': oper_user_username,
-                    'status': obj.get_status_display()
+                    'status': obj.get_status_display(),
                 })
-                #  查询成功 返回200 状态码
-                response.code = 200
-                response.msg = '查询成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count,
-                }
+
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+            }
+
+            # 记录日志
+            insert_log.caozuo(user_id, quanxian_id, select_oper_type_id, '查询')
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -78,81 +79,94 @@ def user(request):
 #  增删改 用户表
 #  csrf  token验证
 @csrf_exempt
-@account.is_token(models.RibaoUserProfile)
+@account.is_token(models_userprofile_obj)
 def user_oper(request, oper_type, o_id):
+    user_id = request.GET.get('user_id')
+
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
-                'user_id': o_id,
-                'oper_user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
                 'password': request.POST.get('password')
             }
-            #  创建 form验证 实例（参数默认转成字典）
+            # form 验证
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
-                print("验证通过")
-                # print(forms_obj.cleaned_data)
-                #  添加数据库
-                # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                models.RibaoUserProfile.objects.create(**forms_obj.cleaned_data)
+                user_obj = models_userprofile_obj.objects.create(**forms_obj.cleaned_data)
+
+                # 记录日志
+                remark = '添加 [{}]   ID: [{}]'.format(user_obj.username, user_obj.id)
+                insert_log.caozuo(user_id, quanxian_id, insert_oper_type_id, remark)
+
                 response.code = 200
                 response.msg = "添加成功"
             else:
-                print("验证不通过")
-                # print(forms_obj.errors)
                 response.code = 301
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
+            username_log = models_userprofile_obj.objects.get(id=user_id)
             # 删除 ID
-            user_objs = models.RibaoUserProfile.objects.filter(id=o_id)
+            user_objs = models_userprofile_obj.objects.filter(id=o_id)
             if user_objs:
-                user_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                user_obj = user_objs[0]
+
+                oper_user_obj = models.project_userprofile.objects.get(id=user_id)
+                if oper_user_obj == user_obj:
+                    response.code = 303
+                    response.msg = "该数据不允许删除"
+                else:
+                    # 记录日志
+                    remark = '将 [{}] 删除   ID: [{}]'.format(user_obj.username, o_id)
+                    insert_log.caozuo(user_id, quanxian_id, delete_oper_type_id, remark)
+
+                    user_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
+
             else:
                 response.code = 302
                 response.msg = '用户ID不存在'
+
         elif oper_type == "update":
-            # 获取ID 用户名 及 角色
             form_data = {
-                'user_id': o_id,
+                'o_id': o_id,
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
             }
-
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
                 print(forms_obj.cleaned_data)
-                user_id = forms_obj.cleaned_data['user_id']
                 username = forms_obj.cleaned_data['username']
                 role_id = forms_obj.cleaned_data['role_id']
-                #  查询数据库  用户id
-                user_obj = models.RibaoUserProfile.objects.filter(
-                    id=user_id
+                user_objs = models_userprofile_obj.objects.filter(
+                    id=o_id
                 )
-                #  更新 数据
-                if user_obj:
-                    user_obj.update(
-                        username=username, role_id=role_id
-                    )
+
+                if user_objs:
+                    user_obj = user_objs[0]
+
+                    # 记录日志
+                    remark = '将 [{}] 修改为 [{}]   ID: [{}]'.format(json.dumps(form_data), json.dumps(forms_obj.cleaned_data), o_id)
+                    insert_log.caozuo(user_id, quanxian_id, update_oper_type_id, remark)
+
+                    user_obj.username = username
+                    user_obj.role_id = role_id
+                    user_obj.save()
+
                     response.code = 200
                     response.msg = "修改成功"
+
                 else:
-                    response.code = 303
-                    response.msg = json.loads(forms_obj.errors.as_json())
+                    response.code = 302
+                    response.msg = '修改ID不存在'
 
             else:
-                print("验证不通过")
-                # print(forms_obj.errors)
                 response.code = 301
-                # print(forms_obj.errors.as_json())
-                #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
