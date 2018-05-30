@@ -5,15 +5,18 @@
 
 
 from django.shortcuts import render, HttpResponse
+from django.http import JsonResponse
 import json
 import hashlib
 import os
 from django.views.decorators.csrf import csrf_exempt
+import time
 
 import xml.dom.minidom
+from publicFunc.Response import ResponseObj
 
-# from webadmin.modules import WeChat
 import datetime
+from publicFunc.gongzhonghao_weixin import WeChatPublicSendMsg
 
 
 def checkSignature(timestamp, nonce, token, signature):
@@ -84,47 +87,6 @@ def index(request):
             # elif event == "unsubscribe":
             #     models.UserProfile.objects.filter(openid=from_user_name).update(openid=None)
 
-            # 用户点击菜单
-            elif event == "CLICK":
-                event_key = collection.getElementsByTagName("EventKey")[0].childNodes[0].data
-                # user_profile_obj = models.UserProfile.objects.get(openid=from_user_name)
-
-                print(event_key)
-
-                post_data = {
-                    "touser": from_user_name,
-                    "template_id": "ksNf6WiqO5JEqd3bY6SUqJvWeL2-kEDqukQC4VeYVvw",
-                    "url": "http://wenda.zhugeyingxiao.com",
-                    "data": {
-                        "first": {
-                            "value": "",
-                            "color": "#173177"
-                        },
-                        "keyword1": {
-                            "value": datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S"),
-                        },
-                        "keyword2": {
-                            "value": "诸葛问答",
-                        },
-
-                        "remark": {
-                            "value": "点击查看详细数据",
-                        }
-                    }
-                }
-
-                if event_key == "show_wenda_cover_num":    # 问答覆盖量查询
-                    post_data["data"]["first"]["value"] = "问答覆盖量查询结果"
-                    post_data["url"] = "http://wenda.zhugeyingxiao.com/show_wenda_cover_num/{from_user_name}/".format(
-                        from_user_name=from_user_name
-                    )
-
-                elif event_key == "show_wenda_publish_num":     # 问答发布量查询
-                    post_data["data"]["first"]["value"] = "问答发布量查询结果"
-                    post_data["url"] = "http://wenda.zhugeyingxiao.com/show_wenda_publish_num/{from_user_name}/".format(
-                        from_user_name=from_user_name
-                    )
-
                 # we_chat_public_send_msg_obj.sendTempMsg(post_data)
 
             return HttpResponse("")
@@ -133,3 +95,17 @@ def index(request):
         return HttpResponse(False)
 
 
+# 获取用于登录的微信二维码
+def generate_qrcode(request):
+    response = ResponseObj()
+    we_chat_public_send_msg_obj = WeChatPublicSendMsg()
+    timestamp = str(int(time.time() * 1000))
+    qc_code_url = we_chat_public_send_msg_obj.generate_qrcode({'timestamp': timestamp})
+    print(qc_code_url)
+
+    response.code = 200
+    response.data = {
+        'qc_code_url': qc_code_url
+    }
+
+    return JsonResponse(response.__dict__)
