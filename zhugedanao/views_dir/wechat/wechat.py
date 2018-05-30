@@ -34,11 +34,8 @@ def index(request):
     nonce = request.GET.get("nonce")
     echostr = request.GET.get("echostr")
 
-    wechat_data_path = os.path.join(os.getcwd(), "zhugedanao/views_dir/wechat/wechat_data.json")
-    with open(wechat_data_path, "r", encoding="utf8") as f:
-        wechat_data = json.loads(f.read())
-        token = wechat_data["token"]
-        EncodingAESKey = wechat_data["EncodingAESKey"]
+    token = 'hfdjsahjklfdhjklhfdkljsa'
+    EncodingAESKey = 'LFYzOBp42g5kwgSUWhGC9uRugSmpyetKfAsJa5FdFHX'
 
     check_result = checkSignature(timestamp, nonce, token, signature)
 
