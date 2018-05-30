@@ -4,3 +4,7 @@
 
 ### app 说明
 wendaku  问答库
+
+python manage.py makemigrations
+
+python manage.py migrate --database wendaku 【注意加上参数】

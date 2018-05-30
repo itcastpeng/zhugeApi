@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from wendaku import models
+from zhugeleida import models
 from publickFunc import Response
 from publickFunc import account
 from django.http import JsonResponse
@@ -14,9 +14,8 @@ def login(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
     print(username, account.str_encrypt(password))
-
     # 查询数据库
-    userprofile_objs = models.UserProfile.objects.filter(
+    userprofile_objs = models.ZgldUserProfile.objects.filter(
         username=username,
         # md5加密 密码
         password=account.str_encrypt(password),

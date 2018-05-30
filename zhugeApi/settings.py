@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'wendaku',
     'ribao',
-    'zhugedanao'
+    'zhugedanao',
+    'zhugeleida',
 ]
 
 MIDDLEWARE = [
@@ -136,6 +137,14 @@ DATABASES = {
         'PORT': '3306',
         'USER': 'zhugedanao',
         'PASSWORD': 'zhugedanao'
+    },
+    'zhugeleida': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zhugeleida',
+        'HOST': 'zhugeleida',
+        'PORT': '3306',
+        'USER': 'zhugeleida',
+        'PASSWORD': 'zhugeleida'
     }
 }
 
@@ -146,6 +155,8 @@ DATABASE_APPS_MAPPING = {
     'wendaku': 'wendaku',
     'ribao': 'ribao',
     'zhugedanao': 'zhugedanao',
+    'zhugeleida': 'zhugeleida',
+
 
 }
 
