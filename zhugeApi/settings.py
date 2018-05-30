@@ -39,11 +39,8 @@ INSTALLED_APPS = [
     'wendaku',
     'ribao',
     'zhugedanao',
-<<<<<<< HEAD
     'zhugeleida',
-=======
     'zhugeproject'
->>>>>>> upstream/dev
 ]
 
 MIDDLEWARE = [
@@ -142,7 +139,7 @@ DATABASES = {
         'USER': 'zhugedanao',
         'PASSWORD': 'zhugedanao'
     },
-<<<<<<< HEAD
+
     'zhugeleida': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zhugeleida',
@@ -150,8 +147,7 @@ DATABASES = {
         'PORT': '3306',
         'USER': 'zhugeleida',
         'PASSWORD': 'zhugeleida'
-    }
-=======
+    },
     'zhugeproject': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'zhugeproject',
@@ -160,7 +156,6 @@ DATABASES = {
             'USER': 'zhugeproject',
             'PASSWORD': 'zhugeproject'
         }
->>>>>>> upstream/dev
 }
 
 DATABASE_ROUTERS = ['wendaku.database_router.DatabaseAppsRouter']
@@ -170,13 +165,8 @@ DATABASE_APPS_MAPPING = {
     'wendaku': 'wendaku',
     'ribao': 'ribao',
     'zhugedanao': 'zhugedanao',
-<<<<<<< HEAD
     'zhugeleida': 'zhugeleida',
-
-
-=======
     'zhugeproject':'zhugeproject',
->>>>>>> upstream/dev
 }
 
 # Password validation

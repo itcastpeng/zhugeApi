@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from zhugeleida import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.user_verify import UserAddForm, UserUpdateForm, UserSelectForm
 import json
 

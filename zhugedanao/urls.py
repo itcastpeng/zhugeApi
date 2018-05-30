@@ -1,9 +1,7 @@
 from django.conf.urls import url
 
-<<<<<<< HEAD
-=======
+
 from zhugedanao.views_dir.wechat import wechat
->>>>>>> upstream/dev
 
 urlpatterns = [
 
