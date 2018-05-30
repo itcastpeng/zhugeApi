@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'wendaku',
     'ribao',
     'zhugedanao',
+    'zhugeleida',
     'zhugeproject'
 ]
 
@@ -138,6 +139,15 @@ DATABASES = {
         'USER': 'zhugedanao',
         'PASSWORD': 'zhugedanao'
     },
+
+    'zhugeleida': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zhugeleida',
+        'HOST': 'zhugeleida',
+        'PORT': '3306',
+        'USER': 'zhugeleida',
+        'PASSWORD': 'zhugeleida'
+    },
     'zhugeproject': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'zhugeproject',
@@ -155,6 +165,7 @@ DATABASE_APPS_MAPPING = {
     'wendaku': 'wendaku',
     'ribao': 'ribao',
     'zhugedanao': 'zhugedanao',
+    'zhugeleida': 'zhugeleida',
     'zhugeproject':'zhugeproject',
 }
 
