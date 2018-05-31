@@ -42,7 +42,6 @@ def work_weixin_auth(request, company_id):
             code_ret_json = code_ret.json()
             user_ticket = code_ret_json['user_ticket']
 
-
             # ?access_token = ACCESS_TOKEN
             post_userlist_data['user_ticket'] = user_ticket
             get_userlist_data['access_token'] = access_token
@@ -74,7 +73,7 @@ def work_weixin_auth(request, company_id):
             if user_profile_objs:
                 user_profile_obj = user_profile_objs[0]
                 if user_profile_obj.status == 1:
-                    redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token
+                    redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'user_id=' + userid + '&' + 'avatar=' + avatar
                     return  redirect(redirect_url)
 
 
