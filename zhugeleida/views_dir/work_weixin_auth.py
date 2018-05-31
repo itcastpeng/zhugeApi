@@ -73,7 +73,7 @@ def work_weixin_auth(request, company_id):
             if user_profile_objs:
                 user_profile_obj = user_profile_objs[0]
                 if user_profile_obj.status == 1:
-                    redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'user_id=' + userid + '&' + 'avatar=' + avatar
+                    redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'id=' + user_profile_obj.id + '&' + 'avatar=' + avatar
                     return  redirect(redirect_url)
 
 
