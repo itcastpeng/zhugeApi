@@ -51,11 +51,18 @@ def user(request):
                     oper_user_username = ''
                 # print('oper_user_username -->', oper_user_username)
                 #  将查询出来的数据 加入列表
+
+                role_name = ''
+                role_id = ''
+                if obj.role:
+                    role_name = obj.role.name
+                    role_id = obj.role.id
+
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,
-                    'role_name': obj.role.name,
-                    'role_id': obj.role.id,
+                    'role_name': role_name,
+                    'role_id': role_id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
                     'oper_user__username': oper_user_username,
@@ -81,11 +88,12 @@ def user(request):
 @account.is_token(models.RibaoUserProfile)
 def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
                 'user_id': o_id,
-                'oper_user_id': request.GET.get('user_id'),
+                'oper_user_id': user_id,
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
                 'password': request.POST.get('password')
@@ -111,9 +119,13 @@ def user_oper(request, oper_type, o_id):
             # 删除 ID
             user_objs = models.RibaoUserProfile.objects.filter(id=o_id)
             if user_objs:
-                user_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                if user_objs[0].id == user_id:
+                    response.code = 302
+                    response.msg = '不能删除自己'
+                else:
+                    user_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
                 response.code = 302
                 response.msg = '用户ID不存在'

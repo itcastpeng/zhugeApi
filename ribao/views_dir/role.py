@@ -70,6 +70,8 @@ def role(request):
 @account.is_token(models.RibaoUserProfile)
 def role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
+
     if request.method == "POST":
         if oper_type == "add":
             role_data = {
@@ -90,9 +92,13 @@ def role_oper(request, oper_type, o_id):
         elif oper_type == "delete":
             role_objs = models.RibaoRole.objects.filter(id=o_id)
             if role_objs:
-                role_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                if role_objs[0].id == models.RibaoUserProfile.objects.get(id=user_id).role_id:
+                    response.code = 302
+                    response.msg = '不能删除自己所属的角色'
+                else:
+                    role_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
             else:
                 response.code = 302
                 response.msg = '角色ID不存在'
