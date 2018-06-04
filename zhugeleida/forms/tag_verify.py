@@ -11,9 +11,16 @@ class TagAddForm(forms.Form):
     name = forms.CharField(
         required=True,
         error_messages={
-            'required': "标签名不能为空"
+            'required': "标签不能为空"
         }
     )
+    # tag_user = forms.CharField(
+    #     required=True,
+    #     error_messages = {
+    #         'required': "关联用户不能为空"
+    #     }
+    #
+    # )
 
     # 查询标签名判断是否存在
     def clean_name(self):
@@ -42,12 +49,6 @@ class TagUpdateForm(forms.Form):
             'required': '标签名不能为空'
         }
     )
-    oper_user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '操作人不能为空'
-        }
-    )
 
     # 判断标签是否存在
     def clean_name(self):
@@ -55,9 +56,9 @@ class TagUpdateForm(forms.Form):
         name = self.data['name']
         objs = models.zgld_tag.objects.filter(
             name=name,
-        ).exclude(id=tag_id)
-        if objs:
-            self.add_error('name', '标签已存在')
+        )
+        if not objs:
+            self.add_error('name', '标签不存在')
         else:
             return name
 

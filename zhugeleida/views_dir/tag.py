@@ -40,17 +40,29 @@ def tag(request):
                 print('current_page -->', current_page)
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
+
+                print('-1111--> objs', objs)
                 objs = objs[start_line: stop_line]
+
+                print('-2222--> objs', objs)
 
             # 获取所有数据
             ret_data = []
             # 获取第几页的数据
-            for obj in objs:
 
+            for obj in objs:
+                customer_obj = models.zgld_tag.objects.get(id=obj.id).tag_customer.all()
+                customer_list = []
+                for obj in customer_obj:
+                    customer_list.append(obj.id)
+
+                print('obj -->', obj)
                 ret_data.append({
                     'id': obj.id,
                     'name': obj.name,
                     'tag_id': obj.id,
+                    'customer_list': customer_list
+
                 })
             response.code = 200
             response.data = {
@@ -71,13 +83,21 @@ def tag_oper(request, oper_type, o_id):
 
     if request.method == "POST":
         if oper_type == "add":
+
+
             tag_data = {
                 'name' : request.POST.get('name'),
-                'oper_user_id':request.GET.get('user_id')
+
+
             }
             forms_obj = TagAddForm(tag_data)
             if forms_obj.is_valid():
-                models.zgld_tag.objects.create(**forms_obj.cleaned_data)
+
+                obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
+                customer_list = request.POST.getlist('user_list')
+                if customer_list :
+                    obj.tag_customer = customer_list
+
                 response.code = 200
                 response.msg = "添加成功"
             else:
@@ -95,16 +115,16 @@ def tag_oper(request, oper_type, o_id):
                 response.msg = "删除成功"
             else:
                 response.code = 302
-                response.msg = '角色ID不存在'
+                response.msg = '标签ID不存在'
 
         elif oper_type == "update":
             form_data = {
                 'tag_id': o_id,
                 'name': request.POST.get('name'),
-                'oper_user_id': request.POST.get('user_id'),
             }
             print(form_data)
             forms_obj = TagUpdateForm(form_data)
+
             if forms_obj.is_valid():
                 name = forms_obj.cleaned_data['name']
                 tag_id = forms_obj.cleaned_data['tag_id']
@@ -113,6 +133,11 @@ def tag_oper(request, oper_type, o_id):
                     id=tag_id
                 )
                 if tag_objs:
+                    customer_list = request.POST.getlist('user_list')
+                    if customer_list:
+                        tag_customer_obj = models.zgld_tag.objects.get(id=tag_id)
+                        tag_customer_obj.tag_customer =  customer_list
+
                     tag_objs.update(
                         name=name
                     )
@@ -120,7 +145,7 @@ def tag_oper(request, oper_type, o_id):
                     response.msg = "修改成功"
                 else:
                     response.code = 302
-                    response.msg = '角色ID不存在'
+                    response.msg = '标签ID不存在'
             else:
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())

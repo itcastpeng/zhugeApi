@@ -31,6 +31,7 @@ def login(request):
             userprofile_obj.token = token
         else:
             token = userprofile_obj.token
+        request.session['user_id'] = userprofile_obj.id
 
         response.code = 200
         response.msg = '登录成功'
