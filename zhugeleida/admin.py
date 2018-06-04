@@ -12,4 +12,5 @@ admin.site.register(models.zgld_photo)
 admin.site.register(models.zgld_quanxian)
 admin.site.register(models.zgld_information)
 admin.site.register(models.zgld_tag)
+admin.site.register(models.zgld_chatinfo)
 
