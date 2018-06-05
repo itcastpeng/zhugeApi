@@ -14,7 +14,7 @@ class zgld_company(models.Model):
 # 用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
-    name = models.CharField(verbose_name="成员姓名", max_length=32)
+    username = models.CharField(verbose_name="成员姓名", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     gender_choices = (
         (1, "男"),
@@ -36,7 +36,7 @@ class zgld_userprofile(models.Model):
 
 
     def __str__(self):
-        return self.name
+        return self.username
 
     class Meta:
         unique_together = (("userid", "company"),)
@@ -118,6 +118,7 @@ class zgld_customer(models.Model):
     status = models.SmallIntegerField(verbose_name='客户状态',choices=status_choice,null=True,blank=True)
 
     nickname = models.CharField(max_length=64, verbose_name='昵称',blank=True,null=True)
+
     city =  models.CharField(max_length=32,verbose_name='客户所在城市',blank=True,null=True)
     province = models.CharField(max_length=32,verbose_name='所在省份',blank=True,null=True)
     expedted_pr = models.CharField(verbose_name='预计成交概率',max_length=64,blank=True,null=True)
@@ -181,6 +182,8 @@ class zgld_chatinfo(models.Model):
                         (2,'customer_to_user')
                         )
     send_type = models.SmallIntegerField(choices=send_type_choice,verbose_name='发送类型',blank=True,null=True)
+    is_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息', )
+    is_last_msg = models.BooleanField(default=True,verbose_name='是否为最后一次的消息')
     userprofile = models.ForeignKey('zgld_userprofile',verbose_name='用户',null=True,blank=True)
     customer  = models.ForeignKey('zgld_customer',verbose_name='客户',null=True,blank=True)
 

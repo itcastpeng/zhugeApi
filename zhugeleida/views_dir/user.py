@@ -29,11 +29,13 @@ def user(request):
                 'role__name': '__contains',
                 'create_date': '',
                 'last_login_date': '',
-                'oper_user__username': '__contains',
+
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            objs = models.zgld_userprofile.objects.select_related('role', 'oper_user').filter(q).order_by(order)
+            print('order -->', order)
+            print(models.zgld_userprofile.objects.all())
+            objs = models.zgld_userprofile.objects.select_related('role','company').filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
@@ -42,15 +44,11 @@ def user(request):
                 objs = objs[start_line: stop_line]
 
             # 返回的数据
+            print('------------->>>',objs)
             ret_data = []
-
             for obj in objs:
-                #  如果有oper_user字段 等于本身名字
-                if obj.oper_user:
-                    oper_user_username = obj.oper_user.username
-                else:
-                    oper_user_username = ''
-                # print('oper_user_username -->', oper_user_username)
+
+                print('oper_user_username -->', obj)
                 #  将查询出来的数据 加入列表
                 ret_data.append({
                     'id': obj.id,
@@ -59,7 +57,7 @@ def user(request):
                     'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
-                    'oper_user__username': oper_user_username,
+
                     'status': obj.get_status_display()
                 })
                 #  查询成功 返回200 状态码
@@ -86,11 +84,11 @@ def user_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
-                'user_id': o_id,
-                'oper_user_id': request.GET.get('user_id'),
+
                 'username': request.POST.get('username'),
                 'role_id': request.POST.get('role_id'),
-                'password': request.POST.get('password')
+                'password': request.POST.get('password'),
+                'company_id':  request.POST.get('company_id')
             }
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = UserAddForm(form_data)
@@ -98,7 +96,8 @@ def user_oper(request, oper_type, o_id):
                 print("验证通过")
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
-                # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
+                print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
+
                 models.zgld_userprofile.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"

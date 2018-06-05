@@ -24,6 +24,5 @@ urlpatterns = [
     url(r'^zhugeleida/', include('zhugeleida.urls')),
     url(r'^zhugeproject/', include('zhugeproject.urls',namespace='zhugeproject')),
     url(r'^zhugedanao/', include('zhugedanao.urls',namespace='zhugedanao')),
-    url(r'^chat/',include('zhugeleida.urls'))
 
 ]
