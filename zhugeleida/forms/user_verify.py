@@ -24,11 +24,12 @@ class UserAddForm(forms.Form):
         error_messages={
             'required': '角色不能为空'
         })
-    oper_user_id = forms.IntegerField(
+    company_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '操作人不能为空'
-        })
+            'required': '公司不能为空'
+        }
+    )
 
     # 查询用户名判断是否存在
     def clean_username(self):

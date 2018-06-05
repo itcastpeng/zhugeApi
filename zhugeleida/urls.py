@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir import login, role, user,quanxian,company,tag,user_weixin_auth,customer,chat
+from zhugeleida.views_dir import login, role, user,quanxian,company,tag,user_weixin_auth,customer,chat,contact,action
 
 
 urlpatterns = [
@@ -33,8 +33,15 @@ urlpatterns = [
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)', customer.customer_oper),
     url(r'^customer$', customer.customer),
 
+    #实时聊天
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
     url(r'^chat$',chat.chat),
+
+    #获取联系人列表
+    url(r'^contact',contact.contact),
+
+    #记录访问动作日志
+    url(r'^action',action.action),
 
     #企业微信网页登录认证
     # url(r'^work_weixin_auth/(?P<oper_type>\w+)/(?P<o_id>\d+)', work_weixin_auth.work_weixin_auth_oper),
