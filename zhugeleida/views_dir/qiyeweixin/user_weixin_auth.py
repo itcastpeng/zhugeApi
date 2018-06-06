@@ -13,10 +13,11 @@ from publicFunc.condition_com import conditionCom
 from ..conf import *
 import os
 
+
 def qr_code_auth():
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
-    post_qr_data = {'path': '/', 'width': 430}
+    post_qr_data = {'path': '/?uid=', 'width': 430}
     get_qr_data = {}
 
     get_token_data['appid'] = Conf['appid']
@@ -31,11 +32,12 @@ def qr_code_auth():
 
     get_qr_data['access_token'] = access_token
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
-    print('-------qr_ret---->', qr_ret.text)
-    IMG_PATH = os.path.join(BASE_DIR, 'statics','zhugeleida') + '\sewm.jpg'
-    with open('%s' % (IMG_PATH)  , 'wb') as f:
+    # print('-------qr_ret---->', qr_ret.text)
+    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida') + '/sewm.jpg'
+    with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
     return IMG_PATH or ''
+
 
 @csrf_exempt
 def work_weixin_auth(request, company_id):
@@ -87,7 +89,7 @@ def work_weixin_auth(request, company_id):
         gender = user_list_ret_json['gender']
 
         print('----------user_list_ret_json---->', user_list_ret_json)
-        qr_code_auth()   #生成二维码保存至数据库路径
+        # qr_code_auth()  # 生成二维码保存至数据库路径
 
         user_profile_objs = models.zgld_userprofile.objects.filter(
             userid=userid,
@@ -113,7 +115,7 @@ def work_weixin_auth(request, company_id):
                 'role_id': 1,
                 'company_id': company_id,
                 'token': token,
-                'qr_code': 'statics/zhugeleida/ewm.jpg'
+                # 'qr_code': 'statics/zhugeleida/ewm.jpg'
             }
             models.zgld_userprofile.objects.create(**user_data_dict)
             print('---------- crete successful ---->')
