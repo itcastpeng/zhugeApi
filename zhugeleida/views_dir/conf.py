@@ -10,5 +10,10 @@ Conf = {
 
     "appid" : "wx1add8692a23b5976",                   #小程序唯一标识
     "appsecret": "26a939c9d1c6fe911acfd9cc9deac8f4",  #小程序的 app secret
-    "appurl": "https://api.weixin.qq.com/sns/jscode2session"  #小程序临时登录凭证校验接口
+    "appurl": "https://api.weixin.qq.com/sns/jscode2session",  #小程序临时登录凭证校验接口
+    "qr_token_url" :  "https://api.weixin.qq.com/cgi-bin/token",
+    "qr_code_url":  "https://api.weixin.qq.com/wxa/getwxacode",
+    # "qr_code_url":  "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode",
+
+
 }

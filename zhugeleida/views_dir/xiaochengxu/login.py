@@ -33,8 +33,9 @@ def get_openid_info(get_token_data):
 
     return ret_data
 
+
 @csrf_exempt
-def small_program_auth(request):
+def login(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
