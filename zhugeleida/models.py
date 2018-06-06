@@ -25,7 +25,7 @@ class zgld_userprofile(models.Model):
     role = models.ForeignKey("zgld_role", verbose_name="角色")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
     avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/Avator.jpg')
-    qr_code = models.CharField(verbose_name='员工个人二维码', max_length=128)
+    qr_code = models.CharField(verbose_name='员工个人二维码', max_length=128,null=True)
     status_choices = (
         (1, "启用"),
         (2, "未启用"),
