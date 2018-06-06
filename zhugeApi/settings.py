@@ -146,8 +146,12 @@ DATABASES = {
         'HOST': 'zhugeleida',
         'PORT': '3306',
         'USER': 'zhugeleida',
-        'PASSWORD': 'zhugeleida'
-    },
+        'PASSWORD': 'zhugeleida',
+        'OPTIONS': {
+                    'init_command': 'SET storage_engine=INNODB',
+                },
+            },
+
     'zhugeproject': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'zhugeproject',
