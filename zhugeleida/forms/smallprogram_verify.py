@@ -29,6 +29,11 @@ class SmallProgramAddForm(forms.Form):
         }
     )
 
+    uid = forms.IntegerField(
+        # 客户上级对应的用户
+        required=False,
+
+    )
 
 
 

@@ -82,7 +82,7 @@ class zgld_quanxian(models.Model):
 # 标签管理
 class zgld_tag(models.Model):
     name = models.CharField(verbose_name='标签名称', max_length=64)
-    tag_customer = models.ManyToManyField('zgld_customer',verbose_name='关联到客户',blank=True,null=True)
+    tag_customer = models.ManyToManyField('zgld_customer',verbose_name='关联到客户')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
@@ -176,12 +176,21 @@ class zgld_photo(models.Model):
 
 class zgld_accesslog(models.Model):
     """Store Schedule run logs """
-    sharing_user = models.ForeignKey('zgld_userprofile',verbose_name='分享的用户')
+
+    gongneng_choices = (
+        (1, '名片'),
+        (2,'朋友圈'),
+        (3,'官网'),
+        (4,'产品')
+    )
+
+    gongneng = models.SmallIntegerField(verbose_name="访问的功能动作", choices=gongneng_choices)
+
+    user = models.ForeignKey('zgld_userprofile',verbose_name=' 被访问的用户')
     customer = models.ForeignKey('zgld_customer',verbose_name='访问的客户')
-    accsess_url = models.CharField(max_length=128,verbose_name="访问的url")
 
     create_date = models.DateTimeField(auto_now_add=True)
-    mem = models.TextField(u'备注', help_text='客户个人信息备注等')
+    remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
 
     class Meta:
         app_label = "zhugeleida"
