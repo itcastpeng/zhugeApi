@@ -22,7 +22,6 @@ def contact(request):
     response = Response.ResponseObj()
     if request.method == 'GET':
 
-
             forms_obj = ContactSelectForm(request.GET)
             if forms_obj.is_valid():
                 print(request.GET)

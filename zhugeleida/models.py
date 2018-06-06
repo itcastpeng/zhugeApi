@@ -20,7 +20,7 @@ class zgld_userprofile(models.Model):
         (1, "男"),
         (2, "女"),
     )
-    gender = models.IntegerField(choices=gender_choices, default=1)
+    gender = models.SmallIntegerField(choices=gender_choices, default=1)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     role = models.ForeignKey("zgld_role", verbose_name="角色")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
@@ -30,6 +30,10 @@ class zgld_userprofile(models.Model):
         (1, "启用"),
         (2, "未启用"),
     )
+    popularity = models.IntegerField(verbose_name='人气(被查看)',default=0)
+    praise = models.IntegerField(verbose_name='被赞',default=0)
+    forward = models.IntegerField(verbose_name='转发',default=0)
+
     status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=2)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
@@ -90,19 +94,24 @@ class zgld_tag(models.Model):
 
 # 客户管理
 class zgld_customer(models.Model):
-    username = models.CharField(verbose_name='客户姓名', max_length=64)
+    username = models.CharField(verbose_name='客户姓名', max_length=64,null=True)
+    user_type_choices = (
+        (1, '微信公众号'),
+        (2, '微信小程序'),
 
-    openid = models.CharField(verbose_name='(公众号)关注者的OpenID', max_length=64)
-    headimgurl = models.CharField(verbose_name="用户头像url", max_length=128, default='statics/imgs/setAvator.jpg')
+    )
+    user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
+    openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=64)
+    headimgurl = models.CharField(verbose_name="用户头像url", max_length=128,null=True)
     expected_time = models.DateField(verbose_name='预计成交时间', max_length=64, blank=True, null=True,
                                      help_text="格式yyyy-mm-dd")
-
-    source_type = (
+    token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
+    source_type_choices = (
         (1, '扫码'),
         (2, '转发'),
 
     )
-    source = models.SmallIntegerField(u'客户来源', choices=source_type)
+    source = models.SmallIntegerField(u'客户来源', choices=source_type_choices) #1
 
     sex_choices = (
         (1, "男"),
@@ -110,20 +119,22 @@ class zgld_customer(models.Model):
     )
     sex = models.IntegerField(choices=sex_choices, default=1,blank=True,null=True)
     memo_name = models.CharField(max_length=64,verbose_name='备注名',blank=True,null=True)
-    status_choice =  ((
-            (1, '未跟进过'),
-            (2, '跟进中'),
-            (3, '今日新增'),
-    ))
+    status_choice =  (
+        (1, '未跟进过'),
+        (2, '跟进中'),
+        (3, '今日新增'),
+    )
     status = models.SmallIntegerField(verbose_name='客户状态',choices=status_choice,null=True,blank=True)
 
     nickname = models.CharField(max_length=64, verbose_name='昵称',blank=True,null=True)
 
+    country = models.CharField(max_length=64,verbose_name='国家',blank=True,null=True)
     city =  models.CharField(max_length=32,verbose_name='客户所在城市',blank=True,null=True)
     province = models.CharField(max_length=32,verbose_name='所在省份',blank=True,null=True)
+    language = models.CharField(max_length=32,verbose_name='语言',blank=True,null=True)
     expedted_pr = models.CharField(verbose_name='预计成交概率',max_length=64,blank=True,null=True)
     superior = models.ForeignKey('self', verbose_name='上级人',null=True,blank=True)
-    belonger = models.ForeignKey('zgld_userprofile', verbose_name='归属人', )
+    belonger = models.ForeignKey('zgld_userprofile', verbose_name='归属人',null=True)
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间',blank=True,null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # 微信聊天室
@@ -139,7 +150,6 @@ class zgld_customer(models.Model):
 class zgld_information(models.Model):
     '''资料详情表'''
     customer = models.ForeignKey('zgld_customer', verbose_name='客户表',null=True)
-
     phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)
     company = models.CharField(u'在职公司', max_length=256, blank=True, null=True)

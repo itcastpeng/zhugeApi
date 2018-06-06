@@ -6,37 +6,6 @@ import datetime
 import re
 from django.core.exceptions import ValidationError
 
-# 添加用户信息
-class CustomerAddForm(forms.Form):
-    memo_name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "备注名不能为空"
-        }
-    )
-
-    source = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '客戶来源不能为空'
-        })
-
-
-    # 查询用户名判断是否存在
-    def clean_username(self):
-        username = self.data['username']
-        # print(username)
-        objs = models.zgld_customer.objects.filter(
-            username=username,
-        )
-        if objs:
-            self.add_error('username', '用户名已存在')
-        else:
-            return username
-
-    # 返回加密后的密码
-    def clean_password(self):
-        return account.str_encrypt(self.data['password'])
 
 def mobile_validate(value):
     mobile_re = re.compile(r'^(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$') #正则匹配
@@ -84,7 +53,7 @@ class Customer_information_UpdateForm(forms.Form):
     )
 
     memo_name = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "备注名不能为空"
         }
