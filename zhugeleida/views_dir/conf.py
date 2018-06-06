@@ -6,5 +6,9 @@ Conf = {
     "corpsecret": "48m2h1e2DRcA55yfKqHa083UpbJy-30u30ypy4zPr8E",
     "token_url": "https://qyapi.weixin.qq.com/cgi-bin/gettoken",
     "code_url":  "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo",
-    "userlist_url" : "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail"
+    "userlist_url" : "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail",
+
+    "appid" : "wx1add8692a23b5976",                   #小程序唯一标识
+    "appsecret": "26a939c9d1c6fe911acfd9cc9deac8f4",  #小程序的 app secret
+    "appurl": "https://api.weixin.qq.com/sns/jscode2session"  #小程序临时登录凭证校验接口
 }
