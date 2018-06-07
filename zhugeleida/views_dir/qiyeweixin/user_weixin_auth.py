@@ -14,30 +14,6 @@ from ..conf import *
 import os
 
 
-def qr_code_auth():
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    get_token_data = {}
-    post_qr_data = {'path': '/?uid=', 'width': 430}
-    get_qr_data = {}
-
-    get_token_data['appid'] = Conf['appid']
-    get_token_data['secret'] = Conf['appsecret']
-    get_token_data['grant_type'] = 'client_credential'
-
-    # get 传参 corpid = ID & corpsecret = SECRECT
-    token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
-    token_ret_json = token_ret.json()
-    access_token = token_ret_json['access_token']
-    print('---- access_token --->>', token_ret_json)
-
-    get_qr_data['access_token'] = access_token
-    qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
-    # print('-------qr_ret---->', qr_ret.text)
-    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida') + '/sewm.jpg'
-    with open('%s' % (IMG_PATH), 'wb') as f:
-        f.write(qr_ret.content)
-    return IMG_PATH or ''
-
 
 @csrf_exempt
 def work_weixin_auth(request, company_id):
@@ -73,14 +49,6 @@ def work_weixin_auth(request, company_id):
         print('======>>>>>', post_userlist_data, get_userlist_data)
         user_list_ret = requests.post(Conf['userlist_url'], params=get_userlist_data,
                                       data=json.dumps(post_userlist_data))
-        # print('user_list_ret_url -->', user_list_ret.url)
-
-        #
-        # response.code = 200
-        # response.data = {
-        #     'ret_data': user_list_ret.json(),
-        #
-        # }
 
         user_list_ret_json = user_list_ret.json()
         userid = user_list_ret_json['userid']
@@ -102,8 +70,6 @@ def work_weixin_auth(request, company_id):
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'id=' + str(
                     user_profile_obj.id) + '&' + 'avatar=' + avatar
                 return redirect(redirect_url)
-
-
 
         else:
             token = account.get_token(account.str_encrypt(str(int(time.time() * 1000)) + userid))
