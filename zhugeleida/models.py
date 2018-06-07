@@ -102,7 +102,7 @@ class zgld_customer(models.Model):
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=64)
-    headimgurl = models.CharField(verbose_name="用户头像url", max_length=128,null=True)
+    headimgurl = models.CharField(verbose_name="用户头像url", max_length=128,default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', max_length=64, blank=True, null=True,
                                      help_text="格式yyyy-mm-dd")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)

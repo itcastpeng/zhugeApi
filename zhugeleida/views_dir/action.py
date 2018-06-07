@@ -4,12 +4,9 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
-from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.chat_verify import ChatSelectForm
+from zhugeleida.forms.xiaochengxu.action_verify import ActionSelectForm
 
-import json
+
 from zhugeleida import models
 
 
@@ -17,38 +14,47 @@ from zhugeleida import models
 @account.is_token(models.zgld_userprofile)
 def action(request):
     '''
-     实时获取聊天信息
+     分页获取访问日志信息
     :param request:
     :return:
     '''
     if request.method == 'GET':
 
-        forms_obj = ChatSelectForm(request.GET)
+        forms_obj = ActionSelectForm(request.GET)
         if forms_obj.is_valid():
             response = Response.ResponseObj()
             user_id = request.GET.get('user_id')
-            customer_id = request.GET.get('customer_id')
-            send_type = request.GET.get('send_type')
 
-            msg_obj = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-                userprofile_id=user_id,customer_id=customer_id, send_type=send_type, is_new_msg=True).values('id', 'userprofile_id',
-                                                                                     'userprofile__username',
-                                                                                     'customer_id', 'customer__username',
-                                                                                     'send_type',
-                                                                                     'msg', 'create_date', ).order_by('-create_date')
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+
+            access_log_objs = models.zgld_accesslog.objects.select_related(
+                'user',
+                'customer'
+            ).filter(
+                user_id=user_id
+
+            ).order_by('-create_date')
+            print(access_log_objs)
+
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                access_log_objs = access_log_objs[start_line: stop_line]
+
+            ret_data_list = []
+            for obj in access_log_objs:
+                ret_data_list.append({
+                    'user_id': obj.user_id,
+                    'customer_id': obj.customer_id,
+                    'log': obj.customer.username + obj.remark,
+                    'create_date': obj.create_date,
+                })
+
             response.code = 200
-            response.msg = 'get new msg successful'
-            print('--- list(msg_obj) -->>', list(msg_obj))
+            response.msg = '查询日志记录成功'
+            response.data = ret_data_list
 
-            response.data = list(msg_obj)
-            msg_obj.update(
-                is_new_msg=False
-            )
-
-
-            if not msg_obj:
-                # 没有新消息
-                response.msg = 'No new data'
 
             return JsonResponse(response.__dict__)
 

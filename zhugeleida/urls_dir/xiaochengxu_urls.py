@@ -38,9 +38,11 @@ urlpatterns = [
     #获取联系人列表
     url(r'^contact$',contact.contact),
 
-    #记录访问动作日志
+    #访问小程序的名片
     url(r'^mingpian$',mingpian.mingpian),
 
+    #获取日志记录。
+    url(r'^action$',action.action),
 
     #小程序登录认证
     url(r'^login$', login.login)

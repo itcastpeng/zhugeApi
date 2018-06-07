@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.chat_verify import ChatSelectForm
+from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm
 
 import json
 from zhugeleida import models
@@ -17,41 +17,62 @@ from zhugeleida import models
 @account.is_token(models.zgld_userprofile)
 def chat(request):
     '''
-     实时获取聊天信息
+     分页获取聊天信息
     :param request:
     :return:
     '''
     if request.method == 'GET':
 
         forms_obj = ChatSelectForm(request.GET)
+
         if forms_obj.is_valid():
             response = Response.ResponseObj()
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
-            send_type = request.GET.get('send_type')
+            # send_type = request.GET.get('send_type')
 
-            msg_obj = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-                userprofile_id=user_id,customer_id=customer_id, send_type=send_type, is_new_msg=True).values('id', 'userprofile_id',
-                                                                                     'userprofile__username',
-                                                                                     'customer_id', 'customer__username',
-                                                                                     'send_type',
-                                                                                     'msg', 'create_date', ).order_by('-create_date')
-            response.code = 200
-            response.msg = 'get new msg successful'
-            print('--- list(msg_obj) -->>', list(msg_obj))
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
 
-            response.data = list(msg_obj)
-            msg_obj.update(
+
+            msg_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                userprofile_id=user_id,
+                customer_id=customer_id,
+            ).order_by('-create_date')
+            msg_objs.update(
                 is_new_msg=False
             )
 
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                msg_objs = msg_objs[start_line: stop_line]
 
-            if not msg_obj:
+            ret_data_list = []
+            for obj in msg_objs:
+                ret_data_list.append({
+                     'customer_id': obj.customer.id,
+                     'user_id': obj.userprofile.id,
+                     'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
+                     'name': obj.customer.username,
+                     'dateTime': obj.create_date,
+                     'msg': obj.msg,
+                     'send_type': obj.send_type,
+                })
+
+
+            response.code = 200
+            response.msg = '分页获取聊天消息成功'
+            print('--- list(msg_obj) -->>', ret_data_list)
+
+            response.data = ret_data_list
+
+
+            if not ret_data_list:
                 # 没有新消息
                 response.msg = 'No new data'
 
             return JsonResponse(response.__dict__)
-
 
 
 @csrf_exempt
@@ -59,7 +80,52 @@ def chat(request):
 def chat_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "GET":
-        pass
+        if oper_type == 'getmsg':
+
+            forms_obj = ChatGetForm(request.GET)
+            if forms_obj.is_valid():
+                response = Response.ResponseObj()
+                user_id = request.GET.get('user_id')
+                customer_id = request.GET.get('customer_id')
+                # send_type = request.GET.get('send_type')
+
+
+                msg_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    # send_type=send_type,
+                    is_new_msg=True
+
+                ).order_by('-create_date')
+
+
+
+                ret_data_list = []
+                for obj in msg_objs:
+                    ret_data_list.append({
+                        'customer_id': obj.customer.id,
+                        'user_id': obj.userprofile.id,
+                        'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
+                        'name': obj.customer.username,
+                        'dateTime': obj.create_date,
+                        'send_type': obj.send_type,
+                        'msg': obj.msg,
+                    })
+
+                response.code = 200
+                response.msg = '实时获取聊天记录成功'
+                print('--- list(msg_obj) -->>', ret_data_list)
+
+                response.data = ret_data_list
+                msg_objs.update(
+                    is_new_msg=False
+                )
+
+                if not ret_data_list:
+                    # 没有新消息
+                    response.msg = '没有得到实时聊天信息'
+
+                return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':
         # 用户推送消息到server端,然后入库
@@ -68,10 +134,6 @@ def chat_oper(request, oper_type, o_id):
             forms_obj = ChatSelectForm(request.POST)
 
             if forms_obj.is_valid():
-                userprofile_id = request.GET.get('user_id')
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
                 data = request.POST
                 user_id = int(data.get('user_id'))
@@ -81,18 +143,15 @@ def chat_oper(request, oper_type, o_id):
 
                 print('---msg----->>', msg)
 
-                info_chat_create_obj = models.zgld_chatinfo.objects.create(msg=msg)
-                info_chat_get_obj = models.zgld_chatinfo.objects.get(id=info_chat_create_obj.id)
-                info_chat_get_obj.userprofile_id = user_id
-                info_chat_get_obj.customer_id = customer_id
-                info_chat_get_obj.send_type = send_type
-                info_chat_get_obj.is_new_msg = True
-                info_chat_get_obj.is_last_msg = True
-                info_chat_create_obj.save()
-                info_chat_get_obj.save()
+                models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
+                models.zgld_chatinfo.objects.create(
+                        msg=msg,
+                        userprofile_id=user_id,
+                        customer_id=customer_id,
+                        send_type=send_type,
 
-                exclude_chatinfo_obj = models.zgld_chatinfo.objects.all().exclude(id=info_chat_create_obj.id)
-                exclude_chatinfo_obj.update(is_last_msg=False)
+                )
+
                 response.code = 200
                 response.msg = 'send msg successful'
                 return JsonResponse(response.__dict__)
