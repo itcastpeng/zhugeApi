@@ -39,7 +39,7 @@ def login(request):
         response.data = {
             'token': token,
             'user_id': userprofile_obj.id,
-            'set_avator': userprofile_obj.set_avator
+            'set_avatar': userprofile_obj.avatar
         }
 
         userprofile_obj.last_login_date = datetime.datetime.now()

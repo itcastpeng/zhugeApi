@@ -15,6 +15,18 @@ class CompanyAddForm(forms.Form):
         }
     )
 
+    corp_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "企业ID不能为空"
+        }
+    )
+    tongxunlu_secret = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "通讯录secret不能为空"
+        }
+    )
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
@@ -43,6 +55,19 @@ class CompanyUpdateForm(forms.Form):
         }
     )
 
+    corp_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "企业ID不能为空"
+        }
+    )
+    tongxunlu_secret = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "通讯录secret不能为空"
+        }
+    )
+
     # 判断公司是否存在
     def clean_name(self):
         company_id = self.data['company_id']
@@ -51,8 +76,8 @@ class CompanyUpdateForm(forms.Form):
             name=name,
         )
 
-        if objs:
-            self.add_error('name', '公司已存在')
+        if not objs:
+            self.add_error('name', '公司不存在')
         else:
             return name
 
@@ -72,6 +97,8 @@ class CompanySelectForm(forms.Form):
             'required': "页显示数量类型错误"
         }
     )
+
+
 
     def clean_current_page(self):
         if 'current_page' not in self.data:

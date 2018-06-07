@@ -5,60 +5,67 @@ from publicFunc import account
 import datetime
 
 
-# 添加角色信息
-class RoleAddForm(forms.Form):
-    # print('添加角色')
+# 添加部门信息
+class DepartmentAddForm(forms.Form):
+    # print('添加部门')
     name = forms.CharField(
         required=True,
         error_messages={
-            'required': "角色名不能为空"
+            'required': "部门名不能为空"
+        }
+    )
+    parentid_id = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "父级部门ID"
         }
     )
 
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
-        objs = models.zgld_role.objects.filter(
+        objs = models.zgld_department.objects.filter(
             name=name,
         )
         if objs:
-            self.add_error('name', '角色名已存在')
+            self.add_error('name', '部门名已存在')
         else:
             return name
 
 
 # 更新用户信息
-class RoleUpdateForm(forms.Form):
-    role_id = forms.IntegerField(
-        required=True,
+class DepartmentUpdateForm(forms.Form):
+    department_id = forms.IntegerField(
+        required=False,
         error_messages={
-            'required': '角色ID不能为空'
+            'required': '部门ID不能为空'
         }
     )
 
     name = forms.CharField(
         required=True,
         error_messages={
-            'required': '角色名不能为空'
+            'required': '部门名不能为空'
         }
     )
 
 
-    # 判断角色是否存在
+    # 判断部门是否存在
     def clean_name(self):
-        role_id = self.data['role_id']
+        department_id = self.data['department_id']
         name = self.data['name']
-        objs = models.zgld_role.objects.filter(
+        objs = models.zgld_department.objects.filter(
             name=name,
-        ).exclude(id=role_id)
+        ).exclude(id=department_id)
+
         if objs:
-            self.add_error('name', '角色已存在')
+            self.add_error('name', '部门已存在')
         else:
             return name
 
 
 # 判断是否是数字
-class RoleSelectForm(forms.Form):
+class DepartmentSelectForm(forms.Form):
     current_page = forms.IntegerField(
         required=False,
         error_messages={

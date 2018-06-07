@@ -4,11 +4,20 @@ from django.db import models
 # 公司管理
 class zgld_company(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
+    corp_id = models.CharField(verbose_name="企业ID", max_length=128)
+    tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
+
+class zgld_department(models.Model):
+    company = models.ForeignKey('zgld_company',verbose_name='所属公司')
+    name = models.CharField(verbose_name="部门名称", max_length=128)
+    parentid = models.ForeignKey('self',verbose_name='父级部门ID',default=1,null=True,blank=True)
+    order = models.IntegerField(verbose_name='在父部门中的次序值',null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 
 # 用户管理
@@ -22,9 +31,11 @@ class zgld_userprofile(models.Model):
     )
     gender = models.SmallIntegerField(choices=gender_choices, default=1)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    department = models.ForeignKey('zgld_department', verbose_name='所属部门',null=True)
+    position = models.CharField(verbose_name='职位信息',max_length=128)
     role = models.ForeignKey("zgld_role", verbose_name="角色")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
-    avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/Avator.jpg')
+    avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/setAvator.jpg')
     qr_code = models.CharField(verbose_name='员工个人二维码', max_length=128,null=True)
     status_choices = (
         (1, "启用"),
@@ -43,7 +54,7 @@ class zgld_userprofile(models.Model):
         return self.username
 
     class Meta:
-        unique_together = (("userid", "company"),)
+        # unique_together = (("userid", "company"),)
         verbose_name_plural = "用户表"
         app_label = "zhugeleida"
 

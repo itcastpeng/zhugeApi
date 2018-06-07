@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import login
+from zhugeleida.views_dir.admin import login
 
 
 urlpatterns = [
