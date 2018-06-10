@@ -15,7 +15,7 @@ class zgld_company(models.Model):
 class zgld_department(models.Model):
     company = models.ForeignKey('zgld_company',verbose_name='所属公司')
     name = models.CharField(verbose_name="部门名称", max_length=128)
-    parentid = models.ForeignKey('self',verbose_name='父级部门ID',default=1,null=True,blank=True)
+    parentid = models.ForeignKey('self',verbose_name='父级部门ID',null=True,blank=True)
     order = models.IntegerField(verbose_name='在父部门中的次序值',null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -31,9 +31,12 @@ class zgld_userprofile(models.Model):
     )
     gender = models.SmallIntegerField(choices=gender_choices, default=1)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
-    department = models.ForeignKey('zgld_department', verbose_name='所属部门',null=True)
+    department = models.ManyToManyField('zgld_department', verbose_name='所属部门')
     position = models.CharField(verbose_name='职位信息',max_length=128)
     role = models.ForeignKey("zgld_role", verbose_name="角色")
+    phone = models.CharField(verbose_name='绑定微信手机号', max_length=20, blank=True, null=True)
+    mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
+
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
     avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/setAvator.jpg')
     qr_code = models.CharField(verbose_name='员工个人二维码', max_length=128,null=True)
@@ -41,11 +44,13 @@ class zgld_userprofile(models.Model):
         (1, "启用"),
         (2, "未启用"),
     )
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=2)
+
     popularity = models.IntegerField(verbose_name='人气(被查看)',default=0)
     praise = models.IntegerField(verbose_name='被赞',default=0)
     forward = models.IntegerField(verbose_name='转发',default=0)
 
-    status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=2)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
 
@@ -188,20 +193,29 @@ class zgld_photo(models.Model):
 class zgld_accesslog(models.Model):
     """Store Schedule run logs """
 
-    gongneng_choices = (
-        (1, '名片'),
-        (2,'朋友圈'),
-        (3,'官网'),
-        (4,'产品')
+    action_choices = (
+        (1, '查看名片'),  # 查看了名片第XXX次。
+        (2, '查看产品'),  # 查看您的产品; 查看竞价排名; 转发了竞价排名。
+        (3, '查看动态'),  # 查看了公司的动态。 评论了您的企业动态。
+        (4, '查看官网'),  # 查看了您的官网 , 转发了您官网。
+
+        (5, '复制微信'),
+        (6, '转发名片'),  #
+        (7, '咨询产品'),
+        (8, '保存电话'),
+        (9, '觉得靠谱'),  # 取消了对您的靠谱
+        (10, '拨打电话'),
+        (11, '播放语音'),
+        (12, '复制邮箱'),
+
     )
 
-    gongneng = models.SmallIntegerField(verbose_name="访问的功能动作", choices=gongneng_choices)
+    action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
 
     user = models.ForeignKey('zgld_userprofile',verbose_name=' 被访问的用户')
     customer = models.ForeignKey('zgld_customer',verbose_name='访问的客户')
-
-    create_date = models.DateTimeField(auto_now_add=True)
     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
+    create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         app_label = "zhugeleida"

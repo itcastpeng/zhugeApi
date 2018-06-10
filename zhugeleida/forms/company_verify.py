@@ -68,16 +68,16 @@ class CompanyUpdateForm(forms.Form):
         }
     )
 
-    # 判断公司是否存在
+    # 判断公司名称是否存在
     def clean_name(self):
         company_id = self.data['company_id']
         name = self.data['name']
         objs = models.zgld_company.objects.filter(
             name=name,
-        )
+        ).exclude(id=company_id)
 
-        if not objs:
-            self.add_error('name', '公司不存在')
+        if objs:
+            self.add_error('name', '公司名称已经存在')
         else:
             return name
 

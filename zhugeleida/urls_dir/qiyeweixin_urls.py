@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag,user_weixin_auth,customer,qr_code_auth
-from zhugeleida.views_dir import chat,contact,action
+from zhugeleida.views_dir.qiyeweixin import  user,quanxian,action,tag,user_weixin_auth,customer,qr_code_auth
+from zhugeleida.views_dir import chat,contact
 
 
 urlpatterns = [
@@ -37,8 +37,16 @@ urlpatterns = [
 
     #获取联系人列表
     url(r'^contact$',contact.contact),
-    #记录访问动作日志
-    url(r'^action$',action.action),
+
+
+
+    #雷达
+
+    url(r'^action/(?P<oper_type>\w+)', action.action),
+    # url(r'^action_count$',action.action_count),
+    # url(r'^action_time$',action.action_time),
+
+
 
     #生成微信二维码 create_qr_code
     url(r'^qr_code_auth$',qr_code_auth.qr_code_auth),

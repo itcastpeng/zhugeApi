@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import  role,company,login,user,department
-from zhugeleida.views_dir import chat,contact,action
+from zhugeleida.views_dir import chat,contact
 
 
 urlpatterns = [

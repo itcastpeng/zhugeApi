@@ -10,6 +10,14 @@ Conf = {
     "userlist_url" : "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail",
 
     "tongxunlu_token_url": "https://qyapi.weixin.qq.com/cgi-bin/gettoken",
+    "add_user_url" : "https://qyapi.weixin.qq.com/cgi-bin/user/create",
+    "update_user_url" : "https://qyapi.weixin.qq.com/cgi-bin/user/update",
+    "delete_user_url" : "https://qyapi.weixin.qq.com/cgi-bin/user/delete",
+
+    "add_department_url":  "https://qyapi.weixin.qq.com/cgi-bin/department/create",
+    "update_department_url":  "https://qyapi.weixin.qq.com/cgi-bin/department/update",
+    "delete_department_url": "https://qyapi.weixin.qq.com/cgi-bin/department/delete",
+
 
     "appid" : "wx1add8692a23b5976",                   #小程序唯一标识
     "appsecret": "26a939c9d1c6fe911acfd9cc9deac8f4",  #小程序的 app secret

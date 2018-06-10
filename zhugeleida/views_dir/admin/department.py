@@ -7,7 +7,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.department_verify import DepartmentAddForm, DepartmentUpdateForm, DepartmentSelectForm
 import json
 from publicFunc.condition_com import conditionCom
-
+import requests
+from ..conf import *
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -37,6 +38,7 @@ def department(request):
                 'parentid': obj.parentid_id,
                 'department_id': obj.id,
                 'create_date': obj.create_date,
+                'company_id': obj.company_id,
                 'order': obj.order,
             })
 
@@ -60,15 +62,57 @@ def department_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             department_data = {
+                'user_id': request.GET.get('user_id'),
+                'company_id': request.POST.get('company_id'),
                 'name': request.POST.get('name'),
                 'parentid_id': request.POST.get('parentid')
 
             }
+
             forms_obj = DepartmentAddForm(department_data)
+
             if forms_obj.is_valid():
-                models.zgld_department.objects.create(**forms_obj.cleaned_data)
-                response.code = 200
-                response.msg = "添加成功"
+                del forms_obj.cleaned_data['user_id']
+                print('-----forms_obj.cleaned_data--------->>',forms_obj.cleaned_data)
+
+                obj = models.zgld_department.objects.create(**forms_obj.cleaned_data)
+
+                print('obj.id -->', obj.id)
+                get_token_data = {}
+                get_user_data = {}
+
+                get_token_data['corpid'] = obj.company.corp_id
+                get_token_data['corpsecret'] = obj.company.tongxunlu_secret
+                ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                ret_json = ret.json()
+                print('ret_json -->', ret_json)
+                access_token = ret_json['access_token']
+                print('---access_token-->>',access_token)
+                get_user_data['access_token'] =  access_token
+                parentid_id = 1   #微信端 父部门id默认从1 开始。当我们数据库里存进去为1时候，父部门一级别从空开始。
+                if obj.parentid:
+                    parentid_id = obj.parentid_id
+                print('parentid_id -->', parentid_id)
+
+                post_user_data = {
+                    'id': obj.id,
+                    'name': forms_obj.cleaned_data.get('name'),
+                    'parentid': parentid_id
+                }
+                print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data),forms_obj.cleaned_data.get('name'))
+                ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
+                print(ret.text)
+
+                weixin_ret = json.loads(ret.text)
+                if weixin_ret.get('errmsg') == 'created':
+                    response.code = 200
+                    response.msg = "添加成功"
+                else:
+                    models.zgld_department.objects.filter(id= obj.id).delete()
+
+                    response.code = weixin_ret['errcode']
+                    response.msg = "企业微信验证未通过"
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)
@@ -81,11 +125,42 @@ def department_oper(request, oper_type, o_id):
             # department_relate_user = models.zgld_department.objects.get(id=o_id).zgld_userprofile_set.all()
 
             department_objs = models.zgld_department.objects.filter(id=o_id)
-            if department_objs:
-                department_objs.delete()
 
-                response.code = 200
-                response.msg = "删除成功"
+            if  department_objs:
+                user_objs = models.zgld_userprofile.objects.filter(department_id=o_id)
+                if user_objs.count() == 0:
+                    get_token_data = {}
+                    get_user_data = {}
+
+                    get_token_data['corpid'] = department_objs[0].company.corp_id
+                    get_token_data['corpsecret'] = department_objs[0].company.tongxunlu_secret
+
+                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    ret_json = ret.json()
+                    print('ret_json -->', ret_json)
+
+                    access_token = ret_json['access_token']
+                    print('---access_token-->>', access_token)
+
+                    get_user_data['access_token'] = access_token
+                    get_user_data['id'] = o_id
+
+                    ret = requests.get(Conf['delete_department_url'], params=get_user_data)
+                    print(ret.text)
+
+                    weixin_ret = json.loads(ret.text)
+                    if weixin_ret.get('errmsg') == 'deleted':
+                        department_objs.delete()
+                        response.code = 200
+                        response.msg = "删除成功"
+                    else:
+                        response.code = weixin_ret['errcode']
+                        response.msg = "企业微信验证未通过"
+
+
+                else:
+                    response.code = 304
+                    response.msg = "含有子级数据,请先删除或转移子级数据"
 
             else:
                 response.code = 302
@@ -93,10 +168,12 @@ def department_oper(request, oper_type, o_id):
 
         elif oper_type == "update":
             form_data = {
-                'department_id': o_id,
-                'name': request.POST.get('name'),
-                'parentid_id': request.POST.get('parentid')
 
+                'user_id': request.GET.get('user_id'),
+                'company_id': request.POST.get('company_id'),
+                'name': request.POST.get('name'),
+                'parentid_id': request.POST.get('parentid'),
+                'department_id': o_id
             }
 
             print(form_data)
@@ -106,14 +183,50 @@ def department_oper(request, oper_type, o_id):
                 department_id = forms_obj.cleaned_data['department_id']
                 print(department_id)
                 department_objs = models.zgld_department.objects.filter(
-                    id=department_id
+                    id=forms_obj.cleaned_data['department_id'],
+
                 )
                 if department_objs:
-                    department_objs.update(
-                        name=name
-                    )
-                    response.code = 200
-                    response.msg = "修改成功"
+                    get_token_data = {}
+                    get_user_data = {}
+
+                    get_token_data['corpid'] = department_objs[0].company.corp_id
+                    get_token_data['corpsecret'] = department_objs[0].company.tongxunlu_secret
+
+                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    ret_json = ret.json()
+                    access_token = ret_json['access_token']
+                    print('---access_token-->>', access_token)
+
+                    get_user_data['access_token'] = access_token
+                    post_user_data = {
+                        'id': o_id,
+                        'name': forms_obj.cleaned_data.get('name'),
+
+                    }
+                    parentid_id = forms_obj.cleaned_data.get('parentid_id')
+                    if parentid_id:
+                        post_user_data['parentid'] = parentid_id
+
+                    print('-----json.dumps(post_user_data)----->>', json.dumps(post_user_data),forms_obj.cleaned_data.get('name'))
+                    ret = requests.post(Conf['update_department_url'], params=get_user_data, data=json.dumps(post_user_data))
+                    print(ret.text)
+
+                    weixin_ret = json.loads(ret.text)
+                    if weixin_ret.get('errmsg') == 'updated':
+                        department_objs.update(
+                            name=name,
+                            company_id=forms_obj.cleaned_data['company_id'],
+                            parentid=forms_obj.cleaned_data['parentid_id'],
+                        )
+                        response.code = 200
+                        response.msg = "修改成功"
+
+                    else:
+                        response.code = weixin_ret['errcode']
+                        response.msg = "企业微信验证未通过"
+
+
                 else:
                     response.code = 302
                     response.msg = '部门ID不存在'

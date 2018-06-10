@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag,user_weixin_auth,customer
 from zhugeleida.views_dir.xiaochengxu import login,mingpian
-from zhugeleida.views_dir import chat,contact,action
+from zhugeleida.views_dir import chat,contact
 
 
 urlpatterns = [
@@ -41,8 +41,6 @@ urlpatterns = [
     #访问小程序的名片
     url(r'^mingpian$',mingpian.mingpian),
 
-    #获取日志记录。
-    url(r'^action$',action.action),
 
     #小程序登录认证
     url(r'^login$', login.login)

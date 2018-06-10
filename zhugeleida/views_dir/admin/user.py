@@ -11,6 +11,8 @@ from zhugeleida.forms.user_verify import UserAddForm, UserUpdateForm, UserSelect
 import json
 from ..conf import *
 import requests
+import uuid
+
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -29,7 +31,7 @@ def user(request):
                 'username': '__contains',
                 'role__name': '__contains',
                 'company__name': '__contains',
-                'create_date':   '',
+                'create_date': '',
                 'last_login_date': '',
 
             }
@@ -37,7 +39,7 @@ def user(request):
             print('q -->', q)
             print('order -->', order)
             print(models.zgld_userprofile.objects.all())
-            objs = models.zgld_userprofile.objects.select_related('role','company').filter(q).order_by(order)
+            objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
@@ -46,20 +48,42 @@ def user(request):
                 objs = objs[start_line: stop_line]
 
             # 返回的数据
-            print('------------->>>',objs)
+            print('------------->>>', objs)
             ret_data = []
             for obj in objs:
-
                 print('oper_user_username -->', obj)
                 #  将查询出来的数据 加入列表
+
+                department = ''
+                department_id = []
+                departmane_objs = obj.department.all()
+                print('departmane_objs -->', departmane_objs)
+                if departmane_objs:
+                    print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
+
+                    department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
+                    department_id = [i[0] for i in departmane_objs.values_list('id')]
+
                 ret_data.append({
                     'id': obj.id,
+                    'userid': obj.userid,
                     'username': obj.username,
                     'role_name': obj.role.name,
                     'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
-                    'status': obj.get_status_display()
+                    'position': obj.position,
+                    'mingpian_phone': obj.mingpian_phone,
+                    'phone': obj.phone,
+                    'status': obj.get_status_display(),
+                    'avatar': obj.avatar,
+                    'qr_code': obj.qr_code,
+                    'company': obj.company.name,
+                    'company_id': obj.company_id,
+                    'department' : department,
+                    'department_id' : department_id,
+                    'gender': obj.gender,
+
                 })
                 #  查询成功 返回200 状态码
                 response.code = 200
@@ -83,68 +107,104 @@ def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
         if oper_type == "add":
             form_data = {
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
-                'role_id': request.POST.get('role_id'),
                 'password': request.POST.get('password'),
-                'company_id':  request.POST.get('company_id'),
-                'department': request.POST.get('department')
+                'role_id': request.POST.get('role_id'),
+                'company_id': request.POST.get('company_id'),
+                'position': request.POST.get('position'),
+                'phone': request.POST.get('phone'),
+                'mingpian_phone': request.POST.get('mingpian_phone')
+
             }
+
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = UserAddForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
-
+                userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
                 username = forms_obj.cleaned_data.get('username')
                 password = forms_obj.cleaned_data.get('password')
                 role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
-                department = forms_obj.cleaned_data.get('department')
+                phone = forms_obj.cleaned_data.get('phone')
+                mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
-                # 把数据入库
-                obj = models.zgld_userprofile.objects.create(
-                    username=username,
-                    password=password,
-                    role_id=role_id,
-                    company_id=company_id,
-                    position=position,
-                    department=department
+                depart_id_list = []
+                department_id = request.POST.get('department_id')
 
-                )
+                if  department_id:
+                    depart_id_list = json.loads(department_id)
+                    # depart_id_list = [int(departmentId) for departmentId in department_id]
+                    # for id in department_id:
+                    #     depart_id_list.append(int(id))
 
-                print(obj.company.corp_id, obj.company.tongxunlu_secret)
+                    objs = models.zgld_department.objects.filter(id__in=depart_id_list)
+                    if objs:
+                        for c_id in objs:
+                            department_company_id = c_id.company_id
 
+                            if str(department_company_id) != str(forms_obj.cleaned_data['company_id']):
+                                response.code = 404
+                                response.msg = '非法请求'
+                                return JsonResponse(response.__dict__)
+                print('depart_id_list',depart_id_list)
+
+                company_obj = models.zgld_company.objects.get(id=company_id)
                 get_token_data = {}
+                post_user_data = {}
+                get_user_data = {}
+                get_token_data['corpid'] = company_obj.company.corp_id
+                get_token_data['corpsecret'] = company_obj.company.tongxunlu_secret
+                ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                ret_json = ret.json()
+                access_token = ret_json['access_token']
+                get_user_data['access_token'] = access_token
+                post_user_data['userid'] = userid
+                post_user_data['name'] = username
+                post_user_data['position'] = position
+                post_user_data['mobile'] = phone
+                post_user_data['department'] = depart_id_list
+                add_user_url = Conf['add_user_url']
+                ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+                print('-----requests----->>', ret.text)
 
+                weixin_ret = json.loads(ret.text)
+                if  weixin_ret.get('errmsg') == 'created':
 
+                    obj = models.zgld_userprofile.objects.create(
+                        userid=user_id,
+                        username=username,
+                        password=account.str_encrypt(password),
+                        role_id=role_id,
+                        company_id=company_id,
+                        position=position,
+                        phone=phone,
+                        mingpian_phone=mingpian_phone
+                    )
+                    obj.department = depart_id_list
+                    # print(obj.company.corp_id, obj.company.tongxunlu_secret)
 
-                # get_token_data['corpid'] = company_obj[0].corp_id
-                # get_token_data['corpsecret'] = company_obj[0].tongxunlu_secret
+                    response.code = 200
+                    response.msg = "添加成功"
+                else:
+                    response.code = weixin_ret['errcode']
+                    response.msg = "企业微信验证未通过"
 
-                # ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                # ret_json = ret.json()
-                # access_token = ret_json['access_token']
-
-
-
-
-                print('---forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                models.zgld_userprofile.objects.create(**forms_obj.cleaned_data)
-                response.code = 200
-                response.msg = "添加成功"
             else:
-                print("验证不通过")
-                print(forms_obj.errors)
-                response.code = 301
-                print(forms_obj.errors.as_json())
-                response.msg = json.loads(forms_obj.errors.as_json())
+                    print("验证不通过")
+                    print(forms_obj.errors)
+                    response.code = 301
+                    print(forms_obj.errors.as_json())
+                    response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
             # 删除 ID
-            print(request.GET.get('user_id'),o_id)
+            print(request.GET.get('user_id'), o_id)
 
             if str(request.GET.get('user_id')) == str(o_id):
                 response.msg = '不允许删除自己'
@@ -153,39 +213,111 @@ def user_oper(request, oper_type, o_id):
             else:
                 user_objs = models.zgld_userprofile.objects.filter(id=o_id)
                 if user_objs:
-                    user_objs.delete()
-                    response.code = 200
-                    response.msg = "删除成功"
+
+                    get_token_data = {}
+                    get_user_data = {}
+                    get_token_data['corpid'] = user_objs[0].company.corp_id
+                    get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
+                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    ret_json = ret.json()
+                    access_token = ret_json['access_token']
+                    get_user_data['access_token'] = access_token
+                    get_user_data['userid'] = user_objs[0].userid
+                    ret = requests.post(Conf['delete_user_url'], params=get_user_data)
+                    print(ret.text)
+
+                    weixin_ret = json.loads(ret.text)
+                    if weixin_ret['errmsg'] == 'updated':
+                        user_objs.delete()
+                        response.code = 200
+                        response.msg = "删除成功"
+                    else:
+                        response.code = weixin_ret['errcode']
+                        response.msg = "企业微信验证未能通过"
+
                 else:
                     response.code = 302
                     response.msg = '用户ID不存在'
 
         elif oper_type == "update":
+            print("dir(requests.POST) ===>", dir(request.POST))
+            print('=====request.POST=====>>>', o_id, request.POST)
+
             # 获取ID 用户名 及 角色
             form_data = {
-                'user_id': o_id,
+                'o_id': o_id,
+                'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
+                'password': request.POST.get('password'),
                 'role_id': request.POST.get('role_id'),
+                'company_id': request.POST.get('company_id'),
+                'position': request.POST.get('position'),
+                'department_id': request.POST.get('department_id'),
+                'phone': request.POST.get('phone'),
+                'mingpian_phone': request.POST.get('mingpian_phone')
             }
-            print(request.POST)
+
+            print("request.POST.getlist('department_id') -->", request.POST.get('department_id'))
+
             forms_obj = UserUpdateForm(form_data)
+
             if forms_obj.is_valid():
                 print("验证通过")
+
                 print(forms_obj.cleaned_data)
-                user_id = forms_obj.cleaned_data['user_id']
-                username = forms_obj.cleaned_data['username']
-                role_id = forms_obj.cleaned_data['role_id']
+                username = forms_obj.cleaned_data.get('username')
+                role_id = forms_obj.cleaned_data.get('role_id')
+                company_id = forms_obj.cleaned_data.get('company_id')
+                position = forms_obj.cleaned_data.get('position')
+                department_id = forms_obj.cleaned_data.get('department_id')
+                phone = forms_obj.cleaned_data.get('phone')
+                mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
+
+                print('-------department_ids------->>', type(department_id))
                 #  查询数据库  用户id
-                user_obj = models.zgld_userprofile.objects.filter(
-                    id=user_id
-                )
-                #  更新 数据
-                if user_obj:
-                    user_obj.update(
-                        username=username, role_id=role_id
-                    )
-                    response.code = 200
-                    response.msg = "修改成功"
+                user_objs = models.zgld_userprofile.objects.filter(id=o_id)
+                #  更新用户 数据
+                if user_objs:
+
+                    print(user_objs[0].company.corp_id, user_objs[0].company.tongxunlu_secret)
+                    get_token_data = {}
+                    post_user_data = {}
+                    get_user_data = {}
+                    get_token_data['corpid'] = user_objs[0].company.corp_id
+                    get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
+                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    ret_json = ret.json()
+                    access_token = ret_json['access_token']
+                    get_user_data['access_token'] = access_token
+                    post_user_data['userid'] = user_objs[0].userid
+                    post_user_data['name'] = username
+                    post_user_data['position'] = position
+                    post_user_data['department'] = department_id
+                    post_user_data['mobile'] = phone
+                    ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
+                    print(ret.text)
+
+                    weixin_ret = json.loads(ret.text)
+                    if weixin_ret['errmsg'] == 'updated':
+
+                        user_objs.update(
+                            username=username,
+                            role_id=role_id,
+                            company_id=company_id,
+                            position=position,
+                            phone=phone,
+                            mingpian_phone=mingpian_phone,
+                        )
+
+                        user_obj = user_objs[0]
+                        user_obj.department = department_id
+                        user_obj.save()
+                        response.code = 200
+                        response.msg = "修改成功"
+                    else:
+                        response.code = weixin_ret['errcode']
+                        response.msg = "修改成功"
+
                 else:
                     response.code = 303
                     response.msg = json.loads(forms_obj.errors.as_json())
