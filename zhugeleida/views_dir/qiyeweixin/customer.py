@@ -22,14 +22,15 @@ def customer(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-            order = request.GET.get('order', '-create_date')
+            order = request.GET.get('order', '-create_date') #排序为成交率; 最后跟进时间; 最后活动时间
             field_dict = {
                 'id': '',
                 'username': '__contains',
-                'belonger__username': '__contains',
-                'superior__username': '__contains',
-                'expected_time': '__contains',
-                'expedted_pr' : '__contains',
+                'belonger__username': '__contains',   #归属人
+                'superior__username': '__contains',   #上级人
+                'expected_time': '__contains',     #预测成交时间
+                'expedted_pr' : '__contains',      #预测成交概率
+                'source'  : '',
                 'create_date': '',
             }
             q = conditionCom(request, field_dict)
@@ -61,53 +62,37 @@ def customer(request):
                         tag_list.append(t_obj.name)
                         print('--->>',tag_list)
                     info_obj = models.zgld_information.objects.filter(id=obj.id)
+                    ai_pr = 0
+                    phone = info_obj[0].phone if info_obj else ''
+                    email = info_obj[0].email if info_obj else ''
+                    company = info_obj[0].company if info_obj else ''
+                    position = info_obj[0].position if info_obj else ''
+                    address = info_obj[0].address if info_obj else ''
+                    birthday = info_obj[0].birthday if info_obj else ''
+                    mem = info_obj[0].mem if info_obj else ''
 
-                    if info_obj:
-                        information_obj = models.zgld_information.objects.get(id=obj.id)
+                    ret_data.append({
+                        'id': obj.id,
+                        'username': obj.username,
+                        'openid': obj.openid,
+                        'headimgurl': obj.headimgurl,
+                        'expected_time': obj.expected_time,  # 预计成交时间
+                        'expedted_pr': obj.expedted_pr,  # 预计成交概率
+                        'ai_pr': ai_pr,  # AI 预计成交概率
+                        'superior': superior_username,  # 所属上级
+                        'belonger': obj.belonger.username,  # 所属用户
+                        'source': obj.source,  # 来源
+                        'memo_name': obj.memo_name,  # 备注名
+                        'phone': phone,              # 手机号
+                        'email': email,              # email
+                        'company': company,                # 公司
+                        'position': position,  # 位置
+                        'address': address,  # 地址
+                        'birthday': birthday,  # 生日
+                        'mem': mem,  # 备注
+                        'tag': tag_list
+                    })
 
-                        ret_data.append({
-                            'id': obj.id,
-                            'username': obj.username,
-                            'openid': obj.openid,
-                            'headimgurl': obj.headimgurl,
-                            'expected_time': obj.expected_time,    #预计成交时间
-                            'expedted_pr': obj.expedted_pr,        #预计成交概率
-                            'superior': superior_username,         #所属上级
-                            'belonger': obj.belonger.username,         #所属用户
-                            'source': obj.source,                  #来源
-                            'memo_name': obj.memo_name,           #备注名
-                            'phone': information_obj.phone,       #手机号
-                            'email': information_obj.email,       #email
-                            'company': information_obj.company,   #公司
-                            'position': information_obj.position, #位置
-                            'address': information_obj.address,   #地址
-                            'birthday': information_obj.birthday, #生日
-                            'mem': information_obj.mem,           #备注
-                            'tag': tag_list
-                        })
-                    else:
-                        ret_data.append({
-                            'id': obj.id,
-                            'username': obj.username,
-                            'openid': obj.openid,
-                            'headimgurl': obj.headimgurl,
-                            'expected_time': obj.expected_time,    #预计成交时间
-                            'expedted_pr': obj.expedted_pr,        #预计成交概率
-                            'superior': superior_username,         #所属上级
-                            'belonger': obj.belonger.username,         #所属用户
-                            'source': obj.source,                  #来源
-                            'memo_name': obj.memo_name,           #备注名
-                            'phone': '',       #手机号
-                            'email': '',       #email
-                            'company': '',   #公司
-                            'position': '', #位置
-                            'address': '',   #地址
-                            'birthday': '', #生日
-                            'mem': '',           #备注
-                            'tag': tag_list
-                        })
-
-                    print('-------for 2 ---->>',ret_data)
 
                 #  查询成功 返回200 状态码
                 print('----ret_data----->',ret_data)

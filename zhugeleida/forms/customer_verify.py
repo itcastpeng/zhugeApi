@@ -94,7 +94,7 @@ class Customer_information_UpdateForm(forms.Form):
             return id
 
 
-# 判断是否是数字
+#
 class CustomerSelectForm(forms.Form):
     current_page = forms.IntegerField(
         required=False,

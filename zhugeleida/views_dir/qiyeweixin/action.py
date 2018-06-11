@@ -116,8 +116,8 @@ def action(request, oper_type):
 
                 user_id = request.GET.get('user_id')
 
-                ret_data = []
-                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('id', 'action').annotate(
+
+                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action').annotate(
                     Count('action'))
                 print('count_action_data -->', objs)
 
@@ -143,17 +143,14 @@ def action(request, oper_type):
 
                 }
 
-                ret_data.append({
-                    'action': action_dict,
-                    'detail': detail_dict,
-                    'user_id': user_id,
-                })
 
                 print('----detail_dict----->>', detail_dict)
 
                 response.code = 200
                 response.msg = '查询日志记录成功'
-                response.data = ret_data
+                response.data['action'] = action_dict
+                response.data['detail'] = detail_dict
+                response.data['user_id'] = user_id
 
                 return JsonResponse(response.__dict__)
 
