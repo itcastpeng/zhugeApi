@@ -54,6 +54,8 @@ def company(request):
                     'name': obj.name,
                     'company_id': obj.id,
                     'create_date': obj.create_date,
+                    'corp_id': obj.corp_id,
+                    'tongxunlu_secret': obj.tongxunlu_secret,
 
                 })
             response.code = 200
@@ -76,7 +78,9 @@ def company_oper(request, oper_type, o_id):
     if request.method == "POST":
         if oper_type == "add":
             company_data = {
-                'name' : request.POST.get('name')
+                'name' : request.POST.get('name'),
+                'corp_id': request.POST.get('corp_id').strip(),
+                'tongxunlu_secret': request.POST.get('tongxunlu_secret').strip()
             }
             forms_obj = CompanyAddForm(company_data)
             if forms_obj.is_valid():
@@ -92,10 +96,15 @@ def company_oper(request, oper_type, o_id):
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
             company_objs = models.zgld_company.objects.filter(id=o_id)
+
             if company_objs:
-                company_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                if company_objs[0].zgld_userprofile_set.all().count() == 0:
+                   company_objs.delete()
+                   response.code = 200
+                   response.msg = "删除成功"
+                else:
+                    response.code = 303
+                    response.msg = "该企业有关联用户,请转移用户后再试"
             else:
                 response.code = 302
                 response.msg = '公司ID不存在'
@@ -104,19 +113,28 @@ def company_oper(request, oper_type, o_id):
             form_data = {
                 'company_id': o_id,
                 'name': request.POST.get('name'),
+                'corp_id': request.POST.get('corp_id').strip(),
+                'tongxunlu_secret': request.POST.get('tongxunlu_secret').strip()
+
             }
-            print(form_data)
+            print('-----form_data------>',form_data)
             forms_obj = CompanyUpdateForm(form_data)
             if forms_obj.is_valid():
+                print('----forms_obj.cleaned_data->>',forms_obj.cleaned_data)
                 name = forms_obj.cleaned_data['name']
                 company_id = forms_obj.cleaned_data['company_id']
+                corp_id = forms_obj.cleaned_data['corp_id']
+                tongxunlu_secret = forms_obj.cleaned_data['tongxunlu_secret']
+
                 print(company_id)
                 company_objs = models.zgld_company.objects.filter(
                     id=company_id
                 )
                 if company_objs:
                     company_objs.update(
-                        name=name
+                        name=name,
+                        corp_id=corp_id,
+                        tongxunlu_secret=tongxunlu_secret,
                     )
                     response.code = 200
                     response.msg = "修改成功"

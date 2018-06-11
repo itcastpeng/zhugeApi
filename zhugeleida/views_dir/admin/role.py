@@ -6,8 +6,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.role_verify import RoleAddForm, RoleUpdateForm, RoleSelectForm
-import time
-import datetime
+
 import json
 
 from publicFunc.condition_com import conditionCom
@@ -92,11 +91,19 @@ def role_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
+
+            # role_relate_user = models.zgld_role.objects.get(id=o_id).zgld_userprofile_set.all()
+
             role_objs = models.zgld_role.objects.filter(id=o_id)
             if role_objs:
-                role_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                role_obj = role_objs[0]
+                if role_obj.zgld_userprofile_set.count() == 0:
+                    role_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
+                else:
+                    response.code = 303
+                    response.msg = "该角色下存在用户,请转移用户后再试"
             else:
                 response.code = 302
                 response.msg = '角色ID不存在'

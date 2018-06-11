@@ -1,6 +1,6 @@
 from django import forms
 
-from wendaku import models
+from zhugeleida import models
 from publicFunc import account
 import datetime
 
@@ -14,16 +14,11 @@ class RoleAddForm(forms.Form):
             'required': "角色名不能为空"
         }
     )
-    oper_user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '操作人不能为空'
-        })
 
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
-        objs = models.Role.objects.filter(
+        objs = models.zgld_role.objects.filter(
             name=name,
         )
         if objs:
@@ -47,18 +42,13 @@ class RoleUpdateForm(forms.Form):
             'required': '角色名不能为空'
         }
     )
-    oper_user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '操作人不能为空'
-        }
-    )
+
 
     # 判断角色是否存在
     def clean_name(self):
         role_id = self.data['role_id']
         name = self.data['name']
-        objs = models.Role.objects.filter(
+        objs = models.zgld_role.objects.filter(
             name=name,
         ).exclude(id=role_id)
         if objs:

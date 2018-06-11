@@ -11,6 +11,9 @@ def conditionCom(request, field_dict):
             if value == '__contains':
                 # 模糊查询
                 q.add(Q(**{key + '__contains': value}), Q.AND)
+            elif value == '__in':
+                # 模糊查询
+                q.add(Q(**{key + '__in': value}), Q.AND)
             else:
                 q.add(Q(**{key: value}), Q.AND)
 
