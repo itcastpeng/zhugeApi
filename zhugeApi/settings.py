@@ -139,19 +139,6 @@ DATABASES = {
         'USER': 'zhugedanao',
         'PASSWORD': 'zhugedanao'
     },
-
-    # 'zhugeleida_dev': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'zhugeleida_dev',
-    #     'HOST': 'zhugeleida_dev',
-    #     'PORT': '3306',
-    #     'USER': 'zhugeleida_dev',
-    #     'PASSWORD': 'zhugeleida_dev',
-    #     'OPTIONS': {
-    #         'init_command': 'SET storage_engine=INNODB',
-    #     },
-    # },
-
     'zhugeleida': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zhugeleida',
@@ -163,7 +150,6 @@ DATABASES = {
                     'init_command': 'SET storage_engine=INNODB',
                 },
             },
-
     'zhugeproject': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'zhugeproject',

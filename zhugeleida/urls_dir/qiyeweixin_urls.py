@@ -41,11 +41,6 @@ urlpatterns = [
     #获取聊天联系人列表
     url(r'^contact$',contact.contact),
 
-    #
-
-
-
-
     #雷达
 
     url(r'^action/(?P<oper_type>\w+)', action.action),
@@ -56,7 +51,6 @@ urlpatterns = [
 
     #生成微信二维码 create_qr_code
     url(r'^qr_code_auth$',qr_code_auth.qr_code_auth),
-
     #企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),
 

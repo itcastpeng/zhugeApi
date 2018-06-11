@@ -19,6 +19,9 @@ class zgld_department(models.Model):
     order = models.IntegerField(verbose_name='在父部门中的次序值',null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    class Meta:
+        verbose_name_plural = "部门表"
+        app_label = "zhugeleida"
 
 # 用户管理
 class zgld_userprofile(models.Model):
@@ -136,7 +139,6 @@ class zgld_customer(models.Model):
 
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
-    flowup = models.ManyToManyField('zgld_flowup', verbose_name='客户跟进情况')
 
     nickname = models.CharField(max_length=64, verbose_name='昵称',blank=True,null=True)
     country = models.CharField(max_length=64,verbose_name='国家',blank=True,null=True)
@@ -157,50 +159,52 @@ class zgld_customer(models.Model):
         verbose_name_plural = "客户表"
         app_label = "zhugeleida"
 
-class zgld_user_customer_flowtime(models.Model):
+#用户-客户跟进信息-关系绑定表
+class zgld_user_customer_flowup(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
-    is_last_follow_time = models.BooleanField(default=True, verbose_name='是否最后一次跟进时间')  # 代表用户跟进选择了常用用语
     last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True) # 指的是 用户最后留言时间和用户跟进用语的写入。
-    flowup = models.ForeignKey('zgld_flowup',verbose_name='跟进详情',null=True)
+    last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = "客户-用户的跟进时间"
+        verbose_name_plural = "用户-客户跟进信息-关系绑定表"
         app_label = "zhugeleida"
 
-class zgld_user_customer_activitytime(models.Model):
+#跟进-消息详情表
+class zgld_follow_info(models.Model):
+    user_customer_flowup = models.ForeignKey('zgld_user_customer_flowup',verbose_name='跟进客户|用户绑定')
+    follow_info = models.CharField(verbose_name='跟进发送信息',max_length=256,null=True)
+
+    class Meta:
+        verbose_name_plural = "跟进-消息详情表"
+        app_label = "zhugeleida"
+
+#跟进常用语
+class zgld_follow_language(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
-    customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
-    last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)  # 代表客户活动日志最后一条记录的时间,或者是客户聊天的最后一条
-    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-
-
-class zgld_flowup(models.Model):
     custom_language = models.CharField(max_length=256,verbose_name='自定义常用语',null=True)
-    language_choices =  (
-        (1,'客户查看了公司产品,有合作意向'),
-        (2,'标记一下,客户有合作意向'),
-        (3,'客户多次查看小程序,合作意向强烈'),
-        (4,'计划近期安排拜访'),
-        (5,'意向客户,需安排拜访'),
-        (6,'见面聊过,客户有合作意向'),
-        (7,'曾拜访过的客户'),
-        (8,'标记一下,需要给客户发送报价'),
-        (9,'已发报价,待客户反馈'),
-        (10,'已成交客户,维护好后续关系')
-    )
-    follow_language = models.SmallIntegerField( choices=language_choices, verbose_name='常用跟进用语', null=True)
+    # language_choices =  (
+    #     #     (1,'客户查看了公司产品,有合作意向'),
+    #     #     (2,'标记一下,客户有合作意向'),
+    #     #     (3,'客户多次查看小程序,合作意向强烈'),
+    #     #     (4,'计划近期安排拜访'),
+    #     #     (5,'意向客户,需安排拜访'),
+    #     #     (6,'见面聊过,客户有合作意向'),
+    #     #     (7,'曾拜访过的客户'),
+    #     #     (8,'标记一下,需要给客户发送报价'),
+    #     #     (9,'已发报价,待客户反馈'),
+    #     #     (10,'已成交客户,维护好后续关系')
+    #     # )
+    #     # follow_language = models.SmallIntegerField( choices=language_choices, verbose_name='常用跟进用语', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)    # 今天新增或者几天前新增,判断当活动没有活动和跟进时间的时候，就会比较新增时间，返回。
 
-
     class Meta:
-        verbose_name_plural = "客户-用户的跟进记录表"
+        verbose_name_plural = "跟进常用语"
         app_label = "zhugeleida"
 
-
+#资料详情表
 class zgld_information(models.Model):
-    '''资料详情表'''
     customer = models.ForeignKey('zgld_customer', verbose_name='客户表',null=True)
     phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)
@@ -212,6 +216,7 @@ class zgld_information(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
+        verbose_name_plural = "资料详情表"
         app_label = "zhugeleida"
 
 
@@ -226,6 +231,7 @@ class zgld_photo(models.Model):
         app_label = "zhugeleida"
 
 
+#访问动能日志记录表
 class zgld_accesslog(models.Model):
     """Store Schedule run logs """
 
@@ -243,20 +249,20 @@ class zgld_accesslog(models.Model):
         (10, '拨打电话'),
         (11, '播放语音'),
         (12, '复制邮箱'),
-
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
     user = models.ForeignKey('zgld_userprofile',verbose_name=' 被访问的用户')
     customer = models.ForeignKey('zgld_customer',verbose_name='访问的客户')
     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
-    # last_activity_time = models.DateTimeField(verbose_name='最后活动时间(客户活动)', null=True)  # 代表客户活动日志最后一条记录的时间
+    activity_time = models.ForeignKey('zgld_user_customer_flowup',verbose_name='活动时间(客户活动)', null=True)  # 代表客户活动日志最后一条记录的时间
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        verbose_name_plural = "访问动能日志记录表"
         app_label = "zhugeleida"
 
-
+#聊天室记录表
 class zgld_chatinfo(models.Model):
     send_type_choice = ((1,'user_to_customer'),
                         (2,'customer_to_user')
@@ -266,7 +272,11 @@ class zgld_chatinfo(models.Model):
     is_last_msg = models.BooleanField(default=True,verbose_name='是否为最后一次的消息')
     userprofile = models.ForeignKey('zgld_userprofile',verbose_name='用户',null=True,blank=True)
     customer  = models.ForeignKey('zgld_customer',verbose_name='客户',null=True,blank=True)
-
     msg = models.TextField(u'消息',null=True,blank=True)
+    activity_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后活动时间(客户发起对话)', null=True)
+    follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name_plural = "聊天室记录表"
+        app_label = "zhugeleida"

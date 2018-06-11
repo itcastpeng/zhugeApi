@@ -31,14 +31,14 @@ def tongxunlu(request):
                 'belonger__username': '__contains',  # 归属人
                 'superior__username': '__contains',  # 上级人
                 'expected_time': '__contains',  # 预测成交时间
-                'source': '',  # 搜索转码 或者 转发
+                'source': '',                   # 搜索转码 或者 转发
                 ''
                 'create_date': '',
 
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            objs = models.zgld_user_customer_flowtime.objects.select_related('user','customer','flowup').filter(q).order_by(order)
+            objs = models.zgld_user_customer_flowup.objects.select_related('user','customer').filter(q).order_by(order)
 
             count = objs.count()
             if length != 0:
@@ -55,26 +55,21 @@ def tongxunlu(request):
 
                     ai_pr = 0
 
-                    tag_list = []
-                    tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
-
-                    for t_obj in tag_obj:
-                        tag_list.append(t_obj.name)
-                        print('--->>', tag_list)
-
-                    info_obj = models.zgld_information.objects.filter(id=obj.id)
                     date_interval_msg = ''
-                    follow_up_obj = obj.is_last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
+                    follow_up_obj = obj.last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
                     if not follow_up_obj:
-                        flow_up_status = '未跟进过'
+                        date_interval_msg = '未跟进过'
 
-
-                    elif last_follow_time_obj:
+                    elif follow_up_obj:
                         last = obj.flowup.filter(is_last_follow_time=True)[0].last_follow_time
                         now = datetime.datetime.now()
-                        date_interval = (now - last).days - int(1)
+                        date_interval = (now - last).days
 
-                        date_interval_msg = '%s天已经跟进' % (date_interval)
+                        if date_interval == 0:
+                            date_interval_msg = '今天新增'
+                        else:
+                            date_interval = date_interval - int(1)
+                            date_interval_msg = '%s天前已经跟进' % (date_interval)
 
                     ret_data.append({
                         'customer_id': obj.id,
@@ -82,13 +77,12 @@ def tongxunlu(request):
                         'openid': obj.openid,
                         'headimgurl': obj.headimgurl,
                         'expected_time': obj.expected_time,  # 预计成交时间
-                        'expedted_pr': obj.expedted_pr,  # 预计成交概率
-                        'ai_pr': ai_pr,  # AI 预计成交概率
-                        'superior': superior_username,  # 所属上级
-                        'belonger': obj.belonger.username,  # 所属用户
-                        'source': obj.source,  # 来源
-                        'flow_time': date_interval_msg,  # 跟进时间
-                        # 'flow_time':
+                        'expedted_pr': obj.expedted_pr,      # 预计成交概率
+                        'ai_pr': ai_pr,                      # AI 预计成交概率
+                        'belonger': obj.belonger.username,   # 所属用户
+                        'source': obj.source,                # 来源
+                        'flow_time': date_interval_msg,      # 跟进时间
+
                     })
 
                     print('-------for 2 ---->>', ret_data)
