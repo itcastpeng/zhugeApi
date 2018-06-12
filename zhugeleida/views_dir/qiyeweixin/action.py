@@ -165,7 +165,7 @@ def action(request, oper_type):
                 # length = forms_obj.cleaned_data['length']
 
 
-                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action','customer_id','customer__username').annotate(Count('action'))
+                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
                 print('customer_action_data -->', objs)
 
                 # if length != 0:
@@ -173,22 +173,10 @@ def action(request, oper_type):
                 #     stop_line = start_line + length
                 #     objs = objs[start_line: stop_line]
 
-                """
-                # c = [
-            #     {
-            #         'totalCount': 107,
-            #         'customer_id': 1,
-            #         'customer__username': '张炬',
-            #         'detail': {
-            #             1: 10,
-            #             2: 20
-            #         }
-            #     }
-            # ]
-                """
 
                 customer_id_list = []
                 customer_username = ''
+                customer__headimgurl = ''
                 detail_dict = {}
                 customer_id = ''
                 total_num = 0
@@ -205,6 +193,7 @@ def action(request, oper_type):
                             total_num  += obj['action__count']
                             customer_id = c_id
                             customer_username = obj['customer__username']
+                            customer__headimgurl = obj['customer__headimgurl']
                             detail_dict[ obj.get('action')] = obj['action__count']
 
                     ret_data.append({
@@ -212,8 +201,8 @@ def action(request, oper_type):
                                 'customer_id': customer_id,
                                 'customer__username': customer_username ,
                                 'user_id': user_id,
+                                'headimgurl': customer__headimgurl,
                                 'detail': detail_dict
-
                     })
                     total_num = 0
 
