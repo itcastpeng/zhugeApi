@@ -255,7 +255,7 @@ class zgld_accesslog(models.Model):
     user = models.ForeignKey('zgld_userprofile',verbose_name=' 被访问的用户')
     customer = models.ForeignKey('zgld_customer',verbose_name='访问的客户')
     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
-    activity_time = models.ForeignKey('zgld_user_customer_flowup',verbose_name='活动时间(客户活动)', null=True)  # 代表客户活动日志最后一条记录的时间
+    activity_time = models.ForeignKey('zgld_user_customer_flowup',related_name='accesslog',verbose_name='活动时间(客户活动)', null=True)  # 代表客户活动日志最后一条记录的时间
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -273,7 +273,7 @@ class zgld_chatinfo(models.Model):
     userprofile = models.ForeignKey('zgld_userprofile',verbose_name='用户',null=True,blank=True)
     customer  = models.ForeignKey('zgld_customer',verbose_name='客户',null=True,blank=True)
     msg = models.TextField(u'消息',null=True,blank=True)
-    activity_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后活动时间(客户发起对话)', null=True)
+    activity_time = models.ForeignKey('zgld_user_customer_flowup',related_name='chatinfo' ,verbose_name='最后活动时间(客户发起对话)', null=True)
     follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
