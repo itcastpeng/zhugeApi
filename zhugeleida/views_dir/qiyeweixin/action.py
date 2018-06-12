@@ -206,7 +206,6 @@ def action(request, oper_type):
                     })
                     total_num = 0
 
-
                 response.code = 200
                 response.msg = '查询日志记录成功'
                 response.data = ret_data

@@ -175,7 +175,7 @@ class zgld_user_customer_flowup(models.Model):
 class zgld_follow_info(models.Model):
     user_customer_flowup = models.ForeignKey('zgld_user_customer_flowup',verbose_name='跟进客户|用户绑定')
     follow_info = models.CharField(verbose_name='跟进发送信息',max_length=256,null=True)
-
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     class Meta:
         verbose_name_plural = "跟进-消息详情表"
         app_label = "zhugeleida"
@@ -185,18 +185,18 @@ class zgld_follow_language(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
     custom_language = models.CharField(max_length=256,verbose_name='自定义常用语',null=True)
     # language_choices =  (
-    #     #     (1,'客户查看了公司产品,有合作意向'),
-    #     #     (2,'标记一下,客户有合作意向'),
-    #     #     (3,'客户多次查看小程序,合作意向强烈'),
-    #     #     (4,'计划近期安排拜访'),
-    #     #     (5,'意向客户,需安排拜访'),
-    #     #     (6,'见面聊过,客户有合作意向'),
-    #     #     (7,'曾拜访过的客户'),
-    #     #     (8,'标记一下,需要给客户发送报价'),
-    #     #     (9,'已发报价,待客户反馈'),
-    #     #     (10,'已成交客户,维护好后续关系')
-    #     # )
-    #     # follow_language = models.SmallIntegerField( choices=language_choices, verbose_name='常用跟进用语', null=True)
+    #         (1,'客户查看了公司产品,有合作意向'),
+    #         (2,'标记一下,客户有合作意向'),
+    #         (3,'客户多次查看小程序,合作意向强烈'),
+    #         (4,'计划近期安排拜访'),
+    #         (5,'意向客户,需安排拜访'),
+    #         (6,'见面聊过,客户有合作意向'),
+    #         (7,'曾拜访过的客户'),
+    #         (8,'标记一下,需要给客户发送报价'),
+    #         (9,'已发报价,待客户反馈'),
+    #         (10,'已成交客户,维护好后续关系')
+    #     )
+    # follow_language = models.SmallIntegerField( choices=language_choices, verbose_name='常用跟进用语', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)    # 今天新增或者几天前新增,判断当活动没有活动和跟进时间的时候，就会比较新增时间，返回。
 
     class Meta:

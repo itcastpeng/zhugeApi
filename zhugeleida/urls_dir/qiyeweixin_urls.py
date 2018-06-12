@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import  user,quanxian,action,tag,user_weixin_auth,customer,tongxunlu,qr_code_auth
+from zhugeleida.views_dir.qiyeweixin import  user,quanxian,action,tag,user_weixin_auth,customer,tongxunlu,qr_code_auth,follow_language,follow_info
 from zhugeleida.views_dir import chat,contact
 
 
@@ -34,14 +34,20 @@ urlpatterns = [
     #客户通讯录
     url(r'^tongxunlu$', tongxunlu.tongxunlu),
 
+    #用户跟进常用语
+    url(r'follow_language$', follow_language.follow_language),
+    url(r'follow_language/(?P<oper_type>\w+)/(?P<o_id>\d+)', follow_language.follow_language_oper),
+
+    # 用户跟进信息
+    url(r'follow_info$', follow_info.follow_info),
+    url(r'follow_info/(?P<oper_type>\w+)/(?P<o_id>\d+)', follow_info.follow_info_oper),
+
     #实时聊天
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
     url(r'^chat$',chat.chat),
 
     #获取聊天联系人列表
     url(r'^contact$',contact.contact),
-
-    #雷达
 
     url(r'^action/(?P<oper_type>\w+)', action.action),
     # url(r'^action_count$',action.action_count),
