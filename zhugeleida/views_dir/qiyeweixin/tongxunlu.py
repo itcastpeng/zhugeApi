@@ -52,9 +52,7 @@ def tongxunlu(request):
             customer_status = ''
             if objs:
                 for obj in objs:
-
                     ai_pr = 0
-
                     last_interval_msg = ''
                     last_follow_time = obj.last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
                     if not last_follow_time:

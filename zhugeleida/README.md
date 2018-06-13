@@ -728,7 +728,7 @@ name            是           公司名
 ####  查询标签 或 拥有标签的客户：
 请求方式：POST（HTTP）
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
 
 
 GET 发送数据部分【公共参数】：
@@ -752,30 +752,38 @@ GET 发送数据部分【公共参数】：
         "ret_data":[
             {
                 "id":3,
-                "name":"相声",
+                "name":"70后",
                 "tag_id":3,
-                "customer_list":[
-                    1
+                "customer_num":3,
+                "customer_id_list":[
+                    1,
+                    2,
+                    3
                 ]
             },
             {
                 "id":2,
-                "name":"歌手",
+                "name":"意向客户",
                 "tag_id":2,
-                "customer_list": [
+                "customer_num":1,
+                "customer_id_list":[
                     1
-                 ]
+                ]
             },
             {
                 "id":1,
-                "name":"演员",
+                "name":"在意质量",
                 "tag_id":1,
-                "customer_list":[
+                "customer_num":2,
+                "customer_id_list":[
+                    1,
+                    2
                 ]
             }
         ],
-        "data_count":3
+        "data_count":7
     }
+}
 }
  
 ```
