@@ -906,6 +906,7 @@ GET 请求发送数据部分【公共参数】：
 
 请求方式：GET（HTTP）
 请求示例：
+
 >http://127.0.0.1:8000//zhugeleida/qiyeweixin/chat?rand_str=53444e4ca12d03176c9b6109c0c557b0&timestamp=1528871213546&user_id=1&customer_id=1
 
 GET 请求参数部分：
@@ -960,8 +961,11 @@ customer_id    是           客户的ID
 
 
 ####  实时聊天  -  发送消息接口
+
 请求方式：POST（HTTP）
- 请求示例
+
+请求示例
+
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/chat/send_msg/0?rand_str=7931b9ab560500e52492fbe92e1f3d6c&timestamp=1528182912675&user_id=1
 
  GET 请求参数部分：
@@ -991,8 +995,10 @@ send_type        发送        发送类型，1代表 用户发送给用户 ,  2
 
 
 ####    实时聊天 - 获取最新的聊天信息
+
 请求方式：GET（HTTP）
 请求示例:
+
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/chat/getmsg/0?rand_str=51d703e387eb75da00f32520d7964d24&timestamp=1528872527395&user_id=1&customer_id=2
  
  
