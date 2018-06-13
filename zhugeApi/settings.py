@@ -139,7 +139,6 @@ DATABASES = {
         'USER': 'zhugedanao',
         'PASSWORD': 'zhugedanao'
     },
-
     'zhugeleida': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zhugeleida',
@@ -151,7 +150,6 @@ DATABASES = {
                     'init_command': 'SET storage_engine=INNODB',
                 },
             },
-
     'zhugeproject': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'zhugeproject',

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import  user,quanxian,action,tag,user_weixin_auth,customer,qr_code_auth
+from zhugeleida.views_dir.qiyeweixin import  user,quanxian,action,tag,user_weixin_auth,customer,tongxunlu,qr_code_auth,follow_language,follow_info
 from zhugeleida.views_dir import chat,contact
 
 
@@ -27,20 +27,27 @@ urlpatterns = [
     url(r'^tag/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag.tag_oper),
     url(r'^tag$', tag.tag),
 
-    #修改客户和客户信息表
+    #修改客户详情和客户关联信息表
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)', customer.customer_oper),
     url(r'^customer$', customer.customer),
+
+    #客户通讯录
+    url(r'^tongxunlu$', tongxunlu.tongxunlu),
+
+    #用户跟进常用语
+    url(r'follow_language$', follow_language.follow_language),
+    url(r'follow_language/(?P<oper_type>\w+)/(?P<o_id>\d+)', follow_language.follow_language_oper),
+
+    # 用户跟进信息
+    url(r'follow_info$', follow_info.follow_info),
+    url(r'follow_info/(?P<oper_type>\w+)/(?P<o_id>\d+)', follow_info.follow_info_oper),
 
     #实时聊天
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
     url(r'^chat$',chat.chat),
 
-    #获取联系人列表
+    #获取聊天联系人列表
     url(r'^contact$',contact.contact),
-
-
-
-    #雷达
 
     url(r'^action/(?P<oper_type>\w+)', action.action),
     # url(r'^action_count$',action.action_count),
@@ -50,7 +57,6 @@ urlpatterns = [
 
     #生成微信二维码 create_qr_code
     url(r'^qr_code_auth$',qr_code_auth.qr_code_auth),
-
     #企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),
 
