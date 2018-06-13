@@ -10,7 +10,7 @@ from zhugeleida import models
 from django.db.models import Count
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
-
+from datetime import datetime, timedelta
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -106,12 +106,21 @@ def action(request, oper_type):
                 field_dict = {
                     'id': '',
                     'user_id': '',
-                    'create_date__gte': '',
-                    'create_date__lt': '',
-                }
-                q = conditionCom(request, field_dict)
 
-                objs = models.zgld_accesslog.objects.filter(q).values('action').annotate(
+                }
+
+                create_date__gte = request.GET.get('create_date__gte')
+                create_date__lt =  request.GET.get('create_date__lt')
+                if not create_date__gte:
+                    now_time = datetime.now()
+                    create_date__lt = now_time.strftime("%Y-%m-%d")
+                    create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+
+
+
+
+                q = conditionCom(request, field_dict)
+                objs = models.zgld_accesslog.objects.filter(q).filter(create_date__gte=create_date__gte,create_date__lt=create_date__lt).values('action').annotate(
                     Count('action'))
                 print('count_action_data -->', objs)
 
@@ -160,12 +169,19 @@ def action(request, oper_type):
                     'id': '',
                     'user_id': '',
                     'name': '__contains',
-                    'create_date__gte': '',
-                    'create_date__lt': '',
+                    # 'create_date__gte': '',
+                    # 'create_date__lt': '',
                 }
-                q = conditionCom(request, field_dict)
 
-                objs = models.zgld_accesslog.objects.filter(q).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
+                create_date__gte = request.GET.get('create_date__gte')
+                create_date__lt =  request.GET.get('create_date__lt')
+                if not create_date__gte:
+                    now_time = datetime.now()
+                    create_date__lt = now_time.strftime("%Y-%m-%d")
+                    create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+
+                q = conditionCom(request, field_dict)
+                objs = models.zgld_accesslog.objects.filter(q).filter(create_date__gte=create_date__gte,create_date__lt=create_date__lt).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
                 print('customer_action_data -->', objs)
 
                 # if length != 0:
@@ -204,6 +220,7 @@ def action(request, oper_type):
                                 'headimgurl': customer__headimgurl,
                                 'detail': detail_dict
                     })
+                    detail_dict  = {}
                     total_num = 0
 
                 response.code = 200
