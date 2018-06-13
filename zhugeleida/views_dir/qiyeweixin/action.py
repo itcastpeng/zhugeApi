@@ -34,10 +34,24 @@ def action(request, oper_type):
 
                 field_dict = {
                     'id': '',
-                    'name': '__contains',
+                    'action': '',
                 }
+
                 q = conditionCom(request, field_dict)
-                print('q -->', q)
+
+                create_date__gte = request.GET.get('create_date__gte')
+                create_date__lt = request.GET.get('create_date__lt')
+                action = request.GET.get('action')
+
+                if action: # 表示是行为中的请求
+                    if not create_date__gte:
+                        now_time = datetime.now()
+                        create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                        q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+
+                    if create_date__lt:
+                        stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                        q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
                 objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
                 count = objs.count()
@@ -48,8 +62,6 @@ def action(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-
-
                 for obj in objs:
                     ret_data.append({
                         'user_id': obj.user_id,
