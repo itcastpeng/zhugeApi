@@ -10,14 +10,11 @@ from zhugeleida.forms.contact_verify import ContactSelectForm
 from zhugeleida import models
 
 
+
+#获取用户聊天的信息列表
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def contact(request):
-    '''
-    获取用户的聊天表
-    :param request:
-    :return:
-    '''
     response = Response.ResponseObj()
     if request.method == 'GET':
 
@@ -25,7 +22,7 @@ def contact(request):
         if forms_obj.is_valid():
             print(request.GET)
 
-            userprofile_id = int(request.GET.get('user_id'))
+            user_id =  request.GET.get('user_id')
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
@@ -34,7 +31,7 @@ def contact(request):
                 'userprofile',
                 'customer'
             ).filter(
-                userprofile_id=userprofile_id,
+                userprofile_id=user_id,
                 is_last_msg=True
             ).order_by('-create_date')
 
@@ -46,9 +43,10 @@ def contact(request):
                 chat_info_objs = chat_info_objs[start_line: stop_line]
 
             ret_data_list = []
-            for obj in chat_info_objs:
-                ret_data_list.append({
 
+            for obj in chat_info_objs:
+                print('--------chat_info_objs-------->>', obj.create_date)
+                ret_data_list.append({
                     'customer_id': obj.customer_id,
                     'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
                     'name': obj.customer.username,

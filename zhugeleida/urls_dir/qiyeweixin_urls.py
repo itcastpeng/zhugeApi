@@ -49,11 +49,8 @@ urlpatterns = [
     #获取聊天联系人列表
     url(r'^contact$',contact.contact),
 
+    #获取访问日志动作。
     url(r'^action/(?P<oper_type>\w+)', action.action),
-    # url(r'^action_count$',action.action_count),
-    # url(r'^action_time$',action.action_time),
-
-
 
     #生成微信二维码 create_qr_code
     url(r'^qr_code_auth$',qr_code_auth.qr_code_auth),
