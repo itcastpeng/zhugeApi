@@ -1361,19 +1361,30 @@ order           否          排序方式:  1、customer__expedted_pr预计成�
         "ret_data":[
             {
                 "customer_id":1,
-                "customer_username":"张炬[客户2]",
+                "customer_username":"习大大",
                 "headimgurl":"statics/imgs/setAvator.jpg",
                 "expected_time":"2018-06-09",
                 "expedted_pr":null,
-                "ai_pr":0,
                 "belonger":"zhangcong",
                 "source":1,
                 "last_follow_time":"昨天",
-                "last_activity_time":"今天",
+                "last_activity_time":"昨天",
                 "follow_status":"昨天已跟进"
+            },
+            {
+                "customer_id":2,
+                "customer_username":"普京",
+                "headimgurl":"statics/imgs/setAvator.jpg",
+                "expected_time":"2018-06-28",
+                "expedted_pr":null,
+                "belonger":"zhangcong",
+                "source":1,
+                "last_follow_time":"今天",
+                "last_activity_time":"今天",
+                "follow_status":"今天跟进"
             }
         ],
-        "data_count":1
+        "data_count":2
     }
 }
 ```
