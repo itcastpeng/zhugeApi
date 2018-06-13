@@ -106,7 +106,7 @@ def action(request, oper_type):
                 field_dict = {
                     'id': '',
                     'user_id': '',
-                    'create_date__gt': '',
+                    'create_date__gte': '',
                     'create_date__lt': '',
                 }
                 q = conditionCom(request, field_dict)
@@ -160,7 +160,7 @@ def action(request, oper_type):
                     'id': '',
                     'user_id': '',
                     'name': '__contains',
-                    'create_date__gt': '',
+                    'create_date__gte': '',
                     'create_date__lt': '',
                 }
                 q = conditionCom(request, field_dict)
