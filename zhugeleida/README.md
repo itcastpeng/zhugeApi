@@ -45,7 +45,7 @@ GET的数据部分【公共参数】：
 }
 ```
 
-####   搜索参数说明：
+搜索参数说明：
 ```
  参数名                 搜索                        说明
 username       		   是                         用户名(可模糊搜索）
@@ -59,7 +59,7 @@ create_date            是                         创建时间
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user?rand_str=d51d2ab1cec69db820c08adddf2f3a61&timestamp=1528114804033&user_id=1
 
 
-#### 返回结果:
+返回结果:
 ``` json
 {
     "code":200,
@@ -93,7 +93,7 @@ create_date            是                         创建时间
 ### 增加用户:
 
 
-#### POST数据示例：
+POST数据示例：
 
 ``` python
 {   
@@ -105,7 +105,8 @@ create_date            是                         创建时间
 } 
 ```
 
-####  POST请求 发送参数说明
+POST请求 发送参数说明
+
 ``` python
 参数          必填            说明                               
 usedid        否             成员UserID,通过微信认证获取的。         
@@ -114,7 +115,8 @@ password      是             密码
 role_id       是             角色ID
 company_id    是             公司ID
 ```
-####  GET 请求发送参数：
+
+GET 请求发送参数：
 
 ``` python
   {
@@ -124,7 +126,7 @@ company_id    是             公司ID
    }
 ```
 
-####  请求示例：
+请求示例：
 
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/add/0?rand_str=ce663215f5c33b93c710c7af952da914&timestamp=1528121862752&user_id=1   # 增加用户
  
@@ -132,7 +134,8 @@ company_id    是             公司ID
 
 
 #### 删除用户:
-####   GET 请求发送数据部分：
+GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -141,14 +144,15 @@ company_id    是             公司ID
 }
 ```
   
-####   请求访问示例:
+请求访问示例:
 
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/delete/4
 
   
 #### 修改用户：
  
-####   GET 请求发送数据部分：
+GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -156,7 +160,8 @@ company_id    是             公司ID
     'user_id': 1,
 }
 ```  
-####  POST数据示例：
+
+POST数据示例：
 
 ``` python 
 {   
@@ -165,22 +170,28 @@ company_id    是             公司ID
     'role_id' ： 1
     'company_id' ： 1
 } 
+
 ```  
 
- ####   POST参数说明：
-``` python 
+POST参数说明：
+
+``` python
+ 
 参数        说明
 username    登录用户名
 password    密码
 role_id     角色ID
 company_id  公司ID
+
 ``` 
 
-####  访问示例:
+访问示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/update/5?rand_str=4c75edb76b06a2983040980f171b83e7&timestamp=1528169127235&user_id=1 
        
 ####  查询客户：
-####   GET 请求发送数据部分：
+
+GET 请求发送数据部分：
+
 ``` python 
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -188,7 +199,9 @@ company_id  公司ID
     'user_id': 1,
 }
 ``` 
+
 搜索参数说明：
+
 ``` python 
 参数名                 搜索                说明
 username               是                  用户名(可模糊搜索）
@@ -198,12 +211,14 @@ expected_time          是                  预计成交时间（可模糊）
 expedted_pr            是                  预计成交概率（可模糊查询） 
 create_date            是                  创建时间                                                
 ``` 
- 访问示例:
+
+访问示例:
  
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer      #修改用户
 
 
-  返回结果：
+返回结果：
+
 ``` python 
 {
     "code":200,
@@ -262,6 +277,7 @@ create_date            是                  创建时间
 ``` 
 
 #### 修改或增加 客户关联的【信息表】：
+
 请求方式：POST（HTTP）
 请求示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer/update_information/2?rand_str=4c75edb76b06a2983040980f171b83e7&timestamp=1528169127235&user_id=1
@@ -298,6 +314,7 @@ POST 请求数据部分:
 ``` 
 
 POST参数说明：
+
 ``` python 
 参数        必填          说明
 id          是           客户ID
@@ -313,17 +330,19 @@ mem         否           备注
 ``` 
 
 返回结果：    
-  
+
 {"code": 200, "msg": "\u6dfb\u52a0\u6210\u529f", "data": {}}
   
   
 ####  修改|添加 -  客戶表信息
+
 请求方式：POST（HTTP）
 请求示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer/update_customer/1?rand_str=4c75edb76b06a2983040980f171b83e7&timestamp=1528169127235&user_id=1
   
 
 GET 请求发送数据部分【公共参数】：
+
 ``` python 
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -334,13 +353,15 @@ GET 请求发送数据部分【公共参数】：
 ```   
   
 POST 请求数据部分:
+
 ``` python 
 {
    'tag_list' : [2,3],
    'expedted_pr' : '80%',
    'expected_time':  '2018-06-06'
 }
-```     
+``` 
+    
 POST参数说明：
 
 ``` python 
@@ -348,21 +369,25 @@ POST参数说明：
 tag_list        否           标签tag
 expedted_pr     否           成交概率
 expected_time   否           成交时间
+
 ```  
 
 返回结果：
+
 ``` python
 {"code": 200, "msg": "\u6dfb\u52a0\u6210\u529f", "data": {}}
 
 ```  
+
 ####  删除客户：
+
 请求方式：GET（HTTP）
 请求示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer/delete/3?rand_str=RAND_STR&timestamp=TIMESTAMP&user_id=USER_ID
 
 
-
 GET 请求发送数据部分【公共参数】：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -372,6 +397,7 @@ GET 请求发送数据部分【公共参数】：
 ``` 
 
 ####  查询角色：
+
 请求方式：GET（HTTP）
 请求示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/role?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
@@ -405,12 +431,14 @@ GET 请求发送数据部分：
 
 ``` 
 ####  增加角色：
+
 请求方式：POST（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/role?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
 
 
- GET 请求发送数据部分：
+GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -418,19 +446,23 @@ GET 请求发送数据部分：
     'user_id': 1,
 }
 ``` 
- POST参数说明:
+
+POST参数说明:
+ 
 ``` python
 参数            必填          说明
 name            是            角色名称
 ``` 
 
 
-####   删除角色：
+####  删除角色：
+
 请求方式：PSOT（HTTP）
- 请求示例：
+请求示例：
 > http://127.0.0.1:8000/zhugeleida/qiyeweixin/role/delete/3?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
 
 GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -441,13 +473,14 @@ GET 请求发送数据部分：
 
 
 ####   修改角色
+
 请求方式：POST（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/role/update/3?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
 
 
-
 GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -457,12 +490,15 @@ GET 请求发送数据部分：
 ``` 
   
 POST 数据格式：
+
 ``` python
 {
   'name': '普通用户'  
 }
 ``` 
+
 POST参数说明：
+
 ``` python
 参数            必填          说明
 name            是            角色名称
@@ -475,6 +511,7 @@ name            是            角色名称
 
 
 GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -484,6 +521,7 @@ GET 请求发送数据部分：
 ``` 
 
 POST 数据格式
+
 ``` python
 {
  'path' : /admin/zhugeleida/quanxian/1111/,
@@ -493,6 +531,7 @@ POST 数据格式
  'order_num' : 2  
 }
 ``` 
+
 POST参数说明：
 
 ``` python
@@ -509,6 +548,7 @@ order           是            排序序号
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/role/add/0?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
 
+
 GET发送数据部分：
 ``` python
 {
@@ -518,13 +558,13 @@ GET发送数据部分：
 }
 ``` 
 
-
 ####  修改权限条目：
 请求方式：POST（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/role/update/3?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
 
 GET 请求发送数据部分：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -532,7 +572,9 @@ GET 请求发送数据部分：
     'user_id': 1,
 }
 ```  
+
 POST 数据格式
+
 ``` python
 {
  'path' : /admin/zhugeleida/quanxian/1111/,
@@ -542,7 +584,9 @@ POST 数据格式
  'order_num' : 2  
 }
 ```  
+
 POST参数说明：
+
 ``` python
 参数            必填          说明
 path            是            访问URL
@@ -552,12 +596,14 @@ order           是            排序序号
 ``` 
 
 ####  查询公司：
- 请求方式：GET（HTTP）
- 请求示例
+
+请求方式：GET（HTTP）
+请求示例
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company
   
 
 GET 请求发送数据部分【公共参数】：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -566,7 +612,7 @@ GET 请求发送数据部分【公共参数】：
 }
 ```
 
-  返回结果：
+返回结果：
 ```python
 {
     "code":200,
@@ -592,6 +638,7 @@ GET 请求发送数据部分【公共参数】：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/delete/3?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
 
 GET 请求发送数据部分【公共参数】：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -600,7 +647,8 @@ GET 请求发送数据部分【公共参数】：
     'name' :   '合众康桥2',
 }
 ```  
- POST 数据格式:
+
+POST 数据格式:
  
 ``` python
  {
@@ -609,19 +657,22 @@ GET 请求发送数据部分【公共参数】：
 ```  
     
 GET 参数说明：
+
 ``` python
 参数            必填          说明
 name            是           公司名
 ``` 
+
 请示示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/add/0?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
  
 ####   删除公司：
- 请求方式：POST（HTTP）
- 请示示例：
+请求方式：POST（HTTP）
+请示示例：
 http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/delete/3?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
 
 GET 请求发送数据部分【公共参数】：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -630,8 +681,7 @@ GET 请求发送数据部分【公共参数】：
     'name' :   '合众康桥2',
 }
 ``` 
-  
-  
+    
 
 ####   修改公司：
 请求方式：POST（HTTP）
@@ -648,14 +698,14 @@ GET 请求发送数据部分【公共参数】:
 }
 ```  
 
-  POST参数说明：
+POST参数说明：
 
 ``` python
 参数            必填          说明
 name            是            角色名称
 ```
 
- POST 数据格式：
+POST 数据格式：
 
 ``` python
  {
@@ -671,7 +721,7 @@ POST参数说明：
 name            是           公司名
 
 ```
- 请求示例：
+请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/update/2?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
 
 
@@ -852,7 +902,8 @@ GET 请求发送数据部分【公共参数】：
     }
 }
 ```
- ####    分页获取 - 所有的聊天信息记录
+####   分页获取 - 所有的聊天信息记录
+
 请求方式：GET（HTTP）
 请求示例：
 >http://127.0.0.1:8000//zhugeleida/qiyeweixin/chat?rand_str=53444e4ca12d03176c9b6109c0c557b0&timestamp=1528871213546&user_id=1&customer_id=1
