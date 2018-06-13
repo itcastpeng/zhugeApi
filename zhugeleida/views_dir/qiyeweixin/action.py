@@ -34,23 +34,10 @@ def action(request, oper_type):
 
                 field_dict = {
                     'id': '',
-                    # 'action': '__in',
                     'name': '__contains',
                 }
                 q = conditionCom(request, field_dict)
                 print('q -->', q)
-
-                # if "action" in request.GET:
-                #     value = request.GET.get('action')
-                #     if value == '2':
-                #         id_list = [2, 3]
-                #
-                #     elif value == '5':
-                #         id_list = [5, 6]
-                #
-                #     else:
-                #         id_list = [value]
-                #     q.add(Q(**{'action' + '__in': id_list}), Q.AND)
 
                 objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
                 count = objs.count()
@@ -116,8 +103,15 @@ def action(request, oper_type):
 
                 user_id = request.GET.get('user_id')
 
+                field_dict = {
+                    'id': '',
+                    'user_id': '',
+                    'create_date__gt': '',
+                    'create_date__lt': '',
+                }
+                q = conditionCom(request, field_dict)
 
-                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action').annotate(
+                objs = models.zgld_accesslog.objects.filter(q).values('action').annotate(
                     Count('action'))
                 print('count_action_data -->', objs)
 
@@ -139,8 +133,7 @@ def action(request, oper_type):
                     9: '觉得靠谱',  # 取消了对您的靠谱
                     10: '拨打电话',
                     11: '播放语音',
-                    12: '复制邮箱'
-
+                    12: '复制邮箱',
                 }
 
 
@@ -163,9 +156,16 @@ def action(request, oper_type):
 
                 # current_page = forms_obj.cleaned_data['current_page']
                 # length = forms_obj.cleaned_data['length']
+                field_dict = {
+                    'id': '',
+                    'user_id': '',
+                    'name': '__contains',
+                    'create_date__gt': '',
+                    'create_date__lt': '',
+                }
+                q = conditionCom(request, field_dict)
 
-
-                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
+                objs = models.zgld_accesslog.objects.filter(q).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
                 print('customer_action_data -->', objs)
 
                 # if length != 0:
