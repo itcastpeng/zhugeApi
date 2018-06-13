@@ -19,7 +19,7 @@
 
 
 ```
-#####  公共参数（登录后所有api都需要加的参数）
+####   公共参数（登录后所有api都需要加的参数）
 
 ``` python
 ?rand_str=RAND_STR&timestamp=TIME_STAMP&user_id=USER_ID
@@ -34,7 +34,7 @@ user_id     是        当前登录用户ID
 
 
 
-#####  查询用户：
+####   查询用户：
 GET的数据部分【公共参数】：
 
 ```python
@@ -45,7 +45,7 @@ GET的数据部分【公共参数】：
 }
 ```
 
-#####  搜索参数说明：
+####   搜索参数说明：
 ```
  参数名                 搜索                        说明
 username       		   是                         用户名(可模糊搜索）
@@ -132,7 +132,7 @@ company_id    是             公司ID
 
 
 #### 删除用户:
-#####  GET 请求发送数据部分：
+####   GET 请求发送数据部分：
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -141,14 +141,14 @@ company_id    是             公司ID
 }
 ```
   
-#####  请求访问示例:
+####   请求访问示例:
 
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/delete/4
 
   
 #### 修改用户：
  
-#####  GET 请求发送数据部分：
+####   GET 请求发送数据部分：
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -156,7 +156,7 @@ company_id    是             公司ID
     'user_id': 1,
 }
 ```  
-##### POST数据示例：
+####  POST数据示例：
 
 ``` python 
 {   
@@ -167,7 +167,7 @@ company_id    是             公司ID
 } 
 ```  
 
- #####  POST参数说明：
+ ####   POST参数说明：
 ``` python 
 参数        说明
 username    登录用户名
@@ -176,11 +176,11 @@ role_id     角色ID
 company_id  公司ID
 ``` 
 
-##### 访问示例:
+####  访问示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/update/5?rand_str=4c75edb76b06a2983040980f171b83e7&timestamp=1528169127235&user_id=1 
        
 ####  查询客户：
-#####  GET 请求发送数据部分：
+####   GET 请求发送数据部分：
 ``` python 
 {
     'rand_str': account.str_encrypt(timestamp + token),
@@ -504,7 +504,7 @@ order           是            排序序号
 ``` 
 
  
-#####   删除权限条目：
+####    删除权限条目：
 请求方式：POST（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/role/add/0?rand_str=94e83293256bed726191ba207c53e342&timestamp=1528209075753&user_id=1
@@ -616,7 +616,7 @@ name            是           公司名
 请示示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/add/0?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
  
-#####  删除公司：
+####   删除公司：
  请求方式：POST（HTTP）
  请示示例：
 http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/delete/3?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
@@ -633,7 +633,7 @@ GET 请求发送数据部分【公共参数】：
   
   
 
-#####  修改公司：
+####   修改公司：
 请求方式：POST（HTTP）
  请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/update/2?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
@@ -729,7 +729,7 @@ GET 发送数据部分【公共参数】：
 }
  
 ``` 
-#####  修改标签 or 标签用户
+####   修改标签 or 标签用户
 请求方式：POST（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/update/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
@@ -763,7 +763,7 @@ user_list       否           【用户id1，用户id2】
 
 
 
-#####  删除标签 \ 标签用户
+####   删除标签 \ 标签用户
 GET 请求发送数据部分【公共参数】：
 ``` python
 {
@@ -775,8 +775,9 @@ GET 请求发送数据部分【公共参数】：
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/delete/1?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
 
-#####  增加标签  或 标签成员
- GET 请求发送数据部分【公共参数】：
+####   增加标签  或 标签成员
+ 
+GET 请求发送数据部分【公共参数】：
 
 ``` python
 {
@@ -805,57 +806,110 @@ user_list       否           【用户id1，用户id2】
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/add/0?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
 
 
-
-
-#####  获取用户的聊天列表
+####   分页获取 - 消息联系人
 请求方式：GET（HTTP）
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/contact?rand_str=0a70c648c73186dbd58ddb5457b412ea&timestamp=1528181743236&user_id=2&customer_id=1&send_type=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/contact?rand_str=267880efc9fc674d7f088c19c4d0bab2&timestamp=1528870581400&user_id=1
 
-GET 请求参数部分：
+GET 请求发送数据部分【公共参数】：
+
 ``` python
 {
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
-    'user_id': 2,
-    
-    'send_type': 1,  
+    'user_id': 1,
 }
-```
-GET参数说明:
-``` python
-参数           必填         说明
-user_id        是           用户的ID
-send_type      是           发送类型，1代表 用户发送给用户 ,  2代表 客户发送给用户。
-``` 
+```  
 
-返回结果：
-```  python
+
+
+返回结果:
+
+
+``` python
+
 {
     "code":200,
     "msg":"",
     "data":{
         "ret_data":[
             {
-                "id":42,
-                "userprofile_id":2,
-                "userprofile__username":"zhangju",
                 "customer_id":1,
-                "customer__username":"\u5f20\u50bb\u5b50",
-                "send_type":1,
-                "msg":"YYYYTTTTT",
-                "create_date":"2018-06-04T19:26:27.658"
+                "src":"http://api.zhugeyingxiao.com/statics/imgs/setAvator.jpg",
+                "name":"张炬[客户2]",
+                "dateTime":"11:49",
+                "msg":"近年来，中俄两国领导人每年都会会晤多次，今年也不例外。报道称，普京在参加完上合峰会后，还会陆续出席金砖四国峰会和亚太经合组织峰会(APEC) 峰会。"
+            },
+            {
+                "customer_id":2,
+                "src":"http://api.zhugeyingxiao.com/statics/imgs/setAvator.jpg",
+                "name":"张聪[客户1]",
+                "dateTime":"11:48",
+                "msg":"，俄总统普京将在上海合作组织成员国元首理事会青岛峰会（上合峰会）前夕对中国进行国事访问。这一消息已经得到了克里姆林宫的证实。"
             }
         ],
-    
-        "data_count":1
+        "data_count":2
     }
 }
- 
+```
+ ####    分页获取 - 所有的聊天信息记录
+请求方式：GET（HTTP）
+请求示例：
+>http://127.0.0.1:8000//zhugeleida/qiyeweixin/chat?rand_str=53444e4ca12d03176c9b6109c0c557b0&timestamp=1528871213546&user_id=1&customer_id=1
+
+GET 请求参数部分：
+
+``` python
+{
+    'rand_str': account.str_encrypt(timestamp + token),
+    'timestamp': timestamp,
+    'user_id': 2,    
+    'customer_id': 1,
+}
+
+```
+
+GET参数说明:
+
+``` python
+参数           必填          说明
+user_id        是           用户的ID
+customer_id    是           客户的ID
+``` 
+
+返回结果：
+
+```  python
+{
+    "code":200,
+    "msg":"分页获取聊天消息成功",
+    "data":[
+        {
+            "customer_id":1,
+            "user_id":1,
+            "src":"http://api.zhugeyingxiao.com/statics/imgs/setAvator.jpg",
+            "name":"张炬[客户2]",
+            "dateTime":"2018-06-13T11:49:57.000",
+            "msg":"近年来，中俄两国领导人每年都会会晤多次，今年也不例外。报道称，普京在参加完上合峰会后，还会陆续出席金砖四国峰会和亚太经合组织峰会(APEC) 峰会。",
+            "send_type":2
+        },
+        {
+            "customer_id":1,
+            "user_id":1,
+            "src":"http://api.zhugeyingxiao.com/statics/imgs/setAvator.jpg",
+            "name":"张炬[客户2]",
+            "dateTime":"2018-06-13T11:44:32.456",
+            "msg":"据中国日报网报道，在记者会上，特朗普再次对朝鲜领导人金正恩表示感谢",
+            "send_type":1
+        }
+    ]
+}
 ```  
 
-#### 实时聊天【发送消息接口】
-请求方式：GET（HTTP）
+
+
+####  实时聊天  -  发送消息接口
+请求方式：POST（HTTP）
  请求示例
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/chat/send_msg/0?rand_str=7931b9ab560500e52492fbe92e1f3d6c&timestamp=1528182912675&user_id=1
 
@@ -884,10 +938,11 @@ send_type        发送        发送类型，1代表 用户发送给用户 ,  2
 ```  
  
 
-#####  实时聊天【接收消息接口】
+
+####    实时聊天 - 获取最新的聊天信息
 请求方式：GET（HTTP）
 请求示例:
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/chat?rand_str=b80263fb72d863255dad2b69fa6b30d5&timestamp=1528183896727&user_id=2&customer_id=1&send_type=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/chat/getmsg/0?rand_str=51d703e387eb75da00f32520d7964d24&timestamp=1528872527395&user_id=1&customer_id=2
  
   
 GET 请求参数部分：
@@ -897,8 +952,7 @@ GET 请求参数部分：
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     'user_id': 2,
-    'customer_id': 1,
-    'send_type': 1,
+    'customer_id': 1
 }
 
 ```  
@@ -909,8 +963,6 @@ GET请求参数部分：
 参数            必填         说明
 customer_id     是           客户ID
 user_id         是           用户ID
-msg             是           消息
-send_type      发送          发送类型， 1代表 用户发送给用户 , 2代表 客户发送给用户。  
 ```  
 
  返回结果：
@@ -918,33 +970,31 @@ send_type      发送          发送类型， 1代表 用户发送给用户 , 2
 ```  python
 {
     "code":200,
-    "msg":"No new data",
+    "msg":"实时获取-最新聊天记录成功",
     "data":[
         {
-            "id":43,
-            "userprofile_id":2,
-            "userprofile__username":"zhangju",
-            "customer_id":1,
-            "customer__username":"\u5f20\u50bb\u5b50",
-            "send_type":1,
-            "msg":"YYYYTTTTT",
-            "create_date":"2018-06-05T15:15:12.723"
+            "customer_id":2,
+            "user_id":1,
+            "src":"http://api.zhugeyingxiao.com/statics/imgs/setAvator.jpg",
+            "name":"张聪[客户1]",
+            "dateTime":"2018-06-13T11:48:25.456",
+            "send_type":2,
+            "msg":"，俄总统普京将在上海合作组织成员国元首理事会青岛峰会（上合峰会）前夕对中国进行国事访问。这一消息已经得到了克里姆林宫的证实。"
         },
         {
-            "id":42,
-            "userprofile_id":2,
-            "userprofile__username":"zhangju",
-            "customer_id":1,
-            "customer__username":"\u5f20\u50bb\u5b50",
+            "customer_id":2,
+            "user_id":1,
+            "src":"http://api.zhugeyingxiao.com/statics/imgs/setAvator.jpg",
+            "name":"张聪[客户1]",
+            "dateTime":"2018-06-13T11:45:40.456",
             "send_type":1,
-            "msg":"YYYYTTTTT",
-            "create_date":"2018-06-04T19:26:27.658"
+            "msg":"武汉大四学生坠楼的最新相关信息"
         }
     ]
 }
 ```  
 
-#####企业微信登录认证
+#### 企业微信登录认证
 请求方式：GET（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/work_weixin_auth/{{company_id}}?code={{code}}&user_type=1&source=2
@@ -968,7 +1018,7 @@ source          是           客户的来源       1,扫码  2,转发
 ``` 
 
 
-#####小程序登录认证
+#### 小程序登录认证
 请求方式：GET（HTTP）
 请求示例：
 >http://127.0.0.1:8000/zhugeleida/xiaochengxu/small_program_auth?code='pm4Mp2zwTb0GOxcJ3hhYETNaWhPWF5lDwDZ_mHWHOqQ'&user_type=2&source=1     # 
@@ -1033,7 +1083,7 @@ id              是               用户的ID
 }
 ```  
 
-##### 【 企业微信-雷达】 按时间展示访问日志
+####  【 企业微信-雷达】 按时间展示访问日志
 请求方式：GET（HTTP）
 访问示例
 >http://127.0.0.1:8000//zhugeleida/qiyeweixin/action/time?user_id=1 & timestamp=1528620512844&rand_str=d968b0af1cc345943d6adf8a3a6d3e0a&length=5&current_page=1
@@ -1096,7 +1146,7 @@ GET 请求参数部分【公共参数】
 }
 ```
 
-##### 【企业微信雷达】 按人头展示访问日志
+####  【企业微信雷达】 按人头展示访问日志
 
 请求方式：GET（HTTP）
 访问示例
@@ -1162,7 +1212,7 @@ GET 请求参数部分【公共参数】
 
 
 
-##### 【企业微信-雷达】按行为统计
+####  【企业微信-雷达】按行为统计
 请求方式：GET（HTTP）
 访问示例
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/action/count?rand_str=9bccf5e05cc92f994f26250c25ae2336&timestamp=1528617397112&user_id=1&customer_id=1r_id=1&customer_id=1
