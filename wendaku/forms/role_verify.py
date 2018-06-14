@@ -1,7 +1,7 @@
 from django import forms
 
 from wendaku import models
-from publickFunc import account
+from publicFunc import account
 import datetime
 
 

@@ -1,7 +1,7 @@
 from django import forms
 
 from zhugeproject import models
-from publickFunc import account
+from publicFunc import account
 
 
 # 添加用户信息
@@ -28,7 +28,7 @@ class AddForm(forms.Form):
     def clean_username(self):
         username = self.data['username']
         # print(username)
-        objs = models.ProjectUserProfile.objects.filter(
+        objs = models.project_userprofile.objects.filter(
             username=username,
         )
         if objs:
@@ -43,7 +43,7 @@ class AddForm(forms.Form):
 
 # 更新用户信息
 class UpdateForm(forms.Form):
-    user_id = forms.IntegerField(
+    o_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': "用户id不能为空"
@@ -67,11 +67,11 @@ class UpdateForm(forms.Form):
     # 判断用户名是否存在
     def clean_username(self):
         username = self.data['username']
-        user_id = self.data['user_id']
+        o_id = self.data['o_id']
         print(username)
-        objs = models.ProjectUserProfile.objects.filter(
+        objs = models.project_userprofile.objects.filter(
             username=username,
-        )
+        ).exclude(id=o_id)
         if objs:
             self.add_error('username', '用户名已存在')
         else:

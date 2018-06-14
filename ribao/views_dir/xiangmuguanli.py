@@ -1,12 +1,12 @@
 from ribao import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ribao.forms.xiangmuguanli_verify import AddForm, UpdateForm, SelectForm
 import json
 
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 
 @csrf_exempt
 @account.is_token(models.RibaoUserProfile)

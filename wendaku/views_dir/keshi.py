@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from wendaku import models
-from publickFunc import Response
-from publickFunc import account
+from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 import json
-from publickFunc.condition_com import conditionCom
+from publicFunc.condition_com import conditionCom
 from wendaku.forms.keshi_verify import KeshiAddForm, KeshiUpdateForm, KeshiSelectForm
 
 

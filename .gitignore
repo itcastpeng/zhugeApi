@@ -5,8 +5,8 @@
 
 migrations/
 __pycache__/
-test
+test/
 *.bak
 db.sqlite3
-venv
+venv/
 
