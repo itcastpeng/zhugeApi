@@ -1159,9 +1159,35 @@ GET 请求参数部分【公共参数】
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     'user_id': 1,
-    'id' : 1
+    'id' : 1,
+	'action' : 1, 
+	'create_date__gte' : 2018-06-07,
+	'create_date__lt' :  2018-06-14,
 }
 ```
+
+GET 参数说明:
+```  python
+参数        		 必填         	   说明
+	action       	 否          (1, '查看名片'),  # 查看了名片第XXX次。
+									 (2, '查看产品'),  # 查看您的产品; 查看竞价排名; 转发了竞价排名。
+									 (3, '查看动态'),  # 查看了公司的动态。 评论了您的企业动态。
+									 (4, '查看官网'),  # 查看了您的官网 , 转发了您官网。
+
+									 (5,  '复制微信'),
+									 (6,  '转发名片'),  #
+									 (7,  '咨询产品'),   
+									 (8,  '保存电话'),
+									 (9,  '觉得靠谱'),  #取消了对您的靠谱
+									 (10, '拨打电话'),
+									 (11, '播放语音'),
+									 (12, '复制邮箱'),
+				
+create_date__gte     否             开始时间
+create_date__lt      否		        技术时间
+			
+```
+
 
 返回结果：
 ```  python
@@ -1223,10 +1249,21 @@ GET 请求参数部分【公共参数】
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     'user_id': 1,
-    'id' : 1
+    'id' : 1,
+	'create_date__gte' : 2018-06-07,
+	'create_date__lt' :  2018-06-14,
 }
 
+
 ```
+GET 参数说明:
+```  python
+参数        		 必填         	   说明
+create_date__gte     否             开始时间
+create_date__lt      否		        技术时间
+			
+```
+
 
 返回结果：
 ```  python
@@ -1288,9 +1325,24 @@ GET 请求参数部分【公共参数】
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     'user_id': 1,
-    'id' : 1
+    'id' : 1,
+	'create_date__gte' : 2018-06-07,
+	'create_date__lt' :  2018-06-14,
 }
 ```
+
+
+```
+GET 参数说明:
+```  python
+参数        		 必填         	   说明
+create_date__gte     否             开始时间
+create_date__lt      否		        技术时间
+			
+```
+
+
+
 返回结果：
 
 ```  python
