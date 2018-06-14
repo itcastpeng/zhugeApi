@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
     qr_code_auth, follow_language, follow_info,tag_list
-from zhugeleida.views_dir import chat, contact
+from zhugeleida.views_dir.qiyeweixin import chat, contact
 
 urlpatterns = [
     # url(r'^login$', login.login),

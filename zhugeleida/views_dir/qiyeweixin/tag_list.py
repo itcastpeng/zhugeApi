@@ -1,4 +1,3 @@
-
 from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
@@ -11,19 +10,14 @@ import datetime
 import json
 from publicFunc.condition_com import conditionCom
 
-#查询标签和所属的用户
+
+# 查询标签和所属的用户
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def tag_list(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        # 获取参数 页数 默认1
-        # forms_obj = TagListSelectForm(request.GET)
-        # if forms_obj.is_valid():
-        #     print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
-            # current_page = forms_obj.cleaned_data['current_page']
-            # length = forms_obj.cleaned_data['length']
         order = request.GET.get('order', '-create_date')
 
         field_dict = {
@@ -35,28 +29,22 @@ def tag_list(request):
 
         objs = models.zgld_tag.objects.filter(q).order_by(order)
 
-        # if length != 0:
-        #     print('current_page -->', current_page)
-        #     start_line = (current_page - 1) * length
-        #     stop_line = start_line + length
-        #     objs = objs[start_line: stop_line]
-
-        # 获取所有数据
+        tag_values = models.zgld_tag.objects.values_list('id', 'name', 'tag_parent_id')
+        tag_dict = {}
         ret_data = []
-        # 获取第几页的数据
-        for obj in objs:
+        date_list = list(tag_values)
+        for obj in date_list:
+            if obj[2] == None:
 
-            tag_obj = models.zgld_tag.objects.get(id=obj.id)
-            parent_id =  obj.tag_parent_id
-            user_id = obj.user_id
+                tag_dict['tags'] = []
+                for tag in date_list:
+                    if tag[2] == obj[0]:
+                        tag_dict['name']  = obj[1]
+                        tag_dict['tags'].append({ 'id': tag[0],'name': tag[1]})
+                        # tag_dict[obj[0]].append({tag[0]})
 
-            ret_data.append({
-                'id': tag_obj.id,
-                'tag_name': tag_obj.name,
-                'tag_id': tag_obj.id,
-                'customer_num': objs.count(),
-
-            })
+                ret_data.append(tag_dict)
+                tag_dict = {}
 
         response.code = 200
         response.data = {
@@ -76,18 +64,22 @@ def tag_list_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
-        if oper_type == "add":
+        if oper_type == "add_tag":   # 为客户新增加标签，然后绑定到这个客户。
 
             tag_data = {
-                'name' : request.POST.get('name'),
+                'name': request.POST.get('name'),
+                'user_id': request.GET.get('user_id')
             }
 
-            forms_obj = TagCustomerAddForm(tag_data)
+            forms_obj = TagListAddForm(tag_data)
             if forms_obj.is_valid():
-                customer_list = json.loads(request.POST.get('customer_list'))
-                if customer_list:
+                customer_id = o_id
+                if customer_id:
                     obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
-                    obj.tag_customer = customer_list
+                    parent_id = models.zgld_tag.objects.filter(name='其他')[0].id
+                    obj.tag_parent_id = parent_id
+                    obj.tag_customer = [customer_id]
+                    obj.save()
                     response.code = 200
                     response.msg = "添加成功"
                 else:
@@ -99,6 +91,25 @@ def tag_list_oper(request, oper_type, o_id):
                 print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == "customer_tag":  # 操作tag，为客户添加多个标签
+            tag_data = {
+                'name': request.POST.get('name'),
+                'user_id': request.GET.get('user_id')
+            }
+
+            forms_obj = TagListAddForm(tag_data)
+            if forms_obj.is_valid():
+                tag_list = request.POST.get('tag_list')
+                customer_obj = models.zgld_customer.objects.get(id=o_id)
+                # tag_objs = models.zgld_tag.objects.filter(id__in=tag_list)
+                if customer_obj:
+                    customer_obj.zgld_tag_set = tag_list
+                    response.code = 200
+                    response.msg = "添加成功"
+                else:
+                    response.code = 302
+                    response.msg = "标签关联客户不能为空"
 
         # elif oper_type == "delete":
         #     print('------delete o_id --------->>',o_id)
