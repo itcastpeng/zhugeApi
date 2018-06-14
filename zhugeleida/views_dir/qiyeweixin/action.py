@@ -82,25 +82,8 @@ def action(request, oper_type):
                         Count('action'))
                     print('customer_action_data -->', customer_action_data)
 
-
-                # {
-                #     'keyvalue': {
-                #         1: "官网",
-                #
-                #     },
-                #     'data': {
-                #         1:
-                #     }
-                # }
-
                 response.code = 200
                 response.msg = '查询日志记录成功'
-
-                # {
-                #     'time_action_list': ret_time_list,
-                #     'count_action_list': ret_count_list,
-                #     'customer_action_list': ret_customer_list,
-                # }
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
@@ -212,6 +195,9 @@ def action(request, oper_type):
                 #     stop_line = start_line + length
                 #     objs = objs[start_line: stop_line]
 
+                action_dict = {}
+                for i in models.zgld_accesslog.action_choices:
+                    action_dict[i[0]] = i[1]
 
                 customer_id_list = []
                 customer_username = ''
@@ -233,7 +219,10 @@ def action(request, oper_type):
                             customer_id = c_id
                             customer_username = obj['customer__username']
                             customer__headimgurl = obj['customer__headimgurl']
-                            detail_dict[ obj.get('action')] = obj['action__count']
+                            detail_dict[obj['action']] = {
+                                'count': obj['action__count'],
+                                'name': action_dict[obj['action']]
+                            }
 
                     ret_data.append({
                                 'totalCount': total_num,
