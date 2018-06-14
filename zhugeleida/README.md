@@ -1272,39 +1272,41 @@ create_date__lt      否		        技术时间
     "msg":"查询日志记录成功",
     "data":[
         {
-            "totalCount":18,
+            "totalCount":5,
             "customer_id":1,
-            "customer__username":"张炬",
+            "customer__username":"张炬[客户2]",
             "user_id":"1",
+            "headimgurl":"statics/imgs/setAvator.jpg",
             "detail":{
-                "1":3,
-                "2":7,
-                "3":5,
-                "4":3,
-                "5":1,
-                "6":2,
-                "7":1,
-                "8":1,
-                "9":1,
-                "12":1
+                "1":{
+                    "count":3,
+                    "name":"查看名片"
+                },
+                "2":{
+                    "count":1,
+                    "name":"查看产品"
+                },
+                "3":{
+                    "count":1,
+                    "name":"查看动态"
+                }
             }
         },
         {
-            "totalCount":18,
+            "totalCount":6,
             "customer_id":2,
-            "customer__username":"张聪",
+            "customer__username":"张聪[客户1]",
             "user_id":"1",
+            "headimgurl":"statics/imgs/setAvator.jpg",
             "detail":{
-                "1":3,
-                "2":7,
-                "3":5,
-                "4":3,
-                "5":1,
-                "6":2,
-                "7":1,
-                "8":1,
-                "9":1,
-                "12":1
+                "2":{
+                    "count":3,
+                    "name":"查看产品"
+                },
+                "3":{
+                    "count":3,
+                    "name":"查看动态"
+                }
             }
         }
     ]
