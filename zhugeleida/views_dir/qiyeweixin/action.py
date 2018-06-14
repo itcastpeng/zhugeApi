@@ -10,7 +10,7 @@ from zhugeleida import models
 from django.db.models import Count
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
-
+from datetime import datetime, timedelta
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -34,23 +34,24 @@ def action(request, oper_type):
 
                 field_dict = {
                     'id': '',
-                    # 'action': '__in',
-                    'name': '__contains',
+                    'action': '',
                 }
-                q = conditionCom(request, field_dict)
-                print('q -->', q)
 
-                # if "action" in request.GET:
-                #     value = request.GET.get('action')
-                #     if value == '2':
-                #         id_list = [2, 3]
-                #
-                #     elif value == '5':
-                #         id_list = [5, 6]
-                #
-                #     else:
-                #         id_list = [value]
-                #     q.add(Q(**{'action' + '__in': id_list}), Q.AND)
+                q = conditionCom(request, field_dict)
+
+                create_date__gte = request.GET.get('create_date__gte')
+                create_date__lt = request.GET.get('create_date__lt')
+                action = request.GET.get('action')
+
+                if action: # 表示是行为中的请求
+                    if not create_date__gte:
+                        now_time = datetime.now()
+                        create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                        q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+
+                    if create_date__lt:
+                        stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                        q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
                 objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
                 count = objs.count()
@@ -61,8 +62,6 @@ def action(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-
-
                 for obj in objs:
                     ret_data.append({
                         'user_id': obj.user_id,
@@ -83,25 +82,8 @@ def action(request, oper_type):
                         Count('action'))
                     print('customer_action_data -->', customer_action_data)
 
-
-                # {
-                #     'keyvalue': {
-                #         1: "官网",
-                #
-                #     },
-                #     'data': {
-                #         1:
-                #     }
-                # }
-
                 response.code = 200
                 response.msg = '查询日志记录成功'
-
-                # {
-                #     'time_action_list': ret_time_list,
-                #     'count_action_list': ret_count_list,
-                #     'customer_action_list': ret_customer_list,
-                # }
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
@@ -116,8 +98,31 @@ def action(request, oper_type):
 
                 user_id = request.GET.get('user_id')
 
+                field_dict = {
+                    'id': '',
+                    'user_id': '',
+                    'create_date__gte': '',
+                    # 'create_date__lt': '',
 
-                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action').annotate(
+                }
+
+                q = conditionCom(request, field_dict)
+
+                create_date__gte = request.GET.get('create_date__gte')
+                create_date__lt = request.GET.get('create_date__lt')
+                if not create_date__gte:
+                    now_time = datetime.now()
+                    create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                    q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+
+                if create_date__lt:
+                    stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                    q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+
+
+                print('q  ---->', q)
+
+                objs = models.zgld_accesslog.objects.filter(q).values('action').annotate(
                     Count('action'))
                 print('count_action_data -->', objs)
 
@@ -139,8 +144,7 @@ def action(request, oper_type):
                     9: '觉得靠谱',  # 取消了对您的靠谱
                     10: '拨打电话',
                     11: '播放语音',
-                    12: '复制邮箱'
-
+                    12: '复制邮箱',
                 }
 
 
@@ -163,9 +167,27 @@ def action(request, oper_type):
 
                 # current_page = forms_obj.cleaned_data['current_page']
                 # length = forms_obj.cleaned_data['length']
+                field_dict = {
+                    'id': '',
+                    'user_id': '',
+                    'name': '__contains',
+                    'create_date__gte': '',
+                }
 
+                q = conditionCom(request, field_dict)
 
-                objs = models.zgld_accesslog.objects.filter(user_id=user_id).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
+                create_date__gte = request.GET.get('create_date__gte')
+                create_date__lt = request.GET.get('create_date__lt')
+                if not create_date__gte:
+                    now_time = datetime.now()
+                    create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                    q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+
+                if create_date__lt:
+                    stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                    q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+
+                objs = models.zgld_accesslog.objects.filter(q).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
                 print('customer_action_data -->', objs)
 
                 # if length != 0:
@@ -173,6 +195,9 @@ def action(request, oper_type):
                 #     stop_line = start_line + length
                 #     objs = objs[start_line: stop_line]
 
+                action_dict = {}
+                for i in models.zgld_accesslog.action_choices:
+                    action_dict[i[0]] = i[1]
 
                 customer_id_list = []
                 customer_username = ''
@@ -194,7 +219,10 @@ def action(request, oper_type):
                             customer_id = c_id
                             customer_username = obj['customer__username']
                             customer__headimgurl = obj['customer__headimgurl']
-                            detail_dict[ obj.get('action')] = obj['action__count']
+                            detail_dict[obj['action']] = {
+                                'count': obj['action__count'],
+                                'name': action_dict[obj['action']]
+                            }
 
                     ret_data.append({
                                 'totalCount': total_num,
@@ -204,6 +232,7 @@ def action(request, oper_type):
                                 'headimgurl': customer__headimgurl,
                                 'detail': detail_dict
                     })
+                    detail_dict  = {}
                     total_num = 0
 
                 response.code = 200

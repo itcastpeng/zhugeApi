@@ -6,7 +6,7 @@ import datetime
 
 
 # 添加标签信息
-class TagAddForm(forms.Form):
+class TagListAddForm(forms.Form):
     # print('添加标签')
     name = forms.CharField(
         required=True,
@@ -35,7 +35,7 @@ class TagAddForm(forms.Form):
 
 
 # 更新标签信息
-class TagUpdateForm(forms.Form):
+class TagListUpdateForm(forms.Form):
     tag_id = forms.IntegerField(
         required=True,
         error_messages={
@@ -64,7 +64,7 @@ class TagUpdateForm(forms.Form):
 
 
 # 判断是否是数字
-class TagSelectForm(forms.Form):
+class TagListSelectForm(forms.Form):
     current_page = forms.IntegerField(
         required=False,
         error_messages={

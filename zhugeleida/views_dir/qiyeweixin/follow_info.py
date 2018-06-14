@@ -11,6 +11,8 @@ import json
 from publicFunc.condition_com import conditionCom
 
 
+
+#分页获取用户跟进-聊天的信息
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def follow_info(request, ):
@@ -20,8 +22,6 @@ def follow_info(request, ):
         forms_obj = FollowInfoSelectForm(request.GET)
         if forms_obj.is_valid():
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-            customer_id = forms_obj.cleaned_data['customer_id']
-            user_id = forms_obj.cleaned_data['user_id']
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')
@@ -43,24 +43,10 @@ def follow_info(request, ):
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
 
-                # ret_data = []
-                # if objs:
-                #     for obj in objs:
-                #         ret_data.append({
-                #             'user_id': user_id,
-                #             'username': obj.user.username,
-                #             'headimgurl': obj.customer.headimgurl,
-                #             'follow_info': obj.follow_info,
-                #             'create_date': obj.create_date
-                #         })
-                #
-
                     ret_data  = objs.values('user_customer_flowup__customer__headimgurl',
                                                     'user_customer_flowup__user__avatar',
                                                     'user_customer_flowup__user__username',
-                                                    'follow_info', 'create_date'
-                                            )
-
+                                                    'follow_info', 'create_date')
                     response.code = 200
                     response.data = {
                         'ret_data': list(ret_data),
@@ -108,6 +94,7 @@ def follow_info_oper(request, oper_type, o_id):
 
                 elif obj_num == 1:
                     obj.update(last_follow_time=now_time)
+
                 else:
                     response.code = 307
                     response.msg = "用户-客户关系表数据重复"

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag,user_weixin_auth,customer
+from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag_customer,user_weixin_auth,customer
 from zhugeleida.views_dir.xiaochengxu import login,mingpian
 from zhugeleida.views_dir import chat,contact
 
@@ -25,8 +25,8 @@ urlpatterns = [
     # url(r'^company$', company.company),
 
     # 标签操作
-    url(r'^tag/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag.tag_oper),
-    url(r'^tag$', tag.tag),
+    # url(r'^tag/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag.tag_oper),
+    # url(r'^tag$', tag.tag_user),
 
     #修改客户和客户信息表
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)', customer.customer_oper),

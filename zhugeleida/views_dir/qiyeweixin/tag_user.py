@@ -5,7 +5,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.tag_verify import TagAddForm, TagUpdateForm, TagSelectForm
+from zhugeleida.forms.qiyeweixin.tag_customer_verify  import TagAddForm, TagUpdateForm, TagSelectForm
 import time
 import datetime
 import json

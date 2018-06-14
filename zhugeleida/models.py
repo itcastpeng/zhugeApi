@@ -100,8 +100,10 @@ class zgld_quanxian(models.Model):
 
 # 标签管理
 class zgld_tag(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='所属用户', null=True)
     name = models.CharField(verbose_name='标签名称', max_length=64)
-    tag_customer = models.ManyToManyField('zgld_customer',verbose_name='关联到客户')
+    tag_parent = models.ForeignKey('self',verbose_name='标签父级',null=True)
+    tag_customer = models.ManyToManyField('zgld_customer',verbose_name='关联到客户',null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):

@@ -17,14 +17,12 @@ from zhugeleida import models
 @account.is_token(models.zgld_userprofile)
 def chat(request):
     '''
-     分页获取聊天信息
+    【分页获取】- 所有的聊天信息
     :param request:
     :return:
     '''
     if request.method == 'GET':
-
         forms_obj = ChatSelectForm(request.GET)
-
         if forms_obj.is_valid():
             response = Response.ResponseObj()
             user_id = request.GET.get('user_id')
@@ -62,7 +60,7 @@ def chat(request):
 
 
             response.code = 200
-            response.msg = '分页获取聊天消息成功'
+            response.msg = '分页获取-全部聊天消息成功'
             print('--- list(msg_obj) -->>', ret_data_list)
 
             response.data = ret_data_list
@@ -89,7 +87,6 @@ def chat_oper(request, oper_type, o_id):
                 customer_id = request.GET.get('customer_id')
                 # send_type = request.GET.get('send_type')
 
-
                 msg_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -113,7 +110,7 @@ def chat_oper(request, oper_type, o_id):
                     })
 
                 response.code = 200
-                response.msg = '实时获取聊天记录成功'
+                response.msg = '实时获取-最新聊天信息成功'
                 print('--- list(msg_obj) -->>', ret_data_list)
 
                 response.data = ret_data_list
@@ -155,8 +152,6 @@ def chat_oper(request, oper_type, o_id):
                 response.code = 200
                 response.msg = 'send msg successful'
                 return JsonResponse(response.__dict__)
-
-
 
     else:
         response.code = 402

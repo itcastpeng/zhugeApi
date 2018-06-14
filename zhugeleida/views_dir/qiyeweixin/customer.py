@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.customer_verify import  Customer_information_UpdateForm,Customer_UpdateForm , CustomerSelectForm
+from zhugeleida.forms.customer_verify import  Customer_information_UpdateForm,Customer_UpdateExpectedTime_Form ,Customer_UpdateExpedtedPr_Form, CustomerSelectForm
 import json
 
 
@@ -131,22 +131,14 @@ def customer_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '用户ID不存在'
 
-        elif oper_type == "update_customer":
+        elif oper_type == "update_tag":
 
-                form_data = {
-                    'id': o_id,
-                    'tag_list': request.POST.getlist('tag_list'),
-                    'expected_time':request.POST.get('expected_time'),
-                    'expedted_pr' : request.POST.get('expedted_pr')
-                }
+                tag_list =  json.loads(request.POST.get('tag_list'))
 
-                forms_obj = Customer_UpdateForm(form_data)
-                if forms_obj.is_valid():
-                    print(forms_obj.cleaned_data)
+                objs = models.zgld_tag.objects.filter(id__in=tag_list)
+                if objs:
                     obj = models.zgld_customer.objects.get(id=o_id)
-                    obj.zgld_tag_set = form_data['tag_list']
-                    obj.expected_time = forms_obj.cleaned_data['expected_time']
-                    obj.expedted_pr = forms_obj.cleaned_data['expedted_pr']
+                    obj.zgld_tag_set = tag_list
                     obj.save()
 
                     response.code = 200
@@ -154,8 +146,97 @@ def customer_oper(request, oper_type, o_id):
 
                 else:
                     response.code = 301
-                    response.msg = '用户ID不存在'
+                    response.msg = '用户标签不存在'
 
+        elif oper_type == "update_expected_time":
+
+            form_data = {
+                'user_id': request.GET.get('user_id'),
+                'customer_id': o_id,
+                'expected_time': request.POST.get('expected_time'),
+
+            }
+
+            forms_obj = Customer_UpdateExpectedTime_Form(form_data)
+            if forms_obj.is_valid():
+                print('-----forms_obj.cleaned_data------->>',forms_obj.cleaned_data)
+                now_time = datetime.datetime.now()
+                follow_data = {
+                    "user_id": forms_obj.cleaned_data.get('user_id'),
+                    "customer_id": forms_obj.cleaned_data.get('customer_id'),
+                }
+                obj = models.zgld_user_customer_flowup.objects.filter(**follow_data)
+                obj_num = obj.count()
+                if obj_num == 0:  # 判断关系表是否有记录。
+                    follow_data['last_follow_time'] = now_time
+                    models.zgld_user_customer_flowup.objects.create(**follow_data)
+                elif obj_num == 1:
+                    obj.update(last_follow_time=now_time)
+                else:
+                    response.code = 307
+                    response.msg = "用户-客户关系表数据重复"
+
+                if response.code != 307:
+                    info = '更新预计成交日期: %s' % (forms_obj.cleaned_data['expected_time'])
+                    models.zgld_follow_info.objects.create(user_customer_flowup_id=obj[0].id,
+                                                           follow_info=info)
+
+
+                expected_time = form_data['expected_time']
+                obj = models.zgld_customer.objects.get(id=o_id)
+                obj.expected_time = expected_time
+                obj.save()
+                response.code = 200
+                response.msg = "添加成功"
+
+            else:
+                response.code = 303
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == "update_expected_pr":
+
+            form_data = {
+                'user_id': o_id,
+                'customer_id': o_id,
+                'expedted_pr': request.POST.get('expedted_pr')
+            }
+
+            forms_obj = Customer_UpdateExpedtedPr_Form(form_data)
+            if forms_obj.is_valid():
+                print(forms_obj.cleaned_data)
+
+                now_time = datetime.datetime.now()
+                follow_data = {
+                    "user_id": forms_obj.cleaned_data.get('user_id'),
+                    "customer_id": forms_obj.cleaned_data.get('customer_id'),
+                }
+                obj = models.zgld_user_customer_flowup.objects.filter(**follow_data)
+                obj_num = obj.count()
+                if obj_num == 0:  # 判断关系表是否有记录。
+                    follow_data['last_follow_time'] = now_time
+                    models.zgld_user_customer_flowup.objects.create(**follow_data)
+                elif obj_num == 1:
+                    obj.update(last_follow_time=now_time)
+                else:
+                    response.code = 307
+                    response.msg = "用户-客户关系表数据重复"
+
+                if response.code != 307:
+                    info = '更新预计成交率为: %s' % (forms_obj.cleaned_data['expedted_pr'])
+                    models.zgld_follow_info.objects.create(user_customer_flowup_id=obj[0].id,
+                                                           follow_info=info)
+
+                expedted_pr = forms_obj.cleaned_data['expedted_pr']
+                obj = models.zgld_customer.objects.get(id=o_id)
+                obj.expedted_pr = expedted_pr
+                obj.save()
+
+                response.code = 200
+                response.msg = "添加成功"
+
+            else:
+                response.code = 303
+                response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "update_information":
             # 更新客户表的具体信息
