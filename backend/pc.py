@@ -8,17 +8,6 @@ import requests
 import random
 
 
-# 用户输入的密码加密
-def str_encrypt(pwd):
-    """
-    :param pwd: 密码
-    :return:
-    """
-    pwd = str(pwd)
-    hash = hashlib.md5()
-    hash.update(pwd.encode())
-    return hash.hexdigest()
-
 
 class Zhidao:
     # 初始化文件
