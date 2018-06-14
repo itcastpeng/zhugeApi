@@ -36,7 +36,7 @@ def chat(request):
             objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            ).order_by('-create_date')
+            ).order_by('create_date')
             objs.update(
                 is_new_msg=False
             )
@@ -90,7 +90,7 @@ def chat_oper(request, oper_type, o_id):
                     customer_id=customer_id,
                     is_new_msg=True
 
-                ).order_by('-create_date')
+                ).order_by('create_date')
 
                 ret_data_list = []
                 count = objs.count()
