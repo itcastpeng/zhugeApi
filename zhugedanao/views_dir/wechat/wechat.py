@@ -90,6 +90,7 @@ def index(request):
                     obj.save()
                 else:
                     ret_obj = we_chat_public_send_msg_obj.get_user_info(openid=openid)
+                    print('ret_obj -->', ret_obj)
 
                     models.zhugedanao_userprofile.objects.create(
                         openid=openid,
