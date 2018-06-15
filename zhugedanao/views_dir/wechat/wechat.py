@@ -112,7 +112,13 @@ def wechat_login(request):
     timestamp = request.POST.get('timestamp')
     user_objs = models.zhugedanao_userprofile.objects.filter(timestamp=timestamp)
     if user_objs:
+        user_obj = user_objs[0]
         response.code = 200
+        response.data = {
+            'token': user_obj.token,
+            'user_id': user_obj.id,
+            'set_avator': user_obj.set_avator,
+        }
         response.msg = "登录成功"
     else:
         response.code = 405
