@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
     qr_code_auth, follow_language, follow_info,tag_list
-from zhugeleida.views_dir.qiyeweixin import chat, contact
+from zhugeleida.views_dir.qiyeweixin import chat, contact,search
 
 urlpatterns = [
     # url(r'^login$', login.login),
@@ -31,6 +31,10 @@ urlpatterns = [
     url(r'^tag_list/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag_list.tag_list_oper),
     url(r'^tag_list$', tag_list.tag_list),
 
+    #搜索(客户\标签)
+    url(r'^search/(?P<oper_type>\w+)$', search.search),
+
+
     # 修改客户详情和客户关联信息表
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)', customer.customer_oper),
     url(r'^customer$', customer.customer),
@@ -58,6 +62,7 @@ urlpatterns = [
 
     # 生成微信二维码 create_qr_code
     url(r'^qr_code_auth$', qr_code_auth.qr_code_auth),
+
     # 企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),
 

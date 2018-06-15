@@ -725,10 +725,10 @@ name            是           公司名
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/update/2?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
 
 
-####  查询标签 或 拥有标签的客户：
-请求方式：POST（HTTP）
+####  查询标签（有客户关联的标签全部显示出来）：
+请求方式：GET（HTTP）
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_customer?rand_str=f107cb8bdce9794748dfe01bb240cea5&timestamp=1529033091635&user_id=1
 
 
 GET 发送数据部分【公共参数】：
@@ -751,46 +751,178 @@ GET 发送数据部分【公共参数】：
     "data":{
         "ret_data":[
             {
-                "id":3,
-                "name":"70后",
-                "tag_id":3,
-                "customer_num":3,
-                "customer_id_list":[
-                    1,
-                    2,
-                    3
+                "id":11,
+                "name":"90后",
+                "tag_id":11,
+                "customer_num":5,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    },
+                    {
+                        "id":5,
+                        "headimgurl":"fdsaf",
+                        "name":"dfasdf"
+                    }
                 ]
             },
             {
-                "id":2,
-                "name":"意向客户",
-                "tag_id":2,
-                "customer_num":1,
-                "customer_id_list":[
-                    1
+                "id":8,
+                "name":"已婚",
+                "tag_id":8,
+                "customer_num":4,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
                 ]
             },
             {
-                "id":1,
+                "id":10,
+                "name":"爱撸串",
+                "tag_id":10,
+                "customer_num":4,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
+                ]
+            },
+            {
+                "id":7,
                 "name":"在意质量",
-                "tag_id":1,
+                "tag_id":7,
+                "customer_num":3,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
+                ]
+            },
+            {
+                "id":14,
+                "name":"爱吃串",
+                "tag_id":14,
                 "customer_num":2,
-                "customer_id_list":[
-                    1,
-                    2
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    }
+                ]
+            },
+            {
+                "id":15,
+                "name":"大傻子客户",
+                "tag_id":15,
+                "customer_num":2,
+                "customer_list":[
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
+                ]
+            },
+            {
+                "id":9,
+                "name":"在意 服务",
+                "tag_id":9,
+                "customer_num":1,
+                "customer_list":[
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    }
                 ]
             }
         ],
-        "data_count":7
+        "ret_count":9
     }
-}
 }
  
 ```
-####   修改标签 or 标签用户
-请求方式：POST（HTTP）
+
+####   查询所有标签 【分级展示】
+请求方式：GET（HTTP）
+
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/update/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_list?rand_str=c0154475f83759e5851644425c5833e0&timestamp=1529041855696&user_id=1 
 
 GET 请求发送数据部分【公共参数】：
 
@@ -802,12 +934,110 @@ GET 请求发送数据部分【公共参数】：
 }
 ```
  
- POST 数据格式：
+返回结果:
+
+POST 数据格式：
+
+``` python
+{
+    "code":200,
+    "msg":"请求成功",
+    "data":{
+        "ret_data":[
+            {
+                "tags":[
+                    {
+                        "id":8,
+                        "name":"已婚"
+                    },
+                    {
+                        "id":11,
+                        "name":"90后"
+                    }
+                ],
+                "name":"基本功能"
+            },
+            {
+                "tags":[
+                    {
+                        "id":7,
+                        "name":"在意质量"
+                    },
+                    {
+                        "id":9,
+                        "name":"在意 服务"
+                    }
+                ],
+                "name":"关注点"
+            },
+            {
+                "tags":[
+                    {
+                        "id":5,
+                        "name":"一般客户"
+                    },
+                    {
+                        "id":6,
+                        "name":"重要客户"
+                    }
+                ],
+                "name":"级别"
+            },
+            {
+                "tags":[
+                    {
+                        "id":10,
+                        "name":"爱撸串"
+                    },
+                    {
+                        "id":14,
+                        "name":"爱吃串"
+                    },
+                    {
+                        "id":15,
+                        "name":"大傻子客户"
+                    }
+                ],
+                "name":"自定义"
+            }
+        ],
+        "tag_count":4
+    }
+}
+```
+   
+ POST参数说明：
+
+``` python
+参数            必填          说明
+name            是            标签名
+customer_list   是           【客户id1，客户id2】
+```
+
+
+
+####   添加标签 (并绑定对应的客户)
+请求方式：POST（HTTP）
+
+请求示例：
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_customer/add/0?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+
+GET 请求发送数据部分【公共参数】：
+
+``` python
+{
+    'rand_str': account.str_encrypt(timestamp + token),
+    'timestamp': timestamp,
+    'user_id': 1,
+}
+```
+ 
+POST 数据格式：
 
 ``` python
  {
-     'name': '东方银谷',
-     'user_list' : [1,2]
+	'name' : '客户不好惹',
+	'customer_list':  '[2,3]'
  }
 ```
    
@@ -815,26 +1045,17 @@ GET 请求发送数据部分【公共参数】：
 
 ``` python
 参数            必填          说明
-name            是           公司名
-user_list       否           【用户id1，用户id2】
+name            是            标签名
+customer_list   是           【客户id1，客户id2】
 ```
 
 
 
-####   删除标签 \ 标签用户
-GET 请求发送数据部分【公共参数】：
-``` python
-{
-    'rand_str': account.str_encrypt(timestamp + token),
-    'timestamp': timestamp,
-    'user_id': 1,
-}
-``` 
+####   添加标签 （同时绑定此标签到此客户）
+请求方式：POST（HTTP）
+
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/delete/1?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
-
-####   增加标签  或 标签成员
- 
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_list/add_tag/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
 GET 请求发送数据部分【公共参数】：
 
 ``` python
@@ -844,24 +1065,74 @@ GET 请求发送数据部分【公共参数】：
     'user_id': 1,
 }
 ``` 
- POST 数据格式：
+
+URL 说明：
+``` python
+参数：       必填        说明
+{{o_id}}     是         /zhugeleida/qiyeweixin/tag_list/add_tag/{{ o_id }}   o_id 代表 customer_id 
+
+```
+
+POST 数据格式：
+
 ``` python
  {
-     'name': '东方银谷',
-     'user_list' : [1,2]
+	'name' : '大傻子型客户',
  }
-```    
-
+```
+   
  POST参数说明：
 
 ``` python
 参数            必填          说明
-name            是           公司名
-user_list       否           【用户id1，用户id2】
+name            是            标签名
 ```
 
- 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/add/0?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+
+
+
+
+####   为客户绑定标签
+请求方式：POST（HTTP）
+
+请求示例：
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_list/customer_tag/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+GET 请求发送数据部分【公共参数】：
+
+``` python
+{
+    'rand_str': account.str_encrypt(timestamp + token),
+    'timestamp': timestamp,
+    'user_id': 1,
+}
+``` 
+
+POST 数据格式：
+
+``` python
+ {
+     'tag_list' : [1,2]
+ }
+```    
+
+
+POST参数说明：
+
+``` python
+参数            必填          说明
+name            是            标签名
+tag_list        否           【标签id1，标签id2】
+```
+
+URL参数说明：
+
+``` python
+参数：       必填        说明
+{{o_id}}     是         /zhugeleida/qiyeweixin/tag_list/customer_tag/{{ o_id }}   o_id 代表 customer_id 
+
+```
+
+
 
 
 ####   分页获取 - 消息联系人
