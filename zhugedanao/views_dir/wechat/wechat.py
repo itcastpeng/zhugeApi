@@ -18,6 +18,8 @@ from publicFunc.Response import ResponseObj
 import datetime
 from publicFunc.gongzhonghao_weixin import WeChatPublicSendMsg
 
+from zhugedanao import models
+
 
 def checkSignature(timestamp, nonce, token, signature):
 
@@ -77,15 +79,15 @@ def index(request):
                 print('event_key -->', event_key)
 
                 # # 保证1个微信只能够关联1个账号
-                # if models.UserProfile.objects.filter(openid=from_user_name).count() == 0:
-                #     obj = models.UserProfile.objects.get(id=user_id)
-                #     print(obj.username)
-                #     obj.openid = from_user_name
-                #     obj.save()
+                if models.zhugedanao_userprofile.objects.filter(openid=from_user_name).count() == 0:
+                    obj = models.zhugedanao_userprofile.objects.get(id=user_id)
+                    print(obj.username)
+                    obj.openid = from_user_name
+                    obj.save()
 
-            # # 取消关注
-            # elif event == "unsubscribe":
-            #     models.UserProfile.objects.filter(openid=from_user_name).update(openid=None)
+            # 取消关注
+            elif event == "unsubscribe":
+                models.zhugedanao_userprofile.objects.filter(openid=from_user_name).update(openid=None)
 
                 # we_chat_public_send_msg_obj.sendTempMsg(post_data)
 
@@ -105,7 +107,8 @@ def generate_qrcode(request):
 
     response.code = 200
     response.data = {
-        'qc_code_url': qc_code_url
+        'qc_code_url': qc_code_url,
+        'timestamp': timestamp
     }
 
     return JsonResponse(response.__dict__)
