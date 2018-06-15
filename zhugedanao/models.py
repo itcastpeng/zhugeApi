@@ -46,7 +46,7 @@ class zhugedanao_userprofile(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
-    set_avator = models.CharField(verbose_name="头像图片地址", max_length=128, default='statics/imgs/setAvator.jpg')
+    set_avator = models.CharField(verbose_name="头像图片地址", max_length=256, default='statics/imgs/setAvator.jpg')
     openid = models.CharField(verbose_name="微信公众号id", max_length=32)
     timestamp = models.CharField(verbose_name="时间戳", max_length=32, null=True, blank=True)
 
