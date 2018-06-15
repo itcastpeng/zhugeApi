@@ -47,6 +47,7 @@ def index(request):
     print('check_result -->', check_result)
 
     if check_result:
+        we_chat_public_send_msg_obj = WeChatPublicSendMsg()
         if request.method == "GET":
             return HttpResponse(echostr)
         else:
@@ -63,7 +64,7 @@ def index(request):
             print("event -->", event)
 
             # 用户的 openid
-            from_user_name = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
+            openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
 
             wechat_data_path = "webadmin/modules/wechat_data.json"
             # we_chat_public_send_msg_obj = WeChat.WeChatPublicSendMsg(wechat_data_path)
@@ -81,22 +82,26 @@ def index(request):
                 print('event_key -->', event_key)
 
                 # # 保证1个微信只能够关联1个账号
-                user_objs = models.zhugedanao_userprofile.objects.filter(openid=from_user_name)
+                user_objs = models.zhugedanao_userprofile.objects.filter(openid=openid)
                 if user_objs:
                     obj = user_objs[0]
                     print(obj.username)
                     obj.timestamp = timestamp
                     obj.save()
                 else:
+                    ret_obj = we_chat_public_send_msg_obj.get_user_info(openid=openid)
+                    print('ret_obj --->', ret_obj)
+
                     models.zhugedanao_userprofile.objects.create(
-                        openid=from_user_name,
+                        openid=openid,
                         token=get_token(timestamp),
                         timestamp=timestamp
                     )
 
+
             # 取消关注
             elif event == "unsubscribe":
-                models.zhugedanao_userprofile.objects.filter(openid=from_user_name).update(openid=None)
+                models.zhugedanao_userprofile.objects.filter(openid=openid).update(openid=None)
 
                 # we_chat_public_send_msg_obj.sendTempMsg(post_data)
 
@@ -125,7 +130,6 @@ def wechat_login(request):
         response.msg = '扫码登录异常，请重新扫描'
 
     return JsonResponse(response.__dict__)
-
 
 
 # 获取用于登录的微信二维码
