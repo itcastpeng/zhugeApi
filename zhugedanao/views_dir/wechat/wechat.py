@@ -14,6 +14,7 @@ import time
 
 import xml.dom.minidom
 from publicFunc.Response import ResponseObj
+from publicFunc.account import get_token
 
 import datetime
 from publicFunc.gongzhonghao_weixin import WeChatPublicSendMsg
@@ -89,6 +90,7 @@ def index(request):
                 else:
                     models.zhugedanao_userprofile.objects.create(
                         openid=from_user_name,
+                        token=get_token(timestamp),
                         timestamp=timestamp
                     )
 
@@ -102,6 +104,22 @@ def index(request):
 
     else:
         return HttpResponse(False)
+
+
+@csrf_exempt
+def wechat_login(request):
+    response = ResponseObj()
+    timestamp = request.POST.get('timestamp')
+    user_objs = models.zhugedanao_userprofile.objects.filter(timestamp=timestamp)
+    if user_objs:
+        response.code = 200
+        response.msg = "登录成功"
+    else:
+        response.code = 405
+        response.msg = '扫码登录异常，请重新扫描'
+
+    return JsonResponse(response.__dict__)
+
 
 
 # 获取用于登录的微信二维码

@@ -27,10 +27,6 @@ def get_token(pwd):
     return token
 
 
-
-
-
-
 # 装饰器 判断token 是否正确
 def is_token(table_obj):
     def is_token_decorator(func):
