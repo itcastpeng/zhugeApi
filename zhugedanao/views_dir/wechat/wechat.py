@@ -76,15 +76,21 @@ def index(request):
                 if event == "subscribe":
                     event_key = event_key.split("qrscene_")[-1]
                 event_key = json.loads(event_key)
-                user_id = event_key["user_id"]
+                timestamp = event_key["timestamp"]
                 print('event_key -->', event_key)
 
                 # # 保证1个微信只能够关联1个账号
-                if models.zhugedanao_userprofile.objects.filter(openid=from_user_name).count() == 0:
-                    obj = models.zhugedanao_userprofile.objects.get(id=user_id)
+                user_objs = models.zhugedanao_userprofile.objects.filter(openid=from_user_name)
+                if user_objs:
+                    obj = user_objs[0]
                     print(obj.username)
-                    obj.openid = from_user_name
+                    obj.timestamp = timestamp
                     obj.save()
+                else:
+                    models.zhugedanao_userprofile.objects.create(
+                        openid=from_user_name,
+                        timestamp=timestamp
+                    )
 
             # 取消关注
             elif event == "unsubscribe":

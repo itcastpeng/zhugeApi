@@ -41,13 +41,14 @@ class zhugedanao_userprofile(models.Model):
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=1)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
-    username = models.CharField(verbose_name="姓名", max_length=32)
+    username = models.CharField(verbose_name="姓名", max_length=32, null=True, blank=True)
     role = models.ForeignKey("zhugedanao_role", verbose_name="角色", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
     set_avator = models.CharField(verbose_name="头像图片地址", max_length=128, default='statics/imgs/setAvator.jpg')
-    openid = models.CharField(verbose_name="微信公众号id", max_length=32, null=True, blank=True)
+    openid = models.CharField(verbose_name="微信公众号id", max_length=32)
+    timestamp = models.CharField(verbose_name="时间戳", max_length=32, null=True, blank=True)
 
     def __str__(self):
         return self.username
