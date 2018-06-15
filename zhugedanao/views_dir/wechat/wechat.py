@@ -43,6 +43,7 @@ def index(request):
     EncodingAESKey = 'LFYzOBp42g5kwgSUWhGC9uRugSmpyetKfAsJa5FdFHX'
 
     check_result = checkSignature(timestamp, nonce, token, signature)
+    print('check_result -->', check_result)
 
     if check_result:
         if request.method == "GET":
