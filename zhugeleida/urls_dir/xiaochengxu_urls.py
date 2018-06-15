@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag_customer,user_weixin_auth,customer
 from zhugeleida.views_dir.xiaochengxu import login,mingpian
-from zhugeleida.views_dir import chat,contact
+from zhugeleida.views_dir.xiaochengxu  import chat
 
 
 urlpatterns = [
@@ -35,8 +35,9 @@ urlpatterns = [
     #实时聊天
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
     url(r'^chat$',chat.chat),
+
     #获取联系人列表
-    url(r'^contact$',contact.contact),
+    # url(r'^contact$',contact.contact),
 
     #访问小程序的名片
     url(r'^mingpian$',mingpian.mingpian),
