@@ -129,6 +129,8 @@ def wechat_login(request):
             'token': user_obj.token,
             'user_id': user_obj.id,
             'set_avator': user_obj.set_avator,
+            'username': user_obj.username,
+
         }
         response.msg = "登录成功"
     else:
