@@ -102,6 +102,7 @@ def index(request):
                         city=ret_obj['city'],
                         subscribe_time=ret_obj['subscribe_time'],
                         set_avator=ret_obj['headimgurl'],
+                        username=ret_obj['nickname'],
                     )
 
 
