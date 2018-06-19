@@ -36,7 +36,7 @@ def chat(request):
             objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            ).order_by('create_date')
+            ).order_by('-create_date')
             objs.update(
                 is_new_msg=False
             )
@@ -52,12 +52,14 @@ def chat(request):
                 ret_data_list.append({
                      'customer_id': obj.customer.id,
                      'user_id': obj.userprofile.id,
-                     'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
+                     'src': obj.customer.headimgurl,
                      'name': obj.customer.username,
                      'dateTime': obj.create_date,
                      'msg': obj.msg,
                      'send_type': obj.send_type,
                 })
+
+            ret_data_list.reverse()
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
             response.data = {
