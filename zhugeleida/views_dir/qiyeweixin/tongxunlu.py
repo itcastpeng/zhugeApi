@@ -73,7 +73,7 @@ def tongxunlu(request):
                             else:
                                 day_interval = day_interval - 1
                                 last_interval_msg = '%s天前' % (day_interval)
-                                customer_status = '%s天前已跟进' % (day_interval)
+                                customer_status = last_follow_time.strftime('%Y-%m-%d')
 
                     last_activity_msg = ''
                     last_activity_time = obj.last_activity_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
@@ -90,8 +90,8 @@ def tongxunlu(request):
                             if day_interval == 1:
                                 last_activity_msg = '昨天'
                             else:
-                                day_interval = day_interval - 1
-                                last_activity_msg = '%s天前' % (day_interval)
+
+                                last_activity_msg = last_activity_time.strftime('%Y-%m-%d')
 
                     ret_data.append({
                         'customer_id': obj.id,

@@ -139,7 +139,14 @@ def chat_oper(request, oper_type, o_id):
                 msg = data.get('msg')
                 send_type = int(data.get('send_type'))
 
-                print('---msg----->>', msg)
+                flow_up_obj = models.zgld_user_customer_flowup.objects.get(user_id=user_id, customer_id=customer_id)
+                if send_type == 1: # 用戶發消息給客戶，修改最後跟進-時間
+                    flow_up_obj.last_follow_time=datetime.datetime.now()
+                    flow_up_obj.save()
+
+                elif send_type == 2: # 客戶發消息給用戶，修改最後活動-時間
+                    flow_up_obj.last_activity_time = datetime.datetime.now()
+                    flow_up_obj.save()
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
                 models.zgld_chatinfo.objects.create(
