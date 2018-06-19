@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
     qr_code_auth, follow_language, follow_info,tag_list
-from zhugeleida.views_dir.qiyeweixin import chat, contact,search
+from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian
 
 urlpatterns = [
     # url(r'^login$', login.login),
@@ -65,5 +65,8 @@ urlpatterns = [
 
     # 企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),
+
+    # 访问企業微信的用戶名片
+    url(r'^mingpian$', mingpian.mingpian),
 
 ]

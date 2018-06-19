@@ -39,9 +39,9 @@ urlpatterns = [
     #获取联系人列表
     # url(r'^contact$',contact.contact),
 
-    #访问小程序的名片
+    #访问小程序的名片上的功能。
     url(r'^mingpian$',mingpian.mingpian),
-
+    url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
 
     #小程序登录认证
     url(r'^login$', login.login)

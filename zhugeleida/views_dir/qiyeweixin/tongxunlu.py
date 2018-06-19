@@ -30,7 +30,7 @@ def tongxunlu(request):
                 'username': '__contains',
                 'belonger__username': '__contains',  # 归属人
                 'superior__username': '__contains',  # 上级人
-                'expected_time': '__contains',  # 预测成交时间
+                'expected_time': '__contains',       # 预测成交时间
                 'customer__source': '',                   # 搜索转码 或者 转发
                 'create_date': '',
 

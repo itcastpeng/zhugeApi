@@ -1370,7 +1370,7 @@ source          是           客户的来源       1,扫码  2,转发
 #### 小程序登录认证
 请求方式：GET（HTTP）
 请求示例：
->http://127.0.0.1:8000/zhugeleida/xiaochengxu/small_program_auth?code='pm4Mp2zwTb0GOxcJ3hhYETNaWhPWF5lDwDZ_mHWHOqQ'&user_type=2&source=1     #
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/login?code='pm4Mp2zwTb0GOxcJ3hhYETNaWhPWF5lDwDZ_mHWHOqQ'&user_type=2&source=1     #
 
 GET 请求参数部分：
 ```  python
@@ -1684,7 +1684,7 @@ GET 请求参数部分【公共参数】
         'rand_str': account.str_encrypt(timestamp + token),
         'timestamp': timestamp,
         'user_id': 1,
-        'source': 1,
+        'customer__source': 1,
         'order' : '  customer__expedted_pr(默认的排序) | last_follow_time | last_activity_time
       
     }
@@ -1694,8 +1694,8 @@ GET请求参数部分：
 ```  python
 参数            必填         说明
 user_id         是          用户的ID
-source          否          搜索方式： 1 代表扫码 2 转发
-order           否          排序方式:  1、customer__expedted_pr预计成交概率  2、last_follow_time 代表最后跟进时间   3、last_activity_time 最后活动时间     
+customer__source          否          搜索方式： 1 代表扫码 2 转发
+order           否          排序方式:  1、customer__expedted_pr 预计成交概率  2、last_follow_time 代表最后跟进时间   3、last_activity_time 最后活动时间     
 
 ```
 返回结果

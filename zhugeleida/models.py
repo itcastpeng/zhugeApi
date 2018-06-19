@@ -38,6 +38,7 @@ class zgld_userprofile(models.Model):
     position = models.CharField(verbose_name='职位信息',max_length=128)
     role = models.ForeignKey("zgld_role", verbose_name="角色")
     phone = models.CharField(verbose_name='绑定微信手机号', max_length=20, blank=True, null=True)
+    email = models.EmailField(u'常用邮箱', blank=True, null=True)
     mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
 
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
@@ -52,7 +53,6 @@ class zgld_userprofile(models.Model):
     popularity = models.IntegerField(verbose_name='人气(被查看)',default=0)
     praise = models.IntegerField(verbose_name='被赞',default=0)
     forward = models.IntegerField(verbose_name='转发',default=0)
-
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
@@ -141,7 +141,7 @@ class zgld_customer(models.Model):
 
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
-
+    is_praise = models.ForeignKey(to='zgld_userprofile',to_field='praise')
     nickname = models.CharField(max_length=64, verbose_name='昵称',blank=True,null=True)
     country = models.CharField(max_length=64,verbose_name='国家',blank=True,null=True)
     city =  models.CharField(max_length=32,verbose_name='客户所在城市',blank=True,null=True)
@@ -161,6 +161,7 @@ class zgld_customer(models.Model):
         verbose_name_plural = "客户表"
         app_label = "zhugeleida"
 
+
 #用户-客户跟进信息-关系绑定表
 class zgld_user_customer_flowup(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
@@ -172,6 +173,20 @@ class zgld_user_customer_flowup(models.Model):
     class Meta:
         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
         app_label = "zhugeleida"
+
+class zgld_UpDown(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户')
+    customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
+    up = models.BooleanField(verbose_name='是否赞',null=True)
+
+    class Meta:
+        unique_together = [
+            ('customer', 'user'),
+        ]
+        verbose_name_plural = "用户顶或踩表"
+        app_label = "zhugeleida"
+
+
 
 #跟进-消息详情表
 class zgld_follow_info(models.Model):
@@ -258,19 +273,20 @@ class zgld_accesslog(models.Model):
     customer = models.ForeignKey('zgld_customer',verbose_name='访问的客户')
     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
     activity_time = models.ForeignKey('zgld_user_customer_flowup',related_name='accesslog',verbose_name='活动时间(客户活动)', null=True)  # 代表客户活动日志最后一条记录的时间
+    is_new_msg = models.BooleanField(default=True, verbose_name='是否为新日志')
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "访问动能日志记录表"
         app_label = "zhugeleida"
 
-#聊天室记录表
+# 聊天室记录表
 class zgld_chatinfo(models.Model):
     send_type_choice = ((1,'user_to_customer'),
                         (2,'customer_to_user')
                         )
     send_type = models.SmallIntegerField(choices=send_type_choice,verbose_name='发送类型',blank=True,null=True)
-    is_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息', )
+    is_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
     is_last_msg = models.BooleanField(default=True,verbose_name='是否为最后一次的消息')
     userprofile = models.ForeignKey('zgld_userprofile',verbose_name='用户',null=True,blank=True)
     customer  = models.ForeignKey('zgld_customer',verbose_name='客户',null=True,blank=True)
