@@ -61,7 +61,7 @@ def chat(request):
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
             response.data = {
-                'ret_data': ret_data_list,
+                'ret_data':  ret_data_list,
                 'data_count': count,
             }
             if not ret_data_list:
