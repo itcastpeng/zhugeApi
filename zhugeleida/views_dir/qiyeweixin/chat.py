@@ -92,7 +92,7 @@ def chat_oper(request, oper_type, o_id):
                     customer_id=customer_id,
                     is_new_msg=True
 
-                ).order_by('create_date')
+                ).order_by('-create_date')
 
                 ret_data_list = []
                 count = objs.count()
@@ -100,7 +100,7 @@ def chat_oper(request, oper_type, o_id):
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
-                        'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
+                        'src':  obj.customer.headimgurl,
                         'name': obj.customer.username,
                         'dateTime': obj.create_date,
                         'send_type': obj.send_type,
@@ -110,7 +110,7 @@ def chat_oper(request, oper_type, o_id):
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
                 print('--- list(msg_obj) -->>', ret_data_list)
-
+                ret_data_list.reverse()
                 response.data = {
                     'ret_data': ret_data_list,
                     'data_count': count,
