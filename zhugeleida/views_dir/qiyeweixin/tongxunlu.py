@@ -101,7 +101,7 @@ def tongxunlu(request):
                         'expedted_pr': obj.customer.expedted_pr,  # 预计成交概率
                         # 'ai_pr': ai_pr,  # AI 预计成交概率
                         'belonger': obj.customer.belonger.username,  # 所属用户
-                        'source': obj.customer.source,  # 来源
+                        'source': obj.get_status_display(),  # 来源
                         'last_follow_time': last_interval_msg,  # 最后跟进时间
                         'last_activity_time':  last_activity_msg,                # 最后活动时间
                         'follow_status': customer_status,       #跟进状态

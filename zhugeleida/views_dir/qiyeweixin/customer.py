@@ -74,7 +74,6 @@ def customer(request):
                     ret_data.append({
                         'id': obj.id,
                         'username': obj.username,
-                        'openid': obj.openid,
                         'headimgurl': obj.headimgurl,
                         'expected_time': obj.expected_time,  # 预计成交时间
                         'expedted_pr': obj.expedted_pr,  # 预计成交概率
