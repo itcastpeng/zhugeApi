@@ -188,7 +188,7 @@ company_id  公司ID
 访问示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/update/5?rand_str=4c75edb76b06a2983040980f171b83e7&timestamp=1528169127235&user_id=1
       
-####  查询客户：
+####  查询【单个】客户信息：
 
 GET 请求发送数据部分：
 
@@ -197,24 +197,21 @@ GET 请求发送数据部分：
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     'user_id': 1,
+	'customer_id'；2  
 }
 ```
 
-搜索参数说明：
+GET 参数说明：
 
 ``` python
-参数名                 搜索                说明
-username               是                  用户名(可模糊搜索）
-belonger__username     是                  归属人(可模糊）   
-superior__username     是                  上级(可模糊）
-expected_time          是                  预计成交时间（可模糊）
-expedted_pr            是                  预计成交概率（可模糊查询）
-create_date            是                  创建时间                                               
+参数名                 必填                说明
+customer_id            是                  客户ID
+user_id                是                  用户ID                                                    
 ```
 
 访问示例:
  
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer      #修改用户
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer      #查询-单个客户信息
 
 
 返回结果：
@@ -226,51 +223,34 @@ create_date            是                  创建时间
     "data":{
         "ret_data":[
             {
-                "id":2,
-                "username":"孙胖子",
-                "openid":"121212dfasdfa",
-                "headimgurl":"statics/imgs/setAvator.jpg",
-                "expected_time":null,
-                "expedted_pr":"",
-                "superior":"",
-                "belonger":"zhangcong",
-                "source":2,
-                "memo_name":"",
-                "phone":"",
-                "email":"",
-                "company":"",
-                "position":"",
-                "address":"",
-                "birthday":"",
-                "mem":"",
-                "tag":[
-                ]
-            },
-            {
                 "id":1,
-                "username":"张傻子",
-                "openid":"fsdfsadf",
+                "username":"张炬[客户2]",       #客户名称  
                 "headimgurl":"statics/imgs/setAvator.jpg",
-                "expected_time":"2018-06-06",
-                "expedted_pr":null,
-                "superior":"",
-                "belonger":"zhangcong",
-                "source":1,
-                "memo_name":"",
-                "phone":"15931788974",
-                "email":"1224423@qq.com",
-                "company":"合众康桥",
-                "position":"开发TTT",
-                "address":"通州区xxx",
-                "birthday":"2018-06-01",
-                "mem":"ffffffffffff",
-                "tag":[
-                    "歌手",
-                    "相声"
+                "expected_time":"2018-06-14",   #预计成交时间
+                "expedted_pr":"80",             # 预计成交概率
+                "ai_pr":"80",                   # AI 成交率
+                "superior":"张聪[客户1]",       # 上级人
+                "source":"扫码",                # 客户通过扫码方式来关注此用户。
+                "memo_name":null,               # 客户的备注名
+                "phone":"",                     #  客户的手机号
+                "email":"",                     # 邮箱 
+                "company":"",                   # 在职公司
+                "position":"",                  # 所在职位
+                "address":"",                   # 客户所在的住址 
+                "birthday":"",                  # 客户的生日
+                "mem":"",                       # 客户个人信息备注等  
+                "tag":[                         #客户的标签
+                    "在意质量",
+                    "一般客户",
+                    "重要客户",
+                    "已婚",
+                    "爱撸串",
+                    "90后",
+                    "爱吃串"
                 ]
             }
         ],
-        "data_count":3
+        "data_count":1
     }
 }
   
