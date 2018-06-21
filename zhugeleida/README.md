@@ -2024,5 +2024,584 @@ o_id       是      /zhugeleida/qiyeweixin/customer/update_expected_pr/{{ o_id}}
 
 
 
+####    【小程序- 显示单个用户的信息 并记录【访问名片】日志信息】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian?rand_str=cae406b10a53dac573369b0eb5200ff0&timestamp=1529499334685&user_id=1&uid=2&action=1
+
+
+GET 请求参数【公共参数】
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' :  2
+		'action' : 1 
+       
+    }
+```
+
+GET参数说明:
+
+``` python
+参数：      必填      参数说明
+uid          是       所属用户的ID
+user_id      是       小程序客户端的客户ID      
+action       是       action 等于 1 时，代表查看名片功能。
+```
+
+返回结果：
+
+``` python
+	{
+		"code":200,
+		"msg":"查询成功",
+		"data":{
+			"ret_data":[
+				{
+					"id":2,
+					"username":"zhangju",
+					"avatar":"statics/imgs/setAvator.jpg",
+					"company":"合众康桥",
+					"address":"1",
+					"position":"技术经理",
+					"email":"",
+					"wechat":"",
+					"mingpian_phone":"18511123918",
+					"create_date":"2018-06-08T22:03:23.772",
+					"popularity":12,
+					"praise":1,
+					"forward":2
+				}
+			],
+			"data_count":1
+		}
+	}
+```
+
+####    【小程序 - 显示所有的用户】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/all?rand_str=e77523b1c848768f040deb530b04bd57&timestamp=1529540109759&user_id=2
+
+GET 请求参数
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+    }
+```
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+
+```
+返回结果：
+
+``` python
+{
+    "code":200,
+    "msg":"查询成功",
+    "data":{
+        "ret_data":[
+            {
+                "id":2,
+                "username":"zhangju",
+                "source":"扫码",
+                "avatar":"statics/imgs/setAvator.jpg",
+                "company":"合众康桥",
+                "position":"技术经理",
+                "email":"",
+                "mingpian_phone":"18511123918",
+                "create_date":"2018-06-08T22:03:23.772"
+            },
+            {
+                "id":1,
+                "username":"zhangcong",
+                "source":"扫码",
+                "avatar":"statics/imgs/setAvator.jpg",
+                "company":"合众康桥",
+                "position":"技术经理",
+                "email":"",
+                "mingpian_phone":"18511125018",
+                "create_date":"2018-06-07T19:47:43"
+            }
+        ],
+        "data_count":2
+    }
+}
+
+```
+
+####    【小程序 - 记录日志拨打手机动作】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/calling?rand_str=b1c3f902e8d15a5e617328d35abc630a&timestamp=1529542925528&user_id=2&uid=2&action=10
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' : 2,
+		'action': 10
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+uid          是       所属用户ID
+action       是       10 代表访问名片的动作。
+
+```
+
+返回结果：
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+
+		}
+	}
+```
+
+
+####    【小程序 - 记录点赞或者取消点赞 你名片的动作】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/praise?rand_str=b587cab28de63a05cdec5e789e6f2b54&timestamp=1529543973411&user_id=2&uid=2&action=9
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' : 2,
+		'action': 9
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+uid          是       所属用户ID
+action       是       9 代表 点赞名片的动作。
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+
+		}
+	}
+```
+
+####    【小程序 - 记录转发用户名片的动作】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/forward?rand_str=2db7d341300b1ab4aec9238ed8618d53&timestamp=1529544299602&user_id=2&uid=2&action=6
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' : 2,
+		'action': 6
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+uid          是       所属用户ID
+action       是       6 代表转发的动作。
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+
+		}
+	}
+```
+
+
+####    【小程序 - 实时获取各个动作的最新访问日志】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/action/get_new_log?rand_str=4b8120c4a83c83ad3a2d2a4d91887f19&timestamp=1529545515255&user_id=2&action=6 【获取用户ID为2的最新动作日志消息】
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+返回结果 ：
+
+``` python
+{
+    "code":200,
+    "msg":"查询日志记录成功",
+    "data":{
+        "ret_data":[
+            {
+                "user_id":2,
+                "customer_id":2,
+                "action":"转发名片",
+                "log":"张聪[客户1]转发了你的名片,你的人脉圈正在裂变",
+                "create_date":"2018-06-21T09:24:59.613"
+            },
+            {
+                "user_id":2,
+                "customer_id":2,
+                "action":"拨打电话",
+                "log":"张聪[客户1]拨打您的手机",
+                "create_date":"2018-06-21T08:55:35.570"
+            },
+            {
+                "user_id":2,
+                "customer_id":1,
+                "action":"觉得靠谱",
+                "log":"张炬[客户2]取消对你的靠谱评价",
+                "create_date":"2018-06-20T13:34:51.858"
+            },
+            {
+                "user_id":2,
+                "customer_id":1,
+                "action":"查看名片",
+                "log":"张炬[客户2]查看你的名片",
+                "create_date":"2018-06-20T13:05:11.081"
+            }
+        ],
+        "data_count":4
+    }
+}
+```
+
+
+####    【小程序 - 生成小程序的二维码（放在小程序名片）】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/qr_code_auth?rand_str=245416a1d0f21129e8e028afaadb592a&timestamp=1529551521953&user_id=2 【获取用户ID为2的最新动作日志消息】
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"生成小程序二维码成功",
+		"data":{
+
+		}
+	}
+```
+
+
+
+####    【小程序 - 查询名片里的用户标签】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user?rand_str=a932b4ac5620edafa2822755a93974bc&timestamp=1529565105630&user_id=2 【获取用户ID为2的最新动作日志消息】
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"",
+		"data":{
+			"user_id":"2",
+			"ret_data":[
+				{
+					"id":1,
+					"name":"有志青年"
+				},
+				{
+					"id":2,
+					"name":"靠谱人士"
+				}
+			],
+			"data_count":2
+		}
+	}
+```
+
+
+####    【小程序 - 名片里-新增用户标签】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/add?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "name" : "积极少年"
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：      必填      参数说明
+name        是        标签名      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"添加成功",
+		"data":[
+			{
+				"id":3,
+				"name":"积极少年"
+			}
+		]
+	}
+```
+
+####    【小程序 - 名片里-保存所有的用户标签】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/save?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "tag_list" : '[1,2,3]'
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：          必填      参数说明
+tag_list        是        [标签id,标签id2,标签id3....]      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"添加成功",
+		"data":[
+			
+		]
+	}
+```
+
+####    【小程序 - 名片里-删除用户标签】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/delete?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "id" : 3
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：      必填      参数说明
+id          是        标签id    
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"删除成功",
+		"data":{
+
+		}
+	}
+```
+
 
 
