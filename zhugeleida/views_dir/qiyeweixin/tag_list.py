@@ -28,6 +28,7 @@ def tag_list(request):
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
+
         for obj in date_list:
             if obj[2] == None:
 
@@ -89,13 +90,7 @@ def tag_list_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "customer_tag":  # 操作tag，为客户添加多个标签
-            # tag_data = {
-            #     'name': request.POST.get('name'),
-            #     'user_id': request.GET.get('user_id')
-            # }
-            #
-            # forms_obj = TagCustomerTagAddForm(tag_data)
-            # if forms_obj.is_valid():
+
             tag_list = request.POST.get('tag_list')
             customer_obj = models.zgld_customer.objects.get(id=o_id)
             tag_objs = models.zgld_tag.objects.filter(id__in=tag_list)
@@ -108,49 +103,6 @@ def tag_list_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = "标签关联客户不能为空"
 
-        # elif oper_type == "delete":
-        #     print('------delete o_id --------->>',o_id)
-        #     tag_objs = models.zgld_tag.objects.filter(id=o_id)
-        #     if tag_objs:
-        #         tag_objs.delete()
-        #         response.code = 200
-        #         response.msg = "删除成功"
-        #     else:
-        #         response.code = 302
-        #         response.msg = '标签ID不存在'
-        #
-        # elif oper_type == "update":
-        #     form_data = {
-        #         'tag_id': o_id,
-        #         'name': request.POST.get('name'),
-        #     }
-        #     print(form_data)
-        #     forms_obj = TagCustomerUpdateForm(form_data)
-        #
-        #     if forms_obj.is_valid():
-        #         name = forms_obj.cleaned_data['name']
-        #         tag_id = forms_obj.cleaned_data['tag_id']
-        #         print(tag_id)
-        #         tag_objs = models.zgld_tag.objects.filter(
-        #             id=tag_id
-        #         )
-        #         if tag_objs:
-        #             customer_list = request.POST.getlist('user_list')
-        #             if customer_list:
-        #                 tag_customer_obj = models.zgld_tag.objects.get(id=tag_id)
-        #                 tag_customer_obj.tag_customer =  customer_list
-        #
-        #             tag_objs.update(
-        #                 name=name
-        #             )
-        #             response.code = 200
-        #             response.msg = "修改成功"
-        #         else:
-        #             response.code = 302
-        #             response.msg = '标签ID不存在'
-        #     else:
-        #         response.code = 303
-        #         response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
         response.code = 402

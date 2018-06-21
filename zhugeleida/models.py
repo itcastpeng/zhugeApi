@@ -4,6 +4,8 @@ from django.db import models
 # 公司管理
 class zgld_company(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
+    area = models.CharField(max_length=128, verbose_name='所在地区', null=True)
+    address = models.TextField(verbose_name='公司详细地址')
     corp_id = models.CharField(verbose_name="企业ID", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -37,9 +39,21 @@ class zgld_userprofile(models.Model):
     department = models.ManyToManyField('zgld_department', verbose_name='所属部门')
     position = models.CharField(verbose_name='职位信息',max_length=128)
     role = models.ForeignKey("zgld_role", verbose_name="角色")
+
+    telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
     phone = models.CharField(verbose_name='绑定微信手机号', max_length=20, blank=True, null=True)
+    wechat = models.CharField(verbose_name='微信号',max_length=64,null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)
+    wechat_phone =  models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
     mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
+    is_show_phone = models.BooleanField(verbose_name='手机号是否显示在名片上',default=True)
+
+    country_choices = ((1,'国内'),
+                       (2,'国外'),
+                       )
+    country = models.SmallIntegerField(choices=country_choices,max_length=8, verbose_name='国家', null=True)
+    area = models.CharField(max_length=128,verbose_name='所在地区',null=True)
+    address =models.TextField(verbose_name='详细地址',null=True)
 
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
     avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/setAvator.jpg')
@@ -53,7 +67,9 @@ class zgld_userprofile(models.Model):
     popularity = models.IntegerField(verbose_name='人气(被查看)',default=0)
     praise = models.IntegerField(verbose_name='被赞',default=0)
     forward = models.IntegerField(verbose_name='转发',default=0)
-
+    sign = models.TextField(verbose_name='个性签名',null=True)
+    voice = models.CharField(verbose_name='语音介绍',null=True,max_length=128)
+    tag = models.ForeignKey('zgld_user_tag',verbose_name='用户标签',null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
 
@@ -66,6 +82,14 @@ class zgld_userprofile(models.Model):
         verbose_name_plural = "用户表"
         app_label = "zhugeleida"
 
+
+class zgld_user_tag(models.Model):
+    user = models.ForeignKey('zgld_userprofile',verbose_name='标签所属用户')
+    name = models.CharField(verbose_name='标签名称', max_length=64)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    class Meta:
+        verbose_name_plural = "用户标签表"
+        app_label = "zhugeleida"
 
 # 角色管理
 class zgld_role(models.Model):
@@ -135,13 +159,6 @@ class zgld_customer(models.Model):
 
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
-    source_type_choices = (
-        (1, '扫码'),
-        (2, '转发'),
-
-    )
-    source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
-    is_praise = models.ForeignKey(to='zgld_userprofile',to_field='praise')
     nickname = models.CharField(max_length=64, verbose_name='昵称',blank=True,null=True)
     country = models.CharField(max_length=64,verbose_name='国家',blank=True,null=True)
     city =  models.CharField(max_length=32,verbose_name='客户所在城市',blank=True,null=True)
@@ -149,7 +166,6 @@ class zgld_customer(models.Model):
     language = models.CharField(max_length=32,verbose_name='语言',blank=True,null=True)
     expedted_pr = models.CharField(verbose_name='预计成交概率',max_length=64,blank=True,null=True)
     superior = models.ForeignKey('self', verbose_name='上级人',null=True,blank=True)
-    belonger = models.ForeignKey('zgld_userprofile', verbose_name='归属人',null=True)
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间',blank=True,null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -159,6 +175,19 @@ class zgld_customer(models.Model):
 
     class Meta:
         verbose_name_plural = "客户表"
+        app_label = "zhugeleida"
+
+#客户所属用户-关系绑定表
+class zgld_user_customer_belonger(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='所属的用户', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
+    source_type_choices = (
+        (1, '扫码'),
+        (2, '转发'),
+    )
+    source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
+    class Meta:
+        verbose_name_plural = "客户所属用户-关系绑定表"
         app_label = "zhugeleida"
 
 
@@ -174,10 +203,10 @@ class zgld_user_customer_flowup(models.Model):
         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
         app_label = "zhugeleida"
 
-class zgld_UpDown(models.Model):
+class zgld_up_down(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户')
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
-    up = models.BooleanField(verbose_name='是否赞',null=True)
+    up = models.BooleanField(verbose_name='是否赞')
 
     class Meta:
         unique_together = [

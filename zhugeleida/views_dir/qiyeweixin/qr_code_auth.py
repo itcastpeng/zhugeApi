@@ -4,12 +4,10 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.role_verify import RoleAddForm, RoleUpdateForm, RoleSelectForm
-import time
-import datetime
+
 import json
 import requests
-from publicFunc.condition_com import conditionCom
+
 from ..conf import *
 import os
 
@@ -43,6 +41,9 @@ def qr_code_auth(request):
     IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida') + user_qr_code
     with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
+    user_obj = models.zgld_userprofile.objects.get(id=user_id)
+    user_obj.qr_code = IMG_PATH
+    user_obj.save()
 
     response.code = 200
     response.msg = "生成二维码成功"

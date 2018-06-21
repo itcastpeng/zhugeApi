@@ -106,36 +106,33 @@ def action(request, oper_type):
                 field_dict = {
                     'user_id': '',
                     'action': '',
-
                 }
 
                 q = conditionCom(request, field_dict)
                 q.add(Q(**{'is_new_msg': True}), Q.AND)
                 print('---action---->>',q)
 
-                action = request.GET.get('action')
+                objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
+                count = objs.count()
 
-                if action:  # 表示是具体的请求
-                    objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
-                    count = objs.count()
+                ret_data = []
+                for obj in objs:
+                    ret_data.append({
+                        'user_id': obj.user_id,
+                        'customer_id': obj.customer_id,
+                        'action' : obj.get_action_display(),
+                        'log': obj.customer.username + obj.remark,
+                        'create_date': obj.create_date,
+                    })
 
-                    ret_data = []
-                    for obj in objs:
-                        ret_data.append({
-                            'user_id': obj.user_id,
-                            'customer_id': obj.customer_id,
-                            'log': obj.customer.username + obj.remark,
-                            'create_date': obj.create_date,
-                        })
-
-                    print('----ret_data----->>',ret_data)
-                    objs.update(is_new_msg=False)
-                    response.code = 200
-                    response.msg = '查询日志记录成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
+                print('----ret_data----->>', ret_data)
+                objs.update(is_new_msg=False)
+                response.code = 200
+                response.msg = '查询日志记录成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
 
                 return JsonResponse(response.__dict__)
 

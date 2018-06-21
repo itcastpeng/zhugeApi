@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
     qr_code_auth, follow_language, follow_info,tag_list
-from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian
+from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user
 
 urlpatterns = [
     # url(r'^login$', login.login),
@@ -23,13 +23,17 @@ urlpatterns = [
     # url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)', company.company_oper),
     # url(r'^company$', company.company),
 
-    # 标签和标签用户的操作
+    # 标签 和 标签客户的操作
     url(r'^tag_customer/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag_customer.tag_customer_oper),
     url(r'^tag_customer$', tag_customer.tag_customer),
 
     # 标签列表和标签列表的的操作
     url(r'^tag_list/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag_list.tag_list_oper),
     url(r'^tag_list$', tag_list.tag_list),
+
+    # 标签 和 标签用户的操作
+    url(r'^tag_user/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
+    url(r'^tag_user$', tag_user.tag_user),
 
     #搜索(客户\标签)
     url(r'^search/(?P<oper_type>\w+)$', search.search),
@@ -66,7 +70,9 @@ urlpatterns = [
     # 企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),
 
-    # 访问企業微信的用戶名片
+    # 访问企业微信-用户名片
     url(r'^mingpian$', mingpian.mingpian),
+    url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
+
 
 ]

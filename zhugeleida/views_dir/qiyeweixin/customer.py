@@ -9,7 +9,7 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.customer_verify import  Customer_information_UpdateForm,Customer_UpdateExpectedTime_Form ,Customer_UpdateExpedtedPr_Form, CustomerSelectForm
 import json
-
+from django.db.models import Q
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -22,6 +22,9 @@ def customer(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('customer_id')
+
             order = request.GET.get('order', '-create_date') #排序为成交率; 最后跟进时间; 最后活动时间
             field_dict = {
                 'id': '',
@@ -33,10 +36,11 @@ def customer(request):
                 'source'  : '',
                 'create_date': '',
             }
-            q = conditionCom(request, field_dict)
-            print('q -->', q)
-            objs = models.zgld_customer.objects.select_related('belonger').filter(q).all().order_by(order)
 
+            q = conditionCom(request, field_dict)
+            q.add(Q(**{'id': customer_id}), Q.AND)
+
+            objs = models.zgld_customer.objects.filter(q).all().order_by(order)
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -62,7 +66,7 @@ def customer(request):
                         tag_list.append(t_obj.name)
                         print('--->>',tag_list)
                     info_obj = models.zgld_information.objects.filter(id=obj.id)
-                    ai_pr = 0
+
                     phone = info_obj[0].phone if info_obj else ''
                     email = info_obj[0].email if info_obj else ''
                     company = info_obj[0].company if info_obj else ''
@@ -71,21 +75,23 @@ def customer(request):
                     birthday = info_obj[0].birthday if info_obj else ''
                     mem = info_obj[0].mem if info_obj else ''
 
+                    belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
+
                     ret_data.append({
                         'id': obj.id,
                         'username': obj.username,
                         'headimgurl': obj.headimgurl,
                         'expected_time': obj.expected_time,  # 预计成交时间
                         'expedted_pr': obj.expedted_pr,  # 预计成交概率
-                        'ai_pr': ai_pr,  # AI 预计成交概率
+                        'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
                         'superior': superior_username,  # 所属上级
-                        'belonger': obj.belonger.username,  # 所属用户
-                        'source': obj.source,  # 来源
+
+                        'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': obj.memo_name,  # 备注名
                         'phone': phone,              # 手机号
                         'email': email,              # email
                         'company': company,                # 公司
-                        'position': position,  # 位置
+                        'position':position,  # 位置
                         'address': address,  # 地址
                         'birthday': birthday,  # 生日
                         'mem': mem,  # 备注

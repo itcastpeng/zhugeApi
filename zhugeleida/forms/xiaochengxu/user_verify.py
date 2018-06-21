@@ -89,7 +89,7 @@ class UserUpdateForm(forms.Form):
 class UserSelectForm(forms.Form):
 
     uid = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'invalid': "用户id不能为空",
         }
