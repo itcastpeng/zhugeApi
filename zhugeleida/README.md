@@ -1391,7 +1391,7 @@ GET 请求参数部分【公共参数】
 GET 参数说明:
 ```  python
 参数        		 必填         	   说明
-	action       	 否          (1, '查看名片'),  # 查看了名片第XXX次。
+	action       	 否              (1, '查看名片'),  # 查看了名片第XXX次。
 									 (2, '查看产品'),  # 查看您的产品; 查看竞价排名; 转发了竞价排名。
 									 (3, '查看动态'),  # 查看了公司的动态。 评论了您的企业动态。
 									 (4, '查看官网'),  # 查看了您的官网 , 转发了您官网。
@@ -1988,7 +1988,7 @@ o_id       是      /zhugeleida/qiyeweixin/customer/update_expected_pr/{{ o_id}}
 请求方式：GET（HTTP）
 访问示例:
 
->http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian?rand_str=cae406b10a53dac573369b0eb5200ff0&timestamp=1529499334685&user_id=1&uid=2&action=1
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian?rand_str=cae406b10a53dac573369b0eb5200ff0&timestamp=1529499334685&user_id=1&uid=2
 
 
 GET 请求参数【公共参数】
@@ -1999,7 +1999,7 @@ GET 请求参数【公共参数】
         'timestamp': timestamp,
         'user_id': 1,
 		'uid' :  2
-		'action' : 1 
+		
        
     }
 ```
@@ -2010,7 +2010,6 @@ GET参数说明:
 参数：      必填      参数说明
 uid          是       所属用户的ID
 user_id      是       小程序客户端的客户ID      
-action       是       action 等于 1 时，代表查看名片功能。
 
 ```
 
@@ -2133,7 +2132,6 @@ GET 请求参数
         'timestamp': timestamp,
         'user_id': 1,
 		'uid' : 2,
-		'action': 10
     }
 ```
 
@@ -2144,7 +2142,6 @@ GET参数必要说明:
 参数：      必填      参数说明
 user_id      是       小程序客户端的客户ID      
 uid          是       所属用户ID
-action       是       10 代表访问名片的动作。
 
 ```
 
@@ -2164,7 +2161,7 @@ action       是       10 代表访问名片的动作。
 
 请求方式：GET（HTTP）
 访问示例:
->http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/praise?rand_str=b587cab28de63a05cdec5e789e6f2b54&timestamp=1529543973411&user_id=2&uid=2&action=9
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/praise?rand_str=b587cab28de63a05cdec5e789e6f2b54&timestamp=1529543973411&user_id=2&uid=2
 
 GET 请求参数
 
@@ -2174,7 +2171,7 @@ GET 请求参数
         'timestamp': timestamp,
         'user_id': 1,
 		'uid' : 2,
-		'action': 9
+		
     }
 ```
 
@@ -2185,7 +2182,7 @@ GET参数必要说明:
 参数：      必填      参数说明
 user_id      是       小程序客户端的客户ID      
 uid          是       所属用户ID
-action       是       9 代表 点赞名片的动作。
+
 
 ```
 
@@ -2215,7 +2212,7 @@ GET 请求参数
         'timestamp': timestamp,
         'user_id': 1,
 		'uid' : 2,
-		'action': 6
+		
     }
 ```
 
@@ -2226,7 +2223,7 @@ GET参数必要说明:
 参数：      必填      参数说明
 user_id      是       小程序客户端的客户ID      
 uid          是       所属用户ID
-action       是       6 代表转发的动作。
+
 
 ```
 
