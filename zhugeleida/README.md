@@ -2037,6 +2037,21 @@ action       是       action 等于 1 时，代表查看名片功能。
 					"praise":1,                      # 点赞多少次
 					"forward":2                      # 转发多少次 
 					"is_up_down": false              #是否点赞了
+					"sign": '我是你爸爸'                      # 签名
+					"photo":[
+						[
+							1,
+							"xxxxx"
+						],
+						[
+							4,
+							"statics/zhugeleida/imgs/xiaochengxu/qr_code/4_uemthqpcdn_photo.jpg"
+						],
+						[
+							5,
+							"statics/zhugeleida/imgs/xiaochengxu/qr_code/5_uemthqpcdn_photo.jpg"
+						]
+                    ],
 				}
 			],
 			"data_count":1
@@ -2565,4 +2580,61 @@ id          是        标签id
 ```
 
 
+
+####    【小程序 - 名片里-修改并保存手机号】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/save_phone?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "id" : 3
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：      必填      参数说明
+id          是        标签id    
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"删除成功",
+		"data":{
+
+		}
+	}
+```
 
