@@ -2052,6 +2052,7 @@ GET参数说明:
 uid          是       所属用户的ID
 user_id      是       小程序客户端的客户ID      
 action       是       action 等于 1 时，代表查看名片功能。
+
 ```
 
 返回结果：
@@ -2064,18 +2065,19 @@ action       是       action 等于 1 时，代表查看名片功能。
 			"ret_data":[
 				{
 					"id":2,
-					"username":"zhangju",
-					"avatar":"statics/imgs/setAvator.jpg",
-					"company":"合众康桥",
-					"address":"1",
-					"position":"技术经理",
-					"email":"",
-					"wechat":"",
-					"mingpian_phone":"18511123918",
+					"username":"zhangju",            #用户名
+					"avatar":"statics/imgs/setAvator.jpg",  #头像
+					"company":"合众康桥",            #公司名称
+					"address":"1",                   #公司地址 
+					"position":"技术经理",           #职位
+					"email":"",                      #邮箱
+					"wechat":"",                     #微信号  
+					"mingpian_phone":"18511123918",  # 名片上显示的手机号
 					"create_date":"2018-06-08T22:03:23.772",
-					"popularity":12,
-					"praise":1,
-					"forward":2
+					"popularity":12,                 # 产看多少次
+					"praise":1,                      # 点赞多少次
+					"forward":2                      # 转发多少次 
+					"is_up_down": false              #是否点赞了
 				}
 			],
 			"data_count":1

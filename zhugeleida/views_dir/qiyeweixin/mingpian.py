@@ -130,19 +130,19 @@ def mingpian_oper(request, oper_type):
                 address = forms_obj.data.get('address')
 
                 objs = models.zgld_userprofile.objects.filter(id=user_id)
-                if objs:
-                    objs.update(
-                        mingpian_phone=mingpian_phone,
-                        wechat=wechat,
-                        telephone=telephone,
-                        email=email,
-                        country=country,
-                        area=area,
-                        address=address
-                    )
-                    objs.save()
-                    response.code = 200
-                    response.msg = '保存成功'
+
+                objs.update(
+                    mingpian_phone=mingpian_phone,
+                    wechat=wechat,
+                    telephone=telephone,
+                    email=email,
+                    country=country,
+                    area=area,
+                    address=address
+                )
+
+                response.code = 200
+                response.msg = '保存成功'
 
             else:
                 response.code = 402

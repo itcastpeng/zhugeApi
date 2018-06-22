@@ -206,7 +206,7 @@ class zgld_user_customer_flowup(models.Model):
 class zgld_up_down(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户')
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
-    up = models.BooleanField(verbose_name='是否赞')
+    up = models.BooleanField(verbose_name='是否赞',default=False)
 
     class Meta:
         unique_together = [

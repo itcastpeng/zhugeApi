@@ -22,6 +22,8 @@ def mingpian(request):
         forms_obj = UserSelectForm(request.GET)
         if forms_obj.is_valid():
             user_id = request.GET.get('uid')  # 用户 id
+            customer_id = request.GET.get('customer_id')
+
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
@@ -59,9 +61,14 @@ def mingpian(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-            ret_data = []
+            ret_data = {}
+            is_up_down = ''
             for obj in objs:
-                ret_data.append({
+                up_down_obj = models.zgld_up_down.objects.filter(user_id=obj.id,customer_id=customer_id)
+                if up_down_obj:
+                    is_up_down = up_down_obj[0].up
+
+                ret_data = {
                     'id': obj.id,
                     'username': obj.username,
                     'avatar': obj.avatar,
@@ -75,7 +82,8 @@ def mingpian(request):
                     'popularity': obj.popularity,    # 被查看多少次。
                     'praise': obj.praise,            # 点赞多少次
                     'forward': obj.forward,          # 转发多少次
-                })
+                    'is_up_down' : is_up_down or False
+                }
 
             # 查询成功 返回200 状态码
             response.code = 200

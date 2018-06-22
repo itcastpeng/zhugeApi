@@ -74,5 +74,4 @@ urlpatterns = [
     url(r'^mingpian$', mingpian.mingpian),
     url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
 
-
 ]
