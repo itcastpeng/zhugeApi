@@ -1368,49 +1368,7 @@ user_type       是              客户访问类型 1,微信公众号  2,微信�
 source          是              客户的来源   1,扫码  2,转发
 ```
 
- 
 
-####小程序-【名片接口】：
-请求方式：GET（HTTP）
-请求示例：
->http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian?rand_str=7cfedc0d40b9bf9e352a234872c57305&timestamp=1528198873304&user_id=1&id=20
-
-GET 请求参数部分：
-```  python
-{
-    'rand_str': account.str_encrypt(timestamp + token),
-    'timestamp': timestamp,
-    'user_id': 1,
-    'id' : 20
-}
-```
-GET请求参数部分：
-```  python
-参数            必填             说明
-id              是               用户的ID
-```
-
-返回结果：
-```  python
-{
-    "code":200,
-    "msg":"查询成功",
-    "data":{
-        "ret_data":[
-            {
-                "id":20,
-                "username":"fffffffxxxxxffff",
-                "avatar":"statics/imgs/Avator.jpg",
-                "company":"合众康桥",
-                "popularity":0,
-                "praise":0,
-                "forward":0
-            }
-        ],
-        "data_count":1
-    }
-}
-``` 
 
 ####  【 企业微信-雷达】 按时间展示访问日志
 请求方式：GET（HTTP）
