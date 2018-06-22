@@ -67,8 +67,9 @@ def mingpian(request):
                 up_down_obj = models.zgld_up_down.objects.filter(user_id=obj.id,customer_id=customer_id)
                 if up_down_obj:
                     is_up_down = up_down_obj[0].up
-
+                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id', 'photo_url')
                 ret_data = {
+
                     'id': obj.id,
                     'username': obj.username,
                     'avatar': obj.avatar,
@@ -83,10 +84,8 @@ def mingpian(request):
                     'praise': obj.praise,            # 点赞多少次
                     'forward': obj.forward,          # 转发多少次
                     'is_up_down' : is_up_down or False,
-                    'sign' : obj.sign,               # 签名
-                    # 'photo' : [
-                    #     {id:1,img_url}
-                    # ]
+                    'sign' : obj.sign or '',               # 签名
+                    'photo': list(photo_data) or '',
 
                 }
 

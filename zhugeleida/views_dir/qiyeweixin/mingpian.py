@@ -62,6 +62,7 @@ def mingpian(request):
                     'wechat_phone': obj.wechat_phone or '',  # 微信绑定的手机号 | 管理员可以修改
                     'is_show_phone': obj.is_show_phone,  # 默认显示名片中的手机号，
                     'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
+                    'sign': obj.sign,                     # 签名
                     'photo' : list(photo_data),
                     'create_date': obj.create_date,  # 创建时间
 
