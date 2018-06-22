@@ -33,21 +33,22 @@ def chat(request):
             length = forms_obj.cleaned_data['length']
 
 
-            msg_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+            objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            ).order_by('-create_date')
-            msg_objs.update(
+            ).order_by('create_date')
+            objs.update(
                 is_new_msg=False
             )
-
+            count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                msg_objs = msg_objs[start_line: stop_line]
+                objs = objs[start_line: stop_line]
+
 
             ret_data_list = []
-            for obj in msg_objs:
+            for obj in objs:
                 ret_data_list.append({
                      'customer_id': obj.customer.id,
                      'user_id': obj.userprofile.id,
@@ -57,15 +58,12 @@ def chat(request):
                      'msg': obj.msg,
                      'send_type': obj.send_type,
                 })
-
-
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
-            print('--- list(msg_obj) -->>', ret_data_list)
-
-            response.data = ret_data_list
-
-
+            response.data = {
+                'ret_data': ret_data_list,
+                'data_count': count,
+            }
             if not ret_data_list:
                 # 没有新消息
                 response.msg = 'No new data'
@@ -87,18 +85,16 @@ def chat_oper(request, oper_type, o_id):
                 customer_id = request.GET.get('customer_id')
                 # send_type = request.GET.get('send_type')
 
-                msg_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    # send_type=send_type,
                     is_new_msg=True
 
-                ).order_by('-create_date')
-
-
+                ).order_by('create_date')
 
                 ret_data_list = []
-                for obj in msg_objs:
+                count = objs.count()
+                for obj in objs:
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
@@ -113,15 +109,18 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = '实时获取-最新聊天信息成功'
                 print('--- list(msg_obj) -->>', ret_data_list)
 
-                response.data = ret_data_list
-                msg_objs.update(
+                response.data = {
+                    'ret_data': ret_data_list,
+                    'data_count': count,
+                }
+
+                objs.update(
                     is_new_msg=False
                 )
 
                 if not ret_data_list:
                     # 没有新消息
                     response.msg = '没有得到实时聊天信息'
-
                 return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':

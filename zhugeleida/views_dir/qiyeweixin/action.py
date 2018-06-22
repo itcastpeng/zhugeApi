@@ -162,11 +162,10 @@ def action(request, oper_type):
             forms_obj = ActionCustomerForm(request.GET)
             if forms_obj.is_valid():
                 response = Response.ResponseObj()
-                user_id = request.GET.get('user_id')
-                ret_data = []
 
-                # current_page = forms_obj.cleaned_data['current_page']
-                # length = forms_obj.cleaned_data['length']
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
                 field_dict = {
                     'id': '',
                     'user_id': '',
@@ -187,57 +186,175 @@ def action(request, oper_type):
                     stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
-                objs = models.zgld_accesslog.objects.filter(q).values('action','customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
+                objs = models.zgld_accesslog.objects.filter(q).values('customer__headimgurl','customer_id','customer__username').annotate(Count('action'))
                 print('customer_action_data -->', objs)
 
-                # if length != 0:
-                #     start_line = (current_page - 1) * length
-                #     stop_line = start_line + length
-                #     objs = objs[start_line: stop_line]
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
 
-                action_dict = {}
-                for i in models.zgld_accesslog.action_choices:
-                    action_dict[i[0]] = i[1]
-
-                customer_id_list = []
-                customer_username = ''
-                customer__headimgurl = ''
-                detail_dict = {}
-                customer_id = ''
-                total_num = 0
+                ret_list = []
                 for obj in objs:
-                    print('---------->>', obj['action'], obj['action__count'])
-                    customer_id_list.append(obj['customer_id'])
+                    customer_id = obj['customer_id']
+                    action_count = obj['action__count']
+                    customer_username = obj['customer__username']
+                    headimgurl = obj['customer__headimgurl']
 
-                ids = list(set(customer_id_list))
-                print('------>>',ids)
-                for c_id in  ids:
-                    for obj in objs:
+                    insert_data = {
+                        'customer_id': customer_id,
+                        'action_count': action_count,
+                        'customer_username': customer_username,
+                        'headimgurl': headimgurl
+                    }
+                    if not ret_list: # 首次添加
+                        ret_list.append(insert_data)
 
-                        if obj['customer_id'] == c_id:
-                            total_num  += obj['action__count']
-                            customer_id = c_id
-                            customer_username = obj['customer__username']
-                            customer__headimgurl = obj['customer__headimgurl']
-                            detail_dict[obj['action']] = {
-                                'count': obj['action__count'],
-                                'name': action_dict[obj['action']]
-                            }
+                    else: # ret_list 中有数据
+                        for index, data in enumerate(ret_list):
+                            if data['action_count'] < action_count:
+                                ret_list.insert(index, insert_data)
+                                break
+                        else:
+                            ret_list.append(insert_data)
 
-                    ret_data.append({
-                                'totalCount': total_num,
-                                'customer_id': customer_id,
-                                'customer__username': customer_username ,
-                                'user_id': user_id,
-                                'headimgurl': customer__headimgurl,
-                                'detail': detail_dict
-                    })
-                    detail_dict  = {}
-                    total_num = 0
+                print('ret_list -->', ret_list)
+
+                # action_dict = {}
+                # for i in models.zgld_accesslog.action_choices:
+                #     action_dict[i[0]] = i[1]
+                #
+                # customer_id_list = []
+                # customer_username = ''
+                # customer__headimgurl = ''
+                # detail_list = []
+                # customer_id = ''
+                # total_num = 0
+                #
+                # temp_dict = {}
+                # for obj in objs:
+                #     print('obj -->', obj)
+                #     customer_id = obj['customer_id']
+                #     action_count = obj['action__count']
+                #     customer_username = obj['customer__username']
+                #     headimgurl = obj['customer__headimgurl']
+                #     action = obj['action']
+                #     if customer_id in temp_dict:
+                #         temp_dict[customer_id]['totalCount'] += action_count
+                #         temp_dict[customer_id]['detail'].append({
+                #             "count": action_count,
+                #             "name": action_dict[action],
+                #             "action": action,
+                #         })
+                #     else:
+                #         temp_dict[customer_id] = {
+                #             "totalCount": action_count,
+                #             "customer_id": customer_id,
+                #             "customer_username": customer_username,
+                #             "user_id": user_id,
+                #             "headimgurl": headimgurl,
+                #             "detail": [
+                #                 {
+                #                     "count": action_count,
+                #                     "name": action_dict[action],
+                #                     "action": action,
+                #
+                #                 }
+                #             ]
+                #         }
+
+
+                # for obj in objs:
+                #     print('---------->>', obj['action'], obj['action__count'])
+                #     customer_id_list.append(obj['customer_id'])
+                #
+                # ids = list(set(customer_id_list))
+                # print('------>>',ids)
+                # for c_id in  ids:
+                #     for obj in objs:
+                #
+                #         if obj['customer_id'] == c_id:
+                #             total_num  += obj['action__count']
+                #             customer_id = c_id
+                #             customer_username = obj['customer__username']
+                #             customer__headimgurl = obj['customer__headimgurl']
+                #             detail_list.append({
+                #                 'count': obj['action__count'],
+                #                 'name': action_dict[obj['action']],
+                #                 'action': obj['action']
+                #             })
+                #
+                #     ret_data.append({
+                #                 'totalCount': total_num,
+                #                 'customer_id': customer_id,
+                #                 'customer__username': customer_username ,
+                #                 'user_id': user_id,
+                #                 'headimgurl': customer__headimgurl,
+                #                 'detail': detail_list
+                #     })
+
+                    # total_num = 0
 
                 response.code = 200
                 response.msg = '查询日志记录成功'
-                response.data = ret_data
+                response.data = ret_list
 
                 return JsonResponse(response.__dict__)
 
+        elif oper_type == 'customer_detail':
+            response = Response.ResponseObj()
+            field_dict = {
+                'customer_id': '',
+                'user_id': '',
+            }
+
+            import json
+            q = conditionCom(request, field_dict)
+            objs = models.zgld_accesslog.objects.filter(q).values('customer_id','action').annotate(Count('action'))
+            print('-------objs---->>',json.dumps(list(objs)))
+
+            ret_data = []
+            action_dict = {}
+            for i in models.zgld_accesslog.action_choices:
+                action_dict[i[0]] = i[1]
+
+            temp_dict = {}
+            ret_list = []
+
+            temp_dict = {}
+            for obj in objs:
+                print('obj -->', obj)
+                customer_id = obj['customer_id']
+                action_count = obj['action__count']
+
+                action = obj['action']
+                if customer_id in temp_dict:
+                    temp_dict[customer_id]['totalCount'] += action_count
+                    temp_dict[customer_id]['detail'].append({
+                        "count": action_count,
+                        "name": action_dict[action],
+                        "action": action,
+                    })
+                else:
+                    temp_dict[customer_id] = {
+                        "totalCount": action_count,
+                        "customer_id": customer_id,
+                        "detail": [
+                            {
+                                "count": action_count,
+                                "name": action_dict[action],
+                                "action": action,
+
+                            }
+                        ]
+                    }
+                # ret_list.append(temp_dict)
+                # temp_dict = {}
+
+            ret_data.append(temp_dict)
+
+            response.code = 200
+            response.msg = '查询日志记录成功'
+            response.data = ret_data
+
+            return JsonResponse(response.__dict__)

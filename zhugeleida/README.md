@@ -879,6 +879,13 @@ GET 请求发送数据部分【公共参数】：
 }
 ``` 
 
+GET 参数说明：
+
+``` python
+参数说明         必填        参数说明:
+current_page     否          当前页数
+length           否          每页长度20页
+``` 
 
 
 返回结果:
@@ -925,6 +932,8 @@ GET 请求参数部分：
     'timestamp': timestamp,
     'user_id': 2,   
     'customer_id': 1,
+	'current_page'：1,            
+    'length'     :   20           
 }
 
 ```
@@ -935,6 +944,10 @@ GET参数说明:
 参数           必填          说明
 user_id        是           用户的ID
 customer_id    是           客户的ID
+current_page   否           当前页数
+length         否           每页长度
+current_page   否           当前页数
+length'        否           每页长度(每页长度为20页)
 ```
 
 返回结果：
@@ -992,7 +1005,7 @@ POST 请求参数部分：
 customer_id      是          客户ID
 user_id          是          用户ID
 msg              是          消息
-send_type        发送        发送类型，1代表 用户发送给用户 ,  2代表 客户发送给用户。
+send_type        发送        发送类型，1代表 用户发送给客户 ,  2代表 客户发送给用户。
 ``` 
 
 返回结果：
@@ -1464,11 +1477,19 @@ GET 请求参数部分【公共参数】
     {
         'rand_str': account.str_encrypt(timestamp + token),
         'timestamp': timestamp,
-        'user_id': 1,      
+        'user_id': 1,
+        'current_page': 1,
+        'length':  20  		
     }
 ```
 
+GET 参数说明：
 
+``` python
+参数说明         必填        参数说明:
+current_page     否          当前页数
+length           否          每页长度20页
+``` 
 
 返回结果:
 

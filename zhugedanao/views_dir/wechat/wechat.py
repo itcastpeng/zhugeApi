@@ -14,9 +14,12 @@ import time
 
 import xml.dom.minidom
 from publicFunc.Response import ResponseObj
+from publicFunc.account import get_token
 
 import datetime
 from publicFunc.gongzhonghao_weixin import WeChatPublicSendMsg
+
+from zhugedanao import models
 
 
 def checkSignature(timestamp, nonce, token, signature):
@@ -41,8 +44,10 @@ def index(request):
     EncodingAESKey = 'LFYzOBp42g5kwgSUWhGC9uRugSmpyetKfAsJa5FdFHX'
 
     check_result = checkSignature(timestamp, nonce, token, signature)
+    print('check_result -->', check_result)
 
     if check_result:
+        we_chat_public_send_msg_obj = WeChatPublicSendMsg()
         if request.method == "GET":
             return HttpResponse(echostr)
         else:
@@ -59,7 +64,7 @@ def index(request):
             print("event -->", event)
 
             # 用户的 openid
-            from_user_name = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
+            openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
 
             wechat_data_path = "webadmin/modules/wechat_data.json"
             # we_chat_public_send_msg_obj = WeChat.WeChatPublicSendMsg(wechat_data_path)
@@ -73,19 +78,37 @@ def index(request):
                 if event == "subscribe":
                     event_key = event_key.split("qrscene_")[-1]
                 event_key = json.loads(event_key)
-                user_id = event_key["user_id"]
+                timestamp = event_key["timestamp"]
                 print('event_key -->', event_key)
 
                 # # 保证1个微信只能够关联1个账号
-                # if models.UserProfile.objects.filter(openid=from_user_name).count() == 0:
-                #     obj = models.UserProfile.objects.get(id=user_id)
-                #     print(obj.username)
-                #     obj.openid = from_user_name
-                #     obj.save()
+                user_objs = models.zhugedanao_userprofile.objects.filter(openid=openid)
+                if user_objs:
+                    obj = user_objs[0]
+                    print(obj.username)
+                    obj.timestamp = timestamp
+                    obj.save()
+                else:
+                    ret_obj = we_chat_public_send_msg_obj.get_user_info(openid=openid)
+                    print('ret_obj -->', ret_obj)
 
-            # # 取消关注
-            # elif event == "unsubscribe":
-            #     models.UserProfile.objects.filter(openid=from_user_name).update(openid=None)
+                    models.zhugedanao_userprofile.objects.create(
+                        openid=openid,
+                        token=get_token(timestamp),
+                        timestamp=timestamp,
+                        sex=ret_obj['sex'],
+                        country=ret_obj['country'],
+                        province=ret_obj['province'],
+                        city=ret_obj['city'],
+                        subscribe_time=ret_obj['subscribe_time'],
+                        set_avator=ret_obj['headimgurl'],
+                        username=ret_obj['nickname'],
+                    )
+
+
+            # 取消关注
+            elif event == "unsubscribe":
+                models.zhugedanao_userprofile.objects.filter(openid=openid).update(openid=None)
 
                 # we_chat_public_send_msg_obj.sendTempMsg(post_data)
 
@@ -93,6 +116,29 @@ def index(request):
 
     else:
         return HttpResponse(False)
+
+
+@csrf_exempt
+def wechat_login(request):
+    response = ResponseObj()
+    timestamp = request.POST.get('timestamp')
+    user_objs = models.zhugedanao_userprofile.objects.filter(timestamp=timestamp)
+    if user_objs:
+        user_obj = user_objs[0]
+        response.code = 200
+        response.data = {
+            'token': user_obj.token,
+            'user_id': user_obj.id,
+            'set_avator': user_obj.set_avator,
+            'username': user_obj.username,
+
+        }
+        response.msg = "登录成功"
+    else:
+        response.code = 405
+        response.msg = '扫码登录异常，请重新扫描'
+
+    return JsonResponse(response.__dict__)
 
 
 # 获取用于登录的微信二维码
@@ -105,7 +151,8 @@ def generate_qrcode(request):
 
     response.code = 200
     response.data = {
-        'qc_code_url': qc_code_url
+        'qc_code_url': qc_code_url,
+        'timestamp': timestamp
     }
 
     return JsonResponse(response.__dict__)
