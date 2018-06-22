@@ -91,6 +91,15 @@ class zgld_user_tag(models.Model):
         verbose_name_plural = "用户标签表"
         app_label = "zhugeleida"
 
+
+class zgld_user_photo(models.Model):
+    user = models.ForeignKey('zgld_userprofile',verbose_name='照片所属用户')
+    photo_url = models.CharField(verbose_name='照片URL链接', max_length=256,null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    class Meta:
+        verbose_name_plural = "用户照片表"
+        app_label = "zhugeleida"
+
 # 角色管理
 class zgld_role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)

@@ -38,11 +38,11 @@ def qr_code_auth(request):
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
     # print('-------qr_ret---->', qr_ret.text)
     user_qr_code = '/%s_qrcode.jpg' %  user_id
-    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida') + user_qr_code
+    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida','imgs','xiaochengxu','qr_code') + user_qr_code
     with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
     user_obj = models.zgld_userprofile.objects.get(id=user_id)
-    user_obj.qr_code = IMG_PATH
+    user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
     user_obj.save()
 
     response.code = 200

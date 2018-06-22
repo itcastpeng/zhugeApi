@@ -10,6 +10,7 @@ from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.qiyeweixin.mingpian_verify import MingPianPhoneUpdateForm, MingPianInfoUpdateForm, UserSelectForm
 import json
 from django.db.models import Q
+import os
 
 
 # 展示企业微信的用户名片的个性签名,标签,
@@ -31,7 +32,6 @@ def mingpian(request):
                 'role__name': '__contains',
                 'company__name': '__contains',
             }
-
             q = conditionCom(request, field_dict)
             q.add(Q(**{'id': user_id}), Q.AND)
 
@@ -45,6 +45,7 @@ def mingpian(request):
 
             ret_data = []
             for obj in objs:
+                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id','photo_url')
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,  # 姓名| 管理员可以修改
@@ -61,6 +62,7 @@ def mingpian(request):
                     'wechat_phone': obj.wechat_phone or '',  # 微信绑定的手机号 | 管理员可以修改
                     'is_show_phone': obj.is_show_phone,  # 默认显示名片中的手机号，
                     'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
+                    'photo' : list(photo_data),
                     'create_date': obj.create_date,  # 创建时间
 
                 })
@@ -91,7 +93,6 @@ def mingpian_oper(request, oper_type):
 
         if oper_type == 'save_phone':
 
-
             forms_obj = MingPianPhoneUpdateForm(request.POST)
             if forms_obj.is_valid():
 
@@ -111,7 +112,6 @@ def mingpian_oper(request, oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-
         elif oper_type == 'save_info':
 
             forms_obj = MingPianInfoUpdateForm(request.POST)
@@ -120,7 +120,7 @@ def mingpian_oper(request, oper_type):
 
                 print('----forms_obj.data--->>', forms_obj.data)
 
-                user_id = forms_obj.data.get('user_id')
+                user_id = request.GET.get('user_id')
                 wechat = forms_obj.data.get('wechat')
                 mingpian_phone = forms_obj.data.get('mingpian_phone')
                 telephone = forms_obj.data.get('telephone')
@@ -130,16 +130,17 @@ def mingpian_oper(request, oper_type):
                 address = forms_obj.data.get('address')
 
                 objs = models.zgld_userprofile.objects.filter(id=user_id)
-
+                print('-----objs--->>', objs)
                 objs.update(
                     mingpian_phone=mingpian_phone,
                     wechat=wechat,
                     telephone=telephone,
                     email=email,
                     country=country,
-                    area=area,
-                    address=address
                 )
+                if objs[0].company_id:  # 后台一定要先将用户外键到公司的ID。在修改公司地址。
+                    company_obj = models.zgld_company.objects.filter(id=objs[0].company_id)
+                    company_obj.update(area=area, address=address)
 
                 response.code = 200
                 response.msg = '保存成功'
@@ -149,6 +150,77 @@ def mingpian_oper(request, oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == 'save_sign':
+
+            user_id = request.GET.get('user_id')
+            mingpian_sign = request.POST.get('sign')
+
+            objs = models.zgld_userprofile.objects.filter(id=user_id)
+
+            if objs:
+                objs.update(sign=mingpian_sign)
+                response.code = 200
+                response.msg = '保存成功'
+
+        elif oper_type == 'upload_photo':
+            user_id = request.GET.get('user_id')
+            photo = request.FILES.get('photo')
+            print('-----photo--->>',type(photo),photo)
+
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            obj = models.zgld_user_photo.objects.create(user_id=user_id)
+            photo_id = obj.id
+            userid = models.zgld_userprofile.objects.get(id=user_id).userid
+            user_photo = '/%s_%s_photo.jpg' % (photo_id, userid)
+
+            photo_url = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % (user_photo)
+            obj.photo_url = photo_url
+            obj.save()
+
+            IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo') + user_photo
+
+            with open('%s' % (IMG_PATH), 'wb') as f:
+                for chunk in photo.chunks():
+                    f.write(chunk)
+
+            response.code = 200
+            response.msg = '上传成功'
+            response.data = {
+                'photo_id': photo_id,
+                'photo_url': photo_url,
+            }
+
+        elif oper_type == 'delete_photo':
+            print('--------->>',request.POST)
+            user_id = request.GET.get('user_id')
+            photo_id = request.POST.get('photo_id')
+
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)
+
+            if objs:
+                IMG_PATH = BASE_DIR  + '/' + objs[0].photo_url
+                print('-----IMG_PATH--->>',IMG_PATH)
+                if os.path.exists(IMG_PATH):os.remove(IMG_PATH)
+                objs.delete()
+                response.code = 200
+                response.msg = '删除成功'
+            else:
+                response.code = 302
+                response.msg = '删除数据不存在'
+
+
+    elif request.method == "GET":
+        if oper_type == 'show_photo':
+            user_id = request.GET.get('user_id')
+            photo_query_list = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url')
+            models.zgld_user_photo.objects.filter(user_id=1)
+            response.code = 200
+            response.msg = '获取成功'
+            response.data = {
+                'ret_data': list(photo_query_list),
+                'user_id': user_id,
+            }
+
+
     return JsonResponse(response.__dict__)
-
-

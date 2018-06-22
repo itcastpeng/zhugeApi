@@ -82,7 +82,12 @@ def mingpian(request):
                     'popularity': obj.popularity,    # 被查看多少次。
                     'praise': obj.praise,            # 点赞多少次
                     'forward': obj.forward,          # 转发多少次
-                    'is_up_down' : is_up_down or False
+                    'is_up_down' : is_up_down or False,
+                    'sign' : obj.sign,               # 签名
+                    # 'photo' : [
+                    #     {id:1,img_url}
+                    # ]
+
                 }
 
             # 查询成功 返回200 状态码
@@ -154,37 +159,6 @@ def mingpian_oper(request, oper_type):
                         response = action_record(request, remark)
                         models.zgld_userprofile.objects.filter(id=user_id).update(praise=F('praise') + 1)
 
-
-
-                # obj = models.zgld_accesslog.objects.create(
-                #     user_id=user_id,
-                #     customer_id=customer_id,
-                #     remark=remark,
-                #     action=action
-                # )
-
-                # follow_objs = models.zgld_user_customer_flowup.objects.filter(user_id=user_id, customer_id=customer_id)
-                # if follow_objs.count() == 1:
-                #     obj.activity_time_id = follow_objs[0].id
-                #     follow_objs.update(last_activity_time=datetime.datetime.now())
-                #     obj.save()
-                #     follow_objs[0].save()
-                #     response.code = 200
-                #     response.msg = '记录日志成功'
-                #
-                #
-                # elif follow_objs.count() == 0:
-                #     flowup_create_obj = models.zgld_user_customer_flowup.objects.create(user_id=user_id,
-                #                                                                         customer_id=customer_id,
-                #                                                                         last_activity_time=datetime.datetime.now())
-                #     obj.activity_time_id = flowup_create_obj.id
-                #     obj.save()
-                #     response.code = 200
-                #     response.msg = '记录日志成功'
-                #
-                # else:
-                #     response.code = 301
-                #     response.msg = '用户-客户跟进信息-关系绑定表数据重复'
 
             elif oper_type == 'forward':
                 user_id = request.GET.get('uid')  # 用户 id
