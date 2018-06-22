@@ -174,7 +174,7 @@ def mingpian_oper(request, oper_type):
             userid = models.zgld_userprofile.objects.get(id=user_id).userid
             user_photo = '/%s_%s_photo.jpg' % (photo_id, userid)
 
-            photo_url = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % (user_photo)
+            photo_url = 'statics/zhugeleida/imgs/xiaochengxu/user_photo%s' % (user_photo)
             obj.photo_url = photo_url
             obj.save()
 
@@ -194,7 +194,7 @@ def mingpian_oper(request, oper_type):
         elif oper_type == 'delete_photo':
             print('--------->>',request.POST)
             user_id = request.GET.get('user_id')
-            photo_id = request.POST.get('photo_id')
+            photo_id = request.POST.get('id')
 
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)

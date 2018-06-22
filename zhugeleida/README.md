@@ -2034,10 +2034,11 @@ action       是       action 等于 1 时，代表查看名片功能。
 					"mingpian_phone":"18511123918",  # 名片上显示的手机号
 					"create_date":"2018-06-08T22:03:23.772",
 					"popularity":12,                 # 产看多少次
-					"praise":1,                      # 点赞多少次
+					"praise":1,                      # 点赞多少次名片 【靠谱数量】
 					"forward":2                      # 转发多少次 
-					"is_up_down": false              #是否点赞了
-					"sign": '我是你爸爸'                      # 签名
+					"is_praise":  false,             # 是否点赞了名片。【靠谱与否】
+					"sign":     '我是你爸爸'            # 签名
+				    "is_sign":false,                    # 是否点赞了签名
 					"photo":[
 						[
 							1,
@@ -2586,7 +2587,7 @@ id          是        标签id
 
 请求方式：POST（HTTP）
 访问示例:
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/save_phone?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/save_phone?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1 
 
 
 GET 请求参数
@@ -2595,7 +2596,7 @@ GET 请求参数
     {
         'rand_str': account.str_encrypt(timestamp + token),
         'timestamp': timestamp,
-        'user_id': 2,   # 企业微信的用户ID
+        'user_id': 2,     #企业微信的用户ID
 		
     }
 ```
@@ -2613,16 +2614,17 @@ POST 请求参数
 
 ``` python
     {
-     "id" : 3
-		
+     "mingpian_phone" : 15931788977
+	 "is_show_phone" : False	
     }
 ```
 
 POST参数必要说明:
 
 ``` python
-参数：      必填      参数说明
-id          是        标签id    
+参数：             必填      参数说明
+mingpian_phone      是       名片中显示的手机号
+is_show_phone       是       名片中是否显示手机号。True 是可显示。False 是不显示
 
 ```
 
@@ -2631,10 +2633,353 @@ id          是        标签id
 ``` python
 	{
 		"code":200,
-		"msg":"删除成功",
+		"msg":"保存成功",
 		"data":{
 
 		}
 	}
 ```
+
+
+####    【小程序 - 名片里-修改并保存个人信息】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/save_phone?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "wechat" : "just so so",
+	 "mingpian_phone" : 15931788975,
+	 "telephone" : (010-4321095),
+	 "email" : '12133@qq.com',
+	 "country" : 1 | 2 ,
+	 "area" :   "北京市 北京 通州区 "
+	 "address" : "新华西街 北京ONE写字楼2303"
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：             必填      参数说明
+mingpian_phone      是       名片中显示的手机号
+telephone           否       座机号
+email               否       邮箱号
+country             否       1代表国内，2代表国外
+area                否       公司所在省份和城市
+address             否       详细地址
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"保存成功",
+		"data":{
+
+		}
+	}
+```
+
+
+
+####    【小程序 - 名片里-添加\修改个人签名】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/save_sign?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "sign" : "一生所爱~~",
+	
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：             必填      参数说明
+sign               否       个性签名
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"保存成功",
+		"data":{
+
+		}
+	}
+```
+
+####    【小程序 - 名片里-显示所有的照片 】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/show_photo?rand_str=207e8db43d1fadee295a8c7e88c31bfa&timestamp=1529657333192&user_id=1
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+返回结果 ：
+
+``` python
+	{
+    "code":200,
+    "msg":"获取成功",
+    "data":{
+        "ret_data":[
+            
+            {
+                "id":4,
+                "photo_url":"statics/zhugeleida/imgs/xiaochengxu/qr_code/4_uemthqpcdn_photo.jpg"
+            },
+            {
+                "id":5,
+                "photo_url":"statics/zhugeleida/imgs/xiaochengxu/qr_code/5_uemthqpcdn_photo.jpg"
+            }
+        ],
+        "user_id":"1"
+    }
+}
+```
+
+
+
+
+
+
+
+####    【小程序 - 名片里-上传照片 】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/upload_photo?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+POST 请求参数【Ajax 发送数据】
+
+``` python
+    {
+	 'photo': 	'ewm.jpg'  # 二进制文件发送。
+	}                 	
+	
+```
+
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"上传成功",
+		"data":{
+			"photo_id":7,
+			"photo_url": "statics/zhugeleida/imgs/xiaochengxu/user_photo/7_uemthqpcdn_photo.jpg"  # 返回了 上传图片 的 ID和URL地址。
+		}
+	}
+```
+
+
+
+####    【小程序 - 名片里-删除上传的照片】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/delete_photo?rand_str=d43fe0f93858169921dc6906e375ae81&timestamp=1529656667083&user_id=1
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID	
+    }
+	
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+POST 请求参数
+
+``` python
+    {
+	 'id': 	7   # 要删除的照片的ID
+	}                 	
+	
+```
+
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"删除数据成功",
+		"data":{
+
+		}
+	}
+```
+
+####    【小程序 - 名片里-点赞签名】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/up_sign?rand_str=d43fe0f93858169921dc6906e375ae81&timestamp=1529656667083&user_id=1&uid=2
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #小程序的用户ID
+        'uid': 2, 	                   #所属用户的ID	
+    }
+	
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+			"ret_data":{
+				"sign_num":11,   # 签名总个数
+				"is_sign":true   # 签名是否点赞了。  true代表点赞了。false 代表没有。
+			}
+		}
+	}
+```
+
+
+
+
+
+
+
+
+
+
+
 

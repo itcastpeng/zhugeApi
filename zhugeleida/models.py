@@ -14,6 +14,7 @@ class zgld_company(models.Model):
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
 
+#公司部门
 class zgld_department(models.Model):
     company = models.ForeignKey('zgld_company',verbose_name='所属公司')
     name = models.CharField(verbose_name="部门名称", max_length=128)
@@ -24,6 +25,7 @@ class zgld_department(models.Model):
     class Meta:
         verbose_name_plural = "部门表"
         app_label = "zhugeleida"
+
 
 # 用户管理
 class zgld_userprofile(models.Model):
@@ -64,10 +66,11 @@ class zgld_userprofile(models.Model):
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=2)
 
-    popularity = models.IntegerField(verbose_name='人气(被查看)',default=0)
-    praise = models.IntegerField(verbose_name='被赞',default=0)
-    forward = models.IntegerField(verbose_name='转发',default=0)
+    popularity = models.IntegerField(verbose_name='人气数(被查看)',default=0)
+    praise = models.IntegerField(verbose_name='被赞数',default=0)
+    forward = models.IntegerField(verbose_name='转发数',default=0)
     sign = models.TextField(verbose_name='个性签名',null=True)
+    sign_num = models.IntegerField(verbose_name='签名被赞个数',default=0)
     voice = models.CharField(verbose_name='语音介绍',null=True,max_length=128)
     tag = models.ForeignKey('zgld_user_tag',verbose_name='用户标签',null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -83,6 +86,7 @@ class zgld_userprofile(models.Model):
         app_label = "zhugeleida"
 
 
+#用户标签
 class zgld_user_tag(models.Model):
     user = models.ForeignKey('zgld_userprofile',verbose_name='标签所属用户')
     name = models.CharField(verbose_name='标签名称', max_length=64)
@@ -92,6 +96,7 @@ class zgld_user_tag(models.Model):
         app_label = "zhugeleida"
 
 
+#用户照片
 class zgld_user_photo(models.Model):
     user = models.ForeignKey('zgld_userprofile',verbose_name='照片所属用户')
     photo_url = models.CharField(verbose_name='照片URL链接', max_length=256,null=True)
@@ -100,7 +105,16 @@ class zgld_user_photo(models.Model):
         verbose_name_plural = "用户照片表"
         app_label = "zhugeleida"
 
-# 角色管理
+
+# #公司产品
+# class zgld_product(models.Model):
+#    user = models.ForeignKey('zgld_userprofile',verbose_name='所属用户',null=True)
+#    compnay = models.ForeignKey('zgld_company',verbose_name='所属企业',null=True)
+#    name = models.CharField(verbose_name='产品名称',null=True)
+#    price = models.CharField(verbose_name='价格')
+
+
+#角色管理
 class zgld_role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -113,7 +127,7 @@ class zgld_role(models.Model):
         return "%s - %s" % (self.id, self.name)
 
 
-# 权限管理
+#权限管理
 class zgld_quanxian(models.Model):
     path = models.CharField(verbose_name="访问路径", max_length=64)
     icon = models.CharField(verbose_name="图标", max_length=64)
@@ -186,6 +200,7 @@ class zgld_customer(models.Model):
         verbose_name_plural = "客户表"
         app_label = "zhugeleida"
 
+
 #客户所属用户-关系绑定表
 class zgld_user_customer_belonger(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='所属的用户', null=True)
@@ -212,6 +227,7 @@ class zgld_user_customer_flowup(models.Model):
         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
         app_label = "zhugeleida"
 
+#用户被赞【是否靠谱】
 class zgld_up_down(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户')
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
@@ -224,6 +240,18 @@ class zgld_up_down(models.Model):
         verbose_name_plural = "用户顶或踩表"
         app_label = "zhugeleida"
 
+#用户被赞【是否靠谱】
+class zgld_up_down_sign(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户签名')
+    customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的用户')
+    up = models.BooleanField(verbose_name='是否赞',default=False)
+
+    class Meta:
+        unique_together = [
+            ('customer', 'user'),
+        ]
+        verbose_name_plural = "用户签名顶或踩表"
+        app_label = "zhugeleida"
 
 
 #跟进-消息详情表
@@ -234,6 +262,7 @@ class zgld_follow_info(models.Model):
     class Meta:
         verbose_name_plural = "跟进-消息详情表"
         app_label = "zhugeleida"
+
 
 #跟进常用语
 class zgld_follow_language(models.Model):
@@ -258,6 +287,7 @@ class zgld_follow_language(models.Model):
         verbose_name_plural = "跟进常用语"
         app_label = "zhugeleida"
 
+
 #资料详情表
 class zgld_information(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name='客户表',null=True)
@@ -273,7 +303,6 @@ class zgld_information(models.Model):
     class Meta:
         verbose_name_plural = "资料详情表"
         app_label = "zhugeleida"
-
 
 
 class zgld_photo(models.Model):

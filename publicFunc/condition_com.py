@@ -22,11 +22,11 @@ def conditionCom(request, field_dict):
     return q
 
 
-def action_record(request,remark):
+def action_record(data,remark):
     response = Response.ResponseObj()
-    user_id = request.GET.get('uid')  # 用户 id
-    customer_id = request.GET.get('user_id')  # 客户 id
-    action = request.GET.get('action')
+    user_id = data.get('uid')  # 用户 id
+    customer_id = data.get('user_id')  # 客户 id
+    action = data.get('action')
 
     obj = models.zgld_accesslog.objects.create(
         user_id=user_id,
