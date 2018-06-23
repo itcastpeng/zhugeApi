@@ -2032,9 +2032,9 @@ user_id      是       小程序客户端的客户ID
 					"wechat":"",                     #微信号  
 					"mingpian_phone":"18511123918",  # 名片上显示的手机号
 					"create_date":"2018-06-08T22:03:23.772",
-					"popularity":12,                 # 产看多少次
-					"praise":1,                      # 点赞多少次名片 【靠谱数量】
-					"forward":2                      # 转发多少次 
+					"popularity_num":12,                 # 产看多少次
+					"praise_num":1,                      # 点赞多少次名片 【靠谱数量】
+					"forward_num":2                      # 转发多少次 
 					"is_praise":  false,             # 是否点赞了名片。【靠谱与否】
 					"sign":     '我是你爸爸'            # 签名
 				    "is_sign":false,                    # 是否点赞了签名
