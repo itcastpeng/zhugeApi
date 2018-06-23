@@ -150,8 +150,6 @@ def mingpian_oper(request, oper_type):
                     customer_id=customer_id,  # 赞或踩的客户
                 )
 
-
-
                 if not updown_obj:
                     updown_obj = models.zgld_up_down.objects.create(
                         user_id=user_id,  # 被赞的用户
@@ -197,7 +195,7 @@ def mingpian_oper(request, oper_type):
                         response.data = {
                             'ret_data':
                                 {
-                                    'praise': praise_num,
+                                    'praise_num': praise_num,
                                     'is_praise': is_praise or False,
                                 }
                         }
