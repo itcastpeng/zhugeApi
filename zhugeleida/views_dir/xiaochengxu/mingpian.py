@@ -76,6 +76,7 @@ def mingpian(request):
                     is_sign = up_down_sign_obj[0].up
 
                 photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id', 'photo_url')
+                tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name').order_by('-create_date')
 
                 ret_data = {
                     'id': obj.id,
@@ -86,7 +87,8 @@ def mingpian(request):
                     'position': obj.position,
                     'email': obj.email or '',
                     'wechat': obj.wechat or '',  # 微信号
-                    'mingpian_phone': obj.mingpian_phone or '',  # 名片手机号
+
+                    'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
                     'create_date': obj.create_date,  # 创建时间
                     'popularity_num': obj.popularity,  # 被查看多少次。
                     'praise_num': obj.praise,  # 点赞多少次
@@ -95,6 +97,7 @@ def mingpian(request):
                     'sign': obj.sign or '',  # 签名
                     'is_sign': is_sign or False,  # 签名
                     'photo': list(photo_data) or '',
+                    'tag': list(tag_data),
 
                 }
 

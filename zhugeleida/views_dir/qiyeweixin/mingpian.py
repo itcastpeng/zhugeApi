@@ -45,6 +45,7 @@ def mingpian(request):
 
             ret_data = []
             for obj in objs:
+                tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
                 photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id','photo_url')
                 ret_data.append({
                     'id': obj.id,
@@ -61,9 +62,10 @@ def mingpian(request):
                     'wechat': obj.wechat or '',  # 微信号
                     'wechat_phone': obj.wechat_phone or '',  # 微信绑定的手机号 | 管理员可以修改
                     'is_show_phone': obj.is_show_phone,  # 默认显示名片中的手机号，
-                    'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
+                    'mingpian_phone': obj.mingpian_phone or '',  # 名片手机号
                     'sign': obj.sign,                     # 签名
                     'photo' : list(photo_data),
+                    'tag' :   list(tag_data),
                     'create_date': obj.create_date,  # 创建时间
 
                 })
