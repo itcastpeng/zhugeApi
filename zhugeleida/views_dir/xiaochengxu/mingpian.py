@@ -173,7 +173,7 @@ def mingpian_oper(request, oper_type):
                     response.data = {
                         'ret_data':
                             {
-                                'praise': praise_num,
+                                'praise_num': praise_num,
                                 'is_praise': is_praise or False,
                             }
                         }
@@ -219,7 +219,7 @@ def mingpian_oper(request, oper_type):
                         response.data = {
                             'ret_data':
                                 {
-                                    'praise': praise_num,
+                                    'praise_num': praise_num,
                                     'is_praise': is_praise or False,
                                 }
                         }
