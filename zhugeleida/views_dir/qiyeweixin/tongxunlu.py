@@ -68,6 +68,11 @@ def tongxunlu(request):
                 customer_status = ''
                 if objs:
                     for obj in objs:
+
+                        customer_id = obj.customer_id
+                        user_id = obj.user_id
+                        _source = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id).source
+
                         last_interval_msg = ''
                         last_follow_time = obj.last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
                         if not last_follow_time:
@@ -106,13 +111,6 @@ def tongxunlu(request):
                                 else:
                                     last_activity_msg = last_activity_time.strftime('%Y-%m-%d')
 
-
-                        # source_list = obj.customer.zgld_user_customer_belonger_set.filter(customer_id=obj.customer.id).values('source')
-                        # if  source_list:
-                        #     source =  source_list[0]['source']
-                        # else:
-                        #     source = ''
-
                         ret_data.append({
                             'customer_id': obj.customer.id,
                             'customer_username': obj.customer.username,
@@ -121,7 +119,7 @@ def tongxunlu(request):
                             'expedted_pr': obj.customer.expedted_pr,  # 预计成交概率
                             # 'ai_pr': ai_pr,  # AI 预计成交概率
 
-                            'source': source ,  # 来源
+                            'source': _source ,  # 来源
                             'last_follow_time': last_interval_msg,  # 最后跟进时间
                             'last_activity_time': last_activity_msg,  # 最后活动时间
                             'follow_status': customer_status,  # 跟进状态
