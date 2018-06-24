@@ -81,6 +81,10 @@ def mingpian(request):
                 photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id', 'photo_url')
                 tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name').order_by('-create_date')
 
+                objs = models.zgld_userprofile.objects.filter(id=user_id)
+                sign_num = objs[0].sign_num
+
+
                 ret_data = {
                     'id': obj.id,
                     'username': obj.username,
@@ -97,8 +101,9 @@ def mingpian(request):
                     'praise_num': obj.praise,     # 点赞多少次
                     'forward_num': obj.forward,   # 转发多少次
                     'is_praise': is_praise,
-                    'sign': obj.sign or '',  # 签名
-                    'is_sign': is_sign ,  # 签名
+                    'sign': obj.sign or '',   # 签名
+                    'is_sign': is_sign ,      # 签名
+                    'sign_num' : sign_num,
                     'photo': list(photo_data) or '',
                     'tag': list(tag_data),
 
@@ -130,7 +135,6 @@ def mingpian_oper(request, oper_type):
     if request.method == "GET":
 
         forms_obj = UserSelectForm(request.GET)
-
         if forms_obj.is_valid():
             if oper_type == 'calling':
                 remark = '拨打您的手机'
@@ -255,7 +259,7 @@ def mingpian_oper(request, oper_type):
                     response = action_record(data, remark)
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
                     objs.update(praise=F('praise') + 1)
-                    praise_num = objs[0].praise
+                    sign_num = objs[0].sign_num
                     is_praise = ''
                     up_down_obj = models.zgld_up_down_sign.objects.filter(user_id=user_id, customer_id=customer_id)
                     if up_down_obj:
@@ -264,7 +268,7 @@ def mingpian_oper(request, oper_type):
                     response.data = {
                         'ret_data':
                             {
-                                'sign_num': praise_num,
+                                'sign_num': sign_num,
                                 'is_sign': is_praise or False,
                             }
                     }
