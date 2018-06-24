@@ -258,22 +258,39 @@ def mingpian_oper(request, oper_type):
                     data['action'] = 9
                     response = action_record(data, remark)
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
-                    objs.update(praise=F('praise') + 1)
+                    objs.update(sign_num=F('sign_num') + 1)
+
                     sign_num = objs[0].sign_num
-                    is_praise = ''
+                    is_sign = False
                     up_down_obj = models.zgld_up_down_sign.objects.filter(user_id=user_id, customer_id=customer_id)
                     if up_down_obj:
-                        is_praise = up_down_obj[0].up
+                        is_sign = up_down_obj[0].up
 
                     response.data = {
                         'ret_data':
                             {
                                 'sign_num': sign_num,
-                                'is_sign': is_praise or False,
+                                'is_sign': is_sign,
                             }
                     }
 
+
                 else:
+                    is_sign = False
+                    objs = models.zgld_userprofile.objects.filter(id=user_id)
+                    sign_num = objs[0].sign_num
+                    up_down_obj = models.zgld_up_down_sign.objects.filter(user_id=user_id, customer_id=customer_id)
+                    if up_down_obj:
+                        is_sign = up_down_obj[0].up
+
+                    response.data = {
+                        'ret_data':
+                            {
+                                'sign_num': sign_num,
+                                'is_sign': is_sign,
+                            }
+                    }
+
                     response.code = 200
                     response.msg = '已经点过赞'
 
