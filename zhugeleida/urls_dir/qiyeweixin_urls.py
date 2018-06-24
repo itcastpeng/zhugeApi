@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
     qr_code_auth, follow_language, follow_info,tag_list
-from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user
+from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product
 
 urlpatterns = [
     # url(r'^login$', login.login),
@@ -74,4 +74,7 @@ urlpatterns = [
     url(r'^mingpian$', mingpian.mingpian),
     url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
 
+    # 企业产品操作
+    url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
+    url(r'^product', product.product),
 ]

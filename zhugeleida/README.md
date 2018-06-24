@@ -2038,6 +2038,7 @@ user_id      是       小程序客户端的客户ID
 					"is_praise":  false,             # 是否点赞了名片。【靠谱与否】
 					"sign":     '我是你爸爸'            # 签名
 				    "is_sign":false,                    # 是否点赞了签名
+					'sign_num' : 20,  				   # 点赞个数
 					"photo":[
 						[
 							1,
@@ -2928,7 +2929,7 @@ POST 请求参数
 ####    【小程序 - 名片里-点赞签名】
 
 
-请求方式：POST（HTTP）
+请求方式：GET（HTTP）
 访问示例:
 >http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/up_sign?rand_str=d43fe0f93858169921dc6906e375ae81&timestamp=1529656667083&user_id=1&uid=2
 
