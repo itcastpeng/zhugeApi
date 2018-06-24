@@ -30,7 +30,6 @@ def action(request, oper_type):
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-
                 order = request.GET.get('order', '-create_date')
 
                 field_dict = {
@@ -40,6 +39,7 @@ def action(request, oper_type):
                 }
 
                 q = conditionCom(request, field_dict)
+                q.add(Q(**{'user_id': user_id}), Q.AND)
 
                 create_date__gte = request.GET.get('create_date__gte')
                 create_date__lt = request.GET.get('create_date__lt')
