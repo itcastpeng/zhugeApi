@@ -39,101 +39,104 @@ def tongxunlu(request):
             }
             q = conditionCom(request, field_dict)
             source = request.GET.get('customer__source')
+            customer_list = []
             if source:
-                customer_list = []
                 customer_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
                     source=source, user_id=user_id).values_list('customer')
 
-                print('---customer_objs--->>', customer_objs)
-                if customer_objs:
-                    for obj in customer_objs:
-                        customer_list.append(obj[0])
-                    print('----customer_list---->', customer_list)
-                    q.add(Q(**{'customer_id' + '__in': customer_list}), Q.AND)
+            else:
+                customer_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+                     user_id=user_id).values_list('customer')
 
-                    objs = models.zgld_user_customer_flowup.objects.select_related('user', 'customer').filter(q).order_by(order)
-                    count = objs.count()
-                    if length != 0:
-                        start_line = (current_page - 1) * length
-                        stop_line = start_line + length
-                        objs = objs[start_line: stop_line]
+            if customer_objs:
+                for obj in customer_objs:
+                    customer_list.append(obj[0])
+                print('----customer_list---->', customer_list)
+                q.add(Q(**{'customer_id' + '__in': customer_list}), Q.AND)
 
-                    # 返回的数据
-                    ret_data = []
-                    print('=====  objs ====>', objs.count())
+                objs = models.zgld_user_customer_flowup.objects.select_related('user', 'customer').filter(q).order_by(order)
+                count = objs.count()
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
 
-                    customer_status = ''
-                    if objs:
-                        for obj in objs:
+                # 返回的数据
+                ret_data = []
+                print('=====  objs ====>', objs.count())
+
+                customer_status = ''
+                if objs:
+                    for obj in objs:
+                        last_interval_msg = ''
+                        last_follow_time = obj.last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
+                        if not last_follow_time:
                             last_interval_msg = ''
-                            last_follow_time = obj.last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
-                            if not last_follow_time:
-                                last_interval_msg = ''
-                                customer_status = '未跟进过'
+                            customer_status = '未跟进过'
 
-                            elif last_follow_time:
-                                now = datetime.datetime.now()
-                                day_interval = (now - last_follow_time).days
-                                if int(day_interval) == 0:
-                                    last_interval_msg = '今天'
-                                    customer_status = '今天跟进'
+                        elif last_follow_time:
+                            now = datetime.datetime.now()
+                            day_interval = (now - last_follow_time).days
+                            if int(day_interval) == 0:
+                                last_interval_msg = '今天'
+                                customer_status = '今天跟进'
 
+                            else:
+                                if int(day_interval) == 1:
+                                    last_interval_msg = '昨天'
+                                    customer_status = '昨天已跟进'
                                 else:
-                                    if int(day_interval) == 1:
-                                        last_interval_msg = '昨天'
-                                        customer_status = '昨天已跟进'
-                                    else:
-                                        day_interval = day_interval - 1
-                                        last_interval_msg = '%s天前' % (day_interval)
-                                        customer_status = last_follow_time.strftime('%Y-%m-%d')
+                                    day_interval = day_interval - 1
+                                    last_interval_msg = '%s天前' % (day_interval)
+                                    customer_status = last_follow_time.strftime('%Y-%m-%d')
 
+                        last_activity_msg = ''
+                        last_activity_time = obj.last_activity_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
+                        if not last_activity_time:
                             last_activity_msg = ''
-                            last_activity_time = obj.last_activity_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
-                            if not last_activity_time:
-                                last_activity_msg = ''
 
-                            elif last_activity_time:
-                                now = datetime.datetime.now()
-                                day_interval = (now - last_activity_time).days
-                                if int(day_interval) == 0:
-                                    last_activity_msg = '今天'
+                        elif last_activity_time:
+                            now = datetime.datetime.now()
+                            day_interval = (now - last_activity_time).days
+                            if int(day_interval) == 0:
+                                last_activity_msg = '今天'
+                            else:
+                                if day_interval == 1:
+                                    last_activity_msg = '昨天'
                                 else:
-                                    if day_interval == 1:
-                                        last_activity_msg = '昨天'
-                                    else:
-                                        last_activity_msg = last_activity_time.strftime('%Y-%m-%d')
+                                    last_activity_msg = last_activity_time.strftime('%Y-%m-%d')
 
 
-                            # source_list = obj.customer.zgld_user_customer_belonger_set.filter(customer_id=obj.customer.id).values('source')
-                            # if  source_list:
-                            #     source =  source_list[0]['source']
-                            # else:
-                            #     source = ''
+                        # source_list = obj.customer.zgld_user_customer_belonger_set.filter(customer_id=obj.customer.id).values('source')
+                        # if  source_list:
+                        #     source =  source_list[0]['source']
+                        # else:
+                        #     source = ''
 
-                            ret_data.append({
-                                'customer_id': obj.customer.id,
-                                'customer_username': obj.customer.username,
-                                'headimgurl': obj.customer.headimgurl,
-                                'expected_time': obj.customer.expected_time,  # 预计成交时间
-                                'expedted_pr': obj.customer.expedted_pr,  # 预计成交概率
-                                # 'ai_pr': ai_pr,  # AI 预计成交概率
+                        ret_data.append({
+                            'customer_id': obj.customer.id,
+                            'customer_username': obj.customer.username,
+                            'headimgurl': obj.customer.headimgurl,
+                            'expected_time': obj.customer.expected_time,  # 预计成交时间
+                            'expedted_pr': obj.customer.expedted_pr,  # 预计成交概率
+                            # 'ai_pr': ai_pr,  # AI 预计成交概率
 
-                                'source': source ,  # 来源
-                                'last_follow_time': last_interval_msg,  # 最后跟进时间
-                                'last_activity_time': last_activity_msg,  # 最后活动时间
-                                'follow_status': customer_status,  # 跟进状态
-                            })
+                            'source': source ,  # 来源
+                            'last_follow_time': last_interval_msg,  # 最后跟进时间
+                            'last_activity_time': last_activity_msg,  # 最后活动时间
+                            'follow_status': customer_status,  # 跟进状态
+                        })
 
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
 
-                else:
-                    response.code = 302
-                    response.msg = '没有数据'
+            else:
+                response.code = 302
+                response.msg = '没有数据'
 
         else:
             response.code = 402
