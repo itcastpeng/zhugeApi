@@ -27,6 +27,7 @@ def action(request, oper_type):
             if forms_obj.is_valid():
                 response = Response.ResponseObj()
                 user_id = request.GET.get('user_id')
+                customer_id = request.GET.get('customer_id')
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -40,7 +41,8 @@ def action(request, oper_type):
 
                 q = conditionCom(request, field_dict)
                 q.add(Q(**{'user_id': user_id}), Q.AND)
-
+                if customer_id:
+                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
                 create_date__gte = request.GET.get('create_date__gte')
                 create_date__lt = request.GET.get('create_date__lt')
                 action = request.GET.get('action')
