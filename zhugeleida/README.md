@@ -1,4 +1,6 @@
 
+[toc]
+
 #### code 说明：
 ```python
 200 正常
@@ -2040,10 +2042,7 @@ user_id      是       小程序客户端的客户ID
 				    "is_sign":false,                    # 是否点赞了签名
 					'sign_num' : 20,  				   # 点赞个数
 					"photo":[
-						[
-							1,
-							"xxxxx"
-						],
+					         {'id':1,'photo_url': xxxxx},
 						[
 							4,
 							"statics/zhugeleida/imgs/xiaochengxu/qr_code/4_uemthqpcdn_photo.jpg"
