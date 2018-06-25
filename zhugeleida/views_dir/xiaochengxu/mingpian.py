@@ -78,7 +78,7 @@ def mingpian(request):
                 if up_down_sign_obj:
                     is_sign = up_down_sign_obj[0].up
 
-                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id', 'photo_url')
+                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url').order_by('-create_date')
                 tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name').order_by('-create_date')
 
                 objs = models.zgld_userprofile.objects.filter(id=user_id)
