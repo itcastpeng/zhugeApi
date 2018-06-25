@@ -109,22 +109,51 @@ class zgld_user_photo(models.Model):
 
 # #公司产品
 class zgld_product(models.Model):
+    product_status_choices = (
+        (1,'已发布'),
+        (2,'已下架'),
+        (3,'推荐')
+    )
+
+    status = models.SmallIntegerField(verbose_name='产品状态',choices=product_status_choices,default=1)
+
     user = models.ForeignKey('zgld_userprofile', verbose_name='所属用户', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
     name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     price = models.CharField(verbose_name='价格', max_length=64, null=True)
     reason = models.CharField(verbose_name='推荐理由', max_length=256, null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "公司产品表"
+        app_label = "zhugeleida"
+
+
+class zgld_product_article(models.Model):
+    product = models.ForeignKey('zgld_product', verbose_name='文章所属的产品', null=True)
+    article_type_choices = (
+                            (1,'标题'),
+                            (2,'内容'),
+    )
+    type = models.SmallIntegerField(verbose_name='产品状态', choices=article_type_choices,null=True)
+    order = models.SmallIntegerField(verbose_name='序号', null=True)
     title = models.CharField(verbose_name='标题', max_length=64, null=True)
     content = models.TextField(verbose_name='内容', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "产品文章表"
+        app_label = "zhugeleida"
 
 
 class zgld_product_picture(models.Model):
+    order = models.SmallIntegerField(verbose_name='序号', null=True)
+    product = models.ForeignKey('zgld_product', verbose_name='图片所属的产品', null=True)
     picture_type_choices = (
         (1, '产品封面'),
         (2, '产品介绍')
     )
     picture_type = models.SmallIntegerField(verbose_name='图片类型', null=True, choices=picture_type_choices)
-    product = models.ForeignKey('zgld_product', verbose_name='图片所属的产品',null=True)
     picture_url = models.CharField(verbose_name='图片URL链接', max_length=256, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
