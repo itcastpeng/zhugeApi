@@ -46,6 +46,8 @@ def follow_info(request, ):
                     ret_data  = objs.values('user_customer_flowup__customer__headimgurl',
                                                     'user_customer_flowup__user__avatar',
                                                     'user_customer_flowup__user__username',
+                                                     'user_customer_flowup__user_id',
+                                                     'user_customer_flowup__customer_id',
                                                     'follow_info', 'create_date')
                     response.code = 200
                     response.data = {
