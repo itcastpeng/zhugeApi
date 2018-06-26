@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm
 
 import json
 from zhugeleida import models
