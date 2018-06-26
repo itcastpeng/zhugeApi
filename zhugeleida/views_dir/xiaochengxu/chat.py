@@ -130,11 +130,10 @@ def chat_oper(request, oper_type, o_id):
 
             if forms_obj.is_valid():
 
-                data = request.POST
-                customer_id = int(data.get('user_id'))
-                user_id = int(data.get('u_id'))
-                msg = data.get('msg')
-                send_type = int(data.get('send_type'))
+                customer_id = request.GET.get('user_id')
+                user_id = request.POST.get('u_id')
+                msg = request.POST.get('msg')
+                send_type = request.POST.get('send_type')
 
                 print('---msg----->>', msg)
 
@@ -144,12 +143,15 @@ def chat_oper(request, oper_type, o_id):
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=send_type,
-
                 )
 
                 response.code = 200
                 response.msg = 'send msg successful'
-                return JsonResponse(response.__dict__)
+
+            else:
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
     else:
         response.code = 402

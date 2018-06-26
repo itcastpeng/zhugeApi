@@ -58,12 +58,11 @@ def follow_info(request, ):
                 response.code = 307
                 response.msg = "用户客户关联数据重复"
 
-
-            return JsonResponse(response.__dict__)
-
     else:
         response.code = 402
         response.msg = "请求异常"
+
+    return JsonResponse(response.__dict__)
 
 
 @csrf_exempt
