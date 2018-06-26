@@ -125,33 +125,27 @@ def chat_oper(request, oper_type, o_id):
     elif request.method == 'POST':
         # 用户推送消息到server端,然后入库
         if  oper_type == 'send_msg':
+
             print('----send_msg--->>',request.POST)
-            forms_obj = ChatPostForm(request.POST)
+            customer_id = request.GET.get('user_id')
+            user_id = request.POST.get('u_id')
+            msg = request.POST.get('msg')
+            send_type = request.POST.get('send_type')
 
-            if forms_obj.is_valid():
 
-                customer_id = request.GET.get('user_id')
-                user_id = request.POST.get('u_id')
-                msg = request.POST.get('msg')
-                send_type = request.POST.get('send_type')
+            models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                is_last_msg=True).update(is_last_msg=False)
+            models.zgld_chatinfo.objects.create(
+                msg=msg,
+                userprofile_id=user_id,
+                customer_id=customer_id,
+                send_type=send_type,
+            )
 
-                print('---msg----->>', msg)
+            response.code = 200
+            response.msg = 'send msg successful'
 
-                models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
-                models.zgld_chatinfo.objects.create(
-                        msg=msg,
-                        userprofile_id=user_id,
-                        customer_id=customer_id,
-                        send_type=send_type,
-                )
 
-                response.code = 200
-                response.msg = 'send msg successful'
-
-            else:
-                response.code = 402
-                response.msg = "请求异常"
-                response.data = json.loads(forms_obj.errors.as_json())
 
     else:
         response.code = 402
