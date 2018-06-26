@@ -129,7 +129,7 @@ def chat_oper(request, oper_type, o_id):
             print('----send_msg--->>',request.POST)
 
             customer_id = int(request.GET.get('user_id'))
-            user_id = int(request.POST.get('u_id'))
+            user_id =  request.POST.get('u_id')
             msg = request.POST.get('msg')
             send_type = request.POST.get('send_type')
 
