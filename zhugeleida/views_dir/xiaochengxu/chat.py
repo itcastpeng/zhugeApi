@@ -132,7 +132,6 @@ def chat_oper(request, oper_type, o_id):
             msg = request.POST.get('msg')
             send_type = request.POST.get('send_type')
 
-
             models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                 is_last_msg=True).update(is_last_msg=False)
             models.zgld_chatinfo.objects.create(
