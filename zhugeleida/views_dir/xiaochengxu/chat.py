@@ -7,14 +7,14 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm
 
 import json
 from zhugeleida import models
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_customer)
 def chat(request):
     '''
     【分页获取】- 所有的聊天信息
@@ -25,8 +25,8 @@ def chat(request):
         forms_obj = ChatSelectForm(request.GET)
         if forms_obj.is_valid():
             response = Response.ResponseObj()
-            user_id = request.GET.get('user_id')
-            customer_id = request.GET.get('customer_id')
+            customer_id = request.GET.get('user_id')
+            user_id = request.GET.get('u_id')
             # send_type = request.GET.get('send_type')
 
             current_page = forms_obj.cleaned_data['current_page']
@@ -72,7 +72,7 @@ def chat(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_customer)
 def chat_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -81,9 +81,8 @@ def chat_oper(request, oper_type, o_id):
             forms_obj = ChatGetForm(request.GET)
             if forms_obj.is_valid():
                 response = Response.ResponseObj()
-                user_id = request.GET.get('user_id')
-                customer_id = request.GET.get('customer_id')
-                # send_type = request.GET.get('send_type')
+                customer_id = request.GET.get('user_id')
+                user_id = request.GET.get('u_id')
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -98,7 +97,7 @@ def chat_oper(request, oper_type, o_id):
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
-                        'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
+                        'src':  obj.customer.headimgurl,
                         'name': obj.customer.username,
                         'dateTime': obj.create_date,
                         'send_type': obj.send_type,
@@ -132,8 +131,8 @@ def chat_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
 
                 data = request.POST
-                user_id = int(data.get('user_id'))
-                customer_id = int(data.get('customer_id'))
+                customer_id = int(data.get('user_id'))
+                user_id = int(data.get('u_id'))
                 msg = data.get('msg')
                 send_type = int(data.get('send_type'))
 
