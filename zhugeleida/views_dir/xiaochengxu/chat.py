@@ -52,7 +52,7 @@ def chat(request):
                 ret_data_list.append({
                      'customer_id': obj.customer.id,
                      'user_id': obj.userprofile.id,
-                     'src': 'http://api.zhugeyingxiao.com/' + obj.customer.headimgurl,
+                     'src':  obj.customer.headimgurl,
                      'name': obj.customer.username,
                      'dateTime': obj.create_date,
                      'msg': obj.msg,
