@@ -45,7 +45,8 @@ class ProductAddForm(forms.Form):
     # 判断企业产品是否存在
     def clean_name(self):
         name = self.data['name']
-        company_id = models.zgld_userprofile.objects.get(id = self.data.get('user_id')).company_id
+        user_id = self.data.get('user_id')
+        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
         objs = models.zgld_product.objects.filter(
             name=name,company_id=company_id
@@ -70,6 +71,7 @@ class ProductUpdateForm(forms.Form):
             'required': "产品ID不能为空"
         }
     )
+
 
     name = forms.CharField(
         required=True,

@@ -91,12 +91,11 @@ def tag_list_oper(request, oper_type, o_id):
 
         elif oper_type == "customer_tag":  # 操作tag，为客户添加多个标签
 
-            tag_list = request.POST.get('tag_list')
+            tag_list = json.loads(request.POST.get('tag_list'))
             customer_obj = models.zgld_customer.objects.get(id=o_id)
-            tag_objs = models.zgld_tag.objects.filter(id__in=tag_list)
 
             if customer_obj:
-                customer_obj.zgld_tag_set = tag_objs
+                customer_obj.zgld_tag_set = tag_list
                 response.code = 200
                 response.msg = "添加成功"
             else:
