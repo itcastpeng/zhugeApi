@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
 
 import json
 from zhugeleida import models
@@ -126,7 +126,7 @@ def chat_oper(request, oper_type, o_id):
         # 用户推送消息到server端,然后入库
         if  oper_type == 'send_msg':
             print('----send_msg--->>',request.POST)
-            forms_obj = ChatSelectForm(request.POST)
+            forms_obj = ChatPostForm(request.POST)
 
             if forms_obj.is_valid():
 
