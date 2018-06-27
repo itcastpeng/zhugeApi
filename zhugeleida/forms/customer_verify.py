@@ -107,12 +107,13 @@ class Customer_information_UpdateForm(forms.Form):
             'required': "客户ID不能为空"
         }
     )
+
     email = forms.EmailField(
         required=False,
         error_messages=
             {'required': u'邮箱不能为空'}
     )
-    sex = forms.IntegerField(
+    sex = forms.CharField(
         required=True,
         error_messages= {
             'required': "性别不能为空"

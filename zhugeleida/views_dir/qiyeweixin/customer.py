@@ -254,7 +254,7 @@ def customer_oper(request, oper_type, o_id):
             form_data = {
                 'id': int(o_id),
                 'source': request.POST.get('source'),
-                'sex': int(request.POST.get('sex')),
+                'sex': request.POST.get('sex'),
                 'memo_name': request.POST.get('username'),
                 'phone': request.POST.get('phone'),
                 'email': request.POST.get('email'),
