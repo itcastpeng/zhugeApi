@@ -97,8 +97,8 @@ def chat_oper(request, oper_type, o_id):
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
-                        'src':  obj.customer.headimgurl,
-                        'name': obj.customer.username,
+                        'customer_headimgurl':  obj.customer.headimgurl,
+                        'customer': obj.customer.username,
                         'dateTime': obj.create_date,
                         'send_type': obj.send_type,
                         'msg': obj.msg,
@@ -120,7 +120,8 @@ def chat_oper(request, oper_type, o_id):
                 if not ret_data_list:
                     # 没有新消息
                     response.msg = '没有得到实时聊天信息'
-                return JsonResponse(response.__dict__)
+
+        return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':
         # 用户推送消息到server端,然后入库
