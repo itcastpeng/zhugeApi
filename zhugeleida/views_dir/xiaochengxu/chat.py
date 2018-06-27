@@ -39,6 +39,7 @@ def chat(request):
                 userprofile_id=user_id,
                 customer_id=customer_id,
             ).order_by('create_date')
+
             objs.update(
                 is_customer_new_msg=False
             )
@@ -54,8 +55,8 @@ def chat(request):
                 ret_data_list.append({
                      'customer_id': obj.customer.id,
                      'user_id': obj.userprofile.id,
-                     'src':  obj.customer.headimgurl,
-                     'name': obj.customer.username,
+                     'customer': obj.customer.username,
+                     'customer_headimgurl': obj.customer.headimgurl,
                      'dateTime': obj.create_date,
                      'msg': obj.msg,
                      'send_type': obj.send_type,
@@ -108,7 +109,7 @@ def chat_oper(request, oper_type, o_id):
                         'customer': obj.customer.username,
                         'dateTime': obj.create_date,
                         'send_type': obj.send_type,
-                        'msg': obj.msg,
+                        'msg':       obj.msg,
                     })
 
                 response.code = 200

@@ -40,7 +40,8 @@ def customer(request):
             q = conditionCom(request, field_dict)
             q.add(Q(**{'id': customer_id}), Q.AND)
 
-            objs = models.zgld_customer.objects.filter(q).all().order_by(order)
+            objs = models.zgld_customer.objects.filter(q).order_by(order)
+
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -65,7 +66,7 @@ def customer(request):
                     for t_obj in tag_obj:
                         tag_list.append(t_obj.name)
                         print('--->>',tag_list)
-                    info_obj = models.zgld_information.objects.filter(id=obj.id)
+                    info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
 
                     phone = info_obj[0].phone if info_obj else ''
                     email = info_obj[0].email if info_obj else ''
@@ -248,8 +249,6 @@ def customer_oper(request, oper_type, o_id):
 
         elif oper_type == "update_information":
 
-            print('------request.POST.get sex ------->',request.POST.get('sex'),type(request.POST.get('sex')))
-
             # 更新客户表的具体信息
             form_data = {
                 'id': int(o_id),
@@ -291,7 +290,7 @@ def customer_oper(request, oper_type, o_id):
 
                     models.zgld_information.objects.create(
                         customer_id =  o_id,
-                        sex=forms_obj.cleaned_data['sex'],
+                        sex= int(forms_obj.cleaned_data['sex']),
                         company = forms_obj.cleaned_data['company'],
                         phone=forms_obj.cleaned_data['phone'],
                         email=forms_obj.cleaned_data['email'],
@@ -301,8 +300,8 @@ def customer_oper(request, oper_type, o_id):
                         mem =  forms_obj.cleaned_data['mem']
                     )
 
-                response.code = 200
-                response.msg = '添加成功'
+                    response.code = 200
+                    response.msg = '添加成功'
 
             else:
                 response.code = 303

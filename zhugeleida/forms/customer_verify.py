@@ -113,7 +113,7 @@ class Customer_information_UpdateForm(forms.Form):
         error_messages=
             {'required': u'邮箱不能为空'}
     )
-    sex = forms.CharField(
+    sex = forms.IntegerField(
         required=True,
         error_messages= {
             'required': "性别不能为空"
@@ -151,7 +151,7 @@ class Customer_information_UpdateForm(forms.Form):
         required=False,
     )
     mem = forms.CharField(
-        widget=forms.Textarea
+        required=False,
     )
 
 
@@ -168,6 +168,14 @@ class Customer_information_UpdateForm(forms.Form):
 
 #
 class CustomerSelectForm(forms.Form):
+    customer_id = forms.CharField(
+        required = True,
+        error_messages={
+            'required': "备注名不能为空"
+        }
+    )
+
+
     current_page = forms.IntegerField(
         required=False,
         error_messages={
@@ -194,3 +202,4 @@ class CustomerSelectForm(forms.Form):
         else:
             length = int(self.data['length'])
         return length
+
