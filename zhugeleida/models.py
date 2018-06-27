@@ -212,13 +212,6 @@ class zgld_tag(models.Model):
 class zgld_customer(models.Model):
     username = models.CharField(verbose_name='客户姓名', max_length=64, null=True)
     memo_name = models.CharField(max_length=64, verbose_name='备注名', blank=True, null=True)
-
-    sex_choices = (
-        (1, "男"),
-        (2, "女"),
-    )
-    sex = models.IntegerField(choices=sex_choices, default=1, blank=True, null=True)
-
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=64)
     headimgurl = models.CharField(verbose_name="用户头像url", max_length=128, default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
@@ -342,6 +335,11 @@ class zgld_follow_language(models.Model):
 
 # 资料详情表
 class zgld_information(models.Model):
+    sex_choices = (
+        (1, "男"),
+        (2, "女"),
+    )
+    sex = models.IntegerField(choices=sex_choices, blank=True, null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户表', null=True)
     phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)

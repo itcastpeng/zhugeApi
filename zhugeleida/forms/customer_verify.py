@@ -112,7 +112,12 @@ class Customer_information_UpdateForm(forms.Form):
         error_messages=
             {'required': u'邮箱不能为空'}
     )
-
+    sex = forms.IntegerField(
+        required=True,
+        error_messages= {
+            'required': "性别不能为空"
+        }
+    )
     phone = forms.CharField(
         required=False,
         validators=[mobile_validate, ],        # 应用咱们自己定义的规则

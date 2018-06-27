@@ -248,6 +248,7 @@ def customer_oper(request, oper_type, o_id):
             form_data = {
                 'id': int(o_id),
                 'source': request.POST.get('source'),
+                'sex': request.POST.get('sex'),
                 'memo_name': request.POST.get('username'),
                 'phone': request.POST.get('phone'),
                 'email': request.POST.get('email'),
@@ -269,6 +270,7 @@ def customer_oper(request, oper_type, o_id):
 
                     information_obj.update(
                         customer_id =  o_id,
+                        sex = forms_obj.cleaned_data['sex'],
                         company = forms_obj.cleaned_data['company'],
                         phone = forms_obj.cleaned_data['phone'],
                         email = forms_obj.cleaned_data['email'],
@@ -283,6 +285,7 @@ def customer_oper(request, oper_type, o_id):
 
                     models.zgld_information.objects.create(
                         customer_id =  o_id,
+                        sex=forms_obj.cleaned_data['sex'],
                         company = forms_obj.cleaned_data['company'],
                         phone=forms_obj.cleaned_data['phone'],
                         email=forms_obj.cleaned_data['email'],
