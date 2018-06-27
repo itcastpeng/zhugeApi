@@ -78,6 +78,8 @@ def customer(request):
                     sex = info_obj[0].sex if info_obj else ''
 
                     belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
+                    print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
+                    day_interval =  datetime.datetime.today() - obj.create_date
 
                     ret_data.append({
                         'id': obj.id,
@@ -92,7 +94,7 @@ def customer(request):
                         'memo_name': obj.memo_name,  # 备注名
                         'phone': phone,              # 手机号
                         'sex':  sex,
-
+                        'day_interval': day_interval.days,
                         'email': email,              # email
                         'company': company,                # 公司
                         'position':position,  # 位置
