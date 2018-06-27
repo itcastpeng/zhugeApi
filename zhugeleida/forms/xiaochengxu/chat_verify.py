@@ -48,7 +48,7 @@ class ChatSelectForm(forms.Form):
     # 判断用户id是否存在
     def clean_u_id(self):
 
-        u_id = self.data['user_id']
+        u_id = self.data['u_id']
 
         objs = models.zgld_userprofile.objects.filter(
             id=u_id,
