@@ -407,7 +407,10 @@ class zgld_chatinfo(models.Model):
                         (2, 'customer_to_user')
                         )
     send_type = models.SmallIntegerField(choices=send_type_choice, verbose_name='发送类型', blank=True, null=True)
-    is_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
+    # is_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
+    is_customer_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
+    is_user_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
+
     is_last_msg = models.BooleanField(default=True, verbose_name='是否为最后一次的消息')
     userprofile = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True, blank=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True, blank=True)

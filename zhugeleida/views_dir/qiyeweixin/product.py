@@ -16,7 +16,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 from django.db.models import Q
 
 
-# cerf  token验证 用户展示模块
+
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def product(request, oper_type):
@@ -50,7 +50,7 @@ def product(request, oper_type):
 
                     cover_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
                                                                                     picture_type=1).order_by(
-                        'create_date').values_list('id', 'picture_url')
+                        'create_date').values('id', 'picture_url')
 
                     product_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
                                                                                       picture_type=2).values('id',
