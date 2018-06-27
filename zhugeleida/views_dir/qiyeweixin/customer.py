@@ -252,7 +252,7 @@ def customer_oper(request, oper_type, o_id):
             # 更新客户表的具体信息
             form_data = {
                 'id': int(o_id),
-                'source': request.POST.get('source'),
+                # 'source': request.POST.get('source'),
                 'sex': request.POST.get('sex'),
                 'memo_name': request.POST.get('username'),
                 'phone': request.POST.get('phone'),

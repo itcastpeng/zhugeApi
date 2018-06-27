@@ -131,11 +131,11 @@ class Customer_information_UpdateForm(forms.Form):
         }
     )
 
-    source = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '客户来源不能为空'
-        })
+    # source = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': '客户来源不能为空'
+    #     })
 
     company = forms.CharField(
         required=False,
