@@ -87,7 +87,6 @@ def chat_oper(request, oper_type, o_id):
                 user_id = request.GET.get('user_id')
                 customer_id = request.GET.get('customer_id')
 
-
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
