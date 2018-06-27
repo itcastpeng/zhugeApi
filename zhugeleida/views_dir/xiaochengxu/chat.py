@@ -22,6 +22,7 @@ def chat(request):
     :return:
     '''
     if request.method == 'GET':
+        response = Response.ResponseObj()
         forms_obj = ChatSelectForm(request.GET)
         if forms_obj.is_valid():
             response = Response.ResponseObj()
@@ -68,7 +69,7 @@ def chat(request):
                 # 没有新消息
                 response.msg = 'No new data'
 
-            return JsonResponse(response.__dict__)
+        return JsonResponse(response.__dict__)
 
 
 @csrf_exempt

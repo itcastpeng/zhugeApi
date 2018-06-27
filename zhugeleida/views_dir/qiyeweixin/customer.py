@@ -247,6 +247,9 @@ def customer_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "update_information":
+
+            print('------request.POST.get sex ------->',request.POST.get('sex'),type(request.POST.get('sex')))
+
             # 更新客户表的具体信息
             form_data = {
                 'id': int(o_id),
@@ -273,7 +276,7 @@ def customer_oper(request, oper_type, o_id):
 
                     information_obj.update(
                         customer_id =  o_id,
-                        sex = forms_obj.cleaned_data['sex'],
+                        sex = int(forms_obj.cleaned_data['sex']),
                         company = forms_obj.cleaned_data['company'],
                         phone = forms_obj.cleaned_data['phone'],
                         email = forms_obj.cleaned_data['email'],
