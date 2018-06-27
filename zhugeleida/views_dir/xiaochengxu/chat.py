@@ -24,6 +24,7 @@ def chat(request):
     if request.method == 'GET':
         response = Response.ResponseObj()
         forms_obj = ChatSelectForm(request.GET)
+
         if forms_obj.is_valid():
             response = Response.ResponseObj()
             customer_id = request.GET.get('user_id')
@@ -68,6 +69,10 @@ def chat(request):
             if not ret_data_list:
                 # 没有新消息
                 response.msg = 'No new data'
+        else:
+            response.code = 402
+            response.msg = "请求异常"
+            response.data = json.loads(forms_obj.errors.as_json())
 
         return JsonResponse(response.__dict__)
 
@@ -122,6 +127,10 @@ def chat_oper(request, oper_type, o_id):
                 if not ret_data_list:
                     # 没有新消息
                     response.msg = '没有得到实时聊天信息'
+            else:
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
         return JsonResponse(response.__dict__)
 
@@ -148,7 +157,10 @@ def chat_oper(request, oper_type, o_id):
 
                 response.code = 200
                 response.msg = 'send msg successful'
-
+            else:
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
 
     else:
