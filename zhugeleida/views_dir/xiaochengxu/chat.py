@@ -38,7 +38,7 @@ def chat(request):
             objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            ).order_by('create_date')
+            ).order_by('-create_date')
 
             objs.update(
                 is_customer_new_msg=False
@@ -61,6 +61,8 @@ def chat(request):
                      'msg': obj.msg,
                      'send_type': obj.send_type,
                 })
+
+            ret_data_list.reverse()
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
             response.data = {
@@ -96,7 +98,7 @@ def chat_oper(request, oper_type, o_id):
                     customer_id=customer_id,
                     is_customer_new_msg = True,
 
-                ).order_by('create_date')
+                ).order_by('-create_date')
 
 
                 ret_data_list = []
@@ -111,7 +113,7 @@ def chat_oper(request, oper_type, o_id):
                         'send_type': obj.send_type,
                         'msg':       obj.msg,
                     })
-
+                ret_data_list.reverse()
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
                 print('--- list(msg_obj) -->>', ret_data_list)

@@ -66,6 +66,7 @@ def chat(request):
                 'ret_data':  ret_data_list,
                 'data_count': count,
             }
+
             if not ret_data_list:
                 # 没有新消息
                 response.msg = 'No new data'
