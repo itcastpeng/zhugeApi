@@ -275,7 +275,7 @@ def customer_oper(request, oper_type, o_id):
 
                     information_obj.update(
                         customer_id =  o_id,
-                        sex = int(forms_obj.cleaned_data['sex']),
+                        sex = forms_obj.cleaned_data['sex'],
                         company = forms_obj.cleaned_data['company'],
                         phone = forms_obj.cleaned_data['phone'],
                         email = forms_obj.cleaned_data['email'],

@@ -113,12 +113,11 @@ def product(request, oper_type):
                     'create_date': '',
                 }
 
-                com
+                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
+
                 q = conditionCom(request, field_dict)
-
                 q.add(Q(**{'user_id': user_id}), Q.AND)
-                q.add(Q(**{'user_id': user_id}), Q.AND)
-
+                q.add(Q(**{'company_id': company_id}), Q.AND)
                 q.add(Q(**{'user_id__isnull': True}), Q.OR)
 
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(q).order_by(order)
