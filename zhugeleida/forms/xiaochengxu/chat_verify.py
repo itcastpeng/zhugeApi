@@ -46,26 +46,38 @@ class ChatSelectForm(forms.Form):
         return length
 
     # 判断用户id是否存在
-    def clean_user_id(self):
+    def clean_u_id(self):
 
-        user_id = self.data['user_id']
+        u_id = self.data['user_id']
 
         objs = models.zgld_userprofile.objects.filter(
-            id=user_id,
+            id=u_id,
         )
         if not objs:
-            self.add_error('username', '用户名不存在')
+            self.add_error('u_id', '用户名不存在')
         else:
-            return user_id
+            return u_id
 
 
 class ChatPostForm(forms.Form):
-
 
     u_id = forms.IntegerField(
         required=True,
         error_messages={
             'invalid': "用户ID不能为空",
+        }
+    )
+    send_type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'invalid': "发送类型不能为空",
+        }
+    )
+
+    msg = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "消息不能为空"
         }
     )
 
@@ -98,29 +110,28 @@ class ChatGetForm(forms.Form):
 
 
 
-
-    # 判断用户id是否存在
-    def clean_user_id(self):
-
-        user_id = self.data['u_id']
-
-        objs = models.zgld_userprofile.objects.filter(
-            id=user_id,
-        )
-        if not objs:
-            self.add_error('username', '用户名不存在')
-        else:
-            return user_id
-
-    # 判断用户名是否存在
-    def clean_customer_id(self):
-
-        customer_id = self.data['user_id']
-
-        objs = models.zgld_customer.objects.filter(
-            id=customer_id,
-        )
-        if not objs:
-            self.add_error('customer_id', '客户不存在')
-        else:
-            return customer_id
+    # # 判断用户id是否存在
+    # def clean_user_id(self):
+    #
+    #     user_id = self.data['u_id']
+    #
+    #     objs = models.zgld_userprofile.objects.filter(
+    #         id=user_id,
+    #     )
+    #     if not objs:
+    #         self.add_error('username', '用户名不存在')
+    #     else:
+    #         return user_id
+    #
+    # # 判断用户名是否存在
+    # def clean_customer_id(self):
+    #
+    #     customer_id = self.data['user_id']
+    #
+    #     objs = models.zgld_customer.objects.filter(
+    #         id=customer_id,
+    #     )
+    #     if not objs:
+    #         self.add_error('customer_id', '客户不存在')
+    #     else:
+    #         return customer_id

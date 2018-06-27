@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm
+from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
 
 import json
 from zhugeleida import models
@@ -85,7 +85,7 @@ def chat_oper(request, oper_type, o_id):
                 response = Response.ResponseObj()
                 user_id = request.GET.get('user_id')
                 customer_id = request.GET.get('customer_id')
-                # send_type = request.GET.get('send_type')
+
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -129,10 +129,9 @@ def chat_oper(request, oper_type, o_id):
         # 用户推送消息到server端,然后入库
         if  oper_type == 'send_msg':
             print('----send_msg--->>',request.POST)
-            forms_obj = ChatSelectForm(request.POST)
+            forms_obj = ChatPostForm(request.POST)
 
             if forms_obj.is_valid():
-
                 data = request.POST
                 user_id = int(data.get('user_id'))
                 customer_id = int(data.get('customer_id'))

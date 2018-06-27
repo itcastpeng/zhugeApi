@@ -74,6 +74,7 @@ def customer(request):
                     address = info_obj[0].address if info_obj else ''
                     birthday = info_obj[0].birthday if info_obj else ''
                     mem = info_obj[0].mem if info_obj else ''
+                    sex = info_obj[0].sex if info_obj else ''
 
                     belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
 
@@ -89,6 +90,8 @@ def customer(request):
                         'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': obj.memo_name,  # 备注名
                         'phone': phone,              # 手机号
+                        'sex':  sex,
+
                         'email': email,              # email
                         'company': company,                # 公司
                         'position':position,  # 位置

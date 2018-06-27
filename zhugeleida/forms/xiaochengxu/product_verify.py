@@ -58,8 +58,8 @@ class ProductAddForm(forms.Form):
 
 
 # 修改企业的产品
-class ProductUpdateForm(forms.Form):
-    user_id = forms.IntegerField(
+class ProductGetForm(forms.Form):
+    u_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': "用户ID不能为空"
@@ -73,60 +73,37 @@ class ProductUpdateForm(forms.Form):
     )
 
 
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "产品名称不能为空"
-        }
-    )
-    price = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "价格不能为空"
-        }
-    )
-    reason = forms.CharField(
-        required=False,
+    def clean_u_id(self):
 
-    )
-
-    title = forms.CharField(
-        required=False,
-
-    )
-    content = forms.CharField(
-        required=False,
-
-    )
-
-    # 判断企业产品名称是否存在
-    def clean_name(self):
-        name = self.data['name']
-        product_id = self.data['product_id']
-        company_id = models.zgld_userprofile.objects.get(id = self.data.get('user_id')).company_id
-
-        objs = models.zgld_product.objects.filter(
-            name=name,company_id=company_id
-        ).exclude(id=product_id)
-
-        if  objs:
-            self.add_error('name', '产品名称不能重复')
+        user_id = self.data['u_id']
+        objs = models.zgld_userprofile.objects.filter(
+            id=user_id,
+        )
+        if not objs:
+            self.add_error('u_id', '用户名不存在')
         else:
-            return name
+            return user_id
 
-    # 判断企业产品名称是否存在
-    def clean_product_id(self):
-        product_id = self.data['product_id']
-        objs = models.zgld_product.objects.filter(id = product_id)
-
-        if  not objs:
-            self.add_error('product_id', '产品不存在')
-
-        else:
-            return product_id
+    # # 判断企业产品名称是否存在
+    # def clean_product_id(self):
+    #     product_id = self.data['product_id']
+    #     objs = models.zgld_product.objects.filter(id = product_id)
+    #
+    #     if  not objs:
+    #         self.add_error('product_id', '产品不存在')
+    #
+    #     else:
+    #         return product_id
 
 
 class ProductSelectForm(forms.Form):
+
+    u_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "用户ID不能为空"
+        }
+    )
 
 
     current_page = forms.IntegerField(

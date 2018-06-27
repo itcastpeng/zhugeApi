@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
 
 import json
 from zhugeleida import models
@@ -127,25 +127,26 @@ def chat_oper(request, oper_type, o_id):
     elif request.method == 'POST':
         # 用户推送消息到server端,然后入库
         if  oper_type == 'send_msg':
+            forms_obj = ChatPostForm(request.GET)
 
-            print('----send_msg--->>',request.POST)
+            if forms_obj.is_valid():
 
-            customer_id = int(request.GET.get('user_id'))
-            user_id =  request.POST.get('u_id')
-            msg = request.POST.get('msg')
-            send_type = request.POST.get('send_type')
+                print('----send_msg--->>',request.POST)
+                customer_id = int(request.GET.get('user_id'))
+                user_id =  request.POST.get('u_id')
+                msg = request.POST.get('msg')
+                send_type = request.POST.get('send_type')
+                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                    is_last_msg=True).update(is_last_msg=False)
+                models.zgld_chatinfo.objects.create(
+                    msg=msg,
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    send_type=send_type,
+                )
 
-            models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                is_last_msg=True).update(is_last_msg=False)
-            models.zgld_chatinfo.objects.create(
-                msg=msg,
-                userprofile_id=user_id,
-                customer_id=customer_id,
-                send_type=send_type,
-            )
-
-            response.code = 200
-            response.msg = 'send msg successful'
+                response.code = 200
+                response.msg = 'send msg successful'
 
 
 
