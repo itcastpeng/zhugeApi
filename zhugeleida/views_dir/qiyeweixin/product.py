@@ -106,22 +106,40 @@ def product(request, oper_type):
         elif oper_type == 'product_list':
             forms_obj = ProductSelectForm(request.GET)
             if forms_obj.is_valid():
-                user_id = request.GET.get('user_id')
+                user_id = int(request.GET.get('user_id'))
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
+                status = request.GET.get('status')
                 field_dict = {
                     'status': '',
                     'create_date': '',
                 }
                 company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
-                q = conditionCom(request, field_dict)
-                q.add(Q(**{'user_id': user_id}), Q.AND)
-                q.add(Q(**{'company_id': company_id}), Q.AND)
-                q.add(Q(**{'user_id__isnull': True,'company_id': company_id},), Q.AND)
 
-                objs = models.zgld_product.objects.select_related('user', 'company').filter(q).order_by(order)
+                # q = conditionCom(request, field_dict)
+                # q.add(Q(**{'user_id': user_id}), Q.AND)
+                # q.add(Q(**{'company_id': company_id}), Q.AND)
+                # q.add(Q(**{'user_id__isnull': True,'company_id': company_id},), Q.AND)
+
+                con = Q()
+                q1 = Q()
+                q1.connector = 'and'
+                q1.children.append(('user_id', user_id))
+                q1.children.append(('company_id', company_id))
+                q1.children.append(('status', status)) if status else ''
+                q2 = Q()
+                q2.connector = 'and'
+                q2.children.append(('company_id', company_id))
+                q2.children.append(('user_id__isnull', True))
+                q2.children.append(('status', status))  if status else ''
+
+                con.add(q1, 'OR')
+                con.add(q2, 'OR')
+                print('-----con----->',con)
+
+                objs = models.zgld_product.objects.select_related('user', 'company').filter(con).order_by(order)
                 count = objs.count()
 
                 if length != 0:

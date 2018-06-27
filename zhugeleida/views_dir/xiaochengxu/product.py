@@ -25,7 +25,7 @@ def product(request, oper_type):
             if forms_obj.is_valid():
 
                 customer_id = request.GET.get('user_id')
-                user_id = request.GET.get('u_id')
+                user_id = request.GET.get('uid')
 
                 product_id = request.GET.get('product_id')
                 field_dict = {
@@ -33,8 +33,6 @@ def product(request, oper_type):
                 }
                 q = conditionCom(request, field_dict)
                 q.add(Q(**{'id': product_id}), Q.AND)
-
-
 
 
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
@@ -81,6 +79,13 @@ def product(request, oper_type):
                             'status_code': obj.status  # 产品的动态值。
 
                         })
+
+
+                        remark = '正在查看%s...,尽快把握商机' % (obj.name[:13])
+                        data = request.GET.copy()
+                        data['action'] = 2
+                        response = action_record(data, remark)
+
                         #  查询成功 返回200 状态码
                         response.code = 200
                         response.msg = '查询成功'
@@ -102,25 +107,30 @@ def product(request, oper_type):
             forms_obj = ProductSelectForm(request.GET)
             if forms_obj.is_valid():
                 customer_id = request.GET.get('user_id')
-                user_id = forms_obj.data['u_id']
+                user_id = forms_obj.data['uid']
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
 
-                field_dict = {
-                    'status': '',
-                    'create_date': '',
-                }
 
-                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
+                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
 
-                q = conditionCom(request, field_dict)
-                q.add(Q(**{'user_id': user_id}), Q.AND)
-                q.add(Q(**{'company_id': company_id}), Q.AND)
-                q.add(Q(**{'user_id__isnull': True}), Q.OR)
+                con = Q()
+                q1 = Q()
+                q1.connector = 'and'
+                q1.children.append(('user_id', user_id))
+                q1.children.append(('company_id', company_id))
+                q2 = Q()
+                q2.connector = 'and'
+                q2.children.append(('company_id', company_id))
+                q2.children.append(('user_id__isnull', True))
 
-                objs = models.zgld_product.objects.select_related('user', 'company').filter(q).order_by(order)
+                con.add(q1, 'OR')
+                con.add(q2, 'OR')
+                print('-----con----->',con)
+
+                objs = models.zgld_product.objects.select_related('user', 'company').filter(con).order_by(order)
                 count = objs.count()
 
                 if length != 0:
@@ -152,6 +162,12 @@ def product(request, oper_type):
                         'status_code': obj.status  # 产品的动态。
 
                     })
+
+                    remark = '正在查看%s...,尽快把握商机' % (obj.name[:15])
+                    data = request.GET.copy()
+                    data['action'] = 2
+                    response = action_record(data, remark)
+
                     #  查询成功 返回200 状态码
                     response.code = 200
                     response.msg = '查询成功'
@@ -159,10 +175,13 @@ def product(request, oper_type):
                         'ret_data': ret_data,
                         'data_count': count,
                     }
+
+
             else:
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
 
     return JsonResponse(response.__dict__)
 

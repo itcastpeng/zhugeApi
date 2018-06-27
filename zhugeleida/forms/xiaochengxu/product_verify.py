@@ -59,7 +59,7 @@ class ProductAddForm(forms.Form):
 
 # 修改企业的产品
 class ProductGetForm(forms.Form):
-    u_id = forms.IntegerField(
+    uid = forms.IntegerField(
         required=True,
         error_messages={
             'required': "用户ID不能为空"
@@ -73,14 +73,14 @@ class ProductGetForm(forms.Form):
     )
 
 
-    def clean_u_id(self):
+    def clean_uid(self):
 
-        user_id = self.data['u_id']
+        user_id = self.data['uid']
         objs = models.zgld_userprofile.objects.filter(
             id=user_id,
         )
         if not objs:
-            self.add_error('u_id', '用户名不存在')
+            self.add_error('uid', '用户名不存在')
         else:
             return user_id
 
@@ -98,7 +98,7 @@ class ProductGetForm(forms.Form):
 
 class ProductSelectForm(forms.Form):
 
-    u_id = forms.IntegerField(
+    uid = forms.IntegerField(
         required=True,
         error_messages={
             'required': "用户ID不能为空"

@@ -68,22 +68,24 @@ def mingpian(request):
             is_sign = False
             for obj in objs:
                 up_down_obj = models.zgld_up_down.objects.filter(user_id=obj.id, customer_id=customer_id)
-                print('user_id=obj.id, customer_id=customer_id', obj.id,customer_id)
+                print('user_id=obj.id, customer_id=customer_id', obj.id, customer_id)
 
                 if up_down_obj:
-                    print('----up_down_obj[0].up----->>',up_down_obj[0].up)
+                    print('----up_down_obj[0].up----->>', up_down_obj[0].up)
                     is_praise = up_down_obj[0].up
 
                 up_down_sign_obj = models.zgld_up_down_sign.objects.filter(user_id=obj.id, customer_id=customer_id)
                 if up_down_sign_obj:
                     is_sign = up_down_sign_obj[0].up
 
-                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url').order_by('-create_date')
-                tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name').order_by('-create_date')
+                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url').order_by(
+                    '-create_date')
+                tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id',
+                                                                                                    'name').order_by(
+                    '-create_date')
 
                 objs = models.zgld_userprofile.objects.filter(id=user_id)
                 sign_num = objs[0].sign_num
-
 
                 ret_data = {
                     'id': obj.id,
@@ -98,12 +100,12 @@ def mingpian(request):
                     'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
                     'create_date': obj.create_date,  # 创建时间
                     'popularity_num': obj.popularity,  # 被查看多少次。
-                    'praise_num': obj.praise,     # 点赞多少次
-                    'forward_num': obj.forward,   # 转发多少次
+                    'praise_num': obj.praise,  # 点赞多少次
+                    'forward_num': obj.forward,  # 转发多少次
                     'is_praise': is_praise,
-                    'sign': obj.sign or '',   # 签名
-                    'is_sign': is_sign ,      # 签名
-                    'sign_num' : sign_num,
+                    'sign': obj.sign or '',  # 签名
+                    'is_sign': is_sign,  # 签名
+                    'sign_num': sign_num,
                     'photo': list(photo_data) or '',
                     'tag': list(tag_data),
 
@@ -181,7 +183,7 @@ def mingpian_oper(request, oper_type):
                                 'praise_num': praise_num,
                                 'is_praise': is_praise or False,
                             }
-                        }
+                    }
 
                 else:
                     praise_status = updown_obj[0].up
@@ -243,11 +245,11 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')  # 客户 id
 
                 updown_obj = models.zgld_up_down_sign.objects.filter(
-                    user_id=user_id,             # 被赞的用户
-                    customer_id=customer_id,     # 赞或踩的客户
+                    user_id=user_id,  # 被赞的用户
+                    customer_id=customer_id,  # 赞或踩的客户
                 )
 
-                if not  updown_obj: # 表示签名没有被赞。
+                if not updown_obj:  # 表示签名没有被赞。
                     models.zgld_up_down_sign.objects.create(
                         user_id=user_id,  # 被赞的用户
                         customer_id=customer_id,  # 赞或踩的客户
@@ -293,6 +295,37 @@ def mingpian_oper(request, oper_type):
 
                     response.code = 200
                     response.msg = '已经点过赞'
+
+            elif oper_type == 'create_poster':
+
+                customer_id = request.GET.get('user_id')
+                user_id = request.GET.get('uid')  # 用户 id
+
+                remark = '保存了您的名片海报'
+                data = request.GET.copy()
+                data['action'] = 1
+                response = action_record(data, remark)
+
+
+                objs = models.zgld_userprofile.objects.filter(id=user_id)
+                print('------->>',objs)
+
+                if objs:
+                    ret_data = []
+                    ret_data.append({
+                        'user_id': objs[0].id,
+                        'user_avatar': objs[0].avatar,
+                        'username': objs[0].username,
+                        'position': objs[0].position,
+                        'mingpian_phone': objs[0].mingpian_phone,
+                        'company': objs[0].company.name,
+                        'qr_code_url': objs[0].qr_code,
+
+                    })
+                    response.data = ret_data
+                    response.code = 200
+                    response.msg = "请求成功"
+
 
         else:
             response.code = 402
