@@ -33,32 +33,45 @@ def follow_info(request, ):
             q = conditionCom(request, field_dict)
             print('q -->', q)
 
-            objs = models.zgld_user_customer_flowup.objects.filter(q).order_by(order)  # 查询出有user用户关联的信心表
+            customer_flowup_objs = models.zgld_user_customer_flowup.objects.filter(q).order_by(order)  # 查询出有user用户关联的信心表
+            objs = models.zgld_follow_info.objects.filter(user_customer_flowup_id=customer_flowup_objs[0].id).order_by(order)
+            print('----objs -->>>>',objs[0].create_date)
             count = objs.count()
-            if count == 1:
-                objs = objs[0].zgld_follow_info_set.all()
+            ret_list = []
+            if objs:
                 if length != 0:
                     print('current_page -->', current_page)
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
 
-                    ret_data  = objs.values('user_customer_flowup__customer__headimgurl',
-                                                    'user_customer_flowup__user__avatar',
-                                                    'user_customer_flowup__user__username',
-                                                     'user_customer_flowup__user_id',
-                                                     'user_customer_flowup__customer_id',
-                                                    'follow_info', 'create_date')
-                    ret_data_list  = list(ret_data)
-                    ret_data_list.reverse()
-                    response.code = 200
-                    response.data = {
-                        'ret_data': ret_data_list,
-                        'data_count': objs.count(),
-                    }
-            else:
-                response.code = 307
-                response.msg = "用户客户关联数据重复"
+                for obj in objs:
+
+
+                    # ret_list  = 'user_customer_flowup__customer__headimgurl',
+                    #                                 'user_customer_flowup__user__avatar',
+                    #                                 'user_customer_flowup__user__username',
+                    #                                  'user_customer_flowup__user_id',
+                    #                                  'user_customer_flowup__customer_id',
+                    #                                 'follow_info', 'create_date')
+
+                    ret_list.append({
+                        'user_customer_flowup__customer__headimgurl':  customer_flowup_objs[0].customer.headimgurl,
+                        'user_customer_flowup__user__avatar' : customer_flowup_objs[0].user.avatar,
+                        'user_customer_flowup__user_id': customer_flowup_objs[0].user_id,
+                        'user_customer_flowup__customer_id' :  customer_flowup_objs[0].customer_id,
+                        'follow_info': obj.follow_info,
+                        'create_date': obj.create_date
+
+                    })
+
+                ret_list.reverse()
+                response.code = 200
+                response.data = {
+                    'ret_data': ret_list,
+                    'data_count': count,
+                }
+
 
     else:
         response.code = 402
