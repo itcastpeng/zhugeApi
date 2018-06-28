@@ -49,9 +49,11 @@ def follow_info(request, ):
                                                      'user_customer_flowup__user_id',
                                                      'user_customer_flowup__customer_id',
                                                     'follow_info', 'create_date')
+                    ret_data_list  = list(ret_data)
+                    ret_data_list.reverse()
                     response.code = 200
                     response.data = {
-                        'ret_data': list(ret_data).reverse(),
+                        'ret_data': ret_data_list,
                         'data_count': objs.count(),
                     }
             else:
