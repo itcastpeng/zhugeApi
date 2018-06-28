@@ -1,20 +1,21 @@
-
 from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.followup_verify import FollowLanguageAddForm,  FollowLanguageSelectForm     ,FollowInfoAddForm, FollowInfoSelectForm
+from zhugeleida.forms.qiyeweixin.followup_verify import FollowLanguageAddForm, FollowLanguageSelectForm, \
+    FollowInfoAddForm, FollowInfoSelectForm
 
 import json
 
 from publicFunc.condition_com import conditionCom
+from django.db.models import Q
 
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def follow_language(request,):
+def follow_language(request, ):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
@@ -27,12 +28,14 @@ def follow_language(request,):
             order = request.GET.get('order', '-create_date')
 
             field_dict = {
-                 'user_id': '',
+                'user_id': '',
             }
             q = conditionCom(request, field_dict)
+            q.add(Q(**{'user_id__isnull': True}), Q.OR)
+
             print('q -->', q)
 
-            objs = models.zgld_follow_language.objects.filter(q).order_by(order) # 查询出有user用户关联的跟进常用语
+            objs = models.zgld_follow_language.objects.filter(q).order_by(order)  # 查询出有user用户关联的跟进常用语
             count = objs.count()
 
             if length != 0:
@@ -42,33 +45,27 @@ def follow_language(request,):
                 objs = objs[start_line: stop_line]
             language_list = []
             ret_data = []
+
             if objs:
-               for obj in objs:
-                   language_list.append({'language_id': obj.id , 'language': obj.custom_language})
-
-            objs = models.zgld_follow_language.objects.filter(user_id=None).order_by('-create_date')
-            if objs:
-               for obj in objs:
-                   language_list.append({'language_id': obj.id , 'language': obj.custom_language})
-
-            ret_data.append({
-
-                'user_id':  user_id,
-                'follow_language_data': language_list,
-
-            })
+                for obj in objs:
+                    language_list.append(
+                        {'language_id': obj.id, 'user_id': obj.user_id, 'language': obj.custom_language})
 
             response.code = 200
             response.data = {
                 'ret_data': ret_data,
-                'data_count': count,
+                'data_count': {
+
+                    'user_id': user_id,
+                    'follow_language_data': language_list,
+
+                },
             }
         return JsonResponse(response.__dict__)
 
     else:
         response.code = 402
         response.msg = "请求异常"
-
 
 
 @csrf_exempt
@@ -82,7 +79,7 @@ def follow_language_oper(request, oper_type, o_id):
             print('----request.POST---->>', request.POST)
             language_data = {
                 'user_id': request.GET.get('user_id'),
-                'custom_language' : request.POST.get('custom_language'),
+                'custom_language': request.POST.get('custom_language'),
             }
             forms_obj = FollowLanguageAddForm(language_data)
             if forms_obj.is_valid():
@@ -100,10 +97,10 @@ def follow_language_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            print('------delete o_id --------->>',o_id)
+            print('------delete o_id --------->>', o_id)
             user_id = request.GET.get('user_id')
 
-            language_objs = models.zgld_follow_language.objects.filter(id=o_id,user_id=user_id)
+            language_objs = models.zgld_follow_language.objects.filter(id=o_id, user_id=user_id)
             if language_objs:
                 language_objs.delete()
                 response.code = 200

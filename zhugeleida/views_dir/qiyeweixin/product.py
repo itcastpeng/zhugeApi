@@ -355,6 +355,7 @@ def product_oper(request, oper_type, o_id):
                     'status': product_objs[0].get_status_display(),
                     'status_code': product_objs[0].status
                 }
+
             else:
                 response.code = 302
                 response.msg = '产品不存在'

@@ -92,6 +92,7 @@ def mingpian(request):
 @account.is_token(models.zgld_userprofile)
 def mingpian_oper(request, oper_type):
     response = Response.ResponseObj()
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     if request.method == "POST":
 
         if oper_type == 'save_phone':
@@ -165,52 +166,80 @@ def mingpian_oper(request, oper_type):
                 response.code = 200
                 response.msg = '保存成功'
 
-        elif oper_type == 'upload_photo':
-            user_id = request.GET.get('user_id')
-            photo = request.FILES.get('photo')
-            print('-----photo--->>',type(photo),photo)
+        # elif oper_type == 'upload_photo':
+        #     user_id = request.GET.get('user_id')
+        #     photo = request.FILES.get('photo')
+        #     print('-----photo--->>',type(photo),photo)
+        #
+        #     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        #     obj = models.zgld_user_photo.objects.create(user_id=user_id)
+        #     photo_id = obj.id
+        #     userid = models.zgld_userprofile.objects.get(id=user_id).userid
+        #     user_photo = '/%s_%s_photo.jpg' % (photo_id, userid)
+        #
+        #     photo_url = 'statics/zhugeleida/imgs/xiaochengxu/user_photo%s' % (user_photo)
+        #     obj.photo_url = photo_url
+        #     obj.save()
+        #
+        #     IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo') + user_photo
+        #
+        #     with open('%s' % (IMG_PATH), 'wb') as f:
+        #         for chunk in photo.chunks():
+        #             f.write(chunk)
+        #
+        #     response.code = 200
+        #     response.msg = '上传成功'
+        #     response.data = {
+        #         'photo_id': photo_id,
+        #         'photo_url': photo_url,
+        #     }
+        #
+        # elif oper_type == 'delete_photo':
+        #     print('--------->>',request.POST)
+        #     user_id = request.GET.get('user_id')
+        #     photo_id = request.POST.get('id')
+        #
+        #     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        #     objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)
+        #
+        #     if objs:
+        #         IMG_PATH = BASE_DIR  + '/' + objs[0].photo_url
+        #         print('-----IMG_PATH--->>',IMG_PATH)
+        #         if os.path.exists(IMG_PATH):os.remove(IMG_PATH)
+        #         objs.delete()
+        #         response.code = 200
+        #         response.msg = '删除成功'
+        #     else:
+        #         response.code = 302
+        #         response.msg = '删除数据不存在'
 
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            obj = models.zgld_user_photo.objects.create(user_id=user_id)
-            photo_id = obj.id
-            userid = models.zgld_userprofile.objects.get(id=user_id).userid
-            user_photo = '/%s_%s_photo.jpg' % (photo_id, userid)
+        elif oper_type == "upload_photo":
 
-            photo_url = 'statics/zhugeleida/imgs/xiaochengxu/user_photo%s' % (user_photo)
-            obj.photo_url = photo_url
-            obj.save()
+            upload_file = request.FILES['file']
+            task = request.POST.get('task_id')  # 获取文件唯一标识符
+            chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
+            filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
 
-            IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo') + user_photo
+            IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo','tmp') + filename
+            with open(IMG_PATH_FILES, 'wb+') as destination:
+                for chunk in upload_file.chunks():
+                    destination.write(chunk)
 
-            with open('%s' % (IMG_PATH), 'wb') as f:
-                for chunk in photo.chunks():
-                    f.write(chunk)
-
-            response.code = 200
-            response.msg = '上传成功'
-            response.data = {
-                'photo_id': photo_id,
-                'photo_url': photo_url,
-            }
-
-        elif oper_type == 'delete_photo':
-            print('--------->>',request.POST)
-            user_id = request.GET.get('user_id')
-            photo_id = request.POST.get('id')
-
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)
-
-            if objs:
-                IMG_PATH = BASE_DIR  + '/' + objs[0].photo_url
-                print('-----IMG_PATH--->>',IMG_PATH)
-                if os.path.exists(IMG_PATH):os.remove(IMG_PATH)
-                objs.delete()
+        elif oper_type == "delete_picture":
+            # 删除 ID
+            product_id = request.POST.get('product_id')
+            picture_objs = models.zgld_product_picture.objects.filter(id=o_id,product_id=product_id) # 接口
+            if picture_objs:
+                picture_objs.delete()
                 response.code = 200
-                response.msg = '删除成功'
+                response.msg = "删除成功"
             else:
                 response.code = 302
-                response.msg = '删除数据不存在'
+                response.msg = '图片ID不存在'
+
+
+
+
 
 
     elif request.method == "GET":
@@ -223,6 +252,49 @@ def mingpian_oper(request, oper_type):
             response.data = {
                 'ret_data': list(photo_query_list),
                 'user_id': user_id,
+            }
+
+        elif oper_type == "upload_complete":
+
+            target_filename = request.GET.get('filename')   # 获取上传文件的文件名
+            task = request.GET.get('task_id')               # 获取文件的唯一标识符
+            picture_type = request.GET.get('picture_type')  # 图片的类型。
+            IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo')
+            TEMP_IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo', 'tmp')
+            chunk = 0  # 分片序号
+            file_tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+            print('===target_filename===>>', target_filename)
+
+            file_type = target_filename.split('.')[1]
+            target_filename = '%s/%s.%s' % (IMG_PATH, file_tag, file_type)
+
+            with open(target_filename, 'wb') as target_file:  # 创建新文件
+                while True:
+                    try:
+                        filename = '%s%d' % (task, chunk)
+                        source_file = open('%s/%s' % (TEMP_IMG_PATH, filename), 'rb')  # 按序打开每个分片
+                        target_file.write(source_file.read())  # 读取分片内容写入新文件
+                        source_file.close()
+                    except IOError:
+                        break
+                    chunk += 1
+                    os.remove('%s/%s' % (TEMP_IMG_PATH, filename))  # 删除该分片，节约空间
+
+
+
+            picture_url = 'statics/zhugeleida/imgs/qiyeweixin/product/%s.%s' % (file_tag, file_type)
+
+            product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
+                                                                             picture_url=picture_url)
+
+            response.code = 200
+            response.msg = "添加图片成功"
+            response.data = {
+                'ret_data':
+                    {
+                        'picture_id': product_picture_obj.id,
+                        'picture_url': product_picture_obj.picture_url,
+                    }
             }
 
 
