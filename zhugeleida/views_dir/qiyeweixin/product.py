@@ -289,7 +289,7 @@ def product_oper(request, oper_type, o_id):
             chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
             filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
 
-            IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product') + filename
+            IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp') + filename
             with open(IMG_PATH_FILES, 'wb+') as destination:
                 for chunk in upload_file.chunks():
                     destination.write(chunk)
@@ -298,7 +298,12 @@ def product_oper(request, oper_type, o_id):
             # 删除 ID
             product_id = request.POST.get('product_id')
             picture_objs = models.zgld_product_picture.objects.filter(id=o_id,product_id=product_id) # 接口
+
             if picture_objs:
+
+                IMG_PATH = BASE_DIR + '/' + picture_objs[0].picture_url
+                if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
+
                 picture_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
@@ -468,6 +473,8 @@ def product_oper(request, oper_type, o_id):
             target_filename = request.GET.get('filename')  # 获取上传文件的文件名
             task = request.GET.get('task_id')  # 获取文件的唯一标识符
             picture_type = request.GET.get('picture_type')  # 图片的类型。
+            TEMP_IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp')
+
             IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product')
             chunk = 0  # 分片序号
             file_tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
@@ -480,13 +487,13 @@ def product_oper(request, oper_type, o_id):
                 while True:
                     try:
                         filename = '%s%d' % (task, chunk)
-                        source_file = open('%s/%s' % (IMG_PATH, filename), 'rb')  # 按序打开每个分片
-                        target_file.write(source_file.read())  # 读取分片内容写入新文件
+                        source_file = open('%s/%s' % (TEMP_IMG_PATH, filename), 'rb')  # 按序打开每个分片
+                        target_file.write(source_file.read())                     # 读取分片内容写入新文件
                         source_file.close()
                     except IOError:
                         break
                     chunk += 1
-                    os.remove('%s/%s' % (IMG_PATH, filename))  # 删除该分片，节约空间
+                    os.remove('%s/%s' % (TEMP_IMG_PATH, filename))  # 删除该分片，节约空间
             picture_url = 'statics/zhugeleida/imgs/qiyeweixin/product/%s.%s' % (file_tag, file_type)
 
             product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,

@@ -109,6 +109,7 @@ def follow_language_oper(request, oper_type, o_id):
                 response.msg = 'ID不存在或者不允许删除'
 
 
+
     else:
         response.code = 402
         response.msg = "请求异常"

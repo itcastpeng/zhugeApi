@@ -51,7 +51,7 @@ def follow_info(request, ):
                                                     'follow_info', 'create_date')
                     response.code = 200
                     response.data = {
-                        'ret_data': list(ret_data),
+                        'ret_data': list(ret_data).reverse(),
                         'data_count': objs.count(),
                     }
             else:
