@@ -65,7 +65,7 @@ def follow_info(request, ):
 
                     })
 
-                ret_list.reverse()
+
                 response.code = 200
                 response.data = {
                     'ret_data': ret_list,
