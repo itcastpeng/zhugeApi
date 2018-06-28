@@ -44,7 +44,7 @@ def follow_language(request, ):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
             language_list = []
-            ret_data = []
+
 
             if objs:
                 for obj in objs:
@@ -53,9 +53,8 @@ def follow_language(request, ):
 
             response.code = 200
             response.data = {
-                'ret_data': ret_data,
-                'data_count': {
-
+                'data_count': objs.count(),
+                'ret_data': {
                     'user_id': user_id,
                     'follow_language_data': language_list,
 
