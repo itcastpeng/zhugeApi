@@ -86,9 +86,12 @@ def follow_language_oper(request, oper_type, o_id):
             }
             forms_obj = FollowLanguageAddForm(language_data)
             if forms_obj.is_valid():
-                models.zgld_follow_language.objects.create(**forms_obj.cleaned_data)
+                obj = models.zgld_follow_language.objects.create(**forms_obj.cleaned_data)
                 response.code = 200
                 response.msg = "添加成功"
+                response.data = {
+                    'language_id': obj.id,
+                }
 
             else:
                 # print("验证不通过")
@@ -98,14 +101,16 @@ def follow_language_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
-            language_objs = models.zgld_follow_language.objects.filter(id=o_id)
+            user_id = request.GET.get('user_id')
+
+            language_objs = models.zgld_follow_language.objects.filter(id=o_id,user_id=user_id)
             if language_objs:
                 language_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
             else:
                 response.code = 302
-                response.msg = 'ID不存在'
+                response.msg = 'ID不存在或者不允许删除'
 
 
     else:

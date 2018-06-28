@@ -26,8 +26,8 @@ def product(request, oper_type):
 
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
-
                 product_id = request.GET.get('product_id')
+
                 field_dict = {
                     'id': '',
                 }
@@ -80,8 +80,11 @@ def product(request, oper_type):
 
                         })
 
+                        if len(('正在查看' + obj.name)) > 20:
+                            remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
+                        else:
+                            remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
 
-                        remark = '正在查看%s...,尽快把握商机' % (obj.name[:13])
                         data = request.GET.copy()
                         data['action'] = 2
                         response = action_record(data, remark)
@@ -163,7 +166,7 @@ def product(request, oper_type):
 
                     })
 
-                    remark = '正在查看%s...,尽快把握商机' % (obj.name[:15])
+                    remark = '正在查看您发布的产品,尽快把握商机'
                     data = request.GET.copy()
                     data['action'] = 2
                     response = action_record(data, remark)
@@ -181,6 +184,22 @@ def product(request, oper_type):
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'forward_product':
+
+            product_id = request.GET.get('product_id')
+            objs = models.zgld_product.objects.filter(id=product_id)
+
+            if len(('转发了' + objs[0].name)) > 23:
+                remark = '%s...' % (('转发了' + objs[0].name)[:23])
+            else:
+                remark = '%s' % (('转发了' + objs[0].name))
+
+            data = request.GET.copy()
+            data['action'] = 2
+            response = action_record(data, remark)
+            response.code = 200
+            response.msg = "记录转发产品成功"
 
 
     return JsonResponse(response.__dict__)

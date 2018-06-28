@@ -285,10 +285,10 @@ def product_oper(request, oper_type, o_id):
         elif oper_type == "add_picture":
 
             upload_file = request.FILES['file']
-
             task = request.POST.get('task_id')  # 获取文件唯一标识符
             chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
             filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
+
             IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product') + filename
             with open(IMG_PATH_FILES, 'wb+') as destination:
                 for chunk in upload_file.chunks():
@@ -296,7 +296,8 @@ def product_oper(request, oper_type, o_id):
 
         elif oper_type == "delete_picture":
             # 删除 ID
-            picture_objs = models.zgld_product_picture.objects.filter(id=o_id) # 接口
+            product_id = request.POST.get('product_id')
+            picture_objs = models.zgld_product_picture.objects.filter(id=o_id,product_id=product_id) # 接口
             if picture_objs:
                 picture_objs.delete()
                 response.code = 200
@@ -305,10 +306,11 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '图片ID不存在'
 
-        # 删除文章的组合的相关记录
+        # 删除文章的[标题或内容]的相关记录
         elif oper_type == "delete_article":
             # 删除 ID
-            picture_article_objs = models.zgld_product_article.objects.filter(id=o_id)
+            product_id = request.POST.get('product_id')
+            picture_article_objs = models.zgld_product_article.objects.filter(id=o_id,product_id=product_id)
             if picture_article_objs:
                 picture_article_objs.delete()
                 response.code = 200
@@ -319,8 +321,9 @@ def product_oper(request, oper_type, o_id):
 
         # 触发-下架产品的动作
         elif oper_type == "shelves":
-            # 出发-发布动作。
-            product_objs = models.zgld_product.objects.filter(id=o_id)
+            user_id = request.GET.get('user_id')
+            product_objs = models.zgld_product.objects.filter(id=o_id,user_id=user_id)
+
             if product_objs:
                 product_objs.update(
                     status=2
@@ -328,6 +331,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 200
                 response.msg = "修改下架状态成功"
                 response.data = {
+                    'product_id': product_objs[0].id,
                     'status': product_objs[0].get_status_display(),
                     'status_code': product_objs[0].status
                 }
@@ -338,7 +342,9 @@ def product_oper(request, oper_type, o_id):
         # 触发-发布产品的动作
         elif oper_type == "publish":
             # 出发-发布动作。
-            product_objs = models.zgld_product.objects.filter(id=o_id)
+            user_id = request.GET.get('user_id')
+            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
+
             if product_objs:
                 product_objs.update(
                     status=1
@@ -356,7 +362,9 @@ def product_oper(request, oper_type, o_id):
         # 触发-推荐产品的动作
         elif oper_type == "recommend":
             # 出发-发布动作。
-            product_objs = models.zgld_product.objects.filter(id=o_id)
+            user_id = request.GET.get('user_id')
+            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
+
             if product_objs:
                 product_objs.update(
                     status=3
@@ -373,8 +381,9 @@ def product_oper(request, oper_type, o_id):
 
         # 触发-删除公司产品
         elif oper_type == "delete":
-            # 删除 ID
-            product_objs = models.zgld_product.objects.filter(id=o_id).delete()
+            user_id = request.GET.get('user_id')
+            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
+
             product_picture_objs = models.zgld_product_picture.objects.filter(product_id=o_id)
             product_article_objs = models.zgld_product_article.objects.filter(product_id=o_id)
 
