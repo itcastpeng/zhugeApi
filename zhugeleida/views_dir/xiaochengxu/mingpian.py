@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom, action_record
-from zhugeleida.forms.xiaochengxu.user_verify import UserAddForm, UserUpdateForm, UserSelectForm
+from zhugeleida.forms.xiaochengxu.user_verify import UserAddForm, UserUpdateForm, UserSelectForm,UserAllForm
 import json
 from django.db.models import Q
 from django.db.models import F
@@ -18,15 +18,14 @@ from django.db.models import F
 @account.is_token(models.zgld_customer)
 def mingpian(request):
     response = Response.ResponseObj()
-    if request.method == "GET":
+    if request.method == "GET":  # 获取单个名片的信息
         forms_obj = UserSelectForm(request.GET)
         if forms_obj.is_valid():
             user_id = request.GET.get('uid')  # 用户 id
             customer_id = request.GET.get('user_id')
+            # current_page = forms_obj.cleaned_data['current_page']
+            # length = forms_obj.cleaned_data['length']
 
-            current_page = forms_obj.cleaned_data['current_page']
-            length = forms_obj.cleaned_data['length']
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
@@ -56,14 +55,11 @@ def mingpian(request):
 
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
-
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
-
+            # if length != 0:
+            #     start_line = (current_page - 1) * length
+            #     stop_line = start_line + length
+            #     objs = objs[start_line: stop_line]
             ret_data = {}
-
             is_praise = False
             is_sign = False
             for obj in objs:
@@ -306,9 +302,8 @@ def mingpian_oper(request, oper_type):
                 data['action'] = 1
                 response = action_record(data, remark)
 
-
                 objs = models.zgld_userprofile.objects.filter(id=user_id)
-                print('------->>',objs)
+                print('------->>', objs)
 
                 if objs:
                     ret_data = []
@@ -334,52 +329,42 @@ def mingpian_oper(request, oper_type):
 
         if oper_type == "all":  # 获取所有的名片
             print('---request.GET-->>', request.GET)
-            forms_obj = UserSelectForm(request.GET)
+            forms_obj = UserAllForm(request.GET)
             if forms_obj.is_valid():
                 user_id = request.GET.get('uid')  # 用户 id
                 customer_id = request.GET.get('user_id')  # 客户 id
-
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                # current_page = forms_obj.cleaned_data['current_page']
+                # length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
+
                 field_dict = {
                     'id': '',
-                    'username': '__contains',
-                    'role__name': '__contains',
-                    'company__name': '__contains',
                 }
-
                 q = conditionCom(request, field_dict)
+                q.add(Q(**{'customer_id': customer_id}), Q.AND)
 
-                objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
+                objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q).order_by(
+                    order)
                 count = objs.count()
 
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
+                # if length != 0:
+                #     start_line = (current_page - 1) * length
+                #     stop_line = start_line + length
+                #     objs = objs[start_line: stop_line]
 
                 ret_data = []
                 for obj in objs:
-                    source_obj = models.zgld_user_customer_belonger.objects.get(user_id=obj.id,
-                                                                                customer_id=customer_id)
-
                     ret_data.append({
                         'id': obj.id,
-                        'username': obj.username,
-                        'source': source_obj.get_source_display(),
-                        'avatar': obj.avatar,
-                        'company': obj.company.name,
-                        'position': obj.position,
-                        'email': obj.email or '',
-                        'mingpian_phone': obj.mingpian_phone or '',  # 名片手机号
-
+                        'username': obj.user.username,
+                        'source': obj.get_source_display(),
+                        'avatar': obj.user.avatar,
+                        'company': obj.user.company.name,
+                        'position': obj.user.position,
+                        'email': obj.user.email or '',
+                        'mingpian_phone': obj.user.mingpian_phone or '',  # 名片手机号
                         'create_date': obj.create_date,  # 创建时间
-
                     })
-                    #  查询成功 返回200 状态码
-                print('---ret_data---->>', ret_data)
 
                 response.code = 200
                 response.msg = '查询成功'

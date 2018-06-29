@@ -250,6 +250,7 @@ class zgld_user_customer_belonger(models.Model):
         (2, '转发'),
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "客户所属用户-关系绑定表"

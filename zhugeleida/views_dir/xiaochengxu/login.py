@@ -41,6 +41,9 @@ def login(request):
     if request.method == "GET":
         print('request.GET -->', request.GET)
 
+        customer_id = request.GET.get('user_id')
+        user_id = request.GET.get('uid')
+
         forms_obj = SmallProgramAddForm(request.GET)
         if forms_obj.is_valid():
 
@@ -63,7 +66,6 @@ def login(request):
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
                 user_type=user_type,
-
             )
             # 如果openid存在一条数据
             if customer_objs:
@@ -72,15 +74,14 @@ def login(request):
 
             else:
                 token = account.get_token(account.str_encrypt(openid))
-
                 obj = models.zgld_customer.objects.create(
                     token=token,
                     openid=openid,
-                    user_type=user_type,
+                    user_type=user_type,  #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
                 )
-                
-                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
 
+                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
                 print('---------- crete successful ---->')
 

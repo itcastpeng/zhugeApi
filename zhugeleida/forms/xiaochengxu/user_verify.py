@@ -85,8 +85,7 @@ class UserUpdateForm(forms.Form):
             return username
 
 
-# 判断是否是数字
-class UserSelectForm(forms.Form):
+class UserAllForm(forms.Form):
 
     uid = forms.IntegerField(
         required=False,
@@ -103,29 +102,46 @@ class UserSelectForm(forms.Form):
     )
 
 
-    current_page = forms.IntegerField(
-        required=False,
+class UserSelectForm(forms.Form):
+
+    uid = forms.IntegerField(
+        required=True,
         error_messages={
-            'invalid': "页码数据类型错误",
-        }
-    )
-    length = forms.IntegerField(
-        required=False,
-        error_messages={
-            'invalid': "页显示数量类型错误"
+            'invalid': "用户id不能为空",
         }
     )
 
-    def clean_current_page(self):
-        if 'current_page' not in self.data:
-            current_page = 1
-        else:
-            current_page = int(self.data['current_page'])
-        return current_page
+    user_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'invalid': "客户id不能为空",
+        }
+    )
 
-    def clean_length(self):
-        if 'length' not in self.data:
-            length = 10
-        else:
-            length = int(self.data['length'])
-        return length
+    #暂时不用做名片分页
+    # current_page = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'invalid': "页码数据类型错误",
+    #     }
+    # )
+    # length = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'invalid': "页显示数量类型错误"
+    #     }
+    # )
+    #
+    # def clean_current_page(self):
+    #     if 'current_page' not in self.data:
+    #         current_page = 1
+    #     else:
+    #         current_page = int(self.data['current_page'])
+    #     return current_page
+    #
+    # def clean_length(self):
+    #     if 'length' not in self.data:
+    #         length = 10
+    #     else:
+    #         length = int(self.data['length'])
+    #     return length
