@@ -77,8 +77,9 @@ def login(request):
                     token=token,
                     openid=openid,
                     user_type=user_type,
-                    source=source,
                 )
+                models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+
                 client_id = obj.id
                 print('---------- crete successful ---->')
 

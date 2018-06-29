@@ -23,6 +23,8 @@ def tag_list(request):
         }
         q = conditionCom(request, field_dict)
         print('q -->', q)
+        user_id = request.GET.get('user_id')
+        customer_id = request.GET.get('customer_id')
 
         tag_values = models.zgld_tag.objects.values_list('id', 'name', 'tag_parent_id')
         tag_dict = {}
@@ -31,12 +33,18 @@ def tag_list(request):
 
         for obj in date_list:
             if obj[2] == None:
-
                 tag_dict['tags'] = []
+
+
                 for tag in date_list:
+                    customr_obj = models.zgld_tag.objects.filter(id=tag[0])[0].tag_customer.filter(id=customer_id)
+                    if customr_obj:
+                        tag_flag = True
+                    else:
+                        tag_flag = False
                     if tag[2] == obj[0]:
                         tag_dict['name']  = obj[1]
-                        tag_dict['tags'].append({ 'id': tag[0],'name': tag[1]})
+                        tag_dict['tags'].append({ 'id': tag[0],'name': tag[1],'is_select': tag_flag})
                         # tag_dict[obj[0]].append({tag[0]})
 
                 ret_data.append(tag_dict)
