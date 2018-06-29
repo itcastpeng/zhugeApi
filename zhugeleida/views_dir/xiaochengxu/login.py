@@ -78,6 +78,7 @@ def login(request):
                     openid=openid,
                     user_type=user_type,
                 )
+                
                 #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
 
                 client_id = obj.id
