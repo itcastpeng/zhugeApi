@@ -8,10 +8,10 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom, action_record
 from zhugeleida.forms.xiaochengxu.user_verify import UserAddForm, UserUpdateForm, UserSelectForm,UserAllForm
-import json
+import json,os,sys
 from django.db.models import Q
 from django.db.models import F
-
+from time import sleep
 
 # 展示单个的名片信息
 @csrf_exempt
@@ -302,24 +302,65 @@ def mingpian_oper(request, oper_type):
                 data['action'] = 1
                 response = action_record(data, remark)
 
-                objs = models.zgld_userprofile.objects.filter(id=user_id)
-                print('------->>', objs)
+                obj = models.zgld_userprofile.objects.get(id=user_id)
+                # print('------->>', objs)
 
-                if objs:
-                    ret_data = []
-                    ret_data.append({
-                        'user_id': objs[0].id,
-                        'user_avatar': objs[0].avatar,
-                        'username': objs[0].username,
-                        'position': objs[0].position,
-                        'mingpian_phone': objs[0].mingpian_phone,
-                        'company': objs[0].company.name,
-                        'qr_code_url': objs[0].qr_code,
+                # if objs:
+                #     ret_data = []
+                ret_data = {
+                    'user_id': obj.id,
+                    'user_avatar': "/" + obj.avatar,
+                    'username': obj.username,
+                    'position': obj.position,
+                    'mingpian_phone': obj.mingpian_phone,
+                    'company': obj.company.name,
+                    'qr_code_url':  "/" + obj.qr_code,
+                }
 
-                    })
-                    response.data = ret_data
-                    response.code = 200
-                    response.msg = "请求成功"
+                #     response.data = ret_data
+                #     response.code = 200
+                #     response.msg = "请求成功"
+                # info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
+                return render(request, 'create_poster.html',locals())
+
+
+
+
+            elif oper_type == 'save_poster':
+
+                BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                BASE_DIR = os.path.join(BASE_DIR, 'xiaochengxu',)
+                print('进入 --------',BASE_DIR)
+
+                # coding:utf-8
+                from selenium import webdriver
+                from PIL import Image
+                option = webdriver.ChromeOptions()
+                # mobileEmulation = {'deviceName': 'iPhone 6'}
+                # option.add_experimental_option('mobileEmulation', mobileEmulation)
+
+                driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
+                url = 'http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/create_poster?rand_str=520ea0b847a0c939a9115e49c88ba4fd&timestamp=1530102750848&user_id=1&uid=1'
+                driver.get(url)
+                sleep(2)
+                driver.save_screenshot('bdbutton.png')
+                driver.get_screenshot_as_file( BASE_DIR+ './XXXXX.png')
+
+                # element = driver.find_element_by_id("container")
+                # print(element.location)  # 打印元素坐标
+                # print(element.size)  # 打印元素大小
+                #
+                # left = element.location['x']
+                # top = element.location['y']
+                # right = element.location['x'] + element.size['width']
+                # bottom = element.location['y'] + element.size['height']
+                #
+                # im = Image.open(BASE_DIR + 'bdbutton.png')
+                # im = im.crop((left, top, right, bottom))
+                # im.save(BASE_DIR +'bdbutton.png')
+
+
+                response.code = 200
 
 
         else:
