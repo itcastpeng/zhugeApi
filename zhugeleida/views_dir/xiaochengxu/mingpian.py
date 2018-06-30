@@ -306,12 +306,12 @@ def mingpian_oper(request, oper_type):
 
                 ret_data = {
                     'user_id': obj.id,
-                    'user_avatar': "/" + obj.avatar,
+                    'user_avatar':  obj.avatar,
                     'username': obj.username,
                     'position': obj.position,
                     'mingpian_phone': obj.mingpian_phone,
                     'company': obj.company.name,
-                    'qr_code_url':  "/" + obj.qr_code,
+                    'qr_code_url':   obj.qr_code,
                 }
                 response.data = ret_data
                 response.msg = "请求成功"
