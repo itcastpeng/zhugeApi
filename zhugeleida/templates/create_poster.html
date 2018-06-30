@@ -88,16 +88,18 @@
 
 <body style="background: #000; height: 1000px">
     <div class="container" id="container">
-        <div class="tu"><img src="{{ ret_data.user_avatar }}"></div>
-        <div class="xinxi">
-            <div class="xinxi1">
-                <h2>{{ ret_data.username }}</h2>
-                <span>{{ ret_data.position }}</span><br>
-                <span>{{ ret_data.mingpian_phone }}</span>
-                <p>{{ ret_data.company }}</p>
+        <div id="jietu">
+            <div class="tu"><img src="{{ ret_data.user_avatar }}"></div>
+            <div class="xinxi">
+                <div class="xinxi1">
+                    <h2>{{ ret_data.username }}</h2>
+                    <span>{{ ret_data.position }}</span><br>
+                    <span>{{ ret_data.mingpian_phone }}</span>
+                    <p>{{ ret_data.company }}</p>
 
+                </div>
+                <div class="xcxt"><img src="{{ ret_data.qr_code_url }}"><div class="wenzi">微信扫码或长按识别</div></div>
             </div>
-            <div class="xcxt"><img src="{{ ret_data.qr_code_url }}"><div class="wenzi">微信扫码或长按识别</div></div>
         </div>
     </div>
 </body>

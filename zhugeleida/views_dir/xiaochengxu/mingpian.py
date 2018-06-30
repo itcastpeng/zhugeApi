@@ -303,10 +303,34 @@ def mingpian_oper(request, oper_type):
                 response = action_record(data, remark)
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
-                # print('------->>', objs)
 
-                # if objs:
-                #     ret_data = []
+                ret_data = {
+                    'user_id': obj.id,
+                    'user_avatar': "/" + obj.avatar,
+                    'username': obj.username,
+                    'position': obj.position,
+                    'mingpian_phone': obj.mingpian_phone,
+                    'company': obj.company.name,
+                    'qr_code_url':  "/" + obj.qr_code,
+                }
+                response.data = ret_data
+                response.msg = "请求成功"
+                response.code = 200
+
+                # return render(request, 'create_poster.html',locals())
+
+            elif oper_type == 'poster_html':
+
+                customer_id = request.GET.get('user_id')
+                user_id = request.GET.get('uid')  # 用户 id
+
+                remark = '保存了您的名片海报'
+                data = request.GET.copy()
+                data['action'] = 1
+                response = action_record(data, remark)
+
+                obj = models.zgld_userprofile.objects.get(id=user_id)
+
                 ret_data = {
                     'user_id': obj.id,
                     'user_avatar': "/" + obj.avatar,
@@ -317,22 +341,16 @@ def mingpian_oper(request, oper_type):
                     'qr_code_url':  "/" + obj.qr_code,
                 }
 
-                #     response.data = ret_data
-                #     response.code = 200
-                #     response.msg = "请求成功"
-                # info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
                 return render(request, 'create_poster.html',locals())
 
 
-
-
             elif oper_type == 'save_poster':
+                from django.conf import settings
 
-                BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                BASE_DIR = os.path.join(BASE_DIR, 'xiaochengxu',)
-                print('进入 --------',BASE_DIR)
+                # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster',)
+                print('---->',BASE_DIR)
 
-                # coding:utf-8
                 from selenium import webdriver
                 from PIL import Image
                 option = webdriver.ChromeOptions()
@@ -340,26 +358,50 @@ def mingpian_oper(request, oper_type):
                 # option.add_experimental_option('mobileEmulation', mobileEmulation)
 
                 driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
-                url = 'http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/create_poster?rand_str=520ea0b847a0c939a9115e49c88ba4fd&timestamp=1530102750848&user_id=1&uid=1'
+                rand_str = request.GET.get('rand_str')
+                timestamp = request.GET.get('timestamp')
+                customer_id = request.GET.get('user_id')
+                user_id = request.GET.get('uid')
+
+                url = 'http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
                 driver.get(url)
                 sleep(2)
-                driver.save_screenshot('bdbutton.png')
-                driver.get_screenshot_as_file( BASE_DIR+ './XXXXX.png')
+                user_poster_file_temp = '/test1.jpg'
+                user_poster_file = '/test2.jpg'
+                # driver.find_element_by_class_name("tu")
+                driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
+                driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
-                # element = driver.find_element_by_id("container")
-                # print(element.location)  # 打印元素坐标
-                # print(element.size)  # 打印元素大小
-                #
-                # left = element.location['x']
-                # top = element.location['y']
-                # right = element.location['x'] + element.size['width']
-                # bottom = element.location['y'] + element.size['height']
-                #
-                # im = Image.open(BASE_DIR + 'bdbutton.png')
-                # im = im.crop((left, top, right, bottom))
-                # im.save(BASE_DIR +'bdbutton.png')
+                element = driver.find_element_by_id("jietu")
+                print(element.location)  # 打印元素坐标
+                print(element.size)      # 打印元素大小
 
+                left = element.location['x']
+                top = element.location['y']
+                right = element.location['x'] + element.size['width']
+                bottom = element.location['y'] + element.size['height']
 
+                im = Image.open( BASE_DIR  + user_poster_file_temp)
+                im = im.crop((left, top, right, bottom))
+                # im.save(os.path.join(settings.BASE_DIR, "test2.jpg"))
+
+                print (len(im.split()))  # test
+                if len(im.split()) == 4:
+                    # prevent IOError: cannot write mode RGBA as BMP
+                    r, g, b, a = im.split()
+                    im = Image.merge("RGB", (r, g, b))
+                    im.save( BASE_DIR  + user_poster_file)
+                else:
+                    im.save( BASE_DIR  + user_poster_file)
+
+                poster_url = '/statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+                ret_data = {
+                    'user_id': user_id,
+                    'poster_url': poster_url,
+                }
+
+                response.data = ret_data
+                response.msg = "请求成功"
                 response.code = 200
 
 
@@ -425,3 +467,7 @@ def mingpian_oper(request, oper_type):
         response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
+
+
+
+

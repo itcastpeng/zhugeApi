@@ -143,41 +143,45 @@ def product(request, oper_type):
 
                 ret_data = []
 
-                for obj in objs:
-                    product_id = obj.id
+                if objs:
+                    for obj in objs:
+                        product_id = obj.id
 
-                    picture_url = models.zgld_product_picture.objects.filter(
-                                product_id=product_id, picture_type=1
-                    ).order_by('create_date')[0].picture_url
-                    user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
+                        picture_url = models.zgld_product_picture.objects.filter(
+                                    product_id=product_id, picture_type=1
+                        ).order_by('create_date')[0].picture_url
+                        user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
 
-                    ret_data.append({
-                        'id': product_id,
-                        'name': obj.name ,# 标题
-                        'price': obj.price,  # 价格
-                        'user_avatar': user_avatar, #用户头像
-                        'reason': obj.reason,       # 推荐理由
-                        'publisher_date': obj.create_date,  # 发布日期。
-                        'cover_picture': picture_url,  # 封面地址的URL
+                        ret_data.append({
+                            'id': product_id,
+                            'name': obj.name ,# 标题
+                            'price': obj.price,  # 价格
+                            'user_avatar': user_avatar, #用户头像
+                            'reason': obj.reason,       # 推荐理由
+                            'publisher_date': obj.create_date,  # 发布日期。
+                            'cover_picture': picture_url,  # 封面地址的URL
 
-                        'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
-                        'status': obj.get_status_display(),
-                        'status_code': obj.status  # 产品的动态。
+                            'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
+                            'status': obj.get_status_display(),
+                            'status_code': obj.status  # 产品的动态。
 
-                    })
+                        })
 
-                    remark = '正在查看您发布的产品,尽快把握商机'
-                    data = request.GET.copy()
-                    data['action'] = 2
-                    response = action_record(data, remark)
+                        remark = '正在查看您发布的产品,尽快把握商机'
+                        data = request.GET.copy()
+                        data['action'] = 2
+                        response = action_record(data, remark)
 
-                    #  查询成功 返回200 状态码
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
+                        #  查询成功 返回200 状态码
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'ret_data': ret_data,
+                            'data_count': count,
+                        }
+                else:
+                    response.code = 302
+                    response.msg = '产品列表无数据'
 
 
             else:
