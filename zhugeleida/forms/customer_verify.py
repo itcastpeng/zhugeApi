@@ -58,12 +58,6 @@ class Customer_UpdateExpectedTime_Form(forms.Form):
             return user_id
 
 class Customer_UpdateExpedtedPr_Form(forms.Form):
-    user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'invalid': "用户ID不能为空",
-        }
-    )
 
     customer_id = forms.IntegerField(
         required=True,

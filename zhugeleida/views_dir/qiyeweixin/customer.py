@@ -207,7 +207,7 @@ def customer_oper(request, oper_type, o_id):
         elif oper_type == "update_expected_pr":
 
             form_data = {
-                'user_id': o_id,
+
                 'customer_id': o_id,
                 'expedted_pr': request.POST.get('expedted_pr')
             }
