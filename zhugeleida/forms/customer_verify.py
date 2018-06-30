@@ -95,7 +95,7 @@ class Customer_UpdateExpedtedPr_Form(forms.Form):
             id=user_id,
         )
         if not objs:
-            self.add_error('username', '用户名不存在')
+            self.add_error('user_id', '用户名不存在')
         else:
             return user_id
 
