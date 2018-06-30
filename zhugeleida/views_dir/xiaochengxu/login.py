@@ -78,6 +78,7 @@ def login(request):
                     token=token,
                     openid=openid,
                     user_type=user_type,  #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    superior=customer_id,  #上级人。
                 )
 
                 #models.zgld_information.objects.filter(customer_id=obj.id,source=source)

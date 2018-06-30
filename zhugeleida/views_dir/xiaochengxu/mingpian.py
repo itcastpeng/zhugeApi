@@ -365,7 +365,7 @@ def mingpian_oper(request, oper_type):
 
                 url = 'http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
                 driver.get(url)
-                sleep(2)
+                # sleep(2)
                 user_poster_file_temp = '/test1.jpg'
                 user_poster_file = '/test2.jpg'
                 # driver.find_element_by_class_name("tu")
