@@ -343,7 +343,6 @@ def mingpian_oper(request, oper_type):
 
                 return render(request, 'create_poster.html',locals())
 
-
             elif oper_type == 'save_poster':
                 from django.conf import settings
 
@@ -353,11 +352,13 @@ def mingpian_oper(request, oper_type):
 
                 from selenium import webdriver
                 from PIL import Image
-                option = webdriver.ChromeOptions()
+                # option = webdriver.ChromeOptions()
+
                 # mobileEmulation = {'deviceName': 'iPhone 6'}
                 # option.add_experimental_option('mobileEmulation', mobileEmulation)
+                driver = webdriver.PhantomJS()
+                # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
-                driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
                 rand_str = request.GET.get('rand_str')
                 timestamp = request.GET.get('timestamp')
                 customer_id = request.GET.get('user_id')
