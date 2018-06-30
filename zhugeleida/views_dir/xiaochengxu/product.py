@@ -14,7 +14,7 @@ from django.db.models import F
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_customer)
 def product(request, oper_type):
     response = Response.ResponseObj()
 
