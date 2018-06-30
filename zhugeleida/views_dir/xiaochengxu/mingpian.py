@@ -366,11 +366,11 @@ def mingpian_oper(request, oper_type):
 
                 url = 'http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
                 print('------>',url)
-                
+
                 driver.get(url)
                 # sleep(2)
-                user_poster_file_temp = '/test1.jpg'
-                user_poster_file = '/test2.jpg'
+                user_poster_file_temp = '/test1.png'
+                user_poster_file = '/test2.png'
                 # driver.find_element_by_class_name("tu")
                 driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
                 driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
