@@ -297,11 +297,6 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')  # 用户 id
 
-                remark = '保存了您的名片海报'
-                data = request.GET.copy()
-                data['action'] = 1
-                response = action_record(data, remark)
-
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 
                 ret_data = {
@@ -344,21 +339,26 @@ def mingpian_oper(request, oper_type):
                 return render(request, 'create_poster.html',locals())
 
             elif oper_type == 'save_poster':
-                from django.conf import settings
 
+                remark = '保存了您的名片海报'
+                data = request.GET.copy()
+                data['action'] = 1
+                response = action_record(data, remark)
+
+                from django.conf import settings
                 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster',)
                 print('---->',BASE_DIR)
 
                 from selenium import webdriver
                 from PIL import Image
-                # option = webdriver.ChromeOptions()
 
+                # option = webdriver.ChromeOptions()
                 # mobileEmulation = {'deviceName': 'iPhone 6'}
                 # option.add_experimental_option('mobileEmulation', mobileEmulation)
-                driver = webdriver.PhantomJS()
                 # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
+                driver = webdriver.PhantomJS()
                 rand_str = request.GET.get('rand_str')
                 timestamp = request.GET.get('timestamp')
                 customer_id = request.GET.get('user_id')
@@ -368,9 +368,9 @@ def mingpian_oper(request, oper_type):
                 print('------>',url)
 
                 driver.get(url)
-                # sleep(2)
-                user_poster_file_temp = '/test1.png'
-                user_poster_file = '/test2.png'
+
+                user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
+                user_poster_file = '/%s_%s_poster.png' % (customer_id,user_id)
                 # driver.find_element_by_class_name("tu")
                 driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
                 driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
@@ -386,7 +386,7 @@ def mingpian_oper(request, oper_type):
 
                 im = Image.open( BASE_DIR  + user_poster_file_temp)
                 im = im.crop((left, top, right, bottom))
-                # im.save(os.path.join(settings.BASE_DIR, "test2.jpg"))
+
 
                 print (len(im.split()))  # test
                 if len(im.split()) == 4:
@@ -398,6 +398,9 @@ def mingpian_oper(request, oper_type):
                     im.save( BASE_DIR  + user_poster_file)
 
                 poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+
+                if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
+
                 ret_data = {
                     'user_id': user_id,
                     'poster_url': poster_url,

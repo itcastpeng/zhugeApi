@@ -80,11 +80,12 @@ def product(request, oper_type):
 
                         })
 
-                        if len(('正在查看' + obj.name)) > 20:
-                            remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
-                        else:
-                            remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
+                        # if len(('正在查看' + obj.name)) > 20:
+                        #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
+                        # else:
+                        #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
 
+                        remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                         data = request.GET.copy()
                         data['action'] = 2
                         response = action_record(data, remark)
@@ -194,11 +195,12 @@ def product(request, oper_type):
             product_id = request.GET.get('product_id')
             objs = models.zgld_product.objects.filter(id=product_id)
 
-            if len(('转发了' + objs[0].name)) > 23:
-                remark = '%s...' % (('转发了' + objs[0].name)[:23])
-            else:
-                remark = '%s' % (('转发了' + objs[0].name))
+            # if len(('转发了' + objs[0].name)) > 23:
+            #     remark = '%s...' % (('转发了' + objs[0].name)[:23])
+            # else:
+            #     remark = '%s' % (('转发了' + objs[0].name))
 
+            remark = '%s' % (('转发了' + objs[0].name))
             data = request.GET.copy()
             data['action'] = 2
             response = action_record(data, remark)
