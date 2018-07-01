@@ -15,11 +15,12 @@ import os
 @account.is_token(models.zgld_userprofile)
 def qr_code_auth(request):
     response = Response.ResponseObj()
-    user_id = request.GET.get('user_id')
+    user_id = request.GET.get('uid')
+    customer_id = request.GET.get('customer_id') or ''
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
-    path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)   #来源 1代表扫码 2 代表转发
+    path = '/pages/mingpian/index?uid=%s&source=1&customer_id=%s' % (user_id,customer_id)   #来源 1代表扫码 2 代表转发
 
     post_qr_data = {'path': path, 'width': 430}
     get_qr_data = {}

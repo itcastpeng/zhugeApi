@@ -32,7 +32,9 @@ urlpatterns = [
     # url(r'^product/(?P<oper_type>\w+)', product.product_oper),
 
     #小程序登录认证
-    url(r'^login$', login.login)
+    url(r'^login$', login.login),
+    url(r'^login/(?P<oper_type>\w+)$', login.login_oper)
+
 
 
 
