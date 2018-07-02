@@ -35,6 +35,8 @@ class TagListAddForm(forms.Form):
             return name
 
 
+
+
 # 更新标签信息
 class TagListUpdateForm(forms.Form):
     tag_id = forms.IntegerField(

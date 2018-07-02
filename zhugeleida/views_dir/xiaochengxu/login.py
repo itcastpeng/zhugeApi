@@ -4,7 +4,8 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm
+from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm,LoginBindingForm
+
 import time
 import datetime
 import json
@@ -41,12 +42,14 @@ def login(request):
     if request.method == "GET":
         print('request.GET -->', request.GET)
 
+        customer_id = request.GET.get('user_id')
+
+
         forms_obj = SmallProgramAddForm(request.GET)
         if forms_obj.is_valid():
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
-            source = forms_obj.cleaned_data.get('source')
 
             get_token_data = {
                 'appid': Conf['appid'],
@@ -63,7 +66,6 @@ def login(request):
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
                 user_type=user_type,
-
             )
             # 如果openid存在一条数据
             if customer_objs:
@@ -72,13 +74,15 @@ def login(request):
 
             else:
                 token = account.get_token(account.str_encrypt(openid))
-
                 obj = models.zgld_customer.objects.create(
                     token=token,
                     openid=openid,
-                    user_type=user_type,
-                    source=source,
+                    user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    # superior=customer_id,  #上级人。
                 )
+
+                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
                 print('---------- crete successful ---->')
 
@@ -99,3 +103,73 @@ def login(request):
         response.msg = "请求方式异常"
 
     return  JsonResponse(response.__dict__)
+
+@csrf_exempt
+@account.is_token(models.zgld_customer)
+def login_oper(request,oper_type):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        if oper_type == 'binding':
+            print('request.GET -->', request.GET)
+
+            forms_obj = LoginBindingForm(request.GET)
+            if forms_obj.is_valid():
+
+                # user_type = forms_obj.cleaned_data.get('user_type')
+                source = forms_obj.cleaned_data.get('source')
+                user_id = forms_obj.cleaned_data.get('uid')
+                customer_id = forms_obj.cleaned_data.get('user_id')
+                parent_id = forms_obj.cleaned_data.get('pid')
+
+                # get_token_data = {
+                #     'appid': Conf['appid'],
+                #     'secret': Conf['appsecret'],
+                #     'grant_type': 'authorization_code',
+                # }
+                #
+                # ret_data = get_openid_info(get_token_data)
+                # openid = ret_data['openid']
+                # session_key = ret_data['session_key']
+                # unionid = ret_data['unionid']
+
+                # customer_objs = models.zgld_customer.objects.filter(
+                #     openid=openid,
+                #     user_type=user_type,
+                # )
+                # 如果openid存在一条数据
+
+                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+
+                if user_customer_belonger_obj:
+                    response.code = 302
+                    response.msg = "关系存在"
+
+                else:
+
+                    # obj = models.zgld_customer.objects.create(
+                    #     customer_id=customer_id
+                    #     # user_type=user_type,  #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    #     # superior=customer_id,  #上级人。
+                    # )
+                    # user_customer_belonger_obj.user_type = user_type     #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    user_customer_belonger_obj.superior = parent_id      #上级人。
+
+                    #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                    models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
+
+                    print('---------- crete successful ---->')
+
+                # ret_data = {
+                #     'cid': client_id,
+                #     'token': token
+                # }
+                    response.code = 200
+                    response.msg = "绑定关系成功"
+                # response.data = ret_data
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        return JsonResponse(response.__dict__)

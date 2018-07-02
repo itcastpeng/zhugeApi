@@ -4,12 +4,10 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.role_verify import RoleAddForm, RoleUpdateForm, RoleSelectForm
-import time
-import datetime
+
 import json
 import requests
-from publicFunc.condition_com import conditionCom
+
 from ..conf import *
 import os
 
@@ -17,13 +15,18 @@ import os
 @account.is_token(models.zgld_userprofile)
 def qr_code_auth(request):
     response = Response.ResponseObj()
-    user_id = request.GET.get('user_id')
+    user_id = request.GET.get('uid')
+    customer_id = request.GET.get('customer_id') or ''
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
-    path = '/pages/mingpian/index?user_id=%s&source=1' % (user_id)   #来源 1代表扫码 2 代表转发
 
-    post_qr_data = {'path': '/?uid=%s', 'width': 430}
+    if customer_id:
+       path = '/pages/mingpian/index?uid=%s&source=1&' % (user_id)
+    else:
+       path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
+
+    post_qr_data = {'path': path, 'width': 430}
     get_qr_data = {}
 
     get_token_data['appid'] = Conf['appid']
@@ -40,9 +43,12 @@ def qr_code_auth(request):
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
     # print('-------qr_ret---->', qr_ret.text)
     user_qr_code = '/%s_qrcode.jpg' %  user_id
-    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida') + user_qr_code
+    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida','imgs','xiaochengxu','qr_code') + user_qr_code
     with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
+    user_obj = models.zgld_userprofile.objects.get(id=user_id)
+    user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
+    user_obj.save()
 
     response.code = 200
     response.msg = "生成二维码成功"

@@ -1,3 +1,4 @@
+[TOC]
 
 #### code 说明：
 ```python
@@ -188,7 +189,7 @@ company_id  公司ID
 访问示例:
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/user/update/5?rand_str=4c75edb76b06a2983040980f171b83e7&timestamp=1528169127235&user_id=1
       
-####  查询客户：
+####  查询【单个】客户信息：
 
 GET 请求发送数据部分：
 
@@ -197,24 +198,21 @@ GET 请求发送数据部分：
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     'user_id': 1,
+	'customer_id'；2  
 }
 ```
 
-搜索参数说明：
+GET 参数说明：
 
 ``` python
-参数名                 搜索                说明
-username               是                  用户名(可模糊搜索）
-belonger__username     是                  归属人(可模糊）   
-superior__username     是                  上级(可模糊）
-expected_time          是                  预计成交时间（可模糊）
-expedted_pr            是                  预计成交概率（可模糊查询）
-create_date            是                  创建时间                                               
+参数名                 必填                说明
+customer_id            是                  客户ID
+user_id                是                  用户ID                                                    
 ```
 
 访问示例:
  
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer      #修改用户
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/customer      #查询-单个客户信息
 
 
 返回结果：
@@ -226,51 +224,34 @@ create_date            是                  创建时间
     "data":{
         "ret_data":[
             {
-                "id":2,
-                "username":"孙胖子",
-                "openid":"121212dfasdfa",
-                "headimgurl":"statics/imgs/setAvator.jpg",
-                "expected_time":null,
-                "expedted_pr":"",
-                "superior":"",
-                "belonger":"zhangcong",
-                "source":2,
-                "memo_name":"",
-                "phone":"",
-                "email":"",
-                "company":"",
-                "position":"",
-                "address":"",
-                "birthday":"",
-                "mem":"",
-                "tag":[
-                ]
-            },
-            {
                 "id":1,
-                "username":"张傻子",
-                "openid":"fsdfsadf",
+                "username":"张炬[客户2]",       #客户名称  
                 "headimgurl":"statics/imgs/setAvator.jpg",
-                "expected_time":"2018-06-06",
-                "expedted_pr":null,
-                "superior":"",
-                "belonger":"zhangcong",
-                "source":1,
-                "memo_name":"",
-                "phone":"15931788974",
-                "email":"1224423@qq.com",
-                "company":"合众康桥",
-                "position":"开发TTT",
-                "address":"通州区xxx",
-                "birthday":"2018-06-01",
-                "mem":"ffffffffffff",
-                "tag":[
-                    "歌手",
-                    "相声"
+                "expected_time":"2018-06-14",   #预计成交时间
+                "expedted_pr":"80",             # 预计成交概率
+                "ai_pr":"80",                   # AI 成交率
+                "superior":"张聪[客户1]",       # 上级人
+                "source":"扫码",                # 客户通过扫码方式来关注此用户。
+                "memo_name":null,               # 客户的备注名
+                "phone":"",                     #  客户的手机号
+                "email":"",                     # 邮箱 
+                "company":"",                   # 在职公司
+                "position":"",                  # 所在职位
+                "address":"",                   # 客户所在的住址 
+                "birthday":"",                  # 客户的生日
+                "mem":"",                       # 客户个人信息备注等  
+                "tag":[                         #客户的标签
+                    "在意质量",
+                    "一般客户",
+                    "重要客户",
+                    "已婚",
+                    "爱撸串",
+                    "90后",
+                    "爱吃串"
                 ]
             }
         ],
-        "data_count":3
+        "data_count":1
     }
 }
   
@@ -725,10 +706,10 @@ name            是           公司名
 >http://127.0.0.1:8000/zhugeleida/qiyeweixin/company/update/2?rand_str=88648074e6e50180796ba8def0154ef9&timestamp=1528203315968&user_id=1
 
 
-####  查询标签 或 拥有标签的客户：
-请求方式：POST（HTTP）
+####  查询标签（有客户关联的标签全部显示出来）：
+请求方式：GET（HTTP）
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_customer?rand_str=f107cb8bdce9794748dfe01bb240cea5&timestamp=1529033091635&user_id=1
 
 
 GET 发送数据部分【公共参数】：
@@ -751,46 +732,178 @@ GET 发送数据部分【公共参数】：
     "data":{
         "ret_data":[
             {
-                "id":3,
-                "name":"70后",
-                "tag_id":3,
-                "customer_num":3,
-                "customer_id_list":[
-                    1,
-                    2,
-                    3
+                "id":11,
+                "name":"90后",
+                "tag_id":11,
+                "customer_num":5,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    },
+                    {
+                        "id":5,
+                        "headimgurl":"fdsaf",
+                        "name":"dfasdf"
+                    }
                 ]
             },
             {
-                "id":2,
-                "name":"意向客户",
-                "tag_id":2,
-                "customer_num":1,
-                "customer_id_list":[
-                    1
+                "id":8,
+                "name":"已婚",
+                "tag_id":8,
+                "customer_num":4,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
                 ]
             },
             {
-                "id":1,
+                "id":10,
+                "name":"爱撸串",
+                "tag_id":10,
+                "customer_num":4,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
+                ]
+            },
+            {
+                "id":7,
                 "name":"在意质量",
-                "tag_id":1,
+                "tag_id":7,
+                "customer_num":3,
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
+                ]
+            },
+            {
+                "id":14,
+                "name":"爱吃串",
+                "tag_id":14,
                 "customer_num":2,
-                "customer_id_list":[
-                    1,
-                    2
+                "customer_list":[
+                    {
+                        "id":1,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张炬[客户2]"
+                    },
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    }
+                ]
+            },
+            {
+                "id":15,
+                "name":"大傻子客户",
+                "tag_id":15,
+                "customer_num":2,
+                "customer_list":[
+                    {
+                        "id":2,
+                        "headimgurl":"statics/imgs/setAvator.jpg",
+                        "name":"张聪[客户1]"
+                    },
+                    {
+                        "id":4,
+                        "headimgurl":"sfdfasd",
+                        "name":"赵六"
+                    }
+                ]
+            },
+            {
+                "id":9,
+                "name":"在意 服务",
+                "tag_id":9,
+                "customer_num":1,
+                "customer_list":[
+                    {
+                        "id":3,
+                        "headimgurl":"dfdsfas",
+                        "name":"王五"
+                    }
                 ]
             }
         ],
-        "data_count":7
+        "ret_count":9
     }
-}
 }
  
 ```
-####   修改标签 or 标签用户
-请求方式：POST（HTTP）
+
+####   查询所有标签 【分级展示】
+请求方式：GET（HTTP）
+
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/update/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_list?rand_str=c0154475f83759e5851644425c5833e0&timestamp=1529041855696&user_id=1 
 
 GET 请求发送数据部分【公共参数】：
 
@@ -802,12 +915,110 @@ GET 请求发送数据部分【公共参数】：
 }
 ```
  
- POST 数据格式：
+返回结果:
+
+POST 数据格式：
+
+``` python
+{
+    "code":200,
+    "msg":"请求成功",
+    "data":{
+        "ret_data":[
+            {
+                "tags":[
+                    {
+                        "id":8,
+                        "name":"已婚"
+                    },
+                    {
+                        "id":11,
+                        "name":"90后"
+                    }
+                ],
+                "name":"基本功能"
+            },
+            {
+                "tags":[
+                    {
+                        "id":7,
+                        "name":"在意质量"
+                    },
+                    {
+                        "id":9,
+                        "name":"在意 服务"
+                    }
+                ],
+                "name":"关注点"
+            },
+            {
+                "tags":[
+                    {
+                        "id":5,
+                        "name":"一般客户"
+                    },
+                    {
+                        "id":6,
+                        "name":"重要客户"
+                    }
+                ],
+                "name":"级别"
+            },
+            {
+                "tags":[
+                    {
+                        "id":10,
+                        "name":"爱撸串"
+                    },
+                    {
+                        "id":14,
+                        "name":"爱吃串"
+                    },
+                    {
+                        "id":15,
+                        "name":"大傻子客户"
+                    }
+                ],
+                "name":"自定义"
+            }
+        ],
+        "tag_count":4
+    }
+}
+```
+   
+ POST参数说明：
+
+``` python
+参数            必填          说明
+name            是            标签名
+customer_list   是           【客户id1，客户id2】
+```
+
+
+
+####   添加标签 (并绑定对应的客户)
+请求方式：POST（HTTP）
+
+请求示例：
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_customer/add/0?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+
+GET 请求发送数据部分【公共参数】：
+
+``` python
+{
+    'rand_str': account.str_encrypt(timestamp + token),
+    'timestamp': timestamp,
+    'user_id': 1,
+}
+```
+ 
+POST 数据格式：
 
 ``` python
  {
-     'name': '东方银谷',
-     'user_list' : [1,2]
+	'name' : '客户不好惹',
+	'customer_list':  '[2,3]'
  }
 ```
    
@@ -815,26 +1026,17 @@ GET 请求发送数据部分【公共参数】：
 
 ``` python
 参数            必填          说明
-name            是           公司名
-user_list       否           【用户id1，用户id2】
+name            是            标签名
+customer_list   是           【客户id1，客户id2】
 ```
 
 
 
-####   删除标签 \ 标签用户
-GET 请求发送数据部分【公共参数】：
-``` python
-{
-    'rand_str': account.str_encrypt(timestamp + token),
-    'timestamp': timestamp,
-    'user_id': 1,
-}
-``` 
+####   添加标签 （同时绑定此标签到此客户）
+请求方式：POST（HTTP）
+
 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/delete/1?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
-
-####   增加标签  或 标签成员
- 
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_list/add_tag/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
 GET 请求发送数据部分【公共参数】：
 
 ``` python
@@ -844,24 +1046,74 @@ GET 请求发送数据部分【公共参数】：
     'user_id': 1,
 }
 ``` 
- POST 数据格式：
+
+URL 说明：
+``` python
+参数：       必填        说明
+{{o_id}}     是         /zhugeleida/qiyeweixin/tag_list/add_tag/{{ o_id }}   o_id 代表 customer_id 
+
+```
+
+POST 数据格式：
+
 ``` python
  {
-     'name': '东方银谷',
-     'user_list' : [1,2]
+	'name' : '大傻子型客户',
  }
-```    
-
+```
+   
  POST参数说明：
 
 ``` python
 参数            必填          说明
-name            是           公司名
-user_list       否           【用户id1，用户id2】
+name            是            标签名
 ```
 
- 请求示例：
->http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag/add/0?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+
+
+
+
+####   为客户绑定标签
+请求方式：POST（HTTP）
+
+请求示例：
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_list/customer_tag/2?rand_str=a8a0d211d38f9dad59dae633629463e5&timestamp=1528206224801&user_id=1
+GET 请求发送数据部分【公共参数】：
+
+``` python
+{
+    'rand_str': account.str_encrypt(timestamp + token),
+    'timestamp': timestamp,
+    'user_id': 1,
+}
+``` 
+
+POST 数据格式：
+
+``` python
+ {
+     'tag_list' : [1,2]
+ }
+```    
+
+
+POST参数说明：
+
+``` python
+参数            必填          说明
+name            是            标签名
+tag_list        否           【标签id1，标签id2】
+```
+
+URL参数说明：
+
+``` python
+参数：       必填        说明
+{{o_id}}     是         /zhugeleida/qiyeweixin/tag_list/customer_tag/{{ o_id }}   o_id 代表 customer_id 
+
+```
+
+
 
 
 ####   分页获取 - 消息联系人
@@ -1099,7 +1351,7 @@ source          是           客户的来源       1,扫码  2,转发
 #### 小程序登录认证
 请求方式：GET（HTTP）
 请求示例：
->http://127.0.0.1:8000/zhugeleida/xiaochengxu/small_program_auth?code='pm4Mp2zwTb0GOxcJ3hhYETNaWhPWF5lDwDZ_mHWHOqQ'&user_type=2&source=1     #
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/login?code='pm4Mp2zwTb0GOxcJ3hhYETNaWhPWF5lDwDZ_mHWHOqQ'&user_type=2&source=1     #
 
 GET 请求参数部分：
 ```  python
@@ -1117,49 +1369,7 @@ user_type       是              客户访问类型 1,微信公众号  2,微信�
 source          是              客户的来源   1,扫码  2,转发
 ```
 
- 
 
-####小程序-【名片接口】：
-请求方式：GET（HTTP）
-请求示例：
->http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian?rand_str=7cfedc0d40b9bf9e352a234872c57305&timestamp=1528198873304&user_id=1&id=20
-
-GET 请求参数部分：
-```  python
-{
-    'rand_str': account.str_encrypt(timestamp + token),
-    'timestamp': timestamp,
-    'user_id': 1,
-    'id' : 20
-}
-```
-GET请求参数部分：
-```  python
-参数            必填             说明
-id              是               用户的ID
-```
-
-返回结果：
-```  python
-{
-    "code":200,
-    "msg":"查询成功",
-    "data":{
-        "ret_data":[
-            {
-                "id":20,
-                "username":"fffffffxxxxxffff",
-                "avatar":"statics/imgs/Avator.jpg",
-                "company":"合众康桥",
-                "popularity":0,
-                "praise":0,
-                "forward":0
-            }
-        ],
-        "data_count":1
-    }
-}
-``` 
 
 ####  【 企业微信-雷达】 按时间展示访问日志
 请求方式：GET（HTTP）
@@ -1182,7 +1392,7 @@ GET 请求参数部分【公共参数】
 GET 参数说明:
 ```  python
 参数        		 必填         	   说明
-	action       	 否          (1, '查看名片'),  # 查看了名片第XXX次。
+	action       	 否              (1, '查看名片'),  # 查看了名片第XXX次。
 									 (2, '查看产品'),  # 查看您的产品; 查看竞价排名; 转发了竞价排名。
 									 (3, '查看动态'),  # 查看了公司的动态。 评论了您的企业动态。
 									 (4, '查看官网'),  # 查看了您的官网 , 转发了您官网。
@@ -1413,7 +1623,7 @@ GET 请求参数部分【公共参数】
         'rand_str': account.str_encrypt(timestamp + token),
         'timestamp': timestamp,
         'user_id': 1,
-        'source': 1,
+        'customer__source': 1,
         'order' : '  customer__expedted_pr(默认的排序) | last_follow_time | last_activity_time
       
     }
@@ -1423,8 +1633,8 @@ GET请求参数部分：
 ```  python
 参数            必填         说明
 user_id         是          用户的ID
-source          否          搜索方式： 1 代表扫码 2 转发
-order           否          排序方式:  1、customer__expedted_pr预计成交概率  2、last_follow_time 代表最后跟进时间   3、last_activity_time 最后活动时间     
+customer__source          否          搜索方式： 1 代表扫码 2 转发
+order           否          排序方式:  1、customer__expedted_pr 预计成交概率  2、last_follow_time 代表最后跟进时间   3、last_activity_time 最后活动时间     
 
 ```
 返回结果
@@ -1770,6 +1980,1000 @@ URL参数说明:
 参数：      必填      说明
 o_id       是      /zhugeleida/qiyeweixin/customer/update_expected_pr/{{ o_id}} o_id 操作的是 customer_id
 ```
+
+
+
+####    【小程序- 显示单个用户的信息 并记录【访问名片】日志信息】
+
+
+请求方式：GET（HTTP）
+访问示例:
+
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian?rand_str=cae406b10a53dac573369b0eb5200ff0&timestamp=1529499334685&user_id=1&uid=2
+
+
+GET 请求参数【公共参数】
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' :  2
+		
+       
+    }
+```
+
+GET参数说明:
+
+``` python
+参数：      必填      参数说明
+uid          是       所属用户的ID
+user_id      是       小程序客户端的客户ID      
+
+```
+
+返回结果：
+
+``` python
+	{
+		"code":200,
+		"msg":"查询成功",
+		"data":{
+			"ret_data":[
+				{
+					"id":2,
+					"username":"zhangju",            #用户名
+					"avatar":"statics/imgs/setAvator.jpg",  #头像
+					"company":"合众康桥",            #公司名称
+					"address":"1",                   #公司地址 
+					"position":"技术经理",           #职位
+					"email":"",                      #邮箱
+					"wechat":"",                     #微信号  
+					"mingpian_phone":"18511123918",  # 名片上显示的手机号
+					"create_date":"2018-06-08T22:03:23.772",
+					"popularity_num":12,                 # 产看多少次
+					"praise_num":1,                      # 点赞多少次名片 【靠谱数量】
+					"forward_num":2                      # 转发多少次 
+					"is_praise":  false,             # 是否点赞了名片。【靠谱与否】
+					"sign":     '我是你爸爸'            # 签名
+				    "is_sign":false,                    # 是否点赞了签名
+					'sign_num' : 20,  				   # 点赞个数
+					"photo":[
+					         {'id':1,'photo_url': xxxxx},
+						[
+							4,
+							"statics/zhugeleida/imgs/xiaochengxu/qr_code/4_uemthqpcdn_photo.jpg"
+						],
+						[
+							5,
+							"statics/zhugeleida/imgs/xiaochengxu/qr_code/5_uemthqpcdn_photo.jpg"
+						]
+                    ],
+				}
+			],
+			"data_count":1
+		}
+	}
+```
+
+####    【小程序 - 显示所有的用户】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/all?rand_str=e77523b1c848768f040deb530b04bd57&timestamp=1529540109759&user_id=2
+
+GET 请求参数
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+    }
+```
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+
+```
+返回结果：
+
+``` python
+{
+    "code":200,
+    "msg":"查询成功",
+    "data":{
+        "ret_data":[
+            {
+                "id":2,
+                "username":"zhangju",
+                "source":"扫码",
+                "avatar":"statics/imgs/setAvator.jpg",
+                "company":"合众康桥",
+                "position":"技术经理",
+                "email":"",
+                "mingpian_phone":"18511123918",
+                "create_date":"2018-06-08T22:03:23.772"
+            },
+            {
+                "id":1,
+                "username":"zhangcong",
+                "source":"扫码",
+                "avatar":"statics/imgs/setAvator.jpg",
+                "company":"合众康桥",
+                "position":"技术经理",
+                "email":"",
+                "mingpian_phone":"18511125018",
+                "create_date":"2018-06-07T19:47:43"
+            }
+        ],
+        "data_count":2
+    }
+}
+
+```
+
+####    【小程序 - 记录日志拨打手机动作】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/calling?rand_str=b1c3f902e8d15a5e617328d35abc630a&timestamp=1529542925528&user_id=2&uid=2&action=10
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' : 2,
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+uid          是       所属用户ID
+
+```
+
+返回结果：
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+
+		}
+	}
+```
+
+
+####    【小程序 - 记录点赞或者取消点赞 你名片的动作】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/praise?rand_str=b587cab28de63a05cdec5e789e6f2b54&timestamp=1529543973411&user_id=2&uid=2
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' : 2,
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+uid          是       所属用户ID
+
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+
+		}
+	}
+```
+
+####    【小程序 - 记录转发用户名片的动作】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/forward?rand_str=2db7d341300b1ab4aec9238ed8618d53&timestamp=1529544299602&user_id=2&uid=2&action=6
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		'uid' : 2,
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       小程序客户端的客户ID      
+uid          是       所属用户ID
+
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+
+		}
+	}
+```
+
+
+####    【小程序 - 实时获取各个动作的最新访问日志】
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/action/get_new_log?rand_str=4b8120c4a83c83ad3a2d2a4d91887f19&timestamp=1529545515255&user_id=2&action=6 【获取用户ID为2的最新动作日志消息】
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+返回结果 ：
+
+``` python
+{
+    "code":200,
+    "msg":"查询日志记录成功",
+    "data":{
+        "ret_data":[
+            {
+                "user_id":2,
+                "customer_id":2,
+                "action":"转发名片",
+                "log":"张聪[客户1]转发了你的名片,你的人脉圈正在裂变",
+                "create_date":"2018-06-21T09:24:59.613"
+            },
+            {
+                "user_id":2,
+                "customer_id":2,
+                "action":"拨打电话",
+                "log":"张聪[客户1]拨打您的手机",
+                "create_date":"2018-06-21T08:55:35.570"
+            },
+            {
+                "user_id":2,
+                "customer_id":1,
+                "action":"觉得靠谱",
+                "log":"张炬[客户2]取消对你的靠谱评价",
+                "create_date":"2018-06-20T13:34:51.858"
+            },
+            {
+                "user_id":2,
+                "customer_id":1,
+                "action":"查看名片",
+                "log":"张炬[客户2]查看你的名片",
+                "create_date":"2018-06-20T13:05:11.081"
+            }
+        ],
+        "data_count":4
+    }
+}
+```
+
+
+####    【小程序 - 生成小程序的二维码（放在小程序名片）】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/qr_code_auth?rand_str=245416a1d0f21129e8e028afaadb592a&timestamp=1529551521953&user_id=2 【获取用户ID为2的最新动作日志消息】
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"生成小程序二维码成功",
+		"data":{
+
+		}
+	}
+```
+
+
+
+####    【小程序 - 查询名片里的用户标签】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user?rand_str=a932b4ac5620edafa2822755a93974bc&timestamp=1529565105630&user_id=2 【获取用户ID为2的最新动作日志消息】
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"",
+		"data":{
+			"user_id":"2",
+			"ret_data":[
+				{
+					"id":1,
+					"name":"有志青年"
+				},
+				{
+					"id":2,
+					"name":"靠谱人士"
+				}
+			],
+			"data_count":2
+		}
+	}
+```
+
+
+####    【小程序 - 名片里-新增用户标签】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/add?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "name" : "积极少年"
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：      必填      参数说明
+name        是        标签名      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"添加成功",
+		"data":[
+			{
+				"id":3,
+				"name":"积极少年"
+			}
+		]
+	}
+```
+
+####    【小程序 - 名片里-保存所有的用户标签】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/save?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "tag_list" : '[1,2,3]'
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：          必填      参数说明
+tag_list        是        [标签id,标签id2,标签id3....]      
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"添加成功",
+		"data":[
+			
+		]
+	}
+```
+
+####    【小程序 - 名片里-删除用户标签】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/tag_user/delete?rand_str=5b199e75f45bcc94c0c4e46e20c0efdb&timestamp=1529569831934&user_id=2 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,   # 企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "id" : 3
+		
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：      必填      参数说明
+id          是        标签id    
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"删除成功",
+		"data":{
+
+		}
+	}
+```
+
+
+
+####    【小程序 - 名片里-修改并保存手机号】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/save_phone?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 2,     #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "mingpian_phone" : 15931788977
+	 "is_show_phone" : False	
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：             必填      参数说明
+mingpian_phone      是       名片中显示的手机号
+is_show_phone       是       名片中是否显示手机号。True 是可显示。False 是不显示
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"保存成功",
+		"data":{
+
+		}
+	}
+```
+
+
+####    【小程序 - 名片里-修改并保存个人信息】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/save_phone?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "wechat" : "just so so",
+	 "mingpian_phone" : 15931788975,
+	 "telephone" : (010-4321095),
+	 "email" : '12133@qq.com',
+	 "country" : 1 | 2 ,
+	 "area" :   "北京市 北京 通州区 "
+	 "address" : "新华西街 北京ONE写字楼2303"
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：             必填      参数说明
+mingpian_phone      是       名片中显示的手机号
+telephone           否       座机号
+email               否       邮箱号
+country             否       1代表国内，2代表国外
+area                否       公司所在省份和城市
+address             否       详细地址
+
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"保存成功",
+		"data":{
+
+		}
+	}
+```
+
+
+
+####    【小程序 - 名片里-添加\修改个人签名】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/save_sign?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+POST 请求参数
+
+``` python
+    {
+     "sign" : "一生所爱~~",
+	
+    }
+```
+
+POST参数必要说明:
+
+``` python
+参数：             必填      参数说明
+sign               否       个性签名
+```
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"保存成功",
+		"data":{
+
+		}
+	}
+```
+
+####    【小程序 - 名片里-显示所有的照片 】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/show_photo?rand_str=207e8db43d1fadee295a8c7e88c31bfa&timestamp=1529657333192&user_id=1
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+返回结果 ：
+
+``` python
+	{
+    "code":200,
+    "msg":"获取成功",
+    "data":{
+        "ret_data":[
+            
+            {
+                "id":4,
+                "photo_url":"statics/zhugeleida/imgs/xiaochengxu/qr_code/4_uemthqpcdn_photo.jpg"
+            },
+            {
+                "id":5,
+                "photo_url":"statics/zhugeleida/imgs/xiaochengxu/qr_code/5_uemthqpcdn_photo.jpg"
+            }
+        ],
+        "user_id":"1"
+    }
+}
+```
+
+
+
+
+
+
+
+####    【小程序 - 名片里-上传照片 】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/upload_photo?rand_str=0d426ac0c58a28be0af3d726bcfa5234&timestamp=1529651748322&user_id=1 
+
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID
+		
+    }
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+POST 请求参数【Ajax 发送数据】
+
+``` python
+    {
+	 'photo': 	'ewm.jpg'  # 二进制文件发送。
+	}                 	
+	
+```
+
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"上传成功",
+		"data":{
+			"photo_id":7,
+			"photo_url": "statics/zhugeleida/imgs/xiaochengxu/user_photo/7_uemthqpcdn_photo.jpg"  # 返回了 上传图片 的 ID和URL地址。
+		}
+	}
+```
+
+
+
+####    【小程序 - 名片里-删除上传的照片】
+
+
+请求方式：POST（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/qiyeweixin/mingpian/delete_photo?rand_str=d43fe0f93858169921dc6906e375ae81&timestamp=1529656667083&user_id=1
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #企业微信的用户ID	
+    }
+	
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+POST 请求参数
+
+``` python
+    {
+	 'id': 	7   # 要删除的照片的ID
+	}                 	
+	
+```
+
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"删除数据成功",
+		"data":{
+
+		}
+	}
+```
+
+####    【小程序 - 名片里-点赞签名】
+
+
+请求方式：GET（HTTP）
+访问示例:
+>http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/up_sign?rand_str=d43fe0f93858169921dc6906e375ae81&timestamp=1529656667083&user_id=1&uid=2
+
+GET 请求参数
+
+``` python
+    {
+        'rand_str': account.str_encrypt(timestamp + token),
+        'timestamp': timestamp,
+        'user_id': 1,                  #小程序的用户ID
+        'uid': 2, 	                   #所属用户的ID	
+    }
+	
+```
+
+
+GET参数必要说明:
+
+``` python
+参数：      必填      参数说明
+user_id      是       企业微信-用户ID      
+
+```
+
+
+返回结果 ：
+
+``` python
+	{
+		"code":200,
+		"msg":"记录日志成功",
+		"data":{
+			"ret_data":{
+				"sign_num":11,   # 签名总个数
+				"is_sign":true   # 签名是否点赞了。  true代表点赞了。false 代表没有。
+			}
+		}
+	}
+```
+
+
+
+
+
+
+
 
 
 

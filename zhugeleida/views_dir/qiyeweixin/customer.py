@@ -9,7 +9,7 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.customer_verify import  Customer_information_UpdateForm,Customer_UpdateExpectedTime_Form ,Customer_UpdateExpedtedPr_Form, CustomerSelectForm
 import json
-
+from django.db.models import Q
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -22,6 +22,9 @@ def customer(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('customer_id')
+
             order = request.GET.get('order', '-create_date') #排序为成交率; 最后跟进时间; 最后活动时间
             field_dict = {
                 'id': '',
@@ -33,9 +36,11 @@ def customer(request):
                 'source'  : '',
                 'create_date': '',
             }
+
             q = conditionCom(request, field_dict)
-            print('q -->', q)
-            objs = models.zgld_customer.objects.select_related('belonger').filter(q).all().order_by(order)
+            q.add(Q(**{'id': customer_id}), Q.AND)
+
+            objs = models.zgld_customer.objects.filter(q).order_by(order)
 
             count = objs.count()
             if length != 0:
@@ -61,8 +66,8 @@ def customer(request):
                     for t_obj in tag_obj:
                         tag_list.append(t_obj.name)
                         print('--->>',tag_list)
-                    info_obj = models.zgld_information.objects.filter(id=obj.id)
-                    ai_pr = 0
+                    info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
+
                     phone = info_obj[0].phone if info_obj else ''
                     email = info_obj[0].email if info_obj else ''
                     company = info_obj[0].company if info_obj else ''
@@ -70,23 +75,29 @@ def customer(request):
                     address = info_obj[0].address if info_obj else ''
                     birthday = info_obj[0].birthday if info_obj else ''
                     mem = info_obj[0].mem if info_obj else ''
+                    sex = info_obj[0].sex if info_obj else ''
+
+                    belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
+                    print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
+                    day_interval =  datetime.datetime.today() - obj.create_date
 
                     ret_data.append({
                         'id': obj.id,
                         'username': obj.username,
-                        'openid': obj.openid,
                         'headimgurl': obj.headimgurl,
                         'expected_time': obj.expected_time,  # 预计成交时间
                         'expedted_pr': obj.expedted_pr,  # 预计成交概率
-                        'ai_pr': ai_pr,  # AI 预计成交概率
+                        'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
                         'superior': superior_username,  # 所属上级
-                        'belonger': obj.belonger.username,  # 所属用户
-                        'source': obj.source,  # 来源
+
+                        'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': obj.memo_name,  # 备注名
                         'phone': phone,              # 手机号
+                        'sex':  sex,
+                        'day_interval': day_interval.days,
                         'email': email,              # email
                         'company': company,                # 公司
-                        'position': position,  # 位置
+                        'position':position,  # 位置
                         'address': address,  # 地址
                         'birthday': birthday,  # 生日
                         'mem': mem,  # 备注
@@ -196,7 +207,7 @@ def customer_oper(request, oper_type, o_id):
         elif oper_type == "update_expected_pr":
 
             form_data = {
-                'user_id': o_id,
+
                 'customer_id': o_id,
                 'expedted_pr': request.POST.get('expedted_pr')
             }
@@ -239,10 +250,12 @@ def customer_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "update_information":
+
             # 更新客户表的具体信息
             form_data = {
                 'id': int(o_id),
-                'source': request.POST.get('source'),
+                # 'source': request.POST.get('source'),
+                'sex': request.POST.get('sex'),
                 'memo_name': request.POST.get('username'),
                 'phone': request.POST.get('phone'),
                 'email': request.POST.get('email'),
@@ -264,6 +277,7 @@ def customer_oper(request, oper_type, o_id):
 
                     information_obj.update(
                         customer_id =  o_id,
+                        sex = forms_obj.cleaned_data['sex'],
                         company = forms_obj.cleaned_data['company'],
                         phone = forms_obj.cleaned_data['phone'],
                         email = forms_obj.cleaned_data['email'],
@@ -278,6 +292,7 @@ def customer_oper(request, oper_type, o_id):
 
                     models.zgld_information.objects.create(
                         customer_id =  o_id,
+                        sex= int(forms_obj.cleaned_data['sex']),
                         company = forms_obj.cleaned_data['company'],
                         phone=forms_obj.cleaned_data['phone'],
                         email=forms_obj.cleaned_data['email'],
@@ -287,8 +302,8 @@ def customer_oper(request, oper_type, o_id):
                         mem =  forms_obj.cleaned_data['mem']
                     )
 
-                response.code = 200
-                response.msg = '添加成功'
+                    response.code = 200
+                    response.msg = '添加成功'
 
             else:
                 response.code = 303
