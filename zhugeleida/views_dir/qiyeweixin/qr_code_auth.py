@@ -20,7 +20,11 @@ def qr_code_auth(request):
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
-    path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id,customer_id)   #来源 1代表扫码 2 代表转发
+
+    if customer_id:
+       path = '/pages/mingpian/index?uid=%s&source=1&' % (user_id)
+    else:
+       path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
 
     post_qr_data = {'path': path, 'width': 430}
     get_qr_data = {}
