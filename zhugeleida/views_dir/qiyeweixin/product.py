@@ -111,7 +111,7 @@ def product(request, oper_type):
                 length = forms_obj.cleaned_data['length']
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
-                status = request.GET.get('status')
+                status = request.GET.get('status_code')
                 field_dict = {
                     'status': '',
                     'create_date': '',
