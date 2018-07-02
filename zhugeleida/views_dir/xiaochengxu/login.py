@@ -41,11 +41,9 @@ def login(request):
 
     if request.method == "GET":
         print('request.GET -->', request.GET)
-
         customer_id = request.GET.get('user_id')
-
-
         forms_obj = SmallProgramAddForm(request.GET)
+
         if forms_obj.is_valid():
 
             js_code = forms_obj.cleaned_data.get('code')
@@ -172,4 +170,40 @@ def login_oper(request,oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        return JsonResponse(response.__dict__)
+
+    else:
+        if oper_type == 'send_user_info':
+            customer_id = request.GET.get('user_id')
+            headimgurl = request.POST.get('avatarUrl')
+            city = request.POST.get('city')
+            country = request.POST.get('country')
+            province = request.POST.get('province')
+
+            gender = request.POST.get('gender')  #1代表男
+            language = request.POST.get('language')
+            username =  request.POST.get('nickName')
+
+            objs = models.zgld_customer.objects.filter(
+                id = customer_id,
+            )
+            if objs:
+                objs.update( username = username,
+                             headimgurl=headimgurl,
+                             city =city,
+                             country=country,
+                             province = province,
+                             language = language,
+                )
+                models.zgld_information.objects.create(sex=gender,customer_id=objs[0].id)
+                response.code = 200
+                response.msg = "保存成功"
+            else:
+                response.code = 301
+                response.msg = "用户不存在"
+
+
+            # else:
+            #     response.code = 301
+            #     response.msg = json.loads(forms_obj.errors.as_json())
+
+    return JsonResponse(response.__dict__)

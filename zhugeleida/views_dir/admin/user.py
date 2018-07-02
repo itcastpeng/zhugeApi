@@ -107,7 +107,7 @@ def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
-
+        global userid
         if oper_type == "add":
             form_data = {
                 'user_id': request.GET.get('user_id'),
@@ -123,6 +123,7 @@ def user_oper(request, oper_type, o_id):
 
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = UserAddForm(form_data)
+
             if forms_obj.is_valid():
                 print("验证通过")
                 userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
@@ -158,18 +159,20 @@ def user_oper(request, oper_type, o_id):
                 get_token_data = {}
                 post_user_data = {}
                 get_user_data = {}
-                get_token_data['corpid'] = company_obj.company.corp_id
-                get_token_data['corpsecret'] = company_obj.company.tongxunlu_secret
+                get_token_data['corpid'] = company_obj.corp_id
+                get_token_data['corpsecret'] = company_obj.tongxunlu_secret
                 ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
                 ret_json = ret.json()
                 access_token = ret_json['access_token']
                 get_user_data['access_token'] = access_token
+
                 post_user_data['userid'] = userid
                 post_user_data['name'] = username
                 post_user_data['position'] = position
                 post_user_data['mobile'] = phone
                 post_user_data['department'] = depart_id_list
                 add_user_url = Conf['add_user_url']
+
                 ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
                 print('-----requests----->>', ret.text)
 
@@ -177,7 +180,7 @@ def user_oper(request, oper_type, o_id):
                 if  weixin_ret.get('errmsg') == 'created':
 
                     obj = models.zgld_userprofile.objects.create(
-                        userid=user_id,
+                        userid= userid,
                         username=username,
                         password=account.str_encrypt(password),
                         role_id=role_id,

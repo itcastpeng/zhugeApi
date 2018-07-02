@@ -77,4 +77,5 @@ urlpatterns = [
     # 企业产品操作
     url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
     url(r'^product/(?P<oper_type>\w+)/', product.product),
+
 ]

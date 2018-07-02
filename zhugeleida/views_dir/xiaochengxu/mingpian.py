@@ -6,7 +6,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
-from publicFunc.condition_com import conditionCom, action_record
+from publicFunc.condition_com import conditionCom, action_record,user_send_action_log
+
 from zhugeleida.forms.xiaochengxu.user_verify import UserAddForm, UserUpdateForm, UserSelectForm,UserAllForm
 import json,os,sys
 from django.db.models import Q
@@ -15,7 +16,7 @@ from time import sleep
 
 # 展示单个的名片信息
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def mingpian(request):
     response = Response.ResponseObj()
     if request.method == "GET":  # 获取单个名片的信息
@@ -51,6 +52,9 @@ def mingpian(request):
             data = request.GET.copy()
             data['action'] = 1
             action_record(data, remark)
+
+            user_send_action_log(data)  #发送企业微信的消息提醒
+
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)

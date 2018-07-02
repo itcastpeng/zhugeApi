@@ -26,7 +26,6 @@ def qr_code_auth(request):
     else:
        path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
 
-    post_qr_data = {'path': path, 'width': 430}
     get_qr_data = {}
 
     get_token_data['appid'] = Conf['appid']
@@ -39,6 +38,7 @@ def qr_code_auth(request):
     access_token = token_ret_json['access_token']
     print('---- access_token --->>', token_ret_json)
 
+    post_qr_data = {'path': path, 'width': 430}
     get_qr_data['access_token'] = access_token
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
     # print('-------qr_ret---->', qr_ret.text)
