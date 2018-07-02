@@ -62,7 +62,7 @@ class LoginBindingForm(forms.Form):
     #         'required': "客户访问类型不能为空"
     #     }
     # )
-    
+
 
     uid = forms.IntegerField(
         # 客户上级对应的用户
