@@ -194,6 +194,7 @@ def login_oper(request,oper_type):
                              province = province,
                              language = language,
                 )
+
                 models.zgld_information.objects.create(sex=gender,customer_id=objs[0].id)
                 response.code = 200
                 response.msg = "保存成功"
