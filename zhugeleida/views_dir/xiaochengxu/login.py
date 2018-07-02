@@ -43,14 +43,13 @@ def login(request):
         print('request.GET -->', request.GET)
 
         customer_id = request.GET.get('user_id')
-        user_id = request.GET.get('uid')
+
 
         forms_obj = SmallProgramAddForm(request.GET)
         if forms_obj.is_valid():
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
-            source = forms_obj.cleaned_data.get('source')
 
             get_token_data = {
                 'appid': Conf['appid'],
@@ -78,12 +77,12 @@ def login(request):
                 obj = models.zgld_customer.objects.create(
                     token=token,
                     openid=openid,
-                    # user_type=user_type,  #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
                     # superior=customer_id,  #上级人。
                 )
 
                 #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
-                models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
+                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
                 print('---------- crete successful ---->')
 
@@ -105,20 +104,19 @@ def login(request):
 
     return  JsonResponse(response.__dict__)
 
-
 @csrf_exempt
+@account.is_token(models.zgld_customer)
 def login_oper(request,oper_type):
     response = Response.ResponseObj()
+
     if request.method == "GET":
-
         if oper_type == 'binding':
-
             print('request.GET -->', request.GET)
 
             forms_obj = LoginBindingForm(request.GET)
             if forms_obj.is_valid():
 
-                user_type = forms_obj.cleaned_data.get('user_type')
+                # user_type = forms_obj.cleaned_data.get('user_type')
                 source = forms_obj.cleaned_data.get('source')
                 user_id = forms_obj.cleaned_data.get('uid')
                 customer_id = forms_obj.cleaned_data.get('user_id')
@@ -154,7 +152,7 @@ def login_oper(request,oper_type):
                     #     # user_type=user_type,  #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
                     #     # superior=customer_id,  #上级人。
                     # )
-                    user_customer_belonger_obj.user_type = user_type     #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    # user_customer_belonger_obj.user_type = user_type     #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
                     user_customer_belonger_obj.superior = parent_id      #上级人。
 
                     #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
@@ -167,7 +165,7 @@ def login_oper(request,oper_type):
                 #     'token': token
                 # }
                     response.code = 200
-                    response.msg = "返回成功"
+                    response.msg = "绑定关系成功"
                 # response.data = ret_data
 
             else:
