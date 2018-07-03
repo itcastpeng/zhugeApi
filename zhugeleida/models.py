@@ -44,10 +44,10 @@ class zgld_userprofile(models.Model):
     role = models.ForeignKey("zgld_role", verbose_name="角色")
 
     telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
-    phone = models.CharField(verbose_name='绑定微信手机号', max_length=20, blank=True, null=True)
+    wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
     wechat = models.CharField(verbose_name='微信号', max_length=64, null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)
-    wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
+
     mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
     is_show_phone = models.BooleanField(verbose_name='手机号是否显示在名片上', default=True)
 

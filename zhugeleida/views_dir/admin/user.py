@@ -11,8 +11,7 @@ from zhugeleida.forms.user_verify import UserAddForm, UserUpdateForm, UserSelect
 import json
 from ..conf import *
 import requests
-import uuid
-
+from  zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_qr_code
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -116,7 +115,7 @@ def user_oper(request, oper_type, o_id):
                 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
-                'phone': request.POST.get('phone'),
+                'wechat_phone': request.POST.get('wechat_phone'),
                 'mingpian_phone': request.POST.get('mingpian_phone')
 
             }
@@ -132,7 +131,7 @@ def user_oper(request, oper_type, o_id):
                 role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
-                phone = forms_obj.cleaned_data.get('phone')
+                wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
                 depart_id_list = []
@@ -179,7 +178,7 @@ def user_oper(request, oper_type, o_id):
                 post_user_data['userid'] = userid
                 post_user_data['name'] = username
                 post_user_data['position'] = position
-                post_user_data['mobile'] = phone
+                post_user_data['mobile'] = wechat_phone
                 post_user_data['department'] = depart_id_list
                 add_user_url = Conf['add_user_url']
 
@@ -196,14 +195,22 @@ def user_oper(request, oper_type, o_id):
                         role_id=role_id,
                         company_id=company_id,
                         position=position,
-                        phone=phone,
+                        wechat_phone=wechat_phone,
                         mingpian_phone=mingpian_phone
                     )
+
                     obj.department = depart_id_list
-                    # print(obj.company.corp_id, obj.company.tongxunlu_secret)
+
+                    # 生成企业用户二维码
+
+                    data_dict ={'user_id': obj.id}
+                    response = create_small_program_qr_code(data_dict) #
+                    if response.code != 200:
+                        return JsonResponse(response.__dict__)
 
                     response.code = 200
-                    response.msg = "添加成功"
+                    response.msg = "添加用户成功"
+
                 else:
                     response.code = weixin_ret['errcode']
                     response.msg = "企业微信验证未通过"
@@ -231,23 +238,38 @@ def user_oper(request, oper_type, o_id):
                     get_user_data = {}
                     get_token_data['corpid'] = user_objs[0].company.corp_id
                     get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
-                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                    ret_json = ret.json()
-                    access_token = ret_json['access_token']
-                    get_user_data['access_token'] = access_token
-                    get_user_data['userid'] = user_objs[0].userid
-                    ret = requests.post(Conf['delete_user_url'], params=get_user_data)
-                    print(ret.text)
 
-                    weixin_ret = json.loads(ret.text)
-                    if weixin_ret['errmsg'] == 'updated':
-                        user_objs.delete()
-                        response.code = 200
-                        response.msg = "删除成功"
+                    import redis
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    token_ret = rc.get('tongxunlu_token')
+                    print('---token_ret---->>', token_ret)
+
+                    if not token_ret:
+                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                        ret_json = ret.json()
+                        access_token = ret_json['access_token']
+                        get_user_data['access_token'] = access_token
+                        rc.set('tongxunlu_token', access_token, 7000)
                     else:
-                        response.code = weixin_ret['errcode']
-                        response.msg = "企业微信验证未能通过"
+                        get_user_data['access_token'] = token_ret
 
+                    userid = user_objs[0].userid
+                    if userid:
+                        get_user_data['userid'] = userid
+                        ret = requests.get(Conf['delete_user_url'], params=get_user_data)
+
+                        weixin_ret = json.loads(ret.text)
+
+                        if weixin_ret['errcode'] == 0:
+                            user_objs.delete()
+                            response.code = 200
+                            response.msg = "删除成功"
+                        else:
+                            response.code = weixin_ret['errcode']
+                            response.msg = "企业微信验证未能通过"
+                    else:
+                        response.code = '302'
+                        response.msg = "userid不存在"
                 else:
                     response.code = 302
                     response.msg = '用户ID不存在'
@@ -298,10 +320,22 @@ def user_oper(request, oper_type, o_id):
                     get_user_data = {}
                     get_token_data['corpid'] = user_objs[0].company.corp_id
                     get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
-                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                    ret_json = ret.json()
-                    access_token = ret_json['access_token']
-                    get_user_data['access_token'] = access_token
+
+                    import redis
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    token_ret = rc.get('tongxunlu_token')
+                    print('---token_ret---->>', token_ret)
+
+                    if not token_ret:
+                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                        ret_json = ret.json()
+                        access_token = ret_json['access_token']
+                        get_user_data['access_token'] = access_token
+                        rc.set('tongxunlu_token', access_token, 7000)
+                    else:
+                        get_user_data['access_token'] = token_ret
+
+
                     post_user_data['userid'] = user_objs[0].userid
                     post_user_data['name'] = username
                     post_user_data['position'] = position

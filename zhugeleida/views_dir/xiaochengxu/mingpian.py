@@ -53,7 +53,7 @@ def mingpian(request):
             data['action'] = 1
             action_record(data, remark)
 
-            # user_send_action_log(data)  #发送企业微信的消息提醒
+            user_send_action_log(data)  #发送企业微信的消息提醒
 
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 

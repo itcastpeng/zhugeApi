@@ -96,26 +96,25 @@ class DepartmentUpdateForm(forms.Form):
     parentid_id = forms.CharField(
         required=False,
         error_messages={
-            'required': "父级部门ID"
+            'required': "父级部门ID不能为空"
         }
     )
     department_id = forms.CharField(
         required=True,
         error_messages={
-            'required': "父级部门ID"
+            'required': "部门ID不能为空"
         }
     )
-
-
 
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
         objs = models.zgld_department.objects.filter(
             name=name,
-        )
-        if not objs:
-            self.add_error('name', '部门名不存在')
+        ).exclude(id=self.data.get('department_id'))
+
+        if objs:
+            self.add_error('name', '部门名已经存在')
         else:
             return name
 

@@ -63,6 +63,7 @@ def action_record(data,remark):
 
     return response
 
+
 def user_send_action_log(data):
     response = Response.ResponseObj()
     user_id = data.get('uid')
