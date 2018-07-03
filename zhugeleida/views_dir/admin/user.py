@@ -161,10 +161,20 @@ def user_oper(request, oper_type, o_id):
                 get_user_data = {}
                 get_token_data['corpid'] = company_obj.corp_id
                 get_token_data['corpsecret'] = company_obj.tongxunlu_secret
-                ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                ret_json = ret.json()
-                access_token = ret_json['access_token']
-                get_user_data['access_token'] = access_token
+
+                import redis
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                token_ret = rc.get('tongxunlu_token')
+                print('---token_ret---->>',token_ret)
+
+                if not  token_ret:
+                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    ret_json = ret.json()
+                    access_token = ret_json['access_token']
+                    get_user_data['access_token'] = access_token
+                    rc.set('tongxunlu_token',access_token,7000)
+                else:
+                    get_user_data['access_token'] = token_ret
 
                 post_user_data['userid'] = userid
                 post_user_data['name'] = username

@@ -53,7 +53,7 @@ def mingpian(request):
             data['action'] = 1
             action_record(data, remark)
 
-            user_send_action_log(data)  #发送企业微信的消息提醒
+            # user_send_action_log(data)  #发送企业微信的消息提醒
 
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 
@@ -66,58 +66,60 @@ def mingpian(request):
             ret_data = {}
             is_praise = False
             is_sign = False
-            for obj in objs:
-                up_down_obj = models.zgld_up_down.objects.filter(user_id=obj.id, customer_id=customer_id)
-                print('user_id=obj.id, customer_id=customer_id', obj.id, customer_id)
 
-                if up_down_obj:
-                    print('----up_down_obj[0].up----->>', up_down_obj[0].up)
-                    is_praise = up_down_obj[0].up
+            if objs:
+                for obj in objs:
+                    up_down_obj = models.zgld_up_down.objects.filter(user_id=obj.id, customer_id=customer_id)
+                    print('user_id=obj.id, customer_id=customer_id', obj.id, customer_id)
 
-                up_down_sign_obj = models.zgld_up_down_sign.objects.filter(user_id=obj.id, customer_id=customer_id)
-                if up_down_sign_obj:
-                    is_sign = up_down_sign_obj[0].up
+                    if up_down_obj:
+                        print('----up_down_obj[0].up----->>', up_down_obj[0].up)
+                        is_praise = up_down_obj[0].up
 
-                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url').order_by(
-                    '-create_date')
-                tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id',
-                                                                                                    'name').order_by(
-                    '-create_date')
+                    up_down_sign_obj = models.zgld_up_down_sign.objects.filter(user_id=obj.id, customer_id=customer_id)
+                    if up_down_sign_obj:
+                        is_sign = up_down_sign_obj[0].up
 
-                objs = models.zgld_userprofile.objects.filter(id=user_id)
-                sign_num = objs[0].sign_num
+                    photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url').order_by(
+                        '-create_date')
+                    tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id',
+                                                                                                        'name').order_by(
+                        '-create_date')
 
-                ret_data = {
-                    'id': obj.id,
-                    'username': obj.username,
-                    'avatar': obj.avatar,
-                    'company': obj.company.name,
-                    'address': obj.company.address or '',
-                    'position': obj.position,
-                    'email': obj.email or '',
-                    'wechat': obj.wechat or '',  # 微信号
+                    objs = models.zgld_userprofile.objects.filter(id=user_id)
+                    sign_num = objs[0].sign_num
 
-                    'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
-                    'create_date': obj.create_date,  # 创建时间
-                    'popularity_num': obj.popularity,  # 被查看多少次。
-                    'praise_num': obj.praise,  # 点赞多少次
-                    'forward_num': obj.forward,  # 转发多少次
-                    'is_praise': is_praise,
-                    'sign': obj.sign or '',  # 签名
-                    'is_sign': is_sign,  # 签名
-                    'sign_num': sign_num,
-                    'photo': list(photo_data) or '',
-                    'tag': list(tag_data),
+                    ret_data = {
+                        'id': obj.id,
+                        'username': obj.username,
+                        'avatar': obj.avatar,
+                        'company': obj.company.name,
+                        'address': obj.company.address or '',
+                        'position': obj.position,
+                        'email': obj.email or '',
+                        'wechat': obj.wechat or '',  # 微信号
 
+                        'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
+                        'create_date': obj.create_date,  # 创建时间
+                        'popularity_num': obj.popularity,  # 被查看多少次。
+                        'praise_num': obj.praise,  # 点赞多少次
+                        'forward_num': obj.forward,  # 转发多少次
+                        'is_praise': is_praise,
+                        'sign': obj.sign or '',  # 签名
+                        'is_sign': is_sign,  # 签名
+                        'sign_num': sign_num,
+                        'photo': list(photo_data) or '',
+                        'tag': list(tag_data),
+
+                    }
+
+                # 查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
                 }
-
-            # 查询成功 返回200 状态码
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {
-                'ret_data': ret_data,
-                'data_count': count,
-            }
 
 
         else:
