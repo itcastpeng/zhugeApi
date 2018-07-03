@@ -54,7 +54,7 @@ class zgld_userprofile(models.Model):
     country_choices = ((1, '国内'),
                        (2, '国外'),
                        )
-    country = models.SmallIntegerField(choices=country_choices, max_length=8, verbose_name='国家', null=True)
+    country = models.SmallIntegerField(choices=country_choices, verbose_name='国家', null=True)
     area = models.CharField(max_length=128, verbose_name='所在地区', null=True)
     address = models.TextField(verbose_name='详细地址', null=True)
 
@@ -198,7 +198,7 @@ class zgld_tag(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='所属用户', null=True)
     name = models.CharField(verbose_name='标签名称', max_length=64)
     tag_parent = models.ForeignKey('self', verbose_name='标签父级', null=True)
-    tag_customer = models.ManyToManyField('zgld_customer', verbose_name='关联到客户', null=True)
+    tag_customer = models.ManyToManyField('zgld_customer', verbose_name='关联到客户')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
