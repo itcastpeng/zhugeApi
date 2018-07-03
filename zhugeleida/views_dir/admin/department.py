@@ -100,6 +100,7 @@ def department_oper(request, oper_type, o_id):
                     'parentid': parentid_id
                 }
                 print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data),forms_obj.cleaned_data.get('name'))
+
                 ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
                 print(ret.text)
 
