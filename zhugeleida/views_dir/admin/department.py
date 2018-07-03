@@ -85,7 +85,24 @@ def department_oper(request, oper_type, o_id):
                 get_token_data['corpsecret'] = obj.company.tongxunlu_secret
                 ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
                 ret_json = ret.json()
-                print('ret_json -->', ret_json)
+
+                # import redis
+                # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                # token_ret = rc.get('tongxunlu_token')
+                # print('---token_ret---->>', token_ret)
+                #
+                # if not token_ret:
+                #     ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                #     ret_json = ret.json()
+                #     access_token = ret_json['access_token']
+                #     get_user_data['access_token'] = access_token
+                #     rc.set('tongxunlu_token', access_token, 7000)
+                # else:
+                #     get_user_data['access_token'] = token_ret
+
+
+
+
                 access_token = ret_json['access_token']
                 print('---access_token-->>',access_token)
                 get_user_data['access_token'] =  access_token
@@ -99,7 +116,7 @@ def department_oper(request, oper_type, o_id):
                     'name': forms_obj.cleaned_data.get('name'),
                     'parentid': parentid_id
                 }
-                print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data),forms_obj.cleaned_data.get('name'))
+                print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data))
 
                 ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
                 print(ret.text)

@@ -90,11 +90,14 @@ def user_send_action_log(data):
         token_ret_json = ret.json()
         access_token = token_ret_json['access_token']
 
-        url  = "https://qyapi.weixin.qq.com/cgi-bin/department/list"
-        ret = requests.get(url, params={'access_token': access_token })
-        print(ret.json())
-
-        return 'ok'
+        # url1  = "https://qyapi.weixin.qq.com/cgi-bin/department/list"
+        # ret = requests.get(url1, params={'access_token': access_token })
+        # print('-----department/list----->>',json.dumps(ret.json()))
+        #
+        # url2="https://qyapi.weixin.qq.com/cgi-bin/agent/get"
+        # ret = requests.get(url2, params={'access_token': access_token, 'agentid': 1000002})
+        # print('-----获取应用----->>', json.dumps(ret.json()))
+        # return 'ok'
 
     else:
         response.code = weixin_ret_data['errcode']
