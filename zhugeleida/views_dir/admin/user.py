@@ -205,7 +205,10 @@ def user_oper(request, oper_type, o_id):
 
                     data_dict ={'user_id': obj.id}
                     response = create_small_program_qr_code(data_dict) #
+
                     if response.code != 200:
+                        print('---response.code--->',response.msg)
+
                         return JsonResponse(response.__dict__)
 
                     response.code = 200
