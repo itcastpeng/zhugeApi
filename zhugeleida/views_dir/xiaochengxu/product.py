@@ -6,7 +6,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
-from publicFunc.condition_com import conditionCom, action_record
+from publicFunc.condition_com import conditionCom
+from zhugeleida.public.common import action_record
 from zhugeleida.forms.xiaochengxu.product_verify  import ProductSelectForm,ProductGetForm
 import json
 from django.db.models import Q
