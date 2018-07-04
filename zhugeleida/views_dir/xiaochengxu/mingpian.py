@@ -52,7 +52,7 @@ def mingpian(request):
             data = request.GET.copy()
             data['action'] = 1
 
-            action_record(data, remark)
+            action_record(data, remark) #记录访问动作
 
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 
@@ -150,17 +150,6 @@ def mingpian_oper(request, oper_type):
                 data = request.GET.copy()
                 data['action'] = 10
                 response = action_record(data, remark)
-
-                user_id = data.get('uid')
-                user_obj = models.zgld_userprofile.objects.filter(id=user_id)
-                data['content'] = remark
-                agent_objs = models.zgld_app.objects.filter(id=user_obj[0].company_id, name='AI雷达')
-                if agent_objs:
-                    data['agentid'] = agent_objs[0].agent_id
-
-
-                user_send_action_log(data)  # 发送企业微信的消息提醒
-
 
 
             if oper_type == 'save_phone':
