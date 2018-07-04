@@ -12,6 +12,7 @@ import json
 from ..conf import *
 import requests
 from  zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_qr_code
+from zhugeapi_celery_project import tasks
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -135,10 +136,13 @@ def user_oper(request, oper_type, o_id):
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
                 depart_id_list = []
-                department_id = request.POST.get('department_id')
 
+                department_id = request.POST.get('department_id')
+                print('-----department_id---->',department_id)
                 if  department_id:
                     depart_id_list = json.loads(department_id)
+
+
                     # depart_id_list = [int(departmentId) for departmentId in department_id]
                     # for id in department_id:
                     #     depart_id_list.append(int(id))
@@ -152,7 +156,7 @@ def user_oper(request, oper_type, o_id):
                                 response.code = 404
                                 response.msg = '非法请求'
                                 return JsonResponse(response.__dict__)
-                print('depart_id_list',depart_id_list)
+
 
                 company_obj = models.zgld_company.objects.get(id=company_id)
                 get_token_data = {}
@@ -169,11 +173,15 @@ def user_oper(request, oper_type, o_id):
                 if not  token_ret:
                     ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
                     ret_json = ret.json()
+                    print('--------ret_json-->>',ret_json)
+
                     access_token = ret_json['access_token']
                     get_user_data['access_token'] = access_token
                     rc.set('tongxunlu_token',access_token,7000)
                 else:
                     get_user_data['access_token'] = token_ret
+                if len(depart_id_list) == 0:
+                    depart_id_list = [1]
 
                 post_user_data['userid'] = userid
                 post_user_data['name'] = username
@@ -181,6 +189,8 @@ def user_oper(request, oper_type, o_id):
                 post_user_data['mobile'] = wechat_phone
                 post_user_data['department'] = depart_id_list
                 add_user_url = Conf['add_user_url']
+
+                print('-------->>',json.dumps(post_user_data))
 
                 ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
                 print('-----requests----->>', ret.text)
@@ -198,13 +208,16 @@ def user_oper(request, oper_type, o_id):
                         wechat_phone=wechat_phone,
                         mingpian_phone=mingpian_phone
                     )
-
+                    if depart_id_list[0] == 1:
+                        depart_id_list = []
                     obj.department = depart_id_list
 
                     # 生成企业用户二维码
 
                     data_dict ={'user_id': obj.id}
                     response = create_small_program_qr_code(data_dict) #
+
+                    # tasks.user_send_action_log.delay(json.dumps(data))
 
                     if response.code != 200:
                         print('---response.code--->',response.msg)
