@@ -59,9 +59,9 @@ def mingpian(request):
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
 
-            # data['content'] = remark
-            # data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
-            # user_send_action_log(data)  #发送企业微信的消息提醒
+            data['content'] = remark
+            data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
+            user_send_action_log(data)  #发送企业微信的消息提醒
 
             # if length != 0:
             #     start_line = (current_page - 1) * length
@@ -150,6 +150,18 @@ def mingpian_oper(request, oper_type):
                 data = request.GET.copy()
                 data['action'] = 10
                 response = action_record(data, remark)
+
+                user_id = data.get('uid')
+                user_obj = models.zgld_userprofile.objects.filter(id=user_id)
+                data['content'] = remark
+                agent_objs = models.zgld_app.objects.filter(id=user_obj[0].company_id, name='AI雷达')
+                if agent_objs:
+                    data['agentid'] = agent_objs[0].agent_id
+
+
+                user_send_action_log(data)  # 发送企业微信的消息提醒
+
+
 
             if oper_type == 'save_phone':
                 remark = '保存了您的电话,可以考虑拜访'
@@ -455,7 +467,7 @@ def mingpian_oper(request, oper_type):
                 ret_data = []
                 for obj in objs:
                     ret_data.append({
-                        'id': obj.id,
+                        'id': obj.user.id,
                         'username': obj.user.username,
                         'source': obj.get_source_display(),
                         'avatar': obj.user.avatar,
