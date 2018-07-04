@@ -67,7 +67,7 @@ def action_record(data,remark):
 #小程序访问动作日志的发送到企业微信
 def user_send_action_log(data):
     response = Response.ResponseObj()
-    user_id = data.get('uid')
+
     customer_id = data.get('customer_id') or ''
     user_id = data.get('uid')
     content = data.get('content')
