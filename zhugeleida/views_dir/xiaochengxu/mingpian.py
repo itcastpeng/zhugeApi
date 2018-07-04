@@ -16,7 +16,7 @@ from time import sleep
 
 # 展示单个的名片信息
 @csrf_exempt
-# @account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_customer)
 def mingpian(request):
     response = Response.ResponseObj()
     if request.method == "GET":  # 获取单个名片的信息
@@ -59,9 +59,9 @@ def mingpian(request):
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
 
-            data['content'] = remark
-            data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
-            user_send_action_log(data)  #发送企业微信的消息提醒
+            # data['content'] = remark
+            # data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
+            # user_send_action_log(data)  #发送企业微信的消息提醒
 
             # if length != 0:
             #     start_line = (current_page - 1) * length
