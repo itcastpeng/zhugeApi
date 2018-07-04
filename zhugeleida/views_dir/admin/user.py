@@ -115,7 +115,7 @@ def user_oper(request, oper_type, o_id):
                 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
-                'wechat_phone': request.POST.get('wechat_phone'),
+                'wechat_phone': request.POST.get('phone'),
                 'mingpian_phone': request.POST.get('mingpian_phone')
 
             }
