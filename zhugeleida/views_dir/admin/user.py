@@ -134,7 +134,7 @@ def user_oper(request, oper_type, o_id):
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
-                depart_id_list = []
+                depart_id_list = [1]
                 department_id = request.POST.get('department_id')
 
                 if  department_id:
