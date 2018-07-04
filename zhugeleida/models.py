@@ -8,12 +8,19 @@ class zgld_company(models.Model):
     address = models.TextField(verbose_name='公司详细地址')
     corp_id = models.CharField(verbose_name="企业ID", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
 
+#企业App应用
+class zgld_app(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    name = models.CharField(verbose_name="企业应用_名称", max_length=128)
+    agent_id = models.CharField(verbose_name="应用ID", max_length=128)
+    app_secret = models.CharField(verbose_name="应用secret", max_length=256)
 
 # 公司部门
 class zgld_department(models.Model):
@@ -44,10 +51,10 @@ class zgld_userprofile(models.Model):
     role = models.ForeignKey("zgld_role", verbose_name="角色")
 
     telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
-    phone = models.CharField(verbose_name='绑定微信手机号', max_length=20, blank=True, null=True)
+    wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
     wechat = models.CharField(verbose_name='微信号', max_length=64, null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)
-    wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
+
     mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
     is_show_phone = models.BooleanField(verbose_name='手机号是否显示在名片上', default=True)
 

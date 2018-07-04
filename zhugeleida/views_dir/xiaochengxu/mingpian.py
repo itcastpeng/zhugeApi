@@ -16,7 +16,7 @@ from time import sleep
 
 # 展示单个的名片信息
 @csrf_exempt
-# @account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_customer)
 def mingpian(request):
     response = Response.ResponseObj()
     if request.method == "GET":  # 获取单个名片的信息
@@ -51,18 +51,23 @@ def mingpian(request):
                 remark = '查看你的名片第%s次,成交在望' % (action_count)
             data = request.GET.copy()
             data['action'] = 1
-            action_record(data, remark)
 
-            # user_send_action_log(data)  #发送企业微信的消息提醒
+            action_record(data, remark) #记录访问动作
 
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
+
+            # data['content'] = remark
+            # data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
+            # user_send_action_log(data)  #发送企业微信的消息提醒
+
             # if length != 0:
             #     start_line = (current_page - 1) * length
             #     stop_line = start_line + length
             #     objs = objs[start_line: stop_line]
+
             ret_data = {}
             is_praise = False
             is_sign = False
@@ -145,6 +150,7 @@ def mingpian_oper(request, oper_type):
                 data = request.GET.copy()
                 data['action'] = 10
                 response = action_record(data, remark)
+
 
             if oper_type == 'save_phone':
                 remark = '保存了您的电话,可以考虑拜访'
@@ -450,7 +456,7 @@ def mingpian_oper(request, oper_type):
                 ret_data = []
                 for obj in objs:
                     ret_data.append({
-                        'id': obj.id,
+                        'id': obj.user.id,
                         'username': obj.user.username,
                         'source': obj.get_source_display(),
                         'avatar': obj.user.avatar,

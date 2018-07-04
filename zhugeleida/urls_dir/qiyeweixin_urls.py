@@ -65,7 +65,7 @@ urlpatterns = [
     url(r'^action/(?P<oper_type>\w+)', action.action),
 
     # 生成微信二维码 create_qr_code
-    url(r'^qr_code_auth$', qr_code_auth.qr_code_auth),
+    url(r'^qr_code_auth$', qr_code_auth.create_qr_code),
 
     # 企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),

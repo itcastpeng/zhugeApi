@@ -53,7 +53,7 @@ class UserAddForm(forms.Form):
         }
     )
 
-    phone = forms.CharField(
+    wechat_phone = forms.CharField(
         required=True,
         validators=[mobile_validate, ],        # 应用咱们自己定义的规则
     )

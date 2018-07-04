@@ -63,14 +63,18 @@ def action_record(data,remark):
 
     return response
 
+
+#小程序访问动作日志的发送到企业微信
 def user_send_action_log(data):
     response = Response.ResponseObj()
-    user_id = data.get('uid')
+
     customer_id = data.get('customer_id') or ''
+    user_id = data.get('uid')
+    content = data.get('content')
+    agentid = data.get('agentid')
 
     get_token_data = {}
-    get_user_data = {}
-    user_id = data.get('uid')
+    send_token_data = {}
 
     user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
     print('---------->>>',user_obj.company.corp_id,user_obj.company.tongxunlu_secret)
@@ -80,30 +84,27 @@ def user_send_action_log(data):
     get_token_data['corpid'] = corp_id
     get_token_data['corpsecret'] = tongxunlu_secret
 
-    # get 传参 corpid = ID & corpsecret = SECRECT
-    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-    weixin_ret_data = json.loads(ret.text)
-    print('---- access_token --->>', weixin_ret_data)
+    import redis
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    token_ret = rc.get('tongxunlu_token')
+    print('---token_ret---->>', token_ret)
 
-    if  weixin_ret_data['errcode'] ==  0 :
-        print('---- access_token --->>', weixin_ret_data)
-        token_ret_json = ret.json()
-        access_token = token_ret_json['access_token']
+    if not token_ret:
+        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+        weixin_ret_data = ret.json()
 
-        # url1  = "https://qyapi.weixin.qq.com/cgi-bin/department/list"
-        # ret = requests.get(url1, params={'access_token': access_token })
-        # print('-----department/list----->>',json.dumps(ret.json()))
-        #
-        # url2="https://qyapi.weixin.qq.com/cgi-bin/agent/get"
-        # ret = requests.get(url2, params={'access_token': access_token, 'agentid': 1000002})
-        # print('-----获取应用----->>', json.dumps(ret.json()))
-        # return 'ok'
+        if weixin_ret_data['errcode'] == 0:
+           access_token = weixin_ret_data['access_token']
+           send_token_data['access_token'] = access_token
+           rc.set('tongxunlu_token', access_token, 7000)
+
+        else:
+            response.code = weixin_ret_data['errcode']
+            response.msg = "企业微信验证未能通过"
+            return response
 
     else:
-        response.code = weixin_ret_data['errcode']
-        response.msg = "企业微信验证未能通过"
-        return  response
-
+        send_token_data['access_token'] = token_ret
 
     userid = user_obj.userid
     post_send_data =  {
@@ -111,15 +112,14 @@ def user_send_action_log(data):
        # "toparty" : "PartyID1|PartyID2",
        # "totag" : "TagID1 | TagID2",
        "msgtype" : "text",
-       "agentid" : 1000002,
+       "agentid" :  agentid,
        "text" : {
-           "content" : "你的快递已到，请携带工卡前往邮件中心领取。\n出发前可查看<a href=\"http://work.weixin.qq.com\">邮件中心视频实况</a>，聪明避开排队。"
+           "content" : content,
        },
        "safe":0
     }
-    get_token_data = {'access_token': access_token}
-    print('---------->>',get_token_data)
-    inter_ret = requests.post(Conf['send_msg_url'], params=get_token_data,data=json.dumps(post_send_data))
+
+    inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data,data=json.dumps(post_send_data))
 
     weixin_ret_data = json.loads(inter_ret.text)
     print('---- access_token --->>', weixin_ret_data)
