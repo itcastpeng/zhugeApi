@@ -73,7 +73,7 @@ def user(request):
                     'last_login_date': obj.last_login_date,
                     'position': obj.position,
                     'mingpian_phone': obj.mingpian_phone,
-                    'phone': obj.phone,
+                    'phone': obj.wechat_phone,         # 代表微信电话
                     'status': obj.get_status_display(),
                     'avatar': obj.avatar,
                     'qr_code': obj.qr_code,
@@ -115,7 +115,7 @@ def user_oper(request, oper_type, o_id):
                 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
-                'wechat_phone': request.POST.get('wechat_phone'),
+                'wechat_phone': request.POST.get('phone'), ##
                 'mingpian_phone': request.POST.get('mingpian_phone')
 
             }
@@ -288,7 +288,7 @@ def user_oper(request, oper_type, o_id):
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
                 'department_id': request.POST.get('department_id'),
-                'phone': request.POST.get('phone'),
+                'wechat_phone': request.POST.get('phone'),
                 'mingpian_phone': request.POST.get('mingpian_phone')
             }
 
@@ -305,7 +305,7 @@ def user_oper(request, oper_type, o_id):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
                 department_id = forms_obj.cleaned_data.get('department_id')
-                phone = forms_obj.cleaned_data.get('phone')
+                wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
                 print('-------department_ids------->>', type(department_id))
@@ -340,7 +340,7 @@ def user_oper(request, oper_type, o_id):
                     post_user_data['name'] = username
                     post_user_data['position'] = position
                     post_user_data['department'] = department_id
-                    post_user_data['mobile'] = phone
+                    post_user_data['mobile'] = wechat_phone
                     ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
                     print(ret.text)
 
@@ -352,7 +352,7 @@ def user_oper(request, oper_type, o_id):
                             role_id=role_id,
                             company_id=company_id,
                             position=position,
-                            phone=phone,
+                            wechat_phone=wechat_phone,
                             mingpian_phone=mingpian_phone,
                         )
 

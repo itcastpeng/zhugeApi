@@ -57,9 +57,21 @@ def action_record(data,remark):
         response.code = 200
         response.msg = '记录日志成功'
 
+
+
     else:
         response.code = 301
         response.msg = '用户-客户跟进信息-关系绑定表数据重复'
+
+    company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+    customer_name = models.zgld_customer.objects.filter(id=customer_id)[0].username
+
+    data['content'] = customer_name + remark
+    data['agentid'] = models.zgld_app.objects.filter(id=company_id,name='AI雷达')[0].agent_id
+    user_send_action_log(data)  #发送企业微信的消息提醒
+
+
+
 
     return response
 
@@ -79,24 +91,31 @@ def user_send_action_log(data):
     user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
     print('---------->>>',user_obj.company.corp_id,user_obj.company.tongxunlu_secret)
     corp_id = user_obj.company.corp_id
-    tongxunlu_secret = user_obj.company.tongxunlu_secret
 
     get_token_data['corpid'] = corp_id
-    get_token_data['corpsecret'] = tongxunlu_secret
+    app_secret = models.zgld_app.objects.filter(id=user_obj.company_id, name='AI雷达')
+    if not app_secret:
+        response.code = 404
+        response.msg = "数据库不存在corpsecret"
+        return response
+
+    get_token_data['corpsecret'] = app_secret[0]
 
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    token_ret = rc.get('tongxunlu_token')
+    token_ret = rc.get('leida_app_token')
     print('---token_ret---->>', token_ret)
 
     if not token_ret:
-        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+        ret = requests.get(Conf['token_url'], params=get_token_data)
+
         weixin_ret_data = ret.json()
+        print('----weixin_ret_data--->',weixin_ret_data)
 
         if weixin_ret_data['errcode'] == 0:
            access_token = weixin_ret_data['access_token']
            send_token_data['access_token'] = access_token
-           rc.set('tongxunlu_token', access_token, 7000)
+           rc.set('leida_app_token', access_token, 7000)
 
         else:
             response.code = weixin_ret_data['errcode']
@@ -108,11 +127,11 @@ def user_send_action_log(data):
 
     userid = user_obj.userid
     post_send_data =  {
-       "touser" :userid,
+       "touser" : userid,
        # "toparty" : "PartyID1|PartyID2",
        # "totag" : "TagID1 | TagID2",
        "msgtype" : "text",
-       "agentid" :  agentid,
+       "agentid" :  int(agentid),
        "text" : {
            "content" : content,
        },
