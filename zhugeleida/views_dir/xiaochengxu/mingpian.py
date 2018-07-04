@@ -51,18 +51,24 @@ def mingpian(request):
                 remark = '查看你的名片第%s次,成交在望' % (action_count)
             data = request.GET.copy()
             data['action'] = 1
-            action_record(data, remark)
 
-            user_send_action_log(data)  #发送企业微信的消息提醒
+            action_record(data, remark)
 
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
+
+            data['content'] = remark
+            data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
+
+            user_send_action_log(data)  #发送企业微信的消息提醒
+
             # if length != 0:
             #     start_line = (current_page - 1) * length
             #     stop_line = start_line + length
             #     objs = objs[start_line: stop_line]
+
             ret_data = {}
             is_praise = False
             is_sign = False

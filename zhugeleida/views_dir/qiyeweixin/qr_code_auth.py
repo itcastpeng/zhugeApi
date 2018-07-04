@@ -32,6 +32,7 @@ def  create_qr_code(request):
 
     return JsonResponse(response.__dict__)
 
+
 def create_small_program_qr_code(data):
     response = Response.ResponseObj()
     user_id = data.get('user_id')
@@ -60,10 +61,11 @@ def create_small_program_qr_code(data):
     print('---token_ret---->>', token_ret)
 
     if not token_ret:
+        # {"errcode": 0, "errmsg": "created"}
         token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
         token_ret_json = token_ret.json()
-
-        if token_ret_json['errcode'] != 0:
+        print('-----token_ret_json------>',token_ret_json)
+        if not token_ret_json.get('access_token'):
             response.code = token_ret_json['errcode']
             response.msg = "生成小程序二维码未验证通过"
             return response
@@ -80,10 +82,9 @@ def create_small_program_qr_code(data):
 
     post_qr_data = {'path': path, 'width': 430}
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
-    ret_json = qr_ret.json()
 
-    if ret_json['errcode'] != 0:
-        response.code = ret_json['errcode']
+    if not qr_ret.content:
+
         response.msg = "生成小程序二维码未验证通过"
         return response
 

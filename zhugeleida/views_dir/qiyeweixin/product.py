@@ -195,7 +195,7 @@ def product(request, oper_type):
 #  增删改 用户表
 #  csrf  token验证
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+# @account.is_token(models.zgld_userprofile)
 def product_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -283,16 +283,22 @@ def product_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "add_picture":
+            print('-----request.POST----->>',request.POST,request.FILES)
 
-            upload_file = request.FILES['file']
+            upload_file = request.POST.get('file')
             task = request.POST.get('task_id')  # 获取文件唯一标识符
             chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
             filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
 
             IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp') + filename
             with open(IMG_PATH_FILES, 'wb+') as destination:
-                for chunk in upload_file.chunks():
-                    destination.write(chunk)
+                destination.write(upload_file)
+                # for chunk in upload_file.chunks():
+                #     print('---chunk->>',chunk)
+                #     destination.write(chunk)
+
+            response.code = 200
+            response.msg = "切片上传图片成功"
 
         elif oper_type == "delete_picture":
             # 删除 ID

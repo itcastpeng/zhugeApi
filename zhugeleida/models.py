@@ -8,12 +8,19 @@ class zgld_company(models.Model):
     address = models.TextField(verbose_name='公司详细地址')
     corp_id = models.CharField(verbose_name="企业ID", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
 
+#企业App应用
+class zgld_app(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    name = models.CharField(verbose_name="企业应用_名称", max_length=128)
+    agent_id = models.CharField(verbose_name="应用ID", max_length=128)
+    app_secret = models.CharField(verbose_name="应用secret", max_length=256)
 
 # 公司部门
 class zgld_department(models.Model):
