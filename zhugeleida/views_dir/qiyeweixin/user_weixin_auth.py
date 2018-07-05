@@ -59,6 +59,7 @@ def work_weixin_auth(request, company_id):
         name = user_list_ret_json['name']
         avatar = user_list_ret_json['avatar']
         gender = user_list_ret_json['gender']
+        email = user_list_ret_json['email']
 
         print('----------user_list_ret_json---->', user_list_ret_json)
         # qr_code_auth()  # 生成二维码保存至数据库路径
@@ -73,14 +74,16 @@ def work_weixin_auth(request, company_id):
             if user_profile_obj.status == 1:
                 print('user_profile_obj.id -->', user_profile_obj.id)
                 print('user_profile_obj.id -->', user_profile_obj.id)
+                user_profile_obj.gender = gender
+                user_profile_obj.email = email
+                user_profile_obj.avatar = avatar
+                user_profile_obj.save()
 
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'id=' + str(
                     user_profile_obj.id) + '&' + 'avatar=' + avatar
                 return redirect(redirect_url)
 
-
         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
-
 
     else:
         response.code = 402
