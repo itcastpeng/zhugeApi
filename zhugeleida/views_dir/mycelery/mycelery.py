@@ -151,7 +151,7 @@ def create_user_or_customer_qr_code(request):
         response.msg = "生成小程序二维码未验证通过"
         return response
 
-    print('-------qr_ret---->', qr_ret.text)
+    # print('-------qr_ret---->', qr_ret.text)
 
     IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'qr_code') + user_qr_code
     with open('%s' % (IMG_PATH), 'wb') as f:
