@@ -75,7 +75,7 @@ def user_send_action_log(request):
         },
         "safe": 0
     }
-    print('userid ==>', userid)
+    print('post_send_data ==>', post_send_data)
 
     inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
 
