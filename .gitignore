@@ -9,4 +9,4 @@ test/
 *.bak
 db.sqlite3
 venv/
-
+tmp/
