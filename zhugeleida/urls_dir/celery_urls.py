@@ -7,8 +7,7 @@ urlpatterns = [
 
     # 权限操作
     url(r'^user_send_action_log', mycelery.user_send_action_log),
-    url(r'^customer_create_qr_code', mycelery.customer_create_qr_code),
-    url(r'^user_create_qr_code', mycelery.user_create_qr_code),
+    url(r'^create_user_or_customer_qr_code', mycelery.create_user_or_customer_qr_code),
 
 
 

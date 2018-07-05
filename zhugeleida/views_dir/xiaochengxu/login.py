@@ -12,7 +12,7 @@ import json
 import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
-
+from zhugeapi_celery_project import tasks
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -115,27 +115,10 @@ def login_oper(request,oper_type):
             if forms_obj.is_valid():
 
                 # user_type = forms_obj.cleaned_data.get('user_type')
-                source = forms_obj.cleaned_data.get('source')
-                user_id = forms_obj.cleaned_data.get('uid')
-                customer_id = forms_obj.cleaned_data.get('user_id')
-                parent_id = forms_obj.cleaned_data.get('pid')
-
-                # get_token_data = {
-                #     'appid': Conf['appid'],
-                #     'secret': Conf['appsecret'],
-                #     'grant_type': 'authorization_code',
-                # }
-                #
-                # ret_data = get_openid_info(get_token_data)
-                # openid = ret_data['openid']
-                # session_key = ret_data['session_key']
-                # unionid = ret_data['unionid']
-
-                # customer_objs = models.zgld_customer.objects.filter(
-                #     openid=openid,
-                #     user_type=user_type,
-                # )
-                # 如果openid存在一条数据
+                source = forms_obj.cleaned_data.get('source')   #1,代表扫码,2 代表转发
+                user_id = forms_obj.cleaned_data.get('uid') # 所属的企业用户的ID
+                customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
+                parent_id = forms_obj.cleaned_data.get('pid')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
 
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
 
@@ -145,26 +128,16 @@ def login_oper(request,oper_type):
 
                 else:
 
-                    # obj = models.zgld_customer.objects.create(
-                    #     customer_id=customer_id
-                    #     # user_type=user_type,  #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                    #     # superior=customer_id,  #上级人。
-                    # )
-                    # user_customer_belonger_obj.user_type = user_type     #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    # 异步生成小程序和企业用户对应的小程序二维码
+                    data_dict = {'user_id': user_id,'customer_id': customer_id}
+                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+
                     user_customer_belonger_obj.superior = parent_id      #上级人。
-
-                    #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
                     models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
-
                     print('---------- crete successful ---->')
 
-                # ret_data = {
-                #     'cid': client_id,
-                #     'token': token
-                # }
                     response.code = 200
                     response.msg = "绑定关系成功"
-                # response.data = ret_data
 
             else:
                 response.code = 301
@@ -173,6 +146,7 @@ def login_oper(request,oper_type):
 
     else:
         if oper_type == 'send_user_info':
+            # 前端把小程序授权的用户信息入库。
             customer_id = request.GET.get('user_id')
             headimgurl = request.POST.get('avatarUrl')
             city = request.POST.get('city')
@@ -202,9 +176,5 @@ def login_oper(request,oper_type):
                 response.code = 301
                 response.msg = "用户不存在"
 
-
-            # else:
-            #     response.code = 301
-            #     response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
