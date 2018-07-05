@@ -7,8 +7,9 @@ import re
 import json
 from django.core.exceptions import ValidationError
 
+
 def mobile_validate(value):
-    mobile_re = re.compile(r'^(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$') #正则匹配
+    mobile_re = re.compile(r'^(13[0-9]|15[012356789]|17[3678]|18[0-9]|14[57])[0-9]{8}$') #正则匹配
     if not mobile_re.match(value):
         raise ValidationError('手机号码格式错误') #如果没有匹配到主动触发一个错误
 
