@@ -59,6 +59,7 @@ def mingpian(request):
                     'email': obj.email or '',
                     'country': obj.get_country_display() or '',
 
+                    'qr_code': obj.qr_code,     # 生成的小程序二维码
                     'wechat': obj.wechat or '',  # 微信号
                     'wechat_phone': obj.wechat_phone or '',  # 微信绑定的手机号 | 管理员可以修改
                     'is_show_phone': obj.is_show_phone,  # 默认显示名片中的手机号，
