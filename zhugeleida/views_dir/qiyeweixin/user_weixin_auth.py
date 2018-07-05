@@ -78,20 +78,6 @@ def work_weixin_auth(request, company_id):
                     user_profile_obj.id) + '&' + 'avatar=' + avatar
                 return redirect(redirect_url)
 
-        else:
-            token = account.get_token(account.str_encrypt(str(int(time.time() * 1000)) + userid))
-            user_data_dict = {
-                'userid': userid,
-                'username': name,
-                'avatar': avatar,
-                'gender': gender,
-                'role_id': 1,
-                'company_id': company_id,
-                'token': token,
-                # 'qr_code': 'statics/zhugeleida/ewm.jpg'
-            }
-            models.zgld_userprofile.objects.create(**user_data_dict)
-            print('---------- crete successful ---->')
 
         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 

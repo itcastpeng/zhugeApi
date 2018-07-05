@@ -2,7 +2,7 @@ from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
@@ -110,9 +110,6 @@ def user_oper(request, oper_type, o_id):
         global userid
         if oper_type == "add":
 
-            data_dict = {'user_id': 1}
-            tasks.create_user_small_program_qr_code(json.dumps(data_dict))  #
-
             form_data = {
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
@@ -145,11 +142,6 @@ def user_oper(request, oper_type, o_id):
                 print('-----department_id---->',department_id)
                 if  department_id:
                     depart_id_list = json.loads(department_id)
-
-
-                    # depart_id_list = [int(departmentId) for departmentId in department_id]
-                    # for id in department_id:
-                    #     depart_id_list.append(int(id))
 
                     objs = models.zgld_department.objects.filter(id__in=depart_id_list)
                     if objs:
@@ -200,7 +192,8 @@ def user_oper(request, oper_type, o_id):
                 print('-----requests----->>', ret.text)
 
                 weixin_ret = json.loads(ret.text)
-                if  weixin_ret.get('errmsg') == 'created':
+                if  weixin_ret.get('errmsg') == 'created': # 在企业微信中创建用户成功
+                    token = account.get_token(account.str_encrypt(password))
 
                     obj = models.zgld_userprofile.objects.create(
                         userid= userid,
@@ -210,18 +203,18 @@ def user_oper(request, oper_type, o_id):
                         company_id=company_id,
                         position=position,
                         wechat_phone=wechat_phone,
-                        mingpian_phone=mingpian_phone
+                        mingpian_phone=mingpian_phone,
+                        token=token
                     )
                     if depart_id_list[0] == 1:
                         depart_id_list = []
                     obj.department = depart_id_list
 
                     # 生成企业用户二维码
-
                     data_dict ={ 'user_id': obj.id }
-                    tasks.create_user_small_program_qr_code(json.dumps(data_dict)) #
+                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict)) #
 
-                    # tasks.user_send_action_log.delay(json.dumps(data))
+
 
                     if response.code != 200:
                         print('---response.code--->',response.msg)
