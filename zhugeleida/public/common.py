@@ -9,6 +9,7 @@ from zhugeapi_celery_project import tasks
 
 # 记录访问日志，例如访问某个功能（名片，产品，官网...）
 # 创建客户与用户之间的关系
+
 def action_record(data,remark):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
@@ -62,4 +63,5 @@ def action_record(data,remark):
     # user_send_action_log(data)  #发送企业微信的消息提醒
 
     return response
+
 

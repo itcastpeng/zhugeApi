@@ -20,3 +20,25 @@ def user_send_action_log(data):
     }
     print(post_data)
     requests.post(url, data=post_data)
+
+
+@app.task
+def create_customer_small_program_qr_code(data):
+    url = 'http://127.0.0.1:8000/zhugeleida/mycelery/customer_create_qr_code'
+    post_data = {
+        'data': data
+    }
+    print(post_data)
+
+    requests.post(url, data=post_data)
+
+
+@app.task
+def create_user_small_program_qr_code(data):
+    url = 'http://127.0.0.1:8000/zhugeleida/mycelery/user_create_qr_code'
+    get_data = {
+        'data': data
+    }
+    print(get_data)
+
+    requests.get(url, data=get_data)
