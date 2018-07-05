@@ -55,13 +55,14 @@ def work_weixin_auth(request, company_id):
                                       data=json.dumps(post_userlist_data))
 
         user_list_ret_json = user_list_ret.json()
+        print('----------user_list_ret_json---->', user_list_ret_json)
+
         userid = user_list_ret_json['userid']
         name = user_list_ret_json['name']
         avatar = user_list_ret_json['avatar']
         gender = user_list_ret_json['gender']
         email = user_list_ret_json['email']
 
-        print('----------user_list_ret_json---->', user_list_ret_json)
         # qr_code_auth()  # 生成二维码保存至数据库路径
 
         user_profile_objs = models.zgld_userprofile.objects.filter(
