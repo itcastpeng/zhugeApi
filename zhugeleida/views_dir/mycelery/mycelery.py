@@ -92,11 +92,11 @@ def user_send_action_log(request):
     return JsonResponse(response.__dict__)
 
 
-
-#企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
+# 企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
 @csrf_exempt
 def create_user_or_customer_qr_code(request):
     response = ResponseObj()
+    print('request -->', request)
     data = json.loads(request.GET.get('data'))
 
     user_id = data.get('user_id')

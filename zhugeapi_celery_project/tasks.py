@@ -10,7 +10,7 @@ import requests
 import json
 
 
-# 测试任务
+#  小程序访问动作日志的发送到企业微信
 @app.task
 def user_send_action_log(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
@@ -22,8 +22,7 @@ def user_send_action_log(data):
     requests.post(url, data=post_data)
 
 
-
-
+# 企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
 @app.task
 def create_user_or_customer_small_program_qr_code(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
