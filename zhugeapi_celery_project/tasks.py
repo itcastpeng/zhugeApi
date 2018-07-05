@@ -13,8 +13,8 @@ import json
 # 测试任务
 @app.task
 def user_send_action_log(data):
-    # url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
-    url = 'http://127.0.0.1:8000/zhugeleida/mycelery/user_send_action_log'
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
+    # url = 'http://127.0.0.1:8000/zhugeleida/mycelery/user_send_action_log'
     post_data = {
         'data': data
     }
@@ -26,7 +26,7 @@ def user_send_action_log(data):
 
 @app.task
 def create_user_or_customer_small_program_qr_code(data):
-    url = 'http://127.0.0.1:8000/zhugeleida/mycelery/create_user_or_customer_qr_code'
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
     get_data = {
         'data': data
     }
