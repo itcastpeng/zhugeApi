@@ -59,9 +59,9 @@ def work_weixin_auth(request, company_id):
 
         userid = user_list_ret_json['userid']
         name = user_list_ret_json['name']
-        avatar = user_list_ret_json['avatar']
+        avatar = user_list_ret_json['avatar'] + '100'    # 加上100 获取小图
         gender = user_list_ret_json['gender']
-        email = user_list_ret_json['email']
+        # email = user_list_ret_json['email']
 
         # qr_code_auth()  # 生成二维码保存至数据库路径
 
@@ -76,7 +76,7 @@ def work_weixin_auth(request, company_id):
                 print('user_profile_obj.id -->', user_profile_obj.id)
                 print('user_profile_obj.id -->', user_profile_obj.id)
                 user_profile_obj.gender = gender
-                user_profile_obj.email = email
+                # user_profile_obj.email = email
                 user_profile_obj.avatar = avatar
                 user_profile_obj.save()
 
