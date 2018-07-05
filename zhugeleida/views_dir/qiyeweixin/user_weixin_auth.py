@@ -26,12 +26,16 @@ def work_weixin_auth(request, company_id):
         post_userlist_data = {}
         get_userlist_data = {}
 
-        get_token_data['corpid'] = Conf['corpid']
-        get_token_data['corpsecret'] = Conf['corpsecret']
+        company_obj = models.zgld_company.objects.get(id=company_id)
+        corpid = company_obj.corp_id
+        corpsecret = company_obj.zgld_app_set.get(company_id=company_id,name='AI雷达').app_secret
+
+        get_token_data['corpid'] = corpid
+        get_token_data['corpsecret'] = corpsecret
         # get 传参 corpid = ID & corpsecret = SECRECT
         ret = requests.get(Conf['token_url'], params=get_token_data)
         ret_json = ret.json()
-        access_token = ret_json['access_token']
+        access_token = ret_json.get('access_token')
 
         print('===========>token_ret', ret_json)
 
@@ -67,6 +71,8 @@ def work_weixin_auth(request, company_id):
         if user_profile_objs:
             user_profile_obj = user_profile_objs[0]
             if user_profile_obj.status == 1:
+                print('user_profile_obj.id -->', user_profile_obj.id)
+
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'id=' + str(
                     user_profile_obj.id) + '&' + 'avatar=' + avatar
                 return redirect(redirect_url)

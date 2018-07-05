@@ -11,6 +11,7 @@ import requests
 from ..conf import *
 import os
 
+#后台点击按钮生成了企业有用户的二维码。
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def  create_qr_code(request):
@@ -32,7 +33,7 @@ def  create_qr_code(request):
 
     return JsonResponse(response.__dict__)
 
-
+#有上面的URl调用的
 def create_small_program_qr_code(data):
     response = Response.ResponseObj()
     user_id = data.get('user_id')

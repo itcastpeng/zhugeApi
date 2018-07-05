@@ -109,6 +109,10 @@ def user_oper(request, oper_type, o_id):
     if request.method == "POST":
         global userid
         if oper_type == "add":
+
+            data_dict = {'user_id': 1}
+            tasks.create_user_small_program_qr_code(json.dumps(data_dict))  #
+
             form_data = {
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
@@ -214,8 +218,8 @@ def user_oper(request, oper_type, o_id):
 
                     # 生成企业用户二维码
 
-                    data_dict ={'user_id': obj.id}
-                    response = create_small_program_qr_code(data_dict) #
+                    data_dict ={ 'user_id': obj.id }
+                    tasks.create_user_small_program_qr_code(json.dumps(data_dict)) #
 
                     # tasks.user_send_action_log.delay(json.dumps(data))
 

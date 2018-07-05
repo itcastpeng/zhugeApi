@@ -283,16 +283,27 @@ def product_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "add_picture":
-            print('-----request.POST----->>',request.POST,request.FILES)
+            print('-----request.POST----->>',request.POST.get('file'))
 
             upload_file = request.POST.get('file')
-            task = request.POST.get('task_id')  # 获取文件唯一标识符
-            chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
-            filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
+            import os, base64
+            imgdata = base64.b64decode(upload_file.encode('utf-8'))
 
-            IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp') + filename
-            with open(IMG_PATH_FILES, 'wb+') as destination:
-                destination.write(upload_file)
+            file = open('1.jpg', 'wb')
+            file.write(imgdata)
+            file.close()
+
+            # base64.b64encode('abcr34r344r'.encode('utf-8'))
+
+            upload_file = request.POST.get('file')
+            # task = request.POST.get('task_id')  # 获取文件唯一标识符
+            # chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
+            # filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
+            #
+            # IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp') + filename
+            # with open(IMG_PATH_FILES, 'wb+') as destination:
+            #     destination.write(upload_file)
+
                 # for chunk in upload_file.chunks():
                 #     print('---chunk->>',chunk)
                 #     destination.write(chunk)
@@ -476,6 +487,7 @@ def product_oper(request, oper_type, o_id):
     elif request.method == "GET":
 
         if oper_type == "upload_complete":
+            import os
             target_filename = request.GET.get('filename')  # 获取上传文件的文件名
             task = request.GET.get('task_id')  # 获取文件的唯一标识符
             picture_type = request.GET.get('picture_type')  # 图片的类型。
