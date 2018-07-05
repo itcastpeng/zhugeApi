@@ -97,7 +97,7 @@ def user_send_action_log(request):
 @csrf_exempt
 def create_user_or_customer_qr_code(request):
     response = ResponseObj()
-    print('request -->', request)
+    print('request -->', request.GET)
     data = json.loads(request.GET.get('data'))
 
     user_id = data.get('user_id')
