@@ -351,7 +351,7 @@ def product_oper(request, oper_type, o_id):
 
                 img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-                img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'product', 'tmp', img_name])
+                img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name])
                 print('img_save_path -->', img_save_path)
                 print('img_data -->', img_data)
                 img_data = base64.b64decode(img_data.encode('utf-8'))
@@ -378,13 +378,13 @@ def product_oper(request, oper_type, o_id):
                 picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面'), (2, '产品介绍')
 
                 img_name = timestamp + '.' + expanded_name
-                img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'product' ,'tmp', img_name])
+                img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'product' ,'tmp', img_name])
                 img_save_path = "/".join([BasePath, img_path])
                 file_obj = open(img_save_path, 'ab')
                 for chunk in range(chunk_num):
                     file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-                    file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'product', file_name])
+                    file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', file_name])
 
                     with open(file_save_path, 'rb') as f:
                         file_obj.write(f.read())
