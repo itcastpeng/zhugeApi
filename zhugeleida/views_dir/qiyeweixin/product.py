@@ -10,6 +10,7 @@ from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.qiyeweixin.product_verify import ProductAddForm, ProductUpdateForm, ProductSelectForm
 import json
 import os
+import base64
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -286,7 +287,6 @@ def product_oper(request, oper_type, o_id):
             print('-----request.POST----->>',request.POST.get('file'))
 
             upload_file = request.POST.get('file')
-            import os, base64
             imgdata = base64.b64decode(upload_file.encode('utf-8'))
 
             file = open('1.jpg', 'wb')
@@ -317,7 +317,6 @@ def product_oper(request, oper_type, o_id):
             picture_objs = models.zgld_product_picture.objects.filter(id=o_id,product_id=product_id) # 接口
 
             if picture_objs:
-
                 IMG_PATH = BASE_DIR + '/' + picture_objs[0].picture_url
                 if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
 
@@ -487,7 +486,6 @@ def product_oper(request, oper_type, o_id):
     elif request.method == "GET":
 
         if oper_type == "upload_complete":
-            import os
             target_filename = request.GET.get('filename')  # 获取上传文件的文件名
             task = request.GET.get('task_id')  # 获取文件的唯一标识符
             picture_type = request.GET.get('picture_type')  # 图片的类型。

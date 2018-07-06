@@ -212,14 +212,7 @@ def user_oper(request, oper_type, o_id):
 
                     # 生成企业用户二维码
                     data_dict ={ 'user_id': obj.id }
-                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict)) #
-
-
-
-                    if response.code != 200:
-                        print('---response.code--->',response.msg)
-
-                        return JsonResponse(response.__dict__)
+                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
                     response.code = 200
                     response.msg = "添加用户成功"
