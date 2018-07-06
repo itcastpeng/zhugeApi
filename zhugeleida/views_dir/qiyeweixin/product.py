@@ -582,7 +582,7 @@ def product_oper(request, oper_type, o_id):
 
 
 
-            return JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
 
 
 
