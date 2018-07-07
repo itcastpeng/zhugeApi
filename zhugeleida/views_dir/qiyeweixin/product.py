@@ -304,7 +304,7 @@ def product_oper(request, oper_type, o_id):
                 now_picture_list = []
                 now_article_list = []
                 if article_data_list:
-                    print('article_data_list 1 ------>>', article_data_list, type(article_data_list))
+
                     for article_data in article_data_list:
                         if 'picture_id' in article_data:
                                 picture_id = article_data.get('picture_id')
@@ -339,11 +339,11 @@ def product_oper(request, oper_type, o_id):
                         exist_article_list.append(a[0])
 
                     delete_article_list = list(set(exist_article_list).difference(set(now_article_list)))
-                    delete_article_objs = models.zgld_product_picture.objects.filter(id__in=delete_article_list)
+                    print('--------delete_article_list------->>',delete_article_list)
+                    delete_article_objs = models.zgld_product_article.objects.filter(id__in=delete_article_list)
 
                     if delete_article_objs:  # 要删除的文章内容的ID。
                         delete_article_objs.delete()
-
 
 
                     for article_data in article_data_list:
