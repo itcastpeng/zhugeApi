@@ -11,17 +11,11 @@ urlpatterns = [
     url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)', quanxian.quanxian_oper),
     url(r'^quanxian', quanxian.quanxian),
 
-    # # 角色操作
-    # url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)', role.role_oper),
-    # url(r'^role$', role.role),
 
     # 用户操作
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)', user.user_oper),
     url(r'^user', user.user),
 
-    # # 公司操作
-    # url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)', company.company_oper),
-    # url(r'^company$', company.company),
 
     # 标签 和 标签客户的操作
     url(r'^tag_customer/(?P<oper_type>\w+)/(?P<o_id>\d+)', tag_customer.tag_customer_oper),

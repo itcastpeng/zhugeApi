@@ -275,19 +275,77 @@ def product_oper(request, oper_type, o_id):
                 cover_picture_list = json.loads(request.POST.get('cover_picture_id'))
 
                 product_obj = models.zgld_product.objects.filter(id=product_id)
-                if product_obj:
-                    product_obj.update(
-                        name=forms_obj.data.get('name'),
-                        price=forms_obj.data.get('price'),
-                        reason=forms_obj.data.get('reason'),
-                    )
+
+                product_obj.update(
+                    name=forms_obj.data.get('name'),
+                    price=forms_obj.data.get('price'),
+                    reason=forms_obj.data.get('reason'),
+                )
+                exist_cover_picture_list = []
+                picture_list = list(models.zgld_product_picture.objects.filter(product_id=product_id, picture_type=1).values_list('id'))
+                for  p in  picture_list:
+                    exist_cover_picture_list.append(p[0])
+
+                delete_cover_picture_list = list(set(exist_cover_picture_list).difference(set(cover_picture_list)))
+                print('----delete_cover_picture_list-->>',delete_cover_picture_list)
+
+                delete_cover_picture_objs = models.zgld_product_picture.objects.filter(id__in=delete_cover_picture_list)
+
+                if delete_cover_picture_objs: #要删除的封面图片。
+                    for delete_picture_obj in delete_cover_picture_objs:
+                        IMG_PATH = BASE_DIR + '/' + delete_picture_obj.picture_url
+                        if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
+                    delete_cover_picture_objs.delete()
 
                 product_id = product_obj[0].id
-                picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)
+                picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)  # 更新前端传过来的封面ID绑定到数据库。
                 picture_objs.update(product_id=product_id)
 
+                now_picture_list = []
+                now_article_list = []
                 if article_data_list:
                     print('article_data_list 1 ------>>', article_data_list, type(article_data_list))
+                    for article_data in article_data_list:
+                        if 'picture_id' in article_data:
+                                picture_id = article_data.get('picture_id')
+                                now_picture_list.append(picture_id)
+
+                    exist_product_picture_list = []
+                    picture_list = list(models.zgld_product_picture.objects.filter(product_id=product_id, picture_type=2).values_list('id'))
+                    for p in picture_list:
+                        exist_product_picture_list.append(p[0])
+
+                    delete_product_picture_list = list(set(exist_product_picture_list).difference(set(now_picture_list)))
+                    print('----delete_product_picture_list-->>', delete_product_picture_list)
+
+                    delete_product_picture_objs = models.zgld_product_picture.objects.filter(
+                        id__in=delete_product_picture_list)
+
+                    if delete_product_picture_objs:  # 要删除的产品图片。
+                        for delete_picture_obj in delete_product_picture_objs:
+                            IMG_PATH = BASE_DIR + '/' + delete_picture_obj.picture_url
+                            if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
+                        delete_product_picture_objs.delete()
+
+                    ## 比较新穿过来的文章列表和已经存在数据库的文章的ID的差级
+                    for article_data in article_data_list:
+                        if 'article_id' in article_data:
+                                article_id = article_data.get('article_id')
+                                now_article_list.append(article_id)
+
+                    exist_article_list = []
+                    article_list = models.zgld_product_article.objects.filter(product_id=product_id).values_list('id')
+                    for a in article_list:
+                        exist_article_list.append(a[0])
+
+                    delete_article_list = list(set(exist_article_list).difference(set(now_article_list)))
+                    delete_article_objs = models.zgld_product_picture.objects.filter(id__in=delete_article_list)
+
+                    if delete_article_objs:  # 要删除的文章内容的ID。
+                        delete_article_objs.delete()
+
+
+
                     for article_data in article_data_list:
                         print('article_data_list 2 ------>>', article_data, type(article_data))
                         article_id = article_data.get('article_id')
@@ -310,12 +368,6 @@ def product_oper(request, oper_type, o_id):
                             )
 
 
-                        elif 'article_id' not  in article_data and 'picture_id' in article_data:
-                            picture_id = article_data.get('picture_id')
-                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
-                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
-
-
                         elif 'article_id' not  in article_data and  'title' in article_data:
                             models.zgld_product_article.objects.create(
                                 product_id=product_id,
@@ -324,13 +376,19 @@ def product_oper(request, oper_type, o_id):
                                 order=article_data.get('order')
                             )
 
-                        elif 'content' in article_data:
+                        elif 'article_id' not  in article_data and 'content' in article_data:
                             models.zgld_product_article.objects.create(
                                 product_id=product_id,
                                 content=article_data.get('content'),
                                 type=2,
                                 order=article_data.get('order')
-                                )
+                            )
+                        elif  'picture_id' in article_data:
+                            picture_id = article_data.get('picture_id')
+                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
+                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
+
+
                     response.code = 200
                     response.msg = "添加成功"
 
@@ -366,6 +424,7 @@ def product_oper(request, oper_type, o_id):
                 response.data = json.loads(forms_obj.errors.as_json())
             return JsonResponse(response.__dict__)
 
+        #产品图片合并请求
         elif  oper_type == "upload_complete":
 
             response = Response.ResponseObj()
@@ -375,7 +434,7 @@ def product_oper(request, oper_type, o_id):
                 timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
                 chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
                 expanded_name = img_name.split('.')[-1]  # 扩展名
-                picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面'), (2, '产品介绍')
+                picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
 
                 img_name = timestamp + '.' + expanded_name
                 img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'product', img_name])
@@ -395,6 +454,7 @@ def product_oper(request, oper_type, o_id):
                                                                                      picture_url=img_path)
 
                 response.data = {
+                            'picture_type': product_picture_obj.picture_type,
                             'picture_id': product_picture_obj.id,
                             'picture_url': product_picture_obj.picture_url,
 
@@ -420,6 +480,7 @@ def product_oper(request, oper_type, o_id):
                 picture_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
+
             else:
                 response.code = 302
                 response.msg = '图片ID不存在'
@@ -545,6 +606,8 @@ def product_oper(request, oper_type, o_id):
                     reason=forms_obj.data.get('reason'),
                 )
 
+
+                #封面图片绑定到产品。
                 product_id = product_obj.id
                 picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)
                 picture_objs.update(product_id=product_id)

@@ -142,7 +142,7 @@ class zgld_product_article(models.Model):
                             (1,'标题'),
                             (2,'内容'),
     )
-    type = models.SmallIntegerField(verbose_name='产品状态', choices=article_type_choices,null=True)
+    type = models.SmallIntegerField(verbose_name='类型', choices=article_type_choices,null=True)
     order = models.SmallIntegerField(verbose_name='序号', null=True)
     title = models.CharField(verbose_name='标题', max_length=64, null=True)
     content = models.TextField(verbose_name='内容', null=True)
