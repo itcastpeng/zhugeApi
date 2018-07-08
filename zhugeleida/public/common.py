@@ -52,8 +52,9 @@ def action_record(data,remark):
 
     company_id = flowup_obj.user.company_id
     customer_name = flowup_obj.customer.username
-    #
-    data['content'] = customer_name + remark
+    print('------customer_name + remark------->>',customer_name , remark)
+
+    data['content'] = '%s%s' % (customer_name,remark)
     data['agentid'] = models.zgld_app.objects.get(
         id=company_id,
         name='AI雷达'
