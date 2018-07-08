@@ -320,19 +320,6 @@ class zgld_follow_info(models.Model):
 class zgld_follow_language(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
     custom_language = models.CharField(max_length=256, verbose_name='自定义常用语', null=True)
-    # language_choices =  (
-    #         (1,'客户查看了公司产品,有合作意向'),
-    #         (2,'标记一下,客户有合作意向'),
-    #         (3,'客户多次查看小程序,合作意向强烈'),
-    #         (4,'计划近期安排拜访'),
-    #         (5,'意向客户,需安排拜访'),
-    #         (6,'见面聊过,客户有合作意向'),
-    #         (7,'曾拜访过的客户'),
-    #         (8,'标记一下,需要给客户发送报价'),
-    #         (9,'已发报价,待客户反馈'),
-    #         (10,'已成交客户,维护好后续关系')
-    #     )
-    # follow_language = models.SmallIntegerField( choices=language_choices, verbose_name='常用跟进用语', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间",
                                        auto_now_add=True)  # 今天新增或者几天前新增,判断当活动没有活动和跟进时间的时候，就会比较新增时间，返回。
 
@@ -413,14 +400,22 @@ class zgld_chatinfo(models.Model):
                         (2, 'customer_to_user')
                         )
     send_type = models.SmallIntegerField(choices=send_type_choice, verbose_name='发送类型', blank=True, null=True)
-    # is_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
-    is_customer_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
-    is_user_new_msg = models.BooleanField(default=True, verbose_name='是否为新消息')
-
+    is_customer_new_msg = models.BooleanField(default=True, verbose_name='是否为客户的新消息')
+    is_user_new_msg = models.BooleanField(default=True, verbose_name='是否为用户的新消息')
     is_last_msg = models.BooleanField(default=True, verbose_name='是否为最后一次的消息')
     userprofile = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True, blank=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True, blank=True)
     msg = models.TextField(u'消息', null=True, blank=True)
+
+    info_type_choices = (
+                        (1,'chat_people_info'),     #客户和用户之间的聊天信息
+                        (2,'chat_product_info')   #客户和用户之间的产品咨询
+    )
+    info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',)
+    product_cover_url = models.CharField(verbose_name='产品封面URl', max_length=256, null=True)
+    product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
+    product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
+
     activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
                                       verbose_name='最后活动时间(客户发起对话)', null=True)
     follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)

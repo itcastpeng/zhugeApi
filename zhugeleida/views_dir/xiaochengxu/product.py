@@ -12,7 +12,9 @@ from zhugeleida.forms.xiaochengxu.product_verify  import ProductSelectForm,Produ
 import json
 from django.db.models import Q
 from django.db.models import F
-
+import uuid
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -190,6 +192,52 @@ def product(request, oper_type):
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'consult_product':
+            forms_obj = ProductGetForm(request.GET)
+            if forms_obj.is_valid():
+                customer_id = request.GET.get('user_id')
+                user_id = request.GET.get('uid')
+                product_id = request.GET.get('product_id')
+                obj = models.zgld_product.objects.get(id=product_id)
+
+                picture_obj = models.zgld_product_picture.objects.filter(product_id=product_id,picture_type=1)[:1]
+                product_cover_url = picture_obj[0].picture_url # 产品封面URL
+                product_price = picture_obj[0].product.price   # 产品价格
+                product_name =  picture_obj[0].product.name    #产品民称
+
+                new_product_cover_filename = str(uuid.uuid1())
+                exit_product_cover_path = BASE_DIR + '/' +  product_cover_url
+                file_type = exit_product_cover_path.split('.')[-1]
+
+                new_filename = new_product_cover_filename + '.' + file_type
+
+                new_product_cover_path =  "/".join((BASE_DIR, 'statics', 'zhugeleida', 'imgs', new_filename))
+                print('------new_product_cover_path------->>',new_product_cover_path)
+                with open(exit_product_cover_path,'rb') as read_file:
+                    with open(new_product_cover_path, 'wb') as new_file:
+                      new_file.write(read_file.read())
+
+                static_product_cover_url =  "/".join(( 'statics', 'zhugeleida', 'imgs', 'chat', new_filename))
+                print('------static_product_cover_url---->>',static_product_cover_url)
+
+                models.zgld_chatinfo.objects.create(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    send_type=1,  # 代表用户发送给客户
+                    info_type=2,  # (2,'product_info')   #客户和用户之间的产品咨询
+                    product_name=product_name,
+                    product_price=product_price,
+                    product_cover_url=static_product_cover_url,
+                    )
+
+                remark = '向您咨询产品'
+                data = request.GET.copy()
+                data['action'] = 2  # 咨询产品
+                response = action_record(data, remark)
+                response.code = 200
+                response.msg = "咨询产品返回成功"
+
 
         elif oper_type == 'forward_product':
 

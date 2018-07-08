@@ -38,8 +38,13 @@ def chat(request):
             objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            ).order_by('-create_date')
+            )
 
+            # 第一条数据
+            first_info = list(objs[:1].values('id'))
+            print('---first_info->>', first_info)
+
+            objs = objs.order_by('-create_date')
             objs.update(
                 is_customer_new_msg=False
             )
@@ -52,15 +57,48 @@ def chat(request):
 
             ret_data_list = []
             for obj in objs:
-                ret_data_list.append({
-                     'customer_id': obj.customer.id,
-                     'user_id': obj.userprofile.id,
-                     'customer': obj.customer.username,
-                     'customer_headimgurl': obj.customer.headimgurl,
-                     'dateTime': obj.create_date,
-                     'msg': obj.msg,
-                     'send_type': obj.send_type,
-                })
+
+                if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
+                    print('------first_info.get----->',first_info[0].get('id'))
+                    ret_data_list.append({
+                        'customer_id': obj.customer.id,
+                        'user_id': obj.userprofile.id,
+                        'customer': obj.customer.username,
+                        'customer_headimgurl': obj.customer.headimgurl,
+                        'dateTime': obj.create_date,
+                        'msg': obj.msg,
+                        'send_type': obj.send_type,
+                        'is_first_info': True,  # 是否为第一条的信息
+                    })
+                elif obj.info_type == 2: # 如果为产品咨询。
+                    print('------first_info.get----->', first_info[0].get('id'))
+                    ret_data_list.append({
+                        'customer_id': obj.customer.id,
+                        'form_user_name': obj.userprofile.username,
+                        'user_id': obj.userprofile.id,
+                        'customer': obj.customer.username,
+                        'customer_headimgurl': obj.customer.headimgurl,
+                        'dateTime': obj.create_date,
+                        'product_cover_url': obj.product_cover_url,
+                        'product_name': obj.product_name,
+                        'product_price': obj.product_price,
+                        'info_type': obj.info_type,  #   (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                        'send_type': obj.send_type,
+
+                    })
+
+                else:
+
+                    ret_data_list.append({
+                        'customer_id': obj.customer.id,
+                        'user_id': obj.userprofile.id,
+                        'customer': obj.customer.username,
+                        'customer_headimgurl': obj.customer.headimgurl,
+                        'dateTime': obj.create_date,
+                        'msg': obj.msg,
+                        'info_type': obj.info_type,
+                        'send_type': obj.send_type, # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                    })
 
             ret_data_list.reverse()
             response.code = 200
