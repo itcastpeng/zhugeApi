@@ -69,13 +69,13 @@ def chat(request):
                         'msg': obj.msg,
                         'send_type': obj.send_type,
                         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                        'is_first_info': True,  # 是否为第一条的信息
+                        'is_first_info': True,       # 是否为第一条的信息
                     })
                 elif obj.info_type == 2: # 如果为产品咨询。
                     print('------first_info.get----->', first_info[0].get('id'))
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
-                        'form_user_name': obj.userprofile.username,
+                        'from_user_name': obj.userprofile.username,
                         'user_id': obj.userprofile.id,
                         'customer': obj.customer.username,
                         'customer_headimgurl': obj.customer.headimgurl,
