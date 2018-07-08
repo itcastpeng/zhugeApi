@@ -36,6 +36,7 @@ def product(request, oper_type):
                 }
                 q = conditionCom(request, field_dict)
                 q.add(Q(**{'id': product_id}), Q.AND)
+                q.add(Q(**{'user_id': user_id}), Q.AND)
 
 
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
