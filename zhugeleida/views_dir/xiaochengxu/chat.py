@@ -84,6 +84,7 @@ def chat(request):
                         'product_price': obj.product_price,
                         'info_type': obj.info_type,  #   (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
                         'send_type': obj.send_type,
+                        'is_first_info': False,  # 是否为第一条的信息
 
                     })
 
@@ -98,6 +99,7 @@ def chat(request):
                         'msg': obj.msg,
                         'info_type': obj.info_type,
                         'send_type': obj.send_type, # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                        'is_first_info': False,  # 是否为第一条的信息
                     })
 
             ret_data_list.reverse()
