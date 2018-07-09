@@ -111,7 +111,7 @@ def department_oper(request, oper_type, o_id):
                     get_user_data['access_token'] = token_ret
 
 
-                if not obj.parentid: #为空的话，说明是顶级
+                if not obj.parentid_id: #为空的话，说明是顶级
                     parentid_id = 1
                 else:
                     parentid_id = obj.parentid_id
