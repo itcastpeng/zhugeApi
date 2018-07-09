@@ -499,7 +499,7 @@ def product_oper(request, oper_type, o_id):
         elif oper_type == "change_status":
 
             status = request.POST.get('status')
-            user_id = request.POST.get('user_id')
+            user_id = request.GET.get('user_id')
             product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
 
             if product_objs:
