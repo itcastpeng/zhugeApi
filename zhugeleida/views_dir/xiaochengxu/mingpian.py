@@ -94,6 +94,7 @@ def mingpian(request):
 
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
                     sign_num = objs[0].sign_num
+                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,send_type=1,is_customer_new_msg=True).count()
 
                     ret_data = {
                         'id': obj.id,
@@ -116,6 +117,7 @@ def mingpian(request):
                         'sign_num': sign_num,
                         'photo': list(photo_data) or '',
                         'tag': list(tag_data),
+                        'chatinfo_count' : chatinfo_count,
 
                     }
 

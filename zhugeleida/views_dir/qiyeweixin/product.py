@@ -11,11 +11,11 @@ from zhugeleida.forms.qiyeweixin.product_verify import ProductAddForm, ProductUp
 import json
 import os
 import base64
+from django import forms
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 from django.db.models import Q
-
+BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 @csrf_exempt
@@ -193,6 +193,61 @@ def product(request, oper_type):
     return JsonResponse(response.__dict__)
 
 
+# 添加企业的产品
+class imgUploadForm(forms.Form):
+    img_name = forms.CharField(
+        error_messages={
+            'required': "图片名不能为空"
+        }
+    )
+    timestamp = forms.CharField(
+        error_messages={
+            'required': "时间戳不能为空"
+        }
+    )
+
+    img_data = forms.CharField(
+        error_messages={
+            'required': "图片内容不能为空"
+        }
+    )
+
+    chunk = forms.IntegerField(
+        error_messages={
+            'required': "当前是第几份文件不能为空",
+            'invalid': '份数必须是整数类型'
+        }
+    )
+
+
+# 添加企业的产品
+class imgMergeForm(forms.Form):
+    img_name = forms.CharField(
+        error_messages={
+            'required': "文件名不能为空"
+        }
+    )
+    timestamp = forms.CharField(
+        error_messages={
+            'required': "时间戳不能为空"
+        }
+    )
+
+    chunk_num = forms.IntegerField(
+        error_messages={
+            'required': "总份数不能为空",
+            'invalid': '总份数必须是整数类型'
+        }
+    )
+
+
+    picture_type = forms.IntegerField(
+        error_messages={
+            'required': "图片不能为空",
+            'invalid': '总份数必须是整数类型'
+        }
+    )
+
 #  增删改 用户表
 #  csrf  token验证
 @csrf_exempt
@@ -220,19 +275,77 @@ def product_oper(request, oper_type, o_id):
                 cover_picture_list = json.loads(request.POST.get('cover_picture_id'))
 
                 product_obj = models.zgld_product.objects.filter(id=product_id)
-                if product_obj:
-                    product_obj.update(
-                        name=forms_obj.data.get('name'),
-                        price=forms_obj.data.get('price'),
-                        reason=forms_obj.data.get('reason'),
-                    )
+
+                product_obj.update(
+                    name=forms_obj.data.get('name'),
+                    price=forms_obj.data.get('price'),
+                    reason=forms_obj.data.get('reason'),
+                )
+                exist_cover_picture_list = []
+                picture_list = list(models.zgld_product_picture.objects.filter(product_id=product_id, picture_type=1).values_list('id'))
+                for  p in  picture_list:
+                    exist_cover_picture_list.append(p[0])
+
+                delete_cover_picture_list = list(set(exist_cover_picture_list).difference(set(cover_picture_list)))
+                print('----delete_cover_picture_list-->>',delete_cover_picture_list)
+
+                delete_cover_picture_objs = models.zgld_product_picture.objects.filter(id__in=delete_cover_picture_list)
+
+                if delete_cover_picture_objs: #要删除的封面图片。
+                    for delete_picture_obj in delete_cover_picture_objs:
+                        IMG_PATH = BASE_DIR + '/' + delete_picture_obj.picture_url
+                        if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
+                    delete_cover_picture_objs.delete()
 
                 product_id = product_obj[0].id
-                picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)
+                picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)  # 更新前端传过来的封面ID绑定到数据库。
                 picture_objs.update(product_id=product_id)
 
+                now_picture_list = []
+                now_article_list = []
                 if article_data_list:
-                    print('article_data_list 1 ------>>', article_data_list, type(article_data_list))
+
+                    for article_data in article_data_list:
+                        if 'picture_id' in article_data:
+                                picture_id = article_data.get('picture_id')
+                                now_picture_list.append(picture_id)
+
+                    exist_product_picture_list = []
+                    picture_list = list(models.zgld_product_picture.objects.filter(product_id=product_id, picture_type=2).values_list('id'))
+                    for p in picture_list:
+                        exist_product_picture_list.append(p[0])
+
+                    delete_product_picture_list = list(set(exist_product_picture_list).difference(set(now_picture_list)))
+                    print('----delete_product_picture_list-->>', delete_product_picture_list)
+
+                    delete_product_picture_objs = models.zgld_product_picture.objects.filter(
+                        id__in=delete_product_picture_list)
+
+                    if delete_product_picture_objs:  # 要删除的产品图片。
+                        for delete_picture_obj in delete_product_picture_objs:
+                            IMG_PATH = BASE_DIR + '/' + delete_picture_obj.picture_url
+                            if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
+                        delete_product_picture_objs.delete()
+
+                    ## 比较新穿过来的文章列表和已经存在数据库的文章的ID的差级
+                    for article_data in article_data_list:
+                        if 'article_id' in article_data:
+                                article_id = article_data.get('article_id')
+                                now_article_list.append(article_id)
+
+                    exist_article_list = []
+                    article_list = models.zgld_product_article.objects.filter(product_id=product_id).values_list('id')
+                    for a in article_list:
+                        exist_article_list.append(a[0])
+
+                    delete_article_list = list(set(exist_article_list).difference(set(now_article_list)))
+                    print('--------delete_article_list------->>',delete_article_list)
+                    delete_article_objs = models.zgld_product_article.objects.filter(id__in=delete_article_list)
+
+                    if delete_article_objs:  # 要删除的文章内容的ID。
+                        delete_article_objs.delete()
+
+
                     for article_data in article_data_list:
                         print('article_data_list 2 ------>>', article_data, type(article_data))
                         article_id = article_data.get('article_id')
@@ -255,12 +368,6 @@ def product_oper(request, oper_type, o_id):
                             )
 
 
-                        elif 'article_id' not  in article_data and 'picture_id' in article_data:
-                            picture_id = article_data.get('picture_id')
-                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
-                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
-
-
                         elif 'article_id' not  in article_data and  'title' in article_data:
                             models.zgld_product_article.objects.create(
                                 product_id=product_id,
@@ -269,13 +376,19 @@ def product_oper(request, oper_type, o_id):
                                 order=article_data.get('order')
                             )
 
-                        elif 'content' in article_data:
+                        elif 'article_id' not  in article_data and 'content' in article_data:
                             models.zgld_product_article.objects.create(
                                 product_id=product_id,
                                 content=article_data.get('content'),
                                 type=2,
                                 order=article_data.get('order')
-                                )
+                            )
+                        elif  'picture_id' in article_data:
+                            picture_id = article_data.get('picture_id')
+                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
+                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
+
+
                     response.code = 200
                     response.msg = "添加成功"
 
@@ -284,32 +397,76 @@ def product_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "add_picture":
-            print('-----request.POST----->>',request.POST.get('file'))
+            response = Response.ResponseObj()
 
-            upload_file = request.POST.get('file')
-            imgdata = base64.b64decode(upload_file.encode('utf-8'))
+            forms_obj = imgUploadForm(request.POST)
+            if forms_obj.is_valid():
+                img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
+                timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
+                img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
+                chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
+                expanded_name = img_name.split('.')[-1]  # 扩展名
 
-            file = open('1.jpg', 'wb')
-            file.write(imgdata)
-            file.close()
+                img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-            # base64.b64encode('abcr34r344r'.encode('utf-8'))
+                img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name])
+                print('img_save_path -->', img_save_path)
+                print('img_data -->', img_data)
+                img_data = base64.b64decode(img_data.encode('utf-8'))
+                with open(img_save_path, 'wb') as f:
+                    f.write(img_data)
 
-            upload_file = request.POST.get('file')
-            # task = request.POST.get('task_id')  # 获取文件唯一标识符
-            # chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
-            # filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
-            #
-            # IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp') + filename
-            # with open(IMG_PATH_FILES, 'wb+') as destination:
-            #     destination.write(upload_file)
+                response.code = 200
+                response.msg = "上传成功"
+            else:
+                response.code = 303
+                response.msg = "上传异常"
+                response.data = json.loads(forms_obj.errors.as_json())
+            return JsonResponse(response.__dict__)
 
-                # for chunk in upload_file.chunks():
-                #     print('---chunk->>',chunk)
-                #     destination.write(chunk)
+        #产品图片合并请求
+        elif  oper_type == "upload_complete":
 
-            response.code = 200
-            response.msg = "切片上传图片成功"
+            response = Response.ResponseObj()
+            forms_obj = imgMergeForm(request.POST)
+            if forms_obj.is_valid():
+                img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
+                timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
+                chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
+                expanded_name = img_name.split('.')[-1]  # 扩展名
+                picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
+
+                img_name = timestamp + '.' + expanded_name
+                img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'product', img_name])
+                img_save_path = "/".join([BasePath, img_path])
+                file_obj = open(img_save_path, 'ab')
+                for chunk in range(chunk_num):
+                    file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+
+                    file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product','tmp', file_name])
+
+                    with open(file_save_path, 'rb') as f:
+                        file_obj.write(f.read())
+                        # file_content += f.read()
+                    os.remove(file_save_path)
+
+                product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
+                                                                                     picture_url=img_path)
+
+                response.data = {
+                            'picture_type': product_picture_obj.picture_type,
+                            'picture_id': product_picture_obj.id,
+                            'picture_url': product_picture_obj.picture_url,
+
+                }
+                response.code = 200
+                response.msg = "添加图片成功"
+
+            else:
+                response.code = 303
+                response.msg = "上传异常"
+                response.data = json.loads(forms_obj.errors.as_json())
+
 
         elif oper_type == "delete_picture":
             # 删除 ID
@@ -323,6 +480,7 @@ def product_oper(request, oper_type, o_id):
                 picture_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
+
             else:
                 response.code = 302
                 response.msg = '图片ID不存在'
@@ -448,6 +606,8 @@ def product_oper(request, oper_type, o_id):
                     reason=forms_obj.data.get('reason'),
                 )
 
+
+                #封面图片绑定到产品。
                 product_id = product_obj.id
                 picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)
                 picture_objs.update(product_id=product_id)
@@ -483,49 +643,11 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-    elif request.method == "GET":
 
-        if oper_type == "upload_complete":
-            target_filename = request.GET.get('filename')  # 获取上传文件的文件名
-            task = request.GET.get('task_id')  # 获取文件的唯一标识符
-            picture_type = request.GET.get('picture_type')  # 图片的类型。
-            TEMP_IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp')
-
-            IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product')
-            chunk = 0  # 分片序号
-            file_tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
-            print('===target_filename===>>', target_filename)
-
-            file_type = target_filename.split('.')[1]
-            target_filename = '%s/%s.%s' % (IMG_PATH, file_tag, file_type)
-
-            with open(target_filename, 'wb') as target_file:  # 创建新文件
-                while True:
-                    try:
-                        filename = '%s%d' % (task, chunk)
-                        source_file = open('%s/%s' % (TEMP_IMG_PATH, filename), 'rb')  # 按序打开每个分片
-                        target_file.write(source_file.read())                     # 读取分片内容写入新文件
-                        source_file.close()
-                    except IOError:
-                        break
-                    chunk += 1
-                    os.remove('%s/%s' % (TEMP_IMG_PATH, filename))  # 删除该分片，节约空间
-            picture_url = 'statics/zhugeleida/imgs/qiyeweixin/product/%s.%s' % (file_tag, file_type)
-
-            product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
-                                                                             picture_url=picture_url)
-
-            response.code = 200
-            response.msg = "添加图片成功"
-            response.data = {
-                'ret_data':
-                    {
-                        'picture_id': product_picture_obj.id,
-                        'picture_url': product_picture_obj.picture_url,
-                    }
-            }
 
     return JsonResponse(response.__dict__)
+
+
 
 
 class create_product_picture:

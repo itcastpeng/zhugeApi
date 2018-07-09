@@ -41,8 +41,6 @@ class imgUploadForm(forms.Form):
 def img_upload(request):
     response = Response.ResponseObj()
 
-    print(BasePath)
-
     forms_obj = imgUploadForm(request.POST)
     if forms_obj.is_valid():
         img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
@@ -53,7 +51,7 @@ def img_upload(request):
 
         img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-        img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'tmp', img_name])
+        img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','product', 'tmp', img_name])
         print('img_save_path -->', img_save_path)
         print('img_data -->', img_data)
         img_data = base64.b64decode(img_data.encode('utf-8'))
@@ -108,7 +106,7 @@ def img_merge(request):
         for chunk in range(chunk_num):
             file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-            file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'tmp', file_name])
+            file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','product', file_name])
 
             with open(file_save_path, 'rb') as f:
                 file_obj.write(f.read())
@@ -128,4 +126,5 @@ def img_merge(request):
         response.code = 303
         response.msg = "上传异常"
         response.data = json.loads(forms_obj.errors.as_json())
+
     return JsonResponse(response.__dict__)
