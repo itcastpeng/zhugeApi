@@ -35,9 +35,6 @@ def product(request, oper_type):
             q = conditionCom(request, field_dict)
             q.add(Q(**{'id': product_id}), Q.AND)
 
-
-
-
             objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
             count = objs.count()
 
@@ -396,6 +393,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        #上传产品图片的接口
         elif oper_type == "add_picture":
             response = Response.ResponseObj()
 
@@ -498,60 +496,20 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '图片ID不存在'
 
-        # 触发-下架产品的动作
-        elif oper_type == "shelves":
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id,user_id=user_id)
+        elif oper_type == "change_status":
+
+            status = request.POST.get('status')
+            user_id = request.POST.get('user_id')
+            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
 
             if product_objs:
                 product_objs.update(
-                    status=2
+                    status=status
                 )
                 response.code = 200
-                response.msg = "修改下架状态成功"
+                response.msg = "修改状态成功"
                 response.data = {
                     'product_id': product_objs[0].id,
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
-            else:
-                response.code = 302
-                response.msg = '产品不存在'
-
-        # 触发-发布产品的动作
-        elif oper_type == "publish":
-            # 出发-发布动作。
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
-
-            if product_objs:
-                product_objs.update(
-                    status=1
-                )
-                response.code = 200
-                response.msg = "修改发布状态成功"
-                response.data = {
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
-
-            else:
-                response.code = 302
-                response.msg = '产品不存在'
-
-        # 触发-推荐产品的动作
-        elif oper_type == "recommend":
-            # 出发-发布动作。
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
-
-            if product_objs:
-                product_objs.update(
-                    status=3
-                )
-                response.code = 200
-                response.msg = "修改推荐状态成功"
-                response.data = {
                     'status': product_objs[0].get_status_display(),
                     'status_code': product_objs[0].status
                 }
