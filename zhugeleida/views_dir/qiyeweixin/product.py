@@ -409,7 +409,7 @@ def product_oper(request, oper_type, o_id):
 
                 img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name])
                 print('img_save_path -->', img_save_path)
-                print('img_data -->', img_data)
+                #print('img_data -->', img_data)
                 img_data = base64.b64decode(img_data.encode('utf-8'))
                 with open(img_save_path, 'wb') as f:
                     f.write(img_data)

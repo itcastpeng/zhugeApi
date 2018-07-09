@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import base64
 BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-
+from zhugeleida import models
 
 # 添加企业的产品
 class imgUploadForm(forms.Form):
@@ -36,6 +36,7 @@ class imgUploadForm(forms.Form):
     )
 
 
+
 # 上传图片（分片上传）
 @csrf_exempt
 def img_upload(request):
@@ -48,12 +49,20 @@ def img_upload(request):
         img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
         chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
         expanded_name = img_name.split('.')[-1]  # 扩展名
+        img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
+        img_save_path = ''
 
-        img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+        if img_source == 'user_photo':
+            img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+            img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo','tmp' , img_name])
+            print('img_save_path -->', img_save_path)
 
-        img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','product', 'tmp', img_name])
-        print('img_save_path -->', img_save_path)
-        print('img_data -->', img_data)
+        elif img_source == 'user_avtor':
+            img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+            img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avtor','tmp' , img_name])
+            print('img_save_path -->', img_save_path)
+
+        # print('img_data -->', img_data)
         img_data = base64.b64decode(img_data.encode('utf-8'))
         with open(img_save_path, 'wb') as f:
             f.write(img_data)
@@ -65,6 +74,7 @@ def img_upload(request):
         response.msg = "上传异常"
         response.data = json.loads(forms_obj.errors.as_json())
     return JsonResponse(response.__dict__)
+
 
 
 # 添加企业的产品
@@ -98,30 +108,55 @@ def img_merge(request):
         timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
         chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
         expanded_name = img_name.split('.')[-1]  # 扩展名
-
+        picture_type = request.POST.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
         img_name = timestamp + '.' + expanded_name
-        img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'tmp', img_name])
-        img_save_path = "/".join([BasePath, img_path])
-        file_obj = open(img_save_path, 'ab')
-        for chunk in range(chunk_num):
-            file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+        img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
 
-            file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','product', file_name])
+        global img_save_path
+        global obj
+        if img_source == 'user_photo':
+            user_id = request.GET.get('user_id')
+            img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo' , img_name])
+            img_save_path = "/".join([BasePath, img_path])
+            file_obj = open(img_save_path, 'ab')
+            for chunk in range(chunk_num):
+                file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-            with open(file_save_path, 'rb') as f:
-                file_obj.write(f.read())
-                # file_content += f.read()
-            os.remove(file_save_path)
+                file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo', 'tmp' , file_name])
 
-        #
-        # with open(img_save_path, 'wb') as f:
-        #     f.write(file_content)
+                with open(file_save_path, 'rb') as f:
+                    file_obj.write(f.read())
+                    # file_content += f.read()
+                os.remove(file_save_path)
+                obj = models.zgld_user_photo.objects.create(user_id=user_id,photo_url=img_path)
 
-        response.code = 200
+
+        elif img_source == 'user_avtor':
+            user_id = request.GET.get('user_id')
+            img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'user_avtor' , img_name])
+            img_save_path = "/".join([BasePath, img_path])
+            file_obj = open(img_save_path, 'ab')
+            for chunk in range(chunk_num):
+                file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+
+                file_save_path = "/".join(
+                    [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avtor','tmp', file_name])
+
+                with open(file_save_path, 'rb') as f:
+                    file_obj.write(f.read())
+
+                os.remove(file_save_path)
+                obj = models.zgld_userprofile.objects.create(id=user_id, avatar=img_path)
+
         response.data = {
-            'img_url': img_path
+            'picture_type': obj.picture_type,
+            'picture_id': obj.id,
+            'picture_url': obj.picture_url,
+
         }
-        response.msg = "上传成功"
+        response.code = 200
+        response.msg = "添加图片成功"
+
     else:
         response.code = 303
         response.msg = "上传异常"
