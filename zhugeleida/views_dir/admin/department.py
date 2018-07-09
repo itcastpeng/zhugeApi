@@ -84,7 +84,9 @@ def department_oper(request, oper_type, o_id):
                     'name' : forms_obj.cleaned_data.get('name'),
                     'parentid_id' : parentid_id
                 }
+                print('-----data_dict------->', data_dict,)
                 obj = models.zgld_department.objects.create(**data_dict)
+                print('-----data_dict------->', data_dict,  obj.id)
 
                 print('obj.id -->', obj.id)
                 get_token_data = {}
