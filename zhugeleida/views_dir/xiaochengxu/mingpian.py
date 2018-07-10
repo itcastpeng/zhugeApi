@@ -100,7 +100,7 @@ def mingpian(request):
 
                     mingpian_avatar = ''
                     if mingpian_avatar_obj:
-                        mingpian_avatar = mingpian_avatar_obj[0]
+                        mingpian_avatar = mingpian_avatar_obj[0].photo_url
                     ret_data = {
                         'id': obj.id,
                         'username': obj.username,
