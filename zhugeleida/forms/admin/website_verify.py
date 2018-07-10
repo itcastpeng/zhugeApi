@@ -5,7 +5,7 @@ from publicFunc import account
 import datetime
 
 # 添加部门信息
-class DepartmentAddForm(forms.Form):
+class WebsiteAddForm(forms.Form):
     # print('添加部门')
     user_id = forms.CharField(
         required=True,
@@ -14,39 +14,21 @@ class DepartmentAddForm(forms.Form):
         }
     )
 
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "部门名不能为空"
-        }
-    )
 
     company_id = forms.CharField(
-        required=False,
-        # error_messages={
-        #     'required': "公司id不能为空"
-        # }
-    )
-
-    parentid_id = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
-            'required': "父级部门ID"
+            'required': "公司id不能为空"
         }
     )
 
-    # 查询用户名判断是否存在
-    def clean_name(self):
-        name = self.data['name']
-        objs = models.zgld_department.objects.filter(
-            name=name,
-        )
-        if objs:
-            self.add_error('name', '部门名已存在')
-        else:
-            return name
+    website_content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "官网内容信息"
+        }
+    )
 
-        # 获取公司id
 
     def clean_company_id(self):
         obj = models.zgld_userprofile.objects.get(id=self.data['user_id'])
@@ -64,9 +46,6 @@ class DepartmentAddForm(forms.Form):
             company_id = obj.company_id
             return company_id
 
-    def clean_parentid_id(self):
-        if not self.data.get('parentid_id'):
-            return None
 
 # 更新用户信息
 class DepartmentUpdateForm(forms.Form):

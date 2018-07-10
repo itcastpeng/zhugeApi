@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.website_verify import DepartmentAddForm, DepartmentUpdateForm, DepartmentSelectForm
+from zhugeleida.forms.admin.website_verify import WebsiteAddForm, DepartmentUpdateForm, DepartmentSelectForm
 import json
 from publicFunc.condition_com import conditionCom
 import requests
@@ -58,81 +58,25 @@ def website_oper(request, oper_type, o_id):
 
     if request.method == "POST":
         if oper_type == "add":
-            department_data = {
+            website_data = {
                 'user_id': request.GET.get('user_id'),
                 'company_id': request.POST.get('company_id'),
-                'name': request.POST.get('name'),
+                'website_content': request.POST.get('website_content'),
 
             }
 
-            forms_obj = WebsiteAddForm(department_data)
+            forms_obj = WebsiteAddForm(website_data)
 
             if forms_obj.is_valid():
-                del forms_obj.cleaned_data['user_id']
-                print('-----forms_obj.cleaned_data--------->>',forms_obj.cleaned_data)
-
-                parentid_id = forms_obj.cleaned_data.get('parentid_id')
-                if not  parentid_id:
-                    parentid_id = ''
-
                 data_dict = {
-                    'company_id' :forms_obj.cleaned_data.get('company_id'),
-                    'name' : forms_obj.cleaned_data.get('name'),
-                    'parentid_id' : parentid_id
+                    'id' : forms_obj.cleaned_data.get('company_id'),
+                    'website_content' : forms_obj.cleaned_data.get('website_content'),
                 }
-                print('-----data_dict------->', data_dict,)
-                obj = models.zgld_department.objects.create(**data_dict)
-                print('-----data_dict------->', data_dict,  obj.id)
+                print('-----data_dict------->', data_dict)
+                obj = models.zgld_company.objects.create(**data_dict)
 
-                print('obj.id -->', obj.id)
-                get_token_data = {}
-                get_user_data = {}
-
-                get_token_data['corpid'] = obj.company.corp_id
-                get_token_data['corpsecret'] = obj.company.tongxunlu_secret
-
-
-                import redis
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                token_ret = rc.get('tongxunlu_token')
-                print('---token_ret---->>', token_ret)
-
-                if not token_ret:
-                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                    ret_json = ret.json()
-                    access_token = ret_json['access_token']
-                    get_user_data['access_token'] = access_token
-                    rc.set('tongxunlu_token', access_token, 7000)
-                else:
-                    get_user_data['access_token'] = token_ret
-
-
-                if not obj.parentid_id: #为空的话，说明是顶级
-                    parentid_id = 1
-                else:
-                    parentid_id = obj.parentid_id
-
-                print('parentid_id -->', parentid_id)
-
-                post_user_data = {
-                    'id': obj.id,
-                    'name': forms_obj.cleaned_data.get('name'),
-                    'parentid': parentid_id
-                }
-                print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data))
-
-                ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
-                print(ret.text)
-
-                weixin_ret = json.loads(ret.text)
-                if weixin_ret.get('errmsg') == 'created':
-                    response.code = 200
-                    response.msg = "添加成功"
-                else:
-                    models.zgld_department.objects.filter(id= obj.id).delete()
-
-                    response.code = weixin_ret['errcode']
-                    response.msg = "企业微信验证未通过"
+                response.code = 200
+                response.msg = "添加成功"
 
             else:
                 # print("验证不通过")

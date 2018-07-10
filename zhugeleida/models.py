@@ -9,6 +9,7 @@ class zgld_company(models.Model):
     corp_id = models.CharField(verbose_name="企业ID", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
     website_content = models.TextField(verbose_name='官网内容')
+    mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -81,6 +82,7 @@ class zgld_userprofile(models.Model):
     sign_num = models.IntegerField(verbose_name='签名被赞个数', default=0)
     voice = models.CharField(verbose_name='语音介绍', null=True, max_length=128)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    user_expired = models.DateTimeField(verbose_name="用户过期时间", null=True, blank=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
 
     def __str__(self):
