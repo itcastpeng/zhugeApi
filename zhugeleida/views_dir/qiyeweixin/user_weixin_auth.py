@@ -60,7 +60,6 @@ def work_weixin_auth(request, company_id):
         userid = user_list_ret_json['userid']
         name = user_list_ret_json['name']
         avatar = user_list_ret_json['avatar']    # 加上100 获取小图
-        
         gender = user_list_ret_json['gender']
         # email = user_list_ret_json['email']
 
