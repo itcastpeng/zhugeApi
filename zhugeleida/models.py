@@ -8,7 +8,7 @@ class zgld_company(models.Model):
     address = models.TextField(verbose_name='公司详细地址')
     corp_id = models.CharField(verbose_name="企业ID", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
-
+    website_content = models.TextField(verbose_name='官网内容')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -103,15 +103,22 @@ class zgld_user_tag(models.Model):
         app_label = "zhugeleida"
 
 
-# 用户照片
+# 用户照片和头像
 class zgld_user_photo(models.Model):
+    photo_type_choices =(
+        (1,'photo'),   # 用户上传照片
+        (2,'avator')   # 用户名片头像
+    )
+    photo_type = models.SmallIntegerField(verbose_name='用户图片的类型',choices=photo_type_choices)
     user = models.ForeignKey('zgld_userprofile', verbose_name='照片所属用户')
     photo_url = models.CharField(verbose_name='照片URL链接', max_length=256, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    order = models.SmallIntegerField(verbose_name='序号', null=True)
 
     class Meta:
         verbose_name_plural = "用户照片表"
         app_label = "zhugeleida"
+
 
 
 # #公司产品

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.admin import  role,company,login,user,department
+from zhugeleida.views_dir.admin import  role,company,login,user,department,website
 
 
 
@@ -22,5 +22,9 @@ urlpatterns = [
     #部门操作
     url(r'^department/(?P<oper_type>\w+)/(?P<o_id>\d+)', department.department_oper),
     url(r'^department$', department.department),
+
+    #官网编辑
+    url(r'edit_website$',website.website)
+
 
 ]

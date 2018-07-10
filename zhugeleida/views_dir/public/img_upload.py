@@ -49,7 +49,7 @@ def img_upload(request):
         img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
         chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
         expanded_name = img_name.split('.')[-1]  # 扩展名
-        img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
+        img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avatar 代表用户的头像。
         img_save_path = ''
 
         if img_source == 'user_photo':
@@ -57,12 +57,16 @@ def img_upload(request):
             img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo','tmp' , img_name])
             print('img_save_path -->', img_save_path)
 
-        elif img_source == 'user_avtor':
+        elif img_source == 'user_avatar':
             img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-            img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avtor','tmp' , img_name])
+            img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avatar','tmp' , img_name])
             print('img_save_path -->', img_save_path)
 
-        # print('img_data -->', img_data)
+        elif img_source == 'user_photo':
+            img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+            img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo','tmp' , img_name])
+            print('img_save_path -->', img_save_path)
+
         img_data = base64.b64decode(img_data.encode('utf-8'))
         with open(img_save_path, 'wb') as f:
             f.write(img_data)
@@ -128,32 +132,34 @@ def img_merge(request):
                     file_obj.write(f.read())
                     # file_content += f.read()
                 os.remove(file_save_path)
-                obj = models.zgld_user_photo.objects.create(user_id=user_id,photo_url=img_path)
+                obj = models.zgld_user_photo.objects.create(user_id=user_id,photo_url=img_path,photo_type=1)  # 用户上传照片
+                response.data = {
+                    'picture_id': obj.id,
+                    'picture_url': obj.photo_url,
+                }
 
-
-        elif img_source == 'user_avtor':
+        elif img_source == 'user_avatar':
             user_id = request.GET.get('user_id')
-            img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'user_avtor' , img_name])
+            img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'user_avatar' , img_name])
             img_save_path = "/".join([BasePath, img_path])
             file_obj = open(img_save_path, 'ab')
             for chunk in range(chunk_num):
                 file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
                 file_save_path = "/".join(
-                    [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avtor','tmp', file_name])
+                    [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avatar','tmp', file_name])
 
                 with open(file_save_path, 'rb') as f:
                     file_obj.write(f.read())
 
                 os.remove(file_save_path)
-                obj = models.zgld_userprofile.objects.create(id=user_id, avatar=img_path)
+                obj = models.zgld_user_photo.objects.create(id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
 
-        response.data = {
-            'picture_type': obj.picture_type,
-            'picture_id': obj.id,
-            'picture_url': obj.picture_url,
+                response.data = {
+                    'picture_id': obj.id,
+                    'picture_url': obj.photo_url,
+                }
 
-        }
         response.code = 200
         response.msg = "添加图片成功"
 
