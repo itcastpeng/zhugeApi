@@ -132,11 +132,11 @@ def product(request, oper_type):
                 q2.connector = 'and' # 满足只能看公司发布的
                 q2.children.append(('company_id', company_id))
                 q2.children.append(('user_id__isnull', True))
-                
+
                 if status:
-                    if  int(status in [1, 3]):
+                    if  int(status) in [1, 3]:
                         q2.children.append(('status', status))
-                    else:
+                else:
                         q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
 
                 con.add(q1, 'OR')
