@@ -109,7 +109,7 @@ def product(request, oper_type):
                 length = forms_obj.cleaned_data['length']
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
-                status = request.GET.get('status_code')
+                status = int(request.GET.get('status_code'))
                 field_dict = {
                     'status': '',
                     'create_date': '',
@@ -132,7 +132,7 @@ def product(request, oper_type):
                 q2.connector = 'and' # 满足只能看公司发布的
                 q2.children.append(('company_id', company_id))
                 q2.children.append(('user_id__isnull', True))
-                if status in [1, 3]:
+                if  status in [1, 3]:
                     q2.children.append(('status', status))
                 else:
                     q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
@@ -504,14 +504,16 @@ def product_oper(request, oper_type, o_id):
 
         elif oper_type == "change_status":
 
-            status = request.POST.get('status')
-            user_id = request.GET.get('user_id')
+            status = int(request.POST.get('status'))
+            user_id =int(request.GET.get('user_id'))
             product_objs = models.zgld_product.objects.filter(id=o_id)
+            print('product_objs--------->',product_objs)
+
 
             if product_objs:
 
                 if not  product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
-                    if status in [1,3]: # 1为上架，2，为下架, 3为推荐
+                    if int(status) in [1,3]: # 1为上架，2，为下架, 3为推荐
                         product_objs.update(
                             status=status
                         )
@@ -526,7 +528,8 @@ def product_oper(request, oper_type, o_id):
                         response.code = 302
                         response.msg = "没有权限修改"
 
-                elif product_objs[0].user_id == user_id:
+                elif product_objs[0].user_id == int(user_id): # 修改用户发布产品的状态
+
                     product_objs.update(
                         status=status
                     )
@@ -537,6 +540,11 @@ def product_oper(request, oper_type, o_id):
                         'status': product_objs[0].get_status_display(),
                         'status_code': product_objs[0].status
                     }
+
+                else:
+                    response.code = 302
+                    response.msg = "没有权限修改"
+
 
             else:
 
