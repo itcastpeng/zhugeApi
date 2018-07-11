@@ -253,8 +253,8 @@ def deal_search_time(data,q):
     for i in user_pop_queryset:
         praise_sum = praise_sum + i[0]  # 被点赞总数
 
-    ret_data = {}
-    ret_data['count_data'] = {
+
+    ret =  {
         'company_name': company_name,
         'username': user_obj[0].username,
         'customer_num': customer_num,  # 客户总数
@@ -265,5 +265,6 @@ def deal_search_time(data,q):
         'saved_total_num': saved_total_num,  # 被保存总数-包括保存手机号（action=8）
         'praise_sum': praise_sum,  # 被点赞总数
     }
+    return  ret
 
 

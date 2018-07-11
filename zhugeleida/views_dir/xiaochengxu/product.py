@@ -239,7 +239,6 @@ def product(request, oper_type):
                 response.code = 200
                 response.msg = "咨询产品返回成功"
 
-
         elif oper_type == 'forward_product':
 
             product_id = request.GET.get('product_id')

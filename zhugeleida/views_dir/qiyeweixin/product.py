@@ -506,20 +506,40 @@ def product_oper(request, oper_type, o_id):
 
             status = request.POST.get('status')
             user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
+            product_objs = models.zgld_product.objects.filter(id=o_id)
 
             if product_objs:
-                product_objs.update(
-                    status=status
-                )
-                response.code = 200
-                response.msg = "修改状态成功"
-                response.data = {
-                    'product_id': product_objs[0].id,
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
+
+                if not  product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+                    if status in [1,3]: # 1为上架，2，为下架, 3为推荐
+                        product_objs.update(
+                            status=status
+                        )
+                        response.code = 200
+                        response.msg = "修改状态成功"
+                        response.data = {
+                            'product_id': product_objs[0].id,
+                            'status': product_objs[0].get_status_display(),
+                            'status_code': product_objs[0].status
+                        }
+                    else:
+                        response.code = 302
+                        response.msg = "没有权限修改"
+
+                elif product_objs[0].user_id == user_id:
+                    product_objs.update(
+                        status=status
+                    )
+                    response.code = 200
+                    response.msg = "修改状态成功"
+                    response.data = {
+                        'product_id': product_objs[0].id,
+                        'status': product_objs[0].get_status_display(),
+                        'status_code': product_objs[0].status
+                    }
+
             else:
+
                 response.code = 302
                 response.msg = '产品不存在'
 
