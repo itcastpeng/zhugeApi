@@ -109,7 +109,7 @@ def product(request, oper_type):
                 length = forms_obj.cleaned_data['length']
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
-                status = int(request.GET.get('status_code'))
+                status = request.GET.get('status_code')
                 field_dict = {
                     'status': '',
                     'create_date': '',
@@ -132,10 +132,12 @@ def product(request, oper_type):
                 q2.connector = 'and' # 满足只能看公司发布的
                 q2.children.append(('company_id', company_id))
                 q2.children.append(('user_id__isnull', True))
-                if  status in [1, 3]:
-                    q2.children.append(('status', status))
-                else:
-                    q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
+                
+                if status:
+                    if  int(status in [1, 3]):
+                        q2.children.append(('status', status))
+                    else:
+                        q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
 
                 con.add(q1, 'OR')
                 con.add(q2, 'OR')
