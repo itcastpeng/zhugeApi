@@ -123,18 +123,24 @@ def product(request, oper_type):
 
                 con = Q()
                 q1 = Q()
-                q1.connector = 'and'
+                q1.connector = 'and'  # 满足个人发布只能看自己的
                 q1.children.append(('user_id', user_id))
                 q1.children.append(('company_id', company_id))
                 q1.children.append(('status', status)) if status else ''
+
                 q2 = Q()
-                q2.connector = 'and'
+                q2.connector = 'and' # 满足只能看公司发布的
                 q2.children.append(('company_id', company_id))
                 q2.children.append(('user_id__isnull', True))
-                q2.children.append(('status', status))  if status else ''
+                if status in [1, 3]:
+                    q2.children.append(('status', status))
+                else:
+                    q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
 
                 con.add(q1, 'OR')
                 con.add(q2, 'OR')
+
+
                 print('-----con----->',con)
 
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(con).order_by(order)
