@@ -383,6 +383,20 @@ def user_oper(request, oper_type, o_id):
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
+        elif oper_type == "update_status":
+            print("dir(requests.POST) ===>", dir(request.POST))
+            print('=====request.POST=====>>>', o_id, request.POST)
+            status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
+            user_id = request.GET.get('user_id')
+
+            objs = models.zgld_userprofile.objects.filter(id=user_id)
+
+            if objs:
+                objs.update(status=status)
+                response.code = 200
+                response.msg = "修改成功"
+
     else:
         response.code = 402
         response.msg = "请求异常"
