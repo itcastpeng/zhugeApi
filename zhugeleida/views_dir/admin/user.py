@@ -127,6 +127,8 @@ def user_oper(request, oper_type, o_id):
 
             if forms_obj.is_valid():
                 print("验证通过")
+
+                user_id = request.GET.get('user_id')
                 userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
                 username = forms_obj.cleaned_data.get('username')
                 password = forms_obj.cleaned_data.get('password')
@@ -136,90 +138,100 @@ def user_oper(request, oper_type, o_id):
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
-                depart_id_list = []
 
-                department_id = request.POST.get('department_id')
-                print('-----department_id---->',department_id)
-                if  department_id:
-                    depart_id_list = json.loads(department_id)
+                available_user_num = models.zgld_company.objects.filter(id=company_id)[0].mingpian_available_num
+                used_user_num  = models.zgld_userprofile.objects.filter(company_id=company_id).count() #
 
-                    objs = models.zgld_department.objects.filter(id__in=depart_id_list)
-                    if objs:
-                        for c_id in objs:
-                            department_company_id = c_id.company_id
+                if  int(used_user_num) >= int(available_user_num): # 开通的用户数量 等于 == 该公司最大可用名片数
+                    response.code = 302
+                    response.msg = "超过明片最大开通数,联系管理员"
+                    return JsonResponse(response.__dict__)
 
-                            if str(department_company_id) != str(forms_obj.cleaned_data['company_id']):
-                                response.code = 404
-                                response.msg = '非法请求'
-                                return JsonResponse(response.__dict__)
+                elif int(used_user_num) < int(available_user_num):  # 开通的用户数量 小于 < 该公司最大可用名片数,才能继续开通
+                    depart_id_list = []
+                    department_id = request.POST.get('department_id')
+                    print('-----department_id---->',department_id)
+                    if  department_id:
+                        depart_id_list = json.loads(department_id)
+
+                        objs = models.zgld_department.objects.filter(id__in=depart_id_list)
+                        if objs:
+                            for c_id in objs:
+                                department_company_id = c_id.company_id
+
+                                if str(department_company_id) != str(forms_obj.cleaned_data['company_id']):
+                                    response.code = 404
+                                    response.msg = '非法请求'
+                                    return JsonResponse(response.__dict__)
 
 
-                company_obj = models.zgld_company.objects.get(id=company_id)
-                get_token_data = {}
-                post_user_data = {}
-                get_user_data = {}
-                get_token_data['corpid'] = company_obj.corp_id
-                get_token_data['corpsecret'] = company_obj.tongxunlu_secret
+                    company_obj = models.zgld_company.objects.get(id=company_id)
+                    get_token_data = {}
+                    post_user_data = {}
+                    get_user_data = {}
+                    get_token_data['corpid'] = company_obj.corp_id
+                    get_token_data['corpsecret'] = company_obj.tongxunlu_secret
 
-                import redis
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                token_ret = rc.get('tongxunlu_token')
-                print('---token_ret---->>',token_ret)
+                    import redis
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    token_ret = rc.get('tongxunlu_token')
+                    print('---token_ret---->>',token_ret)
 
-                if not  token_ret:
-                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                    ret_json = ret.json()
-                    print('--------ret_json-->>',ret_json)
+                    if not  token_ret:
+                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                        ret_json = ret.json()
+                        print('--------ret_json-->>',ret_json)
 
-                    access_token = ret_json['access_token']
-                    get_user_data['access_token'] = access_token
-                    rc.set('tongxunlu_token',access_token,7000)
-                else:
-                    get_user_data['access_token'] = token_ret
-                if len(depart_id_list) == 0:
-                    depart_id_list = [1]
+                        access_token = ret_json['access_token']
+                        get_user_data['access_token'] = access_token
+                        rc.set('tongxunlu_token',access_token,7000)
+                    else:
+                        get_user_data['access_token'] = token_ret
+                    if len(depart_id_list) == 0:
+                        depart_id_list = [1]
 
-                post_user_data['userid'] = userid
-                post_user_data['name'] = username
-                post_user_data['position'] = position
-                post_user_data['mobile'] = wechat_phone
-                post_user_data['department'] = depart_id_list
-                add_user_url = Conf['add_user_url']
+                    post_user_data['userid'] = userid
+                    post_user_data['name'] = username
+                    post_user_data['position'] = position
+                    post_user_data['mobile'] = wechat_phone
+                    post_user_data['department'] = depart_id_list
+                    add_user_url = Conf['add_user_url']
 
-                print('-------->>',json.dumps(post_user_data))
+                    print('-------->>',json.dumps(post_user_data))
 
-                ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
-                print('-----requests----->>', ret.text)
+                    ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+                    print('-----requests----->>', ret.text)
 
-                weixin_ret = json.loads(ret.text)
-                if  weixin_ret.get('errmsg') == 'created': # 在企业微信中创建用户成功
-                    token = account.get_token(account.str_encrypt(password))
+                    weixin_ret = json.loads(ret.text)
+                    if  weixin_ret.get('errmsg') == 'created': # 在企业微信中创建用户成功
+                        token = account.get_token(account.str_encrypt(password))
 
-                    obj = models.zgld_userprofile.objects.create(
-                        userid= userid,
-                        username=username,
-                        password=account.str_encrypt(password),
-                        role_id=role_id,
-                        company_id=company_id,
-                        position=position,
-                        wechat_phone=wechat_phone,
-                        mingpian_phone=mingpian_phone,
-                        token=token
-                    )
-                    if depart_id_list[0] == 1:
-                        depart_id_list = []
-                    obj.department = depart_id_list
+                        obj = models.zgld_userprofile.objects.create(
+                            userid= userid,
+                            username=username,
+                            password=account.str_encrypt(password),
+                            role_id=role_id,
+                            company_id=company_id,
+                            position=position,
+                            wechat_phone=wechat_phone,
+                            mingpian_phone=mingpian_phone,
+                            token=token
+                        )
+                        if depart_id_list[0] == 1:
+                            depart_id_list = []
+                        obj.department = depart_id_list
 
-                    # 生成企业用户二维码
-                    data_dict ={ 'user_id': obj.id }
-                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+                        # 生成企业用户二维码
+                        data_dict ={ 'user_id': obj.id }
+                        tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
-                    response.code = 200
-                    response.msg = "添加用户成功"
+                        response.code = 200
+                        response.msg = "添加用户成功"
 
-                else:
-                    response.code = weixin_ret['errcode']
-                    response.msg = "企业微信验证未通过"
+                    else:
+                        response.code = weixin_ret['errcode']
+                        response.msg = "企业微信验证未通过"
+
 
             else:
                     print("验证不通过")
@@ -385,17 +397,22 @@ def user_oper(request, oper_type, o_id):
 
 
         elif oper_type == "update_status":
-            print("dir(requests.POST) ===>", dir(request.POST))
-            print('=====request.POST=====>>>', o_id, request.POST)
+
             status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
             user_id = request.GET.get('user_id')
 
-            objs = models.zgld_userprofile.objects.filter(id=user_id)
+            objs = models.zgld_userprofile.objects.filter(id=o_id)
 
             if objs:
-                objs.update(status=status)
-                response.code = 200
-                response.msg = "修改成功"
+
+                if int(user_id) == int(o_id):
+                    response.code = 305
+                    response.msg = "不能修改自己"
+
+                else:
+                    objs.update(status=status)
+                    response.code = 200
+                    response.msg = "修改成功"
 
     else:
         response.code = 402
