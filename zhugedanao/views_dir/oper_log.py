@@ -6,7 +6,7 @@ from zhugedanao import models
 
 
 @csrf_exempt
-@is_token(models.zhugedanao_userprofile)
+# @is_token(models.zhugedanao_userprofile)
 def oper_log(request):
     response = ResponseObj()
     user_id = request.GET.get('user_id')
