@@ -98,10 +98,17 @@ class ProductGetForm(forms.Form):
 
 class ProductSelectForm(forms.Form):
 
-    uid = forms.IntegerField(
+    user_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': "用户ID不能为空"
+        }
+    )
+
+    product_type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "产品类型不为空"
         }
     )
 
@@ -128,7 +135,7 @@ class ProductSelectForm(forms.Form):
 
     def clean_length(self):
         if 'length' not in self.data:
-            length = 10
+            length = 20
         else:
             length = int(self.data['length'])
         return length

@@ -5,19 +5,15 @@ from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
-from datetime import datetime
-from django.utils.timezone import now, timedelta
+# from datetime import datetime
+from django.utils.timezone import now, timedelta,datetime
 
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.user_verify import UserAddForm, UserUpdateForm, UserSelectForm
-import json
-from ..conf import *
-import requests
-from zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_qr_code
-from zhugeapi_celery_project import tasks
+
 from django.db.models import Q
 from django.db.models import Sum
-
+from django import forms
+import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -37,9 +33,9 @@ def home_page(request):
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
         mingpian_available_num = user_obj[0].company.mingpian_available_num  # 可开通名片数量
-        user_count = user_obj.filter(company_id=company_id).count()  #
-        used_days = user_obj[0].user_expired.day() - datetime.datetime.now().day
-        available_days = user_obj[0].user_expired.day() - user_obj[0].create_date.day()
+        user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()  #  # 员工总数
+        available_days = (user_obj[0].company.user_expired - datetime.now()).days     #还剩多天可以用
+        used_days = (datetime.now() - user_obj[0].company.create_date).days           #用户使用了多少天了
 
         user_ids = models.zgld_userprofile.objects.select_related('company').filter(company_id=company_id).values_list('id')
         user_list = []
@@ -47,14 +43,14 @@ def home_page(request):
             for u_id in user_ids: user_list.append(u_id[0])
         customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).count()  # 已获取客户数
 
-        ret_data = {}
-        ret_data['count_data'] = {
+
+        ret_data = {
             'company_name': company_name,
             'username': user_obj[0].username,
-            'mingpian_available_num': mingpian_available_num,  # 可开通名片数
+            'mingpian_num': mingpian_available_num,  # 可开通名片数
             'user_count': user_count,  # 员工总数
-            'expired_time': user_obj[0].user_expired,  # 过期时间
-            'open_up_date': user_obj[0].company.create_date,  # 开通时间
+            'expired_time': user_obj[0].company.user_expired.strftime("%Y-%m-%d"),  # 过期时间
+            'open_up_date': user_obj[0].company.create_date.strftime("%Y-%m-%d"),  # 开通时间
             'available_days': available_days,  # 可用天数
             'used_days': used_days,         # 剩余可用天数
             'customer_num': customer_num,   # 已获取客户数
@@ -68,15 +64,31 @@ def home_page(request):
 
         }
 
-    # else:
-    #     response.code = 402
-    #     response.msg = "请求异常"
-    #     response.data = json.loads(forms_obj.errors.as_json())
+
     return JsonResponse(response.__dict__)
 
 
-#  增删改 用户表
-#  csrf  token验证
+# 验证数据指标的传参
+class LineInfoForm(forms.Form):
+
+
+    days = forms.CharField(
+        required=True,
+        error_messages={
+            # 'required': "天数不能为空",
+            'invalid': "天数不能为空",
+        }
+    )
+    index_type =  forms.CharField(
+        required=True,
+        error_messages={
+            # 'required': "类型不能为空",
+            'invalid':  "必须是整数类型"
+        }
+    )
+
+
+
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def home_page_oper(request, oper_type):
@@ -123,46 +135,54 @@ def home_page_oper(request, oper_type):
 
             }
 
-        elif oper_type == "line_info":
-
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-            company_id = user_obj[0].company_id
-            days = request.GET.get('days')
-
-            user_ids = models.zgld_userprofile.objects.select_related('company').filter(
-                company_id=company_id).values_list('id')
-            user_list = []
-            if user_ids:
-                for u_id in user_ids: user_list.append(u_id[0])
-
-            data = request.GET.copy()
-            data['user_list'] = user_list
 
 
-            ret_data = {}
-            for day in range(days,0,-1):
+    elif  request.method == "POST":
 
-               now_time = datetime.now()
-               start_time = (now_time - timedelta(days=day)).strftime("%Y-%m-%d")
-               # stop_time = now_time.strftime("%Y-%m-%d")
-               data['start_time'] = start_time
+        if oper_type == "line_info":
+            print('request.POST',request.POST)
 
-               ret_data[start_time] = deal_line_info(data)
+            forms_obj = LineInfoForm(request.POST)
+
+            if forms_obj.is_valid():
+
+                user_id = request.GET.get('user_id')
+                user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+                company_id = user_obj[0].company_id
+                days = forms_obj.data.get('days')
+
+                user_ids = models.zgld_userprofile.objects.select_related('company').filter(company_id=company_id).values_list('id')
+                user_list = []
+                if user_ids:
+                    for u_id in user_ids: user_list.append(u_id[0])
+
+                data = request.POST.copy()
+                data['user_list'] = user_list
+                data['company_id'] = company_id
 
 
-            # ret = {
-            #     'customer_num': customer_num,  # 客户总数
-            #     # 'new_add_customer': ,                 # 跟进客户数
-            #     'follow_num': follow_num,  # 跟进客户数
-            #     'browse_num': browse_num,  # 浏览总数
-            #     'forward_num': forward_num,  # 被转发的总数  -包括转发名片，但是不包括转发产品
-            #     'saved_total_num': saved_total_num,  # 被保存总数-包括保存手机号（action=8）
-            #     'praise_sum': praise_sum,  # 被点赞总数
-            # }
-            #
+                ret_data = []
+                for day in range(int(days),0,-1):
+
+                   now_time = datetime.now()
+                   start_time = (now_time - timedelta(days=day)).strftime("%Y-%m-%d")
+                   # stop_time = now_time.strftime("%Y-%m-%d")
+                   data['start_time'] = start_time
+                   ret_data.append({'statics_date' : start_time, 'value' : deal_line_info(data)})
 
 
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+
+                }
+
+            else:
+                response.code = 303
+                response.msg = "上传异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
     else:
          response.code = 402
@@ -222,17 +242,20 @@ def deal_search_time(data,q):
 
 
 def deal_line_info(data):
-    index_type = data.get('index_type')
+    index_type = int(data.get('index_type'))
     start_time = data.get('start_time')
     user_list = data.get('user_list')
+    company_id = data.get('company_id')
+    print('user_list',user_list)
 
     q1 = Q()
-
-    q1.add(Q(**{'create_date': start_time}), Q.AND)  # 大于等于
+    q1.add(Q(**{'create_date__contains': start_time}), Q.AND)  # 大于等于
+    print('start_time',start_time)
 
     if index_type == 1:  # 客户总数
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(
-           q1).count()  # 已获取客户数
+
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(create_date__contains=start_time).count()  # 已获取客户数
+        return customer_num
 
     elif index_type == 2:  # 跟进总数
         follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list,
@@ -244,24 +267,24 @@ def deal_line_info(data):
                 follow_id_list.append(f_obj.id)
             follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup_id__in=follow_id_list).filter(
                 q1).count()
+        return follow_num
 
     elif index_type == 3:  # 浏览总数
         browse_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,
                                                           action=1).filter().count()  # 浏览名片的总数(包含着保存名片)
-
+        return browse_num
 
     elif index_type == 4:  # 被转发总数
-        forward_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,
-                                                           action=6).filter(
-            q1).count()  # 被转发的总数-不包括转发产品
+        forward_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,action=6).filter(q1).count()  # 被转发的总数-不包括转发产品
+        return forward_num
 
     elif index_type == 5:  # 被保存总数
-        saved_total_num = models.zgld_accesslog.objects.filter(user_id__in=user_list, action=8).filter(
-            q1).count()  # 保存手机号
+        saved_total_num = models.zgld_accesslog.objects.filter(user_id__in=user_list, action=8).filter(q1).count()  # 保存手机号
+        return saved_total_num
 
     elif index_type == 6:  # 被赞总数
-        user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(
-            q1).values_list('popularity')
+        user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q1).values_list('popularity')
         praise_sum = 0
         for i in user_pop_queryset:
             praise_sum = praise_sum + i[0]  # 被点赞总数
+        return  praise_sum
