@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import base64
 BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from zhugeleida import models
+from publicFunc import account
 
 # 添加企业的产品
 class imgUploadForm(forms.Form):
@@ -46,6 +47,7 @@ class imgUploadForm(forms.Form):
 
 # 上传图片（分片上传）
 @csrf_exempt
+@account.is_token(models.zgld_userprofile)
 def img_upload(request):
     response = Response.ResponseObj()
 
@@ -118,6 +120,7 @@ class imgMergeForm(forms.Form):
 
 # 合并图片
 @csrf_exempt
+@account.is_token(models.zgld_userprofile)
 def img_merge(request):
     response = Response.ResponseObj()
     forms_obj = imgMergeForm(request.POST)
@@ -168,7 +171,7 @@ def img_merge(request):
                     file_obj.write(f.read())
 
                 os.remove(file_save_path)
-                obj = models.zgld_user_photo.objects.create(id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
+                obj = models.zgld_user_photo.objects.create(user_id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
 
                 response.data = {
                     'picture_id': obj.id,
