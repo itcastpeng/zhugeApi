@@ -40,16 +40,17 @@ def mingpian(request):
             q.add(Q(**{'id': user_id}), Q.AND)
 
             global remark
-            accesslog_obj = models.zgld_accesslog.objects.filter(user_id=user_id, action=1)
+            accesslog_obj = models.zgld_accesslog.objects.filter(user_id=user_id,customer_id=customer_id,action=1)
+
             action_count = accesslog_obj.count()
             if action_count == 0:
-                remark = '首次查看你的名片,沟通从此刻开始'
+                remark = '首次查看您的名片,沟通从此刻开始'
             elif action_count == 2:
-                remark = '查看你的名片第%s次,把握深度交流的机会' % (action_count)
+                remark = '查看您的名片第%s次,把握深度交流的机会' % (action_count)
             elif action_count == 3:
-                remark = '查看你的名片第%s次,建议标注重点客户' % (action_count)
+                remark = '查看您的名片第%s次,建议标注重点客户' % (action_count)
             elif action_count > 4:
-                remark = '查看你的名片第%s次,成交在望' % (action_count)
+                remark = '查看您的名片第%s次,成交在望' % (action_count)
             data = request.GET.copy()
             data['action'] = 1
 
@@ -95,7 +96,11 @@ def mingpian(request):
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
                     sign_num = objs[0].sign_num
                     chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,send_type=1,is_customer_new_msg=True).count()
+                    mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2).order_by('order')
 
+                    mingpian_avatar = ''
+                    if mingpian_avatar_obj:
+                        mingpian_avatar = mingpian_avatar_obj[0].photo_url
                     ret_data = {
                         'id': obj.id,
                         'username': obj.username,
@@ -105,7 +110,7 @@ def mingpian(request):
                         'position': obj.position,
                         'email': obj.email or '',
                         'wechat': obj.wechat or '',  # 微信号
-
+                        'mingpian_avatar': mingpian_avatar,  #名片的头像
                         'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
                         'create_date': obj.create_date,  # 创建时间
                         'popularity_num': obj.popularity,  # 被查看多少次。
@@ -307,7 +312,7 @@ def mingpian_oper(request, oper_type):
                     response.code = 200
                     response.msg = '已经点过赞'
 
-            elif oper_type == 'create_poster':
+            elif oper_type == 'create_poster': # 前端先用于生成海报的页面。用了用户体验度更高。
 
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')  # 用户 id
@@ -334,10 +339,10 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')  # 用户 id
 
-                remark = '保存了您的名片海报'
-                data = request.GET.copy()
-                data['action'] = 1
-                response = action_record(data, remark)
+                # remark = '保存了您的名片海报'
+                # data = request.GET.copy()
+                # data['action'] = 1
+                # response = action_record(data, remark)
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 

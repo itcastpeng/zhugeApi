@@ -145,14 +145,18 @@ def chat_oper(request, oper_type, o_id):
                 count = objs.count()
                 for obj in objs:
                     ret_data_list.append({
-                        'customer_id': obj.customer.id,
-                        'user_id': obj.userprofile.id,
-                        'customer_headimgurl':  obj.customer.headimgurl,
-                        'customer': obj.customer.username,
-                        'dateTime': obj.create_date,
-                        'send_type': obj.send_type,
-                        'msg':       obj.msg,
-                    })
+                                'customer_id': obj.customer.id,
+                                'user_id': obj.userprofile.id,
+                                'customer_headimgurl':  obj.customer.headimgurl,
+                                'customer': obj.customer.username,
+                                'dateTime': obj.create_date,
+                                'msg':       obj.msg,
+                                'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                                'is_first_info': False,  # 是否为第一条的信息
+                                'info_type': obj.info_type, # 消息的类型
+                            })
+
+
                 ret_data_list.reverse()
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
@@ -191,7 +195,8 @@ def chat_oper(request, oper_type, o_id):
                 msg = request.POST.get('msg')
                 send_type = request.POST.get('send_type')
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                    is_last_msg=True).update(is_last_msg=False)
+                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
+
                 models.zgld_chatinfo.objects.create(
                     msg=msg,
                     userprofile_id=user_id,

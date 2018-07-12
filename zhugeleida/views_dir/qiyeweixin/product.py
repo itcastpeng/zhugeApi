@@ -35,9 +35,6 @@ def product(request, oper_type):
             q = conditionCom(request, field_dict)
             q.add(Q(**{'id': product_id}), Q.AND)
 
-
-
-
             objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
             count = objs.count()
 
@@ -126,18 +123,26 @@ def product(request, oper_type):
 
                 con = Q()
                 q1 = Q()
-                q1.connector = 'and'
+                q1.connector = 'and'  # 满足个人发布只能看自己的
                 q1.children.append(('user_id', user_id))
                 q1.children.append(('company_id', company_id))
                 q1.children.append(('status', status)) if status else ''
+
                 q2 = Q()
-                q2.connector = 'and'
+                q2.connector = 'and' # 满足只能看公司发布的
                 q2.children.append(('company_id', company_id))
                 q2.children.append(('user_id__isnull', True))
-                q2.children.append(('status', status))  if status else ''
+
+                if status:
+                    if  int(status) in [1, 3]:
+                        q2.children.append(('status', status))
+                else:
+                        q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
 
                 con.add(q1, 'OR')
                 con.add(q2, 'OR')
+
+
                 print('-----con----->',con)
 
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(con).order_by(order)
@@ -396,6 +401,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        #上传产品图片的接口
         elif oper_type == "add_picture":
             response = Response.ResponseObj()
 
@@ -411,7 +417,7 @@ def product_oper(request, oper_type, o_id):
 
                 img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name])
                 print('img_save_path -->', img_save_path)
-                print('img_data -->', img_data)
+                #print('img_data -->', img_data)
                 img_data = base64.b64decode(img_data.encode('utf-8'))
                 with open(img_save_path, 'wb') as f:
                     f.write(img_data)
@@ -498,64 +504,52 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '图片ID不存在'
 
-        # 触发-下架产品的动作
-        elif oper_type == "shelves":
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id,user_id=user_id)
+        elif oper_type == "change_status":
+
+            status = int(request.POST.get('status'))
+            user_id =int(request.GET.get('user_id'))
+            product_objs = models.zgld_product.objects.filter(id=o_id)
+            print('product_objs--------->',product_objs)
+
 
             if product_objs:
-                product_objs.update(
-                    status=2
-                )
-                response.code = 200
-                response.msg = "修改下架状态成功"
-                response.data = {
-                    'product_id': product_objs[0].id,
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
+
+                if not  product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+                    if int(status) in [1,3]: # 1为上架，2，为下架, 3为推荐
+                        product_objs.update(
+                            status=status
+                        )
+                        response.code = 200
+                        response.msg = "修改状态成功"
+                        response.data = {
+                            'product_id': product_objs[0].id,
+                            'status': product_objs[0].get_status_display(),
+                            'status_code': product_objs[0].status
+                        }
+                    else:
+                        response.code = 302
+                        response.msg = "没有权限修改"
+
+                elif product_objs[0].user_id == int(user_id): # 修改用户发布产品的状态
+
+                    product_objs.update(
+                        status=status
+                    )
+                    response.code = 200
+                    response.msg = "修改状态成功"
+                    response.data = {
+                        'product_id': product_objs[0].id,
+                        'status': product_objs[0].get_status_display(),
+                        'status_code': product_objs[0].status
+                    }
+
+                else:
+                    response.code = 302
+                    response.msg = "没有权限修改"
+
+
             else:
-                response.code = 302
-                response.msg = '产品不存在'
 
-        # 触发-发布产品的动作
-        elif oper_type == "publish":
-            # 出发-发布动作。
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
-
-            if product_objs:
-                product_objs.update(
-                    status=1
-                )
-                response.code = 200
-                response.msg = "修改发布状态成功"
-                response.data = {
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
-
-            else:
-                response.code = 302
-                response.msg = '产品不存在'
-
-        # 触发-推荐产品的动作
-        elif oper_type == "recommend":
-            # 出发-发布动作。
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
-
-            if product_objs:
-                product_objs.update(
-                    status=3
-                )
-                response.code = 200
-                response.msg = "修改推荐状态成功"
-                response.data = {
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
-            else:
                 response.code = 302
                 response.msg = '产品不存在'
 

@@ -49,15 +49,33 @@ def chat(request):
 
             ret_data_list = []
             for obj in objs:
-                ret_data_list.append({
-                     'customer_id': obj.customer.id,
-                     'user_id': obj.userprofile.id,
-                     'src': obj.customer.headimgurl,
-                     'name': obj.customer.username,
-                     'dateTime': obj.create_date,
-                     'msg': obj.msg,
-                     'send_type': obj.send_type,
-                })
+                if  obj.info_type == 1:  # 如果为聊信息。
+                    ret_data_list.append({
+                         'customer_id': obj.customer.id,
+                         'customer_avatar': obj.customer.headimgurl,
+                         'user_id': obj.userprofile.id,
+                         'src': obj.customer.headimgurl,
+                         'name': obj.customer.username,
+                         'dateTime': obj.create_date,
+                         'msg': obj.msg,
+                         'send_type': obj.send_type,
+                         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                    })
+                elif obj.info_type == 2:  # 如果为产品咨询。
+                    ret_data_list.append({
+                         'customer_id': obj.customer.id,
+                         'customer_avatar': obj.customer.headimgurl,
+                         'user_id': obj.userprofile.id,
+                         'src': obj.customer.headimgurl,
+                         'name': obj.customer.username,
+                         'dateTime': obj.create_date,
+
+                         'product_cover_url': obj.product_cover_url,
+                         'product_name': obj.product_name,
+                         'product_price': obj.product_price,
+                         'info_type': obj.info_type,      # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                         'send_type': obj.send_type,
+                    })
 
             ret_data_list.reverse()
             response.code = 200
@@ -97,15 +115,33 @@ def chat_oper(request, oper_type, o_id):
                 ret_data_list = []
                 count = objs.count()
                 for obj in objs:
-                    ret_data_list.append({
-                        'customer_id': obj.customer.id,
-                        'user_id': obj.userprofile.id,
-                        'src':  obj.customer.headimgurl,
-                        'name': obj.customer.username,
-                        'dateTime': obj.create_date,
-                        'send_type': obj.send_type,
-                        'msg': obj.msg,
-                    })
+                    if obj.info_type == 1:  # 如果为聊信息。
+                        ret_data_list.append({
+                            'customer_id': obj.customer.id,
+                            'customer_avatar': obj.customer.headimgurl,
+                            'user_id': obj.userprofile.id,
+                            'src': obj.customer.headimgurl,
+                            'name': obj.customer.username,
+                            'dateTime': obj.create_date,
+                            'msg': obj.msg,
+                            'send_type': obj.send_type,
+                            'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                        })
+                    elif obj.info_type == 2:  # 如果为产品咨询。
+                        ret_data_list.append({
+                            'customer_id': obj.customer.id,
+                            'customer_avatar': obj.customer.headimgurl,
+                            'user_id': obj.userprofile.id,
+                            'src': obj.customer.headimgurl,
+                            'name': obj.customer.username,
+                            'dateTime': obj.create_date,
+
+                            'product_cover_url': obj.product_cover_url,
+                            'product_name': obj.product_name,
+                            'product_price': obj.product_price,
+                            'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                            'send_type': obj.send_type,
+                        })
 
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
