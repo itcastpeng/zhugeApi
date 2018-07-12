@@ -42,6 +42,13 @@ def mingpian(request):
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
+            mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('order')
+
+            mingpian_avatar = ''
+            if mingpian_avatar_obj:
+                mingpian_avatar = mingpian_avatar_obj[0].photo_url
+            else:
+                mingpian_avatar = objs[0].avatar
 
             ret_data = []
             for obj in objs:
@@ -50,7 +57,8 @@ def mingpian(request):
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,  # 姓名| 管理员可以修改
-                    'avatar': obj.avatar,
+                    'avatar': mingpian_avatar,
+                    
                     'company': obj.company.name,  # 公司名 | 管理员可以修改
                     'area': obj.company.area or '',
                     'address': obj.company.address or '',
