@@ -129,6 +129,7 @@ def img_merge(request):
         picture_type = request.POST.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
+        print('-----img_source----->', img_source)
 
         global img_save_path
         global obj
