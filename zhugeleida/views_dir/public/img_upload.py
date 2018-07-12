@@ -35,7 +35,7 @@ class imgUploadForm(forms.Form):
         }
     )
 
-    img_source =  forms.IntegerField(
+    img_source =  forms.CharField(
         error_messages={
             'required': "文件类型不能为空",
             'invalid':  "必须是字符串"
@@ -108,7 +108,7 @@ class imgMergeForm(forms.Form):
             'invalid': '总份数必须是整数类型'
         }
     )
-    img_source =  forms.IntegerField(
+    img_source =  forms.CharField(
         error_messages={
             'required': "文件类型不能为空",
             'invalid':  "必须是字符串"
