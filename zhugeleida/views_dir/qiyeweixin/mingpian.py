@@ -42,7 +42,9 @@ def mingpian(request):
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-            mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('order')
+
+
+            mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
 
             mingpian_avatar = ''
             if mingpian_avatar_obj:
@@ -58,7 +60,7 @@ def mingpian(request):
                     'id': obj.id,
                     'username': obj.username,  # 姓名| 管理员可以修改
                     'avatar': mingpian_avatar,
-                    
+
                     'company': obj.company.name,  # 公司名 | 管理员可以修改
                     'area': obj.company.area or '',
                     'address': obj.company.address or '',
