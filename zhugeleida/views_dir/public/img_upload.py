@@ -50,7 +50,8 @@ def img_upload(request):
         chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
         expanded_name = img_name.split('.')[-1]  # 扩展名
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avatar 代表用户的头像。
-        img_save_path = ''
+
+        global img_save_path
 
         if img_source == 'user_photo':
             img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
