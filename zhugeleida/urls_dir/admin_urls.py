@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.admin import  role,company,login,user,department,website,home_page
+from zhugeleida.views_dir.admin import  role,company,login,user,department,website,home_page,product
 
 
 
@@ -28,9 +28,10 @@ urlpatterns = [
     url(r'^department$', department.department),
 
     #官网编辑
-    url(r'edit_website$',website.website)
+    url(r'edit_website$',website.website),
 
-
-
+    #后台产品管理
+    # url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
+    url(r'^product/(?P<oper_type>\w+)/', product.product),
 
 ]

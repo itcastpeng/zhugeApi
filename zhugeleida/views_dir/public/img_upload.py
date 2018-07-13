@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import base64
 BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from zhugeleida import models
+from publicFunc import account
 
 # 添加企业的产品
 class imgUploadForm(forms.Form):
@@ -35,10 +36,18 @@ class imgUploadForm(forms.Form):
         }
     )
 
+    img_source =  forms.CharField(
+        error_messages={
+            'required': "文件类型不能为空",
+            'invalid':  "必须是字符串"
+        }
+    )
+
 
 
 # 上传图片（分片上传）
 @csrf_exempt
+@account.is_token(models.zgld_userprofile)
 def img_upload(request):
     response = Response.ResponseObj()
 
@@ -50,7 +59,8 @@ def img_upload(request):
         chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
         expanded_name = img_name.split('.')[-1]  # 扩展名
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avatar 代表用户的头像。
-        img_save_path = ''
+        print('-----img_source----->',img_source)
+        global img_save_path
 
         if img_source == 'user_photo':
             img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
@@ -100,10 +110,17 @@ class imgMergeForm(forms.Form):
             'invalid': '总份数必须是整数类型'
         }
     )
+    img_source =  forms.CharField(
+        error_messages={
+            'required': "文件类型不能为空",
+            'invalid':  "必须是字符串"
+        }
+    )
 
 
 # 合并图片
 @csrf_exempt
+@account.is_token(models.zgld_userprofile)
 def img_merge(request):
     response = Response.ResponseObj()
     forms_obj = imgMergeForm(request.POST)
@@ -115,6 +132,7 @@ def img_merge(request):
         picture_type = request.POST.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
+        print('-----img_source----->', img_source)
 
         global img_save_path
         global obj
@@ -153,7 +171,7 @@ def img_merge(request):
                     file_obj.write(f.read())
 
                 os.remove(file_save_path)
-                obj = models.zgld_user_photo.objects.create(id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
+                obj = models.zgld_user_photo.objects.create(user_id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
 
                 response.data = {
                     'picture_id': obj.id,
