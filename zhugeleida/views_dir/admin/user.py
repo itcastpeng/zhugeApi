@@ -52,7 +52,6 @@ def user(request):
             ret_data = []
             for obj in objs:
                 print('oper_user_username -->', obj)
-                #  将查询出来的数据 加入列表
 
                 department = ''
                 department_id = []
@@ -60,9 +59,21 @@ def user(request):
                 print('departmane_objs -->', departmane_objs)
                 if departmane_objs:
                     print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
-
                     department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
                     department_id = [i[0] for i in departmane_objs.values_list('id')]
+
+                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by(
+                    '-create_date')
+
+                mingpian_avatar = ''
+                if mingpian_avatar_obj:
+                    mingpian_avatar = "/" +  mingpian_avatar_obj[0].photo_url
+                else:
+
+                    if obj.avatar.startswith("http"):
+                        mingpian_avatar = obj.avatar
+                    else:
+                        mingpian_avatar = "/" + obj.avatar
 
                 ret_data.append({
                     'id': obj.id,
@@ -73,10 +84,10 @@ def user(request):
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
                     'position': obj.position,
-                    'mingpian_phone': obj.mingpian_phone,
-                    'phone': obj.wechat_phone,         # 代表微信电话
+                    'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
+                    'phone': obj.wechat_phone,         # 代表注册企业微信注册时的电话
                     'status': obj.get_status_display(),
-                    'avatar': obj.avatar,
+                    'avatar': mingpian_avatar,       # 头像
                     'qr_code': obj.qr_code,
                     'company': obj.company.name,
                     'company_id': obj.company_id,

@@ -105,6 +105,13 @@ class ProductSelectForm(forms.Form):
         }
     )
 
+    product_type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "产品类型不为空"
+        }
+    )
+
 
     current_page = forms.IntegerField(
         required=False,
