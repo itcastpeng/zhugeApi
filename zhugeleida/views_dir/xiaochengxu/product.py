@@ -182,7 +182,7 @@ def product(request, oper_type):
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
                             'status_code': obj.status,  # 产品的动态。
-                            'chatinfo_count': chatinfo_count,  # 留言个数
+
 
                         })
 
@@ -196,6 +196,7 @@ def product(request, oper_type):
                         response.msg = '查询成功'
                         response.data = {
                             'ret_data': ret_data,
+                            'chatinfo_count': chatinfo_count,  # 留言个数
                             'data_count': count,
                         }
                 else:
