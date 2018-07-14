@@ -158,6 +158,8 @@ def product(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
+                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                     send_type=1, is_customer_new_msg=True).count()
 
                 if objs:
                     for obj in objs:
@@ -179,7 +181,8 @@ def product(request, oper_type):
 
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
-                            'status_code': obj.status  # 产品的动态。
+                            'status_code': obj.status,  # 产品的动态。
+                            'chatinfo_count': chatinfo_count,  # 留言个数
 
                         })
 
