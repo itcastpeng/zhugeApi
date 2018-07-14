@@ -77,6 +77,12 @@ def img_upload(request):
             img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo','tmp' , img_name])
             print('img_save_path -->', img_save_path)
 
+        elif img_source == 'cover_picture' or img_source == 'product_picture': # 后台产品里cover_picture 代表封面上传的照片  product_picture 代表产品介绍图片上传
+            img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+            img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product','tmp' , img_name])
+            print('img_save_path -->', img_save_path)
+
+
         img_data = base64.b64decode(img_data.encode('utf-8'))
         with open(img_save_path, 'wb') as f:
             f.write(img_data)
@@ -176,6 +182,34 @@ def img_merge(request):
                 response.data = {
                     'picture_id': obj.id,
                     'picture_url': obj.photo_url,
+                }
+
+
+        elif  img_source == 'cover_picture' or img_source == 'product_picture':
+            user_id = request.GET.get('user_id')
+            img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', img_name])
+            img_save_path = "/".join([BasePath, img_path])
+            file_obj = open(img_save_path, 'ab')
+            for chunk in range(chunk_num):
+                file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+
+                file_save_path = "/".join(
+                    [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', file_name])
+
+                with open(file_save_path, 'rb') as f:
+                    file_obj.write(f.read())
+
+                os.remove(file_save_path)
+
+                if img_source == 'cover_picture':
+                    obj = models.zgld_product_picture.objects.create(picture_url=img_path,
+                                                                     picture_type=1)  # 封面头像
+                elif  img_source == 'product_picture':
+                    obj = models.zgld_product_picture.objects.create(picture_url=img_path,
+                                                                     picture_type=2)  # 产品图片
+                response.data = {
+                    'picture_id': obj.id,
+                    'picture_url': obj.picture_url,
                 }
 
         response.code = 200

@@ -8,7 +8,8 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
-from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm
+from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm
+
 import json
 from django.db.models import Q
 from django.db.models import F
@@ -335,6 +336,101 @@ def product(request, oper_type):
                 response.data = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
+
+
+
+@csrf_exempt
+@account.is_token(models.zgld_userprofile)
+def product_oper(request, oper_type, o_id):
+    response = Response.ResponseObj()
+
+    if request.method == "POST":
+        # 删除-个人产品
+        if oper_type == "delete":
+            user_id = request.GET.get('user_id')
+            user_obj =  models.zgld_userprofile.objects.filter(id=user_id)
+            role_id = user_obj[0].role_id
+            company_id = user_obj[0].company_id
+            product_picture_objs = models.zgld_product_picture.objects.filter(product_id=o_id)
+            product_article_objs = models.zgld_product_article.objects.filter(product_id=o_id)
+
+            if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
+                product_objs = models.zgld_product.objects.filter(id=o_id)
+                if product_objs:
+                    product_objs.delete()
+                    product_picture_objs.delete()
+                    product_article_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
+
+            elif role_id == 2:  # 普通用户只能删除自己的公司的个人产品。
+                product_objs = models.zgld_product.objects.filter(id=o_id, user_id__isnull=False, company_id=company_id,)
+
+                if product_objs:
+                    product_objs.delete()
+                    product_picture_objs.delete()
+                    product_article_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
+
+            else:
+                response.code = 302
+                response.msg = '产品不存在'
+
+        # 添加-公司产品。不能添加个人产品
+        elif oper_type == "add":
+
+            form_data = {
+                'user_id': request.GET.get('user_id'),
+                'name': request.POST.get('name'),  # 产品名称 必须
+                'price': request.POST.get('price'),  # 价格     必须
+                'reason': request.POST.get('reason'),  # 推荐理由 非必须
+                # 'title': request.POST.get('title'),    # 标题    非必须
+                # 'content': request.POST.get('content'),  # 内容    非必须
+            }
+
+            forms_obj = ProductAddForm(form_data)
+            if forms_obj.is_valid():
+                user_id = request.GET.get('user_id')
+                article_data_list = json.loads(request.POST.get('article_data'))
+                cover_picture_list = json.loads(request.POST.get('cover_picture_id'))
+
+                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+                product_obj = models.zgld_product.objects.create(
+                    user_id=user_id,
+                    company_id=company_id,
+                    name=forms_obj.data.get('name'),
+                    price=forms_obj.data.get('price'),
+                    reason=forms_obj.data.get('reason'),
+                )
+
+
+                #封面图片绑定到产品。
+                product_id = product_obj.id
+                picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)
+                picture_objs.update(product_id=product_id)
+
+                if article_data_list:
+                    for article_data in article_data_list:
+                        print('article_data_list 2 ------>>', article_data, type(article_data))
+
+                        if  'picture_id' in article_data:
+                            picture_id = article_data.get('picture_id')
+                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
+                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
+
+                    response.code = 200
+                    response.msg = "添加成功"
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+
+
+
+
 
 
 def sort_article_data(data):
