@@ -40,8 +40,10 @@ class zgld_department(models.Model):
 # 用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
-    username = models.CharField(verbose_name="成员姓名", max_length=32)
+    name = models.CharField(verbose_name="(登录)用户名", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
+
+    username = models.CharField(verbose_name="成员姓名", max_length=32)
     gender_choices = (
         (1, "男"),
         (2, "女"),
@@ -301,7 +303,7 @@ class zgld_up_down(models.Model):
         app_label = "zhugeleida"
 
 
-# 用户被赞【是否靠谱】
+# 用户签名是否被赞
 class zgld_up_down_sign(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户签名')
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的用户')
@@ -434,3 +436,46 @@ class zgld_chatinfo(models.Model):
     class Meta:
         verbose_name_plural = "聊天室记录表"
         app_label = "zhugeleida"
+
+
+
+#文章详细表
+class ArticleDetail(models.Model):
+    content = models.TextField(verbose_name='文章内容',null=True)
+    article = models.OneToOneField("zgld_article",verbose_name='所属文章')
+
+
+
+class zgld_article(models.Model):
+    title = models.CharField(verbose_name='文章标题', max_length=128)
+    summary = models.CharField(verbose_name='文章摘要', max_length=255)
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    user = models.ForeignKey('zgld_userprofile',verbose_name='所属用户',null=True)
+    # category = models.ForeignKey(verbose_name='文章类型', to='Category', to_field='nid', null=True)
+
+    tags = models.ManyToManyField('zgld_article_tag',through='zgld_article_to_tag',through_fields=('article', 'tag'))
+    up_count = models.IntegerField(default=0,verbose_name="赞次数")
+    down_count = models.IntegerField(default=0,verbose_name="踩次数")
+
+    standing_time = models.CharField(verbose_name='停留时长',max_length=64)
+    read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
+    forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
+    comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
+
+
+#文章标签表
+class zgld_article_tag(models.Model):
+    user = models.ForeignKey('zgld_userprofile',verbose_name="标签所属用户",null=True)
+    name = models.CharField(verbose_name='标签名称', max_length=32)
+
+
+
+class zgld_article_to_tag(models.Model):
+    article = models.ForeignKey('zgld_article',verbose_name='文章',)
+    tag =  models.ForeignKey('zgld_article_tag',verbose_name='文章标签')
+
+    class Meta:
+        unique_together = [
+            ('article', 'tag'),
+        ]
