@@ -423,7 +423,7 @@ class zgld_chatinfo(models.Model):
                         (1,'chat_people_info'),     #客户和用户之间的聊天信息
                         (2,'chat_product_info')   #客户和用户之间的产品咨询
     )
-    info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',)
+    info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',choices=info_type_choices)
     product_cover_url = models.CharField(verbose_name='产品封面URl', max_length=256, null=True)
     product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
@@ -440,37 +440,53 @@ class zgld_chatinfo(models.Model):
 
 
 #文章详细表
-class ArticleDetail(models.Model):
+class zgld_article_detail(models.Model):
     content = models.TextField(verbose_name='文章内容',null=True)
     article = models.OneToOneField("zgld_article",verbose_name='所属文章')
 
+    class Meta:
+        verbose_name_plural = "文章详细表"
+        app_label = "zhugeleida"
 
 
 class zgld_article(models.Model):
     title = models.CharField(verbose_name='文章标题', max_length=128)
     summary = models.CharField(verbose_name='文章摘要', max_length=255)
-    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
-    user = models.ForeignKey('zgld_userprofile',verbose_name='所属用户',null=True)
+    status_choices = ( (1,'已发'),
+                       (2,'未发'),
+                     )
+    status = models.SmallIntegerField(default=2, verbose_name='文章状态', choices=status_choices)
+    source_choices = ( (1,'原创'),
+                       (2,'转载'),
+                     )
+    source = models.SmallIntegerField(default=1, verbose_name='文章来源', choices=source_choices)
+
+    user = models.ForeignKey('zgld_userprofile',verbose_name='文章作者',null=True)
     # category = models.ForeignKey(verbose_name='文章类型', to='Category', to_field='nid', null=True)
 
     tags = models.ManyToManyField('zgld_article_tag',through='zgld_article_to_tag',through_fields=('article', 'tag'))
-    up_count = models.IntegerField(default=0,verbose_name="赞次数")
-    down_count = models.IntegerField(default=0,verbose_name="踩次数")
-
-    standing_time = models.CharField(verbose_name='停留时长',max_length=64)
+    # up_count = models.IntegerField(default=0,verbose_name="赞次数")
+    # down_count = models.IntegerField(default=0,verbose_name="踩次数")
+    cover_picture  = models.CharField(verbose_name="封面图片URL",max_length=128)
     read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
+    class Meta:
+        verbose_name_plural = "文章表"
+        app_label = "zhugeleida"
 
 #文章标签表
 class zgld_article_tag(models.Model):
     user = models.ForeignKey('zgld_userprofile',verbose_name="标签所属用户",null=True)
     name = models.CharField(verbose_name='标签名称', max_length=32)
 
+    class Meta:
+        verbose_name_plural = "文章标签表"
+        app_label = "zhugeleida"
 
-
+# 文章和标签绑定关系表
 class zgld_article_to_tag(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
     tag =  models.ForeignKey('zgld_article_tag',verbose_name='文章标签')
@@ -479,3 +495,34 @@ class zgld_article_to_tag(models.Model):
         unique_together = [
             ('article', 'tag'),
         ]
+        verbose_name_plural = "文章和标签关系绑定表"
+        app_label = "zhugeleida"
+
+
+class zgld_article_stay_time(models.Model):
+    article = models.ForeignKey('zgld_article',verbose_name='文章',)
+    user = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
+    stay_time = models.CharField(verbose_name='停留时长', max_length=64)
+
+    class Meta:
+        unique_together = [
+            ('article', 'user','stay_time'),
+        ]
+        verbose_name_plural = "文章查看用户停留时间表"
+        app_label = "zhugeleida"
+
+
+# class zgld_article_picture(models.Model):
+#     order = models.SmallIntegerField(verbose_name='序号', null=True)
+#     product = models.ForeignKey('zgld_article', verbose_name='图片所属的文章', null=True)
+#     picture_type_choices = (
+#         (1, '文章封面'),
+#         (2, '产品介绍')
+#     )
+#     picture_type = models.SmallIntegerField(verbose_name='图片类型', null=True, choices=picture_type_choices)
+#     picture_url = models.CharField(verbose_name='图片URL链接', max_length=256, null=True)
+#     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+#
+#     class Meta:
+#         verbose_name_plural = "文章关联的图片"
+#         app_label = "zhugeleida"
