@@ -26,20 +26,30 @@ def product(request, oper_type):
 
             forms_obj = ProductGetForm(request.GET)
             if forms_obj.is_valid():
-
-                customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
                 product_id = request.GET.get('product_id')
 
-                field_dict = {
-                    'id': '',
-                }
-                q = conditionCom(request, field_dict)
-                q.add(Q(**{'id': product_id}), Q.AND)
-                q.add(Q(**{'user_id': user_id}), Q.AND)
+
+                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+                con = Q()
+
+                q1 = Q()
+                q1.connector = 'and'
+                q1.children.append(('company_id', company_id))
+                q1.children.append(('id', product_id))
+                q1.children.append(('user_id', user_id))
+
+                q2 = Q()
+                q2.connector = 'and'
+                q2.children.append(('company_id', company_id))
+                q2.children.append(('id', product_id))
+                q2.children.append(('user_id__isnull', True))
+
+                con.add(q1, 'OR')
+                con.add(q2, 'OR')
 
 
-                objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
+                objs = models.zgld_product.objects.select_related('user', 'company').filter(con)
                 count = objs.count()
 
                 if objs:
@@ -127,8 +137,9 @@ def product(request, oper_type):
                 con = Q()
                 q1 = Q()
                 q1.connector = 'and'
-                q1.children.append(('user_id', user_id))
                 q1.children.append(('company_id', company_id))
+                q1.children.append(('user_id', user_id))
+
                 q2 = Q()
                 q2.connector = 'and'
                 q2.children.append(('company_id', company_id))
@@ -147,6 +158,8 @@ def product(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
+                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                     send_type=1, is_customer_new_msg=True).count()
 
                 if objs:
                     for obj in objs:
@@ -168,7 +181,8 @@ def product(request, oper_type):
 
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
-                            'status_code': obj.status  # 产品的动态。
+                            'status_code': obj.status,  # 产品的动态。
+
 
                         })
 
@@ -182,6 +196,7 @@ def product(request, oper_type):
                         response.msg = '查询成功'
                         response.data = {
                             'ret_data': ret_data,
+                            'chatinfo_count': chatinfo_count,  # 留言个数
                             'data_count': count,
                         }
                 else:
@@ -200,7 +215,7 @@ def product(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
                 product_id = request.GET.get('product_id')
-                obj = models.zgld_product.objects.get(id=product_id)
+
 
                 picture_obj = models.zgld_product_picture.objects.filter(product_id=product_id,picture_type=1)[:1]
                 product_cover_url = picture_obj[0].picture_url # 产品封面URL
@@ -260,11 +275,6 @@ def product(request, oper_type):
     return JsonResponse(response.__dict__)
 
 
-
-
-
-
-
 def sort_article_data(data):
     ret_list = []
     for obj in data:
@@ -280,9 +290,6 @@ def sort_article_data(data):
             else:
                 ret_list.append(obj)
     return ret_list
-
-
-
 
 
 

@@ -110,10 +110,10 @@ def product(request, oper_type):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
                 status = request.GET.get('status_code')
-                field_dict = {
-                    'status': '',
-                    'create_date': '',
-                }
+                # field_dict = {
+                #     'status': '',
+                #     'create_date': '',
+                # }
                 company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
 
                 # q = conditionCom(request, field_dict)
@@ -133,14 +133,20 @@ def product(request, oper_type):
                 q2.children.append(('company_id', company_id))
                 q2.children.append(('user_id__isnull', True))
 
+                q3 = Q()
+                q3.connector = 'and'  # 满足只能看公司发布的
                 if status:
-                    if  int(status) in [1, 3]:
-                        q2.children.append(('status', status))
-                else:
-                        q2.children.append(('status__in', [1, 3]))  # 满足上架和推荐的状态。
+                    if  int(status) in [1, 3]:  # 表示搜索了上架或者被推荐了的产品。
+                        q3.children.append(('status', status))
+                    elif int(status) == 2: # 表示下架了产品
+                        q3.children.append(('status', status))
+                        q3.children.append(('status', status))
+
 
                 con.add(q1, 'OR')
                 con.add(q2, 'OR')
+                con.add(q3, 'AND')
+
 
 
                 print('-----con----->',con)
@@ -253,10 +259,10 @@ class imgMergeForm(forms.Form):
         }
     )
 
-#  增删改 用户表
-#  csrf  token验证
+
+
 @csrf_exempt
-# @account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_userprofile)
 def product_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -553,7 +559,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '产品不存在'
 
-        # 触发-删除公司产品
+        # 触发-删除个人产品
         elif oper_type == "delete":
             user_id = request.GET.get('user_id')
             product_objs = models.zgld_product.objects.filter(id=o_id, user_id=user_id)
