@@ -28,15 +28,12 @@ urlpatterns = [
     url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
 
     #查看产品 + 查看竞价产品 + 转发竞价产品 + 咨询产品。
-    url(r'^product/(?P<oper_type>\w+)/', product.product),
+    url(r'^product/(?P<oper_type>\w+)', product.product),
     # url(r'^product/(?P<oper_type>\w+)', product.product_oper),
 
     #小程序登录认证
     url(r'^login$', login.login),
     url(r'^login/(?P<oper_type>\w+)$', login.login_oper)
-
-
-
 
 
 ]
