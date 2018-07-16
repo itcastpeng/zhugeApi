@@ -39,7 +39,10 @@ def tongji_data(request):
 
     for gongneng_obj in gongneng_objs:
         oper_log_q = Q(gongneng_id=gongneng_obj.id) | Q(gongneng__pid=gongneng_obj.id)
-        gongneng_count = models.zhugedanao_oper_log.objects.filter(q).filter(oper_log_q).count()
+        if stop_date:
+            gongneng_count = models.zhugedanao_oper_log.objects.filter(q).filter(oper_log_q).count()
+        else:
+            gongneng_count = models.zhugedanao_oper_log.objects.filter(oper_log_q).count()
         data2.append({
             "title": gongneng_obj.name,
             "value": gongneng_count
@@ -53,11 +56,11 @@ def tongji_data(request):
                 "value": userCount
             },
             {
-                "title": "今日新增用户数",
+                "title": "新增用户数",
                 "value": userNewCount
             },
             {
-                "title": "今日活跃用户数",
+                "title": "活跃用户数",
                 "value": todayHuoyueCount
             },
         ],
