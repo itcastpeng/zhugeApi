@@ -17,7 +17,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer) # 为了转发给别人时候时候可以查看产品详情
 def product(request, oper_type):
     response = Response.ResponseObj()
 
