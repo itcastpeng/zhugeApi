@@ -16,7 +16,7 @@ def tongji_data(request):
     nowDate = datetime.datetime.now().strftime("%Y-%m-%d")
 
     start_date = request.GET.get('start_date', nowDate)
-    stop_date = request.GET.get('start_date', '')
+    stop_date = request.GET.get('stop_date', '')
 
     # 获取参数
     field_dict = {
@@ -26,6 +26,7 @@ def tongji_data(request):
         'create_date__lt': stop_date,
     }
     q = conditionCom(request, field_dict)
+    print('q -->', q)
 
     userCount = models.zhugedanao_userprofile.objects.count()       # 所有用户
     userNewCount = models.zhugedanao_userprofile.objects.filter(q).count()    # 新用户
