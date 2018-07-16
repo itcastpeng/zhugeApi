@@ -387,7 +387,7 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
 
-                url = 'http://127.0.0.1:8000/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
                 print('------>',url)
 
                 driver.get(url)
