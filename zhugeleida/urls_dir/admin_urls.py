@@ -7,7 +7,6 @@ from zhugeleida.views_dir.admin import  role,company,login,user,department,websi
 urlpatterns = [
     url(r'^login$', login.login),
 
-
     url(r'^home_page$',home_page.home_page),
     url(r'^home_page/(?P<oper_type>\w+)', home_page.home_page_oper),
 

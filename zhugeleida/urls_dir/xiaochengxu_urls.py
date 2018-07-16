@@ -35,5 +35,4 @@ urlpatterns = [
     url(r'^login$', login.login),
     url(r'^login/(?P<oper_type>\w+)$', login.login_oper)
 
-
 ]

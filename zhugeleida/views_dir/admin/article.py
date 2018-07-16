@@ -5,12 +5,12 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.company_verify import CompanyAddForm, CompanyUpdateForm, CompanySelectForm
+from zhugeleida.forms.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm
 import time
 import datetime
 import json
 
-from publicFunc.condition_com import conditionCom
+from zhugeleida.public.condition_com import conditionCom
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -22,7 +22,7 @@ def article(request,oper_type):
 
        if oper_type == 'myarticle_list':
 
-            forms_obj = CompanySelectForm(request.GET)
+            forms_obj = ArticleSelectForm(request.GET)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
@@ -32,14 +32,16 @@ def article(request,oper_type):
 
                 field_dict = {
                     'id': '',
-                    'name': '__contains',
-                    'create_date': '',
+                    'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
+                    'user_id': '__in',      # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
+                    'title': '__contains',  # 按文章标题搜索
                 }
 
-                q = conditionCom(request, field_dict)
+                request_data = request.GET.copy()
+                q = conditionCom(request_data, field_dict)
                 print('q -->', q )
 
-                objs = models.zgld_company.objects.filter(q).order_by(order)
+                objs = models.zgld_article.objects.filter(q).order_by(order)
                 count = objs.count()
 
                 if length != 0:
@@ -52,14 +54,19 @@ def article(request,oper_type):
                 ret_data = []
                 # 获取第几页的数据
                 for obj in objs:
-
                     ret_data.append({
                         'id': obj.id,
-                        'name': obj.name,
-                        'company_id': obj.id,
-                        'create_date': obj.create_date,
-                        'corp_id': obj.corp_id,
-                        'tongxunlu_secret': obj.tongxunlu_secret,
+                        'title': obj.title,       # 文章标题
+                        'status_code': obj.status,   # 状态
+                        'status': obj.get_status_display(),   # 状态
+                        'source_code': obj.source,   # 状态
+                        'source': obj.get_source_display(),   # 状态
+                        'author': obj.user.name,   # 如果为原创显示,文章作者
+                        'avatar': obj.user.avatar,  # 用户的头像
+                        'read_count': obj.read_count,        #被阅读数量
+                        'forward_count': obj.forward_count,  #被转发个数
+                        'create_date': obj.create_date,      #文章创建时间
+                        'cover_url' : obj.cover_picture,     #文章图片链接
 
                     })
                 response.code = 200
@@ -69,9 +76,39 @@ def article(request,oper_type):
                 }
             return JsonResponse(response.__dict__)
 
+
+
+       if oper_type == 'tag_list':
+
+           user_id = request.GET.get('user_id')
+           field_dict = {
+               'tag_id': '',
+               'name': '__contains',
+           }
+           request_data = request.GET.copy()
+
+           q = conditionCom(request_data, field_dict)
+           print('q -->', q)
+
+           tag_list = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
+
+           response.code = 200
+           response.data = {
+               'user_id': user_id,
+               'ret_data': list(tag_list),
+               'data_count': tag_list.count(),
+           }
+
+       else:
+           response.code = 402
+           response.msg = "请求异常"
+
+
     else:
         response.code = 402
         response.msg = "请求异常"
+
+    return JsonResponse(response.__dict__)
 
 
 @csrf_exempt
