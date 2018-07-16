@@ -72,7 +72,7 @@ class zhugedanao_userprofile(models.Model):
 class zhugedanao_gongneng(models.Model):
     name = models.CharField(verbose_name="功能名称", max_length=128)
     pid = models.ForeignKey('self', verbose_name="功能父ID，为空表示主功能", null=True, blank=True)
-    createTime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
     class Meta:
         app_label = "zhugedanao"
@@ -82,7 +82,7 @@ class zhugedanao_oper_log(models.Model):
 
     user = models.ForeignKey('zhugedanao_userprofile', verbose_name="用户")
     gongneng = models.ForeignKey('zhugedanao_gongneng', verbose_name='使用功能')
-    createTime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
     class Meta:
         app_label = "zhugedanao"
