@@ -15,8 +15,8 @@ def tongji_data(request):
     response = ResponseObj()
     nowDate = datetime.datetime.now().strftime("%Y-%m-%d")
 
-    start_date = request.GET.get('start_date', nowDate)
-    stop_date = request.GET.get('stop_date', '')
+    start_date = request.GET.get('create_date__gte', nowDate)
+    stop_date = request.GET.get('create_date__lt', '')
 
     # 获取参数
     field_dict = {
