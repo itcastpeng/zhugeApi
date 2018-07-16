@@ -25,6 +25,7 @@ def tongji_data(request):
         'create_date__gte': start_date,
         'create_date__lt': stop_date,
     }
+    print('field_dict -->', field_dict)
     q = conditionCom(request, field_dict)
     print('q -->', q)
 
