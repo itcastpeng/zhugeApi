@@ -122,7 +122,7 @@ def index(request):
 def wechat_login(request):
     response = ResponseObj()
     timestamp = request.POST.get('timestamp')
-    user_objs = models.zhugedanao_userprofile.objects.filter(timestamp=timestamp)
+    user_objs = models.zhugedanao_userprofile.objects.select_related('level_name').filter(timestamp=timestamp)
     if user_objs:
         user_obj = user_objs[0]
         response.code = 200
@@ -131,7 +131,7 @@ def wechat_login(request):
             'user_id': user_obj.id,
             'set_avator': user_obj.set_avator,
             'username': user_obj.username,
-
+            'level_name': user_obj.level_name.name
         }
         response.msg = "登录成功"
     else:
