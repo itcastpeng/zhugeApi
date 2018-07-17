@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.admin import  role,company,login,user,department,website,home_page,product,article
+from zhugeleida.views_dir.admin import  role,company,login,user,department,website,home_page,product,article,article_tag
 
 
 

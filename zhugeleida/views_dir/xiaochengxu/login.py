@@ -128,10 +128,6 @@ def login_oper(request,oper_type):
 
                 else:
 
-                    # 异步生成小程序和企业用户对应的小程序二维码
-                    data_dict = {'user_id': user_id,'customer_id': customer_id}
-                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
-
                     user_customer_belonger_obj.superior = parent_id      #上级人。
                     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
 
@@ -139,7 +135,11 @@ def login_oper(request,oper_type):
                     msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
                     models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)
 
-                    print('---------- crete successful ---->')
+                    print('---------- 插入第一条用户和客户的对话信息 successful ---->')
+
+                    # 异步生成小程序和企业用户对应的小程序二维码
+                    data_dict = {'user_id': user_id,'customer_id': customer_id}
+                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
 
                     response.code = 200
                     response.msg = "绑定关系成功"

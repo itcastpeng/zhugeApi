@@ -141,14 +141,15 @@ def create_user_or_customer_qr_code(request):
         rc.set('xiaochengxu_token', access_token, 7000)
 
     else:
-
         get_qr_data['access_token'] = token_ret
 
     post_qr_data = {'path': path, 'width': 430}
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
 
     if not qr_ret.content:
+        rc.delete('xiaochengxu_token')
         response.msg = "生成小程序二维码未验证通过"
+
         return response
 
     # print('-------qr_ret---->', qr_ret.text)
@@ -157,10 +158,22 @@ def create_user_or_customer_qr_code(request):
     with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
 
-    user_obj = models.zgld_userprofile.objects.get(id=user_id)
-    user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
-    print('user_obj.qr_code -->', user_obj.qr_code)
-    user_obj.save()
+    if not customer_id:
+        user_obj = models.zgld_userprofile.objects.get(id=user_id)
+        user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
+        print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code)
+        user_obj.save()
+
+    else:
+        obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
+        if obj:
+            user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
+            obj.update(qr_code = user_qr_code_path)
+            print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code)
+        else:
+            print('----用户-客户对应绑定关系不存在--->>')
+
+
 
     response.code = 200
     response.msg = "生成小程序二维码成功"

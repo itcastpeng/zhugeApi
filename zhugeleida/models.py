@@ -71,7 +71,7 @@ class zgld_userprofile(models.Model):
 
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
     avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/setAvator.jpg')
-    qr_code = models.CharField(verbose_name='员工个人二维码', max_length=128, null=True)
+    qr_code = models.CharField(verbose_name='企业用户个人二维码', max_length=128, null=True)
     status_choices = (
         (1, "启用"),
         (2, "未启用"),
@@ -269,6 +269,7 @@ class zgld_user_customer_belonger(models.Model):
         (2, '转发'),
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
+    qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:

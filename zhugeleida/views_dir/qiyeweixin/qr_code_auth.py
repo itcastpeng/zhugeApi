@@ -37,7 +37,7 @@ def  create_qr_code(request):
 def create_small_program_qr_code(data):
     response = Response.ResponseObj()
     user_id = data.get('user_id')
-    customer_id = data.get('customer_id') or ''
+    customer_id = data.get('customer_id','')
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
