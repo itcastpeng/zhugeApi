@@ -33,6 +33,11 @@ class zhugedanao_role(models.Model):
         return "%s" % self.name
 
 
+# 用户级别表
+class zhugedanao_level(models.Model):
+    name = models.CharField(verbose_name="级别名称")
+
+
 # 用户信息表
 class zhugedanao_userprofile(models.Model):
     status_choices = (
@@ -42,6 +47,8 @@ class zhugedanao_userprofile(models.Model):
     status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=1)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     username = models.CharField(verbose_name="姓名", max_length=32, null=True, blank=True)
+
+    level_name = models.ForeignKey('zhugedanao_level', verbose_name="用户级别", default=1)
     role = models.ForeignKey("zhugedanao_role", verbose_name="角色", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
@@ -69,6 +76,7 @@ class zhugedanao_userprofile(models.Model):
         app_label = "zhugedanao"
 
 
+# 功能表
 class zhugedanao_gongneng(models.Model):
     name = models.CharField(verbose_name="功能名称", max_length=128)
     pid = models.ForeignKey('self', verbose_name="功能父ID，为空表示主功能", null=True, blank=True)
@@ -78,6 +86,7 @@ class zhugedanao_gongneng(models.Model):
         app_label = "zhugedanao"
 
 
+# 功能访问日志表
 class zhugedanao_oper_log(models.Model):
 
     user = models.ForeignKey('zhugedanao_userprofile', verbose_name="用户")
@@ -86,3 +95,5 @@ class zhugedanao_oper_log(models.Model):
 
     class Meta:
         app_label = "zhugedanao"
+
+
