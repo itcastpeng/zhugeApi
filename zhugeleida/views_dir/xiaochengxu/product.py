@@ -229,7 +229,7 @@ def product(request, oper_type):
 
                 new_filename = new_product_cover_filename + '.' + file_type
 
-                new_product_cover_path =  "/".join((BASE_DIR, 'statics', 'zhugeleida', 'imgs', new_filename))
+                new_product_cover_path =  "/".join((BASE_DIR, 'statics', 'zhugeleida', 'imgs','chat' ,new_filename))
                 print('------new_product_cover_path------->>',new_product_cover_path)
                 with open(exit_product_cover_path,'rb') as read_file:
                     with open(new_product_cover_path, 'wb') as new_file:
