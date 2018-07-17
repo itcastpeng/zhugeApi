@@ -27,21 +27,22 @@ def product(request, oper_type):
             forms_obj = ProductGetForm(request.GET)
             if forms_obj.is_valid():
                 user_id = request.GET.get('uid')
+                customer_id = request.GET.get('user_id')
                 product_id = request.GET.get('product_id')
 
 
-                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+                # company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
                 con = Q()
 
                 q1 = Q()
                 q1.connector = 'and'
-                q1.children.append(('company_id', company_id))
+                # q1.children.append(('company_id', company_id))
                 q1.children.append(('id', product_id))
-                q1.children.append(('user_id', user_id))
+                q1.children.append(('user_id__isnull', False))
 
                 q2 = Q()
                 q2.connector = 'and'
-                q2.children.append(('company_id', company_id))
+                # q2.children.append(('company_id', company_id))
                 q2.children.append(('id', product_id))
                 q2.children.append(('user_id__isnull', True))
 
@@ -98,11 +99,11 @@ def product(request, oper_type):
                         #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
                         # else:
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-
-                        remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                        data = request.GET.copy()
-                        data['action'] = 2
-                        response = action_record(data, remark)
+                        if  customer_id: # 说明客户访问时候经过认证的
+                            remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
+                            data = request.GET.copy()
+                            data['action'] = 2
+                            response = action_record(data, remark)
 
                         #  查询成功 返回200 状态码
                         response.code = 200
