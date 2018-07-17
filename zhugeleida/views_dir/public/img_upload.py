@@ -83,7 +83,8 @@ def img_upload(request):
             print('img_save_path -->', img_save_path)
 
 
-        img_data = base64.b64decode(img_data.encode('utf-8'))
+        # img_data = base64.b64decode(img_data.encode('utf-8'))
+        img_data = base64.b64decode(img_data.encode('utf-8'), '-_')
         with open(img_save_path, 'wb') as f:
             f.write(img_data)
 
