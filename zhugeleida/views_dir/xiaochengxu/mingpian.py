@@ -360,6 +360,7 @@ def mingpian_oper(request, oper_type):
                 qr_code = ''
                 if qr_obj:
                     qr_code = "/" + qr_obj[0].qr_code
+                    print('----- poster 页面二维码 ------>>',qr_code)
                 else:
                     print('---用户-客户对应绑定关系不存在--->>')
 
@@ -402,7 +403,7 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
 
-                url = 'https://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
                 print('------>',url)
 
                 driver.get(url)
