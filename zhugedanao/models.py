@@ -34,8 +34,8 @@ class zhugedanao_role(models.Model):
 
 
 # 用户级别表
-# class zhugedanao_level(models.Model):
-#     name = models.CharField(verbose_name="级别名称", max_length=128)
+class zhugedanao_level(models.Model):
+    name = models.CharField(verbose_name="级别名称", max_length=128)
 
 
 # 用户信息表
