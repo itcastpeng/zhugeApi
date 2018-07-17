@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.admin import  role,company,login,user,department,website,home_page,product,article,article_tag
+from zhugeleida.views_dir.admin import  role,company,login,user,department,website,home_page,product,article
 
 
 
@@ -37,7 +37,7 @@ urlpatterns = [
 
     # 文章的标签管理
     # url(r'^tag/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
-    url(r'^tag$', article_tag.article_tag),
+    # url(r'^tag$', article_tag.article_tag),
 
 
 
