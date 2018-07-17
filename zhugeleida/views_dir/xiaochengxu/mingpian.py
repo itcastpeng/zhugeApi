@@ -349,14 +349,30 @@ def mingpian_oper(request, oper_type):
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 
+                user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2,).order_by('-create_date')
+
+                if user_photo_obj:
+                    user_avatar = user_photo_obj.photo_url
+                else:
+                    user_avatar = '/'  + obj.avatar
+
+                qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
+                qr_code = ''
+                if qr_obj:
+                    qr_code = "/" + qr_obj[0].qr_code
+                    print('----- poster 页面二维码 ------>>',qr_code)
+                else:
+                    print('---用户-客户对应绑定关系不存在--->>')
+
+
                 ret_data = {
                     'user_id': obj.id,
-                    'user_avatar': "/" + obj.avatar,
+                    'user_avatar': user_avatar,
                     'username': obj.username,
                     'position': obj.position,
                     'mingpian_phone': obj.mingpian_phone,
                     'company': obj.company.name,
-                    'qr_code_url':  "/" + obj.qr_code,
+                    'qr_code_url':  qr_code,
                 }
 
                 return render(request, 'create_poster.html',locals())
@@ -428,6 +444,7 @@ def mingpian_oper(request, oper_type):
                     'user_id': user_id,
                     'poster_url': poster_url,
                 }
+                print('-----save_poster ret_data --->>',ret_data)
 
                 response.data = ret_data
                 response.msg = "请求成功"

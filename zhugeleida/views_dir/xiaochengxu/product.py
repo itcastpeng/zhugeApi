@@ -242,7 +242,7 @@ def product(request, oper_type):
                 obj = models.zgld_chatinfo.objects.create(
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=1,  # 代表用户发送给客户
+                    send_type=2,  # 代表客户发送给用户
                     info_type=2,  # (2,'product_info')   #客户和用户之间的产品咨询
                     product_name=product_name,
                     product_price=product_price,
