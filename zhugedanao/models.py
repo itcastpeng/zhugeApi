@@ -48,7 +48,7 @@ class zhugedanao_userprofile(models.Model):
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     username = models.CharField(verbose_name="姓名", max_length=32, null=True, blank=True)
 
-    # level_name = models.ForeignKey('zhugedanao_level', verbose_name="用户级别", default=1)
+    level_name = models.ForeignKey('zhugedanao_level', verbose_name="用户级别", default=1)
     role = models.ForeignKey("zhugedanao_role", verbose_name="角色", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
