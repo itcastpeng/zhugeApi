@@ -47,19 +47,21 @@ class imgUploadForm(forms.Form):
 
 # 上传图片（分片上传）
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+# @account.is_token(models.zgld_userprofile)
 def img_upload(request):
     response = Response.ResponseObj()
 
     forms_obj = imgUploadForm(request.POST)
     if forms_obj.is_valid():
+
         img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
         timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
         img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
         chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
         expanded_name = img_name.split('.')[-1]  # 扩展名
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avatar 代表用户的头像。
-        print('-----img_source----->',img_source)
+       
+
         global img_save_path
 
         if img_source == 'user_photo':
@@ -83,12 +85,21 @@ def img_upload(request):
             print('img_save_path -->', img_save_path)
 
 
-        img_data = base64.b64decode(img_data.encode('utf-8'))
+        # img_data = base64.b64decode(img_data)
+        # img_data = base64.b64decode(img_data, '-_')
+        global data
+        missing_padding = 4 - len(img_data) % 4
+        if missing_padding:
+            data += b'=' * missing_padding
+
+        img_data = base64.b64decode(data)
+
         with open(img_save_path, 'wb') as f:
             f.write(img_data)
 
         response.code = 200
         response.msg = "上传成功"
+
     else:
         response.code = 303
         response.msg = "上传异常"
