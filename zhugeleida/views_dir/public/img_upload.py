@@ -47,7 +47,7 @@ class imgUploadForm(forms.Form):
 
 # 上传图片（分片上传）
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+# @account.is_token(models.zgld_userprofile)
 def img_upload(request):
     response = Response.ResponseObj()
 
@@ -86,14 +86,20 @@ def img_upload(request):
 
 
         # img_data = base64.b64decode(img_data)
-        img_data = base64.b64decode(img_data.encode('utf-8'), '-_')
-        # img_data = base64.urlsafe_b64decode(img_data.encode('utf-8'))
+        # img_data = base64.b64decode(img_data, '-_')
+        global data
+        missing_padding = 4 - len(img_data) % 4
+        if missing_padding:
+            data += b'=' * missing_padding
+
+        img_data = base64.b64decode(data)
 
         with open(img_save_path, 'wb') as f:
             f.write(img_data)
 
         response.code = 200
         response.msg = "上传成功"
+
     else:
         response.code = 303
         response.msg = "上传异常"
