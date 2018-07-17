@@ -29,7 +29,7 @@ def product(request, oper_type):
         if oper_type == 'product_edit':
             product_type = int(request.GET.get('product_type')) if request.GET.get('product_type') else ''
 
-            if int(product_type) == 1:     #单个官网产品展示
+            if product_type  == 1:     #单个官网产品展示
                 user_id = request.GET.get('user_id')
                 product_id = request.GET.get('product_id')
                 field_dict = {

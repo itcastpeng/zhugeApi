@@ -135,8 +135,9 @@ def department_oper(request, oper_type, o_id):
                 else:
                     models.zgld_department.objects.filter(id= obj.id).delete()
 
+                    rc.delete('tongxunlu_token')
                     response.code = weixin_ret['errcode']
-                    response.msg = "企业微信验证未通过"
+                    response.msg = "企业微信返回错误,%s" %  weixin_ret['errmsg']
 
             else:
                 # print("验证不通过")
@@ -185,8 +186,9 @@ def department_oper(request, oper_type, o_id):
                         response.code = 200
                         response.msg = "删除成功"
                     else:
+                        rc.delete('tongxunlu_token')
                         response.code = weixin_ret['errcode']
-                        response.msg = "企业微信验证未通过"
+                        response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
 
                 else:
@@ -272,7 +274,7 @@ def department_oper(request, oper_type, o_id):
 
                     else:
                         response.code = weixin_ret['errcode']
-                        response.msg = "企业微信验证未通过"
+                        response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
 
                 else:

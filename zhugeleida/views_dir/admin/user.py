@@ -240,8 +240,9 @@ def user_oper(request, oper_type, o_id):
                         response.msg = "添加用户成功"
 
                     else:
+                        rc.delete('tongxunlu_token')
                         response.code = weixin_ret['errcode']
-                        response.msg = "企业微信验证未通过"
+                        response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
 
             else:
@@ -294,8 +295,11 @@ def user_oper(request, oper_type, o_id):
                             response.code = 200
                             response.msg = "删除成功"
                         else:
+                            rc.delete('tongxunlu_token')
                             response.code = weixin_ret['errcode']
-                            response.msg = "企业微信验证未能通过"
+                            response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
+
+
                     else:
                         response.code = '302'
                         response.msg = "userid不存在"
