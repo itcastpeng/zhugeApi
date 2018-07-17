@@ -50,16 +50,17 @@ class imgUploadForm(forms.Form):
 @account.is_token(models.zgld_userprofile)
 def img_upload(request):
     response = Response.ResponseObj()
-
+    print('=========================')
     forms_obj = imgUploadForm(request.POST)
     if forms_obj.is_valid():
+        print('进入 form 表单----')
         img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
         timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
         img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
         chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
         expanded_name = img_name.split('.')[-1]  # 扩展名
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avatar 代表用户的头像。
-        print('-----img_source----->',img_source,len(img_data))
+       
 
         global img_save_path
 
@@ -84,8 +85,8 @@ def img_upload(request):
             print('img_save_path -->', img_save_path)
 
 
-        # img_data = base64.b64decode(img_data.encode('utf-8'))
-        img_data = base64.b64decode(img_data, '-_')
+        img_data = base64.b64decode(img_data)
+        # img_data = base64.b64decode(img_data, '-_')
         # img_data = base64.urlsafe_b64decode(img_data.encode('utf-8'))
 
         with open(img_save_path, 'wb') as f:
