@@ -237,7 +237,8 @@ def product(request, oper_type):
                 static_product_cover_url =  "/".join(( 'statics', 'zhugeleida', 'imgs', 'chat', new_filename))
                 print('------static_product_cover_url---->>',static_product_cover_url)
 
-                models.zgld_chatinfo.objects.create(
+                models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id).update(is_last_msg=False)
+                obj = models.zgld_chatinfo.objects.create(
                     userprofile_id=user_id,
                     customer_id=customer_id,
                     send_type=1,  # 代表用户发送给客户
@@ -246,6 +247,7 @@ def product(request, oper_type):
                     product_price=product_price,
                     product_cover_url=static_product_cover_url,
                     )
+
 
                 remark = '向您咨询产品'
                 data = request.GET.copy()
