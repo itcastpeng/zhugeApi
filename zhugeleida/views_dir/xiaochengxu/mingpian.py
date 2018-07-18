@@ -352,9 +352,12 @@ def mingpian_oper(request, oper_type):
                 user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2,).order_by('-create_date')
 
                 if user_photo_obj:
-                    user_avatar = user_photo_obj.photo_url
+                    user_avatar = "/" +  user_photo_obj.photo_url
                 else:
-                    user_avatar = '/'  + obj.avatar
+                    if obj.avatar.startswith("http"):
+                        user_avatar = obj.avatar
+                    else:
+                        user_avatar = "/" + obj.avatar
 
                 qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
                 qr_code = ''
