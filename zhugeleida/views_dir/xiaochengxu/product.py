@@ -17,7 +17,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def product(request, oper_type):
     response = Response.ResponseObj()
 
@@ -99,12 +99,13 @@ def product(request, oper_type):
                         #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
                         # else:
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                        customer_obj = models.zgld_customer.objects.get(id=customer_id)
-                        if  customer_obj.username : # 说明客户访问时候经过认证的
-                            remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                            data = request.GET.copy()
-                            data['action'] = 2
-                            response = action_record(data, remark)
+                        if customer_id:
+                            customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                                remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
+                                data = request.GET.copy()
+                                data['action'] = 2
+                                response = action_record(data, remark)
 
                         #  查询成功 返回200 状态码
                         response.code = 200
@@ -160,8 +161,10 @@ def product(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                     send_type=1, is_customer_new_msg=True).count()
+                chatinfo_count = 0
+                if customer_id:
+                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                         send_type=1, is_customer_new_msg=True).count()
 
                 if objs:
                     for obj in objs:
@@ -188,10 +191,13 @@ def product(request, oper_type):
 
                         })
 
-                        remark = '正在查看您发布的产品,尽快把握商机'
-                        data = request.GET.copy()
-                        data['action'] = 2
-                        response = action_record(data, remark)
+                        if customer_id:
+                            customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                                remark = '正在查看您发布的产品,尽快把握商机'
+                                data = request.GET.copy()
+                                data['action'] = 2
+                                response = action_record(data, remark)
 
                         #  查询成功 返回200 状态码
                         response.code = 200

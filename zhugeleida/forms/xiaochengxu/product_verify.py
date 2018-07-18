@@ -99,7 +99,7 @@ class ProductGetForm(forms.Form):
 class ProductSelectForm(forms.Form):
 
     user_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "用户ID不能为空"
         }
