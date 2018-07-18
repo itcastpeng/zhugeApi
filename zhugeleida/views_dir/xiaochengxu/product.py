@@ -101,7 +101,7 @@ def product(request, oper_type):
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                         if customer_id:
                             customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                            if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
                                 remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                                 data = request.GET.copy()
                                 data['action'] = 2
@@ -190,22 +190,23 @@ def product(request, oper_type):
 
                         })
 
-                        if customer_id:
-                            customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-                            if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
-                                remark = '正在查看您发布的产品,尽快把握商机'
-                                data = request.GET.copy()
-                                data['action'] = 2
-                                response = action_record(data, remark)
+                    if customer_id:
+                        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+                        if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
+                            remark = '正在查看您发布的产品,尽快把握商机'
+                            data = request.GET.copy()
+                            data['action'] = 2
+                            response = action_record(data, remark)
 
-                        #  查询成功 返回200 状态码
-                        response.code = 200
-                        response.msg = '查询成功'
-                        response.data = {
-                            'ret_data': ret_data,
-                            'chatinfo_count': chatinfo_count,  # 留言个数
-                            'data_count': count,
-                        }
+                    #  查询成功 返回200 状态码
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'chatinfo_count': chatinfo_count,  # 留言个数
+                        'data_count': count,
+                    }
+
                 else:
                     response.code = 302
                     response.msg = '产品列表无数据'
