@@ -187,8 +187,8 @@ def product(request, oper_type):
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
                             'status_code': obj.status,  # 产品的动态。
-
                         })
+
 
                     if customer_id:
                         customer_obj = models.zgld_customer.objects.filter(id=customer_id)

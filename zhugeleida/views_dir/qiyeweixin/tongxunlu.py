@@ -35,8 +35,8 @@ def tongxunlu(request):
                 'expected_time': '__contains',  # 预测成交时间
                 # 'customer__zgld_user_customer_belonger_set': '',              # 搜索转码 或者 转发
                 'create_date': '',
-
             }
+
             q = conditionCom(request, field_dict)
             source = request.GET.get('customer__source')
             customer_list = []

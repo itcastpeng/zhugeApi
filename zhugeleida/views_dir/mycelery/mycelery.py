@@ -107,7 +107,7 @@ def create_user_or_customer_qr_code(request):
     get_token_data = {}
 
     if not customer_id:
-        path = '/pages/mingpian/index?uid=%s&source=1&' % (user_id)
+        path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
         user_qr_code = '/%s_qrcode.jpg' % (user_id)
 
     else:
