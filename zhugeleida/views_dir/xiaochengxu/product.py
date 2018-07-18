@@ -191,10 +191,13 @@ def product(request, oper_type):
 
                         })
 
-                        remark = '正在查看您发布的产品,尽快把握商机'
-                        data = request.GET.copy()
-                        data['action'] = 2
-                        response = action_record(data, remark)
+                        if customer_id:
+                            customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                                remark = '正在查看您发布的产品,尽快把握商机'
+                                data = request.GET.copy()
+                                data['action'] = 2
+                                response = action_record(data, remark)
 
                         #  查询成功 返回200 状态码
                         response.code = 200
