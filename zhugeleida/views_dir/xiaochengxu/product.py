@@ -161,8 +161,10 @@ def product(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                     send_type=1, is_customer_new_msg=True).count()
+                chatinfo_count = 0
+                if customer_id:
+                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                         send_type=1, is_customer_new_msg=True).count()
 
                 if objs:
                     for obj in objs:
