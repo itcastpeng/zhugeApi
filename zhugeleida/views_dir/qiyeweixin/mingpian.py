@@ -52,6 +52,7 @@ def mingpian(request):
             else:
                 mingpian_avatar = objs[0].avatar
 
+
             ret_data = []
             for obj in objs:
                 tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
@@ -134,6 +135,7 @@ def mingpian_oper(request, oper_type):
             if forms_obj.is_valid():
 
                 print('----forms_obj.data--->>', forms_obj.data)
+                avator_picture_url = request.POST.get('avator_picture_url')
 
                 user_id = request.GET.get('user_id')
                 wechat = forms_obj.data.get('wechat')
@@ -156,6 +158,15 @@ def mingpian_oper(request, oper_type):
                 if objs[0].company_id:  # 后台一定要先将用户外键到公司的ID。在修改公司地址。
                     company_obj = models.zgld_company.objects.filter(id=objs[0].company_id)
                     company_obj.update(area=area, address=address)
+
+                avator_objs = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2)
+                if  avator_objs:
+                    avator_objs.update(photo_url=avator_picture_url)
+
+                else:
+                    obj = models.zgld_user_photo.objects.create(user_id=user_id, photo_url=avator_picture_url, photo_type=2)
+
+
 
                 response.code = 200
                 response.msg = '保存成功'

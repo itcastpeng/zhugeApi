@@ -118,7 +118,7 @@ def login_oper(request,oper_type):
                 source = forms_obj.cleaned_data.get('source')   #1,代表扫码,2 代表转发
                 user_id = forms_obj.cleaned_data.get('uid') # 所属的企业用户的ID
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
-                parent_id = forms_obj.cleaned_data.get('pid')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+                parent_id = request.GET.get('pid','')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
 
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
 
@@ -128,9 +128,9 @@ def login_oper(request,oper_type):
 
                 else:
 
-                    user_customer_belonger_obj.superior = parent_id      #上级人。
                     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
-
+                    obj.customer_parent_id = parent_id    #上级人。
+                    obj.save()
                     #插入第一条用户和客户的对话信息
                     msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
                     models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)

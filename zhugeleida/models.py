@@ -248,7 +248,6 @@ class zgld_customer(models.Model):
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
     expedted_pr = models.CharField(verbose_name='预计成交概率', max_length=64, blank=True, null=True)
-    superior = models.ForeignKey('self', verbose_name='上级人', null=True, blank=True)
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -262,14 +261,15 @@ class zgld_customer(models.Model):
 
 # 客户所属用户-关系绑定表
 class zgld_user_customer_belonger(models.Model):
-    user = models.ForeignKey('zgld_userprofile', verbose_name='所属的用户', null=True)
-    customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
+    user = models.ForeignKey('zgld_userprofile', verbose_name='客户所属的用户', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='客户ID', null=True)
     source_type_choices = (
         (1, '扫码'),
         (2, '转发'),
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属父级',related_name="customer_parent" ,null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:

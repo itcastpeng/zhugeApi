@@ -479,7 +479,6 @@ def product_oper(request, oper_type, o_id):
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-
         elif oper_type == "delete_picture":
             # 删除 ID
             product_id = request.POST.get('product_id')

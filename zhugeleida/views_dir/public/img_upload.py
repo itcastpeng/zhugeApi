@@ -123,7 +123,7 @@ def img_merge(request):
         file_dir = ''
         if img_source == 'user_photo':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo')
-            #
+
             # user_id = request.GET.get('user_id')
             # img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo' , img_name])
             # img_save_path = "/".join([BasePath, img_path])

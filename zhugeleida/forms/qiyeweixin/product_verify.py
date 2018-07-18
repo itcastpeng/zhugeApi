@@ -23,10 +23,10 @@ class ProductAddForm(forms.Form):
         }
     )
     price = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "价格不能为空"
-        }
+        required=False,
+        # error_messages={
+        #     'required': "价格不能为空"
+        # }
     )
     reason = forms.CharField(
         required=False,
