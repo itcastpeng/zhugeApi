@@ -53,13 +53,7 @@ def customer(request):
             print('=====  objs ====>',objs)
             if objs:
                 for obj in objs:
-                    superior_obj = models.zgld_customer.objects.get(id=obj.id).superior
-                    if superior_obj :
-                        print('obj.superior.username--->',superior_obj.username)
-                        superior_username = superior_obj.username
-                    else:
-                        superior_username = ''
-
+                   
                     tag_list = []
                     tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
 
@@ -88,7 +82,6 @@ def customer(request):
                         'expected_time': obj.expected_time,  # 预计成交时间
                         'expedted_pr': obj.expedted_pr,  # 预计成交概率
                         'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
-                        'superior': superior_username,  # 所属上级
 
                         'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': obj.memo_name,  # 备注名

@@ -101,7 +101,7 @@ def product(request, oper_type):
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                         if customer_id:
                             customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                            if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
                                 remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                                 data = request.GET.copy()
                                 data['action'] = 2
