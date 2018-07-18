@@ -188,12 +188,11 @@ def product(request, oper_type):
                             'status': obj.get_status_display(),
                             'status_code': obj.status,  # 产品的动态。
 
-
                         })
 
                         if customer_id:
                             customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                            if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
                                 remark = '正在查看您发布的产品,尽快把握商机'
                                 data = request.GET.copy()
                                 data['action'] = 2
