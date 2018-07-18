@@ -130,6 +130,7 @@ def login_oper(request,oper_type):
 
                     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
                     obj.customer_parent_id = parent_id    #上级人。
+                    obj.save()
                     #插入第一条用户和客户的对话信息
                     msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
                     models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)
