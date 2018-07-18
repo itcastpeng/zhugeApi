@@ -61,7 +61,7 @@ def img_upload(request):
         expanded_name = img_name.split('.')[-1]  # 扩展名
 
         img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-
+        print('BasePath -->', BasePath)
         img_save_path = os.path.join(BasePath, 'statics', 'zhugeleida', 'imgs', 'tmp', img_name)
 
         with open(img_save_path, 'w') as f:
