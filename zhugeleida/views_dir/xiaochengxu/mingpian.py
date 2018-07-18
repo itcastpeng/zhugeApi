@@ -349,10 +349,11 @@ def mingpian_oper(request, oper_type):
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 
-                user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2,).order_by('-create_date')
+                user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2).order_by('-create_date')
 
                 if user_photo_obj:
-                    user_avatar = "/" +  user_photo_obj.photo_url
+                    user_avatar = "/" +  user_photo_obj[0].photo_url
+
                 else:
                     if obj.avatar.startswith("http"):
                         user_avatar = obj.avatar
