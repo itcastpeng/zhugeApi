@@ -118,7 +118,7 @@ def login_oper(request,oper_type):
                 source = forms_obj.cleaned_data.get('source')   #1,代表扫码,2 代表转发
                 user_id = forms_obj.cleaned_data.get('uid') # 所属的企业用户的ID
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
-                parent_id = forms_obj.cleaned_data.get('pid','')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+                parent_id = request.GET.get('pid','')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
 
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
 
