@@ -53,7 +53,7 @@ def customer(request):
             print('=====  objs ====>',objs)
             if objs:
                 for obj in objs:
-                   
+
                     tag_list = []
                     tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
 
