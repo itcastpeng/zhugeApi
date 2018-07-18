@@ -61,7 +61,6 @@ def img_upload(request):
         expanded_name = img_name.split('.')[-1]  # 扩展名
 
         img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-        print('BasePath -->', __file__)
         img_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', img_name)
         print('img_save_path -->', img_save_path )
 
@@ -179,7 +178,7 @@ def img_merge(request):
         fileData = ''
         for chunk in range(chunk_num):
             file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-            file_save_path = os.path.join(BasePath, 'statics', 'zhugeleida', 'imgs', 'tmp', file_name)
+            file_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', file_name)
             with open(file_save_path, 'r') as f:
                 fileData += f.read()
 
@@ -187,8 +186,8 @@ def img_merge(request):
 
         # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
-        img_save_path = os.path.join(BasePath, img_path)
-        file_obj = open(img_save_path, 'ab')
+        # img_save_path = os.path.join(BasePath, img_path)
+        file_obj = open(img_path, 'ab')
         img_data = base64.b64decode(fileData)
         file_obj.write(img_data)
         # obj = models.zgld_user_photo.objects.create(user_id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
