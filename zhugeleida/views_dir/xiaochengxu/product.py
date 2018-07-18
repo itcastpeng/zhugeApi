@@ -99,12 +99,13 @@ def product(request, oper_type):
                         #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
                         # else:
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-                        if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
-                            remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                            data = request.GET.copy()
-                            data['action'] = 2
-                            response = action_record(data, remark)
+                        if customer_id:
+                            customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+                            if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
+                                remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
+                                data = request.GET.copy()
+                                data['action'] = 2
+                                response = action_record(data, remark)
 
                         #  查询成功 返回200 状态码
                         response.code = 200
