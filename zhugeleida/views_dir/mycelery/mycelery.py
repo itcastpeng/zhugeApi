@@ -163,13 +163,15 @@ def create_user_or_customer_qr_code(request):
         obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id)
         user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
         obj.qr_code=user_qr_code_path
+        obj.save()
         print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code)
 
     else:
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
-        print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code)
         user_obj.save()
+        print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code)
+
 
 
 
