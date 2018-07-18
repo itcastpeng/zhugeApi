@@ -52,6 +52,7 @@ def mingpian(request):
             else:
                 mingpian_avatar = objs[0].avatar
 
+
             ret_data = []
             for obj in objs:
                 tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
@@ -134,7 +135,7 @@ def mingpian_oper(request, oper_type):
             if forms_obj.is_valid():
 
                 print('----forms_obj.data--->>', forms_obj.data)
-                avator_picture_url = request.GET.get('avator_picture_url')
+                avator_picture_url = request.POST.get('avator_picture_url')
 
                 user_id = request.GET.get('user_id')
                 wechat = forms_obj.data.get('wechat')
