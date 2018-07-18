@@ -62,7 +62,8 @@ def img_upload(request):
 
         img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
         print('BasePath -->', __file__)
-        img_save_path = os.path.join(BasePath, 'statics', 'zhugeleida', 'imgs', 'tmp', img_name)
+        img_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', img_name)
+        print('img_save_path -->', img_save_path )
 
         with open(img_save_path, 'w') as f:
             f.write(img_data)
