@@ -17,7 +17,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def product(request, oper_type):
     response = Response.ResponseObj()
 
@@ -99,8 +99,8 @@ def product(request, oper_type):
                         #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
                         # else:
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                        customer_obj = models.zgld_customer.objects.get(id=customer_id)
-                        if  customer_obj.username : # 说明客户访问时候经过认证的
+                        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+                        if customer_obj and  customer_obj.username : # 说明客户访问时候经过认证的
                             remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                             data = request.GET.copy()
                             data['action'] = 2
