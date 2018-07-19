@@ -171,9 +171,13 @@ def product(request, oper_type):
                     else:
                         publisher = '企业发布'
 
-                    picture_url = models.zgld_product_picture.objects.filter(
+                    picture_obj = models.zgld_product_picture.objects.filter(
                                 product_id=product_id, picture_type=1
-                    ).order_by('create_date')[0].picture_url
+                    ).order_by('create_date')
+
+                    picture_url = ''
+                    if picture_obj:
+                        picture_url = picture_obj[0].picture_url
 
 
                     ret_data.append({
@@ -273,7 +277,7 @@ def product_oper(request, oper_type, o_id):
                 'user_id': request.GET.get('user_id'),
                 'product_id': o_id,  # 标题    非必须
                 'name': request.POST.get('name'),  # 产品名称 必须
-                'price': request.POST.get('price'),  # 价格     必须
+                'price': request.POST.get('price'),  # 价格    非必须
                 'reason': request.POST.get('reason'),  # 推荐理由 非必须
                 # 'article_id': request.POST.get('article_id'),  # 内容    非必须
             }
@@ -402,6 +406,14 @@ def product_oper(request, oper_type, o_id):
 
                     response.code = 200
                     response.msg = "添加成功"
+                else:
+                    objs = models.zgld_product_article.objects.filter(product_id=product_id)
+                    if objs:
+                        objs.delete()
+
+                    response.code = 200
+                    response.msg = "添加成功"
+
 
             else:
                 response.code = 301
@@ -635,8 +647,8 @@ def product_oper(request, oper_type, o_id):
                             picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
                             picture_obj.update(product_id=product_id, order=article_data.get('order'))
 
-                    response.code = 200
-                    response.msg = "添加成功"
+                response.code = 200
+                response.msg = "添加成功"
 
             else:
                 response.code = 301

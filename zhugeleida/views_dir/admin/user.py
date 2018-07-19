@@ -233,7 +233,7 @@ def user_oper(request, oper_type, o_id):
                         obj.department = depart_id_list
 
                         # 生成企业用户二维码
-                        data_dict ={ 'user_id': obj.id }
+                        data_dict ={ 'user_id': obj.id, 'customer_id':'' }
                         tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
                         response.code = 200

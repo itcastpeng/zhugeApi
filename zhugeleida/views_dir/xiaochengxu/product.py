@@ -170,9 +170,13 @@ def product(request, oper_type):
                     for obj in objs:
                         product_id = obj.id
 
-                        picture_url = models.zgld_product_picture.objects.filter(
+                        picture_obj = models.zgld_product_picture.objects.filter(
                                     product_id=product_id, picture_type=1
-                        ).order_by('create_date')[0].picture_url
+                        ).order_by('create_date')
+                        picture_url = ''
+                        if picture_obj:
+                            picture_url = picture_obj[0].picture_url
+
                         user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
 
                         ret_data.append({
@@ -187,8 +191,8 @@ def product(request, oper_type):
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
                             'status_code': obj.status,  # 产品的动态。
-
                         })
+
 
                     if customer_id:
                         customer_obj = models.zgld_customer.objects.filter(id=customer_id)
