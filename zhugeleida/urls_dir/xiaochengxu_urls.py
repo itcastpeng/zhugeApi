@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag_customer,user_weixin_auth,customer
 from zhugeleida.views_dir.xiaochengxu import login,mingpian,product
-from zhugeleida.views_dir.xiaochengxu  import chat
+from zhugeleida.views_dir.xiaochengxu  import chat,website
 
 
 urlpatterns = [
@@ -33,6 +33,9 @@ urlpatterns = [
 
     #小程序登录认证
     url(r'^login$', login.login),
-    url(r'^login/(?P<oper_type>\w+)$', login.login_oper)
+    url(r'^login/(?P<oper_type>\w+)$', login.login_oper),
+
+    #小程序官网
+    url(r'website$',website.website),
 
 ]
