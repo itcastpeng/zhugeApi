@@ -635,8 +635,8 @@ def product_oper(request, oper_type, o_id):
                             picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
                             picture_obj.update(product_id=product_id, order=article_data.get('order'))
 
-                    response.code = 200
-                    response.msg = "添加成功"
+                response.code = 200
+                response.msg = "添加成功"
 
             else:
                 response.code = 301
