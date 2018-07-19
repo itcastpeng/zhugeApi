@@ -330,13 +330,9 @@ def mingpian_oper(request, oper_type):
 
                 mingpian_avatar = ''
                 if mingpian_avatar_obj:
-                    mingpian_avatar = "/" +  mingpian_avatar_obj[0].photo_url
+                    mingpian_avatar =   mingpian_avatar_obj[0].photo_url
                 else:
-
-                    if obj.avatar.startswith("http"):
-                        mingpian_avatar = obj.avatar
-                    else:
-                        mingpian_avatar = "/" + obj.avatar
+                    mingpian_avatar =  obj.avatar
 
                 ret_data = {
                     'user_id': obj.id,

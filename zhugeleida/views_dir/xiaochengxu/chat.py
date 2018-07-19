@@ -61,13 +61,13 @@ def chat(request):
                 mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
                 mingpian_avatar = ''
                 if mingpian_avatar_obj:
-                    mingpian_avatar = "/" +  mingpian_avatar_obj[0].photo_url
+                    mingpian_avatar = mingpian_avatar_obj[0].photo_url
                 else:
 
-                    if obj.userprofile.avatar.startswith("http"):
-                        mingpian_avatar = obj.userprofile.avatar
-                    else:
-                        mingpian_avatar = "/" + obj.userprofile.avatar
+                    # if obj.userprofile.avatar.startswith("http"):
+                    #     mingpian_avatar = obj.userprofile.avatar
+                    # else:
+                    mingpian_avatar =  obj.userprofile.avatar
 
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
                     print('------first_info.get----->',first_info[0].get('id'))
@@ -164,13 +164,13 @@ def chat_oper(request, oper_type, o_id):
 
                     mingpian_avatar = ''
                     if mingpian_avatar_obj:
-                        mingpian_avatar = "/" + mingpian_avatar_obj[0].photo_url
+                        mingpian_avatar = mingpian_avatar_obj[0].photo_url
                     else:
 
-                        if obj.userprofile.avatar.startswith("http"):
-                            mingpian_avatar = obj.userprofile.avatar
-                        else:
-                            mingpian_avatar = "/" + obj.userprofile.avatar
+                        # if obj.userprofile.avatar.startswith("http"):
+                        #     mingpian_avatar = obj.userprofile.avatar
+                        # else:
+                        mingpian_avatar =  obj.userprofile.avatar
 
                     ret_data_list.append({
                                 'customer_id': obj.customer.id,
