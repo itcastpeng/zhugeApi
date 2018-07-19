@@ -80,7 +80,7 @@ class ProductUpdateForm(forms.Form):
         }
     )
     price = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "价格不能为空"
         }
