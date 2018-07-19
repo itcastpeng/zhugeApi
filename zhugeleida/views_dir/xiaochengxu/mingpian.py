@@ -100,9 +100,13 @@ def mingpian(request):
 
                     mingpian_avatar = ''
                     if mingpian_avatar_obj:
-                        mingpian_avatar = mingpian_avatar_obj[0].photo_url
+                        mingpian_avatar = "/" + mingpian_avatar_obj[0].photo_url
                     else:
-                        mingpian_avatar = obj.avatar
+
+                        if obj.avatar.startswith("http"):
+                            mingpian_avatar = obj.avatar
+                        else:
+                            mingpian_avatar = "/" + obj.avatar
 
                     ret_data = {
                         'id': obj.id,
@@ -322,9 +326,21 @@ def mingpian_oper(request, oper_type):
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 
+                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
+
+                mingpian_avatar = ''
+                if mingpian_avatar_obj:
+                    mingpian_avatar = "/" +  mingpian_avatar_obj[0].photo_url
+                else:
+
+                    if obj.avatar.startswith("http"):
+                        mingpian_avatar = obj.avatar
+                    else:
+                        mingpian_avatar = "/" + obj.avatar
+
                 ret_data = {
                     'user_id': obj.id,
-                    'user_avatar':  obj.avatar,
+                    'user_avatar': mingpian_avatar,
                     'username': obj.username,
                     'position': obj.position,
                     'mingpian_phone': obj.mingpian_phone,
