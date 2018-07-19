@@ -172,10 +172,10 @@ def product(request, oper_type):
 
                         picture_obj = models.zgld_product_picture.objects.filter(
                                     product_id=product_id, picture_type=1
-                        ).order_by('create_date')[0]
+                        ).order_by('create_date')
                         picture_url = ''
                         if picture_obj:
-                            picture_url = picture_obj.picture_url
+                            picture_url = picture_obj[0].picture_url
 
                         user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
 
