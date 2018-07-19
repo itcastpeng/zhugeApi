@@ -56,7 +56,7 @@ def mingpian(request):
             ret_data = []
             for obj in objs:
                 tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
-                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values_list('id','photo_url')
+                photo_data = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=1).values_list('id','photo_url')
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,  # 姓名| 管理员可以修改
