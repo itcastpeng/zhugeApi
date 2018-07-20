@@ -243,6 +243,7 @@ def chat_oper(request, oper_type, o_id):
                     remark = ':%s' % (msg)
                     data = request.GET.copy()
                     data['action'] = 2  # 代表用客户咨询产品
+                    data['uid'] = user_id
                     response = action_record(data, remark)
 
                 response.code = 200
