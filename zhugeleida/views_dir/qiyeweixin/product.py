@@ -433,11 +433,10 @@ def product_oper(request, oper_type, o_id):
 
                 img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-                img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name])
-                print('img_save_path -->', img_save_path)
-                #print('img_data -->', img_data)
+                img_save_path = os.path.join(BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name)
+
                 img_data = base64.b64decode(img_data.encode('utf-8'))
-                with open(img_save_path, 'wb') as f:
+                with open(img_save_path, 'w') as f:
                     f.write(img_data)
 
                 response.code = 200
@@ -446,6 +445,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 303
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
 
         #产品图片合并请求
@@ -464,14 +464,21 @@ def product_oper(request, oper_type, o_id):
                 img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'product', img_name])
                 img_save_path = "/".join([BasePath, img_path])
                 file_obj = open(img_save_path, 'ab')
+                # for chunk in range(chunk_num):
+                #     file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+                #
+                #     file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product','tmp', file_name])
+                #
+                #     with open(file_save_path, 'rb') as f:
+                #         file_obj.write(f.read())
+
+                fileData = ''
                 for chunk in range(chunk_num):
                     file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+                    file_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', file_name)
+                    with open(file_save_path, 'r') as f:
+                        fileData += f.read()
 
-                    file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product','tmp', file_name])
-
-                    with open(file_save_path, 'rb') as f:
-                        file_obj.write(f.read())
-                        # file_content += f.read()
                     os.remove(file_save_path)
 
                 product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,

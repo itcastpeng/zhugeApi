@@ -9,7 +9,7 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm,imgMergeForm,imgUploadForm
-from zhugeleida.forms.qiyeweixin.product_verify import ProductAddForm, ProductUpdateForm, ProductSelectForm
+from zhugeleida.forms.qiyeweixin.product_verify import  ProductUpdateForm
 import json
 from django.db.models import Q
 from django.db.models import F
@@ -175,10 +175,13 @@ def product(request, oper_type):
 
 
         elif oper_type == 'product_list':
-
+            print('request.GET----->', request.GET)
             forms_obj = ProductSelectForm(request.GET)
             if forms_obj.is_valid():
+                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 product_type = forms_obj.cleaned_data.get('product_type')
+
+                print('product_type----->',request.GET.get('product_type'),product_type)
 
                 # 如果为1 代表是公司的官网
                 if product_type == 1:
@@ -216,9 +219,10 @@ def product(request, oper_type):
 
                         elif int(search_product_status) == 2:
                             q1.children.append(('status__in', [2]))  # (2,'已下架')
-
+                    print('-----q1---->>',q1)
                     objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
                     count = objs.count()
+                    print('-----objs----->>',objs)
 
                     if length != 0:
                         start_line = (current_page - 1) * length

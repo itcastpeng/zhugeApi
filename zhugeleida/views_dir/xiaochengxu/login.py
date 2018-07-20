@@ -13,6 +13,8 @@ import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
 from zhugeapi_celery_project import tasks
+from zhugeleida.public.common import action_record
+
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -161,6 +163,8 @@ def login_oper(request,oper_type):
             gender = request.POST.get('gender')  #1代表男
             language = request.POST.get('language')
             username =  request.POST.get('nickName')
+            page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
+
 
             objs = models.zgld_customer.objects.filter(
                 id = customer_id,
@@ -175,6 +179,28 @@ def login_oper(request,oper_type):
                 )
 
                 models.zgld_information.objects.create(sex=gender,customer_id=objs[0].id)
+
+                # (1, '查看名片详情'),
+                # (2, '查看产品列表'),
+                # (3, '查看产品详情'),
+                # (4, '查看官网'),
+                remark = '%s 已向您授权访问' % (username)
+                if page_info == 1:
+                   remark = '%s 已向您授权访问【名片详情】页面' % (username)
+
+                elif page_info == 2:
+                   remark = '%s 已向您授权访问【产品列表】页面' % (username)
+
+                elif page_info == 3:
+                   remark = '%s 已向您授权访问【产品详情】页面' % (username)
+                elif page_info == 4:
+                   remark = '%s 已向您授权访问【公司官网】页面' % (username)
+
+                data = request.GET.copy()
+                data['action'] = 13   # 代表用客户咨询产品
+                response = action_record(data, remark)
+
+
                 response.code = 200
                 response.msg = "保存成功"
             else:

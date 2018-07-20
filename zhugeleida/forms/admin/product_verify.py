@@ -112,16 +112,17 @@ class ProductSelectForm(forms.Form):
     )
 
 
+
     current_page = forms.IntegerField(
         required=False,
         error_messages={
-            'invalid': "页码数据类型错误",
+            'required': "页码数据类型错误",
         }
     )
     length = forms.IntegerField(
         required=False,
         error_messages={
-            'invalid': "页显示数量类型错误"
+            'required': "页显示数量类型错误"
         }
     )
 
