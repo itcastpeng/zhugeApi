@@ -15,7 +15,7 @@ from django import forms
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from django.db.models import Q
-
+BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 @csrf_exempt
@@ -433,10 +433,11 @@ def product_oper(request, oper_type, o_id):
 
                 img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
 
-                img_save_path = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name)
-
+                img_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', img_name])
+                print('img_save_path -->', img_save_path)
+                #print('img_data -->', img_data)
                 img_data = base64.b64decode(img_data.encode('utf-8'))
-                with open(img_save_path, 'w') as f:
+                with open(img_save_path, 'wb') as f:
                     f.write(img_data)
 
                 response.code = 200
@@ -445,7 +446,6 @@ def product_oper(request, oper_type, o_id):
                 response.code = 303
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
-
             return JsonResponse(response.__dict__)
 
         #产品图片合并请求
@@ -460,22 +460,19 @@ def product_oper(request, oper_type, o_id):
                 expanded_name = img_name.split('.')[-1]  # 扩展名
                 picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
 
-                file_dir = ''
-                file_dir = os.path.join(BASE_DIR,'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product')
-
-                fileData = ''
+                img_name = timestamp + '.' + expanded_name
+                img_path = "/".join(['statics', 'zhugeleida', 'imgs','qiyeweixin', 'product', img_name])
+                img_save_path = "/".join([BasePath, img_path])
+                file_obj = open(img_save_path, 'ab')
                 for chunk in range(chunk_num):
                     file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-                    file_save_path = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product', 'tmp', file_name)
-                    with open(file_save_path, 'r') as f:
-                        fileData += f.read()
 
+                    file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs','qiyeweixin' ,'product','tmp', file_name])
+
+                    with open(file_save_path, 'rb') as f:
+                        file_obj.write(f.read())
+                        # file_content += f.read()
                     os.remove(file_save_path)
-
-                img_path = os.path.join(file_dir, img_name)
-                file_obj = open(img_path, 'ab')
-                img_data = base64.b64decode(fileData)
-                file_obj.write(img_data)
 
                 product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
                                                                                      picture_url=img_path)
@@ -484,8 +481,8 @@ def product_oper(request, oper_type, o_id):
                             'picture_type': product_picture_obj.picture_type,
                             'picture_id': product_picture_obj.id,
                             'picture_url': product_picture_obj.picture_url,
-                }
 
+                }
                 response.code = 200
                 response.msg = "添加图片成功"
 
