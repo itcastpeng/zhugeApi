@@ -124,56 +124,12 @@ def img_merge(request):
         if img_source == 'user_photo':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo')
 
-            # user_id = request.GET.get('user_id')
-            # img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo' , img_name])
-            # img_save_path = "/".join([BasePath, img_path])
-            # file_obj = open(img_save_path, 'ab')
-            # for chunk in range(chunk_num):
-            #     file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-            #
-            #     file_save_path = "/".join([BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo', 'tmp' , file_name])
-            #
-            #     with open(file_save_path, 'rb') as f:
-            #         file_obj.write(f.read())
-            #         # file_content += f.read()
-            #     os.remove(file_save_path)
-            #     obj = models.zgld_user_photo.objects.create(user_id=user_id,photo_url=img_path,photo_type=1)  # 用户上传照片
-            #     response.data = {
-            #         'picture_id': obj.id,
-            #         'picture_url': obj.photo_url,
-            #     }
-
         elif img_source == 'user_avatar':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_avatar')
 
         elif img_source == 'cover_picture' or img_source == 'product_picture':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product')
 
-            # user_id = request.GET.get('user_id')
-            # img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', img_name])
-            # img_save_path = "/".join([BasePath, img_path])
-            # file_obj = open(img_save_path, 'ab')
-            # for chunk in range(chunk_num):
-            #     file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-            #
-            #     file_save_path = "/".join(
-            #         [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', file_name])
-            #
-            #     with open(file_save_path, 'rb') as f:
-            #         file_obj.write(f.read())
-            #
-            #     os.remove(file_save_path)
-            #
-            #     if img_source == 'cover_picture':
-            #         obj = models.zgld_product_picture.objects.create(picture_url=img_path,
-            #                                                          picture_type=1)  # 封面头像
-            #     elif  img_source == 'product_picture':
-            #         obj = models.zgld_product_picture.objects.create(picture_url=img_path,
-            #                                                          picture_type=2)  # 产品图片
-            #     response.data = {
-            #         'picture_id': obj.id,
-            #         'picture_url': obj.picture_url,
-            #     }
 
         fileData = ''
         for chunk in range(chunk_num):
@@ -186,11 +142,9 @@ def img_merge(request):
 
         # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
-        # img_save_path = os.path.join(BasePath, img_path)
         file_obj = open(img_path, 'ab')
         img_data = base64.b64decode(fileData)
         file_obj.write(img_data)
-        # obj = models.zgld_user_photo.objects.create(user_id=user_id, photo_url=img_path,photo_type=2)   # 用户名片头像
 
         response.data = {
             'picture_url': img_path,

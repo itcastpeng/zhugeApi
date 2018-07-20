@@ -234,9 +234,12 @@ def product(request, oper_type):
                     if objs:
                         for obj in objs:
                             product_id = obj.id
-                            picture_url = models.zgld_product_picture.objects.filter(
+                            picture_obj = models.zgld_product_picture.objects.filter(
                                 product_id=product_id, picture_type=1
-                            ).order_by('create_date')[0].picture_url
+                            ).order_by('create_date')
+                            picture_url = ''
+                            if picture_obj:
+                                 picture_url = picture_obj[0].picture_url
 
                             ret_data.append({
                                 'product_id': product_id,
@@ -310,9 +313,13 @@ def product(request, oper_type):
                     if objs:
                         for obj in objs:
                             product_id = obj.id
-                            picture_url = models.zgld_product_picture.objects.filter(
+                            picture_obj = models.zgld_product_picture.objects.filter(
                                 product_id=product_id, picture_type=1
-                            ).order_by('create_date')[0].picture_url
+                            ).order_by('create_date')
+
+                            picture_url = ''
+                            if picture_obj:
+                                picture_url = picture_obj[0].picture_url
 
                             ret_data.append({
                                 'product_id': product_id,
