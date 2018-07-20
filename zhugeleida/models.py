@@ -391,6 +391,7 @@ class zgld_accesslog(models.Model):
         (10, '拨打电话'),
         (11, '播放语音'),
         (12, '复制邮箱'),
+        (13, '授权访问')
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)

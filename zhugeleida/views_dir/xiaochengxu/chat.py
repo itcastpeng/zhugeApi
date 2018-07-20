@@ -11,7 +11,7 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,
 
 import json
 from zhugeleida import models
-
+from zhugeleida.public.common import action_record
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -232,6 +232,18 @@ def chat_oper(request, oper_type, o_id):
                     customer_id=customer_id,
                     send_type=send_type,
                 )
+
+                user_new_msg_count = models.zgld_chatinfo.objects.filter(
+                        userprofile_id=user_id,
+                        customer_id=customer_id,
+                        is_user_new_msg=True
+                ).count()
+
+                if user_new_msg_count > 0: # 说明有新消息
+                    remark = ':%s' % (msg)
+                    data = request.GET.copy()
+                    data['action'] = 2  # 代表用客户咨询产品
+                    response = action_record(data, remark)
 
                 response.code = 200
                 response.msg = 'send msg successful'
