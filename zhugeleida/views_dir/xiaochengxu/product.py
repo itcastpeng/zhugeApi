@@ -77,7 +77,10 @@ def product(request, oper_type):
 
                         # article_content_data = models.zgld_product_article.objects.filter(type=2).values_list('id','order','content')
                         ret_data_list = sort_article_data(list(article_picture_list))
-                        user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
+                        user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                        user_avatar = user_obj.avatar
+                        username = user_obj.username
+                        position = user_obj.position
 
                         ret_data.append({
                             'id': obj.id,
@@ -86,13 +89,13 @@ def product(request, oper_type):
                             'name': obj.name,  # 产品名称
                             'price': obj.price,  # 价格
                             'user_avatar': user_avatar,
-
+                            'username': username,
+                            'position': position,
                             'reason': obj.reason,  # 推荐理由
                             'article_data': ret_data_list,
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),  # 产品的动态
                             'status_code': obj.status  # 产品的动态值。
-
                         })
 
                         # if len(('正在查看' + obj.name)) > 20:
