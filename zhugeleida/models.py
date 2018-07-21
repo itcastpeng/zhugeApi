@@ -141,6 +141,7 @@ class zgld_product(models.Model):
     name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     price = models.CharField(verbose_name='价格', max_length=64, null=True)
     reason = models.CharField(verbose_name='推荐理由', max_length=256, null=True)
+    content = models.TextField(verbose_name='内容', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -430,9 +431,10 @@ class zgld_chatinfo(models.Model):
     product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
 
-    activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
-                                      verbose_name='最后活动时间(客户发起对话)', null=True)
-    follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
+    # is_user_read_msg = models.BooleanField(default=False, verbose_name='用户是否读了客户发的消息')
+    # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
+    #                                   verbose_name='最后活动时间(客户发起对话)', null=True)
+    # follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
