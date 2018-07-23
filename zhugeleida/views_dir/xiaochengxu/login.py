@@ -203,15 +203,15 @@ def login_oper(request,oper_type):
                 # (4, '查看官网'),
                 remark = '%s 已向您授权访问' % (username)
                 if page_info == 1:
-                   remark = '%s 已向您授权访问【名片详情】页面' % (username)
+                   remark = '已向您授权访问【名片详情】页面'
 
                 elif page_info == 2:
-                   remark = '%s 已向您授权访问【产品列表】页面' % (username)
+                   remark = '已向您授权访问【产品列表】页面'
 
                 elif page_info == 3:
-                   remark = '%s 已向您授权访问【产品详情】页面' % (username)
+                   remark = '已向您授权访问【产品详情】页面'
                 elif page_info == 4:
-                   remark = '%s 已向您授权访问【公司官网】页面' % (username)
+                   remark = '已向您授权访问【公司官网】页面'
 
                 data = request.GET.copy()
                 data['action'] = 13   # 代表用客户授权访问
