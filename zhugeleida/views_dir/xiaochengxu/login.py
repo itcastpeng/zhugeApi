@@ -14,7 +14,7 @@ from publicFunc.condition_com import conditionCom
 from ..conf import *
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
-
+import base64
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -181,7 +181,11 @@ def login_oper(request,oper_type):
             logger.info(log_info)
             # logger.debug(log_info)
 
+            encodestr = base64.b64encode(username.encode('utf-8'))
+            username = str(encodestr, 'utf-8')
 
+            # b = base64.b64decode(a)
+            # print('----b64decode username--->', str(b, 'utf-8'))
 
             objs = models.zgld_customer.objects.filter(
                 id = customer_id,
@@ -201,7 +205,10 @@ def login_oper(request,oper_type):
                 # (2, '查看产品列表'),
                 # (3, '查看产品详情'),
                 # (4, '查看官网'),
-                remark = '%s 已向您授权访问' % (username)
+                username = base64.b64decode(objs[0].username)
+                username = str(username, 'utf-8')
+
+                remark = ''
                 if page_info == 1:
                    remark = '已向您授权访问【名片详情】页面'
 
@@ -217,7 +224,7 @@ def login_oper(request,oper_type):
                 data['action'] = 13   # 代表用客户授权访问
                 response = action_record(data, remark)
 
-
+                response.data = { 'ret_data' : username + '已向您授权登录页面' }
                 response.code = 200
                 response.msg = "保存成功"
             else:
