@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from publicFunc import deal_time
 from zhugeleida.forms.contact_verify import ContactSelectForm
-
+import base64
 from zhugeleida import models
 
 
@@ -45,10 +45,13 @@ def contact(request):
 
             for obj in chat_info_objs:
                 print('--------chat_info_objs-------->>', obj.create_date)
+                encodestr = base64.b64encode(obj.customer.username.encode('utf-8'))
+                customer_name = str(encodestr, 'utf-8')
+
                 ret_data_list.append({
                     'customer_id': obj.customer_id,
                     'src': obj.customer.headimgurl,
-                    'name': obj.customer.username,
+                    'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
                     'msg': obj.msg,
                 })

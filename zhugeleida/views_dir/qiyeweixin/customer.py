@@ -76,7 +76,7 @@ def customer(request):
                     print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
                     day_interval =  datetime.datetime.today() - obj.create_date
 
-                    encodestr = base64.b64encode( obj.memo_name.encode('utf-8'))
+                    encodestr = base64.b64encode(obj.username.encode('utf-8'))
                     customer_name = str(encodestr, 'utf-8')
 
                     ret_data.append({
