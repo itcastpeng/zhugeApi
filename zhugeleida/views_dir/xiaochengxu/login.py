@@ -176,22 +176,20 @@ def login_oper(request,oper_type):
             logger = logging.getLogger('test')  # 获取名为tst的logger
             logger.addHandler(handler)  # 为logger添加handler
 
-            logger.setLevel(logging.DEBUG)
-            log_info = "request.GET==> %s | request.POST==> %s" % (request.GET,request.POST)
-            logger.info(log_info)
             # logger.debug(log_info)
 
             encodestr = base64.b64encode(username.encode('utf-8'))
-            username = str(encodestr, 'utf-8')
+            customer_name = str(encodestr, 'utf-8')
 
-            # b = base64.b64decode(a)
-            # print('----b64decode username--->', str(b, 'utf-8'))
+            logger.setLevel(logging.DEBUG)
+            log_info = "request.GET==> %s | b64encode:%s |request.POST==> %s" % (request.GET,customer_name,request.POST)
+            logger.info(log_info)
 
             objs = models.zgld_customer.objects.filter(
                 id = customer_id,
             )
             if objs:
-                objs.update( username = username,
+                objs.update( username = customer_name,
                              headimgurl=headimgurl,
                              city =city,
                              country=country,
@@ -224,7 +222,7 @@ def login_oper(request,oper_type):
                 data['action'] = 13   # 代表用客户授权访问
                 response = action_record(data, remark)
 
-                response.data = { 'ret_data' : username + '已向您授权登录页面' }
+                response.data = { 'ret_data' : username + ' 已向您授权登录页面' }
                 response.code = 200
                 response.msg = "保存成功"
             else:

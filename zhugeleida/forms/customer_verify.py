@@ -119,7 +119,7 @@ class Customer_information_UpdateForm(forms.Form):
     )
 
     memo_name = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
             'required': "备注名不能为空"
         }

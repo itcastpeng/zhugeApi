@@ -10,6 +10,7 @@ from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.customer_verify import  Customer_information_UpdateForm,Customer_UpdateExpectedTime_Form ,Customer_UpdateExpedtedPr_Form, CustomerSelectForm
 import json
 from django.db.models import Q
+import base64
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -75,6 +76,9 @@ def customer(request):
                     print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
                     day_interval =  datetime.datetime.today() - obj.create_date
 
+                    encodestr = base64.b64encode( obj.memo_name.encode('utf-8'))
+                    customer_name = str(encodestr, 'utf-8')
+
                     ret_data.append({
                         'id': obj.id,
                         'username': obj.username,
@@ -84,7 +88,7 @@ def customer(request):
                         'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
 
                         'source': belonger_obj.get_source_display(),  # 来源
-                        'memo_name': obj.memo_name,  # 备注名
+                        'memo_name': customer_name,  # 备注名
                         'phone': phone,              # 手机号
                         'sex':  sex,
                         'day_interval': day_interval.days,
@@ -263,21 +267,30 @@ def customer_oper(request, oper_type, o_id):
             forms_obj = Customer_information_UpdateForm(form_data)
 
             if forms_obj.is_valid():
+                memo_name = forms_obj.data.get('memo_name')
+
+                encodestr = base64.b64encode(memo_name.encode('utf-8'))
+                memo_name = str(encodestr, 'utf-8')
+
                 print("验证通过", forms_obj.cleaned_data )
+                customer_obj = models.zgld_customer.objects.filter(id=o_id)
+                customer_obj.update(
+                    memo_name = memo_name
+                )
 
                 information_obj = models.zgld_information.objects.filter(customer_id=o_id)
                 if information_obj:
 
                     information_obj.update(
                         customer_id =  o_id,
-                        sex = forms_obj.cleaned_data['sex'],
-                        company = forms_obj.cleaned_data['company'],
-                        phone = forms_obj.cleaned_data['phone'],
-                        email = forms_obj.cleaned_data['email'],
-                        position = forms_obj.cleaned_data['position'],
-                        address =  forms_obj.cleaned_data['address'],
-                        birthday = forms_obj.cleaned_data['birthday'],
-                        mem =  forms_obj.cleaned_data['mem']
+                        sex = forms_obj.cleaned_data.get('sex'),
+                        company = forms_obj.cleaned_data.get('company'),
+                        phone = forms_obj.cleaned_data.get('phone'),
+                        email = forms_obj.cleaned_data.get('email'),
+                        position = forms_obj.cleaned_data.get('position'),
+                        address =  forms_obj.cleaned_data.get('address'),
+                        birthday = forms_obj.cleaned_data.get('birthday'),
+                        mem =  forms_obj.cleaned_data.get('mem')
                     )
                     response.code = 200
                     response.msg = '添加成功'
@@ -285,14 +298,14 @@ def customer_oper(request, oper_type, o_id):
 
                     models.zgld_information.objects.create(
                         customer_id =  o_id,
-                        sex= int(forms_obj.cleaned_data['sex']),
-                        company = forms_obj.cleaned_data['company'],
-                        phone=forms_obj.cleaned_data['phone'],
-                        email=forms_obj.cleaned_data['email'],
-                        position = forms_obj.cleaned_data['position'],
-                        address =  forms_obj.cleaned_data['address'],
-                        birthday = forms_obj.cleaned_data['birthday'],
-                        mem =  forms_obj.cleaned_data['mem']
+                        sex= int(forms_obj.cleaned_data.get('sex')),
+                        company = forms_obj.cleaned_data.get('company'),
+                        phone=forms_obj.cleaned_data.get('phone'),
+                        email=forms_obj.cleaned_data.get('email'),
+                        position = forms_obj.cleaned_data.get('position'),
+                        address =  forms_obj.cleaned_data.get('address'),
+                        birthday = forms_obj.cleaned_data.get('birthday'),
+                        mem =  forms_obj.cleaned_data.get('mem')
                     )
 
                     response.code = 200

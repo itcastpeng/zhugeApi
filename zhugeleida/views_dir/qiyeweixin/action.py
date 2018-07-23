@@ -11,7 +11,7 @@ from django.db.models import Count
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
 from datetime import datetime, timedelta
-
+import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -70,11 +70,16 @@ def action(request, oper_type):
 
                 ret_data = []
                 for obj in objs:
+
+                    username = base64.b64decode(obj.customer.username)
+                    username = str(username, 'utf-8')
+                    print('-----b64decode username----->', username)
+
                     ret_data.append({
                         'user_id': obj.user_id,
                         'customer_id': obj.customer_id,
                         'headimgurl': obj.customer.headimgurl,
-                        'log': obj.customer.username + obj.remark,
+                        'log': username + obj.remark,
                         'create_date': obj.create_date,
                     })
 
@@ -119,11 +124,15 @@ def action(request, oper_type):
 
                 ret_data = []
                 for obj in objs:
+                    username = base64.b64decode(obj.customer.username)
+                    username = str(username, 'utf-8')
+                    print('-----b64decode username----->', username)
+
                     ret_data.append({
                         'user_id': obj.user_id,
                         'customer_id': obj.customer_id,
                         'action' : obj.get_action_display(),
-                        'log': obj.customer.username + obj.remark,
+                        'log': username + obj.remark,
                         'create_date': obj.create_date,
                     })
 
