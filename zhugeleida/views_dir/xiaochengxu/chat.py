@@ -239,6 +239,7 @@ def chat_oper(request, oper_type, o_id):
                 #
                 # ).count()
                 # if user_new_msg_count > 0: # 说明有未读的消息
+
                 remark = ':%s' % (msg)
                 data = request.GET.copy()
                 data['action'] = 2  # 代表用客户咨询产品

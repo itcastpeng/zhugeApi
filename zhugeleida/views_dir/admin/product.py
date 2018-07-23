@@ -28,150 +28,66 @@ def product(request, oper_type):
 
     if request.method == "GET":
 
-        if oper_type == 'product_edit':
+        if oper_type == 'product_single':
             product_type = int(request.GET.get('product_type')) if request.GET.get('product_type') else ''
 
-            if product_type  == 1:     #单个官网产品展示
-                user_id = request.GET.get('user_id')
-                product_id = request.GET.get('product_id')
-                field_dict = {
-                    'id': '',
-                }
-                q = conditionCom(request, field_dict)
-                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-                q.add(Q(**{'company_id': company_id}), Q.AND)
-                q.add(Q(**{'id': product_id}), Q.AND)
+
+            user_id = request.GET.get('user_id')
+            product_id = request.GET.get('product_id')
+            field_dict = {
+                'id': '',
+            }
+            q = conditionCom(request, field_dict)
+            company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+            q.add(Q(**{'company_id': company_id}), Q.AND)
+            q.add(Q(**{'id': product_id}), Q.AND)
+
+            if product_type  == 1:   #单个官网产品展示
                 q.add(Q(**{'user_id__isnull': True }), Q.AND)
-
-
-                objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
-                count = objs.count()
-
-                if objs:
-                    ret_data = []
-                    for obj in objs:
-                        if obj.user_id:
-                            if int(obj.user_id) == int(user_id):
-                                publisher = '我添加的'
-                            else:
-                                publisher = obj.user.username + '添加的'
-                        else:
-                            publisher = '企业发布'
-
-                        cover_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
-                                                                                        picture_type=1).order_by(
-                            'create_date').values('id', 'picture_url')
-
-                        product_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
-                                                                                          picture_type=2).order_by(
-                            'create_date').values('id',
-                                                  'order',
-                                                  'picture_url')
-
-                        ret_data.append({
-                            'id': obj.id,
-
-                            'publisher': publisher,  # 发布者
-                            'publisher_date': obj.create_date,  # 发布日期。
-                            'cover_picture': list(cover_picture_data) or '',  # 封面地址的URL
-                            'name': obj.name,  # 产品名称  必填
-                            'price': obj.price,  # 价格     必填
-                            'reason': obj.reason,  # 推荐理由
-
-                            # 'article_data': ret_data_list,
-                            'product_picture_list': list(product_picture_data),  # 产品的列表
-                            'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
-                            'status': obj.get_status_display(),  # 产品的动态
-                            'status_code': obj.status  # 产品的动态值。
-
-                        })
-                        #  查询成功 返回200 状态码
-                        response.code = 200
-                        response.msg = '查询成功'
-                        response.data = {
-                            'ret_data': ret_data,
-                            'data_count': count,
-                        }
-
-                else:
-                    response.code = 302
-                    response.msg = "产品不存在"
-
-            elif product_type == 2:  # 单个个人产品展示
-                user_id = request.GET.get('user_id')
-                product_id = request.GET.get('product_id')
-                field_dict = {
-                    'id': '',
-                }
-                q = conditionCom(request, field_dict)
-                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-                q.add(Q(**{'company_id': company_id}), Q.AND)
-                q.add(Q(**{'id': product_id}), Q.AND)
+            elif product_type == 2:
                 q.add(Q(**{'user_id': user_id }), Q.AND)
 
-                objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
-                count = objs.count()
+            objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
+            count = objs.count()
 
-                if objs:
-                    ret_data = []
-                    for obj in objs:
-                        if obj.user_id:
-                            publisher = obj.user.username + '添加的'
+            if objs:
+                ret_data = []
+                for obj in objs:
+                    if obj.user_id:
+                        if int(obj.user_id) == int(user_id):
+                            publisher = '我添加的'
                         else:
-                            publisher = '企业发布'
+                            publisher = obj.user.username + '添加的'
+                    else:
+                        publisher = '企业发布'
 
-                        cover_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
-                                                                                        picture_type=1).order_by(
-                            'create_date').values('id', 'picture_url')
+                    ret_data.append({
+                        'id': obj.id,
 
-                        product_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
-                                                                                          picture_type=2).values('id',
-                                                                                                                 'order',
-                                                                                                                 'picture_url')
+                        'publisher': publisher,  # 发布者
+                        'publisher_date': obj.create_date,  # 发布日期。
 
-                        article_data = models.zgld_product_article.objects.filter(product_id=obj.id).values('id',
-                                                                                                            'order',
-                                                                                                            'content',
-                                                                                                            'title')
+                        'name': obj.name,  # 产品名称  必填
+                        'price': obj.price,  # 价格     必填
+                        'reason': obj.reason,  # 推荐理由
+                        'content' : obj.content,
 
-                        article_picture_list = []
-                        article_picture_list.extend(product_picture_data)
-                        article_picture_list.extend(article_data)
+                        'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
+                        'status': obj.get_status_display(),  # 产品的动态
+                        'status_code': obj.status  # 产品的动态值。
 
-                        print('---article_picture_list-->>', article_picture_list)
+                    })
+                    #  查询成功 返回200 状态码
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'data_count': count,
+                    }
 
-                        # article_content_data = models.zgld_product_article.objects.filter(type=2).values_list('id','order','content')
-                        ret_data_list = sort_article_data(list(article_picture_list))
-                        user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
-
-                        ret_data.append({
-                            'id': obj.id,
-
-                            'publisher': publisher,  # 发布者
-                            'publisher_date': obj.create_date,  # 发布日期。
-                            'cover_picture': list(cover_picture_data) or '',  # 封面地址的URL
-                            'name': obj.name,  # 产品名称
-                            'price': obj.price,  # 价格
-                            'user_avatar': user_avatar,
-
-                            'reason': obj.reason,  # 推荐理由
-                            'article_data': ret_data_list,
-                            'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
-                            'status': obj.get_status_display(),  # 产品的动态
-                            'status_code': obj.status  # 产品的动态值。
-
-                        })
-                        #  查询成功 返回200 状态码
-                        response.code = 200
-                        response.msg = '查询成功'
-                        response.data = {
-                            'ret_data': ret_data,
-                            'data_count': count,
-                        }
-
-                else:
-                    response.code = 302
-                    response.msg = "产品不存在"
+            else:
+                response.code = 302
+                response.msg = "产品不存在"
 
 
         elif oper_type == 'product_list':
@@ -183,172 +99,94 @@ def product(request, oper_type):
 
                 print('product_type----->',request.GET.get('product_type'),product_type)
 
-                # 如果为1 代表是公司的官网
+                #如果为1 代表是公司的官网
+                user_id = request.GET.get('user_id')
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+
+                q1 = Q()
+                q1.connector = 'and'
+                user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
+                company_id = user_obj.company_id
+                role_id = user_obj.role_id
+
                 if product_type == 1:
-
-                    user_id = request.GET.get('user_id')
-                    current_page = forms_obj.cleaned_data['current_page']
-                    length = forms_obj.cleaned_data['length']
-                    order = request.GET.get('order', '-create_date')
-
-                    q1 = Q()
-                    q1.connector = 'and'
-                    user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
-                    company_id = user_obj.company_id
-                    role_id = user_obj.role_id
-                    q1.children.append(('user_id__isnull', True))
-
-                    if role_id == 1:  # 为管理员 展示出所有公司的产品
-                        search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                        if search_company_id:
-                            q1.children.append(('company_id', search_company_id))
-
-                    elif role_id == 2:  # 为普通用户 展示出自己所属公司的产品
-                        q1.children.append(('company_id', company_id))
-
-                    search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
-                    if search_product_name:
-                        q1.children.append(('name__contains', search_product_name))
-
-                    search_product_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
-                    if not search_product_status:
-                        q1.children.append(('status__in', [1, 3]))  # 默认是显示出所有的上架的产品
-                    else:
-                        if int(search_product_status) == 1:
-                            q1.children.append(('status__in', [1, 3]))  # (1,'已上架')
-
-                        elif int(search_product_status) == 2:
-                            q1.children.append(('status__in', [2]))  # (2,'已下架')
-                    print('-----q1---->>',q1)
-                    objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
-                    count = objs.count()
-                    print('-----objs----->>',objs)
-
-                    if length != 0:
-                        start_line = (current_page - 1) * length
-                        stop_line = start_line + length
-                        objs = objs[start_line: stop_line]
-
-                    ret_data = []
-
-                    if objs:
-                        for obj in objs:
-                            product_id = obj.id
-                            picture_obj = models.zgld_product_picture.objects.filter(
-                                product_id=product_id, picture_type=1
-                            ).order_by('create_date')
-                            picture_url = ''
-                            if picture_obj:
-                                 picture_url = picture_obj[0].picture_url
-
-                            ret_data.append({
-                                'product_id': product_id,
-                                'cover_picture': picture_url,  # 封面地址的URL
-                                'name': obj.name,  # 产品名称
-                                'price': obj.price,  # 价格
-                                'publisher_date': obj.create_date.strftime("%Y-%m-%d %H:%M:%S"),  # 发布日期。
-                                'publisher': obj.company.name,  # 发布者
-                                'status': obj.get_status_display(),
-                                'status_code': obj.status  # 产品的动态。
-                            })
-
-                            #  查询成功 返回200 状态码
-                            response.code = 200
-                            response.msg = '查询成功'
-                            response.data = {
-                                'ret_data': ret_data,
-                                'data_count': count,
-                            }
-                    else:
-                        response.code = 302
-                        response.msg = '产品列表无数据'
-
-                # 如果为2 代表个人产品列表
+                     q1.children.append(('user_id__isnull', True))
                 elif product_type == 2:
+                     q1.children.append(('user_id__isnull', False))
 
-                    user_id = request.GET.get('user_id')
-                    current_page = forms_obj.cleaned_data['current_page']
-                    length = forms_obj.cleaned_data['length']
-                    order = request.GET.get('order', '-create_date')
+                if role_id == 1:  # 为管理员 展示出所有公司的产品
+                    search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
+                    if search_company_id:
+                        q1.children.append(('company_id', search_company_id))
 
-                    q1 = Q()
-                    q1.connector = 'and'
-                    user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
-                    company_id = user_obj.company_id
-                    role_id = user_obj.role_id
-                    q1.children.append(('user_id__isnull', False))
+                elif role_id == 2:  # 为普通用户 展示出自己所属公司的产品
+                    q1.children.append(('company_id', company_id))
 
-                    if role_id == 1:  # 为管理员 展示出所有公司的产品
-                        search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                        if search_company_id:
-                            q1.children.append(('company_id', search_company_id))
+                search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
+                if search_product_name:
+                    q1.children.append(('name__contains', search_product_name))
 
-                    elif role_id == 2:  # 为普通用户 展示出自己所属公司的产品
-                        q1.children.append(('company_id', company_id))
+                search_product_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
+                if not search_product_status:
+                    q1.children.append(('status__in', [1, 3]))  # 默认是显示出所有的上架的产品
+                else:
+                    if int(search_product_status) == 1:
+                        q1.children.append(('status__in', [1, 3]))  # (1,'已上架')
 
-                    search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
-                    if search_product_name:
-                        q1.children.append(('name__contains', search_product_name))
+                    elif int(search_product_status) == 2:
+                        q1.children.append(('status__in', [2]))  # (2,'已下架')
+                print('-----q1---->>',q1)
+                objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
+                count = objs.count()
+                print('-----objs----->>',objs)
 
-                    search_product_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
-                    if not search_product_status:
-                        q1.children.append(('status__in', [1, 3]))  # 默认是显示出所有的上架的产品
-                    else:
-                        if int(search_product_status) == 1:
-                            q1.children.append(('status__in', [1, 3]))  # (1,'已上架')
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
 
-                        elif int(search_product_status) == 2:
-                            q1.children.append(('status__in', [2]))  # (2,'已下架')
+                ret_data = []
 
-                    objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
-                    count = objs.count()
+                if objs:
+                    for obj in objs:
+                        product_id = obj.id
 
-                    if length != 0:
-                        start_line = (current_page - 1) * length
-                        stop_line = start_line + length
-                        objs = objs[start_line: stop_line]
+                        if obj.user_id:
+                            publisher = obj.user.username
+                        else:
+                            publisher = obj.company.name
 
-                    ret_data = []
+                        content = {
+                           'cover_data': json.loads(obj.content).get('cover_data')
 
-                    if objs:
-                        for obj in objs:
-                            product_id = obj.id
-                            picture_obj = models.zgld_product_picture.objects.filter(
-                                product_id=product_id, picture_type=1
-                            ).order_by('create_date')
+                        }
 
-                            picture_url = ''
-                            if picture_obj:
-                                picture_url = picture_obj[0].picture_url
+                        ret_data.append({
+                            'product_id': product_id,
+                            'content': content,  # 封面地址的URL
+                            'name': obj.name,  # 产品名称
+                            'price': obj.price,  # 价格
+                            'publisher_date': obj.create_date.strftime("%Y-%m-%d %H:%M:%S"),  # 发布日期。
+                            'publisher': publisher,  # 发布者
+                            'status': obj.get_status_display(),
+                            'status_code': obj.status  # 产品的动态。
+                        })
 
-                            ret_data.append({
-                                'product_id': product_id,
-                                'cover_picture': picture_url,  # 封面地址的URL
-                                'name': obj.name,  # 产品名称
-                                'price': obj.price,  # 价格
-                                'publisher_date': obj.create_date.strftime("%Y-%m-%d %H:%M:%S"),  # 发布日期。
-                                'publisher': obj.user.username,  # 发布者
-                                'status': obj.get_status_display(),
-                                'status_code': obj.status  # 产品的动态。
-                            })
+                        #  查询成功 返回200 状态码
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'ret_data': ret_data,
+                            'data_count': count,
+                        }
+                else:
+                    response.code = 302
+                    response.msg = '产品列表无数据'
 
-                            #  查询成功 返回200 状态码
-                            response.code = 200
-                            response.msg = '查询成功'
-                            response.data = {
-                                'ret_data': ret_data,
-                                'data_count': count,
-                            }
-                    else:
-                        response.code = 302
-                        response.msg = '产品列表无数据'
 
-            else:
-                response.code = 402
-                response.msg = "请求异常"
-                response.data = json.loads(forms_obj.errors.as_json())
-
-    return JsonResponse(response.__dict__)
+        return JsonResponse(response.__dict__)
 
 
 
@@ -364,15 +202,13 @@ def product_oper(request, oper_type, o_id):
             user_obj =  models.zgld_userprofile.objects.filter(id=user_id)
             role_id = user_obj[0].role_id
             company_id = user_obj[0].company_id
-            product_picture_objs = models.zgld_product_picture.objects.filter(product_id=o_id)
-            product_article_objs = models.zgld_product_article.objects.filter(product_id=o_id)
+
 
             if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
                 product_objs = models.zgld_product.objects.filter(id=o_id)
                 if product_objs:
                     product_objs.delete()
-                    product_picture_objs.delete()
-                    product_article_objs.delete()
+
                     response.code = 200
                     response.msg = "删除成功"
 
@@ -381,8 +217,7 @@ def product_oper(request, oper_type, o_id):
 
                 if product_objs:
                     product_objs.delete()
-                    product_picture_objs.delete()
-                    product_article_objs.delete()
+
                     response.code = 200
                     response.msg = "删除成功"
 
@@ -390,229 +225,6 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '产品不存在'
 
-        # 添加-公司产品。不能添加个人产品
-        elif oper_type == "add_temp":
-
-            form_data = {
-                'user_id': request.GET.get('user_id'),
-                'name': request.POST.get('name'),  # 产品名称 必须
-                'price': request.POST.get('price'),  # 价格     必须
-                'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                # 'title': request.POST.get('title'),    # 标题    非必须
-                # 'content': request.POST.get('content'),  # 内容    非必须
-            }
-
-            forms_obj = ProductAddForm(form_data)
-
-            if forms_obj.is_valid():
-
-                product_type = int(request.POST.get('product_type')) if request.POST.get('product_type') else ''
-
-                if product_type == 1:  # 单个官网产品展示
-                    user_id = request.GET.get('user_id')
-
-                    cover_picture_list = json.loads(request.POST.get('cover_picture_data'))
-                    article_data_list = json.loads(request.POST.get('article_data'))
-
-                    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-                    product_obj = models.zgld_product.objects.create(
-                        user_id=user_id,
-                        company_id=company_id,
-                        name=forms_obj.data.get('name'),
-                        price=forms_obj.data.get('price'),
-                        reason=forms_obj.data.get('reason'),
-                    )
-
-
-                    #封面图片绑定到产品。
-                    product_id = product_obj.id
-                    cover_obj_list = []
-                    for obj in cover_picture_list:
-                        cover_obj = models.zgld_product_picture(
-                            picture_url=obj.get('picture_url'),
-                            picture_type = 1,
-                            product_id=product_id,
-                            order=obj.get('order')
-                        )
-                        cover_obj_list.append(cover_obj)
-                    models.zgld_product_picture.objects.bulk_create(cover_obj_list)
-
-                    #产品图片绑定到产品。
-
-                    product_picture_list = []
-                    for obj in article_data_list:
-                        picture_obj = models.zgld_product_picture(
-                            picture_url=obj.get('picture_url'),
-                            picture_type =2,
-                            product_id= product_id,
-                            order=obj.get('order')
-                        )
-                        product_picture_list.append(picture_obj)
-                    models.zgld_product_picture.objects.bulk_create(product_picture_list)
-
-                    # if article_data_list:
-                    #     for article_data in article_data_list:
-                    #         print('article_data_list 2 ------>>', article_data, type(article_data))
-                    #
-                    #         if  'picture_id' in article_data:
-                    #             picture_id = article_data.get('picture_id')
-                    #             picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
-                    #             picture_obj.update(product_id=product_id, order=article_data.get('order'))
-
-                    response.code = 200
-                    response.msg = "添加成功"
-
-
-
-                elif product_type == 2:  #个人产品
-                    user_id = request.GET.get('user_id')
-
-                    cover_picture_list = json.loads(request.POST.get('cover_picture_data'))
-                    article_data_list = json.loads(request.POST.get('article_data'))
-
-                    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-                    product_obj = models.zgld_product.objects.create(
-                        user_id=user_id,
-                        company_id=company_id,
-                        name=forms_obj.data.get('name'),
-                        price=forms_obj.data.get('price'),
-                        reason=forms_obj.data.get('reason'),
-                    )
-
-                    #封面图片绑定到产品。
-                    product_id = product_obj.id
-                    cover_obj_list = []
-                    for obj in cover_picture_list:
-                        cover_obj = models.zgld_product_picture(
-                            picture_url=obj.get('picture_url'),
-                            picture_type = 1,
-                            product_id=product_id,
-                            order=obj.get('order')
-                        )
-                        cover_obj_list.append(cover_obj)
-                    models.zgld_product_picture.objects.bulk_create(cover_obj_list)
-
-                    #产品图片绑定到产品。
-
-                    product_picture_list = []
-                    for obj in article_data_list:
-                        picture_obj = models.zgld_product_picture(
-                            picture_url=obj.get('picture_url'),
-                            picture_type =2,
-                            product_id= product_id,
-                            order=obj.get('order')
-                        )
-                        product_picture_list.append(picture_obj)
-                    models.zgld_product_picture.objects.bulk_create(product_picture_list)
-
-
-
-
-            else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-        elif oper_type == "update_temp":
-            form_data = {
-                'user_id': request.GET.get('user_id'),
-                'name': request.POST.get('name'),  # 产品名称 必须
-                'price': request.POST.get('price'),  # 价格     必须
-                'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                # 'title': request.POST.get('title'),    # 标题    非必须
-                # 'content': request.POST.get('content'),  # 内容    非必须
-            }
-
-            forms_obj = ProductAddForm(form_data)
-            if forms_obj.is_valid():
-
-                product_type = int(request.POST.get('product_type')) if request.POST.get('product_type') else ''
-
-                if product_type == 1:  # 单个官网产品修改
-
-                    user_id = request.GET.get('user_id')
-                    cover_picture_list = request.POST.get('cover_picture_data')
-                    article_data_list = request.POST.get('article_data')
-
-                    product_obj = models.zgld_product.objects.filter(id=o_id)
-                    product_obj.update(
-                        user_id=user_id,
-
-                        name=forms_obj.data.get('name'),
-                        price=forms_obj.data.get('price'),
-                        reason=forms_obj.data.get('reason'),
-                    )
-                    product_obj.save()
-
-                    # 封面图片数据绑定到产品。
-                    product_id = product_obj.id
-                    cover_objs = models.zgld_product_picture.objects.filter(id=product_id, picture_type=1, )
-                    if cover_objs:
-                        cover_objs.update(
-                            picture_url=cover_picture_list
-                        )
-
-                    # 产品图片数据绑定到产品。
-                    product_picture_objs = models.zgld_product_picture.objects.filter(id=product_id,picture_type=2,)
-                    if product_picture_objs:
-                        product_picture_objs.update(
-                            picture_url = article_data_list
-                        )
-                    response.code = 200
-                    response.msg = "添加成功"
-
-
-                elif product_type == 2:  # 单个个人产品修改
-                    form_data = {
-                        'user_id': request.GET.get('user_id'),
-                        'name': request.POST.get('name'),  # 产品名称 必须
-                        'price': request.POST.get('price'),  # 价格     必须
-                        'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                        # 'title': request.POST.get('title'),    # 标题    非必须
-                        # 'content': request.POST.get('content'),  # 内容    非必须
-                    }
-
-                    forms_obj = ProductAddForm(form_data)
-                    if forms_obj.is_valid():
-                        user_id = request.GET.get('user_id')
-
-                        cover_picture_list = json.loads(request.POST.get('cover_picture_data'))
-                        article_data_list = json.loads(request.POST.get('article_data'))
-
-                        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-
-                        product_obj = models.zgld_product.objects.filter(id=o_id)
-                        product_obj.update(
-                            user_id=user_id,
-                            company_id=company_id,
-                            name=forms_obj.data.get('name'),
-                            price=forms_obj.data.get('price'),
-                            reason=forms_obj.data.get('reason'),
-                        )
-                        product_obj.save()
-
-                        # 封面图片数据绑定到产品。
-                        product_id = product_obj.id
-                        cover_objs = models.zgld_product_picture.objects.filter(id=product_id, picture_type=1, )
-                        if cover_objs:
-                            cover_objs.update(
-                                picture_url=cover_picture_list
-                            )
-
-                        # 产品图片数据绑定到产品。
-                        product_picture_objs = models.zgld_product_picture.objects.filter(id=product_id,
-                                                                                          picture_type=2, )
-                        if product_picture_objs:
-                            product_picture_objs.update(
-                                picture_url=article_data_list
-                            )
-
-                        response.code = 200
-                        response.msg = "添加成功"
-
-
-            else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "change_status":
 
@@ -651,146 +263,24 @@ def product_oper(request, oper_type, o_id):
                 'name': request.POST.get('name'),  # 产品名称 必须
                 'price': request.POST.get('price'),  # 价格    非必须
                 'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                # 'article_id': request.POST.get('article_id'),  # 内容    非必须
+
             }
-            product_type = int(request.POST.get('product_type')) if request.POST.get('product_type') else ''
 
             forms_obj = ProductUpdateForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
                 product_id = forms_obj.data.get('product_id')
-                article_data_list = json.loads(request.POST.get('article_data'))
-                cover_picture_list = json.loads(request.POST.get('cover_picture_id'))
-
-
 
                 product_obj = models.zgld_product.objects.filter(id=product_id)
-
                 product_obj.update(
                     name=forms_obj.data.get('name'),
                     price=forms_obj.data.get('price'),
                     reason=forms_obj.data.get('reason'),
+                    content=forms_obj.data.get('content')
                 )
-                exist_cover_picture_list = []
-                picture_list = list(
-                    models.zgld_product_picture.objects.filter(product_id=product_id, picture_type=1).values_list('id'))
-                for p in picture_list:
-                    exist_cover_picture_list.append(p[0])
 
-                delete_cover_picture_list = list(set(exist_cover_picture_list).difference(set(cover_picture_list)))
-                print('----delete_cover_picture_list-->>', delete_cover_picture_list)
-
-                delete_cover_picture_objs = models.zgld_product_picture.objects.filter(id__in=delete_cover_picture_list)
-
-                if delete_cover_picture_objs:  # 要删除的封面图片。
-                    for delete_picture_obj in delete_cover_picture_objs:
-                        IMG_PATH = BASE_DIR + '/' + delete_picture_obj.picture_url
-                        if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
-                    delete_cover_picture_objs.delete()
-
-                product_id = product_obj[0].id
-                picture_objs = models.zgld_product_picture.objects.filter(
-                    id__in=cover_picture_list)  # 更新前端传过来的封面ID绑定到数据库。
-                picture_objs.update(product_id=product_id)
-
-                now_picture_list = []
-                now_article_list = []
-                if article_data_list:
-
-                    for article_data in article_data_list:
-                        if 'picture_id' in article_data:
-                            picture_id = article_data.get('picture_id')
-                            now_picture_list.append(picture_id)
-
-                    exist_product_picture_list = []
-                    picture_list = list(
-                        models.zgld_product_picture.objects.filter(product_id=product_id, picture_type=2).values_list(
-                            'id'))
-                    for p in picture_list:
-                        exist_product_picture_list.append(p[0])
-
-                    delete_product_picture_list = list(
-                        set(exist_product_picture_list).difference(set(now_picture_list)))
-                    print('----delete_product_picture_list-->>', delete_product_picture_list)
-
-                    delete_product_picture_objs = models.zgld_product_picture.objects.filter(
-                        id__in=delete_product_picture_list)
-
-                    if delete_product_picture_objs:  # 要删除的产品图片。
-                        for delete_picture_obj in delete_product_picture_objs:
-                            IMG_PATH = BASE_DIR + '/' + delete_picture_obj.picture_url
-                            if os.path.exists(IMG_PATH): os.remove(IMG_PATH)
-                        delete_product_picture_objs.delete()
-
-                    ## 比较新穿过来的文章列表和已经存在数据库的文章的ID的差级
-                    for article_data in article_data_list:
-                        if 'article_id' in article_data:
-                            article_id = article_data.get('article_id')
-                            now_article_list.append(article_id)
-
-                    exist_article_list = []
-                    article_list = models.zgld_product_article.objects.filter(product_id=product_id).values_list('id')
-                    for a in article_list:
-                        exist_article_list.append(a[0])
-
-                    delete_article_list = list(set(exist_article_list).difference(set(now_article_list)))
-                    print('--------delete_article_list------->>', delete_article_list)
-                    delete_article_objs = models.zgld_product_article.objects.filter(id__in=delete_article_list)
-
-                    if delete_article_objs:  # 要删除的文章内容的ID。
-                        delete_article_objs.delete()
-
-                    for article_data in article_data_list:
-                        print('article_data_list 2 ------>>', article_data, type(article_data))
-                        article_id = article_data.get('article_id')
-
-                        if 'article_id' in article_data and 'title' in article_data:
-                            obj = models.zgld_product_article.objects.filter(product_id=product_id, id=article_id)
-                            obj.update(
-                                title=article_data.get('title'),
-                                type=1,
-                                order=article_data.get('order')
-                            )
-
-
-                        elif 'article_id' in article_data and 'content' in article_data:
-                            obj = models.zgld_product_article.objects.filter(product_id=product_id, id=article_id)
-                            obj.update(
-                                content=article_data.get('content'),
-                                type=2,
-                                order=article_data.get('order')
-                            )
-
-
-                        elif 'article_id' not in article_data and 'title' in article_data:
-                            models.zgld_product_article.objects.create(
-                                product_id=product_id,
-                                title=article_data.get('title'),
-                                type=1,
-                                order=article_data.get('order')
-                            )
-
-                        elif 'article_id' not in article_data and 'content' in article_data:
-                            models.zgld_product_article.objects.create(
-                                product_id=product_id,
-                                content=article_data.get('content'),
-                                type=2,
-                                order=article_data.get('order')
-                            )
-                        elif 'picture_id' in article_data:
-                            picture_id = article_data.get('picture_id')
-                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
-                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
-
-                    response.code = 200
-                    response.msg = "添加成功"
-                else:
-                    objs = models.zgld_product_article.objects.filter(product_id=product_id)
-                    if objs:
-                        objs.delete()
-
-                    response.code = 200
-                    response.msg = "添加成功"
+                response.code = 200
+                response.msg = "添加成功"
 
 
             else:
@@ -812,8 +302,7 @@ def product_oper(request, oper_type, o_id):
             forms_obj = ProductAddForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
-                article_data_list = json.loads(request.POST.get('article_data'))
-                cover_picture_list = json.loads(request.POST.get('cover_picture_id'))
+                content = forms_obj.data.get('content')
 
                 global product_owner
                 if product_type == 1:             #代表公司产品
@@ -830,34 +319,9 @@ def product_oper(request, oper_type, o_id):
                     reason=forms_obj.data.get('reason'),
                 )
 
-                # 封面图片绑定到产品。
-                product_id = product_obj.id
-                picture_objs = models.zgld_product_picture.objects.filter(id__in=cover_picture_list)
-                picture_objs.update(product_id=product_id)
-
-                if article_data_list:
-                    print('article_data_list 1 ------>>', article_data_list, type(article_data_list))
-                    for article_data in article_data_list:
-                        print('article_data_list 2 ------>>', article_data, type(article_data))
-                        if 'title' in article_data:
-                            models.zgld_product_article.objects.create(
-                                product_id=product_id,
-                                title=article_data.get('title'),
-                                type=1,
-                                order=article_data.get('order')
-
-                            )
-                        elif 'content' in article_data:
-                            models.zgld_product_article.objects.create(
-                                product_id=product_id,
-                                content=article_data.get('content'),
-                                type=2,
-                                order=article_data.get('order')
-                            )
-                        elif 'picture_id' in article_data:
-                            picture_id = article_data.get('picture_id')
-                            picture_obj = models.zgld_product_picture.objects.filter(id=picture_id)
-                            picture_obj.update(product_id=product_id, order=article_data.get('order'))
+                # 封面图片数据绑定到产品。
+                product_obj.content = content
+                product_obj.save()
 
                 response.code = 200
                 response.msg = "添加成功"

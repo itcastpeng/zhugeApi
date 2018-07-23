@@ -165,6 +165,23 @@ def login_oper(request,oper_type):
             username =  request.POST.get('nickName')
             page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
 
+            import logging.handlers
+            LOG_FILE = r'test.log'
+            handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=1024 * 1024, backupCount=5, encoding='utf-8')  # 实例化handler
+            fmt = '%(asctime)s - %(levelname)s - %(message)s'
+
+            formatter = logging.Formatter(fmt)  # 实例化formatter
+            handler.setFormatter(formatter)  # 为handler添加formatter
+
+            logger = logging.getLogger('test')  # 获取名为tst的logger
+            logger.addHandler(handler)  # 为logger添加handler
+
+            logger.setLevel(logging.DEBUG)
+            log_info = "request.GET==> %s | request.POST==> %s" % (request.GET,request.POST)
+            logger.info(log_info)
+            # logger.debug(log_info)
+
+
 
             objs = models.zgld_customer.objects.filter(
                 id = customer_id,

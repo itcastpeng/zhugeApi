@@ -24,22 +24,19 @@ class ProductAddForm(forms.Form):
     )
     price = forms.CharField(
         required=False,
-        error_messages={
-            'required': "价格不能为空"
-        }
+
     )
     reason = forms.CharField(
         required=False,
 
     )
 
-    title = forms.CharField(
-        required=False,
 
-    )
     content = forms.CharField(
-        required=False,
-
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
     )
 
     # 判断企业产品是否存在
