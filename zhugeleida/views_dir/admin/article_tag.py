@@ -22,12 +22,12 @@ def article_tag(request):
         user_id = request.GET.get('user_id')
         field_dict = {
             'tag_id': '',
-            'name': '__contains',
+            'name': '__contains', #标签搜索
         }
         q = conditionCom(request, field_dict)
         print('q -->', q)
 
-        tag_list = models.zgld_article_tag.objects.get(id=user_id).zgld_user_tag_set.values('id','name')
+        tag_list = models.zgld_article_tag.objects.get(user_id=user_id).values('id','name','parent_id')
 
 
         response.code = 200

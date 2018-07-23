@@ -485,6 +485,7 @@ class zgld_article(models.Model):
 class zgld_article_tag(models.Model):
     user = models.ForeignKey('zgld_userprofile',verbose_name="标签所属用户",null=True)
     name = models.CharField(verbose_name='标签名称', max_length=32)
+    parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
 
     class Meta:
         verbose_name_plural = "文章标签表"
