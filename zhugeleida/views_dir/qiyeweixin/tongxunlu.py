@@ -114,6 +114,9 @@ def tongxunlu(request):
                         username = base64.b64decode(obj.customer.username)
                         customer_name = str(username, 'utf-8')
 
+
+
+
                         ret_data.append({
                             'customer_id': obj.customer.id,
                             'customer_username':customer_name,
