@@ -45,8 +45,9 @@ def contact(request):
 
             for obj in chat_info_objs:
                 print('--------chat_info_objs-------->>', obj.create_date)
-                encodestr = base64.b64encode(obj.customer.username.encode('utf-8'))
-                customer_name = str(encodestr, 'utf-8')
+
+                username = base64.b64decode(obj.customer.username)
+                customer_name = str(username, 'utf-8')
 
                 ret_data_list.append({
                     'customer_id': obj.customer_id,

@@ -111,8 +111,8 @@ def tongxunlu(request):
                                 else:
                                     last_activity_msg = last_activity_time.strftime('%Y-%m-%d')
 
-                        encodestr = base64.b64encode(obj.customer.username.encode('utf-8'))
-                        customer_name = str(encodestr, 'utf-8')
+                        username = base64.b64decode(obj.customer.username)
+                        customer_name = str(username, 'utf-8')
 
                         ret_data.append({
                             'customer_id': obj.customer.id,

@@ -76,8 +76,9 @@ def customer(request):
                     print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
                     day_interval =  datetime.datetime.today() - obj.create_date
 
-                    encodestr = base64.b64encode(obj.username.encode('utf-8'))
+                    encodestr = base64.b64decode(obj.username)
                     customer_name = str(encodestr, 'utf-8')
+
 
                     ret_data.append({
                         'id': obj.id,
@@ -88,7 +89,7 @@ def customer(request):
                         'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
 
                         'source': belonger_obj.get_source_display(),  # 来源
-                        # 'memo_name': customer_name,  # 备注名
+                        'memo_name': customer_name,  # 备注名
                         'phone': phone,              # 手机号
                         'sex':  sex,
                         'day_interval': day_interval.days,
@@ -269,7 +270,7 @@ def customer_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 memo_name = forms_obj.data.get('memo_name')
 
-                encodestr = base64.b64encode(memo_name.encode('utf-8'))
+                encodestr = base64.b64decode(memo_name)
                 memo_name = str(encodestr, 'utf-8')
 
                 print("验证通过", forms_obj.cleaned_data )
