@@ -81,14 +81,14 @@ def customer(request):
 
                     ret_data.append({
                         'id': obj.id,
-                        'username': obj.username,
+                        'username': customer_name,
                         'headimgurl': obj.headimgurl,
                         'expected_time': obj.expected_time,  # 预计成交时间
                         'expedted_pr': obj.expedted_pr,  # 预计成交概率
                         'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
 
                         'source': belonger_obj.get_source_display(),  # 来源
-                        'memo_name': customer_name,  # 备注名
+                        # 'memo_name': customer_name,  # 备注名
                         'phone': phone,              # 手机号
                         'sex':  sex,
                         'day_interval': day_interval.days,
