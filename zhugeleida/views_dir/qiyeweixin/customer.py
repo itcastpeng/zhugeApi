@@ -270,7 +270,6 @@ def customer_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 memo_name = forms_obj.data.get('memo_name')
 
-
                 encodestr = base64.b64encode(memo_name.encode('utf-8'))
                 memo_name = str(encodestr, 'utf-8')
 
