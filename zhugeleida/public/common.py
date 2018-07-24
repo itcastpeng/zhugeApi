@@ -16,52 +16,66 @@ def action_record(data,remark):
     customer_id = data.get('user_id')  # 客户 id
     action = data.get('action')
 
-    # 创建访问日志
-    obj = models.zgld_accesslog.objects.create(
-        user_id=user_id,
-        customer_id=customer_id,
-        remark=remark,
-        action=action
-    )
+    if action in [0]: # 只发消息，不用记录日志。
+        customer_name = models.zgld_customer.objects.get(customer_id=customer_id).username
+        company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+        data['content'] = '%s%s' % (customer_name, remark)
+        data['agentid'] = models.zgld_app.objects.get(
+            id=company_id,
+            name='AI雷达'
+        ).agent_id
 
-    # 查询客户与用户是否已经建立关系
-    follow_objs = models.zgld_user_customer_flowup.objects.select_related('user', 'customer').filter(
-        user_id=user_id,
-        customer_id=customer_id
-    )
-    if follow_objs:  # 已经有关系了
-        flowup_obj = follow_objs[0]
-        obj.activity_time_id = flowup_obj.id
-        follow_objs.update(last_activity_time=datetime.datetime.now())
-        obj.save()
-        # follow_objs[0].save()
+        tasks.user_send_action_log.delay(json.dumps(data))
         response.code = 200
-        response.msg = '记录日志成功'
+        response.msg = '发送消息提示成功'
 
-
-    else: # 没有对应关系，要创建对应关系
-        flowup_obj = models.zgld_user_customer_flowup.objects.create(
+    else:
+        # 创建访问日志
+        obj = models.zgld_accesslog.objects.create(
             user_id=user_id,
             customer_id=customer_id,
-            last_activity_time=datetime.datetime.now()
+            remark=remark,
+            action=action
         )
-        obj.activity_time_id = flowup_obj.id
-        obj.save()
-        response.code = 200
-        response.msg = '记录日志成功'
 
-    company_id = flowup_obj.user.company_id
-    customer_name = flowup_obj.customer.username
-    print('------customer_name + remark------->>',customer_name , remark)
+        # 查询客户与用户是否已经建立关系
+        follow_objs = models.zgld_user_customer_flowup.objects.select_related('user', 'customer').filter(
+            user_id=user_id,
+            customer_id=customer_id
+        )
+        if follow_objs:  # 已经有关系了
+            flowup_obj = follow_objs[0]
+            obj.activity_time_id = flowup_obj.id
+            follow_objs.update(last_activity_time=datetime.datetime.now())
+            obj.save()
+            # follow_objs[0].save()
+            response.code = 200
+            response.msg = '记录日志成功'
 
-    data['content'] = '%s%s' % (customer_name,remark)
-    data['agentid'] = models.zgld_app.objects.get(
-        id=company_id,
-        name='AI雷达'
-    ).agent_id
 
-    tasks.user_send_action_log.delay(json.dumps(data))
-    # user_send_action_log(data)  #发送企业微信的消息提醒
+        else: # 没有对应关系，要创建对应关系
+            flowup_obj = models.zgld_user_customer_flowup.objects.create(
+                user_id=user_id,
+                customer_id=customer_id,
+                last_activity_time=datetime.datetime.now()
+            )
+            obj.activity_time_id = flowup_obj.id
+            obj.save()
+            response.code = 200
+            response.msg = '记录日志成功'
+
+        company_id = flowup_obj.user.company_id
+        customer_name = flowup_obj.customer.username
+        print('------customer_name + remark------->>',customer_name , remark)
+
+        data['content'] = '%s%s' % (customer_name,remark)
+        data['agentid'] = models.zgld_app.objects.get(
+            id=company_id,
+            name='AI雷达'
+        ).agent_id
+
+        tasks.user_send_action_log.delay(json.dumps(data))
+        # user_send_action_log(data)  #发送企业微信的消息提醒
 
     return response
 

@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.tag_user_verify import TagUserAddForm,TagUserUpdateForm
+from zhugeleida.forms.qiyeweixin.article_tag_verify import ArticleTagAddForm,TagUserUpdateForm
 import time
 import datetime
 import json
@@ -14,7 +14,7 @@ from publicFunc.condition_com import conditionCom
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def tag_user(request):
+def article_tag(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
@@ -22,12 +22,12 @@ def tag_user(request):
         user_id = request.GET.get('user_id')
         field_dict = {
             'tag_id': '',
-            'name': '__contains',
+            'name': '__contains', #标签搜索
         }
         q = conditionCom(request, field_dict)
         print('q -->', q)
 
-        tag_list = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id','name')
+        tag_list = models.zgld_article_tag.objects.get(user_id=user_id).values('id','name','parent_id')
 
 
         response.code = 200
@@ -58,7 +58,7 @@ def tag_user_oper(request, oper_type):
                 'name': request.POST.get('name'),
             }
 
-            forms_obj = TagUserAddForm(tag_data)
+            forms_obj = ArticleTagAddForm(tag_data)
             if forms_obj.is_valid():
 
                 name = forms_obj.cleaned_data['name']

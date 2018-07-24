@@ -11,7 +11,7 @@ from zhugeleida.forms.qiyeweixin.tongxunlu_verify import TongxunluSelectForm
 import json
 import datetime
 from django.db.models import Q
-
+import base64
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -111,9 +111,15 @@ def tongxunlu(request):
                                 else:
                                     last_activity_msg = last_activity_time.strftime('%Y-%m-%d')
 
+                        username = base64.b64decode(obj.customer.username)
+                        customer_name = str(username, 'utf-8')
+
+
+
+
                         ret_data.append({
                             'customer_id': obj.customer.id,
-                            'customer_username': obj.customer.username,
+                            'customer_username':customer_name,
                             'headimgurl': obj.customer.headimgurl,
                             'expected_time': obj.customer.expected_time,  # 预计成交时间
                             'expedted_pr': obj.customer.expedted_pr,  # 预计成交概率
