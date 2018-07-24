@@ -5,7 +5,7 @@ from publicFunc import Response
 import datetime
 import json
 from zhugeapi_celery_project import tasks
-
+import base64
 
 # 记录访问日志，例如访问某个功能（名片，产品，官网...）
 # 创建客户与用户之间的关系
@@ -19,6 +19,10 @@ def action_record(data,remark):
     if action in [0]: # 只发消息，不用记录日志。
         customer_name = models.zgld_customer.objects.get(customer_id=customer_id).username
         company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+
+        customer_name = base64.b64decode(customer_name)
+        customer_name = str(customer_name, 'utf-8')
+
         data['content'] = '%s%s' % (customer_name, remark)
         data['agentid'] = models.zgld_app.objects.get(
             id=company_id,
@@ -66,7 +70,10 @@ def action_record(data,remark):
 
         company_id = flowup_obj.user.company_id
         customer_name = flowup_obj.customer.username
-        print('------customer_name + remark------->>',customer_name , remark)
+
+        customer_name = base64.b64decode(customer_name)
+        customer_name = str(customer_name, 'utf-8')
+        print('------customer_name + remark------->>', customer_name, remark)
 
         data['content'] = '%s%s' % (customer_name,remark)
         data['agentid'] = models.zgld_app.objects.get(
