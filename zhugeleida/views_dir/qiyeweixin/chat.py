@@ -11,7 +11,7 @@ from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
 
 import json
 from zhugeleida import models
-
+import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -49,13 +49,18 @@ def chat(request):
 
             ret_data_list = []
             for obj in objs:
+
+                customer_name = base64.b64decode(obj.customer.username)
+                customer_name = str(customer_name, 'utf-8')
+
+
                 if  obj.info_type == 1:  # 如果为聊信息。
                     ret_data_list.append({
                          'customer_id': obj.customer.id,
                          'customer_avatar': obj.customer.headimgurl,
                          'user_id': obj.userprofile.id,
                          'src': obj.customer.headimgurl,
-                         'name': obj.customer.username,
+                         'name': customer_name,
                          'dateTime': obj.create_date,
                          'msg': obj.msg,
                          'send_type': obj.send_type,
@@ -67,7 +72,7 @@ def chat(request):
                          'customer_avatar': obj.customer.headimgurl,
                          'user_id': obj.userprofile.id,
                          'src': obj.customer.headimgurl,
-                         'name': obj.customer.username,
+                         'name': customer_name,
                          'dateTime': obj.create_date,
 
                          'product_cover_url': obj.product_cover_url,
@@ -115,13 +120,17 @@ def chat_oper(request, oper_type, o_id):
                 ret_data_list = []
                 count = objs.count()
                 for obj in objs:
+
+                    customer_name = base64.b64decode(obj.customer.username)
+                    customer_name = str(customer_name, 'utf-8')
+
                     if obj.info_type == 1:  # 如果为聊信息。
                         ret_data_list.append({
                             'customer_id': obj.customer.id,
                             'customer_avatar': obj.customer.headimgurl,
                             'user_id': obj.userprofile.id,
                             'src': obj.customer.headimgurl,
-                            'name': obj.customer.username,
+                            'name': customer_name,
                             'dateTime': obj.create_date,
                             'msg': obj.msg,
                             'send_type': obj.send_type,
@@ -133,7 +142,7 @@ def chat_oper(request, oper_type, o_id):
                             'customer_avatar': obj.customer.headimgurl,
                             'user_id': obj.userprofile.id,
                             'src': obj.customer.headimgurl,
-                            'name': obj.customer.username,
+                            'name': customer_name,
                             'dateTime': obj.create_date,
 
                             'product_cover_url': obj.product_cover_url,

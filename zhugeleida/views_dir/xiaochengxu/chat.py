@@ -8,6 +8,7 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
+import base64
 
 import json
 from zhugeleida import models
@@ -69,12 +70,15 @@ def chat(request):
                     # else:
                     mingpian_avatar =  obj.userprofile.avatar
 
+                customer_name = base64.b64decode(obj.customer.username)
+                customer_name = str(customer_name, 'utf-8')
+
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
-                    print('------first_info.get----->',first_info[0].get('id'))
+
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
-                        'customer': obj.customer.username,
+                        'customer': customer_name,
                         'user_avatar': mingpian_avatar,
                         'customer_headimgurl': obj.customer.headimgurl,
                         'dateTime': obj.create_date,
@@ -89,7 +93,7 @@ def chat(request):
                         'customer_id': obj.customer.id,
                         'from_user_name': obj.userprofile.username,
                         'user_id': obj.userprofile.id,
-                        'customer': obj.customer.username,
+                        'customer': customer_name,
                         'user_avatar': mingpian_avatar,
                         'customer_headimgurl': obj.customer.headimgurl,
                         'dateTime': obj.create_date,
@@ -107,7 +111,7 @@ def chat(request):
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
-                        'customer': obj.customer.username,
+                        'customer': customer_name,
                         'user_avatar': mingpian_avatar,
                         'customer_headimgurl': obj.customer.headimgurl,
                         'dateTime': obj.create_date,
@@ -172,12 +176,16 @@ def chat_oper(request, oper_type, o_id):
                         # else:
                         mingpian_avatar =  obj.userprofile.avatar
 
+                    customer_name = base64.b64decode(obj.customer.username)
+                    customer_name = str(customer_name, 'utf-8')
+
+
                     ret_data_list.append({
                                 'customer_id': obj.customer.id,
                                 'user_id': obj.userprofile.id,
                                 'user_avator' :  mingpian_avatar,
                                 'customer_headimgurl':  obj.customer.headimgurl,
-                                'customer': obj.customer.username,
+                                'customer': customer_name,
                                 'dateTime': obj.create_date,
                                 'msg':       obj.msg,
                                 'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
