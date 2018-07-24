@@ -7,11 +7,10 @@ import datetime
 
 # 添加标签信息
 class ArticleTagAddForm(forms.Form):
-    # print('添加标签')
-    name = forms.CharField(
+    parent_tag_name = forms.CharField(
         required=True,
         error_messages={
-            'required': "标签不能为空"
+            'required': "一级标签不能为空"
         }
     )
     user_id = forms.CharField(
@@ -21,16 +20,22 @@ class ArticleTagAddForm(forms.Form):
         }
     )
 
+    second_tag_name = forms.CharField(
+        required=False,
+
+    )
+
     # 查询标签名判断是否存在
-    def clean_name(self):
-        name = self.data['name']
-        objs = models.zgld_user_tag.objects.filter(
-            name=name,user_id=self.data.get('user_id')
+    def clean_parent_tag_name(self):
+        name = self.data['parent_tag_name']
+        objs = models.zgld_article_tag.objects.filter(
+            name=name, user_id=self.data.get('user_id')
         )
         if objs:
             self.add_error('name', '不能存在相同的标签名')
         else:
             return name
+
 
 
 # 更新标签信息
