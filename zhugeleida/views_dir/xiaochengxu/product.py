@@ -57,10 +57,6 @@ def product(request, oper_type):
                     ret_data = []
                     for obj in objs:
 
-                        content = {
-                            'cover_data': json.loads(obj.content).get('cover_data')
-
-                        }
 
 
                         user_obj = models.zgld_userprofile.objects.get(id=user_id)
@@ -71,7 +67,7 @@ def product(request, oper_type):
                         ret_data.append({
                             'id': obj.id,
                             'publisher_date': obj.create_date,  # 发布日期。
-                            'content': content,
+                            'content': json.loads(obj.content),
                             'name': obj.name,  # 产品名称
                             'price': obj.price,  # 价格
                             'user_avatar': user_avatar,
@@ -88,7 +84,7 @@ def product(request, oper_type):
                         #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
                         # else:
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                        if customer_id:
+                        if not  customer_id:
                             customer_obj = models.zgld_customer.objects.filter(id=customer_id)
                             if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
                                 remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
@@ -160,6 +156,10 @@ def product(request, oper_type):
                         product_id = obj.id
 
                         user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
+                        content = {
+                            'cover_data': json.loads(obj.content).get('cover_data')
+
+                        }
 
                         ret_data.append({
                             'id': product_id,
@@ -168,7 +168,7 @@ def product(request, oper_type):
                             'user_avatar': user_avatar, #用户头像
                             'reason': obj.reason,       # 推荐理由
                             'publisher_date': obj.create_date,  # 发布日期。
-                            'content': json.loads(obj.content),
+                            'content': content,
 
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
