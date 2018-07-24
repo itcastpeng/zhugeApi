@@ -277,7 +277,7 @@ def customer_oper(request, oper_type, o_id):
 
                 customer_obj = models.zgld_customer.objects.filter(id=o_id)
                 customer_obj.update(
-                    memo_name = memo_name
+                    username = memo_name
                 )
 
                 information_obj = models.zgld_information.objects.filter(customer_id=o_id)
