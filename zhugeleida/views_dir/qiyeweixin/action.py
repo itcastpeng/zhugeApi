@@ -257,10 +257,15 @@ def action(request, oper_type):
                     customer_username = obj['customer__username']
                     headimgurl = obj['customer__headimgurl']
 
+                    customer_name = base64.b64decode(customer_username)
+                    customer_name = str(customer_name, 'utf-8')
+                    print('-----b64decode username----->', customer_name)
+
+
                     insert_data = {
                         'customer_id': customer_id,
                         'action_count': action_count,
-                        'customer_username': customer_username,
+                        'customer_username': customer_name,
                         'headimgurl': headimgurl
                     }
                     if not ret_list:  # 首次添加
