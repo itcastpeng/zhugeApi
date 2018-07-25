@@ -59,7 +59,7 @@ def product(request, oper_type):
                         # if obj.avatar.startswith("http"):
                         #     user_avatar = obj.avatar
                         # else:
-                        print('---obj-->>',obj.user.name)
+
                         user_avatar = ''
                         if obj.user:
                             user_avatar = obj.user.avatar
