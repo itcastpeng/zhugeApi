@@ -70,7 +70,7 @@ def product(request, oper_type):
                         'name': obj.name,  # 产品名称  必填
                         'price': obj.price,  # 价格     必填
                         'reason': obj.reason,  # 推荐理由
-                        'content' : obj.content,
+                        'content' : json.loads(obj.content),
 
                         'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                         'status': obj.get_status_display(),  # 产品的动态
