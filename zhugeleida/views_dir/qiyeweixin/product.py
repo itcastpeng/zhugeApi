@@ -59,7 +59,7 @@ def product(request, oper_type):
                         # if obj.avatar.startswith("http"):
                         #     user_avatar = obj.avatar
                         # else:
-                        user_avatar =  obj.avatar
+                        user_avatar =  obj.user.avatar
 
 
                     ret_data.append({
