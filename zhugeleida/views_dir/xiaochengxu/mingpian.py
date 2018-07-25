@@ -455,6 +455,7 @@ def mingpian_oper(request, oper_type):
                 poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
 
                 if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
+                driver.quit()
 
                 ret_data = {
                     'user_id': user_id,

@@ -70,7 +70,7 @@ class zgld_userprofile(models.Model):
     address = models.TextField(verbose_name='详细地址', null=True)
 
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
-    avatar = models.CharField(verbose_name="头像url", max_length=128, default='statics/imgs/setAvator.jpg')
+    avatar = models.CharField(verbose_name="头像url", max_length=256, default='statics/imgs/setAvator.jpg')
     qr_code = models.CharField(verbose_name='企业用户个人二维码', max_length=128, null=True)
     status_choices = (
         (1, "启用"),
@@ -233,7 +233,7 @@ class zgld_customer(models.Model):
     username = models.CharField(verbose_name='客户姓名', max_length=64, null=True)
     memo_name = models.CharField(max_length=64, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=64)
-    headimgurl = models.CharField(verbose_name="用户头像url", max_length=128, default='statics/imgs/Avator.jpg')
+    headimgurl = models.CharField(verbose_name="用户头像url", max_length=256, default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
 
@@ -452,7 +452,7 @@ class zgld_article_detail(models.Model):
         verbose_name_plural = "文章详细表"
         app_label = "zhugeleida"
 
-
+# 文章表
 class zgld_article(models.Model):
     title = models.CharField(verbose_name='文章标题', max_length=128)
     summary = models.CharField(verbose_name='文章摘要', max_length=255)
@@ -504,15 +504,14 @@ class zgld_article_to_tag(models.Model):
         app_label = "zhugeleida"
 
 
-class zgld_article_stay_time(models.Model):
+# 文章查看用户停留时间表
+class zgld_article_access_log(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
     user = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
     stay_time = models.CharField(verbose_name='停留时长', max_length=64)
 
     class Meta:
-        unique_together = [
-            ('article', 'user','stay_time'),
-        ]
+
         verbose_name_plural = "文章查看用户停留时间表"
         app_label = "zhugeleida"
 
