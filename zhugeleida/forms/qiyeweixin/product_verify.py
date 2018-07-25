@@ -95,7 +95,7 @@ class ProductUpdateForm(forms.Form):
 
     )
     content = forms.CharField(
-        required=False,
+        required=True,
 
     )
 

@@ -91,7 +91,7 @@ def chat(request):
                     print('------first_info.get----->', first_info[0].get('id'))
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
-                        'from_user_name': obj.userprofile.username,
+                        'from_user_name': customer_name,
                         'user_id': obj.userprofile.id,
                         'customer': customer_name,
                         'user_avatar': mingpian_avatar,

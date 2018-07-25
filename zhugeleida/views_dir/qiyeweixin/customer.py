@@ -268,15 +268,16 @@ def customer_oper(request, oper_type, o_id):
             forms_obj = Customer_information_UpdateForm(form_data)
 
             if forms_obj.is_valid():
-                memo_name = forms_obj.data.get('memo_name')
+                memo_name = forms_obj.cleaned_data.get('memo_name')
 
                 encodestr = base64.b64encode(memo_name.encode('utf-8'))
                 memo_name = str(encodestr, 'utf-8')
 
-                print("验证通过", forms_obj.cleaned_data )
+                print("----验证通过--->", forms_obj.cleaned_data,memo_name)
+
                 customer_obj = models.zgld_customer.objects.filter(id=o_id)
                 customer_obj.update(
-                    memo_name = memo_name
+                    username = memo_name
                 )
 
                 information_obj = models.zgld_information.objects.filter(customer_id=o_id)

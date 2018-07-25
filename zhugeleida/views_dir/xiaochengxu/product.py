@@ -56,27 +56,9 @@ def product(request, oper_type):
                 if objs:
                     ret_data = []
                     for obj in objs:
-                        cover_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
-                                                                                        picture_type=1).order_by(
-                            'create_date').values('id', 'picture_url')
 
-                        product_picture_data = models.zgld_product_picture.objects.filter(product_id=obj.id,
-                                                                                          picture_type=2).values('id',
-                                                                                                                 'order',
-                                                                                                                 'picture_url')
 
-                        article_data = models.zgld_product_article.objects.filter(product_id=obj.id).values('id', 'order',
-                                                                                                            'content',
-                                                                                                            'title')
 
-                        article_picture_list = []
-                        article_picture_list.extend(product_picture_data)
-                        article_picture_list.extend(article_data)
-
-                        print('---article_picture_list-->>', article_picture_list)
-
-                        # article_content_data = models.zgld_product_article.objects.filter(type=2).values_list('id','order','content')
-                        ret_data_list = sort_article_data(list(article_picture_list))
                         user_obj = models.zgld_userprofile.objects.get(id=user_id)
                         user_avatar = user_obj.avatar
                         username = user_obj.username
@@ -85,14 +67,14 @@ def product(request, oper_type):
                         ret_data.append({
                             'id': obj.id,
                             'publisher_date': obj.create_date,  # 发布日期。
-                            'cover_picture': list(cover_picture_data) or '',  # 封面地址的URL
+                            'content': json.loads(obj.content),
                             'name': obj.name,  # 产品名称
                             'price': obj.price,  # 价格
                             'user_avatar': user_avatar,
                             'username': username,
                             'position': position,
                             'reason': obj.reason,  # 推荐理由
-                            'article_data': ret_data_list,
+
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),  # 产品的动态
                             'status_code': obj.status  # 产品的动态值。
@@ -102,7 +84,7 @@ def product(request, oper_type):
                         #     remark = '%s...,尽快把握商机' % (('正在查看'+obj.name)[:20])
                         # else:
                         #     remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
-                        if customer_id:
+                        if not  customer_id:
                             customer_obj = models.zgld_customer.objects.filter(id=customer_id)
                             if customer_obj and  customer_obj[0].username : # 说明客户访问时候经过认证的
                                 remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
@@ -173,14 +155,11 @@ def product(request, oper_type):
                     for obj in objs:
                         product_id = obj.id
 
-                        picture_obj = models.zgld_product_picture.objects.filter(
-                                    product_id=product_id, picture_type=1
-                        ).order_by('create_date')
-                        picture_url = ''
-                        if picture_obj:
-                            picture_url = picture_obj[0].picture_url
-
                         user_avatar = models.zgld_userprofile.objects.get(id=user_id).avatar
+                        content = {
+                            'cover_data': json.loads(obj.content).get('cover_data')
+
+                        }
 
                         ret_data.append({
                             'id': product_id,
@@ -189,7 +168,7 @@ def product(request, oper_type):
                             'user_avatar': user_avatar, #用户头像
                             'reason': obj.reason,       # 推荐理由
                             'publisher_date': obj.create_date,  # 发布日期。
-                            'cover_picture': picture_url,  # 封面地址的URL
+                            'content': content,
 
                             'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                             'status': obj.get_status_display(),
