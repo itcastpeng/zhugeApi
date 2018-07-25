@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.article_tag_verify import ArticleTagAddForm,TagUserUpdateForm
+from zhugeleida.forms.qiyeweixin.article_tag_verify import ArticleTagAddForm,TagUserUpdateForm,ArticleTagSingleAddForm
 import time
 import datetime
 import json
@@ -65,11 +65,12 @@ def article_tag(request):
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def tag_user_oper(request, oper_type):
+def article_tag_oper(request, oper_type):
     response = Response.ResponseObj()
 
     if request.method == "POST":
 
+        #加双层标签
         if oper_type == "double_add":
 
             user_id = request.GET.get('user_id')
@@ -122,56 +123,39 @@ def tag_user_oper(request, oper_type):
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == "single_add":
+        #加单层标签+默认标签或者用户专属标签
+        elif oper_type == "add":
 
             user_id = request.GET.get('user_id')
             tag_data = {
                 'user_id' : request.GET.get('user_id'),
                 # 'parent_tag_name': request.POST.get('parent_tag_name'), # 一级标签
-
-                'parent_tag_id' : request.POST.get('parent_tag_id'),      # 二级标签
-                'second_tag_name' : request.POST.get('second_tag_name')   # 二级标签
+                # 'second_tag_id' : request.POST.get('second_tag_id'),
+                # 'parent_tag_id' : request.POST.get('parent_tag_id'),      # 二级标签
+                'tag_name' : request.POST.get('tag_name')   # 二级标签
             }
 
-            forms_obj = ArticleTagAddForm(tag_data)
+            forms_obj = ArticleTagSingleAddForm(tag_data)
             if forms_obj.is_valid():
-
-                tag= forms_obj.cleaned_data.get('tag')
                 parent_tag_id = forms_obj.cleaned_data['parent_tag_id']
-                # parent_tag_name = forms_obj.cleaned_data['parent_tag_name']
-                second_tag_name = forms_obj.cleaned_data['second_tag_name']
+                tag_name = forms_obj.cleaned_data['tag_name']
 
 
                 #说明新建的一级标签
-                user_tag_obj = models.zgld_article_tag.objects.filter(
-                    user_id=user_id,
-                    # name=parent_tag_name
+                article_tag_obj = models.zgld_article_tag.objects.create(
+                    name = tag_name,
+                    user_id = user_id,
+
                 )
 
-                tag_id = user_tag_obj.id
-                tag_name = user_tag_obj.name
-
-                if second_tag_name:
-                    objs = models.zgld_article_tag.objects.filter(
-                        name=second_tag_name, user_id=user_id
-                    )
-                    if objs:
-                        response.msg = '不能存在相同的标签名'
-                        response.code = 303
-
-                        return JsonResponse(response.__dict__)
-
-                    models.zgld_article_tag.objects.create(
-                        user_id=user_id,
-                        name=second_tag_name,
-                        parent_id_id=tag_id
-                    )
+                tag_id = article_tag_obj.id
+                tag_name = article_tag_obj.name
 
 
 
                 response.code = 200
                 response.msg = "添加成功"
-                response.data = [{ 'parent_tag_id' : tag_id, 'parent_tag_name': tag_name,'second_tag_name': second_tag_name}]
+                response.data = [{ 'second_tag_id' : tag_id, 'second_tag_name': tag_name}]
 
             else:
                 response.code = 303
