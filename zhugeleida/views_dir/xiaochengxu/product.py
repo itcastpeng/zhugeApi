@@ -57,12 +57,22 @@ def product(request, oper_type):
                     ret_data = []
                     for obj in objs:
 
-
-
                         user_obj = models.zgld_userprofile.objects.get(id=user_id)
-                        user_avatar = user_obj.avatar
                         username = user_obj.username
                         position = user_obj.position
+
+                        user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by(
+                            '-create_date')
+
+                        if user_photo_obj:
+                            user_avatar = user_photo_obj[0].photo_url
+
+                        else:
+                            # if obj.avatar.startswith("http"):
+                            #     user_avatar = obj.avatar
+                            # else:
+                            user_avatar = user_obj.avatar
+
 
                         ret_data.append({
                             'id': obj.id,

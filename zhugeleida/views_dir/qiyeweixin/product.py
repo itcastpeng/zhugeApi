@@ -45,21 +45,24 @@ def product(request, oper_type):
                         if int(obj.user_id) == int(user_id):
                             publisher = '我添加的'
                         else:
-                            publisher = obj.user.username + '添加的'
+                            publisher = obj.user.name + '添加的'
                     else:
                         publisher = '企业发布'
 
+                    user_obj = models.zgld_userprofile.objects.get(id=user_id)
 
-                    user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
+                    user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by(
+                        '-create_date')
 
                     if user_photo_obj:
-                        user_avatar =  user_photo_obj[0].photo_url
+                        user_avatar = user_photo_obj[0].photo_url
 
                     else:
                         # if obj.avatar.startswith("http"):
                         #     user_avatar = obj.avatar
-                        # else:
-                        user_avatar =  obj.user.avatar
+                        user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                        if user_obj:
+                            user_avatar = user_obj.avatar
 
 
                     ret_data.append({
