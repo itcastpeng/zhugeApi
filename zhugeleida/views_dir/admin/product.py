@@ -38,8 +38,8 @@ def product(request, oper_type):
                 'id': '',
             }
             q = conditionCom(request, field_dict)
-            company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-            q.add(Q(**{'company_id': company_id}), Q.AND)
+            # company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+            # q.add(Q(**{'company_id': company_id}), Q.AND)
             q.add(Q(**{'id': product_id}), Q.AND)
 
             if product_type  == 1:   #单个官网产品展示
