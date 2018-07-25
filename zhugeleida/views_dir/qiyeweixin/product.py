@@ -45,7 +45,7 @@ def product(request, oper_type):
                         if int(obj.user_id) == int(user_id):
                             publisher = '我添加的'
                         else:
-                            publisher = obj.user.username + '添加的'
+                            publisher = obj.user.name + '添加的'
                     else:
                         publisher = '企业发布'
 
@@ -59,7 +59,10 @@ def product(request, oper_type):
                         # if obj.avatar.startswith("http"):
                         #     user_avatar = obj.avatar
                         # else:
-                        user_avatar =  obj.user.avatar
+                        print('---obj-->>',obj.user.name)
+                        user_avatar = ''
+                        if obj.user:
+                            user_avatar = obj.user.avatar
 
 
                     ret_data.append({
