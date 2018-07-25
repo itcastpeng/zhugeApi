@@ -36,7 +36,49 @@ class ArticleTagAddForm(forms.Form):
         else:
             return name
 
+# 添加标签信息
+class ArticleTagSingleAddForm(forms.Form):
+    parent_tag_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "一级标签不能为空"
+        }
+    )
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "用户ID不能为空"
+        }
+    )
 
+    second_tag_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "二级标签不能为空"
+        }
+
+    )
+
+    # 查询标签名判断是否存在
+    def clean_parent_tag_id(self):
+        parent_tag_id = self.data['parent_tag_id']
+        objs = models.zgld_article_tag.objects.filter(
+            id=parent_tag_id, user_id=self.data.get('user_id')
+        )
+        if not objs:
+            self.add_error('name', '一级标签不存在')
+        else:
+            return parent_tag_id
+
+    def clean_second_tag_name(self):
+        second_tag_name = self.data['second_tag_name']
+        objs = models.zgld_article_tag.objects.filter(
+            name=second_tag_name, user_id=self.data.get('user_id')
+        )
+        if objs:
+            self.add_error('second_tag_name', '二级不能存在相同的标签名')
+        else:
+            return second_tag_name
 
 # 更新标签信息
 class TagUserUpdateForm(forms.Form):

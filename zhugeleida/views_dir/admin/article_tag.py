@@ -114,8 +114,6 @@ def tag_user_oper(request, oper_type):
                         parent_id_id=tag_id
                     )
 
-
-
                 response.code = 200
                 response.msg = "添加成功"
                 response.data = [{ 'parent_tag_id' : tag_id, 'parent_tag_name': tag_name,'second_tag_name': second_tag_name}]
@@ -131,8 +129,8 @@ def tag_user_oper(request, oper_type):
                 'user_id' : request.GET.get('user_id'),
                 # 'parent_tag_name': request.POST.get('parent_tag_name'), # 一级标签
 
-                'parent_tag_id' : request.POST.get('parent_tag_id'),  # 二级标签
-                'second_tag_name' : request.POST.get('second_tag_name')  # 二级标签
+                'parent_tag_id' : request.POST.get('parent_tag_id'),      # 二级标签
+                'second_tag_name' : request.POST.get('second_tag_name')   # 二级标签
             }
 
             forms_obj = ArticleTagAddForm(tag_data)
@@ -178,8 +176,6 @@ def tag_user_oper(request, oper_type):
             else:
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
-
-
 
         elif oper_type == "delete":
             tag_id = request.POST.get('id')
