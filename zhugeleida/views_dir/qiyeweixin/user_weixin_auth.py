@@ -13,7 +13,7 @@ from publicFunc.condition_com import conditionCom
 from ..conf import *
 import os
 import redis
-from django.http import Http404
+from django.http import HttpResponse
 
 
 @csrf_exempt
@@ -57,9 +57,10 @@ def work_weixin_auth(request, company_id):
         print('===========user_ticket==========>', code_ret.json())
         code_ret_json = code_ret.json()
 
+
         user_ticket = code_ret_json.get('user_ticket')
         if not user_ticket:
-            return  Http404
+            return  HttpResponse('404')
 
         # ?access_token = ACCESS_TOKEN
         post_userlist_data['user_ticket'] = user_ticket

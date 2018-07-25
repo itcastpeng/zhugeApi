@@ -230,9 +230,11 @@ class zgld_tag(models.Model):
 
 # 客户管理
 class zgld_customer(models.Model):
-    username = models.CharField(verbose_name='客户姓名', max_length=64, null=True)
-    memo_name = models.CharField(max_length=64, verbose_name='备注名', blank=True, null=True)
-    openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=64)
+    username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
+    memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
+    openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
+    formid = models.CharField(verbose_name='formId(用于发送模板消息)',max_length=128,null=True)
+
     headimgurl = models.CharField(verbose_name="用户头像url", max_length=256, default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)

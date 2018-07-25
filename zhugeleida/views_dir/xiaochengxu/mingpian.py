@@ -87,8 +87,8 @@ def mingpian(request):
                     if up_down_sign_obj:
                         is_sign = up_down_sign_obj[0].up
 
-                    photo_data = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url').order_by(
-                        '-create_date')
+                    # photo_data = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=1).values('id', 'photo_url').order_by(
+                    #     '-create_date')
                     tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id',
                                                                                                         'name').order_by(
                         '-create_date')
@@ -127,7 +127,7 @@ def mingpian(request):
                         'sign': obj.sign or '',  # 签名
                         'is_sign': is_sign,  # 签名
                         'sign_num': sign_num,
-                        'photo': list(photo_data) or '',
+                        # 'photo': list(photo_data) or '', #预留照片墙
                         'tag': list(tag_data),
                         'chatinfo_count' : chatinfo_count,
 
@@ -423,9 +423,10 @@ def mingpian_oper(request, oper_type):
                 print('------>',url)
 
                 driver.get(url)
-
+                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                 user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
-                user_poster_file = '/%s_%s_poster.png' % (customer_id,user_id)
+                user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
+
                 # driver.find_element_by_class_name("tu")
                 driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
                 driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)

@@ -163,6 +163,7 @@ def login_oper(request,oper_type):
             gender = request.POST.get('gender')  #1代表男
             language = request.POST.get('language')
             username =  request.POST.get('nickName')
+            formid =  request.POST.get('formId')
             page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
 
             import logging.handlers
@@ -191,6 +192,7 @@ def login_oper(request,oper_type):
             if objs:
                 objs.update( username = customer_name,
                              headimgurl=headimgurl,
+                             formid = formid,
                              city =city,
                              country=country,
                              province = province,
