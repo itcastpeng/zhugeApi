@@ -49,11 +49,10 @@ def product(request, oper_type):
                     else:
                         publisher = '企业发布'
 
-                    user_obj = models.zgld_userprofile.objects.get(id=user_id)
-
                     user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by(
                         '-create_date')
 
+                    user_avatar = ''
                     if user_photo_obj:
                         user_avatar = user_photo_obj[0].photo_url
 
