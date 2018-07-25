@@ -160,6 +160,7 @@ def tag_user_oper(request, oper_type):
                     if objs:
                         response.msg = '不能存在相同的标签名'
                         response.code = 303
+
                         return JsonResponse(response.__dict__)
 
                     models.zgld_article_tag.objects.create(
