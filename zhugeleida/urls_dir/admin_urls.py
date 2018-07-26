@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)/', article.article),
 
     # 文章的标签管理
-    # url(r'^tag/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
+    url(r'^tag/(?P<oper_type>\w+)$', article_tag.article_tag_oper),
     url(r'^tag$', article_tag.article_tag),
 
 

@@ -76,7 +76,7 @@ class ArticleTagSingleAddForm(forms.Form):
             name=tag_name, user_id=self.data.get('user_id')
         )
         if objs:
-            self.add_error('second_tag_name', '二级不能存在相同的标签名')
+            self.add_error('tag_name', '不能存在相同的标签名')
         else:
             return tag_name
 

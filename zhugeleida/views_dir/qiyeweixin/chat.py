@@ -179,7 +179,7 @@ def chat_oper(request, oper_type, o_id):
             forms_obj = ChatPostForm(request.POST)
 
             if forms_obj.is_valid():
-                data = request.POST
+                data = request.POST.copy()
                 user_id = int(data.get('user_id'))
                 customer_id = int(data.get('customer_id'))
                 msg = data.get('msg')

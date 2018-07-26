@@ -237,17 +237,18 @@ def user_send_template_msg(request):
 
         path = '/pages/mingpian/index?uid=%s' % (user_id)
         post_template_data['page'] = path
+        user_name = models.zgld_userprofile.objects.get(id=user_id).name
 
         # 留言回复通知
         data = {
             'keyword1': {
-                'value': '韩新颖'  # 回复者
+                'value': user_name  # 回复者
             },
             'keyword2': {
                 'value': '2018-07-25 22:30'   #回复时间
             },
             'keyword3': {
-                'value': '您有未读消息。'  #回复内容
+                'value': '您有未读消息,点击小程序查看。'  #回复内容
             }
         }
         post_template_data['data'] = data
