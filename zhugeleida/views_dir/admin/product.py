@@ -235,7 +235,7 @@ def product_oper(request, oper_type, o_id):
 
             if product_objs:
 
-                if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
                     product_objs.update(
                         status=status
                     )
@@ -246,8 +246,6 @@ def product_oper(request, oper_type, o_id):
                         'status': product_objs[0].get_status_display(),
                         'status_code': product_objs[0].status
                     }
-
-
 
 
             else:
