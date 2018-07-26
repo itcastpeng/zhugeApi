@@ -212,7 +212,7 @@ def user_send_template_msg(request):
         # {"errcode": 0, "errmsg": "created"}
         token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
         token_ret_json = token_ret.json()
-        print('-----生成小程序模板信息用的token------>', token_ret_json)
+        print('-----生成小程序模板信息用的token：微信接口返回数据------>', token_ret_json)
         if not token_ret_json.get('access_token'):
             response.code = token_ret_json['errcode']
             response.msg = "生成模板信息用的token未通过"
@@ -258,16 +258,16 @@ def user_send_template_msg(request):
 
         template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
         template_ret = template_ret.json()
+        print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
 
         if  template_ret.get('errmsg') == "ok":
-            print('-----企业用户 send to 客户端 Template Msg Successful---->>', )
+            print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
             response.code = 200
             response.msg = "企业用户发送模板消息成功"
-
-        # if not qr_ret.content:
-        #     rc.delete('xiaochengxu_token')
-        #     response.msg = "生成小程序消息未通过"
-         # return response
+        else:
+            print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
+            response.code = 200
+            response.msg = "企业用户发送模板消息成功"
     else:
         response.msg = "客户不存在"
         response.code = 301
