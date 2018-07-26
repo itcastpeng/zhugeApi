@@ -239,16 +239,17 @@ def user_send_template_msg(request):
         post_template_data['page'] = path
         user_name = models.zgld_userprofile.objects.get(id=user_id).name
 
+        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # 留言回复通知
         data = {
             'keyword1': {
                 'value': user_name  # 回复者
             },
             'keyword2': {
-                'value': '2018-07-25 22:30'   #回复时间
+                'value': now_time   # 回复时间
             },
             'keyword3': {
-                'value': '您有未读消息,点击小程序查看。'  #回复内容
+                'value': '您有未读消息,点击小程序查看哦。'  #回复内容
             }
         }
         post_template_data['data'] = data
