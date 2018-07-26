@@ -267,14 +267,14 @@ def product_oper(request, oper_type, o_id):
             forms_obj = ProductUpdateForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
-                product_id = forms_obj.data.get('product_id')
+                product_id = forms_obj.cleaned_data.get('product_id')
 
                 product_obj = models.zgld_product.objects.filter(id=product_id)
                 product_obj.update(
-                    name=forms_obj.data.get('name'),
-                    price=forms_obj.data.get('price'),
-                    reason=forms_obj.data.get('reason'),
-                    content=forms_obj.data.get('content')
+                    name=forms_obj.cleaned_data.get('name'),
+                    price=forms_obj.cleaned_data.get('price'),
+                    reason=forms_obj.cleaned_data.get('reason'),
+                    content=forms_obj.cleaned_data.get('content')
                 )
 
                 response.code = 200
@@ -300,7 +300,7 @@ def product_oper(request, oper_type, o_id):
             forms_obj = ProductAddForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
-                content = forms_obj.data.get('content')
+                content = forms_obj.cleaned_data.get('content')
 
                 global product_owner
                 if product_type == 1:             #代表公司产品
@@ -312,9 +312,9 @@ def product_oper(request, oper_type, o_id):
                 product_obj = models.zgld_product.objects.create(
                     user_id=product_owner,
                     company_id=company_id,
-                    name=forms_obj.data.get('name'),
-                    price=forms_obj.data.get('price'),
-                    reason=forms_obj.data.get('reason'),
+                    name=forms_obj.cleaned_data.get('name'),
+                    price=forms_obj.cleaned_data.get('price'),
+                    reason=forms_obj.cleaned_data.get('reason'),
                 )
 
                 # 封面图片数据绑定到产品。

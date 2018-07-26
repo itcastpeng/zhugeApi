@@ -33,13 +33,12 @@ class ProductAddForm(forms.Form):
 
     )
 
-    title = forms.CharField(
-        required=False,
 
-    )
     content = forms.CharField(
-        required=False,
-
+        required=True,
+        error_messages={
+            'required': "封面内容不能为空"
+        }
     )
 
     # 判断企业产品是否存在
@@ -96,7 +95,9 @@ class ProductUpdateForm(forms.Form):
     )
     content = forms.CharField(
         required=True,
-
+        error_messages={
+            'required': "封面内容不能为空"
+        }
     )
 
     # 判断企业产品名称是否存在
