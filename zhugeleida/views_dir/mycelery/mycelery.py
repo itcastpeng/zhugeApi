@@ -250,6 +250,7 @@ def user_send_template_msg(request):
             if not exist_formid_json:
                 response.msg = "没有formID"
                 response.code = 301
+                print('------没有消费的formID------>>')
                 return JsonResponse(response.__dict__)
             else:
                 exist_formid_json = json.loads(exist_formid_json, object_pairs_hook=OrderedDict)
@@ -258,7 +259,7 @@ def user_send_template_msg(request):
             obj = models.zgld_customer.objects.filter(id=customer_id)
             print('++++++++++ 2 exist_formid_json++++++++++++>>',exist_formid_json)
 
-            obj.update(openid=json.dumps(exist_formid_json))
+            obj.update(formid=json.dumps(exist_formid_json))
 
             post_template_data['form_id'] = form_id
 
