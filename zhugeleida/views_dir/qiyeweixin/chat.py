@@ -8,10 +8,12 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
+from zhugeapi_celery_project import tasks
 
 import json
 from zhugeleida import models
 import base64
+from zhugeleida.public.common import action_record
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -200,6 +202,16 @@ def chat_oper(request, oper_type, o_id):
                         send_type=send_type,
 
                 )
+
+                # remark = ':%s' % (msg)
+                # data = request.GET.copy()
+                # data['action'] = 0
+                # data['uid'] = user_id
+                # response = action_record(data, remark)
+
+                data['customer_id'] = customer_id
+                data['user_id'] = user_id
+                tasks.user_send_template_msg_to_customer.delay(json.dumps(data))
 
                 response.code = 200
                 response.msg = 'send msg successful'

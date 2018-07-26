@@ -231,11 +231,9 @@ def user_send_template_msg(request):
     if customer_obj:
         form_id =  customer_obj[0].formid
         openid =  customer_obj[0].openid
-
         post_template_data['touser'] = openid
 
-        template_id = ''
-        post_template_data['template_id'] = template_id
+        post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
 
         path = '/pages/mingpian/index?uid=%s' % (user_id)
         post_template_data['page'] = path
