@@ -127,7 +127,7 @@ def mingpian(request):
                         'sign': obj.sign or '',  # 签名
                         'is_sign': is_sign,  # 签名
                         'sign_num': sign_num,
-                        # 'photo': list(photo_data) or '', #预留照片墙
+                        'photo': '', #预留照片墙
                         'tag': list(tag_data),
                         'chatinfo_count' : chatinfo_count,
 
