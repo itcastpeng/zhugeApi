@@ -293,7 +293,7 @@ def product_oper(request, oper_type, o_id):
                 'price': request.POST.get('price'),  # 价格     必须
                 'reason': request.POST.get('reason'),  # 推荐理由 非必须
                 # 'title': request.POST.get('title'),    # 标题    非必须
-                # 'content': request.POST.get('content'),  # 内容    非必须
+                'content': request.POST.get('content'),  # 内容    非必须
             }
             product_type = int(request.POST.get('product_type')) if request.POST.get('product_type') else ''
 
