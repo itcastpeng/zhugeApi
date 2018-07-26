@@ -38,8 +38,8 @@ def product(request, oper_type):
                 'id': '',
             }
             q = conditionCom(request, field_dict)
-            company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-            q.add(Q(**{'company_id': company_id}), Q.AND)
+            # company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+            # q.add(Q(**{'company_id': company_id}), Q.AND)
             q.add(Q(**{'id': product_id}), Q.AND)
 
             if product_type  == 1:   #单个官网产品展示
@@ -70,7 +70,7 @@ def product(request, oper_type):
                         'name': obj.name,  # 产品名称  必填
                         'price': obj.price,  # 价格     必填
                         'reason': obj.reason,  # 推荐理由
-                        'content' : obj.content,
+                        'content' : json.loads(obj.content),
 
                         'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                         'status': obj.get_status_display(),  # 产品的动态
@@ -225,37 +225,34 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '产品不存在'
 
-
         elif oper_type == "change_status":
-
+            print('-------change_status------->>',request.POST)
             status = int(request.POST.get('status'))
-            user_id = int(request.GET.get('user_id'))
+            user_id = request.GET.get('user_id')
             product_objs = models.zgld_product.objects.filter(id=o_id)
             print('product_objs--------->', product_objs)
 
             if product_objs:
 
-                if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
-                    product_objs.update(
-                        status=status
-                    )
-                    response.code = 200
-                    response.msg = "修改状态成功"
-                    response.data = {
-                        'product_id': product_objs[0].id,
-                        'status': product_objs[0].get_status_display(),
-                        'status_code': product_objs[0].status
-                    }
-
-
-
+                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+                product_objs.update(
+                    status=status
+                )
+                response.code = 200
+                response.msg = "修改状态成功"
+                response.data = {
+                    'product_id': product_objs[0].id,
+                    'status': product_objs[0].get_status_display(),
+                    'status_code': product_objs[0].status
+                }
 
             else:
 
                 response.code = 302
                 response.msg = '产品不存在'
 
-        if oper_type == "update":
+
+        elif oper_type == "update":
 
             form_data = {
                 'user_id': request.GET.get('user_id'),
@@ -263,20 +260,20 @@ def product_oper(request, oper_type, o_id):
                 'name': request.POST.get('name'),  # 产品名称 必须
                 'price': request.POST.get('price'),  # 价格    非必须
                 'reason': request.POST.get('reason'),  # 推荐理由 非必须
-
+                'content': request.POST.get('content'),  # 推荐理由 非必须
             }
 
             forms_obj = ProductUpdateForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
-                product_id = forms_obj.data.get('product_id')
+                product_id = forms_obj.cleaned_data.get('product_id')
 
                 product_obj = models.zgld_product.objects.filter(id=product_id)
                 product_obj.update(
-                    name=forms_obj.data.get('name'),
-                    price=forms_obj.data.get('price'),
-                    reason=forms_obj.data.get('reason'),
-                    content=forms_obj.data.get('content')
+                    name=forms_obj.cleaned_data.get('name'),
+                    price=forms_obj.cleaned_data.get('price'),
+                    reason=forms_obj.cleaned_data.get('reason'),
+                    content=forms_obj.cleaned_data.get('content')
                 )
 
                 response.code = 200
@@ -295,14 +292,14 @@ def product_oper(request, oper_type, o_id):
                 'price': request.POST.get('price'),  # 价格     必须
                 'reason': request.POST.get('reason'),  # 推荐理由 非必须
                 # 'title': request.POST.get('title'),    # 标题    非必须
-                # 'content': request.POST.get('content'),  # 内容    非必须
+                'content': request.POST.get('content'),  # 内容    非必须
             }
             product_type = int(request.POST.get('product_type')) if request.POST.get('product_type') else ''
 
             forms_obj = ProductAddForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
-                content = forms_obj.data.get('content')
+                content = forms_obj.cleaned_data.get('content')
 
                 global product_owner
                 if product_type == 1:             #代表公司产品
@@ -314,9 +311,9 @@ def product_oper(request, oper_type, o_id):
                 product_obj = models.zgld_product.objects.create(
                     user_id=product_owner,
                     company_id=company_id,
-                    name=forms_obj.data.get('name'),
-                    price=forms_obj.data.get('price'),
-                    reason=forms_obj.data.get('reason'),
+                    name=forms_obj.cleaned_data.get('name'),
+                    price=forms_obj.cleaned_data.get('price'),
+                    reason=forms_obj.cleaned_data.get('reason'),
                 )
 
                 # 封面图片数据绑定到产品。
@@ -405,8 +402,7 @@ def product_oper(request, oper_type, o_id):
                 response.data = json.loads(forms_obj.errors.as_json())
 
 
-
-    return JsonResponse(response.__dict__)
+        return JsonResponse(response.__dict__)
 
 
 

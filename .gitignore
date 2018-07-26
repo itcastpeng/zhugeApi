@@ -11,3 +11,4 @@ db.sqlite3
 venv/
 tmp/
 qr_code/
+test.log

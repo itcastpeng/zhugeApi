@@ -8,6 +8,7 @@ import json
 from publicFunc.Response import ResponseObj
 from django.http import JsonResponse
 import os
+import datetime
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
@@ -106,13 +107,14 @@ def create_user_or_customer_qr_code(request):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
 
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     if not customer_id:
         path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
-        user_qr_code = '/%s_qrcode.jpg' % (user_id)
+        user_qr_code = '/%s_%s_qrcode.jpg' % (user_id,now_time)
 
     else:
         path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
-        user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, customer_id)
+        user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id ,customer_id,now_time)
 
     get_qr_data = {}
 
@@ -178,5 +180,99 @@ def create_user_or_customer_qr_code(request):
 
     response.code = 200
     response.msg = "生成小程序二维码成功"
+
+    return JsonResponse(response.__dict__)
+
+
+
+# 小程序生成token，并然后发送模板消息
+@csrf_exempt
+def user_send_template_msg(request):
+    response = ResponseObj()
+
+    print('request -->', request.GET)
+    data = json.loads(request.GET.get('data'))
+
+    user_id = data.get('user_id')
+    customer_id = data.get('customer_id')
+
+    get_token_data = {}
+    get_template_data = {}
+    post_template_data =  {}
+    get_token_data['appid'] = Conf['appid']
+    get_token_data['secret'] = Conf['appsecret']
+    get_token_data['grant_type'] = 'client_credential'
+
+    import redis
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    token_ret = rc.get('xiaochengxu_token')
+    print('---token_ret---->>', token_ret)
+
+    if not token_ret:
+        # {"errcode": 0, "errmsg": "created"}
+        token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
+        token_ret_json = token_ret.json()
+        print('-----生成小程序模板信息用的token：微信接口返回数据------>', token_ret_json)
+        if not token_ret_json.get('access_token'):
+            response.code = token_ret_json['errcode']
+            response.msg = "生成模板信息用的token未通过"
+            return response
+
+        access_token = token_ret_json['access_token']
+        print('---- access_token --->>', token_ret_json)
+        get_template_data['access_token'] = access_token
+        rc.set('xiaochengxu_token', access_token, 7000)
+
+    else:
+        get_template_data['access_token'] = token_ret
+
+    global openid,form_id
+    customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+    if customer_obj:
+        form_id =  customer_obj[0].formid
+        openid =  customer_obj[0].openid
+        post_template_data['touser'] = openid
+
+        post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
+
+        path = '/pages/mingpian/index?uid=%s' % (user_id)
+        post_template_data['page'] = path
+        user_name = models.zgld_userprofile.objects.get(id=user_id).name
+
+        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # 留言回复通知
+        data = {
+            'keyword1': {
+                'value': user_name  # 回复者
+            },
+            'keyword2': {
+                'value': now_time   # 回复时间
+            },
+            'keyword3': {
+                'value': '您有未读消息,点击小程序查看哦。'  #回复内容
+            }
+        }
+        post_template_data['data'] = data
+        # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
+
+        # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
+
+        template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+        template_ret = template_ret.json()
+        print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
+
+        if  template_ret.get('errmsg') == "ok":
+            print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
+            response.code = 200
+            response.msg = "企业用户发送模板消息成功"
+        else:
+            print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
+            response.code = 200
+            response.msg = "企业用户发送模板消息成功"
+    else:
+        response.msg = "客户不存在"
+        response.code = 301
+        print('---- Template Msg 客户不存在---->>')
+
 
     return JsonResponse(response.__dict__)

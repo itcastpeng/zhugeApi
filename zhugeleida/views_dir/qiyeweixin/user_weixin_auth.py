@@ -13,7 +13,7 @@ from publicFunc.condition_com import conditionCom
 from ..conf import *
 import os
 import redis
-from django.http import Http404
+from django.http import HttpResponse
 
 
 @csrf_exempt
@@ -28,9 +28,8 @@ def work_weixin_auth(request, company_id):
         get_userlist_data = {}
 
 
-
         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-        token_ret = rc.get('qiyeweixin_token')
+        token_ret = rc.get('leida_app_token')
         print('---token_ret---->>', token_ret)
 
         if not token_ret:
@@ -46,7 +45,7 @@ def work_weixin_auth(request, company_id):
             ret_json = ret.json()
             print('===========access_token==========>', ret_json)
             access_token = ret_json.get('access_token')
-            rc.set('qiyeweixin_token', access_token, 7000)
+            rc.set('leida_app_token', access_token, 7000)
 
         else:
             access_token = token_ret
@@ -58,9 +57,10 @@ def work_weixin_auth(request, company_id):
         print('===========user_ticket==========>', code_ret.json())
         code_ret_json = code_ret.json()
 
+
         user_ticket = code_ret_json.get('user_ticket')
         if not user_ticket:
-            return  Http404
+            return  HttpResponse('404')
 
         # ?access_token = ACCESS_TOKEN
         post_userlist_data['user_ticket'] = user_ticket
