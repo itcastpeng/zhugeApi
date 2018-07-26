@@ -256,6 +256,8 @@ def user_send_template_msg(request):
 
             form_id = exist_formid_json.pop(0)
             obj = models.zgld_customer.objects.filter(id=customer_id)
+            print('++++++++++ 2 exist_formid_json++++++++++++>>',exist_formid_json)
+
             obj.update(openid=json.dumps(exist_formid_json))
 
             post_template_data['form_id'] = form_id
@@ -279,6 +281,7 @@ def user_send_template_msg(request):
         }
         post_template_data['data'] = data
         # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
+        print('===========post_template_data=======>>',post_template_data)
 
         # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
         return  HttpResponse(post_template_data)
