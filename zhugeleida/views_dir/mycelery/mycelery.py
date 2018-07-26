@@ -235,10 +235,10 @@ def user_send_template_msg(request):
 
         post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
 
-        path = '/pages/mingpian/index?uid=%s' % (user_id)
+        path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
         post_template_data['page'] = path
         user_name = models.zgld_userprofile.objects.get(id=user_id).name
-
+        post_template_data['form_id'] = form_id
         now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # 留言回复通知
         data = {

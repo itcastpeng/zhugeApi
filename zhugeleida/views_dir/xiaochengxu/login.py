@@ -8,13 +8,17 @@ from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm,LoginBindin
 
 import time
 import datetime
-import json
+
 import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
 import base64
+import json
+
+from collections import OrderedDict
+
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -163,7 +167,7 @@ def login_oper(request,oper_type):
             gender = request.POST.get('gender')  #1代表男
             language = request.POST.get('language')
             username =  request.POST.get('nickName')
-            formid =  request.POST.get('formId')
+            # formid =  request.POST.get('formId')
             page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
 
             import logging.handlers
@@ -192,7 +196,7 @@ def login_oper(request,oper_type):
             if objs:
                 objs.update( username = customer_name,
                              headimgurl=headimgurl,
-                             formid = formid,
+                             # formid = formid,
                              city =city,
                              country=country,
                              province = province,
@@ -230,6 +234,40 @@ def login_oper(request,oper_type):
             else:
                 response.code = 301
                 response.msg = "用户不存在"
+
+
+        elif oper_type == 'send_form_id':
+            formid = request.POST.get('formId')
+            customer_id = request.GET.get('user_id')
+
+            objs = models.zgld_customer.objects.filter(
+                id=customer_id,
+            )
+            print('-------formid----->>',objs,formid)
+            if objs and formid:
+                exist_formid_json = objs[0].formid
+
+                if not exist_formid_json:
+                    exist_formid_json = []
+                else:
+                    exist_formid_json = json.loads(exist_formid_json, object_pairs_hook=OrderedDict)
+
+                print('=======exist_formid_json====>',exist_formid_json,formid)
+
+                exist_formid_json.append(formid)
+                now_form_id_json = json.dumps(exist_formid_json)
+
+                print('============exist_formid_json  now_form_id_list =====>>',formid)
+                objs.update(formid=now_form_id_json)
+
+                # >> > stack
+                # [3, 4, 5]
+                # >> >
+                # >> > stack.pop(0)
+                # 3
+
+                response.code = 200
+                response.msg = "保存成功"
 
 
     return JsonResponse(response.__dict__)
