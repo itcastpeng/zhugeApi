@@ -26,7 +26,7 @@ Conf = {
     "qr_token_url" :  "https://api.weixin.qq.com/cgi-bin/token",
     "qr_code_url":  "https://api.weixin.qq.com/wxa/getwxacode",
     #小程序发送模板消息
-    "template_msg_url " : "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send",
+    "template_msg_url" : "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send",
 
     # 企业微信发送消息
     "send_msg_url" :  "https://qyapi.weixin.qq.com/cgi-bin/message/send",
