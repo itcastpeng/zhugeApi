@@ -244,16 +244,15 @@ def user_send_template_msg(request):
 
         user_name = ''
         if objs:
-            exist_formid_json = objs[0].customer.formid
+            exist_formid_json = json.loads(objs[0].customer.formid, object_pairs_hook=OrderedDict)
             user_name = objs[0].user.name
             print('===== 1 exist_formid_json 1 ========>>',exist_formid_json,'=====',len(exist_formid_json))
-            if not exist_formid_json or len(exist_formid_json) == 0:
+            if len(exist_formid_json) == 0:
                 response.msg = "没有formID"
                 response.code = 301
                 print('------没有消费的formID------>>')
                 return JsonResponse(response.__dict__)
-            else:
-                exist_formid_json = json.loads(exist_formid_json, object_pairs_hook=OrderedDict)
+
 
             form_id = exist_formid_json.pop(0)
             obj = models.zgld_customer.objects.filter(id=customer_id)

@@ -245,13 +245,8 @@ def login_oper(request,oper_type):
             )
             print('-------formid----->>',objs,formid)
             if objs and formid:
-                exist_formid_json = objs[0].formid
 
-                if not exist_formid_json or len(exist_formid_json) == 0:
-                    exist_formid_json = []
-                else:
-                    exist_formid_json = json.loads(exist_formid_json, object_pairs_hook=OrderedDict)
-
+                exist_formid_json = json.loads(objs[0].formid, object_pairs_hook=OrderedDict)
                 print('=======exist_formid_json====>',exist_formid_json,formid)
 
                 exist_formid_json.append(formid)
