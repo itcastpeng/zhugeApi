@@ -140,7 +140,7 @@ class zgld_product(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
     name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     price = models.CharField(verbose_name='价格', max_length=64, null=True)
-    reason = models.CharField(verbose_name='推荐理由', max_length=256, null=True)
+    reason = models.CharField(verbose_name='推荐理由', max_length=1024, null=True)
     content = models.TextField(verbose_name='内容', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -447,7 +447,7 @@ class zgld_chatinfo(models.Model):
 
 #文章详细表
 class zgld_article_detail(models.Model):
-    content = models.TextField(verbose_name='文章内容',null=True)
+
     article = models.OneToOneField("zgld_article",verbose_name='所属文章')
 
     class Meta:
@@ -466,7 +466,7 @@ class zgld_article(models.Model):
                        (2,'转载'),
                      )
     source = models.SmallIntegerField(default=1, verbose_name='文章来源', choices=source_choices)
-
+    content = models.TextField(verbose_name='文章内容', null=True)
     user = models.ForeignKey('zgld_userprofile',verbose_name='文章作者',null=True)
     # category = models.ForeignKey(verbose_name='文章类型', to='Category', to_field='nid', null=True)
 
