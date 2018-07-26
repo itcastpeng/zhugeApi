@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'edit_website$',website.website),
 
     #后台产品管理
-    # url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
+    url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
     url(r'^product/(?P<oper_type>\w+)/', product.product),
 
     url(r'^article/(?P<oper_type>\w+)/', article.article),

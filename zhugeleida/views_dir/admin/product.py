@@ -225,35 +225,35 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '产品不存在'
 
-
         elif oper_type == "change_status":
-
+            print('-------change_status------->>',request.POST)
             status = int(request.POST.get('status'))
-            user_id = int(request.GET.get('user_id'))
+            user_id = request.GET.get('user_id')
             product_objs = models.zgld_product.objects.filter(id=o_id)
             print('product_objs--------->', product_objs)
 
             if product_objs:
 
                 # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
-                    product_objs.update(
-                        status=status
-                    )
-                    response.code = 200
-                    response.msg = "修改状态成功"
-                    response.data = {
-                        'product_id': product_objs[0].id,
-                        'status': product_objs[0].get_status_display(),
-                        'status_code': product_objs[0].status
-                    }
-
+                product_objs.update(
+                    status=status
+                )
+                response.code = 200
+                response.msg = "修改状态成功"
+                response.data = {
+                    'product_id': product_objs[0].id,
+                    'status': product_objs[0].get_status_display(),
+                    'status_code': product_objs[0].status
+                }
 
             else:
 
                 response.code = 302
                 response.msg = '产品不存在'
 
-        if oper_type == "update":
+
+
+        elif oper_type == "update":
 
             form_data = {
                 'user_id': request.GET.get('user_id'),
@@ -401,7 +401,6 @@ def product_oper(request, oper_type, o_id):
                 response.code = 303
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
-
 
 
         return JsonResponse(response.__dict__)
