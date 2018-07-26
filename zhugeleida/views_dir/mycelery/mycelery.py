@@ -246,7 +246,7 @@ def user_send_template_msg(request):
         if objs:
             exist_formid_json = objs[0].customer.formid
             user_name = objs[0].user.name
-
+            print('===== 1 exist_formid_json 1 ========>>',exist_formid_json,'=====',len(exist_formid_json))
             if not exist_formid_json or len(exist_formid_json) == 0:
                 response.msg = "没有formID"
                 response.code = 301
