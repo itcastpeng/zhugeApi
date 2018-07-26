@@ -9,6 +9,8 @@ from publicFunc.Response import ResponseObj
 from django.http import JsonResponse
 import os
 import datetime
+import redis
+from collections import OrderedDict
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
@@ -175,9 +177,6 @@ def create_user_or_customer_qr_code(request):
         print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code)
 
 
-
-
-
     response.code = 200
     response.msg = "生成小程序二维码成功"
 
@@ -203,7 +202,7 @@ def user_send_template_msg(request):
     get_token_data['secret'] = Conf['appsecret']
     get_token_data['grant_type'] = 'client_credential'
 
-    import redis
+
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     token_ret = rc.get('xiaochengxu_token')
     print('---token_ret---->>', token_ret)
@@ -237,8 +236,34 @@ def user_send_template_msg(request):
 
         path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
         post_template_data['page'] = path
-        user_name = models.zgld_userprofile.objects.get(id=user_id).name
-        post_template_data['form_id'] = form_id
+
+        objs = models.zgld_user_customer_belonger.objects.filter(
+            customer_id=customer_id,user_id=user_id
+        )
+        print('-------formid----->>', objs)
+
+        user_name = ''
+        if objs:
+            exist_formid_json = objs[0].customer.formid
+            user_name = objs[0].user.name
+
+            if not exist_formid_json:
+                response.msg = "没有formID"
+                response.code = 301
+                return JsonResponse(response.__dict__)
+            else:
+                exist_formid_json = json.loads(exist_formid_json, object_pairs_hook=OrderedDict)
+
+            form_id = exist_formid_json.pop(0)
+            obj = models.zgld_customer.objects.filter(id=customer_id)
+            obj.update(openid=json.dumps(exist_formid_json))
+
+            post_template_data['form_id'] = form_id
+
+
+
+
+
         now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # 留言回复通知
         data = {
@@ -256,6 +281,7 @@ def user_send_template_msg(request):
         # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
 
         # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
+        return  HttpResponse(post_template_data)
 
         template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
         template_ret = template_ret.json()
