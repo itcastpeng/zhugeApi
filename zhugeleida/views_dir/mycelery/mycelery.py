@@ -263,9 +263,6 @@ def user_send_template_msg(request):
             post_template_data['form_id'] = form_id
 
 
-
-
-
         now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # 留言回复通知
         data = {
@@ -284,7 +281,7 @@ def user_send_template_msg(request):
         print('===========post_template_data=======>>',post_template_data)
 
         # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
-        return  HttpResponse(post_template_data)
+        # return  HttpResponse(post_template_data)
 
         template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
         template_ret = template_ret.json()

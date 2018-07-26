@@ -243,16 +243,14 @@ def login_oper(request,oper_type):
             objs = models.zgld_customer.objects.filter(
                 id=customer_id,
             )
-            print('-------formid----->>',objs,formid)
+
             if objs and formid:
 
                 exist_formid_json = json.loads(objs[0].formid, object_pairs_hook=OrderedDict)
-                print('=======exist_formid_json====>',exist_formid_json,formid)
-
                 exist_formid_json.append(formid)
                 now_form_id_json = json.dumps(exist_formid_json)
 
-                print('============exist_formid_json  now_form_id_list =====>>',formid)
+                print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>',now_form_id_json)
                 objs.update(formid=now_form_id_json)
 
                 # >> > stack
