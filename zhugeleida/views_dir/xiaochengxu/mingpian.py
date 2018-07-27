@@ -427,7 +427,7 @@ def mingpian_oper(request, oper_type):
                 user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
                 user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
 
-                # driver.find_element_by_class_name("tu")
+
                 driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
                 driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
@@ -454,9 +454,10 @@ def mingpian_oper(request, oper_type):
                     im.save( BASE_DIR  + user_poster_file)
 
                 poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
-                print('----生成海报URL---->',poster_url)
                 if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
-                # driver.quit()
+                print('---------生成海报URL-------->', poster_url)
+
+                driver.quit()
 
                 ret_data = {
                     'user_id': user_id,
