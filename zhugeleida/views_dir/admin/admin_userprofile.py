@@ -109,7 +109,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
 
             if objs:
 
-                if o_id == request.GET.get('user_id'):
+                if int(o_id) == int(request.GET.get('user_id')):
                     response.code = 305
                     response.msg = "不允许删除自己"
                     return JsonResponse(response.__dict__)
@@ -127,7 +127,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 'id': o_id,
                 'login_user': request.POST.get('login_user'),
                 'username': request.POST.get('username'),
-                'company_id': request.POST.get('company'),
+                'company_id': request.POST.get('company_id'),
                 'password': request.POST.get('password'),
                 'position': request.POST.get('position'),
                 'role_id': request.POST.get('role_id'),

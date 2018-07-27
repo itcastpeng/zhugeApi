@@ -13,7 +13,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+# @account.is_token(models.zgld_admin_userprofile)
 def access_rules(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -28,32 +28,28 @@ def access_rules(request):
                 'name': '__contains',
                 'create_date': '',
                 'oper_user__username': '__contains',
-
-
             }
+
             q = conditionCom(request, field_dict)
             print('q -->', q)
 
             if  request.GET.get('super_id_id__isnull'):
-                objs = models.zgld_access_rules.objects.select_related('super_id').filter(super_id_id__isnull=True).order_by(order)
+
+                objs = models.zgld_access_rules.objects.filter(super_id_id__isnull=True).order_by(order)
+                print(objs)
 
             else:
                 objs = models.zgld_access_rules.objects.select_related('super_id').filter(q).order_by(order)
+                # objs = models.zgld_access_rules.objects.values_list('id','name','url_path','super_id_id')
 
-            count = objs.count()
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
-
-            # 返回的数据
             ret_data = []
-
+            count = objs.count()
             for obj in objs:
-                #  将查询出来的数据 加入列表
+                # 将查询出来的数据 加入列表
                 super_name = ''
                 if obj.super_id:
                     super_name = obj.super_id.name
+
                 ret_data.append({
                     'id': obj.id,
                     'name': obj.name,
@@ -70,6 +66,11 @@ def access_rules(request):
                 'ret_data': ret_data,
                 'data_count': count,
             }
+            return JsonResponse(response.__dict__)
+
+
+
+
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -117,6 +118,7 @@ def access_rules_oper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = '删除ID不存在'
+
         elif oper_type == "update":
             # 获取需要修改的信息
             form_data = {

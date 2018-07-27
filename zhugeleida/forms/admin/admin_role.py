@@ -28,6 +28,31 @@ class AddForm(forms.Form):
             return name
 
 
+# 添加
+class RulesAddForm(forms.Form):
+
+    role_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "权限名称不能为空"
+        }
+    )
+
+    # 查询名称是否存在
+    def clean_role_id(self):
+        role_id = self.data['role_id']
+
+        objs = models.zgld_admin_role.objects.filter(
+            id=role_id
+        )
+        if not objs:
+            self.add_error('role_id', '角色不存在')
+        else:
+            return role_id
+
+
+
+
 # 更新
 class UpdateForm(forms.Form):
     o_id = forms.IntegerField(
@@ -40,7 +65,7 @@ class UpdateForm(forms.Form):
     name = forms.CharField(
         required=True,
         error_messages={
-            'required': "权限名称不能为空"
+            'required': "角色名称不能为空"
         }
     )
 
@@ -53,7 +78,7 @@ class UpdateForm(forms.Form):
             name=name
         ).exclude(id=o_id)
         if objs:
-            self.add_error('name', '权限名称已存在')
+            self.add_error('name', '角色名称已存在')
         else:
             return name
 
