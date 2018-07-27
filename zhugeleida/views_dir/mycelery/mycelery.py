@@ -244,24 +244,23 @@ def user_send_template_msg(request):
 
         user_name = ''
         if objs:
-            exist_formid_json = objs[0].customer.formid
+            exist_formid_json = json.loads(objs[0].customer.formid, object_pairs_hook=OrderedDict)
             user_name = objs[0].user.name
-
-            if not exist_formid_json:
+            print('===== 1 exist_formid_json 1 ========>>',exist_formid_json,'=====',len(exist_formid_json))
+            if len(exist_formid_json) == 0:
                 response.msg = "没有formID"
                 response.code = 301
+                print('------没有消费的formID------>>')
                 return JsonResponse(response.__dict__)
-            else:
-                exist_formid_json = json.loads(exist_formid_json, object_pairs_hook=OrderedDict)
+
 
             form_id = exist_formid_json.pop(0)
             obj = models.zgld_customer.objects.filter(id=customer_id)
-            obj.update(openid=json.dumps(exist_formid_json))
+            print('++++++++++ 2 exist_formid_json++++++++++++>>',exist_formid_json)
+
+            obj.update(formid=json.dumps(exist_formid_json))
 
             post_template_data['form_id'] = form_id
-
-
-
 
 
         now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -279,9 +278,10 @@ def user_send_template_msg(request):
         }
         post_template_data['data'] = data
         # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
+        print('===========post_template_data=======>>',post_template_data)
 
         # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
-        return  HttpResponse(post_template_data)
+        # return  HttpResponse(post_template_data)
 
         template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
         template_ret = template_ret.json()

@@ -37,7 +37,59 @@ class zgld_department(models.Model):
         app_label = "zhugeleida"
 
 
-# 用户管理
+# 角色管理
+class zgld_admin_role(models.Model):
+    name = models.CharField(verbose_name="角色名称", max_length=32)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "角色表"
+        app_label = "zhugeleida"
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
+
+# 后台用户管理
+class zgld_admin_userprofile(models.Model):
+    username = models.CharField(verbose_name="成员姓名", max_length=32)
+    password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+
+    avatar = models.CharField(verbose_name="头像url", max_length=256, default='statics/imgs/setAvator.jpg')
+    status_choices = (
+        (1, "启用"),
+        (2, "未启用"),
+    )
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=1)
+    role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
+    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        # unique_together = (("userid", "company"),)
+        verbose_name_plural = "后台用户管理"
+        app_label = "zhugeleida"
+
+# 权限表
+class zgld_access_rules(models.Model):
+    name = models.CharField(verbose_name="权限", max_length=64)
+    url_path = models.CharField(verbose_name="权限url", max_length=64, null=True, blank=True)
+
+    super_id = models.ForeignKey('self', verbose_name="上级ID", null=True, blank=True)
+
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "权限规则表"
+
+    def __str__(self):
+        return "%s" % self.name
+
+# 企业用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
     name = models.CharField(verbose_name="(登录)用户名", max_length=32)
@@ -233,7 +285,7 @@ class zgld_customer(models.Model):
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
-    formid = models.CharField(verbose_name='formId(用于发送模板消息)',max_length=128,null=True)
+    formid = models.CharField(verbose_name='formId(用于发送模板消息)',max_length=128,null=True,default="[]")
 
     headimgurl = models.CharField(verbose_name="用户头像url", max_length=256, default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
