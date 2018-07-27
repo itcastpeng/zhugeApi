@@ -22,6 +22,14 @@ class ProductAddForm(forms.Form):
             'required': "产品名称不能为空"
         }
     )
+
+    product_type = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "产品类型不能为空"
+        }
+    )
+
     price = forms.CharField(
         required=False,
 
