@@ -454,9 +454,9 @@ def mingpian_oper(request, oper_type):
                     im.save( BASE_DIR  + user_poster_file)
 
                 poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
-
+                print('----生成海报URL---->',poster_url)
                 if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
-                driver.quit()
+                # driver.quit()
 
                 ret_data = {
                     'user_id': user_id,
