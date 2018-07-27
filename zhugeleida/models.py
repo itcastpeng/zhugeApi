@@ -62,6 +62,7 @@ class zgld_admin_userprofile(models.Model):
         (2, "未启用"),
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=1)
+    token = models.CharField(verbose_name="token值", max_length=64, null=True, blank=True)
     role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
@@ -122,7 +123,7 @@ class zgld_userprofile(models.Model):
     area = models.CharField(max_length=128, verbose_name='所在地区', null=True)
     address = models.TextField(verbose_name='详细地址', null=True)
 
-    token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
+    token = models.CharField(verbose_name="token值", max_length=64, null=True, blank=True)
     avatar = models.CharField(verbose_name="头像url", max_length=256, default='statics/imgs/setAvator.jpg')
     qr_code = models.CharField(verbose_name='企业用户个人二维码', max_length=128, null=True)
     status_choices = (
@@ -286,7 +287,7 @@ class zgld_customer(models.Model):
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
-    formid = models.CharField(verbose_name='formId(用于发送模板消息)',max_length=128,null=True,default="[]")
+    formid = models.TextField(verbose_name='formId(用于发送模板消息)',null=True,default="[]")
 
     headimgurl = models.CharField(verbose_name="用户头像url", max_length=256, default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
