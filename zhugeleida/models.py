@@ -51,10 +51,11 @@ class zgld_admin_role(models.Model):
 
 # 后台用户管理
 class zgld_admin_userprofile(models.Model):
+    login_user =  models.CharField(verbose_name="登录用户名", max_length=32)
     username = models.CharField(verbose_name="成员姓名", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
-
+    position = models.CharField(verbose_name='职位', max_length=128)
     avatar = models.CharField(verbose_name="头像url", max_length=256, default='statics/imgs/setAvator.jpg')
     status_choices = (
         (1, "启用"),
@@ -92,7 +93,7 @@ class zgld_access_rules(models.Model):
 # 企业用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
-    name = models.CharField(verbose_name="(登录)用户名", max_length=32)
+    login_user = models.CharField(verbose_name="(登录)用户名", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
