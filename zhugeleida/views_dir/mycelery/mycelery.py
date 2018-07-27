@@ -245,7 +245,7 @@ def user_send_template_msg(request):
         user_name = ''
         if objs:
             exist_formid_json = json.loads(objs[0].customer.formid, object_pairs_hook=OrderedDict)
-            user_name = objs[0].user.name
+            user_name = objs[0].user.username
             print('===== 1 exist_formid_json 1 ========>>',exist_formid_json,'=====',len(exist_formid_json))
             if len(exist_formid_json) == 0:
                 response.msg = "没有formID"
