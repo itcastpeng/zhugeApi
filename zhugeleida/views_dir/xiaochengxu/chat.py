@@ -55,7 +55,7 @@ def chat(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-            global mingpian_phone
+            global phone
             ret_data_list = []
             for obj in objs:
 
@@ -72,9 +72,10 @@ def chat(request):
 
                 customer_name = base64.b64decode(obj.customer.username)
                 customer_name = str(customer_name, 'utf-8')
+                phone = obj.userprofile.mingpian_phone  if obj.userprofile.mingpian_phone else obj.userprofile.wechat_phone
 
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
-                    mingpian_phone = obj.userprofile.mingpian_phone
+
                     ret_data_list.append({
                         'customer_id': obj.customer.id,
                         'user_id': obj.userprofile.id,
@@ -126,7 +127,7 @@ def chat(request):
             response.msg = '分页获取-全部聊天消息成功'
             response.data = {
                 'ret_data': ret_data_list,
-                'mingpian_phone': mingpian_phone,
+                'mingpian_phone': phone,
                 'data_count': count,
             }
             if not ret_data_list:
