@@ -13,7 +13,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def admin_role(request):
     response = Response.ResponseObj()
     if request.method == "GET":

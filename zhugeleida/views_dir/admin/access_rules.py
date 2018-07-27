@@ -13,7 +13,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def access_rules(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -80,7 +80,7 @@ def access_rules(request):
 #  增删改
 #  csrf  token验证
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def access_rules_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
