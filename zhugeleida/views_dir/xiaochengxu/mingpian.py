@@ -459,7 +459,6 @@ def mingpian_oper(request, oper_type):
                     if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
                     print('---------生成海报URL-------->', poster_url)
 
-
                     ret_data = {
                         'user_id': user_id,
                         'poster_url': poster_url,
@@ -472,7 +471,7 @@ def mingpian_oper(request, oper_type):
 
                 except Exception as e:
                     response.msg = "PhantomJS截图失败"
-                    response.code = 200
+                    response.code = 400
                     driver.quit()
 
         else:

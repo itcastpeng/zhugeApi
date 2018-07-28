@@ -90,6 +90,8 @@ class zgld_access_rules(models.Model):
     def __str__(self):
         return "%s" % self.name
 
+
+
 # 企业用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
@@ -175,6 +177,23 @@ class zgld_user_photo(models.Model):
 
     class Meta:
         verbose_name_plural = "用户照片表"
+        app_label = "zhugeleida"
+
+
+#意见反馈表
+class zgld_user_feedback(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='意见所属用户')
+    problem_type_choices = (
+        (1,'客户服务'),
+        (2,'功能异常'),
+        (3,'产品建议')
+    )
+    problem_type = models.SmallIntegerField(verbose_name='问题类型',choices=problem_type_choices)
+    content = models.TextField(verbose_name='内容', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "用户标签表"
         app_label = "zhugeleida"
 
 

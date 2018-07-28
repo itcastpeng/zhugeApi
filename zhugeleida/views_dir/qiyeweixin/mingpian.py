@@ -136,7 +136,6 @@ def mingpian_oper(request, oper_type):
 
                 print('----forms_obj.data--->>', forms_obj.data)
                 avator_picture_url = request.POST.get('avator_picture_url')
-
                 user_id = request.GET.get('user_id')
                 wechat = forms_obj.data.get('wechat')
                 mingpian_phone = forms_obj.data.get('mingpian_phone')
@@ -159,12 +158,13 @@ def mingpian_oper(request, oper_type):
                     company_obj = models.zgld_company.objects.filter(id=objs[0].company_id)
                     company_obj.update(area=area, address=address)
 
-                avator_objs = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2)
-                if  avator_objs:
-                    avator_objs.update(photo_url=avator_picture_url)
+                if not  avator_picture_url.startswith('http'):
+                    avator_objs = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2)
+                    if  avator_objs:
+                        avator_objs.update(photo_url=avator_picture_url)
 
-                else:
-                    obj = models.zgld_user_photo.objects.create(user_id=user_id, photo_url=avator_picture_url, photo_type=2)
+                    else:
+                        models.zgld_user_photo.objects.create(user_id=user_id, photo_url=avator_picture_url, photo_type=2)
 
 
 
@@ -217,6 +217,23 @@ def mingpian_oper(request, oper_type):
             else:
                 response.code = 302
                 response.msg = '删除数据不存在'
+
+        elif oper_type == 'feedback':
+            user_id = request.GET.get('user_id')
+            content = request.POST.get('content')
+            problem_type = request.POST.get('problem_type')
+
+            print('---content--->>',request.POST)
+
+            if not content:
+                response.code = 303
+                response.msg = '内容不能为空'
+                return JsonResponse(response.__dict__)
+
+            models.zgld_user_feedback.objects.create(user_id=user_id,content=content,problem_type=problem_type)
+            response.code = 200
+            response.msg = '保存成功'
+
 
 
     elif request.method == "GET":
