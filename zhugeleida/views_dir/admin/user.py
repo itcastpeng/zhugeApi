@@ -85,9 +85,9 @@ def user(request):
                     'last_login_date': obj.last_login_date,
                     'position': obj.position,
                     'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
-                    'phone': obj.wechat_phone,         # 代表注册企业微信注册时的电话
+                    'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
                     'status': obj.get_status_display(),
-                    'avatar': mingpian_avatar,       # 头像
+                    'avatar': mingpian_avatar,          # 头像
                     'qr_code': obj.qr_code,
                     'company': obj.company.name,
                     'company_id': obj.company_id,
