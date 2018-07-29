@@ -175,6 +175,24 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == "update_status":
+
+            status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
+            user_id = request.GET.get('user_id')
+
+            objs = models.zgld_admin_userprofile.objects.filter(id=o_id)
+
+            if objs:
+
+                if int(user_id) == int(o_id):
+                    response.code = 305
+                    response.msg = "不能修改自己"
+
+                else:
+                    objs.update(status=status)
+                    response.code = 200
+                    response.msg = "修改成功"
+
     else:
         response.code = 402
         response.msg = "请求异常"
