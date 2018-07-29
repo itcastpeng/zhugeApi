@@ -49,7 +49,10 @@ def admin_userprofile(request):
                 ret_data.append({
                     'id': obj.id,
                     'avatar': obj.avatar,
+                    'login_user': obj.login_user,
                     'username': obj.username,
+                    'position' : obj.position,
+                    'password' : '',
                     'company_name': obj.company.name,
                     'company_id': obj.company_id,
                     'role_id': obj.role_id,
