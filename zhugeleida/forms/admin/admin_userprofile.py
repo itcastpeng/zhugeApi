@@ -131,9 +131,9 @@ class UpdateForm(forms.Form):
     )
 
     password = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
-            'required': "权限路径不能为空"
+            'required': "密码不能为空"
         }
     )
 
