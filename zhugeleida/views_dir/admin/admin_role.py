@@ -125,6 +125,9 @@ def admin_role_oper(request, oper_type, o_id):
             form_data = {
                 'name': request.POST.get('name'),
             }
+
+            rules_list = json.loads(request.POST.get('rules_list')) if request.POST.get('rules_list') else []
+
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
@@ -132,7 +135,8 @@ def admin_role_oper(request, oper_type, o_id):
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
                 # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                models.zgld_admin_role.objects.create(**forms_obj.cleaned_data)
+                obj = models.zgld_admin_role.objects.create(**forms_obj.cleaned_data)
+                obj.rules = rules_list
                 response.code = 200
                 response.msg = "添加成功"
             else:
