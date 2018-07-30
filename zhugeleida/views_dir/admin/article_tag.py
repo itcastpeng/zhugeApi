@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.article_tag_verify import ArticleTagAddForm,TagUserUpdateForm,ArticleTagSingleAddForm
+from zhugeleida.forms.admin.article_tag_verify import ArticleTagAddForm,ArticleTagUpdateAddForm,ArticleTagSingleAddForm
 import time
 import datetime
 import json
@@ -123,6 +123,42 @@ def article_tag_oper(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         #加单层标签+默认标签或者用户专属标签
+        elif oper_type == "update":
+
+            user_id = request.GET.get('user_id')
+            tag_data = {
+                'tag_id' : request.GET.get('tag_id'),
+                'user_id' : request.GET.get('user_id'),
+                # 'parent_tag_name': request.POST.get('parent_tag_name'), # 一级标签
+                # 'second_tag_id' : request.POST.get('second_tag_id'),
+                # 'parent_tag_id' : request.POST.get('parent_tag_id'),      # 二级标签
+                'tag_name' : request.POST.get('tag_name')   # 二级标签
+            }
+
+            forms_obj = ArticleTagUpdateAddForm(tag_data)
+            if forms_obj.is_valid():
+                # parent_tag_id = forms_obj.cleaned_data['parent_tag_id']
+                tag_name = forms_obj.cleaned_data['tag_name']
+                tag_id = forms_obj.cleaned_data['tag_id']
+
+
+                #说明新建的一级标签
+                article_tag_obj = models.zgld_article_tag.objects.filter(
+                   id = tag_id
+                )
+                article_tag_obj.update(
+                    name = tag_name
+                )
+
+
+                response.code = 200
+                response.msg = "修改成功"
+
+
+            else:
+                response.code = 303
+                response.msg = json.loads(forms_obj.errors.as_json())
+
         elif oper_type == "add":
 
             user_id = request.GET.get('user_id')
@@ -171,61 +207,6 @@ def article_tag_oper(request, oper_type):
             else:
                 response.code = 302
                 response.msg = '标签ID不存在'
-
-
-        elif oper_type == "add":
-
-            user_id = request.GET.get('user_id')
-
-            tag_data = {
-
-                'user_id': request.GET.get('user_id'),
-
-                # 'parent_tag_name': request.POST.get('parent_tag_name'), # 一级标签
-
-                # 'second_tag_id' : request.POST.get('second_tag_id'),
-
-                # 'parent_tag_id' : request.POST.get('parent_tag_id'),      # 二级标签
-
-                'tag_name': request.POST.get('tag_name')  # 二级标签
-
-            }
-
-            forms_obj = ArticleTagSingleAddForm(tag_data)
-
-            if forms_obj.is_valid():
-
-                # parent_tag_id = forms_obj.cleaned_data['parent_tag_id']
-
-                tag_name = forms_obj.cleaned_data['tag_name']
-
-                # 说明新建的一级标签
-
-                article_tag_obj = models.zgld_article_tag.objects.create(
-
-                    name=tag_name,
-
-                    user_id=user_id,
-
-                )
-
-                tag_id = article_tag_obj.id
-
-                tag_name = article_tag_obj.name
-
-                response.code = 200
-
-                response.msg = "添加成功"
-
-                response.data = [{'tag_id': tag_id, 'tag_name': tag_name}]
-
-
-            else:
-
-                response.code = 303
-
-                response.msg = json.loads(forms_obj.errors.as_json())
-
 
 
 

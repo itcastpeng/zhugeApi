@@ -254,7 +254,7 @@ def user_send_template_msg(request):
                 return JsonResponse(response.__dict__)
 
 
-            form_id = exist_formid_json.pop(0)
+            form_id = exist_formid_json.pop(-1)
             obj = models.zgld_customer.objects.filter(id=customer_id)
             print('++++++++++ 2 exist_formid_json++++++++++++>>',exist_formid_json)
 

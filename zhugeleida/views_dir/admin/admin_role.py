@@ -13,7 +13,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def admin_role(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -117,7 +117,7 @@ def admin_role(request):
 #  增删改
 #  csrf  token验证
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def admin_role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
@@ -132,9 +132,7 @@ def admin_role_oper(request, oper_type, o_id):
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
-                # print(forms_obj.cleaned_data)
-                #  添加数据库
-                # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
+
                 obj = models.zgld_admin_role.objects.create(**forms_obj.cleaned_data)
                 obj.rules = rules_list
                 response.code = 200

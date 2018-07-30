@@ -9,8 +9,9 @@ from zhugeleida.forms.article_verify import ArticleAddForm,ArticleSelectForm, Ar
 import time
 import datetime
 import json
-
+from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
+
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -28,7 +29,7 @@ def article(request,oper_type):
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')
+                order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
 
                 field_dict = {
                     'id': '',
@@ -38,8 +39,13 @@ def article(request,oper_type):
                 }
 
                 request_data = request.GET.copy()
+
                 q = conditionCom(request_data, field_dict)
-                print('q -->', q )
+                tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
+
+                if tag_list:
+                    q.add(Q(**{'tags_id__in': tag_list}), Q.AND)
+
 
                 objs = models.zgld_article.objects.filter(q).order_by(order)
                 count = objs.count()

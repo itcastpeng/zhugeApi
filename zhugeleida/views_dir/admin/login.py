@@ -26,6 +26,7 @@ def login(request):
             # 如果有数据 查询第一条对象
             userprofile_obj = userprofile_objs[0]
             # 如果没有token 则生成 token
+
             if not userprofile_obj.token:
                 token = account.get_token(account.str_encrypt(password))
                 userprofile_obj.token = token
@@ -35,11 +36,16 @@ def login(request):
 
             response.code = 200
             response.msg = '登录成功'
-            time.time()
+
+            last_login_date_obj = userprofile_obj.last_login_date
+            last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
             response.data = {
                 'token': token,
                 'user_id': userprofile_obj.id,
-                'set_avatar': userprofile_obj.avatar
+                'set_avatar': userprofile_obj.avatar,
+                'company_name' : userprofile_obj.company.name,
+                'company_id' : userprofile_obj.company_id,
+                'last_login_date': last_login_date
             }
 
             userprofile_obj.last_login_date = datetime.datetime.now()

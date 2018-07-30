@@ -13,10 +13,11 @@ from ..conf import *
 import requests
 from  zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_qr_code
 from zhugeapi_celery_project import tasks
+from django.db.models import Q
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -24,6 +25,8 @@ def user(request):
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
+            user_id = request.GET.get('user_id')
+
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
             field_dict = {
@@ -36,9 +39,17 @@ def user(request):
 
             }
             q = conditionCom(request, field_dict)
-            print('q -->', q)
-            print('order -->', order)
-            print(models.zgld_userprofile.objects.all())
+
+            admin_userobj = models.zgld_admin_userprofile.objects.get(id=user_id)
+            role_id = admin_userobj.role_id
+            company_id = admin_userobj.company_id
+
+            if role_id == 1:  # 超级管理员,展示出所有的企业用户
+               pass
+
+            elif role_id == 2:  #管理员，展示出自己公司的用户
+                q.add(Q(**{"company_id": company_id}), Q.AND)
+
             objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
             count = objs.count()
 
@@ -62,8 +73,7 @@ def user(request):
                     department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
                     department_id = [i[0] for i in departmane_objs.values_list('id')]
 
-                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by(
-                    '-create_date')
+                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
 
                 mingpian_avatar = ''
                 if mingpian_avatar_obj:
@@ -103,6 +113,7 @@ def user(request):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
+
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -113,7 +124,7 @@ def user(request):
 #  增删改 用户表
 #  csrf  token验证
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -152,6 +163,8 @@ def user_oper(request, oper_type, o_id):
 
                 available_user_num = models.zgld_company.objects.filter(id=company_id)[0].mingpian_available_num
                 used_user_num  = models.zgld_userprofile.objects.filter(company_id=company_id).count() #
+
+
                 print('-----超过明片最大开通数------>>',available_user_num,used_user_num)
                 if  int(used_user_num) >= int(available_user_num): # 开通的用户数量 等于 == 该公司最大可用名片数
                     response.code = 302
@@ -409,7 +422,6 @@ def user_oper(request, oper_type, o_id):
                 print(forms_obj.errors.as_json())
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
         elif oper_type == "update_status":
 
