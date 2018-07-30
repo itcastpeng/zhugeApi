@@ -517,13 +517,13 @@ class zgld_chatinfo(models.Model):
 
 
 # #文章详细表
-class zgld_article_detail(models.Model):
-
-    article = models.OneToOneField("zgld_article",verbose_name='所属文章')
-
-    class Meta:
-        verbose_name_plural = "文章详细表"
-        app_label = "zhugeleida"
+# class zgld_article_detail(models.Model):
+#
+#     article = models.OneToOneField("zgld_article",verbose_name='所属文章')
+#
+#     class Meta:
+#         verbose_name_plural = "文章详细表"
+#         app_label = "zhugeleida"
 
 # 文章表
 class zgld_article(models.Model):
