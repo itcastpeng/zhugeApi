@@ -53,7 +53,4 @@ urlpatterns = [
     url(r'^tag$', article_tag.article_tag),
 
 
-
-
-
 ]

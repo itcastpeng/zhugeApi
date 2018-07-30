@@ -41,6 +41,7 @@ class zgld_department(models.Model):
 class zgld_admin_role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    rules= models.ManyToManyField('zgld_access_rules',verbose_name="关联权限条目",null=True)
 
     class Meta:
         verbose_name_plural = "角色表"
@@ -80,9 +81,7 @@ class zgld_admin_userprofile(models.Model):
 class zgld_access_rules(models.Model):
     name = models.CharField(verbose_name="权限", max_length=64)
     url_path = models.CharField(verbose_name="权限url", max_length=64, null=True, blank=True)
-
     super_id = models.ForeignKey('self', verbose_name="上级ID", null=True, blank=True)
-
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -90,6 +89,8 @@ class zgld_access_rules(models.Model):
 
     def __str__(self):
         return "%s" % self.name
+
+
 
 # 企业用户管理
 class zgld_userprofile(models.Model):
@@ -140,7 +141,7 @@ class zgld_userprofile(models.Model):
     voice = models.CharField(verbose_name='语音介绍', null=True, max_length=128)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
-    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
+    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, auto_now_add=True,)
 
     def __str__(self):
         return self.username
@@ -176,6 +177,23 @@ class zgld_user_photo(models.Model):
 
     class Meta:
         verbose_name_plural = "用户照片表"
+        app_label = "zhugeleida"
+
+
+#意见反馈表
+class zgld_user_feedback(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='意见所属用户')
+    problem_type_choices = (
+        (1,'客户服务'),
+        (2,'功能异常'),
+        (3,'产品建议')
+    )
+    problem_type = models.SmallIntegerField(verbose_name='问题类型',choices=problem_type_choices)
+    content = models.TextField(verbose_name='内容', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "用户标签表"
         app_label = "zhugeleida"
 
 

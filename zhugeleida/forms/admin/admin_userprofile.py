@@ -131,9 +131,9 @@ class UpdateForm(forms.Form):
     )
 
     password = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
-            'required': "权限路径不能为空"
+            'required': "密码不能为空"
         }
     )
 
@@ -148,26 +148,27 @@ class UpdateForm(forms.Form):
     # 查询名称是否存在
     def clean_login_user(self):
         login_user = self.data['login_user']
+        id = self.data['id']
 
         objs = models.zgld_admin_userprofile.objects.filter(
             login_user=login_user
-        )
+        ).exclude(id=id)
         if objs:
             self.add_error('login_user', '登录用户名不能重复')
         else:
             return login_user
 
     # 查询名称是否存在
-    def clean_username(self):
-        username = self.data['username']
-
-        objs = models.zgld_admin_userprofile.objects.filter(
-            username=username
-        )
-        if objs:
-            self.add_error('username', '名字不能重复')
-        else:
-            return username
+    # def clean_username(self):
+    #     username = self.data['username']
+    #
+    #     objs = models.zgld_admin_userprofile.objects.filter(
+    #         username=username
+    #     ).exclude(username=username)
+    #     if objs:
+    #         self.add_error('username', '名字不能重复')
+    #     else:
+    #         return username
 
     # 返回加密后的密码
     def clean_password(self):

@@ -107,24 +107,25 @@ def mingpian(request):
                         #     mingpian_avatar = obj.avatar
                         # else:
                         mingpian_avatar =  obj.avatar
+                    mingpian_phone  = obj.mingpian_phone  if   obj.mingpian_phone else  obj.wechat_phone
 
                     ret_data = {
                         'id': obj.id,
                         'username': obj.username,
                         'avatar': obj.avatar,
                         'company': obj.company.name,
-                        'address': obj.company.address or '',
+                        'address': obj.company.address,
                         'position': obj.position,
-                        'email': obj.email or '',
-                        'wechat': obj.wechat or '',  # 微信号
+                        'email': obj.email,
+                        'wechat': obj.wechat,  # 微信号
                         'mingpian_avatar': mingpian_avatar,  #名片的头像
-                        'mingpian_phone': obj.mingpian_phone or '' if obj.is_show_phone else '',  # 名片手机号
+                        'mingpian_phone':  mingpian_phone if obj.is_show_phone else '',  # 名片手机号
                         'create_date': obj.create_date,  # 创建时间
                         'popularity_num': obj.popularity,  # 被查看多少次。
                         'praise_num': obj.praise,  # 点赞多少次
                         'forward_num': obj.forward,  # 转发多少次
                         'is_praise': is_praise,
-                        'sign': obj.sign or '',  # 签名
+                        'sign': obj.sign,  # 签名
                         'is_sign': is_sign,  # 签名
                         'sign_num': sign_num,
                         'photo': '', #预留照片墙
@@ -420,54 +421,58 @@ def mingpian_oper(request, oper_type):
                 user_id = request.GET.get('uid')
 
                 url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
-                print('------>',url)
+                print('----save_poster-->',url)
 
-                driver.get(url)
-                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
-                user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
-
-                # driver.find_element_by_class_name("tu")
-                driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
-                driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
-
-                element = driver.find_element_by_id("jietu")
-                print(element.location)  # 打印元素坐标
-                print(element.size)      # 打印元素大小
-
-                left = element.location['x']
-                top = element.location['y']
-                right = element.location['x'] + element.size['width']
-                bottom = element.location['y'] + element.size['height']
-
-                im = Image.open( BASE_DIR  + user_poster_file_temp)
-                im = im.crop((left, top, right, bottom))
+                try:
+                    driver.get(url)
+                    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                    user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
+                    user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
 
 
-                print (len(im.split()))  # test
-                if len(im.split()) == 4:
-                    # prevent IOError: cannot write mode RGBA as BMP
-                    r, g, b, a = im.split()
-                    im = Image.merge("RGB", (r, g, b))
-                    im.save( BASE_DIR  + user_poster_file)
-                else:
-                    im.save( BASE_DIR  + user_poster_file)
+                    driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
+                    driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
-                poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+                    element = driver.find_element_by_id("jietu")
+                    print(element.location)  # 打印元素坐标
+                    print(element.size)      # 打印元素大小
 
-                if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
-                driver.quit()
+                    left = element.location['x']
+                    top = element.location['y']
+                    right = element.location['x'] + element.size['width']
+                    bottom = element.location['y'] + element.size['height']
 
-                ret_data = {
-                    'user_id': user_id,
-                    'poster_url': poster_url,
-                }
-                print('-----save_poster ret_data --->>',ret_data)
+                    im = Image.open( BASE_DIR  + user_poster_file_temp)
+                    im = im.crop((left, top, right, bottom))
 
-                response.data = ret_data
-                response.msg = "请求成功"
-                response.code = 200
 
+                    print (len(im.split()))  # test
+                    if len(im.split()) == 4:
+                        # prevent IOError: cannot write mode RGBA as BMP
+                        r, g, b, a = im.split()
+                        im = Image.merge("RGB", (r, g, b))
+                        im.save( BASE_DIR  + user_poster_file)
+                    else:
+                        im.save( BASE_DIR  + user_poster_file)
+
+                    poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+                    if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
+                    print('---------生成海报URL-------->', poster_url)
+
+                    ret_data = {
+                        'user_id': user_id,
+                        'poster_url': poster_url,
+                    }
+                    print('-----save_poster ret_data --->>',ret_data)
+                    response.data = ret_data
+                    response.msg = "请求成功"
+                    response.code = 200
+                    driver.quit()
+
+                except Exception as e:
+                    response.msg = "PhantomJS截图失败"
+                    response.code = 400
+                    driver.quit()
 
         else:
             response.code = 402

@@ -13,7 +13,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def admin_userprofile(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -49,7 +49,10 @@ def admin_userprofile(request):
                 ret_data.append({
                     'id': obj.id,
                     'avatar': obj.avatar,
+                    'login_user': obj.login_user,
                     'username': obj.username,
+                    'position' : obj.position,
+                    'password' : '',
                     'company_name': obj.company.name,
                     'company_id': obj.company_id,
                     'role_id': obj.role_id,
@@ -57,7 +60,7 @@ def admin_userprofile(request):
                     'status': obj.status,
                     'status_text': obj.get_status_display(),
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    'last_login_date': obj.last_login_date.strftime('%Y-%m-%d %H:%M:%S')
+                    # 'last_login_date': obj.last_login_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
             #  查询成功 返回200 状态码
@@ -76,7 +79,7 @@ def admin_userprofile(request):
 
 #  增删改
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def admin_userprofile_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
@@ -109,7 +112,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
 
             if objs:
 
-                if o_id == request.GET.get('user_id'):
+                if int(o_id) == int(request.GET.get('user_id')):
                     response.code = 305
                     response.msg = "不允许删除自己"
                     return JsonResponse(response.__dict__)
@@ -127,7 +130,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 'id': o_id,
                 'login_user': request.POST.get('login_user'),
                 'username': request.POST.get('username'),
-                'company_id': request.POST.get('company'),
+                'company_id': request.POST.get('company_id'),
                 'password': request.POST.get('password'),
                 'position': request.POST.get('position'),
                 'role_id': request.POST.get('role_id'),
@@ -144,7 +147,12 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 objs = models.zgld_admin_userprofile.objects.filter(
                     id=id
                 )
-                #  更新 数据
+
+                password = forms_obj.cleaned_data['password']
+
+                if not password:
+                    del forms_obj.cleaned_data['password']
+
                 if objs:
                     # objs.update(
                     #     name=name,
@@ -166,6 +174,24 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == "update_status":
+
+            status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
+            user_id = request.GET.get('user_id')
+
+            objs = models.zgld_admin_userprofile.objects.filter(id=o_id)
+
+            if objs:
+
+                if int(user_id) == int(o_id):
+                    response.code = 305
+                    response.msg = "不能修改自己"
+
+                else:
+                    objs.update(status=status)
+                    response.code = 200
+                    response.msg = "修改成功"
 
     else:
         response.code = 402
