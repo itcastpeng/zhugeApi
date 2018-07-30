@@ -565,17 +565,17 @@ class zgld_article_tag(models.Model):
         verbose_name_plural = "文章标签表"
         app_label = "zhugeleida"
 
-# 文章和标签绑定关系表
-# class zgld_article_to_tag(models.Model):
-#     article = models.ForeignKey('zgld_article',verbose_name='文章',)
-#     tag =  models.ForeignKey('zgld_article_tag',verbose_name='文章标签')
-#
-#     class Meta:
-#         unique_together = [
-#             ('article', 'tag'),
-#         ]
-#         verbose_name_plural = "文章和标签关系绑定表"
-#         app_label = "zhugeleida"
+##文章和标签绑定关系表
+class zgld_article_to_tag(models.Model):
+    article = models.ForeignKey('zgld_article',verbose_name='文章',)
+    tag =  models.ForeignKey('zgld_article_tag',verbose_name='文章标签')
+
+    class Meta:
+        unique_together = [
+            ('article', 'tag'),
+        ]
+        verbose_name_plural = "文章和标签关系绑定表"
+        app_label = "zhugeleida"
 
 
 # 文章查看用户停留时间表
