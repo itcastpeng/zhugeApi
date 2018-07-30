@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import  role,company,login,user,department,website,\
-    home_page,product,article,article_tag, access_rules, admin_role,admin_userprofile
+    home_page,product,article,article_tag, access_rules, admin_role,admin_userprofile,plugin_mingpian
 
 
 
@@ -46,7 +46,18 @@ urlpatterns = [
     url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
     url(r'^product/(?P<oper_type>\w+)/', product.product),
 
+    #公众号文章管理
+    url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
     url(r'^article/(?P<oper_type>\w+)/', article.article),
+
+    #公众号插件名片管理
+    url(r'^plugin_mingpian/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_mingpian.plugin_mingpian_oper),
+    url(r'^plugin_mingpian$', plugin_mingpian.plugin_mingpian),
+
+    # 公众号插件报名管理
+    url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_report.plugin_reports_oper),
+    url(r'^plugin_report$', plugin_report.plugin_reports),
+
 
     # 文章的标签管理
     url(r'^tag/(?P<oper_type>\w+)$', article_tag.article_tag_oper),

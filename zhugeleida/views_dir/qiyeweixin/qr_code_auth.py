@@ -58,7 +58,11 @@ def create_small_program_qr_code(data):
 
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    token_ret = rc.get('xiaochengxu_token')
+
+    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+    key_name = "company_%s_xiaochengxu_token" % (company_id)
+    token_ret = rc.get(key_name)
+
     print('---token_ret---->>', token_ret)
 
     if not token_ret:
@@ -75,7 +79,8 @@ def create_small_program_qr_code(data):
         access_token = token_ret_json['access_token']
         print('---- access_token --->>', token_ret_json)
         get_qr_data['access_token'] = access_token
-        rc.set('xiaochengxu_token', access_token, 7000)
+
+        rc.set(key_name, access_token, 7000)
 
     else:
 

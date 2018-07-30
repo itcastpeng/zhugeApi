@@ -5,122 +5,129 @@ from publicFunc import account
 import datetime
 
 
-# 添加标签信息
-class ArticleTagAddForm(forms.Form):
-    parent_tag_name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "一级标签不能为空"
-        }
-    )
+# 添加公司信息
+class ArticleAddForm(forms.Form):
     user_id = forms.CharField(
         required=True,
         error_messages={
-            'required': "用户ID不能为空"
+            'required': '用户ID不存在'
         }
     )
 
-    second_tag_name = forms.CharField(
-        required=False,
-
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章标题不能为空"
+        }
     )
 
-    # 查询标签名判断是否存在
-    def clean_parent_tag_name(self):
-        name = self.data['parent_tag_name']
-        objs = models.zgld_article_tag.objects.filter(
-            name=name, user_id=self.data.get('user_id')
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章摘要不能为空"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章封面不能为空"
+        }
+    )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
+
+    # 查询用户名判断是否存在
+    def clean_title(self):
+        title = self.data['title']
+        user_id = self.data['user_id']
+        print('----user_id ---title---->',user_id,title)
+        objs = models.zgld_article.objects.filter(
+            title=title,user_id=user_id
         )
         if objs:
-            self.add_error('name', '不能存在相同的标签名')
+            self.add_error('title', '文章名已存在')
         else:
-            return name
+            return title
 
-# 添加标签信息
-class ArticleTagSingleAddForm(forms.Form):
-    # parent_tag_id = forms.CharField(
-    #     required=True,
-    #     error_messages={
-    #         'required': "一级标签不能为空"
-    #     }
-    # )
+
+# 更新用户信息
+class ArticleUpdateForm(forms.Form):
     user_id = forms.CharField(
         required=True,
         error_messages={
-            'required': "用户ID不能为空"
+            'required': '用户ID不存在'
         }
     )
 
-    tag_name = forms.CharField(
+    article_id = forms.CharField(
         required=True,
         error_messages={
-            'required': "标签不能为空"
+            'required': '文章ID不能为空'
         }
-
     )
 
-    # 查询标签名判断是否存在
-    # def clean_parent_tag_id(self):
-    #     parent_tag_id = self.data['parent_tag_id']
-    #     objs = models.zgld_article_tag.objects.filter(
-    #         id=parent_tag_id, user_id=self.data.get('user_id')
-    #     )
-    #     if not objs:
-    #         self.add_error('name', '一级标签不存在')
-    #     else:
-    #         return parent_tag_id
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章标题不能为空"
+        }
+    )
 
-    def clean_tag_name(self):
-        tag_name = self.data['tag_name']
-        objs = models.zgld_article_tag.objects.filter(
-            name=tag_name, user_id=self.data.get('user_id')
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章摘要不能为空"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章封面不能为空"
+        }
+    )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
+    def clean_article_id(self):
+        article_id = self.data['article_id']
+
+        objs = models.zgld_article.objects.filter(
+            id=article_id
         )
-        if objs:
-            self.add_error('tag_name', '不能存在相同的标签名')
-        else:
-            return tag_name
 
-
-
-
-
-# 更新标签信息
-class TagUserUpdateForm(forms.Form):
-    tag_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '标签ID不能为空'
-        }
-    )
-
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '标签名不能为空'
-        }
-    )
-    user_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "用户ID不能为空"
-        }
-    )
-
-    # 判断标签是否存在
-    def clean_name(self):
-        tag_id = self.data['tag_id']
-        name = self.data['name']
-        objs = models.zgld_user_tag.objects.filter(
-            name=name,user_id=self.data.get('user_id')
-        )
         if not objs:
-            self.add_error('name', '标签不存在')
+            self.add_error('article_id', '文章不存在')
         else:
-            return name
+            return article_id
+
+    # 判断公司名称是否存在
+    def clean_title(self):
+        article_id = self.data['article_id']
+        user_id = self.data['user_id']
+        title = self.data['title']
+        objs = models.zgld_article.objects.filter(
+            title=title,user_id=user_id
+        ).exclude(id=article_id)
+
+        if objs:
+            self.add_error('title', '文章标题不能相同')
+        else:
+            return title
 
 
 # 判断是否是数字
-class TagUserSelectForm(forms.Form):
+class ArticleSelectForm(forms.Form):
     current_page = forms.IntegerField(
         required=False,
         error_messages={
@@ -134,6 +141,8 @@ class TagUserSelectForm(forms.Form):
             'required': "页显示数量类型错误"
         }
     )
+
+
 
     def clean_current_page(self):
         if 'current_page' not in self.data:

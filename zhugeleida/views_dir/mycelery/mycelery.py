@@ -32,7 +32,7 @@ def user_send_action_log(request):
     corp_id = user_obj.company.corp_id
 
     get_token_data['corpid'] = corp_id
-    app_secret = models.zgld_app.objects.get(id=user_obj.company_id, name='AI雷达').app_secret
+    app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, name='AI雷达').app_secret
     # if not app_secret:
     #     response.code = 404
     #     response.msg = "数据库不存在corpsecret"
@@ -43,7 +43,9 @@ def user_send_action_log(request):
 
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    token_ret = rc.get('leida_app_token')
+    key_name = "company_%s_leida_app_token" % (user_obj.company_id)
+    token_ret = rc.get(key_name)
+
     print('---token_ret---->>', token_ret)
 
     if not token_ret:
@@ -55,7 +57,8 @@ def user_send_action_log(request):
         if weixin_ret_data['errcode'] == 0:
             access_token = weixin_ret_data['access_token']
             send_token_data['access_token'] = access_token
-            rc.set('leida_app_token', access_token, 7000)
+
+            rc.set(key_name, access_token, 7000)
 
         else:
             print('企业微信验证未能通过')
@@ -123,10 +126,11 @@ def create_user_or_customer_qr_code(request):
     get_token_data['appid'] = Conf['appid']
     get_token_data['secret'] = Conf['appsecret']
     get_token_data['grant_type'] = 'client_credential'
-
+    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    token_ret = rc.get('xiaochengxu_token')
+    key_name = "company_%s_xiaochengxu_token" % (company_id)
+    token_ret = rc.get(key_name)
     print('---token_ret---->>', token_ret)
 
     if not token_ret:
@@ -142,7 +146,8 @@ def create_user_or_customer_qr_code(request):
         access_token = token_ret_json['access_token']
         print('---- access_token --->>', token_ret_json)
         get_qr_data['access_token'] = access_token
-        rc.set('xiaochengxu_token', access_token, 7000)
+
+        rc.set(key_name, access_token, 7000)
 
     else:
         get_qr_data['access_token'] = token_ret
@@ -202,9 +207,11 @@ def user_send_template_msg(request):
     get_token_data['secret'] = Conf['appsecret']
     get_token_data['grant_type'] = 'client_credential'
 
-
+    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    token_ret = rc.get('xiaochengxu_token')
+    key_name = "company_%s_xiaochengxu_token" % (company_id)
+    token_ret = rc.get(key_name)
+
     print('---token_ret---->>', token_ret)
 
     if not token_ret:
@@ -220,7 +227,8 @@ def user_send_template_msg(request):
         access_token = token_ret_json['access_token']
         print('---- access_token --->>', token_ret_json)
         get_template_data['access_token'] = access_token
-        rc.set('xiaochengxu_token', access_token, 7000)
+
+        rc.set(key_name, access_token, 7000)
 
     else:
         get_template_data['access_token'] = token_ret
