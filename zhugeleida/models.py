@@ -505,7 +505,6 @@ class zgld_chatinfo(models.Model):
     product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
 
-    # is_user_read_msg = models.BooleanField(default=False, verbose_name='用户是否读了客户发的消息')
     # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
     #                                   verbose_name='最后活动时间(客户发起对话)', null=True)
     # follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
@@ -517,14 +516,14 @@ class zgld_chatinfo(models.Model):
 
 
 
-#文章详细表
-class zgld_article_detail(models.Model):
-
-    article = models.OneToOneField("zgld_article",verbose_name='所属文章')
-
-    class Meta:
-        verbose_name_plural = "文章详细表"
-        app_label = "zhugeleida"
+# #文章详细表
+# class zgld_article_detail(models.Model):
+#
+#     article = models.OneToOneField("zgld_article",verbose_name='所属文章')
+#
+#     class Meta:
+#         verbose_name_plural = "文章详细表"
+#         app_label = "zhugeleida"
 
 # 文章表
 class zgld_article(models.Model):
