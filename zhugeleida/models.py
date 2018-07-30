@@ -516,15 +516,15 @@ class zgld_chatinfo(models.Model):
         app_label = "zhugeleida"
 
 
-#文章详细表
-# class zgld_article_detail(models.Model):
-#
-#     article = models.OneToOneField("zgld_article",verbose_name='所属文章')
-#
-#     class Meta:
-#         verbose_name_plural = "文章详细表"
-#         app_label = "zhugeleida"
 
+#文章详细表
+class zgld_article_detail(models.Model):
+
+    article = models.OneToOneField("zgld_article",verbose_name='所属文章')
+
+    class Meta:
+        verbose_name_plural = "文章详细表"
+        app_label = "zhugeleida"
 
 # 文章表
 class zgld_article(models.Model):
@@ -542,7 +542,7 @@ class zgld_article(models.Model):
     user = models.ForeignKey('zgld_userprofile',verbose_name='文章作者',null=True)
     # category = models.ForeignKey(verbose_name='文章类型', to='Category', to_field='nid', null=True)
 
-    tags = models.ManyToManyField('zgld_article_tag',through='zgld_article_to_tags',through_fields=('article', 'tag'))
+    tags = models.ManyToManyField('zgld_article_tag',through='zgld_article_to_tag',through_fields=('article', 'tag'))
     # up_count = models.IntegerField(default=0,verbose_name="赞次数")
     # down_count = models.IntegerField(default=0,verbose_name="踩次数")
     cover_picture  = models.CharField(verbose_name="封面图片URL",max_length=128)
@@ -565,9 +565,8 @@ class zgld_article_tag(models.Model):
         verbose_name_plural = "文章标签表"
         app_label = "zhugeleida"
 
-
 # 文章和标签绑定关系表
-class zgld_article_to_tags(models.Model):
+class zgld_article_to_tag(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
     tag =  models.ForeignKey('zgld_article_tag',verbose_name='文章标签')
 
