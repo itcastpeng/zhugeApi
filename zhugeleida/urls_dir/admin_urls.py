@@ -40,7 +40,8 @@ urlpatterns = [
     url(r'^department$', department.department),
 
     #官网编辑
-    url(r'edit_website$',website.website),
+    url(r'website/(?P<oper_type>\w+)/(?P<o_id>\d+)',website.website_oper),
+    url(r'website$',website.website),
 
     #后台产品管理
     url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
@@ -56,7 +57,7 @@ urlpatterns = [
 
     # 公众号插件报名管理
     # url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_report.plugin_reports_oper),
-    # url(r'^plugin_report$', plugin_report.plugin_reports),
+    #     # url(r'^plugin_report$', plugin_report.plugin_reports),
 
 
     # 文章的标签管理
