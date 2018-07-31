@@ -41,7 +41,7 @@ class zgld_department(models.Model):
 class zgld_admin_role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    rules= models.ManyToManyField('zgld_access_rules',verbose_name="关联权限条目",null=True)
+    rules= models.ManyToManyField('zgld_access_rules',verbose_name="关联权限条目")
 
     class Meta:
         verbose_name_plural = "角色表"
@@ -323,6 +323,7 @@ class zgld_customer(models.Model):
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     nickname = models.CharField(max_length=64, verbose_name='昵称', blank=True, null=True)
+    phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     country = models.CharField(max_length=64, verbose_name='国家', blank=True, null=True)
     city = models.CharField(max_length=32, verbose_name='客户所在城市', blank=True, null=True)
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
@@ -638,10 +639,12 @@ class zgld_plugin_report(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
     ad_slogan = models.CharField(verbose_name="广告语", max_length=128)
     sign_up_button = models.CharField(verbose_name="报名按钮", max_length=64, default='statics/imgs/setAvator.jpg')
+    is_get_phone_code = models.BooleanField(verbose_name='是否获取手机验证码', default=False)
     #报名页
     title = models.CharField(verbose_name='活动标题', max_length=128, null=True)
-    introduce = models.TextField(verbose_name='活动说明', max_length=1024, blank=True, null=True)
+    introduce = models.TextField(verbose_name='活动说明', blank=True, null=True)
     skip_link = models.CharField(verbose_name="跳转链接",max_length=128,null=True)
+    read_count = models.IntegerField(verbose_name="总阅读数量", default=0)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
@@ -655,7 +658,7 @@ class zgld_plugin_report(models.Model):
 class zgld_report_to_customer(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
     activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)
-    is_get_phone_code = models.BooleanField(verbose_name='是否获取验证码', default=False)
+
     leave_message = models.TextField(verbose_name="客户留言", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -663,6 +666,7 @@ class zgld_report_to_customer(models.Model):
         return 'Custer: %s | activity: %s ' % (self.customer_id,self.activity_id)
 
     class Meta:
+        unique_together = (("customer", "activity"))
         verbose_name_plural = "报名的客户和活动绑定的关系"
         app_label = "zhugeleida"
 

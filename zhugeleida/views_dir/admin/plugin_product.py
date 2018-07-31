@@ -184,75 +184,6 @@ def product(request, oper_type):
                     response.msg = '产品列表无数据'
 
 
-        elif oper_type == 'feedback_list':
-            user_id = request.GET.get('user_id')
-
-            user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
-            role_id  = user_obj.role_id
-            print('-----role id ---->>',role_id)
-            forms_obj = FeedbackSelectForm(request.GET)
-            if forms_obj.is_valid():
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')
-
-                if int(role_id) == 1:  # 为超级管理员 展示出所有公司的产品
-                    search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                    field_dict = {
-                        'id': '',
-                        'company__name': '__contains',
-                        'status': '',
-
-                    }
-
-
-                    q = conditionCom(request, field_dict)
-                    if search_company_id:
-                        q.add(Q(**{'user__company_id': search_company_id}), Q.AND)
-
-                    objs = models.zgld_user_feedback.objects.select_related('user').filter(q)
-                    count = objs.count()
-                    print('-----objs----->>', objs)
-
-                    ret_data = []
-                    if length != 0:
-                        start_line = (current_page - 1) * length
-                        stop_line = start_line + length
-                        objs = objs[start_line: stop_line]
-
-                    if objs:
-                        for obj in objs:
-                            ret_data.append({
-                                'id': obj.id,
-                                'user_id': obj.user_id,
-                                'user_name': obj.user.username,
-                                'problem_type': obj.problem_type,
-                                'problem_type_text': obj.get_problem_type_display(),
-                                'content': obj.content,
-                                'company_name': obj.user.company.name,
-                                'company_id': obj.user.company_id,
-                                'status': obj.status,
-                                'status_text': obj.get_status_display()
-                            })
-
-                        #  查询成功 返回200 状态码
-                        response.code = 200
-                        response.msg = '查询成功'
-                        response.data = {
-                            'ret_data': ret_data,
-                            'data_count': count,
-                        }
-
-                else:
-                    response.code = 302
-                    response.msg = '列表无数据'
-
-
-
-            return JsonResponse(response.__dict__)
-
-
-
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def product_oper(request, oper_type, o_id):
@@ -287,33 +218,6 @@ def product_oper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = '产品不存在'
-
-        elif oper_type == "change_status":
-            print('-------change_status------->>',request.POST)
-            status = int(request.POST.get('status'))
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id)
-            print('product_objs--------->', product_objs)
-
-            if product_objs:
-
-                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
-                product_objs.update(
-                    status=status
-                )
-                response.code = 200
-                response.msg = "修改状态成功"
-                response.data = {
-                    'product_id': product_objs[0].id,
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
-
-            else:
-
-                response.code = 302
-                response.msg = '产品不存在'
-
 
         elif oper_type == "update":
 
@@ -390,79 +294,6 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        # 上传产品图片的接口
-        elif oper_type == "add_picture":
-            response = Response.ResponseObj()
-
-            forms_obj = imgUploadForm(request.POST)
-            if forms_obj.is_valid():
-                img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
-                timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
-                img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
-                chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
-                expanded_name = img_name.split('.')[-1]  # 扩展名
-
-                img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-
-                img_save_path = "/".join(
-                    [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', img_name])
-                print('img_save_path -->', img_save_path)
-                # print('img_data -->', img_data)
-                img_data = base64.b64decode(img_data.encode('utf-8'))
-                with open(img_save_path, 'wb') as f:
-                    f.write(img_data)
-
-                response.code = 200
-                response.msg = "上传成功"
-            else:
-                response.code = 303
-                response.msg = "上传异常"
-                response.data = json.loads(forms_obj.errors.as_json())
-            return JsonResponse(response.__dict__)
-
-        # 产品图片合并请求
-        elif oper_type == "upload_complete":
-
-            response = Response.ResponseObj()
-            forms_obj = imgMergeForm(request.POST)
-            if forms_obj.is_valid():
-                img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
-                timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
-                chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
-                expanded_name = img_name.split('.')[-1]  # 扩展名
-                picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
-
-                img_name = timestamp + '.' + expanded_name
-                img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', img_name])
-                img_save_path = "/".join([BasePath, img_path])
-                file_obj = open(img_save_path, 'ab')
-                for chunk in range(chunk_num):
-                    file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-
-                    file_save_path = "/".join(
-                        [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', file_name])
-
-                    with open(file_save_path, 'rb') as f:
-                        file_obj.write(f.read())
-                        # file_content += f.read()
-                    os.remove(file_save_path)
-
-                product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
-                                                                                 picture_url=img_path)
-
-                response.data = {
-                    'picture_type': product_picture_obj.picture_type,
-                    'picture_id': product_picture_obj.id,
-                    'picture_url': product_picture_obj.picture_url,
-
-                }
-                response.code = 200
-                response.msg = "添加图片成功"
-
-            else:
-                response.code = 303
-                response.msg = "上传异常"
-                response.data = json.loads(forms_obj.errors.as_json())
 
 
         return JsonResponse(response.__dict__)
