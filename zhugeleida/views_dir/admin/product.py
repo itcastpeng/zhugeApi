@@ -253,6 +253,7 @@ def product(request, oper_type):
 
 
 
+
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def product_oper(request, oper_type, o_id):
@@ -464,6 +465,30 @@ def product_oper(request, oper_type, o_id):
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == "change_feedback_status":
+            print('-------change_status------->>', request.POST)
+            status = int(request.POST.get('status'))
+
+            feedback_objs = models.zgld_user_feedback.objects.filter(id=o_id)
+
+            if feedback_objs:
+
+                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+                feedback_objs.update(
+                    status=status
+                )
+                response.code = 200
+                response.msg = "修改状态成功"
+                response.data = {
+                    # 'feedback_id': feedback_objs[0].id,
+                    # 'status': feedback_objs[0].get_status_display(),
+                    # 'status_code': feedback_objs[0].status
+                }
+
+            else:
+
+                response.code = 302
+                response.msg = '产品不存在'
 
         return JsonResponse(response.__dict__)
 
