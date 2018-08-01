@@ -60,8 +60,8 @@ urlpatterns = [
     url(r'^plugin_report$', plugin_report.plugin_report),
 
     # 公众号-商品管理
-    url(r'^plugin_product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
-    url(r'^plugin_product/(?P<oper_type>\w+)/', product.product),
+    url(r'^plugin_goods/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
+    url(r'^plugin_goods/(?P<oper_type>\w+)/', product.product),
 
     # 文章的标签管理
     url(r'^tag/(?P<oper_type>\w+)$', article_tag.article_tag_oper),

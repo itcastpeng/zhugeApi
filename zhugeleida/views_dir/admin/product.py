@@ -92,10 +92,8 @@ def product(request, oper_type):
             print('request.GET----->', request.GET)
             forms_obj = ProductSelectForm(request.GET)
             if forms_obj.is_valid():
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 product_type = forms_obj.cleaned_data.get('product_type')
-
-                print('------- product_type ----->',request.GET.get('product_type'),product_type)
 
                 #如果为1 代表是公司的官网
                 user_id = request.GET.get('user_id')
@@ -183,6 +181,10 @@ def product(request, oper_type):
                     response.code = 302
                     response.msg = '产品列表无数据'
 
+            else:
+                response.code = 402
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == 'feedback_list':
             user_id = request.GET.get('user_id')
