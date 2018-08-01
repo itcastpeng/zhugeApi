@@ -15,18 +15,29 @@ class CompanyAddForm(forms.Form):
         }
     )
 
-    corp_id = forms.CharField(
+    open_length_time = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "企业ID不能为空"
+            'required': "开通时长不能为空"
         }
     )
-    tongxunlu_secret = forms.CharField(
+
+    charging_start_time = forms.DateField(
         required=True,
         error_messages={
-            'required': "通讯录secret不能为空"
+            'required': "开始计费时间不能为空"
         }
     )
+
+    mingpian_available_num = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "开通名片数量不能为空"
+        }
+    )
+
+
+
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
@@ -38,33 +49,40 @@ class CompanyAddForm(forms.Form):
         else:
             return name
 
-
 # 更新用户信息
 class CompanyUpdateForm(forms.Form):
     company_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '公司ID不能为空'
+            'required': "公司ID不能为空"
         }
     )
 
     name = forms.CharField(
         required=True,
         error_messages={
-            'required': '公司名不能为空'
+            'required': "公司名不能为空"
         }
     )
 
-    corp_id = forms.CharField(
+    open_length_time = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "企业ID不能为空"
+            'required': "开通时长不能为空"
         }
     )
-    tongxunlu_secret = forms.CharField(
+
+    charging_start_time = forms.DateField(
         required=True,
         error_messages={
-            'required': "通讯录secret不能为空"
+            'required': "开始计费时间不能为空"
+        }
+    )
+
+    mingpian_available_num = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "开通名片数量不能为空"
         }
     )
 
@@ -80,6 +98,108 @@ class CompanyUpdateForm(forms.Form):
             self.add_error('name', '公司名称已经存在')
         else:
             return name
+
+    def clean_company_id(self):
+        company_id = self.data['company_id']
+        objs = models.zgld_company.objects.filter(
+            id=company_id
+        )
+        if not objs:
+            self.add_error('company_id', '公司不存在')
+        else:
+            return company_id
+
+
+
+# 添加公司信息
+class AgentAddForm(forms.Form):
+    # print('添加公司')
+    name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "agent名不能为空"
+        }
+    )
+    company_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    agent_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "agent_id 不能为空"
+        }
+    )
+    app_secret = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "app_secret 不能为空"
+        }
+    )
+
+
+
+    # 查询用户名判断是否存在
+    def clean_name(self):
+        name = self.data['name']
+        company_id = self.data['company_id']
+        objs = models.zgld_app.objects.filter(
+            name=name, company_id=company_id
+        )
+        if objs:
+            self.add_error('name', 'app应用名已存在')
+        else:
+            return name
+
+    def clean_company_id(self):
+        company_id = self.data['company_id']
+        objs = models.zgld_company.objects.filter(
+               id=company_id
+        )
+        if not  objs:
+            self.add_error('company_id', '公司名不存在')
+        else:
+            return company_id
+
+# 添加公司信息
+class TongxunluAddForm(forms.Form):
+    # print('添加公司')
+
+    company_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    corp_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "corp_id 不能为空"
+        }
+    )
+    app_secret = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "通讯录secret不能为空"
+        }
+    )
+
+
+
+    def clean_company_id(self):
+        company_id = self.data['company_id']
+        objs = models.zgld_company.objects.filter(
+               id=company_id
+        )
+        if not  objs:
+            self.add_error('company_id', '公司名不存在')
+        else:
+            return company_id
+
 
 
 # 判断是否是数字

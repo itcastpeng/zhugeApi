@@ -10,7 +10,18 @@ class zgld_company(models.Model):
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
     website_content = models.TextField(verbose_name='官网内容')
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
-    user_expired = models.DateTimeField(verbose_name="账户过期时间", null=True)
+    charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)
+    is_validate = models.BooleanField(verbose_name="验证通讯录secret是否通过",default=False)
+
+    open_length_time_choices = (
+        (1, "一个月"),
+        (2, "三个月"),
+        (3, "半年"),
+        (4, "一年"),
+        (5, "二年")
+    )
+    open_length_time = models.SmallIntegerField(choices=open_length_time_choices, verbose_name="开通时长",null=True)
+    account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -23,6 +34,7 @@ class zgld_app(models.Model):
     name = models.CharField(verbose_name="企业应用_名称", max_length=128)
     agent_id = models.CharField(verbose_name="应用ID", max_length=128)
     app_secret = models.CharField(verbose_name="应用secret", max_length=256)
+    is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
 # 公司部门
 class zgld_department(models.Model):
@@ -210,9 +222,7 @@ class zgld_product(models.Model):
         (2,'已下架'),
         (3,'推荐')
     )
-
     status = models.SmallIntegerField(verbose_name='产品状态',choices=product_status_choices,default=1)
-
     user = models.ForeignKey('zgld_userprofile', verbose_name='所属用户', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
     name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
@@ -670,4 +680,37 @@ class zgld_report_to_customer(models.Model):
         verbose_name_plural = "报名的客户和活动绑定的关系"
         app_label = "zhugeleida"
 
+# 公众号 - 名片商品
+class zgld_plugin_goods(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
+    title = models.CharField(verbose_name='商品标题', max_length=128, null=True)
+    content = models.TextField(verbose_name='商品内容', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    def __str__(self):
+        return "%s - %s" % (self.id, self.title)
+
+    class Meta:
+        verbose_name_plural = "插件-商品插件"
+        app_label = "zhugeleida"
+
+# 公众号 - 名片商品
+class zgld_plugin_goods_order(models.Model):
+    customer = models.ForeignKey('zgld_customer', verbose_name="收货人", null=True)
+    address = models.CharField(max_length=256,verbose_name='收货详细地址')
+    leave_message = models.CharField(max_length=1024, verbose_name="客户留言", null=True)
+    activity = models.ForeignKey('zgld_plugin_goods', verbose_name="购买的商品", null=True)
+    order_amount = models.IntegerField(verbose_name='订单总金额',default=0)  #
+    pay_status_choices = (
+        (1, "未支付"),
+        (2, "已支付"),
+    )
+    pay_status = models.SmallIntegerField(choices=pay_status_choices, verbose_name="支付状态", default=1)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.customer_id)
+
+    class Meta:
+        verbose_name_plural = "插件-商品-订单表"
+        app_label = "zhugeleida"
