@@ -228,7 +228,7 @@ def product(request, oper_type):
                                 'user_name': obj.user.username,
                                 'problem_type': obj.problem_type,
                                 'problem_type_text': obj.get_problem_type_display(),
-                                'content': obj.content,
+                                'content': json.loads(obj.content),
                                 'company_name': obj.user.company.name,
                                 'company_id': obj.user.company_id,
                                 'status': obj.status,
