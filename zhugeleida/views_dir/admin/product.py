@@ -253,8 +253,7 @@ def product(request, oper_type):
 
             return JsonResponse(response.__dict__)
 
-
-
+    return JsonResponse(response.__dict__)
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
