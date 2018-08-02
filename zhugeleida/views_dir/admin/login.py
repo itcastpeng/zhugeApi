@@ -65,7 +65,7 @@ def login(request):
     return JsonResponse(response.__dict__)
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def login_rules(request):
     response = Response.ResponseObj()
     if request.method == "GET":
