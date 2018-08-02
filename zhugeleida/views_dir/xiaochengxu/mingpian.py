@@ -358,10 +358,6 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')  # 用户 id
 
-                # remark = '保存了您的名片海报'
-                # data = request.GET.copy()
-                # data['action'] = 1
-                # response = action_record(data, remark)
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 
@@ -414,7 +410,13 @@ def mingpian_oper(request, oper_type):
                 # option.add_experimental_option('mobileEmulation', mobileEmulation)
                 # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
-                driver = webdriver.PhantomJS()
+                platform = sys.platform     # 获取平台
+                phantomjs_path = 'zhugeleida/views_dir/tools/phantomjs.exe'   # windows 平台
+
+                if platform == 'linux2':
+                    phantomjs_path = 'zhugeleida/views_dir/tools/phantomjs'
+
+                driver = webdriver.PhantomJS(phantomjs_path)
                 rand_str = request.GET.get('rand_str')
                 timestamp = request.GET.get('timestamp')
                 customer_id = request.GET.get('user_id')

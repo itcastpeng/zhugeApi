@@ -48,7 +48,7 @@ def admin_role(request):
 
 
 
-                access_rule_objs = models.zgld_access_rules.objects.values_list('id', 'name', 'url_path', 'super_id_id')
+                access_rule_objs = models.zgld_access_rules.objects.values_list('id', 'name', 'title', 'super_id_id')
                 rules_data = []
                 rule_dict = {}
                 for obj in access_rule_objs:

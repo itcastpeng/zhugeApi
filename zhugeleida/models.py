@@ -12,6 +12,7 @@ class zgld_company(models.Model):
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
     charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)
     is_validate = models.BooleanField(verbose_name="验证通讯录secret是否通过",default=False)
+    remarks = models.TextField(verbose_name="备注",null=True)
 
     open_length_time_choices = (
         (1, "一个月"),
@@ -91,8 +92,8 @@ class zgld_admin_userprofile(models.Model):
 
 # 权限表
 class zgld_access_rules(models.Model):
-    name = models.CharField(verbose_name="权限", max_length=64)
-    url_path = models.CharField(verbose_name="权限url", max_length=64, null=True, blank=True)
+    name = models.CharField(verbose_name="权限名称", max_length=64)
+    title = models.CharField(verbose_name="标题", max_length=64, null=True, blank=True)
     super_id = models.ForeignKey('self', verbose_name="上级ID", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

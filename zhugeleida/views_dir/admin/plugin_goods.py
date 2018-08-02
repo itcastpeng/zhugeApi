@@ -93,7 +93,7 @@ def plugin_goods(request, oper_type):
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
 
-                objs = models.zgld_plugin_goods.objects.select_related('user', 'company').order_by(order)
+                objs = models.zgld_plugin_goods.objects.select_related('user').order_by(order)
                 count = objs.count()
 
                 if length != 0:
