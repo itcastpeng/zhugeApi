@@ -9,7 +9,7 @@ import time
 class AddForm(forms.Form):
 
     login_user = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
             'required': "名字不能为空"
         }
@@ -103,7 +103,7 @@ class UpdateForm(forms.Form):
     )
 
     login_user = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
             'required': "名字不能为空"
         }

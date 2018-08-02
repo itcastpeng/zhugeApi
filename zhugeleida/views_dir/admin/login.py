@@ -16,7 +16,7 @@ def login(request):
     print(username, account.str_encrypt(password))
     # 查询数据库
     userprofile_objs = models.zgld_admin_userprofile.objects.filter(
-        username=username,  # 成员姓名, 以后要换成name(登录的用户名)
+        login_user=username,  # 成员姓名, 以后要换成name(登录的用户名)
         # md5加密 密码
         password=account.str_encrypt(password),
     )
@@ -48,7 +48,7 @@ def login(request):
                 'company_id' : userprofile_obj.company_id,
                 'role_id': userprofile_obj.role_id,
                 'role_name': userprofile_obj.role.name,
-                'rules_list': rules_list,
+
                 'last_login_date': last_login_date
             }
 
