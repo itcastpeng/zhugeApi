@@ -15,7 +15,7 @@ def login(request):
     password = request.POST.get('password')
     print(username, account.str_encrypt(password))
     # 查询数据库
-    userprofile_objs = models.zgld_userprofile.objects.filter(
+    userprofile_objs = models.zgld_admin_userprofile.objects.filter(
         username=username,  # 成员姓名, 以后要换成name(登录的用户名)
         # md5加密 密码
         password=account.str_encrypt(password),
@@ -39,12 +39,16 @@ def login(request):
 
             last_login_date_obj = userprofile_obj.last_login_date
             last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
+            rules_list = [ i[0]  for i in  userprofile_obj.role.rules.values_list('title')]
             response.data = {
                 'token': token,
                 'user_id': userprofile_obj.id,
                 'set_avatar': userprofile_obj.avatar,
                 'company_name' : userprofile_obj.company.name,
                 'company_id' : userprofile_obj.company_id,
+                'role_id': userprofile_obj.role_id,
+                'role_name': userprofile_obj.role.name,
+                'rules_list': rules_list,
                 'last_login_date': last_login_date
             }
 

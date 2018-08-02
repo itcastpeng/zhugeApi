@@ -124,7 +124,7 @@ def access_rules_oper(request, oper_type, o_id):
             form_data = {
                 'o_id': o_id,
                 'name': request.POST.get('name'),
-                'url_path': request.POST.get('url_path'),
+                'title': request.POST.get('title'),
                 'super_id_id': request.POST.get('super_id_id')
             }
 
