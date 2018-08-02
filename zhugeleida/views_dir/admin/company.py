@@ -52,13 +52,14 @@ def company(request):
             for obj in objs:
 
                 ret_data.append({
-                    'id': obj.id,
                     'name': obj.name,
                     'company_id': obj.id,
-                    'create_date': obj.create_date,
+                    'charging_start_time': obj.charging_start_time,
+                    'open_length_time': obj.open_length_time,
+                    'mingpian_available_num': obj.mingpian_available_num ,
                     'corp_id': obj.corp_id,
                     'tongxunlu_secret': obj.tongxunlu_secret,
-
+                    'create_date': obj.create_date,
                 })
             response.code = 200
             response.data = {
@@ -137,6 +138,7 @@ def company_oper(request, oper_type, o_id):
                 'charging_start_time' : request.POST.get('charging_start_time'),
                 'open_length_time' : request.POST.get('open_length_time'),
                 'mingpian_available_num': request.POST.get('mingpian_available_num').strip()
+
             }
             forms_obj = CompanyAddForm(company_data)
             if forms_obj.is_valid():
@@ -166,7 +168,8 @@ def company_oper(request, oper_type, o_id):
                     'charging_start_time': charging_start_time,  #开始付费时间
                     'open_length_time': open_length_time,        #开通时长
                     'mingpian_available_num':  request.POST.get('mingpian_available_num'),
-                    'account_expired_time' : account_expired_time #账户过期时间
+                    'account_expired_time' : account_expired_time, #账户过期时间
+                    'remarks' : request.POST.get('remarks')
                 }
 
                 models.zgld_company.objects.create(**company_data)
@@ -215,7 +218,8 @@ def company_oper(request, oper_type, o_id):
                     'charging_start_time': charging_start_time,  # 开始付费时间
                     'open_length_time': open_length_time,        # 开通时长
                     'mingpian_available_num': request.POST.get('mingpian_available_num'),
-                    'account_expired_time': account_expired_time  # 账户过期时间
+                    'account_expired_time': account_expired_time,  # 账户过期时间
+                    'remarks': request.POST.get('remarks')
                 }
 
                 company_id = forms_obj.cleaned_data.get('company_id')
