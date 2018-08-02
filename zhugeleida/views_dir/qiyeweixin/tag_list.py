@@ -35,7 +35,6 @@ def tag_list(request):
             if obj[2] == None:
                 tag_dict['tags'] = []
 
-
                 for tag in date_list:
                     customr_obj = models.zgld_tag.objects.filter(id=tag[0])[0].tag_customer.filter(id=customer_id)
                     if customr_obj:

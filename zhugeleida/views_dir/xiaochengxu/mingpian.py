@@ -14,6 +14,9 @@ import json,os,sys
 from django.db.models import Q
 from django.db.models import F
 from time import sleep
+from selenium import webdriver
+from PIL import Image
+from django.conf import settings
 
 # 展示单个的名片信息
 @csrf_exempt
@@ -401,13 +404,10 @@ def mingpian_oper(request, oper_type):
                 data['action'] = 1
                 response = action_record(data, remark)
 
-                from django.conf import settings
                 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster',)
                 print('---->',BASE_DIR)
 
-                from selenium import webdriver
-                from PIL import Image
 
                 # option = webdriver.ChromeOptions()
                 # mobileEmulation = {'deviceName': 'iPhone 6'}

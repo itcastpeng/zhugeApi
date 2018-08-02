@@ -142,17 +142,6 @@ class AgentAddForm(forms.Form):
 
 
 
-    # 查询用户名判断是否存在
-    def clean_name(self):
-        name = self.data['name']
-        company_id = self.data['company_id']
-        objs = models.zgld_app.objects.filter(
-            name=name, company_id=company_id
-        )
-        if objs:
-            self.add_error('name', 'app应用名已存在')
-        else:
-            return name
 
     def clean_company_id(self):
         company_id = self.data['company_id']
@@ -181,7 +170,7 @@ class TongxunluAddForm(forms.Form):
             'required': "corp_id 不能为空"
         }
     )
-    app_secret = forms.CharField(
+    tongxunlu_secret = forms.CharField(
         required=True,
         error_messages={
             'required': "通讯录secret不能为空"

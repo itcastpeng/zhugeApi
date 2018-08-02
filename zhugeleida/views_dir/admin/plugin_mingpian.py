@@ -56,9 +56,9 @@ def plugin_mingpian (request):
             for obj in objs:
                 ret_data.append({
                     'mingpian_id': obj.id,
-                    'name': obj.name,       # 名片名称
+                    'name': obj.name,           # 名片名称
                     'username': obj.username,   # 姓名
-                    'phone': obj.phone,   # 状态
+                    'phone': obj.phone,         # 状态
                     'create_date': obj.create_date,      #文章创建时间
                     'avatar' : obj.avatar,     #文章图片链接
                     'webchat_code' : obj.webchat_code,     #文章图片链接

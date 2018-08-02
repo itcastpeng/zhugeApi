@@ -12,7 +12,7 @@ import datetime
 import json
 
 from publicFunc.condition_com import conditionCom
-from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month
+from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def company(request):
@@ -74,50 +74,50 @@ def company(request):
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def author_status(request):
+def author_status(request,oper_type):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
+        if oper_type == "author_status":
+            company_id = request.GET.get('company_id')
 
-        company_id = request.POST.get('company_id')
+            company_objs = models.zgld_company.objects.filter(id=company_id)
 
-        company_objs = models.zgld_company.objects.filter(id=company_id)
+            # 获取所有数据
+            ret_data = []
+            # 获取第几页的数据
+            if company_objs:
+                is_validate = company_objs[0].is_validate
 
-        # 获取所有数据
-        ret_data = []
-        # 获取第几页的数据
-        if company_objs:
-            is_validate = company_objs[0].is_validate
+                ret_data.append({
+                    'name' : '通讯录',
+                    'is_validate': is_validate,
 
-            ret_data.append({
-                'name' : '通讯录',
-                'is_validate': is_validate,
+                })
 
-            })
+                for app_name in ["AI雷达","Boss雷达"]:
+                    app_objs  = company_objs[0].zgld_app_set.filter(company_id=company_id,name=app_name)
+                    if app_objs:
+                        ret_data.append({
+                            'name': app_name,
+                            'is_validate': is_validate,
+                            'create_date': company_objs[0].create_date,
+                        })
+                    else:
+                        ret_data.append({
+                            'name': app_name,
+                            'is_validate': False,
+                            'create_date': company_objs[0].create_date,
+                        })
 
-            for app_name in ["AI雷达","Boss雷达"]:
-                app_objs  = company_objs[0].zgld_app_set.filter(company_id=company_id,name=app_name)
-                if app_objs:
-                    ret_data.append({
-                        'name': app_name,
-                        'is_validate': is_validate,
-                        'create_date': company_objs[0].create_date,
-                    })
-                else:
-                    ret_data.append({
-                        'name': app_name,
-                        'is_validate': False,
-                        'create_date': company_objs[0].create_date,
-                    })
+                response.code = 200
+                response.data = {
+                    'ret_data': ret_data,
 
-            response.code = 200
-            response.data = {
-                'ret_data': ret_data,
-
-            }
-        else:
-            response.code = 400
-            response.msg = "公司不存在"
+                }
+            else:
+                response.code = 400
+                response.msg = "公司不存在"
 
     return JsonResponse(response.__dict__)
 
@@ -294,11 +294,11 @@ def company_oper(request, oper_type, o_id):
 
         elif oper_type == "update_tongxunlu":
             company_data = {
-                'company_id': request.POST.get('company_id'),
+                'company_id': o_id,
                 'corp_id': request.POST.get('corp_id').strip(),
-                'tongxunlu_secret': request.POST.get('tongxunlu_secret').strip(),
-
+                'tongxunlu_secret': request.POST.get('tongxunlu_secret').strip()
             }
+
             forms_obj = TongxunluAddForm(company_data)
             if forms_obj.is_valid():
 
@@ -310,7 +310,7 @@ def company_oper(request, oper_type, o_id):
                     'corp_id': corp_id,
                     'tongxunlu_secret': tongxunlu_secret,
                 }
-                result_validate = validate_agent(data)
+                result_validate = validate_tongxunlu(data)
                 is_validate = False
                 if result_validate.code != 0:
                     return JsonResponse(result_validate.__dict__)

@@ -82,7 +82,7 @@ def validate_agent(data):
 
 
 @csrf_exempt
-def validate_agent(data):
+def validate_tongxunlu(data):
     response = Response.ResponseObj()
     get_token_data = {}
     corp_id = data.get('corp_id')

@@ -34,6 +34,9 @@ urlpatterns = [
     # 公司操作
     url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)', company.company_oper),
     url(r'^company$', company.company),
+    #验证雷达，通讯录
+    url(r'^company/(?P<oper_type>\w+)', company.author_status),
+
 
     #部门操作
     url(r'^department/(?P<oper_type>\w+)/(?P<o_id>\d+)', department.department_oper),
