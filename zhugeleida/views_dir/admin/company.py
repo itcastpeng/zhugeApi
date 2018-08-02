@@ -57,6 +57,7 @@ def company(request):
                     'charging_start_time': obj.charging_start_time,
                     'open_length_time': obj.open_length_time,
                     'mingpian_available_num': obj.mingpian_available_num ,
+                    'remarks':  obj.remarks,
                     'corp_id': obj.corp_id,
                     'tongxunlu_secret': obj.tongxunlu_secret,
                     'create_date': obj.create_date,
