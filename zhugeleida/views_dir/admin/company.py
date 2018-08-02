@@ -33,7 +33,8 @@ def company(request):
                 'create_date': '',
             }
 
-            q = conditionCom(request, field_dict)
+            data = request.GET.copy()
+            q = conditionCom(data, field_dict)
             print('q -->', q )
 
             objs = models.zgld_company.objects.filter(q).order_by(order)
