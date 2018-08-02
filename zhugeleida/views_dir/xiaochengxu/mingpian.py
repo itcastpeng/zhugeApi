@@ -156,7 +156,7 @@ def mingpian(request):
 
 # 展示全部的名片、记录各种动作到日志中
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def mingpian_oper(request, oper_type):
     response = Response.ResponseObj()
 
@@ -399,12 +399,12 @@ def mingpian_oper(request, oper_type):
 
             elif oper_type == 'save_poster':
 
-                remark = '保存了您的名片海报'
-                data = request.GET.copy()
-                data['action'] = 1
-                response = action_record(data, remark)
+                # remark = '保存了您的名片海报'
+                # data = request.GET.copy()
+                # data['action'] = 1
+                # response = action_record(data, remark)
 
-                # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
                 BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster',)
                 print('---->',BASE_DIR)
 
@@ -420,7 +420,10 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
 
-                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
+                # url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=46ea0365ae79577a5a33883f6481c491&timestamp=1533179898595&user_id=9&uid=60'
+
+
                 print('----save_poster-->',url)
 
                 try:
