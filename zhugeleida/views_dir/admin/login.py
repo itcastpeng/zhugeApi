@@ -64,3 +64,32 @@ def login(request):
 
     return JsonResponse(response.__dict__)
 
+@csrf_exempt
+@account.is_token(models.zgld_userprofile)
+def login_rules(request):
+    response = Response.ResponseObj()
+    if request.method == "GET":
+        # 获取参数 页数 默认1
+
+        user_id = request.GET.get('user_id')
+
+        userprofile_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+        rules_list = [i[0] for i in userprofile_obj.role.rules.values_list('title')]
+
+
+        response.code = 200
+        response.data = {
+            'rules_list': rules_list,
+
+        }
+
+    else:
+        response.code = 402
+        response.msg = "请求异常"
+
+    return JsonResponse(response.__dict__)
+
+
+
+
+
