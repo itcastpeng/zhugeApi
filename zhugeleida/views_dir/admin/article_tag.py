@@ -27,7 +27,7 @@ def article_tag(request):
         q = conditionCom(request, field_dict)
         print('q -->', q)
 
-        tag_list = models.zgld_article_tag.objects.filter(user_id=user_id).values_list('name')
+        tag_list = models.zgld_article_tag.objects.filter(user_id=user_id).values('id','name')
         tag_data = list(tag_list)
 
         # ret_data = []
@@ -64,7 +64,7 @@ def article_tag(request):
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def article_tag_oper(request, oper_type):
+def article_tag_oper(request, oper_type,o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
@@ -127,8 +127,8 @@ def article_tag_oper(request, oper_type):
 
             user_id = request.GET.get('user_id')
             tag_data = {
-                'tag_id' : request.GET.get('tag_id'),
-                'user_id' : request.GET.get('user_id'),
+                'tag_id' : o_id,
+                'user_id' : user_id,
                 # 'parent_tag_name': request.POST.get('parent_tag_name'), # 一级标签
                 # 'second_tag_id' : request.POST.get('second_tag_id'),
                 # 'parent_tag_id' : request.POST.get('parent_tag_id'),      # 二级标签
@@ -144,7 +144,7 @@ def article_tag_oper(request, oper_type):
 
                 #说明新建的一级标签
                 article_tag_obj = models.zgld_article_tag.objects.filter(
-                   id = tag_id
+                   id = tag_id,user_id=user_id
                 )
                 article_tag_obj.update(
                     name = tag_name
@@ -197,9 +197,9 @@ def article_tag_oper(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "delete":
-            tag_id = request.POST.get('id')
+            tag_id = o_id
             user_id = request.GET.get('user_id')
-            tag_objs = models.zgld_user_tag.objects.filter(id=tag_id,user_id=user_id)
+            tag_objs = models.zgld_article_tag.objects.filter(id=tag_id,user_id=user_id)
             if tag_objs:
                 tag_objs.delete()
                 response.code = 200

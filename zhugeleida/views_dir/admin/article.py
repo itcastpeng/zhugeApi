@@ -35,20 +35,21 @@ def article(request,oper_type):
                     'id': '',
                     'user_id' : '',
                     'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
-                         # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
+                                            # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
                     'title': '__contains',  # 按文章标题搜索
                 }
 
                 request_data = request.GET.copy()
 
+
                 q = conditionCom(request_data, field_dict)
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
-
                 if tag_list:
-                    q.add(Q(**{'tags_id__in': tag_list}), Q.AND)
-
+                    q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
                 objs = models.zgld_article.objects.filter(q).order_by(order)
+
+
                 count = objs.count()
 
                 if length != 0:
@@ -68,7 +69,7 @@ def article(request,oper_type):
                         'status': obj.get_status_display(),   # 状态
                         'source_code': obj.source,   # 状态
                         'source': obj.get_source_display(),   # 状态
-                        'author': obj.user.name,   # 如果为原创显示,文章作者
+                        'author': obj.user.username,   # 如果为原创显示,文章作者
                         'avatar': obj.user.avatar,  # 用户的头像
                         'read_count': obj.read_count,        #被阅读数量
                         'forward_count': obj.forward_count,  #被转发个数
@@ -83,37 +84,6 @@ def article(request,oper_type):
                 }
             return JsonResponse(response.__dict__)
 
-
-
-       if oper_type == 'tag_list':
-
-           user_id = request.GET.get('user_id')
-           field_dict = {
-               'tag_id': '',
-               'name': '__contains',
-           }
-           request_data = request.GET.copy()
-
-           q = conditionCom(request_data, field_dict)
-           print('q -->', q)
-
-           tag_list = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
-
-           response.code = 200
-           response.data = {
-               'user_id': user_id,
-               'ret_data': list(tag_list),
-               'data_count': tag_list.count(),
-           }
-
-       else:
-           response.code = 402
-           response.msg = "请求异常"
-
-
-    else:
-        response.code = 402
-        response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
 

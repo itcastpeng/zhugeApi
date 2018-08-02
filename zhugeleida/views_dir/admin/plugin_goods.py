@@ -188,15 +188,18 @@ def plugin_goods_oper(request, oper_type, o_id):
 
             forms_obj = PluginGoodsUpdateForm(form_data)
             if forms_obj.is_valid():
-                goods_id = request.GET.get('goods_id')
+                goods_id = forms_obj.cleaned_data.get('goods_id')
                 user_id = request.GET.get('user_id')
+                title = forms_obj.cleaned_data.get('title')
                 content = forms_obj.cleaned_data.get('content')
+                print('-----goods_id- user_id------>>',goods_id,user_id,title)
 
                 plugin_goods_objs = models.zgld_plugin_goods.objects.filter(
                         id = goods_id,user_id=user_id
                 )
                 if plugin_goods_objs:
                     plugin_goods_objs.update(
+                        title = title,
                         content=content
                     )
                     response.code = 200
@@ -221,9 +224,11 @@ def plugin_goods_oper(request, oper_type, o_id):
             forms_obj = PluginGoodsAddForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
+                title = forms_obj.cleaned_data.get('title')
                 content = forms_obj.cleaned_data.get('content')
 
                 models.zgld_plugin_goods.objects.create(
+                    title = title,
                     user_id=user_id,
                     content = content
                 )

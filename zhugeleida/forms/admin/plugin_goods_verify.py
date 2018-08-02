@@ -15,6 +15,12 @@ class PluginGoodsAddForm(forms.Form):
             'required': "用户ID不能为空"
         }
     )
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "标题不能为空"
+        }
+    )
 
     content = forms.CharField(
         required=True,
@@ -52,6 +58,13 @@ class PluginGoodsUpdateForm(forms.Form):
         }
     )
 
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "标题不能为空"
+        }
+    )
+
     content = forms.CharField(
         required=True,
         error_messages={
@@ -76,11 +89,12 @@ class PluginGoodsUpdateForm(forms.Form):
 
     # 判断企业产品名称是否存在
     def clean_goods_id(self):
-        goods_id = self.data['goods_id']
+        goods_id = self.data.get('goods_id')
         user_id = self.data.get('user_id')
+
         objs = models.zgld_plugin_goods.objects.filter(id = goods_id,user_id=user_id)
 
-        if  not objs:
+        if  not  objs:
             self.add_error('goods_id', '商品不存在')
 
         else:

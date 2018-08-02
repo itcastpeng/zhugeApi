@@ -67,8 +67,8 @@ urlpatterns = [
     url(r'^plugin_goods/(?P<oper_type>\w+)/', plugin_goods.plugin_goods),
 
     # 文章的标签管理
-    url(r'^tag/(?P<oper_type>\w+)$', article_tag.article_tag_oper),
-    url(r'^tag$', article_tag.article_tag),
+    url(r'^article_tag/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article_tag.article_tag_oper),
+    url(r'^article_tag$', article_tag.article_tag),
 
 
 ]
