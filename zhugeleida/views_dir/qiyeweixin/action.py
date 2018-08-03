@@ -242,9 +242,10 @@ def action(request, oper_type):
                         "%Y-%m-%d")
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
+                print('----q-->>',q)
                 objs = models.zgld_accesslog.objects.filter(q).values('customer__headimgurl', 'customer_id',
                                                                       'customer__username').annotate(Count('action'))
-                print('customer_action_data -->', objs)
+
 
                 if length != 0:
                     start_line = (current_page - 1) * length
