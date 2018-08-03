@@ -265,9 +265,6 @@ def action(request, oper_type):
                     customer_name = str(customer_name, 'utf-8')
                     print('-----b64decode username----->', customer_name)
 
-                    temp_dict = {}
-                    ret_list = []
-
 
                     insert_data = {
                         'customer_id': customer_id,
