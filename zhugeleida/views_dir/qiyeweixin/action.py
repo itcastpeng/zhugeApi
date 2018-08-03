@@ -273,7 +273,7 @@ def action(request, oper_type):
                         'action_count': action_count,
                         'customer_username': customer_name,
                         'headimgurl': headimgurl,
-                        'customer_detail' : temp_dict[customer_id]['detail'],
+                       
                     }
                     if not ret_list:  # 首次添加
                         ret_list.append(insert_data)
