@@ -258,7 +258,7 @@ def action(request, oper_type):
                     action_count = obj['action__count']
                     customer_username = obj['customer__username']
                     headimgurl = obj['customer__headimgurl']
-                    print('----------base64.b64decode(customer_username) ID是---------->>', customer_id)
+                    print('----------base64.b64decode(customer_username) ID 是---------->>', customer_id)
 
                     customer_name = base64.b64decode(customer_username)
                     customer_name = str(customer_name, 'utf-8')
@@ -266,45 +266,6 @@ def action(request, oper_type):
 
                     temp_dict = {}
                     ret_list = []
-
-
-
-                    objs = models.zgld_accesslog.objects.filter(customer_id=customer_id).values('customer_id', 'action').annotate(
-                        Count('action'))
-
-                    action_dict = {}
-                    for i in models.zgld_accesslog.action_choices:
-                        action_dict[i[0]] = i[1]
-
-                    for obj in objs:
-                        print('obj -->', obj)
-                        customer_id = obj['customer_id']
-                        action_count = obj['action__count']
-
-                        action = obj['action']
-                        if customer_id in temp_dict:
-                            temp_dict[customer_id]['totalCount'] += action_count
-                            temp_dict[customer_id]['detail'].append({
-                                "count": action_count,
-                                "name": action_dict[action],
-                                "action": action,
-                            })
-                        else:
-                            temp_dict[customer_id] = {
-                                "totalCount": action_count,
-                                "customer_id": customer_id,
-                                "detail": [
-                                    {
-                                        "count": action_count,
-                                        "name": action_dict[action],
-                                        "action": action,
-
-                                    }
-                                ]
-                            }
-                        # ret_list.append(temp_dict)
-                        # temp_dict = {}
-
 
 
                     insert_data = {
