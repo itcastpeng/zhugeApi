@@ -273,7 +273,7 @@ def action(request, oper_type):
                         'action_count': action_count,
                         'customer_username': customer_name,
                         'headimgurl': headimgurl,
-                       
+
                     }
                     if not ret_list:  # 首次添加
                         ret_list.append(insert_data)
@@ -302,6 +302,7 @@ def action(request, oper_type):
             }
 
             import json
+            customer_id = request.GET.get('customer_id')
             q = conditionCom(request, field_dict)
             objs = models.zgld_accesslog.objects.filter(q).values('customer_id', 'action').annotate(Count('action'))
             print('-------objs---->>', json.dumps(list(objs)))
@@ -344,7 +345,7 @@ def action(request, oper_type):
                 # ret_list.append(temp_dict)
                 # temp_dict = {}
 
-            ret_data.append(temp_dict)
+            ret_data.append(temp_dict[customer_id])
 
             response.code = 200
             response.msg = '查询日志记录成功'
