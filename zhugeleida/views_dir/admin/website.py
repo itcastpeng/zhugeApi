@@ -12,7 +12,7 @@ from ..conf import *
 from django.db.models import Q
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def website(request):
     response = Response.ResponseObj()
     if request.method == "GET":

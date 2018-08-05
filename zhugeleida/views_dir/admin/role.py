@@ -12,7 +12,7 @@ import json
 from publicFunc.condition_com import conditionCom
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def role(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -68,7 +68,7 @@ def role(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 

@@ -14,7 +14,7 @@ import json
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def company(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -76,7 +76,7 @@ def company(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def author_status(request,oper_type):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -128,7 +128,7 @@ def author_status(request,oper_type):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def company_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 

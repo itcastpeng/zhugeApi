@@ -11,7 +11,7 @@ import requests
 from ..conf import *
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def department(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -55,7 +55,7 @@ def department(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def department_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 

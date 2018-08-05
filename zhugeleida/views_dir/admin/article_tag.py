@@ -13,7 +13,7 @@ from publicFunc.condition_com import conditionCom
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def article_tag(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -63,7 +63,7 @@ def article_tag(request):
     return JsonResponse(response.__dict__)
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def article_tag_oper(request, oper_type,o_id):
     response = Response.ResponseObj()
 

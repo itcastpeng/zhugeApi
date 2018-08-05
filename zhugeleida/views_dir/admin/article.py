@@ -14,7 +14,7 @@ from zhugeleida.public.condition_com import conditionCom
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def article(request,oper_type):
     response = Response.ResponseObj()
 
@@ -89,7 +89,7 @@ def article(request,oper_type):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 

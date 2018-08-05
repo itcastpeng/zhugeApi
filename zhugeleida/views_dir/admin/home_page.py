@@ -17,7 +17,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def home_page(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -90,7 +90,7 @@ class LineInfoForm(forms.Form):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def home_page_oper(request, oper_type):
     response = Response.ResponseObj()
 
