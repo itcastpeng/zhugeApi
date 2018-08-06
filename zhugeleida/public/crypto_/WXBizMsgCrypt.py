@@ -79,8 +79,9 @@ class XMLParse:
             encrypt  = xml_tree.find("Encrypt")
             touser_name    = xml_tree.find("ToUserName")
             return  ierror.WXBizMsgCrypt_OK, encrypt.text, touser_name.text
+
         except Exception as e:
-            #print e
+            print ('----+83---->',e)
             return  ierror.WXBizMsgCrypt_ParseXml_Error,None,None
 
     def generate(self, encrypt, signature, timestamp, nonce):
@@ -157,7 +158,7 @@ class Prpcrypt(object):
             # 使用BASE64对加密后的字符串进行编码
             return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
         except Exception as e:
-            #print e
+            print('----- +160 ------>>', e)
             return  ierror.WXBizMsgCrypt_EncryptAES_Error,None
 
     def decrypt(self,text,appid):
@@ -170,7 +171,7 @@ class Prpcrypt(object):
             # 使用BASE64对密文进行解码，然后AES-CBC解密
             plain_text  = cryptor.decrypt(base64.b64decode(text))
         except Exception as e:
-            #print e
+            print ('----- +173 ------>>',e)
             return  ierror.WXBizMsgCrypt_DecryptAES_Error,None
         try:
             pad = ord(plain_text[-1])
@@ -183,7 +184,7 @@ class Prpcrypt(object):
             xml_content = content[4 : xml_len+4]
             from_appid = content[xml_len+4:]
         except Exception as e:
-            #print e
+            print ('------ +186 ---->>',e)
             return  ierror.WXBizMsgCrypt_IllegalBuffer,None
         if  from_appid != appid:
             return ierror.WXBizMsgCrypt_ValidateAppid_Error,None

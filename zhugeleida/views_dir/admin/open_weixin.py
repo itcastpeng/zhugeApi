@@ -43,7 +43,6 @@ def open_weixin(request,oper_type):
                 ret, decryp_xml = decrypt_test.DecryptMsg(postdata, msg_signature, timestamp, nonce)
                 print('--------授权公众号消息解密 DecryptMsg--------->>',ret, decryp_xml)
                 if ret == 0:
-
                     rc.set('decryp_xml', decryp_xml, 7000)
 
             print('--------授权公众号消息解密 DecryptMsg--------->>',decryp_xml)
