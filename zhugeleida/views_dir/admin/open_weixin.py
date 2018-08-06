@@ -15,6 +15,7 @@ def open_weixin(request,oper_type):
     if request.method == "POST":
         response = Response.ResponseObj()
         if oper_type == 'tongzhi':
+            print('------授权第三方 request.POST------>>',request.POST)
 
             signature = request.GET.get('signature')
             timestamp = request.GET.get('timestamp')
