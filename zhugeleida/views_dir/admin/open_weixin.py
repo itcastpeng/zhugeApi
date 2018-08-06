@@ -10,7 +10,6 @@ import json
 import redis
 
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
 def open_weixin(request,oper_type):
 
     if request.method == "POST":
