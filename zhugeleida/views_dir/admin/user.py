@@ -50,7 +50,7 @@ def user(request):
             elif role_id == 2:  #管理员，展示出自己公司的用户
                 q.add(Q(**{"company_id": company_id}), Q.AND)
 
-            objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
+            objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
