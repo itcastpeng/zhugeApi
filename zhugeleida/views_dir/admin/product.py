@@ -213,7 +213,7 @@ def product(request, oper_type):
                     if search_company_id:
                         q.add(Q(**{'user__company_id': search_company_id}), Q.AND)
 
-                    objs = models.zgld_user_feedback.objects.select_related('user').filter(q)
+                    objs = models.zgld_user_feedback.objects.select_related('user').filter(q).order_by('order')
                     count = objs.count()
                     print('-----objs----->>', objs)
 
