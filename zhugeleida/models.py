@@ -122,7 +122,7 @@ class zgld_userprofile(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     department = models.ManyToManyField('zgld_department', verbose_name='所属部门')
     position = models.CharField(verbose_name='职位信息', max_length=128)
-    role = models.ForeignKey("zgld_role", verbose_name="角色")
+    # role = models.ForeignKey("zgld_role", verbose_name="角色")
 
     telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
     wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
