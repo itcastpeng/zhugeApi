@@ -32,7 +32,7 @@ def user(request):
             field_dict = {
                 'id': '',
                 'username': '__contains',
-                'role__name': '__contains',
+
                 'company__name': '__contains',
                 'create_date': '',
                 'last_login_date': '',
@@ -89,8 +89,6 @@ def user(request):
                     'id': obj.id,
                     'userid': obj.userid,
                     'username': obj.username,
-                    'role_name': obj.role.name,
-                    'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
                     'position': obj.position,
