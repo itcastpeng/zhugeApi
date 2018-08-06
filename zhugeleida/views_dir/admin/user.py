@@ -137,7 +137,7 @@ def user_oper(request, oper_type, o_id):
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'password': request.POST.get('password'),
-                'role_id': request.POST.get('role_id'),
+                # 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
                 'wechat_phone': request.POST.get('phone'), ##
@@ -155,7 +155,7 @@ def user_oper(request, oper_type, o_id):
                 userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
                 username = forms_obj.cleaned_data.get('username')
                 password = forms_obj.cleaned_data.get('password')
-                role_id = forms_obj.cleaned_data.get('role_id')
+                # role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
@@ -239,7 +239,7 @@ def user_oper(request, oper_type, o_id):
                             userid= userid,
                             username=username,
                             password=account.str_encrypt(password),
-                            role_id=role_id,
+                            # role_id=role_id,
                             company_id=company_id,
                             position=position,
                             wechat_phone=wechat_phone,
@@ -338,7 +338,7 @@ def user_oper(request, oper_type, o_id):
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'password': request.POST.get('password'),
-                'role_id': request.POST.get('role_id'),
+                # 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
                 'department_id': request.POST.get('department_id'),
@@ -355,7 +355,7 @@ def user_oper(request, oper_type, o_id):
 
                 print(forms_obj.cleaned_data)
                 username = forms_obj.cleaned_data.get('username')
-                role_id = forms_obj.cleaned_data.get('role_id')
+                # role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
                 department_id = forms_obj.cleaned_data.get('department_id')
@@ -407,7 +407,7 @@ def user_oper(request, oper_type, o_id):
 
                         user_objs.update(
                             username=username,
-                            role_id=role_id,
+                            # role_id=role_id,
                             company_id=company_id,
                             position=position,
                             wechat_phone=wechat_phone,
