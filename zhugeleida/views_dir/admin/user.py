@@ -57,7 +57,7 @@ def user(request):
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-
+            mingpian_available_num = objs[0].company.mingpian_available_num
             # 返回的数据
             print('------------->>>', objs)
             ret_data = []
@@ -111,6 +111,7 @@ def user(request):
                 response.msg = '查询成功'
                 response.data = {
                     'ret_data': ret_data,
+                    'mingpian_available_num': mingpian_available_num,
                     'data_count': count,
                 }
 
