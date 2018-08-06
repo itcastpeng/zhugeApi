@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import  role,company,login,user,department,website,\
-    home_page,product,article,article_tag, access_rules, admin_role,admin_userprofile,plugin_mingpian,plugin_report,plugin_goods
+    home_page,product,article,article_tag, access_rules, admin_role,admin_userprofile,plugin_mingpian,plugin_report,plugin_goods,open_weixin
+
 
 
 
@@ -24,6 +25,10 @@ urlpatterns = [
     # 后台-权限管理
     url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)', access_rules.access_rules_oper),
     url(r'^access_rules', access_rules.access_rules),
+
+    #微信认证
+    url(r'^open_weixin/(?P<oper_type>\w+)', open_weixin.open_weixin),
+
 
     # 用户操作
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)', user.user_oper),

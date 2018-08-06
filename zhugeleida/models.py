@@ -67,6 +67,7 @@ class zgld_admin_role(models.Model):
 class zgld_admin_userprofile(models.Model):
     login_user =  models.CharField(verbose_name="登录用户名", max_length=32)
     username = models.CharField(verbose_name="成员姓名", max_length=32)
+    memo_name = models.CharField(verbose_name="成员备注名", max_length=32)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     position = models.CharField(verbose_name='职位', max_length=128)
@@ -112,6 +113,7 @@ class zgld_userprofile(models.Model):
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
+
     gender_choices = (
         (1, "男"),
         (2, "女"),

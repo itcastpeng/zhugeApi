@@ -48,7 +48,7 @@ def login(request):
                 'company_id' : userprofile_obj.company_id,
                 'role_id': userprofile_obj.role_id,
                 'role_name': userprofile_obj.role.name,
-
+                'avatar':  userprofile_obj.avatar,
                 'last_login_date': last_login_date
             }
 

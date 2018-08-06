@@ -111,7 +111,7 @@ def product(request, oper_type):
                      q1.children.append(('user_id__isnull', True))
                 elif product_type == 2:
                      q1.children.append(('user_id', user_id))
-                     
+
 
                 if role_id == 1:  # 为超级管理员 展示出所有公司的产品
                     search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
