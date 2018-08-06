@@ -35,10 +35,10 @@ def open_weixin(request,oper_type):
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
             postdata =  rc.get('postdata')
             if not  postdata:
-                post_data = postdata
+                postdata = postdata
 
 
-            ret, decryp_xml = decrypt_test.DecryptMsg(post_data, msg_signature, timestamp, nonce)
+            ret, decryp_xml = decrypt_test.DecryptMsg(postdata, msg_signature, timestamp, nonce)
             print('--------授权公众号消息解密 DecryptMsg--------->>',ret, decryp_xml)
 
 
