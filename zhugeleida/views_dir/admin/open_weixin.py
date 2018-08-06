@@ -15,7 +15,9 @@ def open_weixin(request,oper_type):
     if request.method == "POST":
         response = Response.ResponseObj()
         if oper_type == 'tongzhi':
-            print('------授权第三方 request.POST------>>',request.POST)
+            print('------授权第三方 request.POST------>>',request.POST,)
+            print('------授权第三方 request.GET------>>',request.GET,)
+            print('------ 第三方   request.body------>>',request.body)
 
             signature = request.GET.get('signature')
             timestamp = request.GET.get('timestamp')
@@ -27,9 +29,9 @@ def open_weixin(request,oper_type):
 
             token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
             encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-
             app_id = 'wx67e2fde0f694111c'
-            app_secret = '4a9690b43178a1287b2ef845158555ed'
+
+
             decrypt_test = WXBizMsgCrypt(token, encodingAESKey, app_id)
 
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
