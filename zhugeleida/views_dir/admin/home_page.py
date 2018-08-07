@@ -197,7 +197,7 @@ def deal_search_time(data,q):
     user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
     company_id = user_obj[0].company_id
 
-    user_ids = models.zgld_admin_userprofile.objects.select_related('company').filter(
+    user_ids = models.zgld_userprofile.objects.select_related('company').filter(
         company_id=company_id).values_list('id')
     user_list = []
     if user_ids:
