@@ -14,6 +14,9 @@ import json,os,sys
 from django.db.models import Q
 from django.db.models import F
 from time import sleep
+from selenium import webdriver
+from PIL import Image
+from django.conf import settings
 
 # 展示单个的名片信息
 @csrf_exempt
@@ -153,7 +156,7 @@ def mingpian(request):
 
 # 展示全部的名片、记录各种动作到日志中
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def mingpian_oper(request, oper_type):
     response = Response.ResponseObj()
 
@@ -355,10 +358,6 @@ def mingpian_oper(request, oper_type):
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')  # 用户 id
 
-                # remark = '保存了您的名片海报'
-                # data = request.GET.copy()
-                # data['action'] = 1
-                # response = action_record(data, remark)
 
                 obj = models.zgld_userprofile.objects.get(id=user_id)
 
@@ -396,31 +395,37 @@ def mingpian_oper(request, oper_type):
 
             elif oper_type == 'save_poster':
 
-                remark = '保存了您的名片海报'
-                data = request.GET.copy()
-                data['action'] = 1
-                response = action_record(data, remark)
+                # remark = '保存了您的名片海报'
+                # data = request.GET.copy()
+                # data['action'] = 1
+                # response = action_record(data, remark)
 
-                from django.conf import settings
-                # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
                 BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster',)
                 print('---->',BASE_DIR)
 
-                from selenium import webdriver
-                from PIL import Image
 
                 # option = webdriver.ChromeOptions()
                 # mobileEmulation = {'deviceName': 'iPhone 6'}
                 # option.add_experimental_option('mobileEmulation', mobileEmulation)
                 # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
-                driver = webdriver.PhantomJS()
+                platform = sys.platform     # 获取平台
+                phantomjs_path = 'zhugeleida/views_dir/tools/phantomjs.exe'   # windows 平台
+
+                if platform == 'linux2':
+                    phantomjs_path = 'zhugeleida/views_dir/tools/phantomjs'
+
+                driver = webdriver.PhantomJS(phantomjs_path)
                 rand_str = request.GET.get('rand_str')
                 timestamp = request.GET.get('timestamp')
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
 
-                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
+                # url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=46ea0365ae79577a5a33883f6481c491&timestamp=1533179898595&user_id=9&uid=60'
+
+
                 print('----save_poster-->',url)
 
                 try:

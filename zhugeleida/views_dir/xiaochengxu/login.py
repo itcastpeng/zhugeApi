@@ -18,7 +18,7 @@ import base64
 import json
 
 from collections import OrderedDict
-
+import logging.handlers
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -170,9 +170,9 @@ def login_oper(request,oper_type):
             # formid =  request.POST.get('formId')
             page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
 
-            import logging.handlers
+
             LOG_FILE = r'test.log'
-            handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=1024 * 1024, backupCount=5, encoding='utf-8')  # 实例化handler
+            handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
             fmt = '%(asctime)s - %(levelname)s - %(message)s'
 
             formatter = logging.Formatter(fmt)  # 实例化formatter
@@ -252,12 +252,6 @@ def login_oper(request,oper_type):
 
                 print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>',now_form_id_json)
                 objs.update(formid=now_form_id_json)
-
-                # >> > stack
-                # [3, 4, 5]
-                # >> >
-                # >> > stack.pop(0)
-                # 3
 
                 response.code = 200
                 response.msg = "保存成功"

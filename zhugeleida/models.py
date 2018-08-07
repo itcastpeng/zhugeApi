@@ -10,7 +10,19 @@ class zgld_company(models.Model):
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
     website_content = models.TextField(verbose_name='官网内容')
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
-    user_expired = models.DateTimeField(verbose_name="账户过期时间", null=True)
+    charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)
+    is_validate = models.BooleanField(verbose_name="验证通讯录secret是否通过",default=False)
+    remarks = models.TextField(verbose_name="备注",null=True)
+
+    open_length_time_choices = (
+        (1, "一个月"),
+        (2, "三个月"),
+        (3, "半年"),
+        (4, "一年"),
+        (5, "二年")
+    )
+    open_length_time = models.SmallIntegerField(choices=open_length_time_choices, verbose_name="开通时长",null=True)
+    account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -23,6 +35,7 @@ class zgld_app(models.Model):
     name = models.CharField(verbose_name="企业应用_名称", max_length=128)
     agent_id = models.CharField(verbose_name="应用ID", max_length=128)
     app_secret = models.CharField(verbose_name="应用secret", max_length=256)
+    is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
 # 公司部门
 class zgld_department(models.Model):
@@ -41,7 +54,7 @@ class zgld_department(models.Model):
 class zgld_admin_role(models.Model):
     name = models.CharField(verbose_name="角色名称", max_length=32)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    rules= models.ManyToManyField('zgld_access_rules',verbose_name="关联权限条目",null=True)
+    rules= models.ManyToManyField('zgld_access_rules',verbose_name="关联权限条目")
 
     class Meta:
         verbose_name_plural = "角色表"
@@ -54,6 +67,7 @@ class zgld_admin_role(models.Model):
 class zgld_admin_userprofile(models.Model):
     login_user =  models.CharField(verbose_name="登录用户名", max_length=32)
     username = models.CharField(verbose_name="成员姓名", max_length=32)
+    memo_name = models.CharField(verbose_name="成员备注名", max_length=32,null=True)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     position = models.CharField(verbose_name='职位', max_length=128)
@@ -79,8 +93,8 @@ class zgld_admin_userprofile(models.Model):
 
 # 权限表
 class zgld_access_rules(models.Model):
-    name = models.CharField(verbose_name="权限", max_length=64)
-    url_path = models.CharField(verbose_name="权限url", max_length=64, null=True, blank=True)
+    name = models.CharField(verbose_name="权限名称", max_length=64)
+    title = models.CharField(verbose_name="标题", max_length=64, null=True, blank=True)
     super_id = models.ForeignKey('self', verbose_name="上级ID", null=True, blank=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -99,6 +113,7 @@ class zgld_userprofile(models.Model):
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
+
     gender_choices = (
         (1, "男"),
         (2, "女"),
@@ -107,7 +122,7 @@ class zgld_userprofile(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     department = models.ManyToManyField('zgld_department', verbose_name='所属部门')
     position = models.CharField(verbose_name='职位信息', max_length=128)
-    role = models.ForeignKey("zgld_role", verbose_name="角色")
+    # role = models.ForeignKey("zgld_role", verbose_name="角色")
 
     telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
     wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
@@ -189,11 +204,16 @@ class zgld_user_feedback(models.Model):
         (3,'产品建议')
     )
     problem_type = models.SmallIntegerField(verbose_name='问题类型',choices=problem_type_choices)
+    status_choices = (
+        (1,'未处理'),
+        (2,'已处理')
+    )
+    status = models.SmallIntegerField(verbose_name='问题处理进度',choices=status_choices,default=1)
     content = models.TextField(verbose_name='内容', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = "用户标签表"
+        verbose_name_plural = "用户意见反馈表"
         app_label = "zhugeleida"
 
 
@@ -205,9 +225,7 @@ class zgld_product(models.Model):
         (2,'已下架'),
         (3,'推荐')
     )
-
     status = models.SmallIntegerField(verbose_name='产品状态',choices=product_status_choices,default=1)
-
     user = models.ForeignKey('zgld_userprofile', verbose_name='所属用户', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
     name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
@@ -300,7 +318,7 @@ class zgld_tag(models.Model):
         app_label = "zhugeleida"
 
 
-# 客户管理
+# 小程序-客户管理
 class zgld_customer(models.Model):
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
@@ -318,6 +336,7 @@ class zgld_customer(models.Model):
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     nickname = models.CharField(max_length=64, verbose_name='昵称', blank=True, null=True)
+    phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     country = models.CharField(max_length=64, verbose_name='国家', blank=True, null=True)
     city = models.CharField(max_length=32, verbose_name='客户所在城市', blank=True, null=True)
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
@@ -505,7 +524,6 @@ class zgld_chatinfo(models.Model):
     product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
     product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
 
-    # is_user_read_msg = models.BooleanField(default=False, verbose_name='用户是否读了客户发的消息')
     # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
     #                                   verbose_name='最后活动时间(客户发起对话)', null=True)
     # follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
@@ -517,17 +535,38 @@ class zgld_chatinfo(models.Model):
 
 
 
-#文章详细表
-class zgld_article_detail(models.Model):
 
-    article = models.OneToOneField("zgld_article",verbose_name='所属文章')
+#公众号-模板文章详细表
+class zgld_template_article(models.Model):
+
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name='模板文章作者', null=True)
+    title = models.CharField(verbose_name='文章标题', max_length=128)
+    cover_picture = models.CharField(verbose_name="封面图片URL", max_length=128)
+    summary = models.CharField(verbose_name='文章摘要', max_length=255)
+    content = models.TextField(verbose_name='文章内容', null=True)
+    # tags = models.ManyToManyField('zgld_article_tag', through='zgld_article_to_tag', through_fields=('article', 'tag'))
+    tags = models.ManyToManyField('zgld_template_article_tag',verbose_name="模板文章关联的标签")
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = "文章详细表"
+        verbose_name_plural = "模板文章表"
         app_label = "zhugeleida"
 
-# 文章表
+
+#公众号-文章标签表
+class zgld_template_article_tag(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile',verbose_name="模板文章标签所属用户",null=True)
+    name = models.CharField(verbose_name='标签名称', max_length=32)
+    # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
+
+    class Meta:
+        verbose_name_plural = "模板文章标签表"
+        app_label = "zhugeleida"
+
+
+#公众号-文章表
 class zgld_article(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     title = models.CharField(verbose_name='文章标题', max_length=128)
     summary = models.CharField(verbose_name='文章摘要', max_length=255)
     status_choices = ( (1,'已发'),
@@ -539,10 +578,8 @@ class zgld_article(models.Model):
                      )
     source = models.SmallIntegerField(default=1, verbose_name='文章来源', choices=source_choices)
     content = models.TextField(verbose_name='文章内容', null=True)
-    user = models.ForeignKey('zgld_userprofile',verbose_name='文章作者',null=True)
-    # category = models.ForeignKey(verbose_name='文章类型', to='Category', to_field='nid', null=True)
 
-    tags = models.ManyToManyField('zgld_article_tag',through='zgld_article_to_tag',through_fields=('article', 'tag'))
+    tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
     # up_count = models.IntegerField(default=0,verbose_name="赞次数")
     # down_count = models.IntegerField(default=0,verbose_name="踩次数")
     cover_picture  = models.CharField(verbose_name="封面图片URL",max_length=128)
@@ -555,33 +592,34 @@ class zgld_article(models.Model):
         verbose_name_plural = "文章表"
         app_label = "zhugeleida"
 
-#文章标签表
+#公众号-文章标签表
 class zgld_article_tag(models.Model):
-    user = models.ForeignKey('zgld_userprofile',verbose_name="标签所属用户",null=True)
+    user = models.ForeignKey('zgld_admin_userprofile',verbose_name="标签所属用户",null=True)
     name = models.CharField(verbose_name='标签名称', max_length=32)
-    parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
+    # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
 
     class Meta:
         verbose_name_plural = "文章标签表"
         app_label = "zhugeleida"
 
-# 文章和标签绑定关系表
-class zgld_article_to_tag(models.Model):
+#公众号-文章和查看客户之间的绑定关系表
+class zgld_article_to_customer_belonger(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
-    tag =  models.ForeignKey('zgld_article_tag',verbose_name='文章标签')
+    customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级', related_name="article_customer_parent", null=True)
 
     class Meta:
         unique_together = [
-            ('article', 'tag'),
+            ('article', 'customer'),
         ]
-        verbose_name_plural = "文章和标签关系绑定表"
+        verbose_name_plural = "文章和查看客户之间绑定关系表"
         app_label = "zhugeleida"
 
 
-# 文章查看用户停留时间表
+#公众号-文章查看用户停留时间表
 class zgld_article_access_log(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
-    user = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
+    customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
     stay_time = models.CharField(verbose_name='停留时长', max_length=64)
 
     class Meta:
@@ -589,18 +627,93 @@ class zgld_article_access_log(models.Model):
         verbose_name_plural = "文章查看用户停留时间表"
         app_label = "zhugeleida"
 
+#公众号-明片插件
+class zgld_plugin_mingpian(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="标签所属用户", null=True)
+    name = models.CharField(verbose_name="名片名称", max_length=64)
+    avatar = models.CharField(verbose_name="头像url", max_length=256, default='statics/imgs/setAvator.jpg')
+    username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
+    phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
+    webchat_code = models.CharField(verbose_name='微信二维码', max_length=128, null=True)
+    position = models.CharField(verbose_name='职位', max_length=256, null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
-# class zgld_article_picture(models.Model):
-#     order = models.SmallIntegerField(verbose_name='序号', null=True)
-#     product = models.ForeignKey('zgld_article', verbose_name='图片所属的文章', null=True)
-#     picture_type_choices = (
-#         (1, '文章封面'),
-#         (2, '产品介绍')
-#     )
-#     picture_type = models.SmallIntegerField(verbose_name='图片类型', null=True, choices=picture_type_choices)
-#     picture_url = models.CharField(verbose_name='图片URL链接', max_length=256, null=True)
-#     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-#
-#     class Meta:
-#         verbose_name_plural = "文章关联的图片"
-#         app_label = "zhugeleida"
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
+
+    class Meta:
+        verbose_name_plural = "插件-名片"
+        app_label = "zhugeleida"
+
+
+#公众号-报名插件
+class zgld_plugin_report(models.Model):
+    #广告位
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
+    ad_slogan = models.CharField(verbose_name="广告语", max_length=128)
+    sign_up_button = models.CharField(verbose_name="报名按钮", max_length=64, default='statics/imgs/setAvator.jpg')
+    is_get_phone_code = models.BooleanField(verbose_name='是否获取手机验证码', default=False)
+    #报名页
+    title = models.CharField(verbose_name='活动标题', max_length=128, null=True)
+    introduce = models.TextField(verbose_name='活动说明', blank=True, null=True)
+    skip_link = models.CharField(verbose_name="跳转链接",max_length=128,null=True)
+    read_count = models.IntegerField(verbose_name="总阅读数量", default=0)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.ad_slogan)
+
+    class Meta:
+        verbose_name_plural = "插件-报名插件"
+        app_label = "zhugeleida"
+
+# # 公众号-报名的客户
+class zgld_report_to_customer(models.Model):
+    customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
+    activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)
+
+    leave_message = models.TextField(verbose_name="客户留言", null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return 'Custer: %s | activity: %s ' % (self.customer_id,self.activity_id)
+
+    class Meta:
+        unique_together = (("customer", "activity"))
+        verbose_name_plural = "报名的客户和活动绑定的关系"
+        app_label = "zhugeleida"
+
+# 公众号 - 名片商品
+class zgld_plugin_goods(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
+    title = models.CharField(verbose_name='商品标题', max_length=128, null=True)
+    content = models.TextField(verbose_name='商品内容', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.title)
+
+    class Meta:
+        verbose_name_plural = "插件-商品插件"
+        app_label = "zhugeleida"
+
+# 公众号 - 名片商品
+class zgld_plugin_goods_order(models.Model):
+    customer = models.ForeignKey('zgld_customer', verbose_name="收货人", null=True)
+    address = models.CharField(max_length=256,verbose_name='收货详细地址')
+    leave_message = models.CharField(max_length=1024, verbose_name="客户留言", null=True)
+    activity = models.ForeignKey('zgld_plugin_goods', verbose_name="购买的商品", null=True)
+    order_amount = models.IntegerField(verbose_name='订单总金额',default=0)  #
+    pay_status_choices = (
+        (1, "未支付"),
+        (2, "已支付"),
+    )
+    pay_status = models.SmallIntegerField(choices=pay_status_choices, verbose_name="支付状态", default=1)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.customer_id)
+
+    class Meta:
+        verbose_name_plural = "插件-商品-订单表"
+        app_label = "zhugeleida"

@@ -12,7 +12,7 @@ import json
 from publicFunc.condition_com import conditionCom
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def role(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -68,7 +68,7 @@ def role(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -97,7 +97,7 @@ def role_oper(request, oper_type, o_id):
             role_objs = models.zgld_role.objects.filter(id=o_id)
             if role_objs:
                 role_obj = role_objs[0]
-                if role_obj.zgld_userprofile_set.count() == 0:
+                if role_obj.zgld_admin_userprofile_set.count() == 0:
                     role_objs.delete()
                     response.code = 200
                     response.msg = "删除成功"

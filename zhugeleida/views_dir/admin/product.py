@@ -8,7 +8,7 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
-from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm,imgMergeForm,imgUploadForm
+from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm,imgMergeForm,imgUploadForm,FeedbackSelectForm
 from zhugeleida.forms.qiyeweixin.product_verify import  ProductUpdateForm
 import json
 from django.db.models import Q
@@ -22,7 +22,7 @@ BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__fil
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def product(request, oper_type):
     response = Response.ResponseObj()
 
@@ -30,8 +30,6 @@ def product(request, oper_type):
 
         if oper_type == 'product_single':
             product_type = int(request.GET.get('product_type')) if request.GET.get('product_type') else ''
-
-
             user_id = request.GET.get('user_id')
             product_id = request.GET.get('product_id')
             field_dict = {
@@ -94,10 +92,8 @@ def product(request, oper_type):
             print('request.GET----->', request.GET)
             forms_obj = ProductSelectForm(request.GET)
             if forms_obj.is_valid():
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 product_type = forms_obj.cleaned_data.get('product_type')
-
-                print('product_type----->',request.GET.get('product_type'),product_type)
 
                 #如果为1 代表是公司的官网
                 user_id = request.GET.get('user_id')
@@ -107,21 +103,22 @@ def product(request, oper_type):
 
                 q1 = Q()
                 q1.connector = 'and'
-                user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
+                user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)[0]
                 company_id = user_obj.company_id
                 role_id = user_obj.role_id
 
                 if product_type == 1:
                      q1.children.append(('user_id__isnull', True))
                 elif product_type == 2:
-                     q1.children.append(('user_id__isnull', False))
+                     q1.children.append(('user_id', user_id))
 
-                if role_id == 1:  # 为管理员 展示出所有公司的产品
+
+                if role_id == 1:  # 为超级管理员 展示出所有公司的产品
                     search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
                     if search_company_id:
                         q1.children.append(('company_id', search_company_id))
 
-                elif role_id == 2:  # 为普通用户 展示出自己所属公司的产品
+                elif role_id == 2:  # 为管理员 展示出自己所属公司的产品
                     q1.children.append(('company_id', company_id))
 
                 search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
@@ -185,13 +182,82 @@ def product(request, oper_type):
                     response.code = 302
                     response.msg = '产品列表无数据'
 
+            else:
+                response.code = 402
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
 
-        return JsonResponse(response.__dict__)
+        elif oper_type == 'feedback_list':
+            user_id = request.GET.get('user_id')
+
+            user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+            role_id  = user_obj.role_id
+            print('-----role id ---->>',role_id)
+            forms_obj = FeedbackSelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+
+                if int(role_id) == 1:  # 为超级管理员 展示出所有公司的产品
+                    search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
+                    field_dict = {
+                        'id': '',
+                        'company__name': '__contains',
+                        'status': '',
+
+                    }
 
 
+                    q = conditionCom(request, field_dict)
+                    if search_company_id:
+                        q.add(Q(**{'user__company_id': search_company_id}), Q.AND)
+
+                    objs = models.zgld_user_feedback.objects.select_related('user').filter(q).order_by(order)
+                    count = objs.count()
+                    print('-----objs----->>', objs)
+
+                    ret_data = []
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+
+                    if objs:
+                        for obj in objs:
+                            ret_data.append({
+                                'id': obj.id,
+                                'user_id': obj.user_id,
+                                'user_name': obj.user.username,
+                                'problem_type': obj.problem_type,
+                                'problem_type_text': obj.get_problem_type_display(),
+                                'content': json.loads(obj.content),
+                                'company_name': obj.user.company.name,
+                                'company_id': obj.user.company_id,
+                                'status': obj.status,
+                                'status_text': obj.get_status_display()
+                            })
+
+                        #  查询成功 返回200 状态码
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'ret_data': ret_data,
+                            'data_count': count,
+                        }
+
+                else:
+                    response.code = 302
+                    response.msg = '列表无数据'
+
+
+
+            return JsonResponse(response.__dict__)
+
+    return JsonResponse(response.__dict__)
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def product_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -199,7 +265,7 @@ def product_oper(request, oper_type, o_id):
         # 删除-个人产品
         if oper_type == "delete":
             user_id = request.GET.get('user_id')
-            user_obj =  models.zgld_userprofile.objects.filter(id=user_id)
+            user_obj =  models.zgld_admin_userprofile.objects.filter(id=user_id)
             role_id = user_obj[0].role_id
             company_id = user_obj[0].company_id
 
@@ -307,7 +373,7 @@ def product_oper(request, oper_type, o_id):
                 elif product_type == 2:           #代表个人产品
                     product_owner = user_id
 
-                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+                company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
                 product_obj = models.zgld_product.objects.create(
                     user_id=product_owner,
                     company_id=company_id,
@@ -401,6 +467,30 @@ def product_oper(request, oper_type, o_id):
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == "change_feedback_status":
+            print('-------change_status------->>', request.POST)
+            status = int(request.POST.get('status'))
+
+            feedback_objs = models.zgld_user_feedback.objects.filter(id=o_id)
+
+            if feedback_objs:
+
+                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+                feedback_objs.update(
+                    status=status
+                )
+                response.code = 200
+                response.msg = "修改状态成功"
+                response.data = {
+                    # 'feedback_id': feedback_objs[0].id,
+                    # 'status': feedback_objs[0].get_status_display(),
+                    # 'status_code': feedback_objs[0].status
+                }
+
+            else:
+
+                response.code = 302
+                response.msg = '产品不存在'
 
         return JsonResponse(response.__dict__)
 

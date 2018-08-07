@@ -77,7 +77,7 @@ def action_record(data,remark):
 
         data['content'] = '%s%s' % (customer_name,remark)
         data['agentid'] = models.zgld_app.objects.get(
-            id=company_id,
+            company_id=company_id,
             name='AI雷达'
         ).agent_id
 

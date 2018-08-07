@@ -11,7 +11,7 @@ import requests
 from ..conf import *
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def department(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -55,7 +55,7 @@ def department(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def department_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -98,7 +98,9 @@ def department_oper(request, oper_type, o_id):
 
                 import redis
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                token_ret = rc.get('tongxunlu_token')
+                key_name = "company_%s_tongxunlu_token" % (obj.company_id)
+                token_ret = rc.get(key_name)
+
                 print('---token_ret---->>', token_ret)
 
                 if not token_ret:
@@ -106,7 +108,9 @@ def department_oper(request, oper_type, o_id):
                     ret_json = ret.json()
                     access_token = ret_json['access_token']
                     get_user_data['access_token'] = access_token
-                    rc.set('tongxunlu_token', access_token, 7000)
+
+                    rc.set(key_name, access_token, 7000)
+
                 else:
                     get_user_data['access_token'] = token_ret
 
@@ -135,7 +139,7 @@ def department_oper(request, oper_type, o_id):
                 else:
                     models.zgld_department.objects.filter(id= obj.id).delete()
 
-                    rc.delete('tongxunlu_token')
+                    rc.delete(key_name)
                     response.code = weixin_ret['errcode']
                     response.msg = "企业微信返回错误,%s" %  weixin_ret['errmsg']
 
@@ -164,7 +168,8 @@ def department_oper(request, oper_type, o_id):
 
                     import redis
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    token_ret = rc.get('tongxunlu_token')
+                    key_name = "company_%s_tongxunlu_token" % (department_objs[0].company_id)
+                    token_ret = rc.get(key_name)
                     print('---token_ret---->>', token_ret)
 
                     if not token_ret:
@@ -172,7 +177,8 @@ def department_oper(request, oper_type, o_id):
                         ret_json = ret.json()
                         access_token = ret_json['access_token']
                         get_user_data['access_token'] = access_token
-                        rc.set('tongxunlu_token', access_token, 7000)
+
+                        rc.set(key_name, access_token, 7000)
                     else:
                         get_user_data['access_token'] = token_ret
 
@@ -186,7 +192,7 @@ def department_oper(request, oper_type, o_id):
                         response.code = 200
                         response.msg = "删除成功"
                     else:
-                        rc.delete('tongxunlu_token')
+                        rc.delete(key_name)
                         response.code = weixin_ret['errcode']
                         response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
@@ -230,7 +236,8 @@ def department_oper(request, oper_type, o_id):
 
                     import redis
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    token_ret = rc.get('tongxunlu_token')
+                    key_name = "company_%s_tongxunlu_token" % (department_objs[0].company_id)
+                    token_ret = rc.get(key_name)
                     print('---token_ret---->>', token_ret)
 
                     if not token_ret:
@@ -238,7 +245,8 @@ def department_oper(request, oper_type, o_id):
                         ret_json = ret.json()
                         access_token = ret_json['access_token']
                         get_user_data['access_token'] = access_token
-                        rc.set('tongxunlu_token', access_token, 7000)
+                        rc.set(key_name, access_token, 7000)
+
                     else:
                         get_user_data['access_token'] = token_ret
 

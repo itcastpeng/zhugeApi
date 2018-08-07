@@ -13,7 +13,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-# @account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def access_rules(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -53,7 +53,7 @@ def access_rules(request):
                 ret_data.append({
                     'id': obj.id,
                     'name': obj.name,
-                    'url_path': obj.url_path,
+                    'title': obj.title,
                     'super_id': obj.super_id_id,
                     'super_name': super_name,
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
@@ -88,7 +88,7 @@ def access_rules_oper(request, oper_type, o_id):
         if oper_type == "add":
             form_data = {
                 'name': request.POST.get('name'),
-                'url_path': request.POST.get('url_path'),
+                'title': request.POST.get('title'),
                 'super_id_id': request.POST.get('super_id_id'),
             }
             #  创建 form验证 实例（参数默认转成字典）
@@ -124,7 +124,7 @@ def access_rules_oper(request, oper_type, o_id):
             form_data = {
                 'o_id': o_id,
                 'name': request.POST.get('name'),
-                'url_path': request.POST.get('url_path'),
+                'title': request.POST.get('title'),
                 'super_id_id': request.POST.get('super_id_id')
             }
 

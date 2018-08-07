@@ -17,7 +17,7 @@ import json
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def home_page(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -28,13 +28,15 @@ def home_page(request):
             'id': '',
         }
         q = conditionCom(request, field_dict)
-        user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+
+        user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
+        print('------user_obj----->',user_obj)
 
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
         mingpian_available_num = user_obj[0].company.mingpian_available_num  # 可开通名片数量
         user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()  #  # 员工总数
-        available_days = (user_obj[0].company.user_expired - datetime.now()).days     #还剩多天可以用
+        available_days = (user_obj[0].company.account_expired_time - datetime.now()).days     #还剩多天可以用
         used_days = (datetime.now() - user_obj[0].company.create_date).days           #用户使用了多少天了
 
         user_ids = models.zgld_userprofile.objects.select_related('company').filter(company_id=company_id).values_list('id')
@@ -49,7 +51,7 @@ def home_page(request):
             'username': user_obj[0].username,
             'mingpian_num': mingpian_available_num,  # 可开通名片数
             'user_count': user_count,  # 员工总数
-            'expired_time': user_obj[0].company.user_expired.strftime("%Y-%m-%d"),  # 过期时间
+            'expired_time': user_obj[0].company.account_expired_time.strftime("%Y-%m-%d"),  # 过期时间
             'open_up_date': user_obj[0].company.create_date.strftime("%Y-%m-%d"),  # 开通时间
             'available_days': available_days,  # 可用天数
             'used_days': used_days,         # 剩余可用天数
@@ -90,7 +92,7 @@ class LineInfoForm(forms.Form):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def home_page_oper(request, oper_type):
     response = Response.ResponseObj()
 
@@ -147,7 +149,7 @@ def home_page_oper(request, oper_type):
             if forms_obj.is_valid():
 
                 user_id = request.GET.get('user_id')
-                user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+                user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
                 company_id = user_obj[0].company_id
                 days = forms_obj.data.get('days')
 
@@ -192,10 +194,10 @@ def home_page_oper(request, oper_type):
 
 def deal_search_time(data,q):
     user_id = data.get('user_id')
-    user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+    user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
     company_id = user_obj[0].company_id
 
-    user_ids = models.zgld_userprofile.objects.select_related('company').filter(
+    user_ids = models.zgld_admin_userprofile.objects.select_related('company').filter(
         company_id=company_id).values_list('id')
     user_list = []
     if user_ids:

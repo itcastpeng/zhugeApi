@@ -15,10 +15,10 @@ class AddForm(forms.Form):
         }
     )
 
-    url_path = forms.CharField(
+    title = forms.CharField(
         required=True,
         error_messages={
-            'required': "权限路径不能为空"
+            'required': "标题不能为空"
         }
     )
 
@@ -39,16 +39,16 @@ class AddForm(forms.Form):
             return name
 
     # 查询名称是否存在
-    def clean_url_path(self):
-        url_path = self.data['url_path']
+    def clean_title(self):
+        title = self.data['title']
 
         objs = models.zgld_access_rules.objects.filter(
-            url_path=url_path
+            title=title
         )
         if objs:
-            self.add_error('url_path', '权限路径已存在')
+            self.add_error('title', '标题已存在')
         else:
-            return url_path
+            return title
 
 # 更新
 class UpdateForm(forms.Form):
@@ -66,10 +66,10 @@ class UpdateForm(forms.Form):
         }
     )
 
-    url_path = forms.CharField(
+    title = forms.CharField(
         required=True,
         error_messages={
-            'required': "权限路径不能为空"
+            'required': "标题不能为空"
         }
     )
 
@@ -91,17 +91,17 @@ class UpdateForm(forms.Form):
             return name
 
     # 查询名称是否存在
-    def clean_url_path(self):
-        url_path = self.data['url_path']
+    def clean_title(self):
+        title = self.data['title']
         o_id = self.data['o_id']
 
         objs = models.zgld_access_rules.objects.filter(
-            url_path=url_path
+            title=title
         ).exclude(id=o_id)
         if objs:
-            self.add_error('url_path', '权限路径已存在')
+            self.add_error('title', '标题已存在')
         else:
-            return url_path
+            return title
 
 
 # 判断是否是数字

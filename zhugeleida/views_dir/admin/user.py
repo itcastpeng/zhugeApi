@@ -13,10 +13,11 @@ from ..conf import *
 import requests
 from  zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_qr_code
 from zhugeapi_celery_project import tasks
+from django.db.models import Q
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -24,29 +25,39 @@ def user(request):
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
+            user_id = request.GET.get('user_id')
+
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
                 'username': '__contains',
-                'role__name': '__contains',
+
                 'company__name': '__contains',
                 'create_date': '',
                 'last_login_date': '',
 
             }
             q = conditionCom(request, field_dict)
-            print('q -->', q)
-            print('order -->', order)
-            print(models.zgld_userprofile.objects.all())
-            objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
+
+            admin_userobj = models.zgld_admin_userprofile.objects.get(id=user_id)
+            role_id = admin_userobj.role_id
+            company_id = admin_userobj.company_id
+
+            if role_id == 1:  # 超级管理员,展示出所有的企业用户
+               pass
+
+            elif role_id == 2:  #管理员，展示出自己公司的用户
+                q.add(Q(**{"company_id": company_id}), Q.AND)
+
+            objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-
+            mingpian_available_num = objs[0].company.mingpian_available_num
             # 返回的数据
             print('------------->>>', objs)
             ret_data = []
@@ -62,8 +73,7 @@ def user(request):
                     department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
                     department_id = [i[0] for i in departmane_objs.values_list('id')]
 
-                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by(
-                    '-create_date')
+                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
 
                 mingpian_avatar = ''
                 if mingpian_avatar_obj:
@@ -79,8 +89,6 @@ def user(request):
                     'id': obj.id,
                     'userid': obj.userid,
                     'username': obj.username,
-                    'role_name': obj.role.name,
-                    'role_id': obj.role.id,
                     'create_date': obj.create_date,
                     'last_login_date': obj.last_login_date,
                     'position': obj.position,
@@ -101,8 +109,10 @@ def user(request):
                 response.msg = '查询成功'
                 response.data = {
                     'ret_data': ret_data,
+                    'mingpian_available_num': mingpian_available_num,
                     'data_count': count,
                 }
+
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -113,7 +123,7 @@ def user(request):
 #  增删改 用户表
 #  csrf  token验证
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def user_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -125,7 +135,7 @@ def user_oper(request, oper_type, o_id):
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'password': request.POST.get('password'),
-                'role_id': request.POST.get('role_id'),
+                # 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
                 'wechat_phone': request.POST.get('phone'), ##
@@ -143,7 +153,7 @@ def user_oper(request, oper_type, o_id):
                 userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
                 username = forms_obj.cleaned_data.get('username')
                 password = forms_obj.cleaned_data.get('password')
-                role_id = forms_obj.cleaned_data.get('role_id')
+                # role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
@@ -152,6 +162,8 @@ def user_oper(request, oper_type, o_id):
 
                 available_user_num = models.zgld_company.objects.filter(id=company_id)[0].mingpian_available_num
                 used_user_num  = models.zgld_userprofile.objects.filter(company_id=company_id).count() #
+
+
                 print('-----超过明片最大开通数------>>',available_user_num,used_user_num)
                 if  int(used_user_num) >= int(available_user_num): # 开通的用户数量 等于 == 该公司最大可用名片数
                     response.code = 302
@@ -185,7 +197,9 @@ def user_oper(request, oper_type, o_id):
 
                     import redis
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    token_ret = rc.get('tongxunlu_token')
+                    key_name = "company_%s_tongxunlu_token" % (company_id)
+                    token_ret = rc.get(key_name)
+
                     print('---token_ret---->>',token_ret)
 
                     if not  token_ret:
@@ -195,7 +209,9 @@ def user_oper(request, oper_type, o_id):
 
                         access_token = ret_json['access_token']
                         get_user_data['access_token'] = access_token
-                        rc.set('tongxunlu_token',access_token,7000)
+
+                        rc.set(key_name,access_token,7000)
+
                     else:
                         get_user_data['access_token'] = token_ret
                     if len(depart_id_list) == 0:
@@ -221,7 +237,7 @@ def user_oper(request, oper_type, o_id):
                             userid= userid,
                             username=username,
                             password=account.str_encrypt(password),
-                            role_id=role_id,
+                            # role_id=role_id,
                             company_id=company_id,
                             position=position,
                             wechat_phone=wechat_phone,
@@ -240,7 +256,7 @@ def user_oper(request, oper_type, o_id):
                         response.msg = "添加用户成功"
 
                     else:
-                        rc.delete('tongxunlu_token')
+                        rc.delete(key_name)
                         response.code = weixin_ret['errcode']
                         response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
@@ -271,7 +287,9 @@ def user_oper(request, oper_type, o_id):
 
                     import redis
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    token_ret = rc.get('tongxunlu_token')
+                    key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
+                    token_ret = rc.get(key_name)
+
                     print('---token_ret---->>', token_ret)
 
                     if not token_ret:
@@ -279,7 +297,8 @@ def user_oper(request, oper_type, o_id):
                         ret_json = ret.json()
                         access_token = ret_json['access_token']
                         get_user_data['access_token'] = access_token
-                        rc.set('tongxunlu_token', access_token, 7000)
+
+                        rc.set(key_name, access_token, 7000)
                     else:
                         get_user_data['access_token'] = token_ret
 
@@ -295,7 +314,7 @@ def user_oper(request, oper_type, o_id):
                             response.code = 200
                             response.msg = "删除成功"
                         else:
-                            rc.delete('tongxunlu_token')
+                            rc.delete(key_name)
                             response.code = weixin_ret['errcode']
                             response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
@@ -317,7 +336,7 @@ def user_oper(request, oper_type, o_id):
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
                 'password': request.POST.get('password'),
-                'role_id': request.POST.get('role_id'),
+                # 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
                 'department_id': request.POST.get('department_id'),
@@ -334,7 +353,7 @@ def user_oper(request, oper_type, o_id):
 
                 print(forms_obj.cleaned_data)
                 username = forms_obj.cleaned_data.get('username')
-                role_id = forms_obj.cleaned_data.get('role_id')
+                # role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
                 department_id = forms_obj.cleaned_data.get('department_id')
@@ -356,7 +375,9 @@ def user_oper(request, oper_type, o_id):
 
                     import redis
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    token_ret = rc.get('tongxunlu_token')
+                    key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
+                    token_ret = rc.get(key_name)
+
                     print('---token_ret---->>', token_ret)
 
                     if not token_ret:
@@ -364,7 +385,9 @@ def user_oper(request, oper_type, o_id):
                         ret_json = ret.json()
                         access_token = ret_json['access_token']
                         get_user_data['access_token'] = access_token
-                        rc.set('tongxunlu_token', access_token, 7000)
+
+                        rc.set(key_name, access_token, 7000)
+
                     else:
                         get_user_data['access_token'] = token_ret
 
@@ -382,7 +405,7 @@ def user_oper(request, oper_type, o_id):
 
                         user_objs.update(
                             username=username,
-                            role_id=role_id,
+                            # role_id=role_id,
                             company_id=company_id,
                             position=position,
                             wechat_phone=wechat_phone,
@@ -409,7 +432,6 @@ def user_oper(request, oper_type, o_id):
                 print(forms_obj.errors.as_json())
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
         elif oper_type == "update_status":
 

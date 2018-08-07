@@ -30,7 +30,7 @@ class AddForm(forms.Form):
     )
 
     position = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "职位不能为空"
         }
@@ -124,7 +124,7 @@ class UpdateForm(forms.Form):
     )
 
     position = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "职位不能为空"
         }
