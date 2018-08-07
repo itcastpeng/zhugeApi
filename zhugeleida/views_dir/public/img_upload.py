@@ -134,7 +134,7 @@ def img_merge(request):
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'feedback')
 
         elif img_source == 'website':
-            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'website')
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'website')
 
 
         fileData = ''

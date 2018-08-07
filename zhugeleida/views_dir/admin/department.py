@@ -61,6 +61,8 @@ def department_oper(request, oper_type, o_id):
 
     if request.method == "POST":
         if oper_type == "add":
+
+            print('----department add ---->>',request.POST)
             department_data = {
                 'user_id': request.GET.get('user_id'),
                 'company_id': request.POST.get('company_id'),
