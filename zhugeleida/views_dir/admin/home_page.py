@@ -28,7 +28,9 @@ def home_page(request):
             'id': '',
         }
         q = conditionCom(request, field_dict)
+
         user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
+        print('------user_obj----->',user_obj)
 
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
