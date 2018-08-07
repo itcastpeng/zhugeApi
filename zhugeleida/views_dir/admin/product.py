@@ -43,7 +43,8 @@ def product(request, oper_type):
             if product_type  == 1:   #单个官网产品展示
                 q.add(Q(**{'user_id__isnull': True }), Q.AND)
             elif product_type == 2:
-                q.add(Q(**{'user_id': user_id }), Q.AND)
+                # q.add(Q(**{'user_id': user_id }), Q.AND)
+                q.add(Q(**{'user_id__isnull': False }), Q.AND)
 
             objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
             count = objs.count()
@@ -105,21 +106,21 @@ def product(request, oper_type):
                 q1.connector = 'and'
                 user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)[0]
                 company_id = user_obj.company_id
-                role_id = user_obj.role_id
+                # role_id = user_obj.role_id
 
-                if product_type == 1:
+                if product_type == 1:  #展示公司 产品
                      q1.children.append(('user_id__isnull', True))
-                elif product_type == 2:
-                     q1.children.append(('user_id', user_id))
+                elif product_type == 2: # 展示个人 产品
+                     q1.children.append(('user_id__isnull', False))
 
 
-                if role_id == 1:  # 为超级管理员 展示出所有公司的产品
-                    search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                    if search_company_id:
-                        q1.children.append(('company_id', search_company_id))
-
-                elif role_id == 2:  # 为管理员 展示出自己所属公司的产品
-                    q1.children.append(('company_id', company_id))
+                # if role_id == 1:  # 为超级管理员 展示出所有公司的产品
+                #     search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
+                #     if search_company_id:
+                #         q1.children.append(('company_id', search_company_id))
+                #
+                # elif role_id == 2:  # 为管理员 展示出自己所属公司的产品
+                q1.children.append(('company_id', company_id))
 
                 search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
                 if search_product_name:
@@ -134,6 +135,7 @@ def product(request, oper_type):
 
                     elif int(search_product_status) == 2:
                         q1.children.append(('status__in', [2]))  # (2,'已下架')
+
                 print('-----q1---->>',q1)
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
                 count = objs.count()
@@ -270,25 +272,25 @@ def product_oper(request, oper_type, o_id):
             company_id = user_obj[0].company_id
 
 
-            if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
-                product_objs = models.zgld_product.objects.filter(id=o_id)
-                if product_objs:
-                    product_objs.delete()
+            # if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
+            product_objs = models.zgld_product.objects.filter(id=o_id,company_id=company_id)
+            if product_objs:
+                product_objs.delete()
 
-                    response.code = 200
-                    response.msg = "删除成功"
+                response.code = 200
+                response.msg = "删除成功"
 
-            elif role_id == 2:  # 普通用户只能删除自己的公司的个人产品。
-                product_objs = models.zgld_product.objects.filter(id=o_id, user_id__isnull=False, company_id=company_id,)
-
-                if product_objs:
-                    product_objs.delete()
-
-                    response.code = 200
-                    response.msg = "删除成功"
+            # elif role_id == 2 or role_id == 3:  # 普通用户只能删除自己的公司的个人产品。
+            #     product_objs = models.zgld_product.objects.filter(id=o_id, company_id=company_id)
+            #
+            #     if product_objs:
+            #         product_objs.delete()
+            #
+            #         response.code = 200
+            #         response.msg = "删除成功"
 
             else:
-                response.code = 302
+                response.code = 301
                 response.msg = '产品不存在'
 
         elif oper_type == "change_status":
