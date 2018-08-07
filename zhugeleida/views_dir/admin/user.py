@@ -399,6 +399,9 @@ def user_oper(request, oper_type, o_id):
                     ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
                     print(ret.text)
 
+                    if len(department_id) == 0:
+                        department_id = ''
+
                     weixin_ret = json.loads(ret.text)
                     if weixin_ret['errmsg'] == 'updated':
 
