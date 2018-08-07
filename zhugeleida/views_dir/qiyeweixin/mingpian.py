@@ -35,7 +35,7 @@ def mingpian(request):
             q = conditionCom(request, field_dict)
             q.add(Q(**{'id': user_id}), Q.AND)
 
-            objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
+            objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
