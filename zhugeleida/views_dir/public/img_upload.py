@@ -133,6 +133,10 @@ def img_merge(request):
         elif img_source == 'feedback':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'feedback')
 
+        elif img_source == 'website':
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'website')
+
+
         fileData = ''
         for chunk in range(chunk_num):
             file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
