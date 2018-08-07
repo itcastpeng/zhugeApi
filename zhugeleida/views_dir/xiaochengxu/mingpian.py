@@ -61,7 +61,7 @@ def mingpian(request):
 
             models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
 
-            objs = models.zgld_userprofile.objects.select_related('role', 'company').filter(q).order_by(order)
+            objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
             count = objs.count()
 
             # data['content'] = remark
