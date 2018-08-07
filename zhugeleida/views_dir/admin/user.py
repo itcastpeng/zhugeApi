@@ -327,8 +327,6 @@ def user_oper(request, oper_type, o_id):
                     response.msg = '用户ID不存在'
 
         elif oper_type == "update":
-            print("dir(requests.POST) ===>", dir(request.POST))
-            print('=====request.POST=====>>>', o_id, request.POST)
 
             # 获取ID 用户名 及 角色
             form_data = {
@@ -391,7 +389,8 @@ def user_oper(request, oper_type, o_id):
                     else:
                         get_user_data['access_token'] = token_ret
 
-
+                    if len(department_id) == 0:
+                        department_id = [1]
                     post_user_data['userid'] = user_objs[0].userid
                     post_user_data['name'] = username
                     post_user_data['position'] = position

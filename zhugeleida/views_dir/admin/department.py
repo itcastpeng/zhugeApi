@@ -196,7 +196,13 @@ def department_oper(request, oper_type, o_id):
                     else:
                         rc.delete(key_name)
                         response.code = weixin_ret['errcode']
-                        response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
+
+                        if weixin_ret['errcode'] == 60005:
+                           error_msg = '部门下存在成员,请先删除或转移子级数据'
+                        else:
+                           error_msg =  "企业微信返回错误,%s" % weixin_ret['errmsg']
+
+                        response.msg =  error_msg
 
 
                 else:
