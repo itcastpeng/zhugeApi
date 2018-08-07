@@ -399,10 +399,10 @@ def user_oper(request, oper_type, o_id):
                     ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
                     print(ret.text)
 
-                    if len(department_id) == 0:
+                    if department_id[0] == 1 and len(department_id) == 1:
                         department_id = []
-                    print('----department_id ManyTomany --->>',department_id)
 
+                    print('------ManToMany department_id ----->')
                     weixin_ret = json.loads(ret.text)
                     if weixin_ret['errmsg'] == 'updated':
 
