@@ -106,7 +106,7 @@ class imgMergeForm(forms.Form):
 
 # 合并图片
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+# @account.is_token(models.zgld_admin_userprofile)
 def img_merge(request):
     response = Response.ResponseObj()
     forms_obj = imgMergeForm(request.POST)
