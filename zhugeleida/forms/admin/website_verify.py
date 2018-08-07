@@ -31,7 +31,7 @@ class WebsiteAddForm(forms.Form):
 
 
     def clean_company_id(self):
-        obj = models.zgld_userprofile.objects.get(id=self.data['user_id'])
+        obj = models.zgld_admin_userprofile.objects.get(id=self.data['user_id'])
         role_id = obj.role_id
 
         if role_id == 1:  # 管理员角色
@@ -99,7 +99,7 @@ class DepartmentUpdateForm(forms.Form):
         # 获取公司id
 
     def clean_company_id(self):
-        obj = models.zgld_userprofile.objects.get(id=self.data['user_id'])
+        obj = models.zgld_admin_userprofile.objects.get(id=self.data['user_id'])
         role_id = obj.role_id
 
         if role_id == 1:  # 管理员角色

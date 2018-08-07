@@ -51,7 +51,7 @@ class ProductAddForm(forms.Form):
     def clean_name(self):
         name = self.data['name']
         user_id = self.data.get('user_id')
-        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
         objs = models.zgld_product.objects.filter(
             name=name,company_id=company_id
@@ -80,7 +80,7 @@ class ProductGetForm(forms.Form):
     def clean_uid(self):
 
         user_id = self.data['uid']
-        objs = models.zgld_userprofile.objects.filter(
+        objs = models.zgld_admin_userprofile.objects.filter(
             id=user_id,
         )
         if not objs:

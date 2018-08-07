@@ -97,7 +97,7 @@ def role_oper(request, oper_type, o_id):
             role_objs = models.zgld_role.objects.filter(id=o_id)
             if role_objs:
                 role_obj = role_objs[0]
-                if role_obj.zgld_userprofile_set.count() == 0:
+                if role_obj.zgld_admin_userprofile_set.count() == 0:
                     role_objs.delete()
                     response.code = 200
                     response.msg = "删除成功"

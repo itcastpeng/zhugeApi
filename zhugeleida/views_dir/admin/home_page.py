@@ -28,7 +28,7 @@ def home_page(request):
             'id': '',
         }
         q = conditionCom(request, field_dict)
-        user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+        user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
 
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
@@ -147,7 +147,7 @@ def home_page_oper(request, oper_type):
             if forms_obj.is_valid():
 
                 user_id = request.GET.get('user_id')
-                user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+                user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
                 company_id = user_obj[0].company_id
                 days = forms_obj.data.get('days')
 
@@ -192,10 +192,10 @@ def home_page_oper(request, oper_type):
 
 def deal_search_time(data,q):
     user_id = data.get('user_id')
-    user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+    user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
     company_id = user_obj[0].company_id
 
-    user_ids = models.zgld_userprofile.objects.select_related('company').filter(
+    user_ids = models.zgld_admin_userprofile.objects.select_related('company').filter(
         company_id=company_id).values_list('id')
     user_list = []
     if user_ids:

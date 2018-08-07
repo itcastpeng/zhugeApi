@@ -103,7 +103,7 @@ def product(request, oper_type):
 
                 q1 = Q()
                 q1.connector = 'and'
-                user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
+                user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)[0]
                 company_id = user_obj.company_id
                 role_id = user_obj.role_id
 
@@ -265,7 +265,7 @@ def product_oper(request, oper_type, o_id):
         # 删除-个人产品
         if oper_type == "delete":
             user_id = request.GET.get('user_id')
-            user_obj =  models.zgld_userprofile.objects.filter(id=user_id)
+            user_obj =  models.zgld_admin_userprofile.objects.filter(id=user_id)
             role_id = user_obj[0].role_id
             company_id = user_obj[0].company_id
 
@@ -373,7 +373,7 @@ def product_oper(request, oper_type, o_id):
                 elif product_type == 2:           #代表个人产品
                     product_owner = user_id
 
-                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+                company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
                 product_obj = models.zgld_product.objects.create(
                     user_id=product_owner,
                     company_id=company_id,

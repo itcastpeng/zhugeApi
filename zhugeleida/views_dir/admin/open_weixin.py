@@ -31,7 +31,6 @@ def open_weixin(request,oper_type):
             encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
             app_id = 'wx67e2fde0f694111c'
 
-
             decrypt_test = WXBizMsgCrypt(token, encodingAESKey, app_id)
 
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)

@@ -342,7 +342,7 @@ def company_oper(request, oper_type, o_id):
             company_objs = models.zgld_company.objects.filter(id=o_id)
 
             if company_objs:
-                if company_objs[0].zgld_userprofile_set.all().count() == 0:
+                if company_objs[0].zgld_admin_userprofile_set.all().count() == 0:
                    company_objs.delete()
                    response.code = 200
                    response.msg = "删除成功"
