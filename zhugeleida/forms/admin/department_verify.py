@@ -21,12 +21,11 @@ class DepartmentAddForm(forms.Form):
         }
     )
 
-
     company_id = forms.CharField(
-        required=False,
-        # error_messages={
-        #     'required': "公司id不能为空"
-        # }
+        required=True,
+        error_messages={
+            'required': "公司id不能为空"
+        }
     )
 
     parentid_id = forms.CharField(
@@ -50,20 +49,15 @@ class DepartmentAddForm(forms.Form):
         # 获取公司id
 
     def clean_company_id(self):
-        obj = models.zgld_admin_userprofile.objects.get(id=self.data['user_id'])
-        role_id = obj.role_id
 
-        if role_id == 1:  # 管理员角色
-            company_id = self.data['company_id']
-            company_obj = models.zgld_company.objects.filter(id=company_id)
-            if not company_obj:
-                self.add_error('company_id', '公司id不能为空')
-            else:
-                return company_id
-
-        elif role_id == 2:  # 普通用户角色
-            company_id = obj.company_id
+        company_id = self.data['company_id']
+        company_obj = models.zgld_company.objects.filter(id=company_id)
+        if not company_obj:
+            self.add_error('company_id', '公司id不能为空')
+        else:
             return company_id
+
+
 
     def clean_parentid_id(self):
         if not self.data.get('parentid_id'):
@@ -78,7 +72,6 @@ class DepartmentUpdateForm(forms.Form):
         }
     )
 
-
     name = forms.CharField(
         required=True,
         error_messages={
@@ -87,10 +80,10 @@ class DepartmentUpdateForm(forms.Form):
     )
 
     company_id = forms.CharField(
-        required=False,
-        # error_messages={
-        #     'required': "公司id不能为空"
-        # }
+        required=True,
+        error_messages={
+            'required': "公司id不能为空"
+        }
     )
 
     parentid_id = forms.CharField(
@@ -121,20 +114,13 @@ class DepartmentUpdateForm(forms.Form):
         # 获取公司id
 
     def clean_company_id(self):
-        obj = models.zgld_admin_userprofile.objects.get(id=self.data['user_id'])
-        role_id = obj.role_id
-
-        if role_id == 1:  # 管理员角色
-            company_id = self.data['company_id']
-            company_obj = models.zgld_company.objects.filter(id=company_id)
-            if not company_obj:
-                self.add_error('company_id', '公司id不能为空')
-            else:
-                return company_id
-
-        elif role_id == 2:  # 普通用户角色
-            company_id = obj.company_id
+        company_id = self.data['company_id']
+        company_obj = models.zgld_company.objects.filter(id=company_id)
+        if not company_obj:
+            self.add_error('company_id', '公司id不能为空')
+        else:
             return company_id
+
 
 # 判断是否是数字
 class DepartmentSelectForm(forms.Form):
