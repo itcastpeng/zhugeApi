@@ -400,7 +400,7 @@ def user_oper(request, oper_type, o_id):
                     print(ret.text)
 
                     if len(department_id) == 0:
-                        department_id = ''
+                        department_id = []
 
                     weixin_ret = json.loads(ret.text)
                     if weixin_ret['errmsg'] == 'updated':
