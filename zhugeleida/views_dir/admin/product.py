@@ -43,7 +43,8 @@ def product(request, oper_type):
             if product_type  == 1:   #单个官网产品展示
                 q.add(Q(**{'user_id__isnull': True }), Q.AND)
             elif product_type == 2:
-                q.add(Q(**{'user_id': user_id }), Q.AND)
+                # q.add(Q(**{'user_id': user_id }), Q.AND)
+                q.add(Q(**{'user_id__isnull': False }), Q.AND)
 
             objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
             count = objs.count()
