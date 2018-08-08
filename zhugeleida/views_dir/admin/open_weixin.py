@@ -26,7 +26,7 @@ def open_weixin(request, oper_type):
             # postdata =  request.POST.get('postdata')
 
             postdata = request.body.decode(encoding='UTF-8')
-            # print(postdata)
+
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -117,7 +117,8 @@ def open_weixin(request, oper_type):
             post_component_data['component_appid'] = app_id
             post_component_data['component_appsecret'] = app_secret
 
-            component_verify_ticket = rc.get('ComponentVerifyTicket')
+            # component_verify_ticket = rc.get('ComponentVerifyTicket')
+            component_verify_ticket = 'ticket@@@20PsDLMbSN5sNeFXKucVgY3W0k62ayAVrExBOoerwgte_APw1sPlxNijdOeOdwcPIPBjufQC-S0vCz6S4JroBw'
             post_component_data['component_verify_ticket'] = component_verify_ticket
 
             token_ret = rc.get('component_access_token')
@@ -162,7 +163,7 @@ def open_weixin(request, oper_type):
 
             # 生成授权链接
 
-            redirect_uri = '/zhugeleida/admin/open_weixin/auth_code'
+            redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/admin/open_weixin/auth_code'
             get_bind_auth_data = 'action=bindcomponent&no_scan=1&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (
                                     app_id, pre_auth_code, redirect_uri,)
             pre_auth_code_url = 'https://mp.weixin.qq.com/safe/bindcomponent?' + get_bind_auth_data
