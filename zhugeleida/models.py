@@ -37,6 +37,35 @@ class zgld_app(models.Model):
     app_secret = models.CharField(verbose_name="应用secret", max_length=256)
     is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
+    class Meta:
+        verbose_name_plural = "企业微信App应用"
+        app_label = "zhugeleida"
+
+#小程序App应用
+class zgld_xiaochengxu_app(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="小程序授权的后台用户", null=True)
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+
+    head_img = models.CharField(verbose_name="授权方头像", max_length=256)
+    qrcode_url = models.CharField(verbose_name="二维码图片的URL", max_length=128)
+    name = models.CharField(verbose_name="小程序名称", max_length=128)
+    principal_name = models.CharField(verbose_name="小程序主体名称", max_length=128)
+
+    # service_category = models.CharField(verbose_name="服务类目", max_length=64)
+
+    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128)
+    authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
+    verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)    #-1代表未认证，0代表微信认证
+
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
+
+    class Meta:
+        verbose_name_plural = "小程序App应用"
+        app_label = "zhugeleida"
+
+
 # 公司部门
 class zgld_department(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属公司')
@@ -44,6 +73,9 @@ class zgld_department(models.Model):
     parentid = models.ForeignKey('self', verbose_name='父级部门ID', null=True, blank=True)
     order = models.IntegerField(verbose_name='在父部门中的次序值', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
 
     class Meta:
         verbose_name_plural = "部门表"
@@ -81,7 +113,7 @@ class zgld_admin_userprofile(models.Model):
     role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
-    authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据刷新令牌',max_length=64,null=True)
+    # authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据刷新令牌',max_length=64,null=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
 
     def __str__(self):
