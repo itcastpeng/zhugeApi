@@ -81,6 +81,7 @@ class zgld_admin_userprofile(models.Model):
     role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
+    authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据刷新令牌',max_length=64,null=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
 
     def __str__(self):
