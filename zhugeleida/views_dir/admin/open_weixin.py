@@ -153,7 +153,7 @@ def open_weixin(request, oper_type):
                 pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
                 print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
                 if pre_auth_code:
-                    rc.set('pre_auth_code', pre_auth_code, 500)
+                    rc.set('pre_auth_code', pre_auth_code, 1600)
                 else:
                     response.code = 400
                     response.msg = "--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->"
@@ -163,10 +163,10 @@ def open_weixin(request, oper_type):
 
             # 生成授权链接
 
-            redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/admin/open_weixin/auth_code'
-            get_bind_auth_data = 'action=bindcomponent&no_scan=1&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (
+            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/admin/open_weixin/auth_code'
+            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (
                                     app_id, pre_auth_code, redirect_uri,)
-            pre_auth_code_url = 'https://mp.weixin.qq.com/safe/bindcomponent?' + get_bind_auth_data
+            pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
             response.code = 200
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
