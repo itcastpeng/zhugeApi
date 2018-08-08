@@ -23,9 +23,9 @@ def open_weixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            postdata =  request.POST.get('postdata')
+            # postdata =  request.POST.get('postdata')
 
-            # postdata = request.body.decode(encoding='UTF-8')
+            postdata = request.body.decode(encoding='UTF-8')
             # print(postdata)
 
             xml_tree = ET.fromstring(postdata)
