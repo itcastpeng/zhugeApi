@@ -157,7 +157,7 @@ def open_weixin(request, oper_type):
 
 
         elif oper_type == "create_grant_url":
-            user_id = request.get('user_id')
+            user_id = request.GET.get('user_id')
             request.session['user_id'] = user_id
             print('----request.session userId--->',request.session.get('user_id'))
 
@@ -174,8 +174,8 @@ def open_weixin(request, oper_type):
             post_component_data['component_appid'] = app_id
             post_component_data['component_appsecret'] = app_secret
 
-            # component_verify_ticket = rc.get('ComponentVerifyTicket')
-            component_verify_ticket = 'ticket@@@20PsDLMbSN5sNeFXKucVgY3W0k62ayAVrExBOoerwgte_APw1sPlxNijdOeOdwcPIPBjufQC-S0vCz6S4JroBw'
+            component_verify_ticket = rc.get('ComponentVerifyTicket')
+
             post_component_data['component_verify_ticket'] = component_verify_ticket
 
             token_ret = rc.get('component_access_token')
