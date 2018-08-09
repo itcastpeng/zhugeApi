@@ -84,7 +84,7 @@ def open_weixin(request, oper_type):
                     response.msg = "-------- 授权公众号消息解密  ------->"
                     return JsonResponse(response.__dict__)
 
-            except Exception as e:
+            except AttributeError as e:
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text       # authorizer_appid 授权方 appid
 
