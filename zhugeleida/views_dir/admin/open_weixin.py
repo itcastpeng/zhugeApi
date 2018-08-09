@@ -134,7 +134,7 @@ def open_weixin(request, oper_type):
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                    verify_type_info = True  if authorizer_info_ret['authorizer_info'].get('verify_type_info') == 0 else False
+                    verify_type_info = True  if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                     qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 主体名称
 
