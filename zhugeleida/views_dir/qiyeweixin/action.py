@@ -133,7 +133,7 @@ def action(request, oper_type):
                         username = base64.b64decode(obj.customer.username)
                         username = str(username, 'utf-8')
                         print('----- 解密b64decode 客户的username----->', username)
-                    except TypeError as e:
+                    except Exception as e:
                         print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
                         username = '客户ID%s' % (obj.customer_id)
 
@@ -274,7 +274,7 @@ def action(request, oper_type):
                         customer_name = base64.b64decode(customer_username)
                         customer_name = str(customer_name, 'utf-8')
 
-                    except TypeError as e:
+                    except Exception as e:
                         print('----- b64decode解密失败的 customer_id 是----->', customer_id)
                         customer_name = '客户ID%s' % (customer_id)
 

@@ -114,7 +114,7 @@ def tongxunlu(request):
                             username = base64.b64decode(obj.customer.username)
                             customer_name = str(username, 'utf-8')
                             print('----- 解密b64decode username----->', username)
-                        except TypeError as e:
+                        except Exception as e:
                             print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
                             customer_name = '客户ID%s' % (obj.customer_id)
 
