@@ -116,7 +116,7 @@ def open_weixin(request, oper_type):
                 print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',access_token_ret)
                 authorizer_access_token = access_token_ret['authorization_info'].get('authorizer_access_token')
                 authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
-                authorizer_appid = access_token_ret.get('authorizer_appid')
+                authorizer_appid = access_token_ret['authorization_info'].get('authorizer_appid')
 
                 if authorizer_access_token and authorizer_refresh_token:
 
