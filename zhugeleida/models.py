@@ -45,18 +45,19 @@ class zgld_app(models.Model):
 class zgld_xiaochengxu_app(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="小程序授权的后台用户", null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    original_id = models.CharField(verbose_name='小程序原始唯一ID',max_length=64,null=True)
 
-    head_img = models.CharField(verbose_name="授权方头像", max_length=256)
-    qrcode_url = models.CharField(verbose_name="二维码图片的URL", max_length=128)
-    name = models.CharField(verbose_name="小程序名称", max_length=128)
-    principal_name = models.CharField(verbose_name="小程序主体名称", max_length=128)
 
-    # service_category = models.CharField(verbose_name="服务类目", max_length=64)
+    head_img = models.CharField(verbose_name="授权方头像", max_length=256,null=True)
+    qrcode_url = models.CharField(verbose_name="二维码图片的URL", max_length=128,null=True)
+    name = models.CharField(verbose_name="小程序名称", max_length=128, null=True)
+    principal_name = models.CharField(verbose_name="小程序主体名称", max_length=128,null=True)
 
-    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128)
+    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
     authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)    #-1代表未认证，0代表微信认证
-
+    introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
+    service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True)
 
     def __str__(self):
         return "%s - %s" % (self.id, self.name)

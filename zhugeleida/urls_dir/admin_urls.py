@@ -23,12 +23,15 @@ urlpatterns = [
     url(r'^admin_role', admin_role.admin_role),
 
     # 后台-权限管理
-    url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)', access_rules.access_rules_oper),
+    url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)$', access_rules.access_rules_oper),
     url(r'^access_rules', access_rules.access_rules),
 
     #微信认证
     url(r'^open_weixin/(?P<oper_type>\w+)', open_weixin.open_weixin),
 
+
+    url(r'^xcx_auth_process/(?P<oper_type>\w+)/(?P<o_id>\d+)$', open_weixin.xcx_auth_process_oper),
+    url(r'^xcx_auth_process$', open_weixin.xcx_auth_process),
 
     # 用户操作
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)', user.user_oper),
