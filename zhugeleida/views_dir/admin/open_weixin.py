@@ -114,8 +114,8 @@ def open_weixin(request, oper_type):
                                                  data=json.dumps(post_access_token_data))
                 access_token_ret = access_token_ret.json()
                 print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',access_token_ret)
-                authorizer_access_token = access_token_ret.get('authorizer_access_token')
-                authorizer_refresh_token = access_token_ret.get('authorizer_refresh_token')
+                authorizer_access_token = access_token_ret['authorization_info'].get('authorizer_access_token')
+                authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
                 authorizer_appid = access_token_ret.get('authorizer_appid')
 
                 if authorizer_access_token and authorizer_refresh_token:
@@ -130,12 +130,13 @@ def open_weixin(request, oper_type):
                     url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
                     authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->', authorizer_info_ret.json())
+                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->', authorizer_info_ret)
                     authorizer_info_ret = authorizer_info_ret.json()
-                    original_id = authorizer_info_ret.get('user_name')
-                    verify_type_info = True  if authorizer_info_ret.get('verify_type_info') == 0 else False
-                    principal_name = authorizer_info_ret.get('principal_name')  # 主体名称
-                    qrcode_url = authorizer_info_ret.get('qrcode_url')  # 主体名称
+                    original_id = authorizer_info_ret['authorizer_info'].get('user_name')
+
+                    verify_type_info = True  if authorizer_info_ret['authorizer_info'].get('verify_type_info') == 0 else False
+                    principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
+                    qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 主体名称
 
                     if original_id:
                         obj = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
@@ -143,6 +144,7 @@ def open_weixin(request, oper_type):
                             obj.update(
                                 authorization_appid=authorization_appid, #授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token, # 刷新的 令牌
+
                                 original_id=original_id, # 小程序的原始ID
                                 verify_type_info=verify_type_info,
                                 principal_name=principal_name,
