@@ -260,7 +260,8 @@ def open_weixin(request, oper_type):
             component_access_token = rc.get('component_access_token')
             authorizer_access_token = rc.get('authorizer_access_token')
             app_id = 'wx67e2fde0f694111c'
-            global authorizer_appid
+
+
 
             obj = models.zgld_admin_userprofile.objects.get(user_id=user_id)
             authorizer_refresh_token = obj.authorizer_refresh_token
@@ -300,11 +301,33 @@ def open_weixin(request, oper_type):
 
                 print('-------获取（刷新）授权小程序的接口调用凭据 authorizer_token 返回--------->>',authorizer_info_ret)
 
+                authorizer_access_token = authorizer_info_ret.get('authorizer_access_token')
+                authorizer_refresh_token = authorizer_info_ret.get('authorizer_refresh_token')
 
+                if authorizer_access_token and authorizer_refresh_token:
+                    rc.set('authorizer_access_token', authorizer_access_token, 7000)
+
+                else:
+                    print('------ 获取令牌（authorizer_access_token）为空------>>')
+                    response.code = 400
+                    response.msg = "获取令牌authorizer_access_token为空"
+                    return JsonResponse(response.__dict__)
+
+            user_version = 'V1.0'
+            template_id = 0
+            user_desc = '这里是描述...'
+            ext_json = '''
+                        
+            
+            '''
             get_wxa_commit_data = {}
             post_wxa_commit_data = {}
+
             get_wxa_commit_data['access_token'] = authorizer_access_token
-            post_wxa_commit_data['template_id'] = 0
+            post_wxa_commit_data['template_id'] = template_id        # 代码库中的代码模版ID
+            post_wxa_commit_data['ext_json'] = ext_json             # 代码库中的代码模版ID
+            post_wxa_commit_data['user_version'] = user_version     # 代码库中的代码模版ID
+            post_wxa_commit_data['user_desc'] = user_desc          # 代码库中的代码模版ID
             commit_url = 'https://api.weixin.qq.com/wxa/commit'
 
             wxa_commit_info_ret = requests.post(commit_url, params=get_wxa_commit_data, data=json.dumps(post_wxa_commit_data))
