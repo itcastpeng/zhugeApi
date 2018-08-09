@@ -84,7 +84,7 @@ def open_weixin(request, oper_type):
                     response.msg = "-------- 授权公众号消息解密  ------->"
                     return JsonResponse(response.__dict__)
 
-            except AttributeError as e:
+            except Exception as e:
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text       # authorizer_appid 授权方 appid
 
@@ -130,7 +130,7 @@ def open_weixin(request, oper_type):
                     url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
                     authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->', authorizer_info_ret)
+                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->', json.dumps(authorizer_info_ret.json()))
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
