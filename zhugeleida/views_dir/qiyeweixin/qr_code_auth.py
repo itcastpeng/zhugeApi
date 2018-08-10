@@ -101,7 +101,7 @@ def create_small_program_qr_code(data):
         f.write(qr_ret.content)
 
     user_obj = models.zgld_userprofile.objects.get(id=user_id)
-    user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code/%s' % user_qr_code
+    user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
     user_obj.save()
 
     response.code = 200

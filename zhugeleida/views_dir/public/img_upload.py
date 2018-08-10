@@ -136,6 +136,9 @@ def img_merge(request):
         elif img_source == 'website':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'website')
 
+        elif img_source == 'wcx_head_image': # 上传小程序头像
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'wcx_head_image')
+
 
         fileData = ''
         for chunk in range(chunk_num):
