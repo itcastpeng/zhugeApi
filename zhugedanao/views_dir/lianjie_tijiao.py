@@ -89,7 +89,7 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 #  添加数据库
                 print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
                 # models.zhugedanao_userprofile.objects.create(**forms_obj.cleaned_data)
-                url_list = forms_obj.cleaned_data.get('url_list')
+                url_list = forms_obj.cleaned_data.get('url')
                 name = forms_obj.cleaned_data.get('name')
                 oper_user_id = forms_obj.cleaned_data.get('oper_user_id')
                 querysetlist = []
@@ -99,6 +99,7 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                         name=name,
                         url=url
                     ))
+                models.zhugedanao_lianjie_tijiao.objects.bulk_create(querysetlist)
                 response.code = 200
                 response.msg = "添加成功"
             else:
