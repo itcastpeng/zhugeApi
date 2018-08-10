@@ -4,6 +4,7 @@ from django.conf.urls import url
 from zhugedanao.views_dir.wechat import wechat
 from zhugedanao.views_dir import oper_log
 from zhugedanao.views_dir import tongji_data
+from zhugedanao.views_dir import lianjie_tijiao
 
 urlpatterns = [
 
@@ -21,7 +22,11 @@ urlpatterns = [
     # 记录使用日志
     url(r'^oper_log$', oper_log.oper_log),
 
-    # 获取统计数据
+    # 微信公众号获取统计数据
     url(r'^tongji_data$', tongji_data.tongji_data),
+
+    # 需求管理
+    url(r'^lianjie_tijiao/(?P<oper_type>\w+)/(?P<o_id>\d+)', lianjie_tijiao.lianjie_tijiao_oper),
+    url(r'^lianjie_tijiao', lianjie_tijiao.lianjie_tijiao),
 
 ]

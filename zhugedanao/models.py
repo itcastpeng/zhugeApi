@@ -1,6 +1,5 @@
 from django.db import models
 
-
 # Create your models here.
 
 
@@ -97,3 +96,24 @@ class zhugedanao_oper_log(models.Model):
         app_label = "zhugedanao"
 
 
+# 百度知道链接提交
+class zhugedanao_lianjie_tijiao(models.Model):
+    user = models.ForeignKey('zhugedanao_userprofile', verbose_name="用户")
+    name = models.CharField(verbose_name="任务名称", max_length=128)
+    url = models.TextField(verbose_name="提交链接")
+    count = models.SmallIntegerField(verbose_name="提交次数")
+    status_choices = (
+        (1, "未收录"),
+        (2, "已收录"),
+    )
+    status = models.SmallIntegerField(verbose_name="收录状态", choices=status_choices, default=1)
+    get_task_date = models.DateTimeField(verbose_name='获取任务时间', null=True, blank=True)
+    create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+
+
+# 百度知道链接提交日志
+class zhugedanao_lianjie_tijiao_log(models.Model):
+    zhugedanao_lianjie_tijiao = models.ForeignKey('zhugedanao_lianjie_tijiao', verbose_name="提交的链接信息")
+    ip = models.CharField(verbose_name="提交的ip", max_length=128)
+    address = models.CharField(verbose_name="提交机器的ip", max_length=128)
+    create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
