@@ -87,7 +87,7 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 print("验证通过")
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
-                # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
+                print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
                 # models.zhugedanao_userprofile.objects.create(**forms_obj.cleaned_data)
                 url_list = forms_obj.cleaned_data.get('url_list')
                 name = forms_obj.cleaned_data.get('name')
