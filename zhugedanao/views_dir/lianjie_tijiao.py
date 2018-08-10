@@ -49,6 +49,7 @@ def lianjie_tijiao(request):
                     'id': obj.id,
                     'name': obj.name,
                     'url': obj.url,
+                    'count': obj.count,
                     'status_text': obj.get_status_display(),
                     'status': obj.status,
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
@@ -77,10 +78,8 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
         if oper_type == "add":
             form_data = {
                 'oper_user_id': request.GET.get('user_id'),
-                'username': request.POST.get('username'),
-                'role_id': request.POST.get('role_id'),
-                'company_id': request.GET.get('company_id'),
-                'password': request.POST.get('password'),
+                'name': request.POST.get('name'),
+                'url': request.POST.get('url')
             }
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
@@ -89,7 +88,17 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 # print(forms_obj.cleaned_data)
                 #  添加数据库
                 # print('forms_obj.cleaned_data-->',forms_obj.cleaned_data)
-                models.zhugedanao_userprofile.objects.create(**forms_obj.cleaned_data)
+                # models.zhugedanao_userprofile.objects.create(**forms_obj.cleaned_data)
+                url_list = forms_obj.cleaned_data.get('url_list')
+                name = forms_obj.cleaned_data.get('name')
+                oper_user_id = forms_obj.cleaned_data.get('oper_user_id')
+                querysetlist = []
+                for url in url_list:
+                    querysetlist.append(models.zhugedanao_lianjie_tijiao(
+                        user_id=oper_user_id,
+                        name=name,
+                        url=url
+                    ))
                 response.code = 200
                 response.msg = "添加成功"
             else:

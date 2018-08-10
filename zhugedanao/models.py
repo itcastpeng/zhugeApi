@@ -101,7 +101,7 @@ class zhugedanao_lianjie_tijiao(models.Model):
     user = models.ForeignKey('zhugedanao_userprofile', verbose_name="用户")
     name = models.CharField(verbose_name="任务名称", max_length=128)
     url = models.TextField(verbose_name="提交链接")
-    count = models.SmallIntegerField(verbose_name="提交次数")
+    count = models.SmallIntegerField(verbose_name="提交次数", default=0)
     status_choices = (
         (1, "未收录"),
         (2, "已收录"),

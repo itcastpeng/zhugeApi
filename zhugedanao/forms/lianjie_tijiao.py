@@ -13,57 +13,29 @@ class AddForm(forms.Form):
         }
     )
 
-    username = forms.CharField(
+    name = forms.CharField(
         required=True,
         error_messages={
-            'required': "用户名不能为空"
+            'required': "任务名称不能为空"
         }
     )
-    password = forms.CharField(
+    url = forms.CharField(
         required=True,
         error_messages={
-            'required': "密码不能为空"
-        }
-    )
-
-    role_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "角色名称不能为空"
+            'required': "提交链接不能为空"
         }
     )
 
-    company_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "公司ID不能为空"
-        }
-    )
-
-    token = forms.IntegerField(
-        required=False
-    )
-
-    # 查询名称是否存在
-    def clean_name(self):
-        username = self.data['username']
-        company_id = self.data['company_id']
-        objs = models.userprofile.objects.filter(
-            username=username,
-            company_id=company_id,
-        )
-        if objs:
-            self.add_error('username', '用户名已存在')
+    def clean_url(self):
+        url_list = []
+        url = self.data.get('url')
+        for i in url.strip().split():
+            if i.strip():
+                url_list.append(i.strip())
+        if len(url_list) == 0:
+            self.add_error('url', '提交链接不能为空')
         else:
-            return username
-
-    def clean_password(self):
-        password = self.data['password']
-        return account.str_encrypt(password)
-
-    def clean_token(self):
-        password = self.data['password']
-        return account.get_token(password + str(int(time.time()) * 1000))
+            return url_list
 
 
 # 更新
