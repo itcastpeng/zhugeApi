@@ -58,6 +58,14 @@ class GetqrCodeForm(forms.Form):
         }
     )
 
+    upload_code_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "上传的代码ID不能为空"
+        }
+    )
+
+
     path = forms.CharField(
         #指定体验版二维码跳转到某个具体页面（如果不需要的话，则不需要填path参数)
         required=False,
@@ -66,6 +74,13 @@ class GetqrCodeForm(forms.Form):
         }
     )
 
+    def clean_upload_code_id(self):
+        upload_code_id = self.data['upload_code_id']
+        obj = models.zgld_xiapchengxu_upload.objects.filter(id=upload_code_id)
+        if not obj:
+            self.add_error('upload_code_id', '代小程序上传的代码不存在')
+        else:
+            return upload_code_id
 
     def clean_customer_id(self):
         customer_id = self.data['customer_id']
@@ -86,7 +101,35 @@ class SubmitAuditForm(forms.Form):
             'required': "客户ID不能为空"
         }
     )
+    upload_code_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "上传的代码ID不能为空"
+            # 'required': "提交审核的代码任务ID不能为空"
+        }
+    )
 
+    def clean_upload_code_id(self):
+        upload_code_id = self.data['upload_code_id']
+        obj = models.zgld_xiapchengxu_upload.objects.filter(id=upload_code_id)
+        if not obj:
+            self.add_error('upload_code_id', '代小程序上传的代码不存在')
+        else:
+
+            return upload_code_id
+
+    # def clean_audit_code_id(self):
+    #     audit_code_id = self.data['audit_code_id']
+    #     obj = models.zgld_xiapchengxu_audit.objects.filter(id=audit_code_id)
+    #     if not obj:
+    #         self.add_error('audit_code_id', '提交审核的代码任务不存在')
+    #     else:
+    #         audit_result = obj[0].audit_result
+    #         if audit_result in [1,3]:
+    #             self.add_error('audit_code_id', '提交审核的代码任务没有通过或在审核中')
+    #         elif audit_result in [2] :
+    #
+    #             return audit_code_id
 
 
     def clean_customer_id(self):
