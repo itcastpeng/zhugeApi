@@ -15,13 +15,6 @@ class AddForm(forms.Form):
         }
     )
 
-    username = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "名字不能为空"
-        }
-    )
-
     company_id = forms.CharField(
         required=True,
         error_messages={
@@ -63,17 +56,17 @@ class AddForm(forms.Form):
         else:
             return login_user
 
-    # 查询名称是否存在
-    def clean_username(self):
-        username = self.data['username']
-
-        objs = models.zgld_admin_userprofile.objects.filter(
-            username=username
-        )
-        if objs:
-            self.add_error('username', '名字不能重复')
-        else:
-            return username
+    # # 查询名称是否存在
+    # def clean_username(self):
+    #     username = self.data['username']
+    #
+    #     objs = models.zgld_admin_userprofile.objects.filter(
+    #         username=username
+    #     )
+    #     if objs:
+    #         self.add_error('username', '名字不能重复')
+    #     else:
+    #         return username
 
 
     # 返回加密后的密码
@@ -109,12 +102,12 @@ class UpdateForm(forms.Form):
         }
     )
 
-    username = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "名字不能为空"
-        }
-    )
+    # username = forms.CharField(
+    #     required=False,
+    #     error_messages={
+    #         'required': "名字不能为空"
+    #     }
+    # )
 
     company_id = forms.CharField(
         required=True,

@@ -86,7 +86,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
         if oper_type == "add":
             form_data = {
                 'login_user': request.POST.get('login_user'),
-                'username': request.POST.get('username'),
+
                 'company_id': request.POST.get('company_id'),
                 'password': request.POST.get('password'),
                 'position': request.POST.get('position'),
@@ -129,7 +129,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
             form_data = {
                 'id': o_id,
                 'login_user': request.POST.get('login_user'),
-                'username': request.POST.get('username'),
+
                 'company_id': request.POST.get('company_id'),
                 'password': request.POST.get('password'),
                 'position': request.POST.get('position'),

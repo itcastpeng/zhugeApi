@@ -37,6 +37,102 @@ class zgld_app(models.Model):
     app_secret = models.CharField(verbose_name="应用secret", max_length=256)
     is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
+    class Meta:
+        verbose_name_plural = "企业微信App应用"
+        app_label = "zhugeleida"
+
+#小程序App应用
+class zgld_xiaochengxu_app(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="小程序授权的后台用户", null=True)
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    original_id = models.CharField(verbose_name='小程序原始唯一ID',max_length=64,null=True)
+
+    head_img = models.CharField(verbose_name="授权方头像", max_length=256,null=True)
+    qrcode_url = models.CharField(verbose_name="二维码图片的URL", max_length=128,null=True)
+    name = models.CharField(verbose_name="小程序名称", max_length=128, null=True)
+    principal_name = models.CharField(verbose_name="小程序主体名称", max_length=128,null=True)
+
+    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
+    authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
+    verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)    #-1代表未认证，0代表微信认证
+    introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
+    service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True)
+    ext_json = models.TextField(verbose_name="第三方自定义的配置", null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
+
+    class Meta:
+        verbose_name_plural = "小程序App应用"
+        app_label = "zhugeleida"
+
+
+# 代小程序上传代码表
+class zgld_xiapchengxu_upload(models.Model):
+    app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='所属小程序App')
+    publisher = models.ForeignKey('zgld_admin_userprofile', verbose_name="代小程序-发布者", null=True)
+    desc = models.TextField(verbose_name='描述', null=True)
+    version_num = models.CharField(verbose_name="版本号",null=True,max_length=32)
+    template_id = models.IntegerField(verbose_name="小程序模板ID", null=True)
+    upload_code_date = models.DateTimeField(verbose_name="代码长传时间", null=True)
+    experience_qrcode =  models.CharField(verbose_name="体验二维码",null=True,max_length=64)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.version_num)
+
+    class Meta:
+        verbose_name_plural = "代小程序上传代码表"
+        app_label = "zhugeleida"
+
+## 代小程序提交审核代码表 ##
+class zgld_xiapchengxu_audit(models.Model):
+    app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='审核的-小程序App')
+    auditid = models.IntegerField(verbose_name="接口返回审核编号",null=True)
+    upload_code = models.OneToOneField('zgld_xiapchengxu_upload', verbose_name='上传的代码') # 审核的哪个版本的长传后的代码。
+    audit_commit_date = models.DateTimeField(verbose_name='提交审核时间',null=True)
+    audit_reply_date = models.DateTimeField(verbose_name="审核回复时间", null=True)
+    audit_result_type = (
+        (0,'审核成功'),
+        (1,'审核失败'),
+        (2,'审核中')
+    )
+    audit_result = models.SmallIntegerField(verbose_name='审核结果',null=True,choices=audit_result_type)
+    reason = models.CharField(verbose_name='审核失败原因',max_length=1024,null=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.auditid)
+
+    class Meta:
+        verbose_name_plural = "代小程序提交审核代码表"
+        app_label = "zhugeleida"
+
+## 代小程序发布审核通过代码表 ##
+class zgld_xiapchengxu_release(models.Model):
+    app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='审核的-小程序App')
+    audit_code = models.OneToOneField('zgld_xiapchengxu_audit', verbose_name='审核通过的代码') # 审核的哪个版本的长传后的代码。
+    release_commit_date = models.DateTimeField(verbose_name='提交发布时间',null=True)
+    release_reply_date = models.DateTimeField(verbose_name="发布回复时间", null=True)
+    release_result_type = (
+        (1,'上线通过'),
+        (2,'上线失败')
+    )
+    release_result = models.SmallIntegerField(verbose_name='发布结果',null=True,choices=release_result_type)
+    reason = models.CharField(verbose_name='上线失败原因',max_length=1024,null=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.audit_code)
+
+    class Meta:
+        verbose_name_plural = "代小程序提交发布代码表"
+        app_label = "zhugeleida"
+
+
+
+
+
+
+
 # 公司部门
 class zgld_department(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属公司')
@@ -44,6 +140,9 @@ class zgld_department(models.Model):
     parentid = models.ForeignKey('self', verbose_name='父级部门ID', null=True, blank=True)
     order = models.IntegerField(verbose_name='在父部门中的次序值', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
 
     class Meta:
         verbose_name_plural = "部门表"
@@ -80,7 +179,6 @@ class zgld_admin_userprofile(models.Model):
     token = models.CharField(verbose_name="token值", max_length=64, null=True, blank=True)
     role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
 
     def __str__(self):

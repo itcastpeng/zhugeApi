@@ -27,9 +27,9 @@ if __name__ == "__main__":
    nonce = "1320562132"
    appid = "wx2c2769f8efd9abc2"
    #测试加密接口
-   # encryp_test = WXBizMsgCrypt(token,encodingAESKey,appid)
-   # ret,encrypt_xml = encryp_test.EncryptMsg(to_xml,nonce)
-   # print (ret,encrypt_xml)
+   encryp_test = WXBizMsgCrypt(token,encodingAESKey,appid)
+   ret,encrypt_xml = encryp_test.EncryptMsg(to_xml,nonce)
+   print (ret,encrypt_xml)
    
 
    #测试解密接口

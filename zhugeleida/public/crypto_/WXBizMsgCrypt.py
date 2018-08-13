@@ -25,6 +25,8 @@ from zhugeleida.public.crypto_ import ierror
 # sys.setdefaultencoding('utf-8')
 
 """
+https://www.cnblogs.com/comsokey/p/enterprise_CheckToken.html [参考博客]
+
 关于Crypto.Cipher模块，ImportError: No module named 'Crypto'解决方案
 请到官方网站 https://www.dlitz.net/software/pycrypto/ 下载pycrypto。
 下载后，按照README中的“Installation”小节的提示进行pycrypto安装。
@@ -51,10 +53,10 @@ class SHA1:
             sortlist = [token, timestamp, nonce, encrypt]
             sortlist.sort()
             sha = hashlib.sha1()
-            sha.update("".join(sortlist))
+            sha.update("".join(sortlist).encode("ascii"))
             return  ierror.WXBizMsgCrypt_OK, sha.hexdigest()
         except Exception as e:
-            #print e
+            print ('-----+57---->>',e)
             return  ierror.WXBizMsgCrypt_ComputeSignature_Error, None
 
 
@@ -62,12 +64,14 @@ class XMLParse:
     """提供提取消息格式中的密文及生成回复消息格式的接口"""
 
     # xml消息模板
-    AES_TEXT_RESPONSE_TEMPLATE = """<xml>
-<Encrypt><![CDATA[%(msg_encrypt)s]]></Encrypt>
-<MsgSignature><![CDATA[%(msg_signaturet)s]]></MsgSignature>
-<TimeStamp>%(timestamp)s</TimeStamp>
-<Nonce><![CDATA[%(nonce)s]]></Nonce>
-</xml>"""
+    AES_TEXT_RESPONSE_TEMPLATE = """
+        <xml>
+            <Encrypt><![CDATA[%(msg_encrypt)s]]></Encrypt>
+            <MsgSignature><![CDATA[%(msg_signaturet)s]]></MsgSignature>
+            <TimeStamp>%(timestamp)s</TimeStamp>
+            <Nonce><![CDATA[%(nonce)s]]></Nonce>
+        </xml>
+    """
 
     def extract(self, xmltext):
         """提取出xml数据包中的加密消息
@@ -172,22 +176,23 @@ class Prpcrypt(object):
             plain_text  = cryptor.decrypt(base64.b64decode(text))
         except Exception as e:
             print ('----- +173 ------>>',e)
-            return  ierror.WXBizMsgCrypt_DecryptAES_Error,None
-        try:
-            pad = ord(plain_text[-1])
-            # 去掉补位字符串
-            #pkcs7 = PKCS7Encoder()
-            #plain_text = pkcs7.encode(plain_text)
-            # 去除16位随机字符串
-            content = plain_text[16:-pad]
-            xml_len = socket.ntohl(struct.unpack("I",content[ : 4])[0])
-            xml_content = content[4 : xml_len+4]
-            from_appid = content[xml_len+4:]
-        except Exception as e:
-            print ('------ +186 ---->>',e)
-            return  ierror.WXBizMsgCrypt_IllegalBuffer,None
-        if  from_appid != appid:
+            return  ierror.WXBizMsgCrypt_DecryptAES_Error, None
+
+
+        pad = plain_text[-1]
+        # 去掉补位字符串
+        #pkcs7 = PKCS7Encoder()
+        #plain_text = pkcs7.encode(plain_text)
+        # 去除16位随机字符串
+        content = plain_text[16:-pad]
+        xml_len = socket.ntohl(struct.unpack("I",content[ : 4])[0])
+        xml_content = content[ 4: xml_len+4:].decode("utf8")
+        from_appid = content[xml_len+4:]
+        print ('------- 解密后xml_content ----->>',xml_content,'\n',from_appid,'\n',appid)
+
+        if  from_appid.decode("utf8") != appid:
             return ierror.WXBizMsgCrypt_ValidateAppid_Error,None
+
         return 0,xml_content
 
     def get_random_str(self):
@@ -234,7 +239,7 @@ class WXBizMsgCrypt(object):
         xmlParse = XMLParse()
         return ret,xmlParse.generate(encrypt, signature, timestamp, sNonce)
 
-    def DecryptMsg(self, sPostData, sMsgSignature, sTimeStamp, sNonce):
+    def DecryptMsg(self, encrypt, sMsgSignature, sTimeStamp, sNonce):
         # 检验消息的真实性，并且获取解密后的明文
         # @param sMsgSignature: 签名串，对应URL参数的msg_signature
         # @param sTimeStamp: 时间戳，对应URL参数的timestamp
@@ -242,18 +247,19 @@ class WXBizMsgCrypt(object):
         # @param sPostData: 密文，对应POST请求的数据
         #  xml_content: 解密后的原文，当return返回0时有效
         # @return: 成功0，失败返回对应的错误码
-         # 验证安全签名
-        xmlParse = XMLParse()
-        ret,encrypt,touser_name = xmlParse.extract(sPostData)
-        if ret != 0:
-            return ret, None
+        # 验证安全签名
+        # xmlParse = XMLParse()
+        # ret, encrypt, touser_name = xmlParse.extract(sPostData)
+        # if ret != 0:
+        #     return ret, None
         sha1 = SHA1()
-        ret,signature = sha1.getSHA1(self.token, sTimeStamp, sNonce, encrypt)
-        if ret  != 0:
+        ret, signature = sha1.getSHA1(self.token, sTimeStamp, sNonce, encrypt)
+        #print('----- 解密 sha1.getSHA1 signature ----->>',ret, signature)
+        if ret != 0:
             return ret, None
         if not signature == sMsgSignature:
             return ierror.WXBizMsgCrypt_ValidateSignature_Error, None
         pc = Prpcrypt(self.key)
-        ret,xml_content = pc.decrypt(encrypt,self.appid)
-        return ret,xml_content
+        ret, xml_content = pc.decrypt(encrypt, self.appid)
+        return ret, xml_content
 

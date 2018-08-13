@@ -71,10 +71,13 @@ def action(request, oper_type):
 
                 ret_data = []
                 for obj in objs:
-
-                    username = base64.b64decode(obj.customer.username)
-                    username = str(username, 'utf-8')
-                    print('-----b64decode username----->', username)
+                    try:
+                        username = base64.b64decode(obj.customer.username)
+                        username = str(username, 'utf-8')
+                        print('----- 解密b64decode User_id username----->', username)
+                    except Exception as e:
+                        print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
+                        username = '客户ID%s' % (obj.customer_id)
 
                     ret_data.append({
                         'user_id': obj.user_id,
@@ -125,9 +128,15 @@ def action(request, oper_type):
 
                 ret_data = []
                 for obj in objs:
-                    username = base64.b64decode(obj.customer.username)
-                    username = str(username, 'utf-8')
-                    print('-----b64decode username----->', username)
+
+                    try:
+                        username = base64.b64decode(obj.customer.username)
+                        username = str(username, 'utf-8')
+                        print('----- 解密b64decode 客户的username----->', username)
+                    except Exception as e:
+                        print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
+                        username = '客户ID%s' % (obj.customer_id)
+
 
                     ret_data.append({
                         'user_id': obj.user_id,
@@ -259,12 +268,15 @@ def action(request, oper_type):
                     action_count = obj['action__count']
                     customer_username = obj['customer__username']
                     headimgurl = obj['customer__headimgurl']
-                    print('----------base64.b64decode(customer_username) ID 是---------->>', customer_id)
 
-                    customer_name = base64.b64decode(customer_username)
-                    customer_name = str(customer_name, 'utf-8')
-                    print('-----b64decode username----->', customer_name)
+                    try:
+                        print('----- 解密b64decode 客户的username----->', customer_username)
+                        customer_name = base64.b64decode(customer_username)
+                        customer_name = str(customer_name, 'utf-8')
 
+                    except Exception as e:
+                        print('----- b64decode解密失败的 customer_id 是----->', customer_id)
+                        customer_name = '客户ID%s' % (customer_id)
 
                     insert_data = {
                         'customer_id': customer_id,
