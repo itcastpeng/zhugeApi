@@ -62,7 +62,7 @@ class UpdateForm(forms.Form):
 
     def clean_url(self):
         url = self.data.get('url')
-        if url.strip():
+        if not url.strip():
             self.add_error('url', '提交链接不能为空')
         else:
             return url
