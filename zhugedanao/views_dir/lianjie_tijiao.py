@@ -113,7 +113,7 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             # 删除 ID
-            objs = models.zhugedanao_userprofile.objects.filter(id=o_id)
+            objs = models.zhugedanao_lianjie_tijiao.objects.filter(id=o_id)
             if objs:
                 objs.delete()
                 response.code = 200
