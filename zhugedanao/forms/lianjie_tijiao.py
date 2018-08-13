@@ -47,42 +47,25 @@ class UpdateForm(forms.Form):
         }
     )
 
-    username = forms.CharField(
+    name = forms.CharField(
         required=True,
         error_messages={
-            'required': "用户名不能为空"
+            'required': "任务名称不能为空"
+        }
+    )
+    url = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "提交链接不能为空"
         }
     )
 
-    role_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "角色名称不能为空"
-        }
-    )
-
-    company_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "公司ID不能为空"
-        }
-    )
-
-    # 判断名称是否存在
-    def clean_username(self):
-        o_id = self.data['o_id']
-        username = self.data['username']
-        company_id = self.data['company_id']
-        objs = models.userprofile.objects.filter(
-            username=username,
-            company_id=company_id
-        ).exclude(
-            id=o_id
-        )
-        if objs:
-            self.add_error('username', '用户名已存在')
+    def clean_url(self):
+        url = self.data.get('url')
+        if url.strip():
+            self.add_error('url', '提交链接不能为空')
         else:
-            return username
+            return url
 
 
 # 判断是否是数字

@@ -94,11 +94,13 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 oper_user_id = forms_obj.cleaned_data.get('oper_user_id')
                 querysetlist = []
                 for url in url_list:
-                    querysetlist.append(models.zhugedanao_lianjie_tijiao(
-                        user_id=oper_user_id,
-                        name=name,
-                        url=url
-                    ))
+                    querysetlist.append(
+                        models.zhugedanao_lianjie_tijiao(
+                            user_id=oper_user_id,
+                            name=name,
+                            url=url
+                        )
+                    )
                 models.zhugedanao_lianjie_tijiao.objects.bulk_create(querysetlist)
                 response.code = 200
                 response.msg = "添加成功"
@@ -111,8 +113,7 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             # 删除 ID
-            company_id = request.GET.get('company_id')
-            objs = models.zhugedanao_userprofile.objects.filter(id=o_id, company_id=company_id)
+            objs = models.zhugedanao_userprofile.objects.filter(id=o_id)
             if objs:
                 objs.delete()
                 response.code = 200
@@ -124,9 +125,8 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
             # 获取需要修改的信息
             form_data = {
                 'o_id': o_id,
-                'username': request.POST.get('username'),
-                'role_id': request.POST.get('role_id'),
-                'company_id': request.GET.get('company_id')
+                'name': request.POST.get('name'),
+                'url': request.POST.get('url')
             }
 
             forms_obj = UpdateForm(form_data)
@@ -134,19 +134,17 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 print("验证通过")
                 print(forms_obj.cleaned_data)
                 o_id = forms_obj.cleaned_data['o_id']
-                username = forms_obj.cleaned_data['username']
-                role_id = forms_obj.cleaned_data['role_id']
-                company_id = forms_obj.cleaned_data['company_id']
+                name = forms_obj.cleaned_data['name']
+                url = forms_obj.cleaned_data['url']
                 #  查询数据库  用户id
-                objs = models.zhugedanao_userprofile.objects.filter(
-                    id=o_id
+                objs = models.zhugedanao_lianjie_tijiao.objects.filter(
+                    id=o_id,
                 )
                 #  更新 数据
                 if objs:
                     objs.update(
-                        username=username,
-                        role_id=role_id,
-                        company_id=company_id
+                        name=name,
+                        url=url
                     )
 
                     response.code = 200

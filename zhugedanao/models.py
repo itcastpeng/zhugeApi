@@ -103,8 +103,9 @@ class zhugedanao_lianjie_tijiao(models.Model):
     url = models.TextField(verbose_name="提交链接")
     count = models.SmallIntegerField(verbose_name="提交次数", default=0)
     status_choices = (
-        (1, "未收录"),
-        (2, "已收录"),
+        (1, "等待查询"),
+        (2, "未收录"),
+        (3, "已收录"),
     )
     status = models.SmallIntegerField(verbose_name="收录状态", choices=status_choices, default=1)
     get_task_date = models.DateTimeField(verbose_name='获取任务时间', null=True, blank=True)
