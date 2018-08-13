@@ -57,6 +57,7 @@ class zgld_xiaochengxu_app(models.Model):
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)    #-1代表未认证，0代表微信认证
     introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True)
+    ext_json = models.TextField(verbose_name="第三方自定义的配置", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
@@ -92,9 +93,9 @@ class zgld_xiapchengxu_audit(models.Model):
     audit_commit_date = models.DateTimeField(verbose_name='提交审核时间',null=True)
     audit_reply_date = models.DateTimeField(verbose_name="审核回复时间", null=True)
     audit_result_type = (
-        (1,'审核中'),
-        (2,'审核通过'),
-        (3,'审核失败')
+        (0,'审核成功'),
+        (1,'审核失败'),
+        (2,'审核中')
     )
     audit_result = models.SmallIntegerField(verbose_name='审核结果',null=True,choices=audit_result_type)
     reason = models.CharField(verbose_name='审核失败原因',max_length=1024,null=True)
@@ -114,8 +115,7 @@ class zgld_xiapchengxu_release(models.Model):
     release_reply_date = models.DateTimeField(verbose_name="发布回复时间", null=True)
     release_result_type = (
         (1,'上线通过'),
-        (2,'上线失败'),
-
+        (2,'上线失败')
     )
     release_result = models.SmallIntegerField(verbose_name='发布结果',null=True,choices=release_result_type)
     reason = models.CharField(verbose_name='上线失败原因',max_length=1024,null=True)
