@@ -79,7 +79,7 @@ def lianjie_tijiao_detail(request):
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
-                'name': '__contains',
+                # 'name': '__contains',
                 'url': '__contains',
                 'create_date': '',
                 'user_id': '',
@@ -146,10 +146,8 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 name = forms_obj.cleaned_data.get('name')
                 oper_user_id = forms_obj.cleaned_data.get('oper_user_id')
                 now_datetime = datetime.datetime.today().strftime('%Y-%m-%d %H-%M-%S')
-                models.zhugedanao_lianjie_task_list.objects.create(
+                objs_id = models.zhugedanao_lianjie_task_list.objects.create(
                     task_name = name,
-                    # task_status = 0,
-                    # task_progress = 0,
                     create_date = now_datetime
                 )
                 querysetlist = []
@@ -157,7 +155,7 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                     querysetlist.append(
                         models.zhugedanao_lianjie_tijiao(
                             user_id=oper_user_id,
-                            name=name,
+                            tid_id=objs_id.id,
                             url=url
                         )
                     )
