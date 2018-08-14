@@ -161,6 +161,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
                     'is_get_phone_code': request.POST.get('is_get_phone_code'),  # 是否获取手机验证码
                     'skip_link': forms_obj.cleaned_data['skip_link'],
+                    'leave_message': request.POST.get('leave_message')  # 留言
                 }
 
                 obj = models.zgld_plugin_report.objects.create(**dict_data)
@@ -202,6 +203,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 # 'leave_message': obj.leave_message,  # 留言
                 'introduce': request.POST.get('introduce'),  # 活动说明
                 'skip_link': request.POST.get('skip_link'),
+
             }
 
             forms_obj = ReportUpdateForm(report_data)
@@ -216,6 +218,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
                     'is_get_phone_code': request.POST.get('is_get_phone_code'),  # 是否获取手机验证码
                     'skip_link': forms_obj.cleaned_data['skip_link'],
+                    'leave_message': request.POST.get('leave_message')  # 留言
                 }
                 user_id = request.GET.get('user_id')
                 report_id = forms_obj.cleaned_data['id']
