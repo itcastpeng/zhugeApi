@@ -44,11 +44,14 @@ def lianjie_tijiao(request):
             ret_data = []
 
             for obj in objs:
+                zhuangtai = '未完成'
+                if obj.task_status:
+                    zhuangtai = '已完成'
                 #  将查询出来的数据 加入列表
                 ret_data.append({
                     'id': obj.id,
                     'task_name': obj.task_name,
-                    'task_status': obj.task_status,
+                    'task_status':zhuangtai,
                     'task_progress': obj.task_progress,
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                 })
