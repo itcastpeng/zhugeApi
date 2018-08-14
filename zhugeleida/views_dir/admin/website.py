@@ -28,6 +28,7 @@ def website(request):
         objs = models.zgld_company.objects.filter(q).order_by('-create_date')
         count = objs.count()
 
+
         # 获取所有数据
         ret_data = []
         # 获取第几页的数据
