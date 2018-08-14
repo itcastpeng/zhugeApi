@@ -32,7 +32,7 @@ def lianjie_tijiao(request):
             q = conditionCom(request, field_dict)
 
             print('q -->', q)
-            objs = models.zhugedanao_lianjie_task_list.objects.select_related('user',).filter(q).order_by(order)
+            objs = models.zhugedanao_lianjie_task_list.objects.filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
