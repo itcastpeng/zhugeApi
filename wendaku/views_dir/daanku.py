@@ -109,13 +109,14 @@ def daanku(request):
 
 #  增删改
 @csrf_exempt
-@account.is_token(models.UserProfile)
+# @account.is_token(models.UserProfile)
 def daanku_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == "add":
             print('开始入库')
             data = request.POST.get('data')
+            print('data -------- >',data)
             role_data = {
                 # # 审核人
                 'oper_user_id':request.GET.get('user_id'),
@@ -130,14 +131,17 @@ def daanku_oper(request, oper_type, o_id):
             }
             forms_obj = DaankuAddForm(role_data)
             if forms_obj.is_valid():
+            # if role_data['content']:
                 # data_list = request.POST.get('data_list')
                 # for data in data_list:
-
+                # print(role_data['content'])
                 # print('forms_obj.forms_obj -->',forms_obj.cleaned_data)
-                models.DaAnKu.objects.create(**forms_obj.cleaned_data)
+                # models.DaAnKu.objects.create(**forms_obj.cleaned_data)
+                print('添加成功')
                 response.code = 200
                 response.msg = "添加成功"
             else:
+                print('添加失败')
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 

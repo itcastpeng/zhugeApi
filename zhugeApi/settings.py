@@ -158,6 +158,7 @@ DATABASES = {
             'USER': 'zhugeproject',
             'PASSWORD': 'zhugeproject'
         }
+
 }
 
 DATABASE_ROUTERS = ['wendaku.database_router.DatabaseAppsRouter']

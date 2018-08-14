@@ -11,10 +11,12 @@ import random
 
 class Zhidao:
     # 初始化文件
-    def __init__(self, line,params):
+    def __init__(self, line,params,o_id):
         self.params = params
+        self.o_id=o_id
         self.line = line
         self.dr = webdriver.Chrome('./plugin/chromedriver_2.36.exe')
+        sleep(self.rand)
         self.dr.maximize_window()  # 全屏
         self.url = 'https://zhidao.baidu.com'
         self.data_list = []
@@ -22,7 +24,7 @@ class Zhidao:
     # 随机数
     @property
     def rand(self):
-        return random.randint(2, 7)
+        return random.randint(2, 5)
 
     # 获取页面数据并判断
     # 获取输入框 输入内容
@@ -34,15 +36,16 @@ class Zhidao:
         self.unit()
         # 调用get_save 返回本网页所有需要链接
         data_list = self.get_save()
+        self.get_status(self.o_id,self.params)
         # 调用get_url_data 获取所有答案 并判断最长的
         temps = self.get_url_data(data_list)
         self.get_data(temps)
 
     # 获取url 返回所有url链接
     def get_save(self):
-        sleep(self.rand)
         data_list = self.data_list
         # 获取页面数据
+        sleep(self.rand)
         all_tags = self.dr.find_element_by_class_name('list-inner')
         # 获取a标签
         a_tags = all_tags.find_elements_by_class_name('ti')
@@ -50,7 +53,8 @@ class Zhidao:
             # 获取 a标签的 url
             url = a_tag.get_attribute('href')
             print('url_all -- >',url)
-            data_list.append(url)
+            if url:
+                data_list.append(url)
         # 循环下一页 取出所有url
         while True:
             # sleep(self.rand)
@@ -66,16 +70,15 @@ class Zhidao:
     # 请求获取到的url返回答案
     def get_url_data(self, data_list):
         # print('获取答案')
-        temps = []
         for url in data_list:
-            self.dr.get(url)
-            # 总页面
-            soup = BeautifulSoup(self.dr.page_source, 'lxml')
-            # 所有答案页面
-            article_tag = soup.find('article', class_='qb-content')
-            # 获取答案div 两个
-            # sleep(self.rand)
             try:
+                self.dr.get(url)
+                # 总页面
+                soup = BeautifulSoup(self.dr.page_source, 'lxml')
+                # 所有答案页面
+                article_tag = soup.find('article', class_='qb-content')
+                # 获取答案div 两个
+                # sleep(self.rand)
                 div_tags = article_tag.find_all('div', class_='line content')
                 for div in div_tags:
                     span = div.find_all('span', class_='con')
@@ -99,28 +102,32 @@ class Zhidao:
                             if len(text_data) > 30:
                                 self.get_data(text_data)
                                 # temps.append(text_data)
-
+                    else:
+                        continue
             except Exception as e:
                 print(e)
         # return temps
 
+    # 请求api 修改状态
+    def get_status(self,o_id, params):
+        pass
+
+        # url = 'http://127.0.0.1:8000/wendaku/guanjianci/update_status/{}'.format(o_id)
+        url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/update_status/{}'.format(o_id)
+        requests.post(url, params=params)
 
     # 获取答案 并返回api
     def get_data(self, text_data):
+        if text_data:
             data = {
                 'data': text_data
             }
-            # url = 'http://127.0.0.1:8000/wendaku/daanku/add/0'
+            # url = 'http://192.168.10.243:8003/wendaku/daanku/add/0'
             url = 'http://api.zhugeyingxiao.com/wendaku/daanku/add/0'
             ret = requests.post(url, params=self.params, data=data)
             print('data --->',data )
 
-    # 密码加密 请求参数
-    def str_encrypt(self, pwd):
-        pwd = str(pwd)
-        hash = hashlib.md5()
-        hash.update(pwd.encode())
-        return hash.hexdigest()
+
 
     # 定位窗口句柄
     def unit(self):
@@ -145,13 +152,14 @@ class Zhidao:
         self.dr.get(self.url)
         self.data_url()
     # self.dr.implicitly_wait(10)  # 隐式等待30秒
+# 密码加密 请求参数
+def str_encrypt(pwd):
+    pwd = str(pwd)
+    hash = hashlib.md5()
+    hash.update(pwd.encode())
+    return hash.hexdigest()
 
 
-# 请求api 修改状态
-def get_status(o_id, params):
-    # url = 'http://127.0.0.1:8000/wendaku/guanjianci/update_status/{}'.format(o_id)
-    url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/update_status/{}'.format(o_id)
-    requests.post(url, params=params)
 # vps 签到
 def vpsServerQiandao():
     print("开始签到")
@@ -178,12 +186,11 @@ if __name__ == '__main__':
             'rand_str': str_encrypt(timestamp + token)
         }
         # 请求api获取 关键词
-        # url = 'http://127.0.0.1:8000/wendaku/guanjianci/get_once/0'
+        # url = 'http://192.168.10.243:8003/wendaku/guanjianci/get_once/0'
         url = 'http://api.zhugeyingxiao.com/wendaku/guanjianci/get_once/0'
         # 发送带有id参数的请求
         sleep(2)
         ret = requests.get(url, params=params)
-        # print(ret.text)
         ret_json = ret.json()
         # 请求后的参数需要json转换
         print('ret_json -- >',ret_json)
@@ -192,10 +199,13 @@ if __name__ == '__main__':
             if response_code == 200:
                 content = ret_json['data']['content']
                 o_id = ret_json['data']['o_id']
-                zhidao = Zhidao(content,params)
+                # o_id = 1
+                # content = '男科哪家好'
+                zhidao = Zhidao(content,params,o_id)
                 zhidao.run()
                 # 返回api 更改状态
-                get_status(o_id, params)
-        else:
-            break
+                # get_status(o_id, params)
+        # else:
+        #     break
+
 

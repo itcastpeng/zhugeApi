@@ -122,6 +122,8 @@ class DaAnKu(models.Model):
 class DaAnKuTemp(models.Model):
 
     content = models.TextField(verbose_name="答案")
+    class Meta:
+        app_label = "wendaku"
 
 
 # 问题表
