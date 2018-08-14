@@ -4,14 +4,21 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm
+from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm,LoginBindingForm
+
 import time
 import datetime
-import json
+
 import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
+from zhugeapi_celery_project import tasks
+from zhugeleida.public.common import action_record
+import base64
+import json
 
+from collections import OrderedDict
+import logging.handlers
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -40,13 +47,13 @@ def login(request):
 
     if request.method == "GET":
         print('request.GET -->', request.GET)
-
+        customer_id = request.GET.get('user_id')
         forms_obj = SmallProgramAddForm(request.GET)
+
         if forms_obj.is_valid():
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
-            source = forms_obj.cleaned_data.get('source')
 
             get_token_data = {
                 'appid': Conf['appid'],
@@ -63,7 +70,6 @@ def login(request):
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
                 user_type=user_type,
-
             )
             # 如果openid存在一条数据
             if customer_objs:
@@ -72,13 +78,15 @@ def login(request):
 
             else:
                 token = account.get_token(account.str_encrypt(openid))
-
                 obj = models.zgld_customer.objects.create(
                     token=token,
                     openid=openid,
-                    user_type=user_type,
-                    source=source,
+                    user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    # superior=customer_id,  #上级人。
                 )
+
+                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
                 print('---------- crete successful ---->')
 
@@ -99,3 +107,154 @@ def login(request):
         response.msg = "请求方式异常"
 
     return  JsonResponse(response.__dict__)
+
+@csrf_exempt
+@account.is_token(models.zgld_customer)
+def login_oper(request,oper_type):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        if oper_type == 'binding':
+            print('request.GET -->', request.GET)
+
+            forms_obj = LoginBindingForm(request.GET)
+            if forms_obj.is_valid():
+
+                # user_type = forms_obj.cleaned_data.get('user_type')
+                source = forms_obj.cleaned_data.get('source')   #1,代表扫码,2 代表转发
+                user_id = forms_obj.cleaned_data.get('uid') # 所属的企业用户的ID
+                customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
+                parent_id = request.GET.get('pid','')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+
+                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+
+                if user_customer_belonger_obj:
+                    response.code = 302
+                    response.msg = "关系存在"
+
+                else:
+
+                    obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
+                    obj.customer_parent_id = parent_id    #上级人。
+                    obj.save()
+                    #插入第一条用户和客户的对话信息
+                    msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
+                    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)
+
+                    print('---------- 插入第一条用户和客户的对话信息 successful ---->')
+
+                    # 异步生成小程序和企业用户对应的小程序二维码
+                    data_dict = {'user_id': user_id,'customer_id': customer_id}
+                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+
+                    response.code = 200
+                    response.msg = "绑定关系成功"
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+    else:
+        if oper_type == 'send_user_info':
+            # 前端把小程序授权的用户信息入库。
+            customer_id = request.GET.get('user_id')
+            headimgurl = request.POST.get('avatarUrl')
+            city = request.POST.get('city')
+            country = request.POST.get('country')
+            province = request.POST.get('province')
+
+            gender = request.POST.get('gender')  #1代表男
+            language = request.POST.get('language')
+            username =  request.POST.get('nickName')
+            # formid =  request.POST.get('formId')
+            page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
+
+
+            LOG_FILE = r'test.log'
+            handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
+            fmt = '%(asctime)s - %(levelname)s - %(message)s'
+
+            formatter = logging.Formatter(fmt)  # 实例化formatter
+            handler.setFormatter(formatter)  # 为handler添加formatter
+
+            logger = logging.getLogger('test')  # 获取名为tst的logger
+            logger.addHandler(handler)  # 为logger添加handler
+
+            # logger.debug(log_info)
+
+            encodestr = base64.b64encode(username.encode('utf-8'))
+            customer_name = str(encodestr, 'utf-8')
+
+            logger.setLevel(logging.DEBUG)
+            log_info = "request.GET==> %s | b64encode:%s |request.POST==> %s" % (request.GET,customer_name,request.POST)
+            logger.info(log_info)
+
+            objs = models.zgld_customer.objects.filter(
+                id = customer_id,
+            )
+            if objs:
+                objs.update( username = customer_name,
+                             headimgurl=headimgurl,
+                             # formid = formid,
+                             city =city,
+                             country=country,
+                             province = province,
+                             language = language,
+                )
+
+                models.zgld_information.objects.create(sex=gender,customer_id=objs[0].id)
+
+                # (1, '查看名片详情'),
+                # (2, '查看产品列表'),
+                # (3, '查看产品详情'),
+                # (4, '查看官网'),
+                username = base64.b64decode(objs[0].username)
+                username = str(username, 'utf-8')
+
+                remark = ''
+                if page_info == 1:
+                   remark = '已向您授权访问【名片详情】页面'
+
+                elif page_info == 2:
+                   remark = '已向您授权访问【产品列表】页面'
+
+                elif page_info == 3:
+                   remark = '已向您授权访问【产品详情】页面'
+                elif page_info == 4:
+                   remark = '已向您授权访问【公司官网】页面'
+
+                data = request.GET.copy()
+                data['action'] = 13   # 代表用客户授权访问
+                response = action_record(data, remark)
+
+                response.data = { 'ret_data' : username + ' 已向您授权登录页面' }
+                response.code = 200
+                response.msg = "保存成功"
+            else:
+                response.code = 301
+                response.msg = "用户不存在"
+
+
+        elif oper_type == 'send_form_id':
+            formid = request.POST.get('formId')
+            customer_id = request.GET.get('user_id')
+
+            objs = models.zgld_customer.objects.filter(
+                id=customer_id,
+            )
+
+            if objs and formid:
+
+                exist_formid_json = json.loads(objs[0].formid, object_pairs_hook=OrderedDict)
+                exist_formid_json.append(formid)
+                now_form_id_json = json.dumps(exist_formid_json)
+
+                print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>',now_form_id_json)
+                objs.update(formid=now_form_id_json)
+
+                response.code = 200
+                response.msg = "保存成功"
+
+
+    return JsonResponse(response.__dict__)

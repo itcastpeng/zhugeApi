@@ -58,12 +58,6 @@ class Customer_UpdateExpectedTime_Form(forms.Form):
             return user_id
 
 class Customer_UpdateExpedtedPr_Form(forms.Form):
-    user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'invalid': "用户ID不能为空",
-        }
-    )
 
     customer_id = forms.IntegerField(
         required=True,
@@ -95,7 +89,7 @@ class Customer_UpdateExpedtedPr_Form(forms.Form):
             id=user_id,
         )
         if not objs:
-            self.add_error('username', '用户名不存在')
+            self.add_error('user_id', '用户名不存在')
         else:
             return user_id
 
@@ -107,29 +101,35 @@ class Customer_information_UpdateForm(forms.Form):
             'required': "客户ID不能为空"
         }
     )
+
     email = forms.EmailField(
         required=False,
         error_messages=
             {'required': u'邮箱不能为空'}
     )
-
+    sex = forms.IntegerField(
+        required=True,
+        error_messages= {
+            'required': "性别不能为空"
+        }
+    )
     phone = forms.CharField(
         required=False,
         validators=[mobile_validate, ],        # 应用咱们自己定义的规则
     )
 
     memo_name = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
             'required': "备注名不能为空"
         }
     )
 
-    source = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '客户来源不能为空'
-        })
+    # source = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': '客户来源不能为空'
+    #     })
 
     company = forms.CharField(
         required=False,
@@ -145,7 +145,7 @@ class Customer_information_UpdateForm(forms.Form):
         required=False,
     )
     mem = forms.CharField(
-        widget=forms.Textarea
+        required=False,
     )
 
 
@@ -162,6 +162,14 @@ class Customer_information_UpdateForm(forms.Form):
 
 #
 class CustomerSelectForm(forms.Form):
+    customer_id = forms.CharField(
+        required = True,
+        error_messages={
+            'required': "备注名不能为空"
+        }
+    )
+
+
     current_page = forms.IntegerField(
         required=False,
         error_messages={
@@ -188,3 +196,4 @@ class CustomerSelectForm(forms.Form):
         else:
             length = int(self.data['length'])
         return length
+

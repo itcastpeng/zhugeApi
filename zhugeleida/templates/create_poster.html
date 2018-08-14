@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Test</title>
+<style type="text/css">
+    *{
+        margin:0 auto;
+        padding:0;
+    }
+    .btn{
+        width:100px;
+        height:30px;
+        line-height:30px;
+        background:green;
+        color:#fff;
+        border-radius:10px;
+        -webkit-border-radius:10px;
+        text-align:center;
+        display:block;
+        text-decoration:none;
+    }
+    .container{
+        background:#fff;
+        width:604px;
+        height:851px;
+        overflow: hidden;
+    }
+    #jietu{
+        width:604px;
+        height:851px;
+    }
+    .tu{
+        width:480px;
+        height:482px;
+        margin:0 auto;
+    }
+    .tu img{
+        width:480px;
+        height: 482px;
+        margin-top:30px;
+    }
+    .xinxi{
+        width:480px;
+        height: 232px;
+        margin: 0 auto;
+        margin-top: 73px;
+        overflow: hidden;
+    }
+    .xinxi1{
+        width:222px;
+        float: left;
+        height: 212px;
+    }
+    .xinxi1 h2{
+        font-size: 32px;
+        font-weight: 500;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        letter-spacing: 2px;
+    }
+    .xinxi1 span{
+        font-size: 26px;
+        line-height: 40px;
+        letter-spacing: 1px;
+    }
+    .gongsi{
+        width:100%;
+        overflow: hidden;
+        text-align: center;
+        font-size: 24px;
+        color: #000;
+        line-height: 30px;
+        letter-spacing: 1px;
+    }
+    .xcxt{
+        width:180px;
+        margin-left: 77px;
+        height: 212px;
+        float: left;
+    }
+    .xcxt img{
+        width:150px;
+        height: 150px;
+        float: left;
+        margin-left: 10px;
+    }
+    .wenzi{
+        width:180px;
+        font-size: 18px;
+        line-height: 40px;
+        margin-top: 60px;
+        overflow: hidden;
+        letter-spacing: 2px;
+    }
+</style>
+</head>
+
+<body style="background: #000; height: 1000px">
+    <div class="container" id="container">
+        <div id="jietu">
+            <div class="tu"><img src="{{ ret_data.user_avatar }}"></div>
+            <div class="xinxi">
+                <div class="xinxi1">
+                    <h2>{{ ret_data.username }}</h2>
+                    <span>{{ ret_data.position }}</span><br>
+                    <span>{{ ret_data.mingpian_phone }}</span>
+                </div>
+                <div class="xcxt"><img src="{{ ret_data.qr_code_url }}"><div class="wenzi">微信扫码或长按识别</div></div>
+            </div>
+            <div class="gongsi">{{ ret_data.company }}</div>
+        </div>
+    </div>
+</body>
+
+</html>

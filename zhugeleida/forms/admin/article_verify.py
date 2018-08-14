@@ -1,0 +1,160 @@
+from django import forms
+
+from zhugeleida import models
+from publicFunc import account
+import datetime
+
+
+# 添加公司信息
+class ArticleAddForm(forms.Form):
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '用户ID不存在'
+        }
+    )
+
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章标题不能为空"
+        }
+    )
+
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章摘要不能为空"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章封面不能为空"
+        }
+    )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
+
+    # 查询用户名判断是否存在
+    def clean_title(self):
+        title = self.data['title']
+        user_id = self.data['user_id']
+        print('----user_id ---title---->',user_id,title)
+        objs = models.zgld_article.objects.filter(
+            title=title,user_id=user_id
+        )
+        if objs:
+            self.add_error('title', '文章名已存在')
+        else:
+            return title
+
+
+# 更新用户信息
+class ArticleUpdateForm(forms.Form):
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '用户ID不存在'
+        }
+    )
+
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章标题不能为空"
+        }
+    )
+
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章摘要不能为空"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章封面不能为空"
+        }
+    )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
+    def clean_article_id(self):
+        article_id = self.data['article_id']
+
+        objs = models.zgld_article.objects.filter(
+            id=article_id
+        )
+
+        if not objs:
+            self.add_error('article_id', '文章不存在')
+        else:
+            return article_id
+
+    # 判断公司名称是否存在
+    def clean_title(self):
+        article_id = self.data['article_id']
+        user_id = self.data['user_id']
+        title = self.data['title']
+        objs = models.zgld_article.objects.filter(
+            title=title,user_id=user_id
+        ).exclude(id=article_id)
+
+        if objs:
+            self.add_error('title', '文章标题不能相同')
+        else:
+            return title
+
+
+# 判断是否是数字
+class ArticleSelectForm(forms.Form):
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        }
+    )
+
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 10
+        else:
+            length = int(self.data['length'])
+        return length
