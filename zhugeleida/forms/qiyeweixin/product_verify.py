@@ -34,12 +34,12 @@ class ProductAddForm(forms.Form):
     )
 
 
-    content = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "封面内容不能为空"
-        }
-    )
+    # content = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "封面内容不能为空"
+    #     }
+    # )
 
     # 判断企业产品是否存在
     def clean_name(self):
@@ -93,12 +93,12 @@ class ProductUpdateForm(forms.Form):
         required=False,
 
     )
-    content = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "封面内容不能为空"
-        }
-    )
+    # content = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "封面内容不能为空"
+    #     }
+    # )
 
     # 判断企业产品名称是否存在
     def clean_name(self):
