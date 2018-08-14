@@ -68,9 +68,9 @@ def website_oper(request, oper_type,o_id):
 
             if forms_obj.is_valid():
                 company_id  =  forms_obj.cleaned_data.get('company_id')
-
+                website_content = forms_obj.cleaned_data.get('website_content')
                 obj = models.zgld_company.objects.get(id=company_id)
-                obj.website_content = request.POST.get('website_content')
+                obj.website_content = website_content
                 obj.save()
                 response.code = 200
                 response.msg = "保存成功"
