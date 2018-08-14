@@ -14,7 +14,7 @@ import hashlib
 import time
 import struct
 # from Crypto.Cipher import AES
-from Crypto.Cipher import AES
+# from Crypto.Cipher import AES
 
 import xml.etree.cElementTree as ET
 import sys
