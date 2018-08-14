@@ -12,8 +12,6 @@ import xml.etree.cElementTree as ET
 from django import forms
 
 
-
-
 @csrf_exempt
 def open_weixin(request, oper_type):
     if request.method == "POST":
@@ -88,8 +86,7 @@ def open_weixin(request, oper_type):
 
             except Exception as e:
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
-                authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text       # authorizer_appid 授权方de  appid
-
+                authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
 
                 app_id = 'wx67e2fde0f694111c'
                 if auth_code:
@@ -115,7 +112,8 @@ def open_weixin(request, oper_type):
                 access_token_ret = requests.post(access_token_url, params=get_access_token_data,
                                                  data=json.dumps(post_access_token_data))
                 access_token_ret = access_token_ret.json()
-                print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',access_token_ret)
+                print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',
+                      access_token_ret)
                 authorizer_access_token = access_token_ret['authorization_info'].get('authorizer_access_token')
                 authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
                 authorizer_appid = access_token_ret['authorization_info'].get('authorizer_appid')
@@ -132,19 +130,22 @@ def open_weixin(request, oper_type):
                     post_wx_info_data['authorizer_appid'] = authorizer_appid
                     get_wx_info_data['component_access_token'] = component_access_token
                     url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
+                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,
+                                                        data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->', json.dumps(authorizer_info_ret.json()))
+                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->',
+                          json.dumps(authorizer_info_ret.json()))
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                    verify_type_info = True  if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
+                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
+                                                   'id'] == 0 else False
                     # ---->预留代码
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
-                    qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')    # 二维码
-                    head_img = authorizer_info_ret['authorizer_info'].get('head_img')        # 头像
-                    nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')        # 头像
-                    categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')        # 头像
+                    qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
+                    head_img = authorizer_info_ret['authorizer_info'].get('head_img')  # 头像
+                    nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')  # 头像
+                    categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 头像
                     if len(categories) != 0:
                         categories = json.dumps(categories)
                     else:
@@ -153,20 +154,50 @@ def open_weixin(request, oper_type):
                         obj = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
                         if obj:
                             obj.update(
-                                authorization_appid=authorization_appid, #授权方appid
-                                authorizer_refresh_token=authorizer_refresh_token, # 刷新的 令牌
-                                original_id=original_id,            # 小程序的原始ID
+                                authorization_appid=authorization_appid,  # 授权方appid
+                                authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
+                                original_id=original_id,  # 小程序的原始ID
                                 verify_type_info=verify_type_info,  # 是否 微信认证
 
-                                principal_name=principal_name,      # 主体名称
-                                qrcode_url = qrcode_url,            # 二维码
-                                head_img=head_img,                  # 头像
-                                name=nick_name,                     # 昵称
-                                service_category= categories,        # 服务类目
+                                principal_name=principal_name,  # 主体名称
+                                qrcode_url=qrcode_url,  # 二维码
+                                head_img=head_img,  # 头像
+                                name=nick_name,  # 昵称
+                                service_category=categories,  # 服务类目
                             )
-
+                        print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
+
+                        get_domin_data = {
+                            'access_token': authorizer_access_token
+                        }
+                        post_domain_data = {
+                            "action": "add",
+                            "requestdomain": ["https://api.zhugeyingxiao.com"],
+                            "wsrequestdomain": ["wss://api.zhugeyingxiao.com"],
+                            "uploaddomain": ["https://api.zhugeyingxiao.com"],
+                            "downloaddomain": ["https://api.zhugeyingxiao.com"],
+
+                        }
+                        post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
+                        domain_data_ret = requests.post(post_domain_url, params=get_domin_data,
+                                                        data=json.dumps(post_domain_data))
+                        domain_data_ret = domain_data_ret.json()
+                        errcode = domain_data_ret.get('errcode')
+                        errmsg = domain_data_ret.get('errmsg')
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "修改小程序服务器域名成功"
+                            print('---------授权appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid))
+
+
+
                     else:
                         response.code = 400
                         response.msg = "获取帐号基本信息 authorizer_info信息为空"
@@ -179,14 +210,13 @@ def open_weixin(request, oper_type):
                     response.msg = "令牌 authorizer_access_token 为空"
                     return JsonResponse(response.__dict__)
 
-
             return HttpResponse("success")
 
 
         elif oper_type == "create_grant_url":
             user_id = request.GET.get('user_id')
             request.session['user_id'] = user_id
-            print('----request.session userId--->',request.session.get('user_id'))
+            print('----request.session userId--->', request.session.get('user_id'))
 
             app_id = 'wx67e2fde0f694111c'
             app_secret = '4a9690b43178a1287b2ef845158555ed'
@@ -200,11 +230,8 @@ def open_weixin(request, oper_type):
 
             post_component_data['component_appid'] = app_id
             post_component_data['component_appsecret'] = app_secret
-
             component_verify_ticket = rc.get('ComponentVerifyTicket')
-
             post_component_data['component_verify_ticket'] = component_verify_ticket
-
             token_ret = rc.get('component_access_token')
 
             print('--- Redis 里存储的 component_access_token---->>', token_ret)
@@ -248,7 +275,7 @@ def open_weixin(request, oper_type):
             # 生成授权链接
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (
-                                    app_id, pre_auth_code, redirect_uri,)
+                app_id, pre_auth_code, redirect_uri,)
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
             response.code = 200
             response.msg = '生成【授权链接】成功'
@@ -256,20 +283,21 @@ def open_weixin(request, oper_type):
 
         return JsonResponse(response.__dict__)
 
+
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def xcx_auth_process(request):
     response = Response.ResponseObj()
-    if  request.method == "GET":
+    if request.method == "GET":
 
-        user_id =request.GET.get('user_id')
+        user_id = request.GET.get('user_id')
         obj = models.zgld_xiaochengxu_app.objects.filter(user_id=user_id)
 
         if not obj:
             response.code = 200
             response.msg = "请求成功。请先填写步骤1 app_id信息"
             response.data = {
-                'step' : 1
+                'step': 1
             }
 
         else:
@@ -280,8 +308,7 @@ def xcx_auth_process(request):
             principal_name = obj[0].principal_name
             head_img = obj[0].head_img
 
-
-            if not authorization_appid:              # 没有原始ID，首先填写原始ID和用户\公司关联信息
+            if not authorization_appid:  # 没有原始ID，首先填写原始ID和用户\公司关联信息
                 response.code = 200
                 response.msg = "请求成功。请先进行步骤1"
                 response.data = {
@@ -289,14 +316,13 @@ def xcx_auth_process(request):
                 }
 
 
-            elif not  authorizer_refresh_token:  #没有通过授权
-
+            elif not authorizer_refresh_token:  # 没有通过授权
 
                 response.code = 200
                 response.msg = "请求成功.请先进行步骤2"
                 response.data = {
                     'step': 2,
-                    'ret_data' : {
+                    'ret_data': {
                         'authorization_appid': authorization_appid,
 
                     }
@@ -311,42 +337,66 @@ def xcx_auth_process(request):
                         'authorization_appid': authorization_appid
                     }
                 }
-            elif  authorizer_refresh_token and  name:  #授权通过以及填写信息完毕展示授权完整信息。
+            elif authorizer_refresh_token and name:  # 授权通过以及填写信息完毕展示授权完整信息。
 
-                response.code = 200
-                response.msg = "请求成功"
+                release_obj = models.zgld_xiapchengxu_release.objects.filter(app_id=obj[0].id).order_by('-release_commit_date')
+                version_num = ''
+                release_time = ''
+                if release_obj:
+                    release_result = release_obj[0].release_result
+                    if release_result == 1:  # 上线成功
+                        version_num = release_obj[0].audit_code.version_num
+                        release_time = release_obj[0].release_commit_date
+
+                upload_audit_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj[0].id, audit_result=2,
+                                                                                       auditid__isnull=False).order_by(
+                    '-audit_commit_date')  #在审核中并且auditid 不能为空。
+                stay_version_num = ''
+                stay_audit_time = ''
+                if upload_audit_obj:
+                    stay_version_num = upload_audit_obj[0].audit_code.version_num
+                    stay_audit_time = upload_audit_obj[0].audit_commit_date
+
                 response.data = {
-                    'step':'',
+                    'step': '',
                     'ret_data': {
-                        'authorization_appid': authorization_appid,  #小程序原始唯一ID
-                        'name': name,    #小程序名称
-                        'principal_name':   principal_name,   #小程序主体名称
-                        'head_img': head_img,                 #授权方头像
-                        'verify_type_info': verify_type_info,  #微信认证是否通过. True 为认证通过，Falsew为认证通过
+                        'authorization_appid': authorization_appid,  # 授权方appid
+                        'name': name,  # 小程序名称
+                        'principal_name': principal_name,  # 小程序主体名称
+                        'head_img': head_img,  # 授权方头像
+                        'verify_type_info': verify_type_info,  # 微信认证是否通过. True 为认证通过，Falsew为认证通过
+                        'version_num': version_num,  #上线版本号
+                        'release_time': release_time,   # 上线时间
+                        'stay_version_num': stay_version_num,  #代上线-版本号
+                        'stay_audit_time': stay_audit_time,    #代上线-审核时间
 
                     }
                 }
+                response.code = 200
+                response.msg = "请求成功"
 
         return JsonResponse(response.__dict__)
 
 
-    elif  request.method == "POST":
+    elif request.method == "POST":
         pass
 
     return JsonResponse(response.__dict__)
 
+
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def xcx_auth_process_oper(request,oper_type):
+def xcx_auth_process_oper(request, oper_type):
     response = Response.ResponseObj()
 
-    if  request.method == "POST":
+    if request.method == "POST":
 
         if oper_type == 'app_id':  # 修改更新 original_id
 
             forms_obj = UpdateIDForm(request.POST)
             if forms_obj.is_valid():
-                authorization_appid = request.POST.get('authorization_appid')
+                authorization_appid = request.POST.get('authorization_appid').strip()
+                authorization_secret = request.POST.get('authorization_secret').strip()
                 print("验证通过")
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
@@ -355,6 +405,7 @@ def xcx_auth_process_oper(request,oper_type):
                 if objs:
                     objs.update(
                         authorization_appid=authorization_appid,
+                        authorization_secret=authorization_secret,
                         company_id=company_id
                     )
                 else:
@@ -362,6 +413,7 @@ def xcx_auth_process_oper(request,oper_type):
                         user_id=user_id,
                         company_id=company_id,
                         authorization_appid=authorization_appid,
+                        authorization_secret=authorization_secret,
                     )
                 response.code = 200
                 response.msg = "修改成功"
@@ -396,9 +448,7 @@ def xcx_auth_process_oper(request,oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
         return JsonResponse(response.__dict__)
-
 
 
 # 添加企业的产品
@@ -409,6 +459,7 @@ class UpdateIDForm(forms.Form):
             'required': "authorization_appid 不能为空"
         }
     )
+
 
 class UpdateInfoForm(forms.Form):
     name = forms.CharField(
@@ -437,4 +488,3 @@ class UpdateInfoForm(forms.Form):
             'required': "服务类目不能为空"
         }
     )
-

@@ -33,7 +33,7 @@ def create_user_or_customer_small_program_qr_code(data):
 
     requests.get(url, params=get_data)
 
-# 企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
+# 发送模板消息。
 @app.task
 def user_send_template_msg_to_customer(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_template_msg'

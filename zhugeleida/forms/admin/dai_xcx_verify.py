@@ -3,7 +3,7 @@ from zhugeleida import models
 
 
 class CommitCodeInfoForm(forms.Form):
-    app_id = forms.CharField(
+    app_ids_list = forms.CharField(
         required=True,
         error_messages={
             'required': "小程序app id不能为空"
@@ -16,20 +16,20 @@ class CommitCodeInfoForm(forms.Form):
             'required': "代码模版ID不能为空"
         }
     )
-
-    ext_json = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "自定义的配置不能为空"
-        }
-    )
+    #
+    # ext_json = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "自定义的配置不能为空"
+    #     }
+    # )
     user_version = forms.CharField(
         required=True,
         error_messages={
             'required': "代码版本号不能为空"
         }
     )
-
+    #
     user_desc = forms.CharField(
         required=True,
         error_messages={
@@ -37,17 +37,17 @@ class CommitCodeInfoForm(forms.Form):
         }
     )
 
-    def clean_app_id(self):
-        app_id = self.data['app_id']
-        obj = models.zgld_xiaochengxu_app.objects.filter(id=app_id)
-        if not obj:
-            self.add_error('app_id', '小程序id不存在')
-        else:
-            authorizer_refresh_token = obj[0].authorizer_refresh_token
-            if not authorizer_refresh_token:
-                self.add_error('app_id', '小程序刷新令牌authorizer_refresh_token不存在')
-            else:
-                return app_id
+    # def clean_app_id(self):
+    #     app_id = self.data['app_id']
+    #     obj = models.zgld_xiaochengxu_app.objects.filter(id=app_id)
+    #     if not obj:
+    #         self.add_error('app_id', '小程序id不存在')
+    #     else:
+    #         authorizer_refresh_token = obj[0].authorizer_refresh_token
+    #         if not authorizer_refresh_token:
+    #             self.add_error('app_id', '小程序刷新令牌authorizer_refresh_token不存在')
+    #         else:
+    #             return app_id
 
 
 class GetqrCodeForm(forms.Form):

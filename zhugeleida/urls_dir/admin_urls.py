@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
-    plugin_report, plugin_goods, open_weixin,dai_xcx
+    plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app
 
 urlpatterns = [
     url(r'^login$', login.login),
@@ -30,6 +30,9 @@ urlpatterns = [
     url(r'^xcx_auth_process/update/(?P<oper_type>\w+)$', open_weixin.xcx_auth_process_oper),
     url(r'^xcx_auth_process$', open_weixin.xcx_auth_process),
 
+    # 小程序-批量上线
+    url(r'^xcx_app$', xcx_app.xcx_app),
+
     # 代写小程序发布
     url(r'^dai_xcx/(?P<oper_type>\w+)$', dai_xcx.dai_xcx_oper),
 
@@ -44,6 +47,7 @@ urlpatterns = [
     # 公司操作
     url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)', company.company_oper),
     url(r'^company$', company.company),
+
     # 验证雷达，通讯录
     url(r'^company/(?P<oper_type>\w+)', company.author_status),
 
