@@ -24,15 +24,15 @@ def lianjie_tijiao(request):
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
-                'name': '__contains',
-                'url': '__contains',
-                'create_date': '',
-                'user_id': ''
+                'task_name': '',
+                'task_status': '',
+                'task_progress': '',
+                'create_date': ''
             }
             q = conditionCom(request, field_dict)
 
             print('q -->', q)
-            objs = models.zhugedanao_lianjie_tijiao.objects.select_related('user',).filter(q).order_by(order)
+            objs = models.zhugedanao_lianjie_task_list.objects.select_related('user',).filter(q).order_by(order)
             count = objs.count()
 
             if length != 0:
@@ -47,7 +47,60 @@ def lianjie_tijiao(request):
                 #  将查询出来的数据 加入列表
                 ret_data.append({
                     'id': obj.id,
-                    'name': obj.name,
+                    'task_name': obj.task_name,
+                    'task_status': obj.task_status,
+                    'task_progress': obj.task_progress,
+                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                })
+            #  查询成功 返回200 状态码
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+            }
+        else:
+            response.code = 402
+            response.msg = "请求异常"
+            response.data = json.loads(forms_obj.errors.as_json())
+    return JsonResponse(response.__dict__)
+
+
+@csrf_exempt
+@account.is_token(models.zhugedanao_userprofile)
+def lianjie_tijiao_detail(request):
+    response = Response.ResponseObj()
+    if request.method == "GET":
+        forms_obj = SelectForm(request.GET)
+        if forms_obj.is_valid():
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            tid = forms_obj.cleaned_data['tid']
+            order = request.GET.get('order', '-create_date')
+            field_dict = {
+                'id': '',
+                'name': '__contains',
+                'url': '__contains',
+                'create_date': '',
+                'user_id': '',
+            }
+            q = conditionCom(request, field_dict)
+            print('q -->', q)
+            objs = models.zhugedanao_lianjie_tijiao.objects.select_related('user', ).filter(q).filter(tid='{}'.format(tid)).order_by(order)
+            count = objs.count()
+
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
+
+            # 返回的数据
+            ret_data = []
+
+            for obj in objs:
+                #  将查询出来的数据 加入列表
+                ret_data.append({
+                    'id': obj.id,
                     'url': obj.url,
                     'count': obj.count,
                     'status_text': obj.get_status_display(),
@@ -92,6 +145,13 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
                 url_list = forms_obj.cleaned_data.get('url')
                 name = forms_obj.cleaned_data.get('name')
                 oper_user_id = forms_obj.cleaned_data.get('oper_user_id')
+                now_datetime = datetime.datetime.today().strftime('%Y-%m-%d %H-%M-%S')
+                models.zhugedanao_lianjie_task_list.objects.create(
+                    task_name = name,
+                    # task_status = 0,
+                    # task_progress = 0,
+                    create_date = now_datetime
+                )
                 querysetlist = []
                 for url in url_list:
                     querysetlist.append(
@@ -113,9 +173,12 @@ def lianjie_tijiao_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             # 删除 ID
-            objs = models.zhugedanao_lianjie_tijiao.objects.filter(id=o_id)
+            objs = models.zhugedanao_lianjie_task_list.objects.filter(id=o_id)
             if objs:
                 objs.delete()
+                task_id = objs[0].id
+                task_detail_objs = models.zhugedanao_lianjie_tijiao.objects.filter(tid=task_id)
+                task_detail_objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
             else:

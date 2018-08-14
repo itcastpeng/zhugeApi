@@ -84,6 +84,14 @@ class SelectForm(forms.Form):
         }
     )
 
+    tid = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "任务id类型错误"
+        }
+    )
+
+
     def clean_current_page(self):
         if 'current_page' not in self.data:
             current_page = 1
