@@ -416,9 +416,10 @@ def mingpian_oper(request, oper_type):
 
                 if platform == 'linux2':
                     phantomjs_path = phantomjs_path   + '/phantomjs'
-                    
+
                 else:
                     phantomjs_path =  phantomjs_path  + '/phantomjs.exe'
+                print('----- phantomjs_path ----->>',phantomjs_path)
 
                 driver = webdriver.PhantomJS(phantomjs_path)
 
