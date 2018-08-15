@@ -30,6 +30,7 @@ class AddForm(forms.Form):
         url_list = []
         url = self.data.get('url')
         for i in url.strip().split():
+            print('i--------> ',i)
             if i.strip():
                 url_list.append(i.strip())
         if len(url_list) == 0:
