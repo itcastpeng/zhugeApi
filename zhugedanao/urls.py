@@ -28,6 +28,6 @@ urlpatterns = [
     # 需求管理
     url(r'^lianjie_tijiao/(?P<oper_type>\w+)/(?P<o_id>\d+)', lianjie_tijiao.lianjie_tijiao_oper),
     url(r'^lianjie_tijiao', lianjie_tijiao.lianjie_tijiao),
-    url(r'^lianjie_tijiao_detail', lianjie_tijiao.lianjie_tijiao_detail),
+    url(r'^detail_lianjie_tijiao/', lianjie_tijiao.lianjie_tijiao_detail),
 
 ]
