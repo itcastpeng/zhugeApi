@@ -411,20 +411,23 @@ def mingpian_oper(request, oper_type):
                 # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
                 platform = sys.platform     # 获取平台
-                phantomjs_path = 'zhugeleida/views_dir/tools/phantomjs.exe'   # windows 平台
+                phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
+
 
                 if platform == 'linux2':
-                    phantomjs_path = 'zhugeleida/views_dir/tools/phantomjs'
+                    phantomjs_path = phantomjs_path   + '/phantomjs'
+                    
+                else:
+                    phantomjs_path =  phantomjs_path  + '/phantomjs.exe'
 
                 driver = webdriver.PhantomJS(phantomjs_path)
+
                 rand_str = request.GET.get('rand_str')
                 timestamp = request.GET.get('timestamp')
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')
 
-                # url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
-                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=46ea0365ae79577a5a33883f6481c491&timestamp=1533179898595&user_id=9&uid=60'
-
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?rand_str=%s&timestamp=%s&user_id=%d&uid=%d' % (rand_str,timestamp,int(customer_id),int(user_id))
 
                 print('----save_poster-->',url)
 
