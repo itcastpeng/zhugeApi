@@ -414,7 +414,7 @@ def mingpian_oper(request, oper_type):
                 phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
 
-                if platform == 'linux2':
+                if 'linux' in platform:
                     phantomjs_path = phantomjs_path   + '/phantomjs'
 
                 else:
