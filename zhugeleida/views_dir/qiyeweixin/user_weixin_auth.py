@@ -37,7 +37,8 @@ def work_weixin_auth(request, company_id):
 
             company_obj = models.zgld_company.objects.get(id=company_id)
             corpid = company_obj.corp_id
-            corpsecret = company_obj.zgld_app_set.get(company_id=company_id,name='AI雷达').app_secret
+            # corpsecret = company_obj.zgld_app_set.get(company_id=company_id,name='AI雷达').app_secret
+            corpsecret = company_obj.zgld_app_set.get(company_id=company_id,app_type=1).app_secret
 
             get_token_data['corpid'] = corpid
             get_token_data['corpsecret'] = corpsecret

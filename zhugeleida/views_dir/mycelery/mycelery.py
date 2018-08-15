@@ -32,7 +32,8 @@ def user_send_action_log(request):
     corp_id = user_obj.company.corp_id
 
     get_token_data['corpid'] = corp_id
-    app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, name='AI雷达').app_secret
+    # app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, name='AI雷达').app_secret
+    app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, app_type=1).app_secret
     # if not app_secret:
     #     response.code = 404
     #     response.msg = "数据库不存在corpsecret"
@@ -248,26 +249,24 @@ def user_send_template_msg(request):
         objs = models.zgld_user_customer_belonger.objects.filter(
             customer_id=customer_id,user_id=user_id
         )
-        print('-------formid----->>', objs)
+
 
         user_name = ''
         if objs:
-            exist_formid_json = json.loads(objs[0].customer.formid, object_pairs_hook=OrderedDict)
+            exist_formid_json = json.loads(objs[0].customer.formid )
             user_name = objs[0].user.username
-            print('===== 1 exist_formid_json 1 ========>>',exist_formid_json,'=====',len(exist_formid_json))
             if len(exist_formid_json) == 0:
                 response.msg = "没有formID"
                 response.code = 301
                 print('------没有消费的formID------>>')
                 return JsonResponse(response.__dict__)
 
-
+            print('---------formId 消费前数据----------->>',exist_formid_json)
             form_id = exist_formid_json.pop(-1)
             obj = models.zgld_customer.objects.filter(id=customer_id)
-            print('++++++++++ 2 exist_formid_json++++++++++++>>',exist_formid_json)
 
             obj.update(formid=json.dumps(exist_formid_json))
-
+            print('---------formId 消费了谁----------->>', form_id)
             post_template_data['form_id'] = form_id
 
 
@@ -293,12 +292,16 @@ def user_send_template_msg(request):
 
         template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
         template_ret = template_ret.json()
+
         print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
 
         if  template_ret.get('errmsg') == "ok":
             print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
             response.code = 200
             response.msg = "企业用户发送模板消息成功"
+
+        elif template_ret.get('errcode') == 40001:
+            rc.delete(key_name)
         else:
             print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
             response.code = 200

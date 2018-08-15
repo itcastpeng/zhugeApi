@@ -35,11 +35,33 @@ class zgld_app(models.Model):
     name = models.CharField(verbose_name="企业应用_名称", max_length=128)
     agent_id = models.CharField(verbose_name="应用ID", max_length=128)
     app_secret = models.CharField(verbose_name="应用secret", max_length=256)
+    app_type_choice = (
+        (1,'AI雷达'),
+        (2,'Boss雷达')
+    )
+    app_type = models.SmallIntegerField(verbose_name='app类型区分', choices=app_type_choice,default=1)
     is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
     class Meta:
         verbose_name_plural = "企业微信App应用"
         app_label = "zhugeleida"
+
+
+#企业公众号-App应用
+class zgld_gongzhonghao_app(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    name = models.CharField(verbose_name="公众号名称", max_length=128)
+    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
+    authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128,null=True)
+
+    is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
+
+    class Meta:
+        verbose_name_plural = "公众号App应用"
+        app_label = "zhugeleida"
+
+
+
 
 #小程序App应用
 class zgld_xiaochengxu_app(models.Model):
@@ -122,10 +144,6 @@ class zgld_xiapchengxu_release(models.Model):
     class Meta:
         verbose_name_plural = "代小程序提交发布代码表"
         app_label = "zhugeleida"
-
-
-
-
 
 
 

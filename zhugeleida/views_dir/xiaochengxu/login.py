@@ -290,7 +290,7 @@ def login_oper(request,oper_type):
                 exist_formid_json.append(formid)
                 now_form_id_json = json.dumps(exist_formid_json)
 
-                # print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>',now_form_id_json)
+                print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>','\n',now_form_id_json)
                 objs.update(formid=now_form_id_json)
 
                 response.code = 200

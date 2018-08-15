@@ -1,104 +1,112 @@
 from django.shortcuts import render, redirect
 from zhugeleida import models
 from publicFunc import Response
-
+from publicFunc import account
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm,LoginBindingForm
 
-import json
+import time
+import datetime
+
 import requests
-
+from publicFunc.condition_com import conditionCom
 from ..conf import *
+from zhugeapi_celery_project import tasks
+from zhugeleida.public.common import action_record
+import base64
+import json
 
-import redis
-from django.http import HttpResponse
+from collections import OrderedDict
+import logging.handlers
+
+# 从微信公众号接口中获取openid等信息
+def get_openid_info(get_token_data):
+    oauth_url = 'https://api.weixin.qq.com/sns/oauth2/access_token'
+    ret = requests.get(oauth_url, params=get_token_data)
+    ret_json = ret.json()
+    print('---ret_json-->>', ret_json)
+    openid = ret_json['openid']  # 用户唯一标识
+    session_key = ret_json['session_key']  # 会话密钥
+    access_token = ret_json['access_token']  # 会话密钥
+
+
+    ret_data = {
+        'openid': openid,
+        'session_key': session_key,
+        'access_token' : access_token
+    }
+
+    return ret_data
 
 
 @csrf_exempt
-def work_gongzhonghao_auth(request, company_id):
+def user_gongzhonghao_auth(request,company_id):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        code = request.GET.get('code')
-        get_code_data = {}
-        get_token_data = {}
-        post_userlist_data = {}
-        get_userlist_data = {}
+        print('request.GET -->', request.GET)
+        customer_id = request.GET.get('user_id')
+        company_id = company_id
+        forms_obj = SmallProgramAddForm(request.GET)
 
+        if forms_obj.is_valid():
 
-        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-        key_name = "company_%s_leida_app_token" % (company_id)
-        token_ret = rc.get(key_name)
-        print('---token_ret---->>', token_ret)
+            js_code = forms_obj.cleaned_data.get('code')
+            user_type = forms_obj.cleaned_data.get('user_type')
+            gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+            # gongzhonghao_app_obj[]
+            appid = ''   #公众号的唯一标识
+            secret = ''   #公众号的appsecret
+            get_token_data = {
+                'appid': appid ,
+                'secret': secret,
+                'code': js_code,
+                'grant_type': 'authorization_code',
+            }
 
-        if not token_ret:
+            ret_data = get_openid_info(get_token_data)
+            openid = ret_data['openid']
+            # session_key = ret_data['session_key']
+            # unionid = ret_data['unionid']
 
-            company_obj = models.zgld_company.objects.get(id=company_id)
-            corpid = company_obj.corp_id
-            corpsecret = company_obj.zgld_app_set.get(company_id=company_id,name='AI雷达').app_secret
+            customer_objs = models.zgld_customer.objects.filter(
+                openid=openid,
+                user_type=user_type,
+            )
+            # 如果openid存在一条数据
+            if customer_objs:
+                token = customer_objs[0].token
+                client_id = customer_objs[0].id
 
-            get_token_data['corpid'] = corpid
-            get_token_data['corpsecret'] = corpsecret
+            else:
+                token = account.get_token(account.str_encrypt(openid))
+                obj = models.zgld_customer.objects.create(
+                    token=token,
+                    openid=openid,
+                    user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    # superior=customer_id,  #上级人。
+                )
 
-            ret = requests.get(Conf['token_url'], params=get_token_data)
-            ret_json = ret.json()
-            print('===========access_token==========>', ret_json)
-            access_token = ret_json.get('access_token')
+                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
+                client_id = obj.id
+                print('---------- crete successful ---->')
 
-            key_name = "company_%s_leida_app_token" % (company_id)
-            rc.set(key_name, access_token, 7000)
+            ret_data = {
+                'cid': client_id,
+                'token': token
+            }
+            response.code = 200
+            response.msg = "返回成功"
+            response.data = ret_data
 
         else:
-            access_token = token_ret
-
-
-        get_code_data['code'] = code
-        get_code_data['access_token'] = access_token
-        code_ret = requests.get(Conf['code_url'], params=get_code_data)
-        print('===========user_ticket==========>', code_ret.json())
-        code_ret_json = code_ret.json()
-
-
-        user_ticket = code_ret_json.get('user_ticket')
-        if not user_ticket:
-            return  HttpResponse('404')
-
-        # ?access_token = ACCESS_TOKEN
-        post_userlist_data['user_ticket'] = user_ticket
-        get_userlist_data['access_token'] = access_token
-        print('======>>>>>', post_userlist_data, get_userlist_data)
-        user_list_ret = requests.post(Conf['userlist_url'], params=get_userlist_data,
-                                      data=json.dumps(post_userlist_data))
-
-        user_list_ret_json = user_list_ret.json()
-        print('----------user_list_ret_json---->', user_list_ret_json)
-
-        userid = user_list_ret_json['userid']
-        name = user_list_ret_json['name']
-        avatar = user_list_ret_json['avatar']    # 加上100 获取小图
-        gender = user_list_ret_json['gender']
-        # email = user_list_ret_json['email']
-
-        # qr_code_auth()  # 生成二维码保存至数据库路径
-
-        user_profile_objs = models.zgld_userprofile.objects.filter(
-            userid=userid,
-            company_id=company_id
-        )
-        # 如果用户存在
-        if user_profile_objs:
-            user_profile_obj = user_profile_objs[0]
-            if user_profile_obj.status == 1:
-                user_profile_obj.gender = gender
-                # user_profile_obj.email = email
-                user_profile_obj.avatar = avatar
-                user_profile_obj.save()
-
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'id=' + str(
-                    user_profile_obj.id) + '&' + 'avatar=' + avatar
-                return redirect(redirect_url)
-
-        return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+            response.code = 301
+            response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
         response.code = 402
         response.msg = "请求方式异常"
+
+    return  JsonResponse(response.__dict__)
