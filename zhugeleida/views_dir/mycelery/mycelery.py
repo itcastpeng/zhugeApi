@@ -201,97 +201,99 @@ def user_send_template_msg(request):
     user_id = data.get('user_id')
     customer_id = data.get('customer_id')
 
-    get_token_data = {}
-    get_template_data = {}
-    post_template_data =  {}
-    get_token_data['appid'] = Conf['appid']
-    get_token_data['secret'] = Conf['appsecret']
-    get_token_data['grant_type'] = 'client_credential'
+    flag = True
+    while flag:
 
-    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    key_name = "company_%s_xiaochengxu_token" % (company_id)
-    token_ret = rc.get(key_name)
+        get_token_data = {}
+        get_template_data = {}
+        post_template_data =  {}
+        get_token_data['appid'] = Conf['appid']
+        get_token_data['secret'] = Conf['appsecret']
+        get_token_data['grant_type'] = 'client_credential'
 
-    print('---token_ret---->>', token_ret)
+        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+        key_name = "company_%s_xiaochengxu_token" % (company_id)
+        token_ret = rc.get(key_name)
 
-    if not token_ret:
-        # {"errcode": 0, "errmsg": "created"}
-        token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
-        token_ret_json = token_ret.json()
-        print('-----生成小程序模板信息用的token：微信接口返回数据------>', token_ret_json)
-        if not token_ret_json.get('access_token'):
-            response.code = token_ret_json['errcode']
-            response.msg = "生成模板信息用的token未通过"
-            return response
+        print('---token_ret---->>', token_ret)
 
-        access_token = token_ret_json['access_token']
-        print('---- access_token --->>', token_ret_json)
-        get_template_data['access_token'] = access_token
+        if not token_ret:
+            # {"errcode": 0, "errmsg": "created"}
+            token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
+            token_ret_json = token_ret.json()
+            print('-----生成小程序模板信息用的token：微信接口返回数据------>', token_ret_json)
+            if not token_ret_json.get('access_token'):
+                response.code = token_ret_json['errcode']
+                response.msg = "生成模板信息用的token未通过"
+                return response
 
-        rc.set(key_name, access_token, 7000)
+            access_token = token_ret_json['access_token']
+            print('---- access_token --->>', token_ret_json)
+            get_template_data['access_token'] = access_token
 
-    else:
-        get_template_data['access_token'] = token_ret
+            rc.set(key_name, access_token, 7000)
 
-    global openid,form_id
-    customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-    if customer_obj:
-        form_id =  customer_obj[0].formid
-        openid =  customer_obj[0].openid
-        post_template_data['touser'] = openid
+        else:
+            get_template_data['access_token'] = token_ret
 
-        post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
+        global openid,form_id
+        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+        if customer_obj:
+            form_id =  customer_obj[0].formid
+            openid =  customer_obj[0].openid
+            post_template_data['touser'] = openid
 
-        path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
-        post_template_data['page'] = path
+            post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
 
-        objs = models.zgld_user_customer_belonger.objects.filter(
-            customer_id=customer_id,user_id=user_id
-        )
+            path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
+            post_template_data['page'] = path
 
-
-        user_name = ''
-        if objs:
-            exist_formid_json = json.loads(objs[0].customer.formid )
-            user_name = objs[0].user.username
-            if len(exist_formid_json) == 0:
-                response.msg = "没有formID"
-                response.code = 301
-                print('------没有消费的formID------>>')
-                return JsonResponse(response.__dict__)
-
-            print('---------formId 消费前数据----------->>',exist_formid_json)
-            form_id = exist_formid_json.pop(-1)
-            obj = models.zgld_customer.objects.filter(id=customer_id)
-
-            obj.update(formid=json.dumps(exist_formid_json))
-            print('---------formId 消费了谁----------->>', form_id)
-            post_template_data['form_id'] = form_id
+            objs = models.zgld_user_customer_belonger.objects.filter(
+                customer_id=customer_id,user_id=user_id
+            )
 
 
-        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # 留言回复通知
-        data = {
-            'keyword1': {
-                'value': user_name  # 回复者
-            },
-            'keyword2': {
-                'value': now_time   # 回复时间
-            },
-            'keyword3': {
-                'value': '您有未读消息,点击小程序查看哦。'  #回复内容
+            user_name = ''
+            if objs:
+                exist_formid_json = json.loads(objs[0].customer.formid )
+                user_name = objs[0].user.username
+                if len(exist_formid_json) == 0:
+                    response.msg = "没有formID"
+                    response.code = 301
+                    print('------没有消费的formID------>>')
+                    return JsonResponse(response.__dict__)
+
+                print('---------formId 消费前数据----------->>',exist_formid_json)
+                form_id = exist_formid_json.pop(-1)
+                obj = models.zgld_customer.objects.filter(id=customer_id)
+
+                obj.update(formid=json.dumps(exist_formid_json))
+                print('---------formId 消费了谁----------->>', form_id)
+                post_template_data['form_id'] = form_id
+
+
+            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # 留言回复通知
+            data = {
+                'keyword1': {
+                    'value': user_name  # 回复者
+                },
+                'keyword2': {
+                    'value': now_time   # 回复时间
+                },
+                'keyword3': {
+                    'value': '您有未读消息,点击小程序查看哦。'  #回复内容
+                }
             }
-        }
-        post_template_data['data'] = data
-        # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
-        print('===========post_template_data=======>>',post_template_data)
+            post_template_data['data'] = data
+            # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
+            print('===========post_template_data=======>>',post_template_data)
 
-        # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
-        # return  HttpResponse(post_template_data)
+            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
+            # return  HttpResponse(post_template_data)
 
-        flag = True
-        while flag:
+
             template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
 
@@ -314,10 +316,10 @@ def user_send_template_msg(request):
 
 
 
-    else:
-        response.msg = "客户不存在"
-        response.code = 301
-        print('---- Template Msg 客户不存在---->>')
+        else:
+            response.msg = "客户不存在"
+            response.code = 301
+            print('---- Template Msg 客户不存在---->>')
 
 
     return JsonResponse(response.__dict__)
