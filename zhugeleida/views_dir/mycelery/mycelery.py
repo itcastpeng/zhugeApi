@@ -200,6 +200,21 @@ def user_send_template_msg(request):
 
     user_id = data.get('user_id')
     customer_id = data.get('customer_id')
+    userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
+    company_id = userprofile_obj.company_id
+    authorization_app_obj = userprofile_obj.company.zgld_xiaochengxu_app_set.get(company_id=company_id)
+    authorization_appid = authorization_app_obj.authorization_appid
+    authorization_secret = authorization_app_obj.authorization_secret
+    template_id = authorization_app_obj.template_id
+
+
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+    now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    objs = models.zgld_user_customer_belonger.objects.filter(
+        customer_id=customer_id, user_id=user_id
+    )
 
     flag = True
     while flag:
@@ -207,22 +222,19 @@ def user_send_template_msg(request):
         get_token_data = {}
         get_template_data = {}
         post_template_data =  {}
-        get_token_data['appid'] = Conf['appid']
-        get_token_data['secret'] = Conf['appsecret']
+        get_token_data['appid'] = authorization_appid
+        get_token_data['secret'] = authorization_secret
         get_token_data['grant_type'] = 'client_credential'
 
-        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
         key_name = "company_%s_xiaochengxu_token" % (company_id)
         token_ret = rc.get(key_name)
-
         print('---token_ret---->>', token_ret)
 
         if not token_ret:
             # {"errcode": 0, "errmsg": "created"}
             token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
             token_ret_json = token_ret.json()
-            print('-----生成小程序模板信息用的token：微信接口返回数据------>', token_ret_json)
+            print('------- 生成小程序模板信息用的token： 接口返回数据------>', token_ret_json)
             if not token_ret_json.get('access_token'):
                 response.code = token_ret_json['errcode']
                 response.msg = "生成模板信息用的token未通过"
@@ -231,28 +243,21 @@ def user_send_template_msg(request):
             access_token = token_ret_json['access_token']
             print('---- access_token --->>', token_ret_json)
             get_template_data['access_token'] = access_token
-
             rc.set(key_name, access_token, 7000)
 
         else:
             get_template_data['access_token'] = token_ret
 
         global openid,form_id
-        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
         if customer_obj:
             form_id =  customer_obj[0].formid
             openid =  customer_obj[0].openid
             post_template_data['touser'] = openid
 
-            post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
-
+            # post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
+            post_template_data['template_id'] = template_id
             path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
             post_template_data['page'] = path
-
-            objs = models.zgld_user_customer_belonger.objects.filter(
-                customer_id=customer_id,user_id=user_id
-            )
-
 
             user_name = ''
             if objs:
@@ -261,7 +266,7 @@ def user_send_template_msg(request):
                 if len(exist_formid_json) == 0:
                     response.msg = "没有formID"
                     response.code = 301
-                    print('------没有消费的formID------>>')
+                    print('------- 没有消费的formID -------->>')
                     return JsonResponse(response.__dict__)
 
                 print('---------formId 消费前数据----------->>',exist_formid_json)
@@ -269,11 +274,10 @@ def user_send_template_msg(request):
                 obj = models.zgld_customer.objects.filter(id=customer_id)
 
                 obj.update(formid=json.dumps(exist_formid_json))
-                print('---------formId 消费了谁----------->>', form_id)
+                print('---------formId 消费了哪个 ----------->>', form_id)
                 post_template_data['form_id'] = form_id
 
 
-            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             # 留言回复通知
             data = {
                 'keyword1': {
@@ -283,16 +287,14 @@ def user_send_template_msg(request):
                     'value': now_time   # 回复时间
                 },
                 'keyword3': {
-                    'value': '您有未读消息,点击小程序查看哦。'  #回复内容
+                    'value': '您有未读消息,点击小程序查看哦'  #回复内容
                 }
             }
             post_template_data['data'] = data
             # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
             print('===========post_template_data=======>>',post_template_data)
 
-            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
-            # return  HttpResponse(post_template_data)
-
+            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
 
             template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
@@ -307,7 +309,6 @@ def user_send_template_msg(request):
 
             elif template_ret.get('errcode') == 40001:
                 rc.delete(key_name)
-
 
             else:
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
