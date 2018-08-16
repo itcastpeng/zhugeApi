@@ -92,7 +92,7 @@ def dai_xcx_oper(request, oper_type):
                                 return JsonResponse(authorizer_access_token.__dict__)
 
 
-                        print('------ 第三方自定义的配置 ext_json ------>',ext_json)
+                        print('------ 第三方自定义的配置 ext_json ------>',json.dumps(ext_json))
                         get_wxa_commit_data =  {
                             'access_token': authorizer_access_token
                         }
@@ -152,9 +152,10 @@ def dai_xcx_oper(request, oper_type):
                                 authorizer_access_token = response.data
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
-
+                        path = 'pages/mingpian/index?uid=1&source=1'
                         get_qrcode_data = {
-                            'access_token': authorizer_access_token
+                            'access_token': authorizer_access_token,
+                            'path': path,
                         }
 
                         get_qrcode_ret = requests.get(get_qrcode_url, params=get_qrcode_data)
@@ -162,8 +163,7 @@ def dai_xcx_oper(request, oper_type):
                         try:
 
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                            BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin',
-                                                    'qr_code')
+                            BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
 
                             qr_code_name = '/%s_%s_QRCode.jpg' % (authorizer_appid, now_time)
 
@@ -611,3 +611,39 @@ def create_authorizer_access_token(data):
         return JsonResponse(response.__dict__)
 
     return  response
+
+
+def create_component_access_token():
+    response = Response.ResponseObj()
+
+    app_id = 'wx67e2fde0f694111c'
+    app_secret = '4a9690b43178a1287b2ef845158555ed'
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+    component_access_token = rc.get('component_access_token')
+    if not component_access_token:
+
+        get_pre_auth_data = {}
+        post_component_data = {}
+        post_component_data['component_appid'] = app_id
+        post_component_data['component_appsecret'] = app_secret
+        component_verify_ticket = rc.get('ComponentVerifyTicket')
+        post_component_data['component_verify_ticket'] = component_verify_ticket
+
+        post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
+        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+        print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
+        component_token_ret = component_token_ret.json()
+        access_token = component_token_ret.get('component_access_token')
+        if access_token:
+            get_pre_auth_data['component_access_token'] = access_token
+            rc.set('component_access_token', access_token, 7000)
+            component_access_token = access_token
+
+        else:
+            response.code = 400
+            response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
+            return JsonResponse(response.__dict__)
+
+    return    component_access_token
+

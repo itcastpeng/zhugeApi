@@ -62,7 +62,6 @@ class zgld_gongzhonghao_app(models.Model):
 
 
 
-
 #小程序App应用
 class zgld_xiaochengxu_app(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="小程序授权的后台用户", null=True)

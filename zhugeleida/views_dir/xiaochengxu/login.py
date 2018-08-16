@@ -19,12 +19,12 @@ import json
 import redis
 from collections import OrderedDict
 import logging.handlers
-from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token
+from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token,create_component_access_token
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
     appurl = 'https://api.weixin.qq.com/sns/component/jscode2session'
-
+    print()
     ret = requests.get(appurl, params=get_token_data)
     ret_json = ret.json()
     print('------ 第三方平台 代替小程序实现【登录功能】接口返回 ----->>', ret_json)
@@ -48,22 +48,22 @@ def crate_authorizer_access_token(data):
     authorizer_appid =data.get('authorizer_appid')
     authorizer_refresh_token =data.get('authorizer_refresh_token')
 
-    key_name = '%s_authorizer_access_token' % (authorizer_appid)
-    authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+    # key_name = '%s_authorizer_access_token' % (authorizer_appid)
+    # authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+    #
+    # if not authorizer_access_token:
+    #     data = {
+    #         'key_name': key_name,
+    #         'authorizer_refresh_token': authorizer_refresh_token,
+    #         'authorizer_appid': authorizer_appid
+    #     }
+    component_access_token = create_component_access_token()
+        # if authorizer_access_token_result.code == 200:
+        #     authorizer_access_token = response.data
+        # else:
+        #     return JsonResponse(authorizer_access_token.__dict__)
 
-    if not authorizer_access_token:
-        data = {
-            'key_name': key_name,
-            'authorizer_refresh_token': authorizer_refresh_token,
-            'authorizer_appid': authorizer_appid
-        }
-        authorizer_access_token_result = create_authorizer_access_token(data)
-        if authorizer_access_token_result.code == 200:
-            authorizer_access_token = response.data
-        else:
-            return JsonResponse(authorizer_access_token.__dict__)
-
-    return authorizer_access_token
+    return component_access_token
 
 @csrf_exempt
 def login(request):
@@ -92,13 +92,14 @@ def login(request):
                 'authorizer_appid': authorizer_appid,
 
             }
-            authorizer_access_token = crate_authorizer_access_token(data)
+            # authorizer_access_token = crate_authorizer_access_token(data)
+            component_access_token = create_component_access_token()
             get_token_data = {
-                'appid': authorizer_appid,     #小程序的AppID
+                'appid': authorizer_appid,     #授权小程序的AppID
                 'js_code': js_code,            #登录时获取的 code
                 'grant_type': 'authorization_code',
-                'component_appid': component_appid,  # 第三方平台appid
-                'component_access_token': authorizer_access_token
+                'component_appid': component_appid,               # 第三方平台appid
+                'component_access_token': component_access_token  # 第三方平台的 component_access_token
             }
 
             ret_data = get_openid_info(get_token_data)
@@ -289,9 +290,11 @@ def login_oper(request,oper_type):
                 exist_formid_json = json.loads(exist_formid)
                 exist_formid_json.append(formid)
                 now_form_id_json = json.dumps(exist_formid_json)
+                now_form_id_json = list(set(now_form_id_json))
 
-                print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>','\n',now_form_id_json)
+                # print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>','\n',now_form_id_json)
                 objs.update(formid=now_form_id_json)
+
 
                 response.code = 200
                 response.msg = "保存成功"

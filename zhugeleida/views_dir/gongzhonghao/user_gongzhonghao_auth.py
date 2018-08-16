@@ -19,17 +19,18 @@ import json
 
 from collections import OrderedDict
 import logging.handlers
+import redis
 
 # 从微信公众号接口中获取openid等信息
 def get_openid_info(get_token_data):
     oauth_url = 'https://api.weixin.qq.com/sns/oauth2/access_token'
+    # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     ret = requests.get(oauth_url, params=get_token_data)
     ret_json = ret.json()
     print('---ret_json-->>', ret_json)
     openid = ret_json['openid']  # 用户唯一标识
     session_key = ret_json['session_key']  # 会话密钥
     access_token = ret_json['access_token']  # 会话密钥
-
 
     ret_data = {
         'openid': openid,
@@ -54,10 +55,16 @@ def user_gongzhonghao_auth(request,company_id):
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
-            gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
-            # gongzhonghao_app_obj[]
-            appid = ''   #公众号的唯一标识
-            secret = ''   #公众号的appsecret
+            gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
+
+            authorization_appid = ''
+            authorization_secret = ''
+            if gongzhonghao_app_obj:
+                authorization_appid = gongzhonghao_app_obj.authorization_appid
+                authorization_secret = gongzhonghao_app_obj.authorization_secret
+            appid = authorization_appid    #公众号的唯一标识
+            secret = authorization_secret  #公众号的appsecret
+
             get_token_data = {
                 'appid': appid ,
                 'secret': secret,
@@ -67,6 +74,7 @@ def user_gongzhonghao_auth(request,company_id):
 
             ret_data = get_openid_info(get_token_data)
             openid = ret_data['openid']
+            access_token = ret_data['access_token']
             # session_key = ret_data['session_key']
             # unionid = ret_data['unionid']
 
@@ -88,10 +96,42 @@ def user_gongzhonghao_auth(request,company_id):
                     # superior=customer_id,  #上级人。
                 )
 
-                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
-                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
-                print('---------- crete successful ---->')
+                print('---------- 公众号-新用户创建成功 crete successful ---->')
+
+                get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
+                get_user_info_data = {
+                    'access_token': access_token,
+                    'openid': openid,
+                    'lang': 'zh_CN',
+                }
+
+                ret = requests.get(get_user_info_url, params=get_user_info_data)
+                ret_json = ret.json()
+                print('------- 拉取用户信息 接口返回----->>', ret_json)
+
+
+                if 'errcode' not  in  ret_json:
+
+                    openid = ret_json['openid']  # 用户唯一标识
+                    nickname = ret_json['nickname']  # 会话密钥
+                    sex = ret_json['sex']  #
+                    province = ret_json['province']  #
+                    city = ret_json['city']  #
+                    country = ret_json['country']    #
+                    headimgurl = ret_json['headimgurl']  #
+                    obj.openid = openid
+                    obj.nickname = nickname
+                    obj.sex = sex
+                    obj.openid = openid
+
+
+                else:
+                    errcode = ret_json.get('errcode')
+                    errmsg = ret_json.get('errmsg')
+
+
+
 
             ret_data = {
                 'cid': client_id,
