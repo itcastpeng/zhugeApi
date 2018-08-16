@@ -101,12 +101,13 @@ def article_oper(request, oper_type, o_id):
                 'summary': request.POST.get('summary'),
                 'content': request.POST.get('content'),
                 'cover_picture': request.POST.get('cover_picture'),
+
             }
 
             forms_obj = ArticleAddForm(article_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====??', forms_obj.cleaned_data)
+                print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
 
                 dict_data = {
                     'user_id': request.GET.get('user_id'),

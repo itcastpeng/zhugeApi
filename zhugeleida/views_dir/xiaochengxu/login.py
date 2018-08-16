@@ -19,7 +19,7 @@ import json
 import redis
 from collections import OrderedDict
 import logging.handlers
-from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token,create_component_access_token
+from zhugeleida.views_dir.admin.dai_xcx  import create_component_access_token
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -32,7 +32,6 @@ def get_openid_info(get_token_data):
     openid = ret_json.get('openid')  # 用户唯一标识
     session_key = ret_json.get('session_key')  # 会话密钥
 
-
     ret_data = {
         'openid': openid,
         'session_key': session_key
@@ -41,29 +40,6 @@ def get_openid_info(get_token_data):
     return ret_data
 
 
-def crate_authorizer_access_token(data):
-    response = Response.ResponseObj()
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-    authorizer_appid =data.get('authorizer_appid')
-    authorizer_refresh_token =data.get('authorizer_refresh_token')
-
-    # key_name = '%s_authorizer_access_token' % (authorizer_appid)
-    # authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
-    #
-    # if not authorizer_access_token:
-    #     data = {
-    #         'key_name': key_name,
-    #         'authorizer_refresh_token': authorizer_refresh_token,
-    #         'authorizer_appid': authorizer_appid
-    #     }
-    component_access_token = create_component_access_token()
-        # if authorizer_access_token_result.code == 200:
-        #     authorizer_access_token = response.data
-        # else:
-        #     return JsonResponse(authorizer_access_token.__dict__)
-
-    return component_access_token
 
 @csrf_exempt
 def login(request):
@@ -81,18 +57,11 @@ def login(request):
             company_id = forms_obj.cleaned_data.get('company_id')
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-
             authorizer_refresh_token = obj.authorizer_refresh_token
             authorizer_appid = obj.authorization_appid
             component_appid = 'wx67e2fde0f694111c'
 
 
-            data = {
-                'authorizer_refresh_token': authorizer_refresh_token,
-                'authorizer_appid': authorizer_appid,
-
-            }
-            # authorizer_access_token = crate_authorizer_access_token(data)
             component_access_token = create_component_access_token()
             get_token_data = {
                 'appid': authorizer_appid,     #授权小程序的AppID

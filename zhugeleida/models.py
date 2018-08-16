@@ -758,7 +758,7 @@ class zgld_plugin_mingpian(models.Model):
         app_label = "zhugeleida"
 
 
-#公众号-报名插件
+# 公众号-报名插件
 class zgld_plugin_report(models.Model):
     #广告位
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
@@ -780,7 +780,7 @@ class zgld_plugin_report(models.Model):
         verbose_name_plural = "插件-报名插件"
         app_label = "zhugeleida"
 
-# # 公众号-报名的客户
+# 公众号-报名的客户
 class zgld_report_to_customer(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
     activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)

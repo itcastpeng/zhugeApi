@@ -304,7 +304,7 @@ def dai_xcx_oper(request, oper_type):
                         errmsg = submit_audit_ret.get('errmsg')
                         now_time = datetime.datetime.now()
                         print('-------- 代码包-提交审核 返回 submit_audit_ret 返回------>>', submit_audit_ret)
-                        if errcode == 0:
+                        if errmsg == 'ok':
 
                             print('-----auditid--->>', auditid)
                             audit_result = 2  # (2,'审核中')
@@ -379,13 +379,14 @@ def dai_xcx_oper(request, oper_type):
                         }
                         authorizer_access_token_result = create_authorizer_access_token(data)
                         if authorizer_access_token_result.code == 200:
-                            authorizer_access_token = response.data
+                            authorizer_access_token = authorizer_access_token_result.data
                         else:
                             return JsonResponse(authorizer_access_token.__dict__)
 
                     get_latest_audit_data = {
                         'access_token': authorizer_access_token
                     }
+                    print('------get_latest_audit_data--------<<',get_latest_audit_data)
 
                     get_latest_audit_ret = requests.get(get_latest_auditstatus_url, params=get_latest_audit_data)
                     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -394,13 +395,12 @@ def dai_xcx_oper(request, oper_type):
 
                     errcode = get_latest_audit_ret.get('errcode')
                     errmsg = get_latest_audit_ret.get('errmsg')
-                    status = get_latest_audit_ret.get('status')
+                    status = int(get_latest_audit_ret.get('status'))
                     reason = get_latest_audit_ret.get('reason')
 
                     if status == 0:
-                        response.code = 200
-                        response.msg = '审核成功ID'
-                        print('--------审核成功ID | audit_code_id: -------->',obj.app_id,'|',auditid)
+
+                        print('-------- 代码审核状态【成功】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
                         release_obj = models.zgld_xiapchengxu_release.objects.filter(audit_code_id=obj.app_id)
                         obj.audit_reply_date = now_time
 
@@ -412,12 +412,13 @@ def dai_xcx_oper(request, oper_type):
 
                             get_release_ret = requests.post(release_url, params=get_release_data)
                             get_release_ret = get_release_ret.json()
-                            errcode = get_release_ret.get('errcode')
+                            errcode = int(get_release_ret.get('errcode'))
                             errmsg = get_release_ret.get('errmsg')
                             status = get_release_ret.get('status')
                             reason = get_release_ret.get('reason')
+                            print('-------- 获取发布的状态 接口返回：---------->>',get_release_ret)
 
-                            if errcode == 0:
+                            if errmsg == "ok":
                                 release_result=1  # 上线成功
                                 reason = ''
                                 print('--------发布已通过审核的小程序【成功】: auditid | audit_code_id -------->>',auditid,'|',obj.app_id)
@@ -440,17 +441,20 @@ def dai_xcx_oper(request, oper_type):
                                 release_commit_date=now_time,
                                 reason=reason
                             )
-
+                            response.code = 200
+                            response.msg = '审核成功ID'
 
 
                     elif status == 1: # 0为审核成功
                         response.code = 200
                         response.msg = '审核状态失败'
+                        print('-------- 代码审核状态【失败】---- auditid | audit_code_id -------->>',auditid,'|' ,obj.app_id)
 
 
                     elif status == 2 :
                         response.code = 200
                         response.msg = '审核中'
+                        print('-------- 代码审核状态【审核中】---- auditid | audit_code_id -------->>',auditid,'|' ,obj.app_id)
 
 
                     obj.audit_result = status

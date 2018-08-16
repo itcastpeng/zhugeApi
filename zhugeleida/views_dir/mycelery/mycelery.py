@@ -11,6 +11,7 @@ import os
 import datetime
 import redis
 from collections import OrderedDict
+from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
@@ -123,35 +124,58 @@ def create_user_or_customer_qr_code(request):
         user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id ,customer_id,now_time)
 
     get_qr_data = {}
-
-    get_token_data['appid'] = Conf['appid']
-    get_token_data['secret'] = Conf['appsecret']
-    get_token_data['grant_type'] = 'client_credential'
-    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-    import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    key_name = "company_%s_xiaochengxu_token" % (company_id)
-    token_ret = rc.get(key_name)
-    print('---token_ret---->>', token_ret)
 
-    if not token_ret:
-        # {"errcode": 0, "errmsg": "created"}
-        token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
-        token_ret_json = token_ret.json()
-        print('-----token_ret_json------>', token_ret_json)
-        if not token_ret_json.get('access_token'):
-            response.code = token_ret_json['errcode']
-            response.msg = "生成小程序二维码未验证通过"
-            return response
+    # get_token_data['appid'] = Conf['appid']
+    # get_token_data['secret'] = Conf['appsecret']
+    # get_token_data['grant_type'] = 'client_credential'
+    # company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+    # import redis
 
-        access_token = token_ret_json['access_token']
-        print('---- access_token --->>', token_ret_json)
-        get_qr_data['access_token'] = access_token
+    # key_name = "company_%s_xiaochengxu_token" % (company_id)
+    # token_ret = rc.get(key_name)
+    # print('---token_ret---->>', token_ret)
+    #
+    # if not token_ret:
+    #     # {"errcode": 0, "errmsg": "created"}
+    #     token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
+    #     token_ret_json = token_ret.json()
+    #     print('-----token_ret_json------>', token_ret_json)
+    #     if not token_ret_json.get('access_token'):
+    #         response.code = token_ret_json['errcode']
+    #         response.msg = "生成小程序二维码未验证通过"
+    #         return response
+    #
+    #     access_token = token_ret_json['access_token']
+    #     print('---- access_token --->>', token_ret_json)
+    #     get_qr_data['access_token'] = access_token
+    #
+    #     rc.set(key_name, access_token, 7000)
+    #
+    # else:
+    #     get_qr_data['access_token'] = token_ret
+    userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
+    company_id = userprofile_obj.company_id
+    obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+    authorizer_refresh_token = obj.authorizer_refresh_token
+    authorizer_appid = obj.authorization_appid
 
-        rc.set(key_name, access_token, 7000)
 
-    else:
-        get_qr_data['access_token'] = token_ret
+    component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
+    key_name = '%s_authorizer_access_token' % (authorizer_appid)
+
+    authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+    if not authorizer_access_token:
+        data = {
+            'key_name' : key_name,
+            'authorizer_refresh_token': authorizer_refresh_token,
+            'authorizer_appid': authorizer_appid,
+
+        }
+        authorizer_access_token = create_authorizer_access_token(data) # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
+
+    get_qr_data['access_token'] = authorizer_access_token
 
     post_qr_data = {'path': path, 'width': 430}
     qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
@@ -202,10 +226,10 @@ def user_send_template_msg(request):
     customer_id = data.get('customer_id')
     userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
     company_id = userprofile_obj.company_id
-    authorization_app_obj = userprofile_obj.company.zgld_xiaochengxu_app_set.get(company_id=company_id)
-    authorization_appid = authorization_app_obj.authorization_appid
-    authorization_secret = authorization_app_obj.authorization_secret
-    template_id = authorization_app_obj.template_id
+    obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+    authorizer_refresh_token = obj.authorizer_refresh_token
+    authorizer_appid = obj.authorization_appid
+    template_id = obj.template_id
 
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
@@ -219,35 +243,50 @@ def user_send_template_msg(request):
     flag = True
     while flag:
 
-        get_token_data = {}
-        get_template_data = {}
         post_template_data =  {}
-        get_token_data['appid'] = authorization_appid
-        get_token_data['secret'] = authorization_secret
-        get_token_data['grant_type'] = 'client_credential'
+        # get_token_data['appid'] = authorization_appid
+        # get_token_data['secret'] = authorization_secret
+        # get_token_data['grant_type'] = 'client_credential'
 
-        key_name = "company_%s_xiaochengxu_token" % (company_id)
-        token_ret = rc.get(key_name)
-        print('---token_ret---->>', token_ret)
+        component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
+        key_name = '%s_authorizer_access_token' % (authorizer_appid)
+        authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-        if not token_ret:
-            # {"errcode": 0, "errmsg": "created"}
-            token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
-            token_ret_json = token_ret.json()
-            print('------- 生成小程序模板信息用的token： 接口返回数据------>', token_ret_json)
-            if not token_ret_json.get('access_token'):
-                response.code = token_ret_json['errcode']
-                response.msg = "生成模板信息用的token未通过"
-                return response
+        if not authorizer_access_token:
+            data = {
+                'key_name' : key_name,
+                'authorizer_refresh_token': authorizer_refresh_token,
+                'authorizer_appid': authorizer_appid,
 
-            access_token = token_ret_json['access_token']
-            print('---- access_token --->>', token_ret_json)
-            get_template_data['access_token'] = access_token
-            rc.set(key_name, access_token, 7000)
+            }
+            authorizer_access_token = create_authorizer_access_token(data)
 
-        else:
-            get_template_data['access_token'] = token_ret
 
+
+        # key_name = "company_%s_xiaochengxu_token" % (company_id)
+        # token_ret = rc.get(key_name)
+        # print('---token_ret---->>', token_ret)
+        #
+        # if not token_ret:
+        #     # {"errcode": 0, "errmsg": "created"}
+        #     token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
+        #     token_ret_json = token_ret.json()
+        #     print('------- 生成小程序模板信息用的token： 接口返回数据------>', token_ret_json)
+        #     if not token_ret_json.get('access_token'):
+        #         response.code = token_ret_json['errcode']
+        #         response.msg = "生成模板信息用的token未通过"
+        #         return response
+        #
+        #     access_token = token_ret_json['access_token']
+        #     print('---- access_token --->>', token_ret_json)
+        #     get_template_data['access_token'] = access_token
+        #     rc.set(key_name, access_token, 7000)
+        #
+        # else:
+        #     get_template_data['access_token'] = token_ret
+        get_template_data = {
+            'access_token' : authorizer_access_token      #授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
+        }
         global openid,form_id
         if customer_obj:
             form_id =  customer_obj[0].formid
