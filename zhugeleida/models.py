@@ -35,11 +35,33 @@ class zgld_app(models.Model):
     name = models.CharField(verbose_name="企业应用_名称", max_length=128)
     agent_id = models.CharField(verbose_name="应用ID", max_length=128)
     app_secret = models.CharField(verbose_name="应用secret", max_length=256)
+    app_type_choice = (
+        (1,'AI雷达'),
+        (2,'Boss雷达')
+    )
+    app_type = models.SmallIntegerField(verbose_name='app类型区分', choices=app_type_choice,default=1)
     is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
     class Meta:
         verbose_name_plural = "企业微信App应用"
         app_label = "zhugeleida"
+
+
+#企业公众号-App应用
+class zgld_gongzhonghao_app(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    name = models.CharField(verbose_name="公众号名称", max_length=128)
+    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
+    authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128,null=True)
+
+    is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
+
+    class Meta:
+        verbose_name_plural = "公众号App应用"
+        app_label = "zhugeleida"
+
+
+
 
 #小程序App应用
 class zgld_xiaochengxu_app(models.Model):
@@ -83,11 +105,12 @@ class zgld_xiapchengxu_upload_audit(models.Model):
     # upload_code = models.OneToOneField('zgld_xiapchengxu_upload', verbose_name='上传的代码') # 审核的哪个版本的长传后的代码。
     auditid = models.IntegerField(verbose_name="接口返回审核编号", null=True)
     audit_commit_date = models.DateTimeField(verbose_name='提交审核时间',null=True)
-    audit_reply_date = models.DateTimeField(verbose_name="审核回复时间", null=True)
+    audit_reply_date = models.DateTimeField(verbose_name="审核成功回复时间", null=True)
     audit_result_type = (
         (0,'审核成功'),
         (1,'审核失败'),
-        (2,'审核中')
+        (2,'审核中'),
+        (3,'提交审核代码失败')
     )
     audit_result = models.SmallIntegerField(verbose_name='审核结果',null=True,choices=audit_result_type)
     reason = models.CharField(verbose_name='审核失败原因',max_length=1024,null=True)
@@ -106,7 +129,7 @@ class zgld_xiapchengxu_upload_audit(models.Model):
 class zgld_xiapchengxu_release(models.Model):
     app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='审核的-小程序App')
     audit_code = models.OneToOneField('zgld_xiapchengxu_upload_audit', verbose_name='审核通过的代码') # 审核的哪个版本的长传后的代码。
-    release_commit_date = models.DateTimeField(verbose_name='提交发布时间',null=True)
+    release_commit_date = models.DateTimeField(verbose_name='发布时间',null=True)
     # release_reply_date = models.DateTimeField(verbose_name="发布回复时间", null=True)
     release_result_type = (
         (1,'上线通过'),
@@ -121,10 +144,6 @@ class zgld_xiapchengxu_release(models.Model):
     class Meta:
         verbose_name_plural = "代小程序提交发布代码表"
         app_label = "zhugeleida"
-
-
-
-
 
 
 
@@ -746,6 +765,7 @@ class zgld_plugin_report(models.Model):
     ad_slogan = models.CharField(verbose_name="广告语", max_length=128)
     sign_up_button = models.CharField(verbose_name="报名按钮", max_length=64, default='statics/imgs/setAvator.jpg')
     is_get_phone_code = models.BooleanField(verbose_name='是否获取手机验证码', default=False)
+    leave_message = models.TextField(verbose_name="客户留言提示", null=True)
     #报名页
     title = models.CharField(verbose_name='活动标题', max_length=128, null=True)
     introduce = models.TextField(verbose_name='活动说明', blank=True, null=True)

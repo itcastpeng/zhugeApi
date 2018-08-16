@@ -24,10 +24,8 @@ def action_record(data,remark):
         customer_name = str(customer_name, 'utf-8')
 
         data['content'] = '%s%s' % (customer_name, remark)
-        data['agentid'] = models.zgld_app.objects.get(
-            id=company_id,
-            name='AI雷达'
-        ).agent_id
+        # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
+        data['agentid'] = models.zgld_app.objects.get(id=company_id, app_type=1).agent_id
 
         tasks.user_send_action_log.delay(json.dumps(data))
         response.code = 200
@@ -76,10 +74,8 @@ def action_record(data,remark):
         print('------customer_name + remark------->>', customer_name, remark)
 
         data['content'] = '%s%s' % (customer_name,remark)
-        data['agentid'] = models.zgld_app.objects.get(
-            company_id=company_id,
-            name='AI雷达'
-        ).agent_id
+        # data['agentid'] = models.zgld_app.objects.get(company_id=company_id, name='AI雷达').agent_id
+        data['agentid'] = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
 
         tasks.user_send_action_log.delay(json.dumps(data))
         # user_send_action_log(data)  #发送企业微信的消息提醒

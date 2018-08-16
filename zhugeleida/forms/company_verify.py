@@ -120,6 +120,13 @@ class AgentAddForm(forms.Form):
             'required': "agent名不能为空"
         }
     )
+    app_type = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "App区分类型不能为空"
+        }
+    )
+
     company_id = forms.CharField(
         required=True,
         error_messages={

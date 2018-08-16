@@ -83,7 +83,6 @@ def author_status(request,oper_type):
         # 获取参数 页数 默认1
         if oper_type == "author_status":
             company_id = request.GET.get('company_id')
-
             company_objs = models.zgld_company.objects.filter(id=company_id)
 
             # 获取所有数据
@@ -95,23 +94,20 @@ def author_status(request,oper_type):
                 ret_data.append({
                     'name' : '通讯录',
                     'is_validate': is_validate,
-
+                    'app_type': ''
                 })
 
-                for app_name in ["AI雷达","Boss雷达"]:
-                    app_objs  = company_objs[0].zgld_app_set.filter(company_id=company_id,name=app_name)
-                    if app_objs:
+
+                app_objs  = company_objs[0].zgld_app_set.filter(company_id=company_id)
+                if app_objs:
+                    for obj in  app_objs:
+
                         ret_data.append({
-                            'name': app_name,
-                            'is_validate': is_validate,
-                            'create_date': company_objs[0].create_date,
+                            'name': obj.name,
+                            'is_validate': obj.is_validate,
+                            'app_type' : obj.app_type,
                         })
-                    else:
-                        ret_data.append({
-                            'name': app_name,
-                            'is_validate': False,
-                            'create_date': company_objs[0].create_date,
-                        })
+
 
                 response.code = 200
                 response.data = {
@@ -244,7 +240,8 @@ def company_oper(request, oper_type, o_id):
                 'company_id': o_id,
                 'name' : request.POST.get('name').strip(), #应用的名字
                 'agent_id': request.POST.get('agent_id').strip(),
-                'app_secret': request.POST.get('app_secret').strip()
+                'app_secret': request.POST.get('app_secret').strip(),
+                'app_type': request.POST.get('app_type').strip()
             }
             forms_obj = AgentAddForm(agent_data)
 
@@ -252,6 +249,7 @@ def company_oper(request, oper_type, o_id):
 
                 company_id =  forms_obj.cleaned_data.get('company_id')
                 name =  forms_obj.cleaned_data.get('name')
+                app_type =  forms_obj.cleaned_data.get('app_type') #  (1,'AI雷达'),  (2,'Boss雷达')
                 agent_id =  forms_obj.cleaned_data.get('agent_id')
                 app_secret =  forms_obj.cleaned_data.get('app_secret')
 
@@ -276,6 +274,8 @@ def company_oper(request, oper_type, o_id):
                 objs = models.zgld_app.objects.filter(name=name,company_id=company_id)
                 if objs:
                     objs.update(
+                        name=name,
+                        app_type=app_type,
                         is_validate = is_validate,
                         agent_id = agent_id,
                         app_secret = app_secret
@@ -284,6 +284,7 @@ def company_oper(request, oper_type, o_id):
                     models.zgld_app.objects.create(
                         is_validate = is_validate,
                         name=name,
+                        app_type=app_type,
                         agent_id=agent_id,
                         app_secret= app_secret,
                         company_id = company_id

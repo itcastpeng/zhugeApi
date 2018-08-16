@@ -34,7 +34,20 @@ class SmallProgramAddForm(forms.Form):
 
     )
 
+    company_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "公司id不能为空"
+        }
+    )
 
+    def clean_company_id(self):
+        company_id = self.data['company_id']
+        company_obj = models.zgld_company.objects.filter(id=company_id)
+        if not company_obj:
+            self.add_error('company_id', '公司不存在')
+        else:
+            return company_id
 
     # tag_user = forms.CharField(
     #     required=True,

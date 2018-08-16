@@ -96,7 +96,7 @@ def plugin_report(request):
                     # 'customer_phone':obj.phone,  #活动标题
                     # 'phone' : obj.phone,    #手机号
                     # 'leave_message' : obj.leave_message,     #留言
-
+                    'leave_message': obj.leave_message,
                     'introduce': obj.introduce,      #活动说明
                     'is_get_phone_code' : obj.is_get_phone_code,    #是否获取手机验证码
                     'skip_link' : obj.skip_link,    #跳转链接
@@ -149,7 +149,7 @@ def plugin_report_oper(request, oper_type, o_id):
             forms_obj = ReportAddForm(report_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====??', forms_obj.cleaned_data)
+                print('======forms_obj.cleaned_data====>', forms_obj.cleaned_data)
 
                 dict_data = {
                     'user_id': request.GET.get('user_id'),
@@ -161,6 +161,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
                     'is_get_phone_code': request.POST.get('is_get_phone_code'),  # 是否获取手机验证码
                     'skip_link': forms_obj.cleaned_data['skip_link'],
+                    'leave_message': request.POST.get('leave_message')  # 留言
                 }
 
                 obj = models.zgld_plugin_report.objects.create(**dict_data)
@@ -202,6 +203,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 # 'leave_message': obj.leave_message,  # 留言
                 'introduce': request.POST.get('introduce'),  # 活动说明
                 'skip_link': request.POST.get('skip_link'),
+
             }
 
             forms_obj = ReportUpdateForm(report_data)
@@ -216,6 +218,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
                     'is_get_phone_code': request.POST.get('is_get_phone_code'),  # 是否获取手机验证码
                     'skip_link': forms_obj.cleaned_data['skip_link'],
+                    'leave_message': request.POST.get('leave_message')  # 留言
                 }
                 user_id = request.GET.get('user_id')
                 report_id = forms_obj.cleaned_data['id']
@@ -232,7 +235,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == "sign_up_activity": # 报名活动
+        elif oper_type == "sign_up_activity": # 客户 报名活动
             report_data = {
                 'customer_id': request.GET.get('user_id'),
                 'activity_id': o_id,      # 活动ID
