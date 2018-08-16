@@ -290,22 +290,30 @@ def user_send_template_msg(request):
         # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
         # return  HttpResponse(post_template_data)
 
-        template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
-        template_ret = template_ret.json()
+        flag = True
+        while flag:
+            template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+            template_ret = template_ret.json()
 
-        print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
+            print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
 
-        if  template_ret.get('errmsg') == "ok":
-            print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
-            response.code = 200
-            response.msg = "企业用户发送模板消息成功"
+            if  template_ret.get('errmsg') == "ok":
+                print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
+                response.code = 200
+                response.msg = "企业用户发送模板消息成功"
+                flag = False
 
-        elif template_ret.get('errcode') == 40001:
-            rc.delete(key_name)
-        else:
-            print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
-            response.code = 200
-            response.msg = "企业用户发送模板消息成功"
+            elif template_ret.get('errcode') == 40001:
+                rc.delete(key_name)
+
+
+            else:
+                print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
+                response.code = 301
+                response.msg = "企业用户发送模板消息失败"
+
+
+
     else:
         response.msg = "客户不存在"
         response.code = 301
