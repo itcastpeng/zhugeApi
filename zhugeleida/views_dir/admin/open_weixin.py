@@ -138,8 +138,7 @@ def open_weixin(request, oper_type):
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
-                                                   'id'] == 0 else False
+                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
                     # ---->预留代码
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                     qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
@@ -173,17 +172,18 @@ def open_weixin(request, oper_type):
                             'access_token': authorizer_access_token
                         }
                         post_domain_data = {
-                            "action": "add",
-                            "requestdomain": ["https://api.zhugeyingxiao.com"],
-                            "wsrequestdomain": ["wss://api.zhugeyingxiao.com"],
-                            "uploaddomain": ["https://api.zhugeyingxiao.com"],
-                            "downloaddomain": ["https://api.zhugeyingxiao.com"],
-
+                            'action': 'add',
+                            'requestdomain': ['https://api.zhugeyingxiao.com'],
+                            'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
+                            'uploaddomain': ['https://api.zhugeyingxiao.com'],
+                            'downloaddomain': ['https://api.zhugeyingxiao.com']
                         }
                         post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
                         domain_data_ret = requests.post(post_domain_url, params=get_domin_data,
                                                         data=json.dumps(post_domain_data))
                         domain_data_ret = domain_data_ret.json()
+                        print('--------- 修改小程序服务器 接口返回---------->>',domain_data_ret)
+
                         errcode = domain_data_ret.get('errcode')
                         errmsg = domain_data_ret.get('errmsg')
 
@@ -412,7 +412,7 @@ def xcx_auth_process_oper(request, oper_type):
                         user_id=user_id,
                         company_id=company_id,
                         authorization_appid=authorization_appid,
-                       
+
                     )
                 response.code = 200
                 response.msg = "修改成功"
