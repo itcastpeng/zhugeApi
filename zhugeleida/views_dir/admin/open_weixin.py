@@ -396,7 +396,7 @@ def xcx_auth_process_oper(request, oper_type):
             forms_obj = UpdateIDForm(request.POST)
             if forms_obj.is_valid():
                 authorization_appid = request.POST.get('authorization_appid').strip()
-                authorization_secret = request.POST.get('authorization_secret').strip()
+
                 print("验证通过")
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
@@ -405,7 +405,6 @@ def xcx_auth_process_oper(request, oper_type):
                 if objs:
                     objs.update(
                         authorization_appid=authorization_appid,
-                        authorization_secret=authorization_secret,
                         company_id=company_id
                     )
                 else:
@@ -413,7 +412,7 @@ def xcx_auth_process_oper(request, oper_type):
                         user_id=user_id,
                         company_id=company_id,
                         authorization_appid=authorization_appid,
-                        authorization_secret=authorization_secret,
+                       
                     )
                 response.code = 200
                 response.msg = "修改成功"
