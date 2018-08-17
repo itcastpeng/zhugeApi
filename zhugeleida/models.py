@@ -698,6 +698,7 @@ class zgld_article(models.Model):
     read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
+    insert_ads = models.CharField(verbose_name='插入广告语',null=True,max_length=64)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
     class Meta:
