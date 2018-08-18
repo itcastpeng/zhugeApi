@@ -237,10 +237,12 @@ def user_send_template_msg(request):
     customer_obj = models.zgld_customer.objects.filter(id=customer_id)
     now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    objs = models.zgld_user_customer_belonger.objects.filter(
-        customer_id=customer_id, user_id=user_id
+    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+        customer_id=customer_id,
+        user_id=user_id
     )
-
+    exist_formid_json = json.loads(objs[0].customer.formid)
+    user_name = objs[0].user.username
     flag = True
     while flag:
 
@@ -262,36 +264,12 @@ def user_send_template_msg(request):
             }
             authorizer_access_token = create_authorizer_access_token(data)
 
-
-
-        # key_name = "company_%s_xiaochengxu_token" % (company_id)
-        # token_ret = rc.get(key_name)
-        # print('---token_ret---->>', token_ret)
-        #
-        # if not token_ret:
-        #     # {"errcode": 0, "errmsg": "created"}
-        #     token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
-        #     token_ret_json = token_ret.json()
-        #     print('------- 生成小程序模板信息用的token： 接口返回数据------>', token_ret_json)
-        #     if not token_ret_json.get('access_token'):
-        #         response.code = token_ret_json['errcode']
-        #         response.msg = "生成模板信息用的token未通过"
-        #         return response
-        #
-        #     access_token = token_ret_json['access_token']
-        #     print('---- access_token --->>', token_ret_json)
-        #     get_template_data['access_token'] = access_token
-        #     rc.set(key_name, access_token, 7000)
-        #
-        # else:
-        #     get_template_data['access_token'] = token_ret
         get_template_data = {
             'access_token' : authorizer_access_token      #授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
         }
-        global openid,form_id
-        if customer_obj:
-            form_id =  customer_obj[0].formid
-            openid =  customer_obj[0].openid
+        # global openid,form_id
+        if customer_obj and objs:
+            openid = customer_obj[0].openid
             post_template_data['touser'] = openid
 
             # post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
@@ -299,23 +277,19 @@ def user_send_template_msg(request):
             path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
             post_template_data['page'] = path
 
-            user_name = ''
-            if objs:
-                exist_formid_json = json.loads(objs[0].customer.formid )
-                user_name = objs[0].user.username
-                if len(exist_formid_json) == 0:
-                    response.msg = "没有formID"
-                    response.code = 301
-                    print('------- 没有消费的formID -------->>')
-                    return JsonResponse(response.__dict__)
+            if len(exist_formid_json) == 0:
+                response.msg = "没有formID"
+                response.code = 301
+                print('------- 没有消费的formID -------->>')
+                break
 
-                print('---------formId 消费前数据----------->>',exist_formid_json)
-                form_id = exist_formid_json.pop(-1)
-                obj = models.zgld_customer.objects.filter(id=customer_id)
+            print('---------formId 消费前数据----------->>',exist_formid_json)
+            form_id = exist_formid_json.pop(-1)
+            obj = models.zgld_customer.objects.filter(id=customer_id)
 
-                obj.update(formid=json.dumps(exist_formid_json))
-                print('---------formId 消费了哪个 ----------->>', form_id)
-                post_template_data['form_id'] = form_id
+            obj.update(formid=json.dumps(exist_formid_json))
+            print('---------formId 消费了哪个 ----------->>', form_id)
+            post_template_data['form_id'] = form_id
 
 
             # 留言回复通知
@@ -341,7 +315,7 @@ def user_send_template_msg(request):
 
             print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
 
-            if  template_ret.get('errmsg') == "ok":
+            if template_ret.get('errmsg') == "ok":
                 print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
                 response.code = 200
                 response.msg = "企业用户发送模板消息成功"
@@ -355,13 +329,10 @@ def user_send_template_msg(request):
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
 
-
-
         else:
             response.msg = "客户不存在"
             response.code = 301
             print('---- Template Msg 客户不存在---->>')
-
 
     return JsonResponse(response.__dict__)
 
