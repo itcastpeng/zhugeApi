@@ -226,6 +226,7 @@ def user_send_template_msg(request):
     customer_id = data.get('customer_id')
     userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
     company_id = userprofile_obj.company_id
+    print('company_id -->', company_id)
     obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
     authorizer_refresh_token = obj.authorizer_refresh_token
     authorizer_appid = obj.authorization_appid
