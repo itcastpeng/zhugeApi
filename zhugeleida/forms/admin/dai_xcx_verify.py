@@ -50,6 +50,15 @@ class CommitCodeInfoForm(forms.Form):
     #             return app_id
 
 
+class RelaseCodeInfoForm(forms.Form):
+    app_ids_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "小程序app id不能为空"
+        }
+    )
+
+
 
 class AuditCodeInfoForm(forms.Form):
     app_ids_list = forms.CharField(
