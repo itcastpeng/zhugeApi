@@ -251,6 +251,7 @@ def login_oper(request,oper_type):
             objs = models.zgld_customer.objects.filter(id=customer_id)
 
             if objs and formid and 'formId' not in formid:
+                print('formid ------------------->', formid)
 
                 exist_formid = objs[0].formid
                 if not exist_formid:
@@ -258,11 +259,10 @@ def login_oper(request,oper_type):
 
                 exist_formid_json = json.loads(exist_formid)
                 exist_formid_json.append(formid)
-                now_form_id_json = json.dumps(exist_formid_json)
-                now_form_id_json = list(set(now_form_id_json))
+                now_form_id_json = list(set(exist_formid_json))
 
                 # print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>','\n',now_form_id_json)
-                objs.update(formid=now_form_id_json)
+                objs.update(formid=json.dumps(now_form_id_json))
 
 
                 response.code = 200
