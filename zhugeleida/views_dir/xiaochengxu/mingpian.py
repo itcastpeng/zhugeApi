@@ -98,7 +98,7 @@ def mingpian(request):
 
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
                     sign_num = objs[0].sign_num
-                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,send_type=1,is_customer_new_msg=True).count()
+                    # chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,send_type=1,is_customer_new_msg=True).count()
                     mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2).order_by('-create_date')
 
                     mingpian_avatar = ''
@@ -133,7 +133,6 @@ def mingpian(request):
                         'sign_num': sign_num,
                         'photo': '', #预留照片墙
                         'tag': list(tag_data),
-                        'chatinfo_count' : chatinfo_count,
 
                     }
 

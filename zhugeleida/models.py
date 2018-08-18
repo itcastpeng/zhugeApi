@@ -62,7 +62,6 @@ class zgld_gongzhonghao_app(models.Model):
 
 
 
-
 #小程序App应用
 class zgld_xiaochengxu_app(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="小程序授权的后台用户", null=True)
@@ -76,6 +75,7 @@ class zgld_xiaochengxu_app(models.Model):
 
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
     authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128,null=True)
+    template_id = models.CharField(verbose_name="消息模板ID", max_length=128,null=True)
     authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)    #-1代表未认证，0代表微信认证
     introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
@@ -100,6 +100,12 @@ class zgld_xiapchengxu_upload_audit(models.Model):
     template_id = models.IntegerField(verbose_name="小程序模板ID", null=True)
     upload_code_date = models.DateTimeField(verbose_name="代码长传时间", null=True)
     experience_qrcode =  models.CharField(verbose_name="体验二维码",null=True,max_length=128)
+
+    upload_result_type = (
+        (0,'代码上传成功'),
+        (1,'代码上传失败')
+    )
+    upload_result = models.SmallIntegerField(verbose_name='上传结果',null=True,choices=upload_result_type)
 
     # app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='审核的-小程序App')
     # upload_code = models.OneToOneField('zgld_xiapchengxu_upload', verbose_name='上传的代码') # 审核的哪个版本的长传后的代码。
@@ -698,6 +704,7 @@ class zgld_article(models.Model):
     read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
+    insert_ads = models.CharField(verbose_name='插入广告语',null=True,max_length=64)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
     class Meta:
@@ -758,7 +765,7 @@ class zgld_plugin_mingpian(models.Model):
         app_label = "zhugeleida"
 
 
-#公众号-报名插件
+# 公众号-报名插件
 class zgld_plugin_report(models.Model):
     #广告位
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
@@ -780,7 +787,7 @@ class zgld_plugin_report(models.Model):
         verbose_name_plural = "插件-报名插件"
         app_label = "zhugeleida"
 
-# # 公众号-报名的客户
+# 公众号-报名的客户
 class zgld_report_to_customer(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
     activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)

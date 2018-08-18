@@ -154,7 +154,7 @@ def chat_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 response = Response.ResponseObj()
                 customer_id = request.GET.get('user_id')
-                user_id = request.GET.get('u_id')
+                user_id = request.GET.get('uid')
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -217,6 +217,27 @@ def chat_oper(request, oper_type, o_id):
                     response.msg = '没有得到实时聊天信息'
             else:
                 response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
+
+        #查询聊天信息数量
+        elif oper_type == 'query_num':
+            forms_obj = ChatGetForm(request.GET)
+            if forms_obj.is_valid():
+                response = Response.ResponseObj()
+                customer_id = request.GET.get('user_id')
+                user_id = request.GET.get('u_id')
+
+                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'chatinfo_count': chatinfo_count,
+                }
+
+            else:
+                response.code = 302
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 

@@ -13,7 +13,7 @@ from django import forms
 import datetime
 from django.conf import settings
 import os
-from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,GetqrCodeForm,GetLatestAuditForm,GetAuditForm
+from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,GetqrCodeForm,AuditCodeInfoForm,GetAuditForm
 
 
 
@@ -25,7 +25,7 @@ def dai_xcx_oper(request, oper_type):
     if request.method == "POST":
 
         # 第三方代小程序上传
-        if oper_type == 'code_commit_audit':
+        if oper_type   == 'upload_code':
 
             # user_id = request.GET.get('user_id')
             '''
@@ -52,6 +52,7 @@ def dai_xcx_oper(request, oper_type):
                 user_desc = forms_obj.cleaned_data.get('user_desc')       #描述
                 # ext_json = forms_obj.cleaned_data.get('ext_json')
                 app_ids_list = json.loads(app_ids_list)
+
                 objs = models.zgld_xiaochengxu_app.objects.filter(id__in=app_ids_list)
                 if objs:
                     for obj in objs:
@@ -87,12 +88,12 @@ def dai_xcx_oper(request, oper_type):
                             }
                             authorizer_access_token_result = create_authorizer_access_token(data)
                             if authorizer_access_token_result.code == 200:
-                                authorizer_access_token = response.data
+                                authorizer_access_token = authorizer_access_token_result.data
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
 
 
-                        print('------ 第三方自定义的配置 ext_json ------>',ext_json)
+                        print('------ 第三方自定义的配置 ext_json ------>',json.dumps(ext_json))
                         get_wxa_commit_data =  {
                             'access_token': authorizer_access_token
                         }
@@ -112,16 +113,26 @@ def dai_xcx_oper(request, oper_type):
 
                         errcode = wxa_commit_info_ret.get('errcode')
                         errmsg = wxa_commit_info_ret.get('errmsg')
+                        if int(errcode) == 0:
+                            errcode = 0
+                            reason = ''
+                        else:
+                            errcode = 1
+                            reason = errmsg
+
                         datetime_now = datetime.datetime.now()
+                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.create(
+                            app_id=obj.id,
+                            publisher_id=user_id,
+                            desc=user_desc,
+                            version_num=user_version,
+                            template_id=template_id,
+                            upload_code_date=datetime_now,
+                            upload_result = errcode,
+                            reason=reason
+                        )
+
                         if errcode == 0:
-                            upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.create(
-                                app_id=obj.id,
-                                publisher_id=user_id,
-                                desc=user_desc,
-                                version_num=user_version,
-                                template_id=template_id,
-                                upload_code_date=datetime_now
-                            )
                             # response.code = 200
                             # response.msg = '小程序帐号上传小程序代码成功'
                             print('------ 代小程序上传代码成功 ------>>')
@@ -130,13 +141,11 @@ def dai_xcx_oper(request, oper_type):
                             response.msg = errmsg  # https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1489140610_Uavc4&token=&lang=zh_CN
                             return  JsonResponse(response.__dict__)
 
+
                         get_qrcode_url = 'https://api.weixin.qq.com/wxa/get_qrcode'
                         # app_id = forms_obj.cleaned_data.get('app_id')  # 账户
                         # upload_code_id = forms_obj.cleaned_data.get('upload_code_id')
 
-
-                        authorizer_refresh_token = obj.authorizer_refresh_token
-                        authorizer_appid = obj.authorization_appid
 
                         key_name = '%s_authorizer_access_token' % (authorizer_appid)
                         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
@@ -149,12 +158,13 @@ def dai_xcx_oper(request, oper_type):
                             }
                             authorizer_access_token_result = create_authorizer_access_token(data)
                             if authorizer_access_token_result.code == 200:
-                                authorizer_access_token = response.data
+                                authorizer_access_token = authorizer_access_token_result.data
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
-
+                        path = 'pages/mingpian/index?uid=1&source=1'
                         get_qrcode_data = {
-                            'access_token': authorizer_access_token
+                            'access_token': authorizer_access_token,
+                            'path': path,
                         }
 
                         get_qrcode_ret = requests.get(get_qrcode_url, params=get_qrcode_data)
@@ -162,8 +172,7 @@ def dai_xcx_oper(request, oper_type):
                         try:
 
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                            BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin',
-                                                    'qr_code')
+                            BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
 
                             qr_code_name = '/%s_%s_QRCode.jpg' % (authorizer_appid, now_time)
 
@@ -180,8 +189,11 @@ def dai_xcx_oper(request, oper_type):
                             #     'qrcode_url': qr_url
                             #
                             # }
+
                             upload_code_obj.experience_qrcode=qr_url
                             upload_code_obj.save()
+                            return JsonResponse(response.__dict__)
+
 
                         except Exception as e:
                             response.code = 301
@@ -189,6 +201,29 @@ def dai_xcx_oper(request, oper_type):
                             print('------- 获取体验小程序的体验二维码_接口返回-错误 ---->>', get_qrcode_ret.text, '|', e)
                             return JsonResponse(response.__dict__)
 
+
+
+
+                else:
+                    print("验证不通过")
+                    response.code = 301
+                    response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 代码包提交审核
+        elif oper_type == 'submit_audit':
+
+
+            forms_obj = AuditCodeInfoForm(request.POST)
+            if forms_obj.is_valid():
+                user_id = request.GET.get('user_id')  # 账户
+                app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
+
+                app_ids_list = json.loads(app_ids_list)
+                objs = models.zgld_xiaochengxu_app.objects.filter(id__in=app_ids_list)
+                if objs:
+                    for obj in objs:
+
+                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id).order_by('-upload_code_date')[0]
 
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
@@ -204,7 +239,7 @@ def dai_xcx_oper(request, oper_type):
                             }
                             authorizer_access_token_result = create_authorizer_access_token(data)
                             if authorizer_access_token_result.code == 200:
-                                authorizer_access_token = response.data
+                                authorizer_access_token = authorizer_access_token_result.data
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
 
@@ -223,7 +258,7 @@ def dai_xcx_oper(request, oper_type):
                         if errcode == 0:
 
                             print('-----page_list--->>', page_list)
-                            #-----page_list--->> ['pages/index/index', 'pages/logs/logs']
+                            # -----page_list--->> ['pages/index/index', 'pages/logs/logs']
 
 
                         else:
@@ -261,7 +296,7 @@ def dai_xcx_oper(request, oper_type):
                         item_dict = {
                             'address': page_list[0],
                             'first_class': category_list[0].get('first_class'),
-                            'second_class' : category_list[0].get('second_class'),
+                            'second_class': category_list[0].get('second_class'),
                             'first_id': category_list[0].get('first_id'),
                             'second_id': category_list[0].get('second_id'),
                             'tag': '名片',
@@ -272,7 +307,7 @@ def dai_xcx_oper(request, oper_type):
 
                         '''
                         {'errcode': 0, 'errmsg': 'ok', 'page_list': ['pages/index/index', 'pages/logs/logs'] }
-        
+            
                         {'errcode': 0, 'errmsg': 'ok', 
                              'category_list': [{
                                     "first_class":"教育",
@@ -283,7 +318,7 @@ def dai_xcx_oper(request, oper_type):
                                     "third_id":5
                                 }]
                              }
-        
+            
                         '''
 
                         get_submit_audit_data = {
@@ -293,10 +328,10 @@ def dai_xcx_oper(request, oper_type):
                             'item_list': item_list
                         }
                         post_submit_audit_data = json.dumps(post_submit_audit_data, ensure_ascii=False)
-                        print('json.dumps(post_submit_audit_data)----->>',post_submit_audit_data)
+                        print('---- json.dumps(post_submit_audit_data) --->>', post_submit_audit_data)
 
                         submit_audit_ret = requests.post(submit_audit_url, params=get_submit_audit_data,
-                                                        data=post_submit_audit_data.encode('utf-8'))
+                                                         data=post_submit_audit_data.encode('utf-8'))
 
                         submit_audit_ret = submit_audit_ret.json()
                         auditid = submit_audit_ret.get('auditid')
@@ -304,21 +339,20 @@ def dai_xcx_oper(request, oper_type):
                         errmsg = submit_audit_ret.get('errmsg')
                         now_time = datetime.datetime.now()
                         print('-------- 代码包-提交审核 返回 submit_audit_ret 返回------>>', submit_audit_ret)
-                        if errcode == 0:
+                        if errmsg == 'ok':
 
                             print('-----auditid--->>', auditid)
                             audit_result = 2  # (2,'审核中')
-                            reason  = ''
+                            reason = ''
                             response.code = 200
                             response.msg = '提交审核代码成功'
 
                         else:
 
-                            audit_result = 3   # (3,'提交审核失败')
+                            audit_result = 3  # (3,'提交审核失败')
                             response.code = errcode
-                            reason = '提交审核代码报错: %s : %s' % (errcode,errmsg)
+                            reason = '提交审核代码报错: %s : %s' % (errcode, errmsg)
                             response.msg = reason
-
 
                         upload_code_obj.auditid = auditid
                         upload_code_obj.audit_commit_date = now_time
@@ -327,144 +361,56 @@ def dai_xcx_oper(request, oper_type):
                         upload_code_obj.save()
 
                 else:
-                    print("验证不通过")
                     response.code = 301
-                    response.msg = json.loads(forms_obj.errors.as_json())
+                    response.msg = '没有需要提交审核的小程序'
 
-        # 获取体验小程序的体验二维码
-        elif oper_type == 'get_qrcode':
-            forms_obj = GetqrCodeForm(request.POST)
 
-            if forms_obj.is_valid():
-                pass
-
-        # 将第三方提交的代码包提交审核
-        elif oper_type == 'submit_audit':
-            forms_obj = SubmitAuditForm(request.POST)
-            if forms_obj.is_valid():
-                pass
 
         return JsonResponse(response.__dict__)
 
     elif request.method == "GET":
         print('------post.get--->',)
-        #查询最新一次提交的审核状态
+
+        #查询最新一次提交的审核状态，并把审核通过的代码提交上线。
         if oper_type == 'get_latest_audit_status':
-            # forms_obj = GetLatestAuditForm(request.POST)
-            # if forms_obj.is_valid():
 
             objs = models.zgld_xiapchengxu_upload_audit.objects.filter(audit_result=2,auditid__isnull=False)
 
-            if objs: #如果在审核中，并有编号，说明提交了审核。定时器要不停的去轮训,一旦发现有通过审核的，就要触发上线操作,并记录下来。
-                auditid = objs[0].auditid
-                for obj in objs:
+            audit_status_data = {
+                'upload_audit_objs': objs
+            }
+            audit_status_response = batch_get_latest_audit_status(audit_status_data) # 只管查询最后一次上传的代码，
 
-                    app_id = obj.app_id
-                    get_latest_auditstatus_url = 'https://api.weixin.qq.com/wxa/get_latest_auditstatus'
-                    # app_id = forms_obj.cleaned_data.get('app_id')  # 账户
-                    # audit_code_id= forms_obj.cleaned_data.get('audit_code_id')
 
-                    # app_obj = models.zgld_xiaochengxu_app.objects.get(id=app_id)
-                    authorizer_refresh_token = obj.app.authorizer_refresh_token
-                    authorizer_appid = obj.app.authorization_appid
 
-                    key_name = '%s_authorizer_access_token' % (authorizer_appid)
-                    authorizer_access_token = rc.get(key_name)  #不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+        elif oper_type == 'relase_code':
 
-                    if not authorizer_access_token:
-                        data = {
-                            'key_name': key_name,
-                            'authorizer_refresh_token': authorizer_refresh_token,
-                            'authorizer_appid': authorizer_appid
+            forms_obj = CommitCodeInfoForm(request.POST)
+            if forms_obj.is_valid():
+                user_id = request.GET.get('user_id')  # 账户
+                app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
+                auditid_list = forms_obj.cleaned_data.get('auditid_list')  # 账户
+                auditid_list = json.loads(auditid_list)
+                app_ids_list = json.loads(app_ids_list)
+
+
+                objs = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id_in=app_ids_list,audit_result=0, auditid__in=auditid_list)
+
+                if objs:
+
+                    for obj in objs: # 循环上线代码
+                        # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
+                        relase_data = {
+                            'upload_audit_objs': objs,
+                            'app_id': obj.app_id,
+                            'audit_code_id' : obj.id,
+                            'auditid' : obj.auditid
                         }
-                        authorizer_access_token_result = create_authorizer_access_token(data)
-                        if authorizer_access_token_result.code == 200:
-                            authorizer_access_token = response.data
-                        else:
-                            return JsonResponse(authorizer_access_token.__dict__)
+                        response  =  relase_code(relase_data)
 
-                    get_latest_audit_data = {
-                        'access_token': authorizer_access_token
-                    }
-
-                    get_latest_audit_ret = requests.get(get_latest_auditstatus_url, params=get_latest_audit_data)
-                    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                    get_latest_audit_ret = get_latest_audit_ret.json()
-                    print('------获取查询审核中+最新一次提交的审核状态 接口返回----->>',get_latest_audit_ret)
-
-                    errcode = get_latest_audit_ret.get('errcode')
-                    errmsg = get_latest_audit_ret.get('errmsg')
-                    status = get_latest_audit_ret.get('status')
-                    reason = get_latest_audit_ret.get('reason')
-
-                    if status == 0:
-                        response.code = 200
-                        response.msg = '审核成功ID'
-                        print('--------审核成功ID | audit_code_id: -------->',obj.app_id,'|',auditid)
-                        release_obj = models.zgld_xiapchengxu_release.objects.filter(audit_code_id=obj.app_id)
-                        obj.audit_reply_date = now_time
-
-                        if not release_obj: # 没有发布相关的代码记录,说明没有上过线呢。
-                            release_url =  'https://api.weixin.qq.com/wxa/release'
-                            get_release_data = {
-                                'access_token': authorizer_access_token
-                            }
-
-                            get_release_ret = requests.post(release_url, params=get_release_data)
-                            get_release_ret = get_release_ret.json()
-                            errcode = get_release_ret.get('errcode')
-                            errmsg = get_release_ret.get('errmsg')
-                            status = get_release_ret.get('status')
-                            reason = get_release_ret.get('reason')
-
-                            if errcode == 0:
-                                release_result=1  # 上线成功
-                                reason = ''
-                                print('--------发布已通过审核的小程序【成功】: auditid | audit_code_id -------->>',auditid,'|',obj.app_id)
-
-                            else:
-                                release_result=2  # 上线失败
-                                if errcode == -1:
-                                   reason = '系统繁忙'
-                                elif errcode ==  85019:
-                                   reason = '没有审核版本'
-                                elif errcode == 85020:
-                                    reason = '审核状态未满足发布'
-                                print('-------发布已通过审核的小程序【失败】auditid | audit_code_id -------->>',auditid,'|' ,obj.app_id)
-
-
-                            models.zgld_xiapchengxu_release.objects.create(
-                                app=app_id,
-                                audit_code_id=obj.app_id,
-                                release_result =release_result,
-                                release_commit_date=now_time,
-                                reason=reason
-                            )
-
-
-
-                    elif status == 1: # 0为审核成功
-                        response.code = 200
-                        response.msg = '审核状态失败'
-
-
-                    elif status == 2 :
-                        response.code = 200
-                        response.msg = '审核中'
-
-
-                    obj.audit_result = status
-                    obj.reason = reason
-                    obj.save()
-
-                # else:
-                #     print("--验证不通过-->",forms_obj.errors.as_json())
-                #     response.code = 301
-                #     response.msg = json.loads(forms_obj.errors.as_json())
-            else:
-                response.code = 302
-                response.msg = '没有正在审核中的代码'
-                print('-------- 没有正在【审核中】状态的代码 ------>>')
+                else:
+                    response.code = 301
+                    response.msg = '没有正在审核中的代码'
 
         #查询某个指定版本的审核状态
         elif oper_type == 'get_auditstatus':
@@ -491,7 +437,7 @@ def dai_xcx_oper(request, oper_type):
                     }
                     authorizer_access_token_result = create_authorizer_access_token(data)
                     if authorizer_access_token_result.code == 200:
-                        authorizer_access_token = response.data
+                        authorizer_access_token = authorizer_access_token_result.data
                     else:
                         return JsonResponse(authorizer_access_token.__dict__)
 
@@ -514,6 +460,7 @@ def dai_xcx_oper(request, oper_type):
                     reason = get_audit_ret.get('reason')
                     status = get_audit_ret.get('status')
                     if status == 0:
+
                         response.code = 200
                         response.msg = '审核状态成功'
 
@@ -538,8 +485,156 @@ def dai_xcx_oper(request, oper_type):
     return JsonResponse(response.__dict__)
 
 
+def  batch_get_latest_audit_status(data):
+    response = Response.ResponseObj()
+    objs = data.get('upload_audit_objs')
+
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    if objs:                            # 如果在审核中，并有编号，说明提交了审核。定时器要不停的去轮训,一旦发现有通过审核的，就要触发上线操作,并记录下来。
+        auditid = objs[0].auditid
+        for obj in objs:
+
+            get_latest_auditstatus_url = 'https://api.weixin.qq.com/wxa/get_latest_auditstatus'
+
+            authorizer_refresh_token = obj.app.authorizer_refresh_token
+            authorizer_appid = obj.app.authorization_appid
+
+            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+            if not authorizer_access_token:
+                data = {
+                    'key_name': key_name,
+                    'authorizer_refresh_token': authorizer_refresh_token,
+                    'authorizer_appid': authorizer_appid
+                }
+                authorizer_access_token_result = create_authorizer_access_token(data)
+                if authorizer_access_token_result.code == 200:
+                    authorizer_access_token = authorizer_access_token_result.data
+                else:
+                    return JsonResponse(authorizer_access_token.__dict__)
+
+            get_latest_audit_data = {
+                'access_token': authorizer_access_token
+            }
+            print('------get_latest_audit_data--------<<', get_latest_audit_data)
+
+            get_latest_audit_ret = requests.get(get_latest_auditstatus_url, params=get_latest_audit_data)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            get_latest_audit_ret = get_latest_audit_ret.json()
+            print('------获取查询审核中+最新一次提交的审核状态 接口返回----->>', get_latest_audit_ret)
+
+            errcode = get_latest_audit_ret.get('errcode')
+            errmsg = get_latest_audit_ret.get('errmsg')
+            status = int(get_latest_audit_ret.get('status'))
+            reason = get_latest_audit_ret.get('reason')
+
+            if status == 0:
+                response.code = 0
+                response.msg = '审核成功'
+                print('-------- 代码审核状态为【成功】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
+
+                ### 开始上线
+                relase_data = {
+                    'app_id' : obj.app_id,
+                    'audit_code_id' : obj.audit_code_id,
+                    'auditid' : auditid
+                }
+                obj.audit_reply_date = now_time
+                # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
+                relase_code(relase_data)
 
 
+
+            elif status == 1:  # 0为审核成功
+                response.code = 1
+                response.msg = '审核状态失败'
+                print('-------- 代码审核状态为【失败】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
+
+
+            elif status == 2:
+                response.code = 2
+                response.msg = '审核中'
+                print('-------- 代码审核状态为【审核中】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
+
+            # response.data = {
+            #     'obj': obj.id,
+            #     'auditid': auditid
+            # }
+
+            obj.audit_result = status  # 修改数据库-审核代码-状态无论是否通过或者不通过。
+            obj.reason = reason
+            obj.save()
+
+
+    else:
+        response.code = 302
+        response.msg = '没有正在审核中的代码'
+        print('>>-------- 没有状态正在【审核中】状态的代码 ------<<')
+
+    return response
+
+
+def relase_code(data):
+    response = Response.ResponseObj()
+    app_id = data.get('app_id')
+    audit_code_id = data.get('audit_code_id')
+    auditid = data.get('auditid')
+
+
+    # app_id = obj.app_id
+    # audit_code_id = obj.id
+    authorizer_access_token = data.get('authorizer_access_token')
+
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    print('-------- 代码审核状态【成功】---- auditid | audit_code_id -------->>', auditid, '|', audit_code_id)
+    release_obj = models.zgld_xiapchengxu_release.objects.filter(audit_code_id=audit_code_id)
+
+
+    if not release_obj:  # 没有发布相关的代码记录,说明没有上过线呢。
+        release_url = 'https://api.weixin.qq.com/wxa/release'
+        get_release_data = {
+            'access_token': authorizer_access_token
+        }
+
+        get_release_ret = requests.post(release_url, params=get_release_data)
+        get_release_ret = get_release_ret.json()
+        errcode = int(get_release_ret.get('errcode'))
+        errmsg = get_release_ret.get('errmsg')
+        status = get_release_ret.get('status')
+        reason = get_release_ret.get('reason')
+        print('-------- 获取发布的状态 接口返回：---------->>', get_release_ret)
+
+        if errmsg == "ok":
+            release_result = 1  # 上线成功
+            reason = ''
+            response.code = 200
+            response.msg = '上线成功'
+
+            print('--------发布已通过审核的小程序【成功】: auditid | audit_code_id -------->>', auditid, '|', audit_code_id)
+
+        else:
+            release_result = 2  # 上线失败
+            if errcode == -1:
+                reason = '系统繁忙'
+            elif errcode == 85019:
+                reason = '没有审核版本'
+            elif errcode == 85020:
+                reason = '审核状态未满足发布'
+
+            response.code = 303
+            response.msg = reason
+
+            print('-------发布已通过审核的小程序【失败】auditid | audit_code_id -------->>', auditid, '|', audit_code_id)
+
+        models.zgld_xiapchengxu_release.objects.create(
+            app=app_id,
+            audit_code_id=audit_code_id,
+            release_result=release_result,
+            release_commit_date=now_time,
+            reason=reason
+        )
+    return  response
 
 def create_authorizer_access_token(data):
     response = Response.ResponseObj()
@@ -611,3 +706,39 @@ def create_authorizer_access_token(data):
         return JsonResponse(response.__dict__)
 
     return  response
+
+
+def create_component_access_token():
+    response = Response.ResponseObj()
+
+    app_id = 'wx67e2fde0f694111c'
+    app_secret = '4a9690b43178a1287b2ef845158555ed'
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+    component_access_token = rc.get('component_access_token')
+    if not component_access_token:
+
+        get_pre_auth_data = {}
+        post_component_data = {}
+        post_component_data['component_appid'] = app_id
+        post_component_data['component_appsecret'] = app_secret
+        component_verify_ticket = rc.get('ComponentVerifyTicket')
+        post_component_data['component_verify_ticket'] = component_verify_ticket
+
+        post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
+        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+        print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
+        component_token_ret = component_token_ret.json()
+        access_token = component_token_ret.get('component_access_token')
+        if access_token:
+            get_pre_auth_data['component_access_token'] = access_token
+            rc.set('component_access_token', access_token, 7000)
+            component_access_token = access_token
+
+        else:
+            response.code = 400
+            response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
+            return JsonResponse(response.__dict__)
+
+    return    component_access_token
+

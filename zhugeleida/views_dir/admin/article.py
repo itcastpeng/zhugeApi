@@ -62,6 +62,7 @@ def article(request,oper_type):
                 ret_data = []
                 # 获取第几页的数据
                 for obj in objs:
+                    print('-----obj.tags.values---->', obj.tags.values('id','name'))
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,       # 文章标题
@@ -75,6 +76,9 @@ def article(request,oper_type):
                         'forward_count': obj.forward_count,  #被转发个数
                         'create_date': obj.create_date,      #文章创建时间
                         'cover_url' : obj.cover_picture,     #文章图片链接
+                        'tag_list' :  list(obj.tags.values('id','name')),
+                        'insert_ads' : json.loads(obj.insert_ads)  if obj.insert_ads else '' # 插入的广告语
+
 
                     })
                 response.code = 200
@@ -101,12 +105,13 @@ def article_oper(request, oper_type, o_id):
                 'summary': request.POST.get('summary'),
                 'content': request.POST.get('content'),
                 'cover_picture': request.POST.get('cover_picture'),
+
             }
 
             forms_obj = ArticleAddForm(article_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====??', forms_obj.cleaned_data)
+                print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
 
                 dict_data = {
                     'user_id': request.GET.get('user_id'),
@@ -114,6 +119,7 @@ def article_oper(request, oper_type, o_id):
                     'summary' :forms_obj.cleaned_data['summary'],
                     'content' :forms_obj.cleaned_data['content'],
                     'cover_picture' :forms_obj.cleaned_data['cover_picture'].strip(),
+                    'insert_ads': request.POST.get('insert_ads')
                 }
 
                 obj = models.zgld_article.objects.create(**dict_data)
@@ -151,6 +157,7 @@ def article_oper(request, oper_type, o_id):
                 'summary': request.POST.get('summary'),
                 'content': request.POST.get('content'),
                 'cover_picture': request.POST.get('cover_picture'),
+
             }
 
             forms_obj = ArticleUpdateForm(article_data)
@@ -160,6 +167,7 @@ def article_oper(request, oper_type, o_id):
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
                     'cover_picture': forms_obj.cleaned_data['cover_picture'],
+                    'insert_ads': request.POST.get('insert_ads')
                 }
                 user_id = request.GET.get('user_id')
                 article_id = forms_obj.cleaned_data['article_id']

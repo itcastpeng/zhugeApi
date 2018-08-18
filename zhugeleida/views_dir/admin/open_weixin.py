@@ -138,8 +138,7 @@ def open_weixin(request, oper_type):
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
-                                                   'id'] == 0 else False
+                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
                     # ---->预留代码
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                     qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
@@ -173,28 +172,29 @@ def open_weixin(request, oper_type):
                             'access_token': authorizer_access_token
                         }
                         post_domain_data = {
-                            "action": "add",
-                            "requestdomain": ["https://api.zhugeyingxiao.com"],
-                            "wsrequestdomain": ["wss://api.zhugeyingxiao.com"],
-                            "uploaddomain": ["https://api.zhugeyingxiao.com"],
-                            "downloaddomain": ["https://api.zhugeyingxiao.com"],
-
+                            'action': 'add',
+                            'requestdomain': ['https://api.zhugeyingxiao.com'],
+                            'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
+                            'uploaddomain': ['https://api.zhugeyingxiao.com'],
+                            'downloaddomain': ['https://api.zhugeyingxiao.com']
                         }
                         post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
                         domain_data_ret = requests.post(post_domain_url, params=get_domin_data,
                                                         data=json.dumps(post_domain_data))
                         domain_data_ret = domain_data_ret.json()
+                        print('--------- 修改小程序服务器 接口返回---------->>',domain_data_ret)
+
                         errcode = domain_data_ret.get('errcode')
                         errmsg = domain_data_ret.get('errmsg')
 
                         if errcode == 0:
                             response.code = 200
                             response.msg = "修改小程序服务器域名成功"
-                            print('---------授权appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
+                            print('---------授权 appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('---------授权appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid))
+                            print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
 
 
 
@@ -396,7 +396,7 @@ def xcx_auth_process_oper(request, oper_type):
             forms_obj = UpdateIDForm(request.POST)
             if forms_obj.is_valid():
                 authorization_appid = request.POST.get('authorization_appid').strip()
-                authorization_secret = request.POST.get('authorization_secret').strip()
+
                 print("验证通过")
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
@@ -405,7 +405,6 @@ def xcx_auth_process_oper(request, oper_type):
                 if objs:
                     objs.update(
                         authorization_appid=authorization_appid,
-                        authorization_secret=authorization_secret,
                         company_id=company_id
                     )
                 else:
@@ -413,7 +412,7 @@ def xcx_auth_process_oper(request, oper_type):
                         user_id=user_id,
                         company_id=company_id,
                         authorization_appid=authorization_appid,
-                        authorization_secret=authorization_secret,
+
                     )
                 response.code = 200
                 response.msg = "修改成功"

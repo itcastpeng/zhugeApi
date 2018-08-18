@@ -50,6 +50,31 @@ class CommitCodeInfoForm(forms.Form):
     #             return app_id
 
 
+
+class AuditCodeInfoForm(forms.Form):
+    app_ids_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "小程序app id不能为空"
+        }
+    )
+
+
+    # def clean_app_id(self):
+    #     app_id = self.data['app_id']
+    #     obj = models.zgld_xiaochengxu_app.objects.filter(id=app_id)
+    #     if not obj:
+    #         self.add_error('app_id', '小程序id不存在')
+    #     else:
+    #         authorizer_refresh_token = obj[0].authorizer_refresh_token
+    #         if not authorizer_refresh_token:
+    #             self.add_error('app_id', '小程序刷新令牌authorizer_refresh_token不存在')
+    #         else:
+    #             return app_id
+
+
+
+
 class GetqrCodeForm(forms.Form):
     app_id = forms.CharField(
         required=True,
@@ -73,13 +98,7 @@ class GetqrCodeForm(forms.Form):
         }
     )
 
-    def clean_upload_code_id(self):
-        upload_code_id = self.data['upload_code_id']
-        obj = models.zgld_xiapchengxu_upload.objects.filter(id=upload_code_id)
-        if not obj:
-            self.add_error('upload_code_id', '代小程序上传的代码不存在')
-        else:
-            return upload_code_id
+
 
     # def clean_customer_id(self):
     #     customer_id = self.data['customer_id']
@@ -120,14 +139,7 @@ class SubmitAuditForm(forms.Form):
         }
     )
 
-    def clean_upload_code_id(self):
-        upload_code_id = self.data['upload_code_id']
-        obj = models.zgld_xiapchengxu_upload.objects.filter(id=upload_code_id)
-        if not obj:
-            self.add_error('upload_code_id', '代小程序上传的代码不存在')
-        else:
 
-            return upload_code_id
 
     # def clean_audit_code_id(self):
     #     audit_code_id = self.data['audit_code_id']
@@ -237,19 +249,7 @@ class GetAuditForm(forms.Form):
             else:
                 return app_id
 
-    def clean_audit_code_id(self):
-        audit_code_id = self.data['audit_code_id']
-        obj = models.zgld_xiapchengxu_audit.objects.filter(id=audit_code_id)
-        if not obj:
-            self.add_error('audit_code_id', '提交审核的代码任务不存在')
 
-        else:
-            auditid = obj[0].auditid
-            if not  auditid:
-                self.add_error('audit_code_id', '审核auditid不存在')
-
-            else:
-                return audit_code_id
 
     # def clean_audit_code_id(self):
     #     audit_code_id = self.data['audit_code_id']
