@@ -101,6 +101,12 @@ class zgld_xiapchengxu_upload_audit(models.Model):
     upload_code_date = models.DateTimeField(verbose_name="代码长传时间", null=True)
     experience_qrcode =  models.CharField(verbose_name="体验二维码",null=True,max_length=128)
 
+    upload_result_type = (
+        (0,'代码上传成功'),
+        (1,'代码上传失败')
+    )
+    upload_result = models.SmallIntegerField(verbose_name='上传结果',null=True,choices=upload_result_type)
+
     # app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='审核的-小程序App')
     # upload_code = models.OneToOneField('zgld_xiapchengxu_upload', verbose_name='上传的代码') # 审核的哪个版本的长传后的代码。
     auditid = models.IntegerField(verbose_name="接口返回审核编号", null=True)

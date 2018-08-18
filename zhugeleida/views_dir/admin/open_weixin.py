@@ -190,11 +190,11 @@ def open_weixin(request, oper_type):
                         if errcode == 0:
                             response.code = 200
                             response.msg = "修改小程序服务器域名成功"
-                            print('---------授权appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
+                            print('---------授权 appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('---------授权appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid))
+                            print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
 
 
 

@@ -41,7 +41,7 @@ class ProductAddForm(forms.Form):
 
 
     content = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "内容不能为空"
         }

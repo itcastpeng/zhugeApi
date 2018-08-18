@@ -328,7 +328,7 @@ def product_oper(request, oper_type, o_id):
                 'name': request.POST.get('name'),  # 产品名称 必须
                 'price': request.POST.get('price'),  # 价格    非必须
                 'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                'content': request.POST.get('content'),  # 推荐理由 非必须
+                'content': request.POST.get('content'),  # 内容 非必须
             }
 
             forms_obj = ProductUpdateForm(form_data)
