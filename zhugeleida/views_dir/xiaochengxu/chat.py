@@ -160,6 +160,7 @@ def chat_oper(request, oper_type, o_id):
                     userprofile_id=user_id,
                     customer_id=customer_id,
                     is_customer_new_msg = True,
+                    is_user_new_msg = True
                 ).order_by('-create_date')
 
 

@@ -59,7 +59,11 @@ def dai_xcx_oper(request, oper_type):
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
 
-                        ext_json = json.loads(obj.ext_json)
+                        ext_json = {
+                            "extEnable": "true",
+                            "directCommit": "false"
+                        }
+
                         ext_json['extAppid'] = authorizer_appid
                         ext_json['ext'] = {
                             'company_id': obj.company_id
@@ -133,8 +137,8 @@ def dai_xcx_oper(request, oper_type):
                         )
 
                         if errcode == 0:
-                            # response.code = 200
-                            # response.msg = '小程序帐号上传小程序代码成功'
+                            response.code = 200
+                            response.msg = '小程序帐号上传小程序代码成功'
                             print('------ 代小程序上传代码成功 ------>>')
                         else:
                             response.code = errcode

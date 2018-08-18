@@ -10,5 +10,5 @@ test/
 db.sqlite3
 venv/
 tmp/
-qr_code/
+qr_code/*.jpg
 test.log
