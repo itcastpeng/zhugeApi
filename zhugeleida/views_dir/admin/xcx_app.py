@@ -58,6 +58,7 @@ def xcx_app(request):
 
                 status_time = ''
                 status_text = ''
+                auditid = ''
                 status = upload_audit_obj[0].upload_result
                 if status == 0:
                     status_text = '代码上传成功'
@@ -71,9 +72,12 @@ def xcx_app(request):
 
 
                 status =  upload_audit_obj[0].audit_result
+                auditid = upload_audit_obj[0].auditid
                 if status == 0:
                     status_text = '审核通过'
                     status_time = upload_audit_obj[0].audit_reply_date
+
+
                 elif status == 1:
                     status_text =  '审核未通过'
                     status_time = upload_audit_obj[0].audit_reply_date
@@ -108,6 +112,7 @@ def xcx_app(request):
                     'company_name': obj.company.name,
                     'version_num' : upload_audit_obj[0].version_num,
                     'template_id' : upload_audit_obj[0].template_id,
+                    'auditid' : auditid,
                     'status' :  status_text, # 审核的结果。
                     'status_time' : status_time.strftime('%Y-%m-%d %H:%M'),
                     'experience_qrcode': upload_audit_obj[0].experience_qrcode,

@@ -274,8 +274,7 @@ def open_weixin(request, oper_type):
 
             # 生成授权链接
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
-            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (
-                app_id, pre_auth_code, redirect_uri,)
+            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri)
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
             response.code = 200
             response.msg = '生成【授权链接】成功'
@@ -291,7 +290,9 @@ def xcx_auth_process(request):
     if request.method == "GET":
 
         user_id = request.GET.get('user_id')
-        obj = models.zgld_xiaochengxu_app.objects.filter(user_id=user_id)
+
+        userprofile_obj =  models.zgld_admin_userprofile.objects.get(id=user_id)
+        obj = models.zgld_xiaochengxu_app.objects.filter(company_id=userprofile_obj.company_id)
 
         if not obj:
             response.code = 200
@@ -308,7 +309,7 @@ def xcx_auth_process(request):
             principal_name = obj[0].principal_name
             head_img = obj[0].head_img
 
-            if not authorization_appid:  # 没有原始ID，首先填写原始ID和用户\公司关联信息
+            if not authorization_appid:  # 没有App ID，首先填写
                 response.code = 200
                 response.msg = "请求成功。请先进行步骤1"
                 response.data = {
@@ -340,22 +341,30 @@ def xcx_auth_process(request):
             elif authorizer_refresh_token and name:  # 授权通过以及填写信息完毕展示授权完整信息。
 
                 release_obj = models.zgld_xiapchengxu_release.objects.filter(app_id=obj[0].id).order_by('-release_commit_date')
+
+
                 version_num = ''
                 release_time = ''
                 if release_obj:
                     release_result = release_obj[0].release_result
-                    if release_result == 1:  # 上线成功
-                        version_num = release_obj[0].audit_code.version_num
-                        release_time = release_obj[0].release_commit_date
 
-                upload_audit_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj[0].id, audit_result=2,
-                                                                                       auditid__isnull=False).order_by(
+                    if release_result == 1:  # 上线成功
+                        audit_code_id = release_obj[0].audit_code_id
+                        upload_audit_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(id=audit_code_id)
+                        if upload_audit_obj:
+                            version_num = upload_audit_obj[0].version_num
+
+                        version_num =  version_num
+                        release_time = release_obj[0].release_commit_date.strftime('%Y-%m-%d %H:%M')
+
+                upload_audit_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj[0].id, audit_result=2,auditid__isnull=False).order_by(
                     '-audit_commit_date')  #在审核中并且auditid 不能为空。
                 stay_version_num = ''
                 stay_audit_time = ''
+
                 if upload_audit_obj:
-                    stay_version_num = upload_audit_obj[0].audit_code.version_num
-                    stay_audit_time = upload_audit_obj[0].audit_commit_date
+                    stay_version_num = upload_audit_obj[0].version_num ,
+                    stay_audit_time = upload_audit_obj[0].audit_commit_date.strftime('%Y-%m-%d %H:%M')
 
                 response.data = {
                     'step': '',

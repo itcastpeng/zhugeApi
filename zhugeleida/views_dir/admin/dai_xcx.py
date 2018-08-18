@@ -13,7 +13,7 @@ from django import forms
 import datetime
 from django.conf import settings
 import os
-from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,GetqrCodeForm,AuditCodeInfoForm,GetAuditForm
+from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,RelaseCodeInfoForm,AuditCodeInfoForm,GetAuditForm
 
 
 
@@ -59,7 +59,11 @@ def dai_xcx_oper(request, oper_type):
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
 
-                        ext_json = json.loads(obj.ext_json)
+                        ext_json = {
+                            "extEnable": "true",
+                            "directCommit": "false"
+                        }
+
                         ext_json['extAppid'] = authorizer_appid
                         ext_json['ext'] = {
                             'company_id': obj.company_id
@@ -133,8 +137,8 @@ def dai_xcx_oper(request, oper_type):
                         )
 
                         if errcode == 0:
-                            # response.code = 200
-                            # response.msg = '小程序帐号上传小程序代码成功'
+                            response.code = 200
+                            response.msg = '小程序帐号上传小程序代码成功'
                             print('------ 代小程序上传代码成功 ------>>')
                         else:
                             response.code = errcode
@@ -381,11 +385,13 @@ def dai_xcx_oper(request, oper_type):
             }
             audit_status_response = batch_get_latest_audit_status(audit_status_data) # 只管查询最后一次上传的代码，
 
+            response.code = 200
+            response.msg = '查询最新一次提交的审核状态-执行完成'
 
 
         elif oper_type == 'relase_code':
 
-            forms_obj = CommitCodeInfoForm(request.POST)
+            forms_obj = RelaseCodeInfoForm(request.POST)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')  # 账户
                 app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
@@ -401,13 +407,15 @@ def dai_xcx_oper(request, oper_type):
                     for obj in objs: # 循环上线代码
                         # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
                         relase_data = {
-                            'upload_audit_objs': objs,
+
                             'app_id': obj.app_id,
                             'audit_code_id' : obj.id,
                             'auditid' : obj.auditid
                         }
                         response  =  relase_code(relase_data)
 
+                    response.code = 200
+                    response.msg = '发布已经审核通过的代码-执行完成'
                 else:
                     response.code = 301
                     response.msg = '没有正在审核中的代码'
@@ -534,16 +542,15 @@ def  batch_get_latest_audit_status(data):
                 response.msg = '审核成功'
                 print('-------- 代码审核状态为【成功】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
 
-                ### 开始上线
-                relase_data = {
-                    'app_id' : obj.app_id,
-                    'audit_code_id' : obj.audit_code_id,
-                    'auditid' : auditid
-                }
-                obj.audit_reply_date = now_time
-                # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
-                relase_code(relase_data)
-
+                # ### 开始上线
+                # relase_data = {
+                #     'app_id' : obj.app_id,
+                #     'audit_code_id' : obj.audit_code_id,
+                #     'auditid' : auditid
+                # }
+                # obj.audit_reply_date = now_time
+                # # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
+                # relase_code(relase_data)
 
 
             elif status == 1:  # 0为审核成功
@@ -565,6 +572,7 @@ def  batch_get_latest_audit_status(data):
             obj.audit_result = status  # 修改数据库-审核代码-状态无论是否通过或者不通过。
             obj.reason = reason
             obj.save()
+
 
 
     else:
