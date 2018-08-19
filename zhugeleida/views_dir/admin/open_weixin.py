@@ -112,8 +112,7 @@ def open_weixin(request, oper_type):
                 access_token_ret = requests.post(access_token_url, params=get_access_token_data,
                                                  data=json.dumps(post_access_token_data))
                 access_token_ret = access_token_ret.json()
-                print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',
-                      access_token_ret)
+                print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>', access_token_ret)
                 authorizer_access_token = access_token_ret['authorization_info'].get('authorizer_access_token')
                 authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
                 authorizer_appid = access_token_ret['authorization_info'].get('authorizer_appid')
