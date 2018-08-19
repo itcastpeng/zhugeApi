@@ -54,7 +54,8 @@ def login(request):
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
-            company_id = forms_obj.cleaned_data.get('company_id')
+            # company_id = forms_obj.cleaned_data.get('company_id')
+            company_id = request.GET.get('company_id')
 
             if not company_id:  # 暂时修改 ，等审核后在注释。。
                 company_id = 1
