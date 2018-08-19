@@ -220,10 +220,10 @@ def product(request, oper_type):
                 product_id = request.GET.get('product_id')
 
 
-                picture_obj = models.zgld_product_picture.objects.filter(product_id=product_id,picture_type=1)[:1]
-                product_cover_url = picture_obj[0].picture_url # 产品封面URL
-                product_price = picture_obj[0].product.price   # 产品价格
-                product_name =  picture_obj[0].product.name    #产品民称
+                picture_obj = models.zgld_product.objects.get(id=product_id)
+                product_cover_url = json.loads(picture_obj.content).get('cover_data')[0]['data'][0]   # 产品价格
+                product_price = picture_obj.price   # 产品价格
+                product_name =  picture_obj.name    #产品民称
 
                 new_product_cover_filename = str(uuid.uuid1())
                 exit_product_cover_path = BASE_DIR + '/' +  product_cover_url

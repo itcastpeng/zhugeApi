@@ -130,11 +130,9 @@ def open_weixin(request, oper_type):
                     post_wx_info_data['authorizer_appid'] = authorizer_appid
                     get_wx_info_data['component_access_token'] = component_access_token
                     url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,
-                                                        data=json.dumps(post_wx_info_data))
+                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->',
-                          json.dumps(authorizer_info_ret.json()))
+                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->',json.dumps(authorizer_info_ret.json()))
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
