@@ -56,8 +56,10 @@ def login(request):
             user_type = forms_obj.cleaned_data.get('user_type')
             company_id = forms_obj.cleaned_data.get('company_id')
 
+            if not company_id:  # 暂时修改 ，等审核后在注释。。
+                company_id = 1
+
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            authorizer_refresh_token = obj.authorizer_refresh_token
             authorizer_appid = obj.authorization_appid
             component_appid = 'wx67e2fde0f694111c'
 

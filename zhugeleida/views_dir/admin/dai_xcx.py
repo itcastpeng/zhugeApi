@@ -228,6 +228,13 @@ def dai_xcx_oper(request, oper_type):
                     for obj in objs:
 
                         upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id).order_by('-upload_code_date')[0]
+                        auditid = upload_code_obj.auditid
+                        audit_result = upload_code_obj.audit_result
+                        upload_result = upload_code_obj.upload_result
+                        if int(audit_result) == 2 or int(upload_result) == 1:
+                            print('------------ 代码上传失败或者已有正在审核中的的代码 - auditid | id ------------------>>',auditid,'|',upload_code_obj.id)
+
+                            continue
 
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
@@ -395,27 +402,54 @@ def dai_xcx_oper(request, oper_type):
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')  # 账户
                 app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
-                auditid_list = forms_obj.cleaned_data.get('auditid_list')  # 账户
-                auditid_list = json.loads(auditid_list)
+                # auditid_list = forms_obj.cleaned_data.get('auditid_list')  # 账户
+                # auditid_list = json.loads(auditid_list)
                 app_ids_list = json.loads(app_ids_list)
 
+                forms_obj = AuditCodeInfoForm(request.POST)
+                if forms_obj.is_valid():
+                    user_id = request.GET.get('user_id')  # 账户
+                    app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
 
-                objs = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id_in=app_ids_list,audit_result=0, auditid__in=auditid_list)
+                    app_ids_list = json.loads(app_ids_list)
+                    objs = models.zgld_xiaochengxu_app.objects.filter(id__in=app_ids_list)
+                    if objs:
+                        for obj in objs:
 
-                if objs:
+                            upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,auditid__isnull=False).order_by('-audit_commit_date')[0]
 
-                    for obj in objs: # 循环上线代码
+                            authorizer_refresh_token = obj.authorizer_refresh_token
+                            authorizer_appid = obj.authorization_appid
+
+                            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+                            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                            if not authorizer_access_token:
+                                data = {
+                                    'key_name': key_name,
+                                    'authorizer_refresh_token': authorizer_refresh_token,
+                                    'authorizer_appid': authorizer_appid
+                                }
+                                authorizer_access_token_result = create_authorizer_access_token(data)
+                                if authorizer_access_token_result.code == 200:
+                                    authorizer_access_token = authorizer_access_token_result.data
+                                else:
+                                    return JsonResponse(authorizer_access_token.__dict__)
+
+                    # for obj in objs: # 循环上线代码
                         # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
-                        relase_data = {
+                            relase_data = {
 
-                            'app_id': obj.app_id,
-                            'audit_code_id' : obj.id,
-                            'auditid' : obj.auditid
-                        }
-                        response  =  relase_code(relase_data)
+                                'app_id': upload_code_obj.app_id,
+                                'audit_code_id' : upload_code_obj.id,
+                                'auditid' : upload_code_obj.auditid,
+                                'authorizer_access_token': authorizer_access_token
+                            }
+                            response  =  relase_code(relase_data)
 
                     response.code = 200
                     response.msg = '发布已经审核通过的代码-执行完成'
+
                 else:
                     response.code = 301
                     response.msg = '没有正在审核中的代码'
