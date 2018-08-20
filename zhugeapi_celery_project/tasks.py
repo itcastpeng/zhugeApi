@@ -59,30 +59,31 @@ def kill_phantomjs_process():
 
 
 
-import datetime
-import psutil
-def kill_phantomjs_process():
-    pids = psutil.pids()
-    for pid in pids:
-        # print(pid)
-        p = psutil.Process(pid)
-        # print(p.name)
-        if p.name() == 'phantomjs':
-            print(pid)
-            import math
-            # from jb51.net
-
-            start_time  =  p.create_time()
-            start_time = str(math.floor(int(start_time)))
-            create_time_minute = datetime.datetime.strptime("%Y%M", start_time)
-            # process_name = p.name()
-            now_time_minute = datetime.datetime.strptime("%M", datetime.datetime.now())
-            if now_time_minute == create_time_minute:
-                continue
-            else:
-                print('------ kill process_name---->>',p.name(),'|',pid)
-
-
-kill_phantomjs_process()
+# import datetime
+# import psutil
+# def kill_phantomjs_process():
+#     pids = psutil.pids()
+#     for pid in pids:
+#         # print(pid)
+#         p = psutil.Process(pid)
+#         # print(p.name)
+#         if p.name() == 'phantomjs':
+#             print(pid)
+#             import math
+#             # from jb51.net
+#
+#             start_time  =  p.create_time()
+#             start_time = str((int(start_time)))
+#             create_time_minute = start_time.strftime(start_time)
+#
+#             # process_name = p.name()
+#             now_time_minute = datetime.datetime.strptime("%M", datetime.datetime.now())
+#             if now_time_minute == create_time_minute:
+#                 continue
+#             else:
+#                 print('------ kill process_name---->>',p.name(),'|',pid)
+#
+#
+# kill_phantomjs_process()
 
 
