@@ -227,15 +227,16 @@ def ueditor_image_upload(request):
 
     elif request.GET.get('action') == 'uploadimage':
         img = request.FILES.get('upfile')
-        name = request.FILES.get('upfile').name
+        # name = request.FILES.get('upfile').name
 
-        print('------request.FILES-------->>',request.FILES.get,img,name)
+        print('------request.FILES-------->>',request.FILES.get,img)
 
         allow_suffix = ['jpg', 'png', 'jpeg', 'gif', 'bmp']
-        file_suffix = name.split(".")[-1]
+        # file_suffix = name.split(".")[-1]
+        file_suffix = img.split(".")[-1]
 
         if file_suffix not in allow_suffix:
-            return {"state": 'error', "name": name, "url": "", "size": "", "type": file_suffix}
+            return {"state": 'error', "name": img, "url": "", "size": "", "type": file_suffix}
 
         # 上传文件路径
         dir_name = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article')
@@ -249,7 +250,7 @@ def ueditor_image_upload(request):
         with open(file_url, 'wb+') as destination:
             for chunk in img.chunks():
                 destination.write(chunk)
-        data = {"state": 'SUCCESS', "url": filenameurl, "title": file_name, "original": name, "type": file_suffix}
+        data = {"state": 'SUCCESS', "url": filenameurl, "title": file_name, "original": img, "type": file_suffix}
 
         print('-------data-------->>',data)
 
