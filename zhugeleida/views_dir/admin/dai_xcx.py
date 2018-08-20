@@ -165,7 +165,8 @@ def dai_xcx_oper(request, oper_type):
                                 authorizer_access_token = authorizer_access_token_result.data
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
-                        path = 'pages/mingpian/index?uid=1&source=1'
+                        path = 'pages/mingpian/index'
+                        # path = 'pages/mingpian/index?uid=1&source=1'
                         get_qrcode_data = {
                             'access_token': authorizer_access_token,
                             'path': path,

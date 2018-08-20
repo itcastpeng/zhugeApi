@@ -9,9 +9,9 @@ UEditorUploadSettings = {
     "imageCompressBorder": 1600, #图片压缩最长边限制 
     "imageInsertAlign": None, #插入的图片浮动方式 
     "imagePath": "/zhugeleida/public/ueditor_img_upload",
-    "imageUrlPrefix": "http://127.0.0.1:8001",     #图片访问路径前缀
+    "imageUrlPrefix": "http://api.zhugeyingxiao.com",     #图片访问路径前缀
     # "imagePathFormat": "statics/zhugeleida/imgs/admin/article", #上传保存路径,可以自定义保存路径和文件名格式
-    "imagePathFormat": "C:\\Users\EDZ\PycharmProjects\zhuge\zhugeApi\statics\zhugeleida\imgs\\admin\\article", #上传保存路径,可以自定义保存路径和文件名格式
+    # "imagePathFormat": "C:\\Users\EDZ\PycharmProjects\zhuge\zhugeApi\statics\zhugeleida\imgs\\admin\\article", #上传保存路径,可以自定义保存路径和文件名格式
 
 
     #涂鸦图片上传配置项 

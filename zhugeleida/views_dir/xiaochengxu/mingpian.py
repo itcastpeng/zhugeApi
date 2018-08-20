@@ -176,6 +176,14 @@ def mingpian_oper(request, oper_type):
                 data['action'] = 8
                 response = action_record(data, remark)
 
+            elif oper_type == 'save_wechat':
+                if oper_type == 'save_wechat':
+                    remark = '复制了您的微信,留意微信新朋友消息'
+                    data = request.GET.copy()
+                    data['action'] = 5
+                    response = action_record(data, remark)
+
+
             elif oper_type == 'praise':  # 点赞功能，觉得你靠谱
                 user_id = request.GET.get('uid')  # 用户 id
                 customer_id = request.GET.get('user_id')  # 客户 id

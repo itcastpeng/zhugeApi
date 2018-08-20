@@ -232,6 +232,7 @@ def ueditor_image_upload(request):
         print('------request.FILES-------->>',request.FILES.get,img,name)
 
         allow_suffix = ['jpg', 'png', 'jpeg', 'gif', 'bmp']
+        # file_suffix = name.split(".")[-1]
         file_suffix = name.split(".")[-1]
 
         if file_suffix not in allow_suffix:

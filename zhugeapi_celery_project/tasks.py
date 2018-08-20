@@ -5,9 +5,13 @@
 
 from __future__ import absolute_import, unicode_literals
 from .celery import app
-
+import psutil
 import requests
-import json
+import datetime,time
+import psutil
+import os
+import signal
+
 
 
 #  小程序访问动作日志的发送到企业微信
@@ -41,5 +45,39 @@ def user_send_template_msg_to_customer(data):
         'data': data
     }
     print(get_data)
-
     requests.get(url, params=get_data)
+
+
+@app.task
+def kill_phantomjs_process():
+    pids = psutil.pids()
+    for pid in pids:
+        # print(pid)
+        p = psutil.Process(pid)
+        # print(p.name)
+        if p.name() == 'phantomjs':
+            print(pid)
+
+            start_time  =  p.create_time()
+            start_time = int(start_time)
+            create_time_minute = time.localtime(start_time).tm_min
+
+            # process_name = p.name()
+            now_time = int(time.time())
+            now_time_minute = time.localtime(now_time).tm_min
+            if now_time_minute == create_time_minute:
+                print('------ Lived process_name---->>', p.name(), '|', pid)
+                continue
+            else:
+                print('------ kill process_name---->>',p.name(),'|',pid)
+                try:
+                    # cmd_name = 'kill -9  %s' % (pid)
+                    # os.system(cmd_name)
+                    process_ret = os.kill(pid, signal.SIGKILL)
+                    print ('---- 已杀死%s pid为%s的进程, 返回值%s----->>' % (p.name(),pid,process_ret))
+
+                except Exception as  e:
+                    print ('----- Exception 没有如此进程!!!------>>')
+
+
+
