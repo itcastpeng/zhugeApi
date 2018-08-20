@@ -227,7 +227,7 @@ def ueditor_image_upload(request):
 
     elif request.GET.get('action') == 'uploadimage':
         img = request.FILES.get('upfile')
-        name = request.FILES.get('upfile').filename
+        name = request.FILES.get('upfile').name
 
         print('------request.FILES-------->>',request.FILES.get,img,name)
 
