@@ -475,8 +475,12 @@ def mingpian_oper(request, oper_type):
                 response.data = ret_data
                 response.msg = "请求成功"
                 response.code = 200
+
+                print('开始关闭 --->')
                 driver.service.stop()
+                print('执行完 driver.service.stop()')
                 driver.quit()
+                print('执行完 driver.quit()')
 
                 # except Exception as e:
                 #     response.msg = "PhantomJS截图失败"
