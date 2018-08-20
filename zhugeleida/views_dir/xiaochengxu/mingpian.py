@@ -475,6 +475,7 @@ def mingpian_oper(request, oper_type):
                 response.data = ret_data
                 response.msg = "请求成功"
                 response.code = 200
+                driver.service.stop()
                 driver.quit()
 
                 # except Exception as e:
