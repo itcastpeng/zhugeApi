@@ -141,11 +141,17 @@ def open_weixin(request, oper_type):
                     qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
                     head_img = authorizer_info_ret['authorizer_info'].get('head_img')  # 头像
                     nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')  # 头像
-                    categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 头像
-                    if len(categories) != 0:
-                        categories = json.dumps(categories)
-                    else:
-                        categories = ''
+
+                    miniprograminfo = authorizer_info_ret['authorizer_info'].get('MiniProgramInfo')
+                    categories = ''
+                    if miniprograminfo:
+                        categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 头像
+
+                        if len(categories) != 0:
+                            categories = json.dumps(categories)
+                        else:
+                            categories = ''
+
                     if original_id:
                         obj = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
                         if obj:
