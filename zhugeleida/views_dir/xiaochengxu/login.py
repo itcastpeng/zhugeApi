@@ -236,6 +236,7 @@ def login_oper(request,oper_type):
                    remark = '已向您授权访问【公司官网】页面'
 
                 data = request.GET.copy()
+                print('data --> request.GET.copy() -->', data)
                 data['action'] = 13   # 代表用客户授权访问
                 response = action_record(data, remark)
 
