@@ -432,60 +432,54 @@ def mingpian_oper(request, oper_type):
 
                 print('----save_poster-->',url)
 
-                # try:
-                driver.get(url)
-                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
-                user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
+                try:
+                    driver.get(url)
+                    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                    user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
+                    user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
 
-                driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
-                driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
+                    driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
+                    driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
-                element = driver.find_element_by_id("jietu")
-                print(element.location)  # 打印元素坐标
-                print(element.size)      # 打印元素大小
+                    element = driver.find_element_by_id("jietu")
+                    print(element.location)  # 打印元素坐标
+                    print(element.size)      # 打印元素大小
 
-                left = element.location['x']
-                top = element.location['y']
-                right = element.location['x'] + element.size['width']
-                bottom = element.location['y'] + element.size['height']
+                    left = element.location['x']
+                    top = element.location['y']
+                    right = element.location['x'] + element.size['width']
+                    bottom = element.location['y'] + element.size['height']
 
-                im = Image.open( BASE_DIR  + user_poster_file_temp)
-                im = im.crop((left, top, right, bottom))
+                    im = Image.open( BASE_DIR  + user_poster_file_temp)
+                    im = im.crop((left, top, right, bottom))
 
 
-                print (len(im.split()))  # test
-                if len(im.split()) == 4:
-                    # prevent IOError: cannot write mode RGBA as BMP
-                    r, g, b, a = im.split()
-                    im = Image.merge("RGB", (r, g, b))
-                    im.save( BASE_DIR  + user_poster_file)
-                else:
-                    im.save( BASE_DIR  + user_poster_file)
+                    print (len(im.split()))  # test
+                    if len(im.split()) == 4:
+                        # prevent IOError: cannot write mode RGBA as BMP
+                        r, g, b, a = im.split()
+                        im = Image.merge("RGB", (r, g, b))
+                        im.save( BASE_DIR  + user_poster_file)
+                    else:
+                        im.save( BASE_DIR  + user_poster_file)
 
-                poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
-                if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
-                print('---------生成海报URL-------->', poster_url)
+                    poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+                    if os.path.exists(BASE_DIR  + user_poster_file_temp): os.remove(BASE_DIR  + user_poster_file_temp)
+                    print('---------生成海报URL-------->', poster_url)
 
-                ret_data = {
-                    'user_id': user_id,
-                    'poster_url': poster_url,
-                }
-                print('-----save_poster ret_data --->>',ret_data)
-                response.data = ret_data
-                response.msg = "请求成功"
-                response.code = 200
+                    ret_data = {
+                        'user_id': user_id,
+                        'poster_url': poster_url,
+                    }
+                    print('-----save_poster ret_data --->>',ret_data)
+                    response.data = ret_data
+                    response.msg = "请求成功"
+                    response.code = 200
 
-                print('开始关闭 --->')
-                driver.service.stop()
-                print('执行完 driver.service.stop()')
-                driver.quit()
-                print('执行完 driver.quit()')
-
-                # except Exception as e:
-                #     response.msg = "PhantomJS截图失败"
-                #     response.code = 400
-                #     driver.quit()
+                except Exception as e:
+                    response.msg = "PhantomJS截图失败"
+                    response.code = 400
+                    driver.quit()
 
         else:
             response.code = 402
