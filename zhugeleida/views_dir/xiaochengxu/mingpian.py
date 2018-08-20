@@ -421,6 +421,7 @@ def mingpian_oper(request, oper_type):
                 print('----- phantomjs_path ----->>',phantomjs_path)
 
                 driver = webdriver.PhantomJS(phantomjs_path)
+                driver.implicitly_wait(10)
 
                 rand_str = request.GET.get('rand_str')
                 timestamp = request.GET.get('timestamp')
@@ -436,7 +437,6 @@ def mingpian_oper(request, oper_type):
                 now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                 user_poster_file_temp = '/%s_%s_poster_temp.png' % (customer_id,user_id)
                 user_poster_file = '/%s_%s_%s_poster.png' % (customer_id,user_id,now_time)
-
 
                 driver.save_screenshot(BASE_DIR  + user_poster_file_temp)
                 driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
