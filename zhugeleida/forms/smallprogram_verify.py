@@ -34,7 +34,7 @@ class SmallProgramAddForm(forms.Form):
 
     )
 
-    company_id = forms.CharField(
+    company_id = forms.IntegerField(
         required=False,
         error_messages={
             'required': "公司id不能为空"

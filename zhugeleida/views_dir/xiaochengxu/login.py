@@ -54,11 +54,14 @@ def login(request):
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
-            # company_id = forms_obj.cleaned_data.get('company_id')
-            company_id = request.GET.get('company_id')
+            company_id = forms_obj.cleaned_data.get('company_id')
+            user_id = forms_obj.cleaned_data.get('uid')
 
             if not company_id:  # 暂时修改 ，等审核后在注释。。
                 company_id = 1
+
+            if not user_id:
+                user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             authorizer_appid = obj.authorization_appid
@@ -103,7 +106,8 @@ def login(request):
 
             ret_data = {
                 'cid': client_id,
-                'token': token
+                'token': token,
+                'uid': user_id
             }
             response.code = 200
             response.msg = "返回成功"
