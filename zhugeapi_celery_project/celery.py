@@ -24,6 +24,13 @@ app.conf.beat_schedule = {
     #     # 'args': (2, 2),                                     # 传递的参数
     # },
 
+    # 配置每隔一个小时执行一次
+    'CheckWenda': {  # 此处的命名不要用 tasks 开头,否则会报错
+        'task': 'wenda_celery_project.tasks.CheckWenda',  # 要执行的任务函数名
+        'schedule': crontab("*", '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
+        # 'args': (2, 2),                                     # 传递的参数
+    },
+
 }
 
 # Optional configuration, see the application user guide.

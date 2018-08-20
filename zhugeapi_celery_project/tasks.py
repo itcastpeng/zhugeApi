@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, unicode_literals
 from .celery import app
-
+import psutil
 import requests
 import json
 
@@ -41,5 +41,48 @@ def user_send_template_msg_to_customer(data):
         'data': data
     }
     print(get_data)
-
     requests.get(url, params=get_data)
+
+
+@app.task
+def kill_phantomjs_process():
+    process_name = 'phantomjs'
+    pids = psutil.pids()
+    for pid in pids:
+        # print(pid)
+        p = psutil.Process(pid)
+        # print(p.name)
+        if p.name() == process_name:
+            print(pid)
+            p.name()
+
+
+
+
+import datetime
+import psutil
+def kill_phantomjs_process():
+    pids = psutil.pids()
+    for pid in pids:
+        # print(pid)
+        p = psutil.Process(pid)
+        # print(p.name)
+        if p.name() == 'phantomjs':
+            print(pid)
+            import math
+            # from jb51.net
+
+            start_time  =  p.create_time()
+            start_time = str(math.floor(int(start_time)))
+            create_time_minute = datetime.datetime.strptime("%Y%M", start_time)
+            # process_name = p.name()
+            now_time_minute = datetime.datetime.strptime("%M", datetime.datetime.now())
+            if now_time_minute == create_time_minute:
+                continue
+            else:
+                print('------ kill process_name---->>',p.name(),'|',pid)
+
+
+kill_phantomjs_process()
+
+
