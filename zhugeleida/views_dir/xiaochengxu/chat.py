@@ -154,7 +154,7 @@ def chat_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 response = Response.ResponseObj()
                 customer_id = request.GET.get('user_id')
-                user_id = request.GET.get('uid')
+                user_id = request.GET.get('u_id')
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
