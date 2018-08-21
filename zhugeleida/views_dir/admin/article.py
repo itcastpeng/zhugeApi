@@ -224,14 +224,9 @@ def article_oper(request, oper_type, o_id):
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,  # 文章标题
-                        'status_code': obj.status,  # 状态
-                        'status': obj.get_status_display(),  # 状态
-                        'source_code': obj.source,  # 状态
-                        'source': obj.get_source_display(),  # 状态
                         'author': obj.user.username,  # 如果为原创显示,文章作者
                         'avatar': obj.user.avatar,  # 用户的头像
-                        'read_count': obj.read_count,  # 被阅读数量
-                        'forward_count': obj.forward_count,  # 被转发个数
+                        'summary': obj.summary,     # 摘要
                         'create_date': obj.create_date,  # 文章创建时间
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'content': obj.content,  # 文章内容
