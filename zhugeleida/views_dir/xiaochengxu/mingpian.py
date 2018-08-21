@@ -48,30 +48,25 @@ def mingpian(request):
             action_count = accesslog_obj.count()
             if action_count == 0:
                 remark = '首次查看您的名片,沟通从此刻开始'
-            elif action_count == 2:
+            elif action_count == 1:
                 remark = '查看您的名片第%s次,把握深度交流的机会' % (action_count)
-            elif action_count == 3:
+            elif action_count == 2:
                 remark = '查看您的名片第%s次,建议标注重点客户' % (action_count)
-            elif action_count > 4:
+            elif action_count > 3:
                 remark = '查看您的名片第%s次,成交在望' % (action_count)
-            data = request.GET.copy()
-            data['action'] = 1
 
-            action_record(data, remark) #记录访问动作
+            customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+            if customer_obj:
+                customer_username = customer_obj[0].username
+                if customer_username: # 只有客户名字存在时候，才去记录日志并通知用户。
+                    data = request.GET.copy()
+                    data['action'] = 1
+                    action_record(data, remark)  # 记录访问动作
 
-            models.zgld_userprofile.objects.filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
-
+            models.zgld_userprofile.objects.select_related('company').filter(id=user_id).update(popularity=F('popularity') + 1)  # 查看的个数加1
             objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
             count = objs.count()
 
-            # data['content'] = remark
-            # data['agentid'] = models.zgld_app.objects.filter(id=objs[0].company_id,name='AI雷达')[0].agent_id
-            # user_send_action_log(data)  #发送企业微信的消息提醒
-
-            # if length != 0:
-            #     start_line = (current_page - 1) * length
-            #     stop_line = start_line + length
-            #     objs = objs[start_line: stop_line]
 
             ret_data = {}
             is_praise = False
@@ -79,11 +74,8 @@ def mingpian(request):
 
             if objs:
                 for obj in objs:
-                    up_down_obj = models.zgld_up_down.objects.filter(user_id=obj.id, customer_id=customer_id)
-                    print('user_id=obj.id, customer_id=customer_id', obj.id, customer_id)
-
+                    up_down_obj = models.zgld_up_down.objects.select_related('user', 'customer').filter(user_id=user_id,customer_id=customer_id)
                     if up_down_obj:
-                        print('----up_down_obj[0].up----->>', up_down_obj[0].up)
                         is_praise = up_down_obj[0].up
 
                     up_down_sign_obj = models.zgld_up_down_sign.objects.filter(user_id=obj.id, customer_id=customer_id)
@@ -105,10 +97,6 @@ def mingpian(request):
                     if mingpian_avatar_obj:
                         mingpian_avatar =  mingpian_avatar_obj[0].photo_url
                     else:
-                        #
-                        # if obj.avatar.startswith("http"):
-                        #     mingpian_avatar = obj.avatar
-                        # else:
                         mingpian_avatar =  obj.avatar
                     mingpian_phone  = obj.mingpian_phone  if   obj.mingpian_phone else  obj.wechat_phone
 
