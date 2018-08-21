@@ -231,7 +231,7 @@ class zgld_userprofile(models.Model):
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
-
+    memo_name = models.CharField(max_length=64, verbose_name='名片-昵称', blank=True, null=True)
     gender_choices = (
         (1, "男"),
         (2, "女"),

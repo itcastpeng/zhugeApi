@@ -112,9 +112,15 @@ def mingpian(request):
                         mingpian_avatar =  obj.avatar
                     mingpian_phone  = obj.mingpian_phone  if   obj.mingpian_phone else  obj.wechat_phone
 
+                    memo_name = obj.memo_name
+                    if memo_name:
+                        username = memo_name
+                    else:
+                        username = obj.username
+
                     ret_data = {
                         'id': obj.id,
-                        'username': obj.username,
+                        'username': username,
                         'avatar': obj.avatar,
                         'company': obj.company.name,
                         'address': obj.company.address,

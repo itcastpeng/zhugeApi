@@ -232,10 +232,15 @@ def dai_xcx_oper(request, oper_type):
                         auditid = upload_code_obj.auditid
                         audit_result = upload_code_obj.audit_result
                         upload_result = upload_code_obj.upload_result
-                        if int(audit_result) == 2 or int(upload_result) == 1:
-                            print('------------ 代码上传失败或者已有正在审核中的的代码 - auditid | id ------------------>>',auditid,'|',upload_code_obj.id)
+                        if upload_result:
+                            if int(upload_result) == 1:
+                                print('------------ 代码上传失败,id: ------------------>>', auditid, '|', upload_code_obj.id)
+                                continue
 
-                            continue
+                        if audit_result:
+                            if int(audit_result) == 2:
+                                print('------------ 已有正在审核中的的代码 - auditid | id ------------------>>', auditid,'|',upload_code_obj.id)
+                                continue
 
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
@@ -255,7 +260,7 @@ def dai_xcx_oper(request, oper_type):
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
 
-                        # 获取小程序的第三方提交代码的页面配置
+                        ## 获取小程序的第三方提交代码的页面配置
                         get_page_url = 'https://api.weixin.qq.com/wxa/get_page'
                         get_page_data = {
                             'access_token': authorizer_access_token,

@@ -63,6 +63,7 @@ urlpatterns = [
 
     # 企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)', user_weixin_auth.work_weixin_auth),
+    url(r'^enterprise_weixin_share/(?P<company_id>\d+)', user_weixin_auth.enterprise_weixin_share),
 
     # 访问企业微信-我的用户名片
     url(r'^mingpian$', mingpian.mingpian),
