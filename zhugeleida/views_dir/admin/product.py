@@ -401,18 +401,18 @@ def product_oper(request, oper_type, o_id):
             form_data = {
                 'user_id': request.GET.get('user_id'),
                 'product_id': o_id,  # 产品ID
-                'index' : request.POST.get('index')
+                'recommend_index' : request.POST.get('recommend_index') # 排序优先级。
             }
 
             forms_obj = RecommendIndexForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
                 product_id = forms_obj.cleaned_data.get('product_id')
-                index = forms_obj.cleaned_data.get('index')
+                recommend_index = forms_obj.cleaned_data.get('recommend_index')
 
                 product_obj = models.zgld_product.objects.filter(id=product_id)
                 product_obj.update(
-                    recommend_index=index
+                    recommend_index=recommend_index
                 )
 
                 response.code = 200

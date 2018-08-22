@@ -143,7 +143,7 @@ class RecommendIndexForm(forms.Form):
         }
     )
 
-    index = forms.IntegerField(
+    recommend_index = forms.IntegerField(
         required=True,
         error_messages={
             'required': "推荐指数不能为空"
