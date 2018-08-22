@@ -183,7 +183,7 @@ def enterprise_weixin_sign(request):
 
         noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
         timestamp = int(time.time())
-        url = 'http://zhugeleida.zhugeyingxiao.com'
+        url = 'zhugeleida.zhugeyingxiao.com'
         sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket,noncestr,timestamp,url)
         signature = str_sha_encrypt(sha_string.encode('utf-8'))
 
