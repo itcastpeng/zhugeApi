@@ -311,6 +311,7 @@ def xcx_auth_process(request):
             name = obj[0].name
             principal_name = obj[0].principal_name
             head_img = obj[0].head_img
+            service_category = obj[0].service_category
 
             if not authorization_appid:  # 没有App ID，首先填写
                 response.code = 200
@@ -377,6 +378,7 @@ def xcx_auth_process(request):
                         'principal_name': principal_name,  # 小程序主体名称
                         'head_img': head_img,  # 授权方头像
                         'verify_type_info': verify_type_info,  # 微信认证是否通过. True 为认证通过，Falsew为认证通过
+                        'service_category': service_category,  #服务类目
                         'version_num': version_num,  #上线版本号
                         'release_time': release_time,   # 上线时间
                         'stay_version_num': stay_version_num,  #代上线-版本号

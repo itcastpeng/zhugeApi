@@ -9,7 +9,7 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm,imgMergeForm,imgUploadForm,FeedbackSelectForm
-from zhugeleida.forms.qiyeweixin.product_verify import  ProductUpdateForm
+from zhugeleida.forms.qiyeweixin.product_verify import  ProductUpdateForm,RecommendIndexForm
 import json
 from django.db.models import Q
 from django.db.models import F
@@ -394,6 +394,32 @@ def product_oper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        ## 修改推荐指数-影响产品展示排序。
+        elif oper_type == 'recommend_index':
+            form_data = {
+                'user_id': request.GET.get('user_id'),
+                'product_id': o_id,  # 产品ID
+                'index' : request.POST.get('index')
+            }
+
+            forms_obj = RecommendIndexForm(form_data)
+            if forms_obj.is_valid():
+                user_id = request.GET.get('user_id')
+                product_id = forms_obj.cleaned_data.get('product_id')
+                index = forms_obj.cleaned_data.get('index')
+
+                product_obj = models.zgld_product.objects.filter(id=product_id)
+                product_obj.update(
+                    recommend_index=index
+                )
+
+                response.code = 200
+                response.msg = "修改成功"
+            else:
+                response.code = 303
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
 
         # 上传产品图片的接口
         elif oper_type == "add_picture":

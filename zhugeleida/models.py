@@ -350,6 +350,7 @@ class zgld_product(models.Model):
     price = models.CharField(verbose_name='价格', max_length=64, null=True)
     reason = models.CharField(verbose_name='推荐理由', max_length=1024, null=True)
     content = models.TextField(verbose_name='内容', null=True)
+    recommend_index =  models.SmallIntegerField(verbose_name='产品推荐指数',default=0) # 从0 - 10 ,0 代表不推荐。
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
