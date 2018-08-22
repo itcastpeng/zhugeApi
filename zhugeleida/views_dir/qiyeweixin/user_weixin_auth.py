@@ -117,7 +117,7 @@ def work_weixin_auth(request, company_id):
 #生成JS-SDK使用权限签名算法
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def enterprise_weixin_sign(request, company_id):
+def enterprise_weixin_sign(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
@@ -127,8 +127,9 @@ def enterprise_weixin_sign(request, company_id):
         '''
         get_ticket_data = {}
         get_token_data = {}
-
-
+        user_id = request.GET.get('user_id')
+        user_obj = models.zgld_userprofile.objects.get(id=user_id)
+        company_id = user_obj.company_id
         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
         key_name = "company_%s_leida_app_token" % (company_id)
         token_ret = rc.get(key_name)

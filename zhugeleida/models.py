@@ -73,6 +73,21 @@ class zgld_xiaochengxu_app(models.Model):
     name = models.CharField(verbose_name="小程序名称", max_length=128, null=True)
     principal_name = models.CharField(verbose_name="小程序主体名称", max_length=128,null=True)
 
+    code_release_status_choice = (
+        (1, '代码上传成功'),
+        (2, '代码上传失败'),
+
+        (3, '提交审核报错'),
+        (4, '审核中'),
+        (5, '审核通过'),
+        (6, '审核未通过'),
+
+        (7, '上线成功'),
+        (8, '上线失败')
+    )
+    code_release_status = models.SmallIntegerField(verbose_name='代码发布流程状态', null=True, choices=code_release_status_choice)
+    code_release_result = models.CharField(verbose_name='结果',max_length=1024,null=True)
+
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
     authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128,null=True)
     template_id = models.CharField(verbose_name="消息模板ID", max_length=128,null=True)
@@ -111,7 +126,7 @@ class zgld_xiapchengxu_upload_audit(models.Model):
     # upload_code = models.OneToOneField('zgld_xiapchengxu_upload', verbose_name='上传的代码') # 审核的哪个版本的长传后的代码。
     auditid = models.IntegerField(verbose_name="接口返回审核编号", null=True)
     audit_commit_date = models.DateTimeField(verbose_name='提交审核时间',null=True)
-    audit_reply_date = models.DateTimeField(verbose_name="审核成功回复时间", null=True)
+    audit_reply_date = models.DateTimeField(verbose_name="审核回复时间", null=True)
     audit_result_type = (
         (0,'审核成功'),
         (1,'审核失败'),
@@ -665,6 +680,7 @@ class zgld_template_article(models.Model):
     content = models.TextField(verbose_name='文章内容', null=True)
     # tags = models.ManyToManyField('zgld_article_tag', through='zgld_article_to_tag', through_fields=('article', 'tag'))
     tags = models.ManyToManyField('zgld_template_article_tag',verbose_name="模板文章关联的标签")
+    qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -705,7 +721,8 @@ class zgld_article(models.Model):
     read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
-    insert_ads = models.CharField(verbose_name='插入广告语',null=True,max_length=64)
+    insert_ads = models.TextField(verbose_name='插入广告语',null=True)
+    qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
     class Meta:

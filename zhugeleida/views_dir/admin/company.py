@@ -97,16 +97,20 @@ def author_status(request,oper_type):
                     'app_type': ''
                 })
 
-
-                app_objs  = company_objs[0].zgld_app_set.filter(company_id=company_id)
+                app_objs = company_objs[0].zgld_app_set.filter(company_id=company_id,app_type=1)
                 if app_objs:
-                    for obj in  app_objs:
+                    for obj in app_objs:
+                        name = obj.name,
+                        is_validate =  obj.is_validate,
+                        # app_type' =  obj.app_type,
 
-                        ret_data.append({
-                            'name': obj.name,
-                            'is_validate': obj.is_validate,
-                            'app_type' : obj.app_type,
-                        })
+                # ret_data.append({
+                #     'name': name,
+                #     'is_validate': obj.is_validate,
+                #     'app_type': obj.app_type,
+                # })
+
+
 
 
                 response.code = 200

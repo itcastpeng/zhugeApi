@@ -120,9 +120,13 @@ def dai_xcx_oper(request, oper_type):
                         if int(errcode) == 0:
                             errcode = 0
                             reason = ''
+                            code_release_status = 1
+                            code_release_result = '成功'
                         else:
+                            code_release_status = 2
+                            code_release_result = '上传小程序报错: %s' %  errmsg
                             errcode = 1
-                            reason = errmsg
+                            reason = code_release_result
 
                         datetime_now = datetime.datetime.now()
                         upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.create(
@@ -133,10 +137,16 @@ def dai_xcx_oper(request, oper_type):
                             template_id=template_id,
                             upload_code_date=datetime_now,
                             upload_result = errcode,
-                            reason=reason
+                            reason=reason,
                         )
 
+                        obj.code_release_status=code_release_status
+                        obj.code_release_result=code_release_result
+                        obj.save()
+
+
                         if errcode == 0:
+
                             response.code = 200
                             response.msg = '小程序帐号上传小程序代码成功'
                             print('------ 代小程序上传代码成功 ------>>')
@@ -360,6 +370,8 @@ def dai_xcx_oper(request, oper_type):
 
                             print('-----auditid--->>', auditid)
                             audit_result = 2  # (2,'审核中')
+                            code_release_status = 4 # app 代码发布流程显示的状态。
+                            code_release_result = '成功'
                             reason = ''
                             response.code = 200
                             response.msg = '提交审核代码成功'
@@ -367,15 +379,22 @@ def dai_xcx_oper(request, oper_type):
                         else:
 
                             audit_result = 3  # (3,'提交审核失败')
+                            code_release_status = 3  # app 代码发布流程显示的状态。
                             response.code = errcode
                             reason = '提交审核代码报错: %s : %s' % (errcode, errmsg)
                             response.msg = reason
+                            code_release_result = reason
+
+                        obj.code_release_status = code_release_status
+                        obj.code_release_result = code_release_result
+                        obj.save()
 
                         upload_code_obj.auditid = auditid
                         upload_code_obj.audit_commit_date = now_time
                         upload_code_obj.audit_result = audit_result  # (2,'审核中')
                         upload_code_obj.reason = reason  # (2,'审核中')
                         upload_code_obj.save()
+
 
                 else:
                     response.code = 301
@@ -543,6 +562,7 @@ def dai_xcx_oper(request, oper_type):
 def  batch_get_latest_audit_status(data):
     response = Response.ResponseObj()
     objs = data.get('upload_audit_objs')
+    now_time = datetime.datetime.now()
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     if objs:                            # 如果在审核中，并有编号，说明提交了审核。定时器要不停的去轮训,一旦发现有通过审核的，就要触发上线操作,并记录下来。
@@ -553,6 +573,7 @@ def  batch_get_latest_audit_status(data):
 
             authorizer_refresh_token = obj.app.authorizer_refresh_token
             authorizer_appid = obj.app.authorization_appid
+            xcx_app_id = obj.app.id
 
             key_name = '%s_authorizer_access_token' % (authorizer_appid)
             authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
@@ -583,10 +604,15 @@ def  batch_get_latest_audit_status(data):
             errmsg = get_latest_audit_ret.get('errmsg')
             status = int(get_latest_audit_ret.get('status'))
             reason = get_latest_audit_ret.get('reason')
+            xcx_app_obj = models.zgld_xiaochengxu_app.objects.get(id=xcx_app_id)
 
             if status == 0:
+                obj.audit_reply_date = now_time
                 response.code = 0
                 response.msg = '审核成功'
+                xcx_app_obj.code_release_status = 5
+                xcx_app_obj.code_release_result = '成功'
+
                 print('-------- 代码审核状态为【成功】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
 
                 # ### 开始上线
@@ -600,13 +626,20 @@ def  batch_get_latest_audit_status(data):
                 # relase_code(relase_data)
 
 
-            elif status == 1:  # 0为审核成功
+            elif status == 1:  #
+                obj.audit_reply_date = now_time
+                code_release_result = '代码审核状态报错: %s : %s' % (errmsg,reason)
+
+                xcx_app_obj.code_release_status = 6
+                xcx_app_obj.code_release_result = code_release_result
                 response.code = 1
                 response.msg = '审核状态失败'
                 print('-------- 代码审核状态为【失败】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
 
 
             elif status == 2:
+                xcx_app_obj.code_release_status = 4
+                xcx_app_obj.code_release_result = '审核中'
                 response.code = 2
                 response.msg = '审核中'
                 print('-------- 代码审核状态为【审核中】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
@@ -615,7 +648,7 @@ def  batch_get_latest_audit_status(data):
             #     'obj': obj.id,
             #     'auditid': auditid
             # }
-
+            xcx_app_obj.save()
             obj.audit_result = status  # 修改数据库-审核代码-状态无论是否通过或者不通过。
             obj.reason = reason
             obj.save()
@@ -637,7 +670,7 @@ def relase_code(data):
     audit_code_id = data.get('audit_code_id')
     auditid = data.get('auditid')
     key_name = data.get('key_name')
-
+    xcx_app_obj = models.zgld_xiaochengxu_app.objects.get(id=app_id)
 
     # app_id = obj.app_id
     # audit_code_id = obj.id
@@ -663,6 +696,8 @@ def relase_code(data):
     print('-------- 获取发布的状态 接口返回：---------->>', get_release_ret)
 
     if errmsg == "ok":
+        xcx_app_obj.code_release_status = 7
+        xcx_app_obj.code_release_result = '成功'
         release_result = 1  # 上线成功
         reason = ''
         response.code = 200
@@ -671,6 +706,10 @@ def relase_code(data):
         print('--------发布已通过审核的小程序【成功】: auditid | audit_code_id -------->>', auditid, '|', audit_code_id)
 
     else:
+        code_release_result = '上线报错: %s : %s' % (errmsg,reason)
+        xcx_app_obj.code_release_status = 8
+        xcx_app_obj.code_release_result =  code_release_result
+
         release_result = 2  # 上线失败
         if errcode == -1:
             reason = '系统繁忙'
@@ -689,8 +728,7 @@ def relase_code(data):
 
         print('-------发布已通过审核的小程序【失败】auditid | audit_code_id -------->>', auditid, '|', audit_code_id)
 
-
-    # if not  release_obj:  # 没有发布相关的代码记录,说明没有上过线呢。
+    xcx_app_obj.save()
     models.zgld_xiapchengxu_release.objects.create(
         app_id=app_id,
         audit_code_id=audit_code_id,
