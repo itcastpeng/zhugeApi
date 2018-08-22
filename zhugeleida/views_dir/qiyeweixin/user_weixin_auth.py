@@ -125,12 +125,9 @@ def enterprise_weixin_sign(request):
         生成签名之前必须先了解一下jsapi_ticket，jsapi_ticket是H5应用调用企业微信JS接口的临时票据。
         正常情况下，jsapi_ticket的有效期为7200秒，通过access_token来获取
         '''
-       
+
         get_token_data = {}
         user_id = request.GET.get('user_id')
-        token = request.GET.get('token')
-        id = request.GET.get('id')
-
 
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         company_id = user_obj.company_id
@@ -187,7 +184,7 @@ def enterprise_weixin_sign(request):
 
         noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
         timestamp = int(time.time())
-        url = 'zhugeleida.zhugeyingxiao.com/?token=%s&id=%s' % (token,id)
+        url = 'http://zhugeleida.zhugeyingxiao.com/'
         sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket,noncestr,timestamp,url)
         signature = str_sha_encrypt(sha_string.encode('utf-8'))
 

@@ -56,6 +56,7 @@ def validate_agent(data):
 
     corp_id = data.get('corp_id')
     app_secret = data.get('app_secret')
+    agent_id = data.get('agent_id')
     get_token_data = {}
     send_token_data = {}
 
