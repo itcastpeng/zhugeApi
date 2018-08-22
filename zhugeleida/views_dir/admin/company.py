@@ -287,6 +287,7 @@ def company_oper(request, oper_type, o_id):
                 if result_validate.code != 0:
                     return JsonResponse(result_validate.__dict__)
                 else:
+                    print('-----result_validate.data--------->>',result_validate.data)
                     is_validate = True
                     name = result_validate.data.get('name')
                     agent_id = result_validate.data.get('agentid')
