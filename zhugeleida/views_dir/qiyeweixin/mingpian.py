@@ -57,9 +57,15 @@ def mingpian(request):
             for obj in objs:
                 tag_data = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id', 'name')
                 photo_data = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=1).values_list('id','photo_url')
+                memo_name = obj.memo_name
+                if memo_name:
+                    username = memo_name
+                else:
+                    username = obj.username
+
                 ret_data.append({
                     'id': obj.id,
-                    'username': obj.username,  # 姓名| 管理员可以修改
+                    'username': username,  # 姓名| 管理员可以修改
                     'avatar': mingpian_avatar,
 
                     'company': obj.company.name,  # 公司名 | 管理员可以修改
@@ -138,6 +144,7 @@ def mingpian_oper(request, oper_type):
                 avator_picture_url = request.POST.get('avator_picture_url')
                 user_id = request.GET.get('user_id')
                 wechat = forms_obj.data.get('wechat')
+                memo_name = forms_obj.data.get('memo_name')
                 mingpian_phone = forms_obj.data.get('mingpian_phone')
                 telephone = forms_obj.data.get('telephone')
                 email = forms_obj.data.get('email')
@@ -148,6 +155,7 @@ def mingpian_oper(request, oper_type):
                 objs = models.zgld_userprofile.objects.filter(id=user_id)
                 print('-----objs--->>', objs)
                 objs.update(
+                    memo_name=memo_name,
                     mingpian_phone=mingpian_phone,
                     wechat=wechat,
                     telephone=telephone,

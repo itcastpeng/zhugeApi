@@ -36,6 +36,10 @@ class  MingPianInfoUpdateForm(forms.Form):
     #     }
     # )
     #
+    memo_name = forms.CharField(
+        required=False,
+
+    )
     wechat = forms.CharField(
         required=False,
 

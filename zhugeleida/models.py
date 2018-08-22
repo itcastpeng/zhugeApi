@@ -134,7 +134,7 @@ class zgld_xiapchengxu_upload_audit(models.Model):
 ## 代小程序发布审核通过代码表 ##
 class zgld_xiapchengxu_release(models.Model):
     app = models.ForeignKey('zgld_xiaochengxu_app', verbose_name='审核的-小程序App')
-    audit_code = models.OneToOneField('zgld_xiapchengxu_upload_audit', verbose_name='审核通过的代码') # 审核的哪个版本的长传后的代码。
+    audit_code = models.ForeignKey('zgld_xiapchengxu_upload_audit', verbose_name='审核通过的代码') # 审核的哪个版本的长传后的代码。
     release_commit_date = models.DateTimeField(verbose_name='发布时间',null=True)
     # release_reply_date = models.DateTimeField(verbose_name="发布回复时间", null=True)
     release_result_type = (
@@ -231,7 +231,7 @@ class zgld_userprofile(models.Model):
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
-
+    memo_name = models.CharField(max_length=64, verbose_name='名片-昵称', blank=True, null=True)
     gender_choices = (
         (1, "男"),
         (2, "女"),

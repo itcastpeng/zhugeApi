@@ -20,6 +20,16 @@ def str_encrypt(pwd):
     return hash.hexdigest()
 
 
+def str_sha_encrypt(str):
+    """
+    使用sha1加密算法，返回str加密后的字符串
+    """
+    sha = hashlib.sha1(str)
+    encrypts = sha.hexdigest()
+    return encrypts
+
+
+
 # 生产token值
 def get_token(pwd):
     tmp_str = str(int(time.time()*1000)) + pwd

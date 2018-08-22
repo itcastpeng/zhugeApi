@@ -55,12 +55,11 @@ def product(request, oper_type):
 
                 if objs:
                     ret_data = []
+                    user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                    username = user_obj.username
+                    position = user_obj.position
+
                     for obj in objs:
-
-                        user_obj = models.zgld_userprofile.objects.get(id=user_id)
-                        username = user_obj.username
-                        position = user_obj.position
-
                         user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by(
                             '-create_date')
 

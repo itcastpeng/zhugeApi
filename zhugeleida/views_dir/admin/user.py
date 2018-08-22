@@ -31,13 +31,15 @@ def user(request):
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
-                'username': '__contains',
-
-                'company__name': '__contains',
-                'create_date': '',
-                'last_login_date': '',
+                'username': '__contains',         #名称模糊搜索
+                # 'company__name': '__contains',    #公司名称
+                'position':  '__contains',        # 职位搜索
+                'department':  '',                # 部门搜索，按ID
+                'status':  '',                    # (1, "启用"),   (2, "未启用"),
+                # 'last_login_date': ''
 
             }
+
             q = conditionCom(request, field_dict)
 
             admin_userobj = models.zgld_admin_userprofile.objects.get(id=user_id)
@@ -51,6 +53,7 @@ def user(request):
                 q.add(Q(**{"company_id": company_id}), Q.AND)
 
             objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
+
             count = objs.count()
 
             if length != 0:
@@ -61,6 +64,10 @@ def user(request):
             # 返回的数据
             print('------------->>>', objs)
             ret_data = []
+
+            department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id','name')
+            department_list =  list(department_objs)  if department_objs else []
+
             for obj in objs:
                 print('oper_user_username -->', obj)
 
@@ -72,6 +79,7 @@ def user(request):
                     print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
                     department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
                     department_id = [i[0] for i in departmane_objs.values_list('id')]
+
 
                 mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
 
@@ -111,6 +119,8 @@ def user(request):
                     'ret_data': ret_data,
                     'mingpian_available_num': mingpian_available_num,
                     'data_count': count,
+                    'department_list' : department_list,
+
                 }
 
         else:
