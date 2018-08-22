@@ -97,17 +97,33 @@ def author_status(request,oper_type):
                     'app_type': ''
                 })
 
+                name = ''
+                is_validate = False
+                # app_objs = list(company_objs[0].zgld_app_set.filter(company_id=company_id).values('id','name','is_validate','app_type'))
+                app_objs = company_objs[0].zgld_app_set.filter(company_id=company_id,app_type=1)
 
-                app_objs  = company_objs[0].zgld_app_set.filter(company_id=company_id)
-                if app_objs:
-                    for obj in  app_objs:
+                if app_objs: # AI雷达
+                    name = app_objs[0].name
+                    is_validate =  app_objs[0].is_validate
 
-                        ret_data.append({
-                            'name': obj.name,
-                            'is_validate': obj.is_validate,
-                            'app_type' : obj.app_type,
-                        })
+                ret_data.append({
+                    'name': name,
+                    'is_validate': is_validate,
+                    'app_type': 1
+                })
 
+                name = ''
+                is_validate = False
+                app_objs = company_objs[0].zgld_app_set.filter(company_id=company_id, app_type=2)
+                if app_objs:  # Boss雷达
+                    name = app_objs[0].name
+                    is_validate = app_objs[0].is_validate
+
+                ret_data.append({
+                    'name': name,
+                    'is_validate': is_validate,
+                    'app_type': 2
+                })
 
                 response.code = 200
                 response.data = {

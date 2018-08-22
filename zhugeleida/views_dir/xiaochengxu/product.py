@@ -126,7 +126,7 @@ def product(request, oper_type):
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')
+                order = request.GET.get('order', '-recommend_index')
 
 
                 company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id

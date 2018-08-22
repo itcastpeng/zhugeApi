@@ -127,6 +127,46 @@ class ProductUpdateForm(forms.Form):
             return product_id
 
 
+
+# 修改企业的产品
+class RecommendIndexForm(forms.Form):
+    user_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "用户ID不能为空"
+        }
+    )
+    product_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "产品ID不能为空"
+        }
+    )
+
+    recommend_index = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "推荐指数不能为空"
+        }
+    )
+
+
+
+
+    # 判断企业产品名称是否存在
+    def clean_product_id(self):
+        product_id = self.data['product_id']
+        objs = models.zgld_product.objects.filter(id = product_id)
+
+        if  not objs:
+            print('-----产品不存在----->>')
+            self.add_error('product_id', '产品不存在')
+
+        else:
+            return product_id
+
+
+
 class ProductSelectForm(forms.Form):
 
 

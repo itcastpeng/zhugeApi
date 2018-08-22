@@ -22,13 +22,16 @@ def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = UserSelectForm(request.GET)
+
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             user_id = request.GET.get('user_id')
-
+            print('--------------->>',request.GET)
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
+            status = request.GET.get('status')
+
             field_dict = {
                 'id': '',
                 'username': '__contains',         #名称模糊搜索
@@ -41,87 +44,95 @@ def user(request):
             }
 
             q = conditionCom(request, field_dict)
+            # if status:
+            #     q.add(Q(**{'status': int(status)}), Q.AND)
 
+            print('------q------>>',q)
             admin_userobj = models.zgld_admin_userprofile.objects.get(id=user_id)
             role_id = admin_userobj.role_id
             company_id = admin_userobj.company_id
 
-            if role_id == 1:  # 超级管理员,展示出所有的企业用户
-               pass
-
-            elif role_id == 2:  #管理员，展示出自己公司的用户
-                q.add(Q(**{"company_id": company_id}), Q.AND)
+            # if role_id == 1:  # 超级管理员,展示出所有的企业用户
+            #    pass
+            #
+            # else:  #管理员，展示出自己公司的用户
+            q.add(Q(**{"company_id": company_id}), Q.AND)
 
             objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
-
             count = objs.count()
 
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
-            mingpian_available_num = objs[0].company.mingpian_available_num
-            # 返回的数据
-            print('------------->>>', objs)
+
+
+
             ret_data = []
 
             department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id','name')
             department_list =  list(department_objs)  if department_objs else []
 
-            for obj in objs:
-                print('oper_user_username -->', obj)
+            if objs:
+                mingpian_available_num = objs[0].company.mingpian_available_num
+                for obj in objs:
+                    print('oper_user_username -->', obj)
 
-                department = ''
-                department_id = []
-                departmane_objs = obj.department.all()
-                print('departmane_objs -->', departmane_objs)
-                if departmane_objs:
-                    print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
-                    department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
-                    department_id = [i[0] for i in departmane_objs.values_list('id')]
+                    department = ''
+                    department_id = []
+                    departmane_objs = obj.department.all()
+                    print('departmane_objs -->', departmane_objs)
+                    if departmane_objs:
+                        print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
+                        department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
+                        department_id = [i[0] for i in departmane_objs.values_list('id')]
 
 
-                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
+                    mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
 
-                mingpian_avatar = ''
-                if mingpian_avatar_obj:
-                    mingpian_avatar =  mingpian_avatar_obj[0].photo_url
-                else:
-
-                    if obj.avatar.startswith("http"):
-                        mingpian_avatar = obj.avatar
+                    mingpian_avatar = ''
+                    if mingpian_avatar_obj:
+                        mingpian_avatar =  mingpian_avatar_obj[0].photo_url
                     else:
-                        mingpian_avatar =  obj.avatar
 
-                ret_data.append({
-                    'id': obj.id,
-                    'userid': obj.userid,
-                    'username': obj.username,
-                    'create_date': obj.create_date,
-                    'last_login_date': obj.last_login_date,
-                    'position': obj.position,
-                    'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
-                    'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
-                    'status': obj.get_status_display(),
-                    'avatar': mingpian_avatar,          # 头像
-                    'qr_code': obj.qr_code,
-                    'company': obj.company.name,
-                    'company_id': obj.company_id,
-                    'department' : department,
-                    'department_id' : department_id,
-                    'gender': obj.gender,
+                        if obj.avatar.startswith("http"):
+                            mingpian_avatar = obj.avatar
+                        else:
+                            mingpian_avatar =  obj.avatar
 
-                })
-                #  查询成功 返回200 状态码
-                response.code = 200
-                response.msg = '查询成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'mingpian_available_num': mingpian_available_num,
-                    'data_count': count,
-                    'department_list' : department_list,
+                    ret_data.append({
+                        'id': obj.id,
+                        'userid': obj.userid,
+                        'username': obj.username,
+                        'create_date': obj.create_date,
+                        'last_login_date': obj.last_login_date,
+                        'position': obj.position,
+                        'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
+                        'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
+                        'status': obj.get_status_display(),
+                        'avatar': mingpian_avatar,          # 头像
+                        'qr_code': obj.qr_code,
+                        'company': obj.company.name,
+                        'company_id': obj.company_id,
+                        'department' : department,
+                        'department_id' : department_id,
+                        'gender': obj.gender,
 
-                }
+                    })
+                    #  查询成功 返回200 状态码
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'mingpian_available_num': mingpian_available_num,
+                        'data_count': count,
+                        'department_list' : department_list,
+
+                    }
+
+            else:
+                response.code = 301
+                response.msg = "产品为空"
 
         else:
             response.code = 402
