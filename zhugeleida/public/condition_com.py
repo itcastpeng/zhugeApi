@@ -84,7 +84,7 @@ def validate_agent(data):
             name = agent_dict.get('name')
             square_logo_url = agent_dict.get('square_logo_url')
 
-            if agentid == agent_id:
+            if int(agentid) == int(agent_id):
                 response.data = {
                     'agentid' : agentid,
                     'name' :    name,
