@@ -128,6 +128,9 @@ def enterprise_weixin_sign(request):
         get_ticket_data = {}
         get_token_data = {}
         user_id = request.GET.get('user_id')
+        url = request.GET.get('url')
+        url = url.split('#')[0]
+
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         company_id = user_obj.company_id
         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
@@ -183,7 +186,7 @@ def enterprise_weixin_sign(request):
 
         noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
         timestamp = int(time.time())
-        url = 'zhugeleida.zhugeyingxiao.com'
+        url = url
         sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket,noncestr,timestamp,url)
         signature = str_sha_encrypt(sha_string.encode('utf-8'))
 
