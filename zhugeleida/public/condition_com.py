@@ -67,8 +67,29 @@ def validate_agent(data):
 
     weixin_ret_data = ret.json()
     print('---- 企业微信agent secret 验证接口返回 --->', weixin_ret_data)
+    access_token = weixin_ret_data.get('access_token')
 
     if weixin_ret_data['errcode'] == 0:
+        agent_list_url = 'https://qyapi.weixin.qq.com/cgi-bin/agent/list'
+        get_token_data = {
+            'access_token' : access_token
+        }
+        agent_list_ret = requests.get(agent_list_url, params=get_token_data)
+        agent_list_ret = agent_list_ret.json()
+        agentlist = agent_list_ret.get('agentlist')
+        for agent_dict in agentlist:
+            agentid = agent_dict.get('agentid')
+            name = agent_dict.get('name')
+            square_logo_url = agent_dict.get('square_logo_url')
+
+            if agentid == agent_id:
+                response.data = {
+                    'agentid' : agentid,
+                    'name' :    name,
+                    'square_logo_url' : square_logo_url
+                }
+
+
         response.code = 0
         response.msg = '企业微信验证'
         print("=========企业微信agent secret验证-通过======>",corp_id,'|',app_secret)
