@@ -100,7 +100,7 @@ def product(request, oper_type):
                 user_id = request.GET.get('user_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')
+                order = request.GET.get('order', '-recommend_index')
 
                 q1 = Q()
                 q1.connector = 'and'
@@ -108,7 +108,7 @@ def product(request, oper_type):
                 company_id = user_obj.company_id
                 # role_id = user_obj.role_id
 
-                if product_type == 1:  #展示公司 产品
+                if product_type == 1:   # 展示公司 产品
                      q1.children.append(('user_id__isnull', True))
                 elif product_type == 2: # 展示个人 产品
                      q1.children.append(('user_id__isnull', False))
@@ -170,6 +170,7 @@ def product(request, oper_type):
                             'publisher_date': obj.create_date.strftime("%Y-%m-%d %H:%M:%S"),  # 发布日期。
                             'publisher': publisher,  # 发布者
                             'status': obj.get_status_display(),
+                            'recommend_index': obj.recommend_index, #产品推荐指数
                             'status_code': obj.status  # 产品的动态。
                         })
 
