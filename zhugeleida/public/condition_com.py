@@ -76,6 +76,8 @@ def validate_agent(data):
         }
         agent_list_ret = requests.get(agent_list_url, params=get_token_data)
         agent_list_ret = agent_list_ret.json()
+        print('------- Agent_list_ret ----------->>',agent_list_ret)
+
         agentlist = agent_list_ret.get('agentlist')
         for agent_dict in agentlist:
             agentid = agent_dict.get('agentid')
