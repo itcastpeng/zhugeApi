@@ -46,11 +46,11 @@ def user(request):
             role_id = admin_userobj.role_id
             company_id = admin_userobj.company_id
 
-            if role_id == 1:  # 超级管理员,展示出所有的企业用户
-               pass
-
-            elif role_id == 2:  #管理员，展示出自己公司的用户
-                q.add(Q(**{"company_id": company_id}), Q.AND)
+            # if role_id == 1:  # 超级管理员,展示出所有的企业用户
+            #    pass
+            #
+            # else:  #管理员，展示出自己公司的用户
+            q.add(Q(**{"company_id": company_id}), Q.AND)
 
             objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
 
@@ -60,6 +60,7 @@ def user(request):
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
+
             mingpian_available_num = objs[0].company.mingpian_available_num
             # 返回的数据
             print('------------->>>', objs)
