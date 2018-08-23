@@ -222,41 +222,17 @@ def open_weixin(request, oper_type):
             print('----request.session userId--->', request.session.get('user_id'))
 
             app_id = 'wx67e2fde0f694111c'
-            app_secret = '4a9690b43178a1287b2ef845158555ed'
-
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-            post_component_data = {}
-            post_pre_auth_data = {}
-            get_pre_auth_data = {}
-            get_auth_info_data = {}
-            post_auth_info_data = {}
 
-            post_component_data['component_appid'] = app_id
-            post_component_data['component_appsecret'] = app_secret
-            component_verify_ticket = rc.get('ComponentVerifyTicket')
-            post_component_data['component_verify_ticket'] = component_verify_ticket
-            token_ret = rc.get('component_access_token')
+            response_ret =  create_component_access_token()
+            component_access_token = response_ret.data.get('component_access_token')
 
-            print('--- Redis 里存储的 component_access_token---->>', token_ret)
-
-            if not token_ret:
-                post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
-                component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
-                print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
-                component_token_ret = component_token_ret.json()
-                access_token = component_token_ret.get('component_access_token')
-                if access_token:
-                    get_pre_auth_data['component_access_token'] = access_token
-                    rc.set('component_access_token', access_token, 7000)
-                else:
-                    response.code = 400
-                    response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
-                    return JsonResponse(response.__dict__)
-            else:
-                get_pre_auth_data['component_access_token'] = token_ret
-
-            post_pre_auth_data['component_appid'] = app_id
-
+            get_pre_auth_data = {
+                'component_access_token' : component_access_token
+            }
+            post_pre_auth_data = {
+                'component_appid' :  app_id
+            }
             exist_pre_auth_code = rc.get('pre_auth_code')
 
             if not exist_pre_auth_code:
@@ -462,6 +438,51 @@ def xcx_auth_process_oper(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         return JsonResponse(response.__dict__)
+
+
+
+
+## 生成请 第三方平台 自己 的component_access_token
+def create_component_access_token():
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    response = Response.ResponseObj()
+
+    component_verify_ticket = rc.get('ComponentVerifyTicket')
+    app_id = 'wx67e2fde0f694111c'
+    app_secret = '4a9690b43178a1287b2ef845158555ed'
+    post_component_data = {
+        'component_appid': app_id,
+        'component_appsecret' : app_secret,
+        'component_verify_ticket' : component_verify_ticket
+    }
+
+
+    token_ret = rc.get('component_access_token')
+    print('--- Redis 里存储的 component_access_token---->>', token_ret)
+
+    if not token_ret:
+        post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
+        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+        print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
+        component_token_ret = component_token_ret.json()
+        access_token = component_token_ret.get('component_access_token')
+
+        if access_token:
+            token_ret = access_token
+            rc.set('component_access_token', access_token, 7000)
+        else:
+            response.code = 400
+            response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
+            return JsonResponse(response.__dict__)
+
+    response.data = {
+        'component_access_token'  : token_ret
+    }
+    response.code = 200
+
+    return response
+
+
 
 
 # 添加企业的产品
