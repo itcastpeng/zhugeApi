@@ -110,7 +110,11 @@ def validate_agent(data):
                 set_agent_ret = requests.post(set_agent_url, params=get_agent_data,data=post_agent_data)
                 set_agent_ret = set_agent_ret.json()
                 print('--------- 设置应用 set_agent_ret 返回 ----------->>', set_agent_ret)
-
+                errmsg = set_agent_ret.get('errmsg')
+                if errmsg == 'ok':
+                    print('--------- 设置应用 set_agent_ret 成功 ----------->>')
+                else:
+                    print('--------- 设置应用 set_agent_ret 失败 ----------->>')
 
 
 
