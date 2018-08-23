@@ -292,7 +292,7 @@ def company_oper(request, oper_type, o_id):
                     name = result_validate.data.get('name')
                     agent_id = result_validate.data.get('agentid')
 
-                objs = models.zgld_app.objects.filter(name=name,company_id=company_id)
+                objs = models.zgld_app.objects.filter(app_type=app_type,company_id=company_id)
                 if objs:
                     objs.update(
                         name=name,
