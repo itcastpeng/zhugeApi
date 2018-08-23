@@ -40,6 +40,7 @@ class zgld_app(models.Model):
         (2,'Boss雷达')
     )
     app_type = models.SmallIntegerField(verbose_name='app类型区分', choices=app_type_choice,default=1)
+
     is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
 
     class Meta:

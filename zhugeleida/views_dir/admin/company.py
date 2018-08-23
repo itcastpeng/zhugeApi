@@ -254,7 +254,7 @@ def company_oper(request, oper_type, o_id):
         elif oper_type == "update_agent":  #雷达AI APP秘钥添加。
             agent_data = {
                 'company_id': o_id,
-                'name' : request.POST.get('name').strip(), #应用的名字
+                # 'name' : request.POST.get('name').strip(), #应用的名字
                 'agent_id': request.POST.get('agent_id').strip(),
                 'app_secret': request.POST.get('app_secret').strip(),
                 'app_type': request.POST.get('app_type').strip()
@@ -264,7 +264,7 @@ def company_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
 
                 company_id =  forms_obj.cleaned_data.get('company_id')
-                name =  forms_obj.cleaned_data.get('name')
+                # name =  forms_obj.cleaned_data.get('name')
                 app_type =  forms_obj.cleaned_data.get('app_type') #  (1,'AI雷达'),  (2,'Boss雷达')
                 agent_id =  forms_obj.cleaned_data.get('agent_id')
                 app_secret =  forms_obj.cleaned_data.get('app_secret')
@@ -287,7 +287,10 @@ def company_oper(request, oper_type, o_id):
                 if result_validate.code != 0:
                     return JsonResponse(result_validate.__dict__)
                 else:
+                    print('-----result_validate.data--------->>',result_validate.data)
                     is_validate = True
+                    name = result_validate.data.get('name')
+                    agent_id = result_validate.data.get('agentid')
 
                 objs = models.zgld_app.objects.filter(name=name,company_id=company_id)
                 if objs:

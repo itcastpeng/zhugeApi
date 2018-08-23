@@ -114,12 +114,12 @@ class CompanyUpdateForm(forms.Form):
 # 添加公司信息
 class AgentAddForm(forms.Form):
     # print('添加公司')
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "agent名不能为空"
-        }
-    )
+    # name = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "agent名不能为空"
+    #     }
+    # )
     app_type = forms.CharField(
         required=True,
         error_messages={
