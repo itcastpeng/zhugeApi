@@ -401,7 +401,6 @@ def dai_xcx_oper(request, oper_type):
                     response.msg = '没有需要提交审核的小程序'
 
 
-
         elif oper_type == 'relase_code':
 
             forms_obj = RelaseCodeInfoForm(request.POST)
@@ -463,6 +462,33 @@ def dai_xcx_oper(request, oper_type):
                     response.code = 301
                     response.msg = '没有正在审核中的代码'
 
+    elif  request.method == "GET":
+
+        if oper_type == "template_list":
+
+            gettemplate_list_url = 'https://api.weixin.qq.com/wxa/gettemplatelist'
+            response_ret = create_component_access_token()
+            component_access_token = response_ret
+
+            gettemplate_list_data = {
+                'access_token': component_access_token
+            }
+
+            gettemplate_list_ret = requests.post(gettemplate_list_url, params=gettemplate_list_data)
+            gettemplate_list_ret = gettemplate_list_ret.json()
+            errmsg = gettemplate_list_ret.get('errmsg')
+            template_list = gettemplate_list_ret.get('template_list')
+
+            print('----------- 版库中的所有小程序代码模版 返回 ------------->', json.dumps(gettemplate_list_ret))
+            if errmsg == 'ok':
+                response.data = {
+                    'template_list': template_list,
+                }
+                response.code = 200
+                response.msg = '获取成功'
+            else:
+                response.code = 301
+                response.msg = '获取失败'
 
 
         return JsonResponse(response.__dict__)
