@@ -145,7 +145,7 @@ def open_weixin(request, oper_type):
                     miniprograminfo = authorizer_info_ret['authorizer_info'].get('MiniProgramInfo')
                     categories = ''
                     if miniprograminfo:
-                        categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 头像
+                        categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 类目
 
                         if len(categories) != 0:
                             categories = json.dumps(categories)
@@ -198,6 +198,13 @@ def open_weixin(request, oper_type):
                             response.code = errcode
                             response.msg = errmsg
                             print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
+
+                        ## 绑定微信用户为小程序体验者
+
+                        bind_tester_url = 'https://api.weixin.qq.com/wxa/bind_tester'
+                        for wechatid in ['ai6026325','crazy_acong','lihanjie5201314','wxid_6bom1qvrrjhv22']:
+                            pass
+
 
 
 
@@ -481,7 +488,6 @@ def create_component_access_token():
     response.code = 200
 
     return response
-
 
 
 
