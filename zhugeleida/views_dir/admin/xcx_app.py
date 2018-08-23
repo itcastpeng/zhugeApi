@@ -61,6 +61,9 @@ def xcx_app(request):
                     status_time = ''
                     status_text = ''
                     app_status = ''
+                    version_num = upload_audit_obj[0].version_num
+                    template_id = upload_audit_obj[0].template_id
+                    experience_qrcode = upload_audit_obj[0].experience_qrcode
                     status = upload_audit_obj[0].upload_result
                     if status == 0:
                         app_status = 1
@@ -114,29 +117,37 @@ def xcx_app(request):
                             app_status = 8
                             status_text = '上线失败'
                             reason =  release_obj[0].reason
-
-                    ret_data.append({
-                        'id': obj.id,
-                        'belong_user': obj.user.login_user, # 小程序授权的用户
-                        'company_id': obj.company_id,
-                        'company_name': obj.company.name,
-                        'version_num' : upload_audit_obj[0].version_num,
-                        'template_id' : upload_audit_obj[0].template_id,
-                        'status' :  app_status,           # 审核的结果。
-                        'status_text' :  status_text,     # 审核的结果。
-                        'status_time' : status_time.strftime('%Y-%m-%d %H:%M'),
-                        'experience_qrcode': upload_audit_obj[0].experience_qrcode,
-                        'reason': reason,
+                else:
+                    version_num = ''
+                    template_id = ''
+                    experience_qrcode = ''
+                    app_status = 0  # 
+                    status_text = ''
+                    status_time = ''
 
 
-                    })
-                    #  查询成功 返回200 状态码
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
+                ret_data.append({
+                    'id': obj.id,
+                    'belong_user': obj.user.login_user, # 小程序授权的用户
+                    'company_id': obj.company_id,
+                    'company_name': obj.company.name,
+                    'version_num' : version_num,
+                    'template_id' : template_id,
+                    'status' :  app_status,           # 审核的结果。
+                    'status_text' :  status_text,     # 审核的结果。
+                    'status_time' : status_time.strftime('%Y-%m-%d %H:%M') if status_time else '',
+                    'experience_qrcode': experience_qrcode ,
+                    'reason': reason,
+
+
+                })
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
 
         else:
             response.code = 402
