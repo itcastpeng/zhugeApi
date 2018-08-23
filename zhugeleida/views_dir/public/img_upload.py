@@ -151,6 +151,10 @@ def img_merge(request):
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'wcx_head_image')
 
 
+        elif img_source == 'article':  # 上传小程序头像
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article')
+
+
         fileData = ''
         for chunk in range(chunk_num):
             file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
