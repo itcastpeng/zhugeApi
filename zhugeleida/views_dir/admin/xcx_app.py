@@ -121,7 +121,7 @@ def xcx_app(request):
                     version_num = ''
                     template_id = ''
                     experience_qrcode = ''
-                    app_status = 0  # 
+                    app_status = 0
                     status_text = ''
                     status_time = ''
 

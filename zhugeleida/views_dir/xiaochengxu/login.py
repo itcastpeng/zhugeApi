@@ -56,8 +56,9 @@ def login(request):
             user_type = forms_obj.cleaned_data.get('user_type')
             company_id = forms_obj.cleaned_data.get('company_id')
             user_id = forms_obj.cleaned_data.get('uid')
+            company_id = int(company_id) if company_id else ''
 
-            if not company_id:  # 暂时修改 ，等审核后在注释。。
+            if not company_id or company_id == 2:  # 暂时修改 ，等审核后在注释。。
                 company_id = 1
 
             if not user_id:
