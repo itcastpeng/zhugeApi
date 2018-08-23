@@ -467,6 +467,7 @@ def dai_xcx_oper(request, oper_type):
 
         return JsonResponse(response.__dict__)
 
+    # 获取查询最新一次提交的审核状态 并提交审核通过的代码上线
     elif request.method == "GET":
         print('------post.get--->',)
 

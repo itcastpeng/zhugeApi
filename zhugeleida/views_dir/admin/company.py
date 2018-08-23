@@ -276,6 +276,7 @@ def company_oper(request, oper_type, o_id):
                     return JsonResponse(response.__dict__)
 
                 data = {
+                    'company_id': company_id,
                     'corp_id': corp_id,  #企业应用id
                     'app_secret' : app_secret,
                     'agent_id' : agent_id,

@@ -55,6 +55,7 @@ def validate_agent(data):
     response = Response.ResponseObj()
 
     corp_id = data.get('corp_id')
+    company_id = data.get('company_id')
     app_secret = data.get('app_secret')
     agent_id = data.get('agent_id')
     get_token_data = {}
@@ -90,6 +91,31 @@ def validate_agent(data):
                     'name' :    name,
                     'square_logo_url' : square_logo_url
                 }
+
+                #设置应用
+                set_agent_url = 'https://qyapi.weixin.qq.com/cgi-bin/agent/set'
+                home_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?redirect_uri=http://zhugeleida.zhugeyingxiao.com/zhugeleida/qiyeweixin/work_weixin_auth/%s&appid=%s&agentid=%s&scope=snsapi_userinfo&response_type=code#wechat_redirect' % (company_id,corp_id,agentid)
+
+                get_agent_data = {
+                    'access_token': access_token
+                }
+                post_agent_data = {
+                    "agentid": agentid,
+                    # "name": "NAME",
+                    # "description": "DESC",  #企业应用详情
+                    "redirect_domain": "zhugeleida.zhugeyingxiao.com",
+                    "home_url": home_url
+
+                }
+                set_agent_ret = requests.post(set_agent_url, params=get_agent_data,data=post_agent_data)
+                set_agent_ret = set_agent_ret.json()
+                print('--------- 设置应用 set_agent_ret 返回 ----------->>', set_agent_ret)
+                errmsg = set_agent_ret.get('errmsg')
+                if errmsg == 'ok':
+                    print('--------- 设置应用 set_agent_ret 成功 ----------->>')
+                else:
+                    print('--------- 设置应用 set_agent_ret 失败 ----------->>')
+
 
 
         response.code = 0
