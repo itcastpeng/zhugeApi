@@ -32,14 +32,14 @@ def login(request):
                 userprofile_obj.token = token
             else:
                 token = userprofile_obj.token
-            request.session['user_id'] = userprofile_obj.id
+
 
             response.code = 200
             response.msg = '登录成功'
 
             last_login_date_obj = userprofile_obj.last_login_date
             last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
-            rules_list = [ i[0]  for i in  userprofile_obj.role.rules.values_list('title')]
+
             response.data = {
                 'token': token,
                 'user_id': userprofile_obj.id,

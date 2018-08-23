@@ -6,9 +6,9 @@ import datetime
 import json
 from zhugeapi_celery_project import tasks
 import base64
-
-# 记录访问日志，例如访问某个功能（名片，产品，官网...）
-# 创建客户与用户之间的关系
+import qrcode
+from django.conf import settings
+import os
 
 def action_record(data,remark):
     response = Response.ResponseObj()
@@ -83,3 +83,29 @@ def action_record(data,remark):
     return response
 
 
+def create_qrcode(data):
+    url = data.get('url')
+    article_id = data.get('article_id')
+
+    response = Response.ResponseObj()
+    qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image()
+    img.show()
+
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
+
+    qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
+    path_qr_code_name = BASE_DIR + qr_code_name
+    qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
+
+    img.save(path_qr_code_name)
+    response.data = {'pre_qrcode_url': qr_url}
+    response.code = 200
+    response.msg = '生成文章体验二维码成功'
+    print('---------生成文章体验二维码成功--------->>', qr_url)
+
+
+    return response

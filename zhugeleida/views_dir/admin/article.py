@@ -11,6 +11,7 @@ import datetime
 import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
+from zhugeleida.public.common import create_qrcode
 
 
 @csrf_exempt
@@ -127,8 +128,22 @@ def article_oper(request, oper_type, o_id):
                 if  tags_id_list:
                     obj.tags = tags_id_list
 
-                response.code = 200
-                response.msg = "添加成功"
+                url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
+                data = {
+                    'url': url,
+                    'article_id' : obj[0].id,
+                }
+                response_ret = create_qrcode(data)
+                pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                if pre_qrcode_url:
+                    response = response_ret
+                    response.code = 200
+                    response.msg = "添加成功"
+
+                else:
+                    response.code = 303
+                    response.msg = '生成文章体验二维码失败'
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)
@@ -180,8 +195,20 @@ def article_oper(request, oper_type, o_id):
                 if tags_id_list:
                     obj[0].tags = tags_id_list
 
-                response.code = 200
-                response.msg = "修改成功"
+                url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
+                data = {
+                    'url': url,
+                    'article_id' : obj[0].id,
+                }
+                response_ret = create_qrcode(data)
+                pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                if pre_qrcode_url:
+                    response = response_ret
+                else:
+                    response.code = 303
+                    response.msg = '生成文章体验二维码失败'
+
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)

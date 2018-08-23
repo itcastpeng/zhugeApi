@@ -80,4 +80,16 @@ def kill_phantomjs_process():
                     print ('----- Exception 没有如此进程!!!------>>')
 
 
+#获取查询最新一次提交的审核状态并记录到数据库
+@app.task
+def get_latest_audit_status_and_release_code():
+
+
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/get_latest_audit_status_and_release_code'
+    get_data = {
+
+    }
+
+    requests.get(url, params=get_data)
+
 
