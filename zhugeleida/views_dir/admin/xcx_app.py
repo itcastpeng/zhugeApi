@@ -62,13 +62,13 @@ def xcx_app(request):
                 app_status = ''
                 status = upload_audit_obj[0].upload_result
                 if status == 0:
-                    app_status = 0
+                    app_status = 1
                     status_text = '代码上传成功'
                     status_time = upload_audit_obj[0].upload_code_date
                     reason = ''
 
                 elif status == 1:
-                    app_status = 1
+                    app_status = 2
                     status_text = '代码上传失败'
                     status_time = upload_audit_obj[0].upload_code_date
                     reason = upload_audit_obj[0].reason
@@ -77,13 +77,13 @@ def xcx_app(request):
                 status =  upload_audit_obj[0].audit_result
 
                 if status == 0:
-                    app_status = 2
+                    app_status = 5
                     status_text = '审核通过'
                     status_time = upload_audit_obj[0].audit_reply_date
 
 
                 elif status == 1:
-                    app_status = 3
+                    app_status = 6
                     status_text =  '审核未通过'
                     status_time = upload_audit_obj[0].audit_reply_date
                     reason = upload_audit_obj[0].reason
@@ -94,7 +94,7 @@ def xcx_app(request):
                     status_time = upload_audit_obj[0].audit_commit_date
 
                 elif status == 3:
-                    app_status = 5
+                    app_status = 3
                     status_text =  '提交审核报错'
                     status_time = upload_audit_obj[0].audit_commit_date
                     reason = upload_audit_obj[0].reason
@@ -105,12 +105,12 @@ def xcx_app(request):
                     status_time = release_obj[0].release_commit_date
 
                     if status == 1:
-                        app_status = 6
+                        app_status = 7
                         status_text =  '上线成功'
                         reason = ''
 
                     elif status == 2:
-                        app_status = 7
+                        app_status = 8
                         status_text = '上线失败'
                         reason =  release_obj[0].reason
 
