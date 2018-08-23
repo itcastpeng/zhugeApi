@@ -59,7 +59,7 @@ MIDDLEWARE = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = (
-    'zhugeyingxiao.com'
+    '*'
 )
 
 CORS_ALLOW_METHODS = (
