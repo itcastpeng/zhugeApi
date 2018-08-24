@@ -132,7 +132,7 @@ def home_page_oper(request, oper_type):
             #今日新增
             q5 = Q()
             now_time = datetime.now().strftime("%Y-%m-%d")
-            q5.add(Q(**{'create_date': now_time}), Q.AND)
+            q5.add(Q(**{'create_date__gte': now_time}), Q.AND)
             ret_data['today_data'] = deal_search_time(data, q5)
 
 
@@ -176,8 +176,10 @@ def home_page_oper(request, oper_type):
 
                    now_time = datetime.now()
                    start_time = (now_time - timedelta(days=day)).strftime("%Y-%m-%d")
+                   stop_time = (now_time - timedelta(days=day-1)).strftime("%Y-%m-%d")
                    # stop_time = now_time.strftime("%Y-%m-%d")
                    data['start_time'] = start_time
+                   data['stop_time'] = stop_time
                    ret_data.append({'statics_date' : start_time, 'value' : deal_line_info(data)})
 
 
@@ -185,8 +187,7 @@ def home_page_oper(request, oper_type):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'ret_data': ret_data,
-
+                    'ret_data': ret_data
                 }
 
             else:
@@ -254,22 +255,26 @@ def deal_search_time(data,q):
 def deal_line_info(data):
     index_type = int(data.get('index_type'))
     start_time = data.get('start_time')
+    stop_time = data.get('stop_time')
     user_list = data.get('user_list')
     company_id = data.get('company_id')
     print('user_list',user_list)
+    if not user_list:
+        user_list = []
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
     print('---->start_time',start_time)
 
     if index_type == 1:  # 客户总数
 
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(create_date__gte=start_time).values_list('customer_id').distinct().count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q1).values_list('customer_id').distinct().count()  # 已获取客户数
         return customer_num
 
     elif index_type == 2:  # 跟进总数
-        follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list,
-                                                                                      last_follow_time__isnull=False)
+        follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list, last_follow_time__isnull=False)
+
         follow_num = 0
         if follow_customer_folowup_obj:
             follow_id_list = []
