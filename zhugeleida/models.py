@@ -132,7 +132,9 @@ class zgld_xiapchengxu_upload_audit(models.Model):
         (0,'审核成功'),
         (1,'审核失败'),
         (2,'审核中'),
-        (3,'提交审核代码失败')
+        (3,'提交审核代码失败'),
+        (4,'审核撤回成功'),
+        (5,'审核撤回失败'),
     )
     audit_result = models.SmallIntegerField(verbose_name='审核结果',null=True,choices=audit_result_type)
     reason = models.CharField(verbose_name='审核失败原因',max_length=1024,null=True)
@@ -212,6 +214,8 @@ class zgld_admin_userprofile(models.Model):
         (2, "未启用"),
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=1)
+
+    is_reset_password = models.BooleanField(verbose_name="是否重置密码", default=False)
     token = models.CharField(verbose_name="token值", max_length=64, null=True, blank=True)
     role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)

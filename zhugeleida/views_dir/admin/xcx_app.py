@@ -103,6 +103,18 @@ def xcx_app(request):
                         status_time = upload_audit_obj[0].audit_commit_date
                         reason = upload_audit_obj[0].reason
 
+                    elif status == 4:
+                        app_status = 9
+                        status_text = '审核撤回成功'
+                        status_time = upload_audit_obj[0].audit_reply_date
+                        reason = upload_audit_obj[0].reason
+
+                    elif status == 5:
+                        app_status = 10
+                        status_text = '审核撤回失败'
+                        status_time = upload_audit_obj[0].audit_reply_date
+                        reason = upload_audit_obj[0].reason
+
                     release_obj = models.zgld_xiapchengxu_release.objects.filter(audit_code_id=upload_audit_obj[0].id).order_by('-release_commit_date')
                     if release_obj:
                         status = release_obj[0].release_result

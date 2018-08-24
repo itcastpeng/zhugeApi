@@ -238,18 +238,9 @@ def dai_xcx_oper(request, oper_type):
                 if objs:
                     for obj in objs:
 
-                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id).order_by('-upload_code_date')[0]
-                        auditid = upload_code_obj.auditid
-                        audit_result = upload_code_obj.audit_result
-                        upload_result = upload_code_obj.upload_result
-                        if upload_result:
-                            if int(upload_result) == 1:
-                                print('------------ 代码上传失败,id: ------------------>>', auditid, '|', upload_code_obj.id)
-                                continue
-
-                        if audit_result:
-                            if int(audit_result) == 2:
-                                print('------------ 已有正在审核中的的代码 - auditid | id ------------------>>', auditid,'|',upload_code_obj.id)
+                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,audit_result=2).order_by('-upload_code_date')
+                        if upload_code_obj:
+                                print('------------ 已有正在审核中的的代码 - auditid | id ------------------>>', upload_code_obj[0].auditid,'|',upload_code_obj[0].id)
                                 continue
 
                         authorizer_refresh_token = obj.authorizer_refresh_token
@@ -462,6 +453,83 @@ def dai_xcx_oper(request, oper_type):
                     response.code = 301
                     response.msg = '没有正在审核中的代码'
 
+        elif oper_type == 'undocode_audit':
+            forms_obj = AuditCodeInfoForm(request.POST)
+            if forms_obj.is_valid():
+                user_id = request.GET.get('user_id')  # 账户
+                app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
+
+                app_ids_list = json.loads(app_ids_list)
+                objs = models.zgld_xiaochengxu_app.objects.filter(id__in=app_ids_list)
+                if objs:
+                    for obj in objs:
+                        authorizer_refresh_token = obj.authorizer_refresh_token
+                        authorizer_appid = obj.authorization_appid
+                        now_time = datetime.datetime.now()
+                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
+                                                                                              audit_result=2,
+                                                                                              auditid__isnull=False).order_by(
+                            '-upload_code_date')
+                        if upload_code_obj:
+                            upload_code_obj = upload_code_obj[0]
+                            undocode_audit_url = 'https://api.weixin.qq.com/wxa/undocodeaudit'
+                            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+                            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                            if not authorizer_access_token:
+                                data = {
+                                    'key_name': key_name,
+                                    'authorizer_refresh_token': authorizer_refresh_token,
+                                    'authorizer_appid': authorizer_appid
+                                }
+                                authorizer_access_token_result = create_authorizer_access_token(data)
+                                if authorizer_access_token_result.code == 200:
+                                    authorizer_access_token = authorizer_access_token_result.data
+                                else:
+                                    return JsonResponse(authorizer_access_token.__dict__)
+
+                            undocode_audit_data = {
+                                'access_token': authorizer_access_token
+                            }
+
+                            undocode_audit_ret = requests.get(undocode_audit_url, params=undocode_audit_data)
+                            undocode_audit_ret = undocode_audit_ret.json()
+                            reason = ''
+                            errmsg = undocode_audit_ret.get('errmsg')
+                            errcode = undocode_audit_ret.get('errcode')
+
+                            if errmsg == 'ok':
+                                response.code = 200
+                                response.msg = '小程序审核撤回成功'
+                                audit_result = 4  # (4,'审核撤回成功'),
+                                print('-------- 小程序审核撤回成功 --------->>')
+                            else:
+                                response.code = 304
+                                response.msg = '小程序审核撤回失败'
+                                audit_result = 5  # (5,'审核撤回失败'),
+                                if int(errcode) == -1:
+                                    reason = '系统错误'
+                                elif int(errcode) == 87013:
+                                    reason = '撤回次数达到上限（每天一次，每个月10次）'
+
+                                reason = '审核撤回报错: %s:%s' % (errmsg, reason)
+                                print('-------- 小程序审核撤回失败  errcode | errmsg   --------->>', errcode, errmsg)
+
+                            upload_code_obj.reason = reason
+                            upload_code_obj.audit_result = audit_result
+                            upload_code_obj.audit_reply_date = now_time
+                            upload_code_obj.save()
+
+                        else:
+                            response.code = 301
+                            response.msg = '没有正在审核中的代码'
+                            print('-------- 没有正在审核中的代码 xcx_app_id：---------->', obj.id)
+
+            else:
+                response.code = 402
+                response.msg = "未验证通过"
+                response.data = json.loads(forms_obj.errors.as_json())
+
     elif  request.method == "GET":
 
         if oper_type == "template_list":
@@ -489,6 +557,8 @@ def dai_xcx_oper(request, oper_type):
             else:
                 response.code = 301
                 response.msg = '获取失败'
+
+
 
 
         return JsonResponse(response.__dict__)

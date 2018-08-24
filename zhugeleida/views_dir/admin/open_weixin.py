@@ -11,14 +11,14 @@ import redis
 import xml.etree.cElementTree as ET
 from django import forms
 
-
+## 第三方平台接入
 @csrf_exempt
 def open_weixin(request, oper_type):
     if request.method == "POST":
         response = Response.ResponseObj()
         if oper_type == 'tongzhi':
 
-            print('------ 第三方   request.body------>>', request.body.decode(encoding='UTF-8'))
+            print('------ 第三方 request.body tongzhi 通知内容 ------>>', request.body.decode(encoding='UTF-8'))
 
             signature = request.GET.get('signature')
             timestamp = request.GET.get('timestamp')
@@ -199,13 +199,19 @@ def open_weixin(request, oper_type):
                             response.msg = errmsg
                             print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
 
+
                         ## 绑定微信用户为小程序体验者
-
                         bind_tester_url = 'https://api.weixin.qq.com/wxa/bind_tester'
-                        for wechatid in ['ai6026325','crazy_acong','lihanjie5201314','wxid_6bom1qvrrjhv22']:
-                            pass
-
-
+                        get_bind_tester_data = {
+                            'access_token' : authorizer_access_token
+                        }
+                        for wechatid in ['Ju_do_it','ai6026325','crazy_acong','lihanjie5201314','wxid_6bom1qvrrjhv22']:
+                            post_bind_tester_data = {
+                                    "wechatid": wechatid
+                            }
+                            domain_data_ret = requests.post(bind_tester_url, params=get_bind_tester_data,data=json.dumps(post_bind_tester_data))
+                            domain_data_ret = domain_data_ret.json()
+                            print('---------- 第三方平台 - 绑定微信用户为小程序体验者 返回------------>>',domain_data_ret)
 
 
                     else:
@@ -222,7 +228,7 @@ def open_weixin(request, oper_type):
 
             return HttpResponse("success")
 
-
+        # 生成接入的二维码
         elif oper_type == "create_grant_url":
             user_id = request.GET.get('user_id')
             request.session['user_id'] = user_id
@@ -269,6 +275,7 @@ def open_weixin(request, oper_type):
         return JsonResponse(response.__dict__)
 
 
+## 生成接入流程控制页面
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def xcx_auth_process(request):
@@ -443,8 +450,73 @@ def xcx_auth_process_oper(request, oper_type):
                 print("验证不通过")
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+    elif request.method == 'GET':
 
-        return JsonResponse(response.__dict__)
+        ###获取小程序基本信息
+        if oper_type == 'xcx_get_authorizer_info':
+            user_id = request.GET.get('user_id')
+            company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            app_obj =   models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+            if app_obj:
+                authorizer_appid = app_obj[0].authorization_appid
+                get_wx_info_data = {}
+                post_wx_info_data = {}
+                app_id = 'wx67e2fde0f694111c' # 三方平台的appid
+
+                component_access_token_ret = create_component_access_token()
+                component_access_token = component_access_token_ret.data.get('component_access_token')
+                post_wx_info_data['component_appid'] = app_id
+                post_wx_info_data['authorizer_appid'] = authorizer_appid
+                get_wx_info_data['component_access_token'] = component_access_token
+
+                url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+                authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+                authorizer_info_ret = authorizer_info_ret.json()
+                print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
+                original_id = authorizer_info_ret['authorizer_info'].get('user_name')
+
+                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
+                                               'id'] == 0 else False
+                # ---->预留代码
+                principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
+                qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
+                head_img = authorizer_info_ret['authorizer_info'].get('head_img')  # 头像
+                nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')  # 头像
+
+                miniprograminfo = authorizer_info_ret['authorizer_info'].get('MiniProgramInfo')
+                categories = ''
+                if miniprograminfo:
+                    categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 类目
+
+                    if len(categories) != 0:
+                        categories = json.dumps(categories)
+                    else:
+                        categories = ''
+
+                if original_id:
+                    app_obj.update(
+                            # authorization_appid=authorization_appid,  # 授权方appid
+                            # authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
+                            original_id=original_id,  # 小程序的原始ID
+                            verify_type_info=verify_type_info,  # 是否 微信认证
+
+                            principal_name=principal_name,  # 主体名称
+                            qrcode_url=qrcode_url,  # 二维码
+                            head_img=head_img,  # 头像
+                            name=nick_name,  # 昵称
+                            service_category=categories,  # 服务类目
+                        )
+                    print('----------成功获取小程序帐号基本信息authorizer_info---------->>')
+                    response.code = 200
+                    response.msg = "成功获取小程序帐号基本信息authorizer_info"
+
+
+            else:
+                response.msg = '小程序不存在'
+                response.code = 302
+
+
+    return JsonResponse(response.__dict__)
 
 
 
