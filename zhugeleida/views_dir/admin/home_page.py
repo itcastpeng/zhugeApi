@@ -179,7 +179,7 @@ def home_page_oper(request, oper_type):
                    stop_time = (now_time - timedelta(days=day-1)).strftime("%Y-%m-%d")
                    # stop_time = now_time.strftime("%Y-%m-%d")
                    data['start_time'] = start_time
-                   data['start_time'] = stop_time
+                   data['stop_time'] = stop_time
                    ret_data.append({'statics_date' : start_time, 'value' : deal_line_info(data)})
 
 
