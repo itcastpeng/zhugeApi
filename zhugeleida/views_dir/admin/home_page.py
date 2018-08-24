@@ -132,7 +132,7 @@ def home_page_oper(request, oper_type):
             #今日新增
             q5 = Q()
             now_time = datetime.now().strftime("%Y-%m-%d")
-            q5.add(Q(**{'create_date': now_time}), Q.AND)
+            q5.add(Q(**{'create_date__gte': now_time}), Q.AND)
             ret_data['today_data'] = deal_search_time(data, q5)
 
 
