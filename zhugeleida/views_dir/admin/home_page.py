@@ -187,8 +187,7 @@ def home_page_oper(request, oper_type):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'ret_data': ret_data,
-
+                    'ret_data': ret_data
                 }
 
             else:
@@ -260,7 +259,9 @@ def deal_line_info(data):
     user_list = data.get('user_list')
     company_id = data.get('company_id')
     print('user_list',user_list)
-
+    if not user_list:
+        user_list = []
+        
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
     q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
@@ -272,8 +273,8 @@ def deal_line_info(data):
         return customer_num
 
     elif index_type == 2:  # 跟进总数
-        follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list,
-                                                                                      last_follow_time__isnull=False)
+        follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list, last_follow_time__isnull=False)
+
         follow_num = 0
         if follow_customer_folowup_obj:
             follow_id_list = []
