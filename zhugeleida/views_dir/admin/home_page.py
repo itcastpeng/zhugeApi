@@ -263,12 +263,12 @@ def deal_line_info(data):
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 大于等于
+    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
     print('---->start_time',start_time)
 
     if index_type == 1:  # 客户总数
 
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(create_date__gte=start_time).values_list('customer_id').distinct().count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q1).values_list('customer_id').distinct().count()  # 已获取客户数
         return customer_num
 
     elif index_type == 2:  # 跟进总数
