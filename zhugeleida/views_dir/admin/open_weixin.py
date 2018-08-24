@@ -450,6 +450,7 @@ def xcx_auth_process_oper(request, oper_type):
                 print("验证不通过")
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
     elif request.method == 'GET':
 
         ###获取小程序基本信息
