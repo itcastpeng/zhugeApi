@@ -261,7 +261,7 @@ def deal_line_info(data):
     print('user_list',user_list)
     if not user_list:
         user_list = []
-        
+
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
     q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于

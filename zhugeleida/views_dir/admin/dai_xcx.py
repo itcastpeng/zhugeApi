@@ -240,7 +240,8 @@ def dai_xcx_oper(request, oper_type):
 
                         upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,audit_result=2).order_by('-upload_code_date')
                         if upload_code_obj:
-                                print('------------ 已有正在审核中的的代码 - auditid | id ------------------>>', upload_code_obj[0].auditid,'|',upload_code_obj[0].id)
+                                upload_code_obj = upload_code_obj[0]
+                                print('------------ 已有正在审核中的的代码 - auditid | id ------------------>>', upload_code_obj.auditid,'|',upload_code_obj.id)
                                 continue
 
                         authorizer_refresh_token = obj.authorizer_refresh_token
