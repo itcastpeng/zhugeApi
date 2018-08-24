@@ -43,7 +43,7 @@ def home_page(request):
         user_list = []
         if user_ids:
             for u_id in user_ids: user_list.append(u_id[0])
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).values_list('customer_id').distinct().count()  # 已获取客户数
 
 
         ret_data = {
@@ -129,6 +129,14 @@ def home_page_oper(request, oper_type):
             q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
+            #今日新增
+            q5 = Q()
+            now_time = datetime.now().strftime("%Y-%m-%d")
+            q5.add(Q(**{'create_date': now_time}), Q.AND)
+            ret_data['today_data'] = deal_search_time(data, q5)
+
+
+
             #  查询成功 返回200 状态码
             response.code = 200
             response.msg = '查询成功'
@@ -197,14 +205,14 @@ def deal_search_time(data,q):
     user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
     company_id = user_obj[0].company_id
 
-    user_ids = models.zgld_userprofile.objects.select_related('company').filter(
-        company_id=company_id).values_list('id')
+    user_ids = models.zgld_userprofile.objects.select_related('company').filter(company_id=company_id).values_list('id')
     user_list = []
     if user_ids:
         for u_id in user_ids: user_list.append(u_id[0])
 
 
-    customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q).count()  # 已获取客户数
+    customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
+    print('-----customer_num----->',customer_num)
 
 
     follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list,
@@ -233,12 +241,12 @@ def deal_search_time(data,q):
 
     ret =  {
         'customer_num': customer_num,  # 客户总数
-        # 'new_add_customer': ,                 # 跟进客户数
-        'follow_num': follow_num,  # 跟进客户数
-        'browse_num': browse_num,  # 浏览总数
-        'forward_num': forward_num,  # 被转发的总数  -包括转发名片，但是不包括转发产品
+        # 'new_add_customer': ,        # 跟进客户数
+        'follow_num': follow_num,      # 跟进客户数
+        'browse_num': browse_num,      # 浏览总数
+        'forward_num': forward_num,    # 被转发的总数  -包括转发名片，但是不包括转发产品
         'saved_total_num': saved_total_num,  # 被保存总数-包括保存手机号（action=8）
-        'praise_sum': praise_sum,  # 被点赞总数
+        'praise_sum': praise_sum,      # 被点赞总数
     }
     return  ret
 
@@ -251,12 +259,12 @@ def deal_line_info(data):
     print('user_list',user_list)
 
     q1 = Q()
-    q1.add(Q(**{'create_date__contains': start_time}), Q.AND)  # 大于等于
-    print('start_time',start_time)
+    q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+    print('---->start_time',start_time)
 
     if index_type == 1:  # 客户总数
 
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(create_date__contains=start_time).count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(create_date__gte=start_time).values_list('customer_id').distinct().count()  # 已获取客户数
         return customer_num
 
     elif index_type == 2:  # 跟进总数
