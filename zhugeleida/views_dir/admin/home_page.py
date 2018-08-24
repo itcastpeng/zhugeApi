@@ -176,8 +176,10 @@ def home_page_oper(request, oper_type):
 
                    now_time = datetime.now()
                    start_time = (now_time - timedelta(days=day)).strftime("%Y-%m-%d")
+                   stop_time = (now_time - timedelta(days=day-1)).strftime("%Y-%m-%d")
                    # stop_time = now_time.strftime("%Y-%m-%d")
                    data['start_time'] = start_time
+                   data['start_time'] = stop_time
                    ret_data.append({'statics_date' : start_time, 'value' : deal_line_info(data)})
 
 
@@ -254,12 +256,14 @@ def deal_search_time(data,q):
 def deal_line_info(data):
     index_type = int(data.get('index_type'))
     start_time = data.get('start_time')
+    stop_time = data.get('stop_time')
     user_list = data.get('user_list')
     company_id = data.get('company_id')
     print('user_list',user_list)
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 大于等于
     print('---->start_time',start_time)
 
     if index_type == 1:  # 客户总数
