@@ -109,8 +109,7 @@ def open_weixin(request, oper_type):
                 post_access_token_data['component_appid'] = app_id
                 post_access_token_data['authorization_code'] = auth_code
 
-                access_token_ret = requests.post(access_token_url, params=get_access_token_data,
-                                                 data=json.dumps(post_access_token_data))
+                access_token_ret = requests.post(access_token_url, params=get_access_token_data,data=json.dumps(post_access_token_data))
                 access_token_ret = access_token_ret.json()
                 print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>', access_token_ret)
                 authorizer_access_token = access_token_ret['authorization_info'].get('authorizer_access_token')
@@ -136,11 +135,11 @@ def open_weixin(request, oper_type):
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
                     verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
-                    # ---->预留代码
+                    #
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
-                    qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
-                    head_img = authorizer_info_ret['authorizer_info'].get('head_img')  # 头像
-                    nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')  # 头像
+                    qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')   # 二维码
+                    head_img = authorizer_info_ret['authorizer_info'].get('head_img')       # 头像
+                    nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')     # 头像
 
                     miniprograminfo = authorizer_info_ret['authorizer_info'].get('MiniProgramInfo')
                     categories = ''
@@ -162,15 +161,16 @@ def open_weixin(request, oper_type):
                                 verify_type_info=verify_type_info,  # 是否 微信认证
 
                                 principal_name=principal_name,  # 主体名称
-                                qrcode_url=qrcode_url,  # 二维码
-                                head_img=head_img,  # 头像
-                                name=nick_name,  # 昵称
+                                qrcode_url=qrcode_url,   # 二维码
+                                head_img=head_img,       # 头像
+                                name=nick_name,          # 昵称
                                 service_category=categories,  # 服务类目
                             )
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
 
+                        ########################### 修改小程序服务器域名 ######################################
                         get_domin_data = {
                             'access_token': authorizer_access_token
                         }
@@ -200,7 +200,7 @@ def open_weixin(request, oper_type):
                             print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
 
 
-                        ## 绑定微信用户为小程序体验者
+                        ########################## 绑定微信用户为小程序体验者 ###############################
                         bind_tester_url = 'https://api.weixin.qq.com/wxa/bind_tester'
                         get_bind_tester_data = {
                             'access_token' : authorizer_access_token
@@ -266,7 +266,8 @@ def open_weixin(request, oper_type):
 
             # 生成授权链接
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
-            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri)
+            # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
+            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (app_id, pre_auth_code, redirect_uri)   #auth_type=3 表示公众号和小程序都展示
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
             response.code = 200
             response.msg = '生成【授权链接】成功'

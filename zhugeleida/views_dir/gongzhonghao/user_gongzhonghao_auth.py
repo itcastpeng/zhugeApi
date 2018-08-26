@@ -75,8 +75,6 @@ def user_gongzhonghao_auth(request,company_id):
             ret_data = get_openid_info(get_token_data)
             openid = ret_data['openid']
             access_token = ret_data['access_token']
-            # session_key = ret_data['session_key']
-            # unionid = ret_data['unionid']
 
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
@@ -99,36 +97,35 @@ def user_gongzhonghao_auth(request,company_id):
                 client_id = obj.id
                 print('---------- 公众号-新用户创建成功 crete successful ---->')
 
-                get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
-                get_user_info_data = {
-                    'access_token': access_token,
-                    'openid': openid,
-                    'lang': 'zh_CN',
-                }
-
-                ret = requests.get(get_user_info_url, params=get_user_info_data)
-                ret_json = ret.json()
-                print('------- 拉取用户信息 接口返回----->>', ret_json)
-
-
-                if 'errcode' not  in  ret_json:
-
-                    openid = ret_json['openid']  # 用户唯一标识
-                    nickname = ret_json['nickname']  # 会话密钥
-                    sex = ret_json['sex']  #
-                    province = ret_json['province']  #
-                    city = ret_json['city']  #
-                    country = ret_json['country']    #
-                    headimgurl = ret_json['headimgurl']  #
-                    obj.openid = openid
-                    obj.nickname = nickname
-                    obj.sex = sex
-                    obj.openid = openid
-
-
-                else:
-                    errcode = ret_json.get('errcode')
-                    errmsg = ret_json.get('errmsg')
+                # get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
+                # get_user_info_data = {
+                #     'access_token': access_token,
+                #     'openid': openid,
+                #     'lang': 'zh_CN',
+                # }
+                #
+                # ret = requests.get(get_user_info_url, params=get_user_info_data)
+                # ret_json = ret.json()
+                # print('------- 拉取用户信息 接口返回----->>', ret_json)
+                #
+                #
+                # if 'errcode' not  in  ret_json:
+                #
+                #     openid = ret_json['openid']  # 用户唯一标识
+                #     nickname = ret_json['nickname']  # 会话密钥
+                #     sex = ret_json['sex']  #
+                #     province = ret_json['province']  #
+                #     city = ret_json['city']  #
+                #     country = ret_json['country']    #
+                #     headimgurl = ret_json['headimgurl']  #
+                #     obj.openid = openid
+                #     obj.nickname = nickname
+                #     obj.sex = sex
+                #     obj.openid = openid
+                #
+                # else:
+                #     errcode = ret_json.get('errcode')
+                #     errmsg = ret_json.get('errmsg')
 
 
 
