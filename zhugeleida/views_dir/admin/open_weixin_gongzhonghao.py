@@ -61,7 +61,7 @@ def open_weixin_gongzhonghao(request, oper_type):
 
                 token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
                 encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                appid = 'wx67e2fde0f694111c'
+                appid = 'wx6ba07e6ddcdc69b3'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
@@ -73,10 +73,10 @@ def open_weixin_gongzhonghao(request, oper_type):
                 print('-----decryp_xml -->', decryp_xml)
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                # rc.get('ComponentVerifyTicket')
 
+                ComponentVerifyTicket_key_name =  'ComponentVerifyTicket_%s' % (appid)
                 if ret == 0:
-                    rc.set('ComponentVerifyTicket', ComponentVerifyTicket, 10000)
+                    rc.set(ComponentVerifyTicket_key_name, ComponentVerifyTicket, 10000)
                     print('--------授权公众号消息解密 ComponentVerifyTicket--------->>', ComponentVerifyTicket)
 
                 else:
@@ -88,11 +88,13 @@ def open_weixin_gongzhonghao(request, oper_type):
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
 
-                app_id = 'wx67e2fde0f694111c'
+                app_id = 'wx6ba07e6ddcdc69b3'
                 if auth_code:
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                     # exist_auth_code = rc.get('auth_code')
-                    rc.set('auth_code', auth_code, 3400)
+                    auth_code_key_name = 'auth_code_%s' % (app_id)
+                    rc.set(auth_code_key_name, auth_code, 3400)
+
                     print("---------- 成功获取授权码auth_code --------->>", auth_code)
 
                 else:
@@ -101,9 +103,11 @@ def open_weixin_gongzhonghao(request, oper_type):
                     response.msg = "授权码authorization_code为空"
                     return JsonResponse(response.__dict__)
 
+                component_access_token_key_name = 'component_access_token_%s' % (app_id)
                 get_access_token_data = {}
                 post_access_token_data = {}
-                component_access_token = rc.get('component_access_token')
+                component_access_token = rc.get(component_access_token_key_name)
+
                 access_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_query_auth'
                 get_access_token_data['component_access_token'] = component_access_token
                 post_access_token_data['component_appid'] = app_id
@@ -116,10 +120,10 @@ def open_weixin_gongzhonghao(request, oper_type):
                 authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
                 authorizer_appid = access_token_ret['authorization_info'].get('authorizer_appid')
 
-                key_name = '%s_authorizer_access_token' % (authorization_appid)
+                authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorization_appid)
                 if authorizer_access_token and authorizer_refresh_token:
 
-                    rc.set(key_name, authorizer_access_token, 7000)
+                    rc.set(authorizer_access_token_key_name, authorizer_access_token, 7000)
 
                     ##################### 获取小程序授权方的authorizer_info信息 ##################
                     get_wx_info_data = {}
@@ -171,54 +175,13 @@ def open_weixin_gongzhonghao(request, oper_type):
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
 
                         ########################### 修改小程序服务器域名 ######################################
-                        get_domin_data = {
-                            'access_token': authorizer_access_token
-                        }
-                        post_domain_data = {
-                            'action': 'add',
-                            'requestdomain': ['https://api.zhugeyingxiao.com'],
-                            'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
-                            'uploaddomain': ['https://api.zhugeyingxiao.com'],
-                            'downloaddomain': ['https://api.zhugeyingxiao.com']
-                        }
-                        post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
-                        domain_data_ret = requests.post(post_domain_url, params=get_domin_data,
-                                                        data=json.dumps(post_domain_data))
-                        domain_data_ret = domain_data_ret.json()
-                        print('--------- 修改小程序服务器 接口返回---------->>',domain_data_ret)
-
-                        errcode = domain_data_ret.get('errcode')
-                        errmsg = domain_data_ret.get('errmsg')
-
-                        if errcode == 0:
-                            response.code = 200
-                            response.msg = "修改小程序服务器域名成功"
-                            print('---------授权 appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
-                        else:
-                            response.code = errcode
-                            response.msg = errmsg
-                            print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
-
-
-                        ########################## 绑定微信用户为小程序体验者 ###############################
-                        bind_tester_url = 'https://api.weixin.qq.com/wxa/bind_tester'
-                        get_bind_tester_data = {
-                            'access_token' : authorizer_access_token
-                        }
-                        for wechatid in ['Ju_do_it','ai6026325','crazy_acong','lihanjie5201314','wxid_6bom1qvrrjhv22']:
-                            post_bind_tester_data = {
-                                    "wechatid": wechatid
-                            }
-                            domain_data_ret = requests.post(bind_tester_url, params=get_bind_tester_data,data=json.dumps(post_bind_tester_data))
-                            domain_data_ret = domain_data_ret.json()
-                            print('---------- 第三方平台 - 绑定微信用户为小程序体验者 返回------------>>',domain_data_ret)
-
 
                     else:
                         response.code = 400
                         response.msg = "获取帐号基本信息 authorizer_info信息为空"
                         return JsonResponse(response.__dict__)
-                    ######################### end ############################################
+
+                        ######################### end ############################################
 
                 else:
                     print('------ 令牌（authorizer_access_token）为空------>>')
@@ -234,7 +197,7 @@ def open_weixin_gongzhonghao(request, oper_type):
             request.session['user_id'] = user_id
             print('----request.session userId--->', request.session.get('user_id'))
 
-            app_id = 'wx67e2fde0f694111c'
+            app_id = 'wx6ba07e6ddcdc69b3'  #诸葛雷达_公众号 appid
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
             response_ret =  create_component_access_token()
@@ -246,17 +209,17 @@ def open_weixin_gongzhonghao(request, oper_type):
             post_pre_auth_data = {
                 'component_appid' :  app_id
             }
-            exist_pre_auth_code = rc.get('pre_auth_code')
+            pre_auth_code_key_name = 'pre_auth_code_%s' % (app_id)
+            exist_pre_auth_code = rc.get(pre_auth_code_key_name)
 
             if not exist_pre_auth_code:
                 pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
-                pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data,
-                                                  data=json.dumps(post_pre_auth_data))
+                pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
                 pre_auth_code_ret = pre_auth_code_ret.json()
                 pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
                 print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
                 if pre_auth_code:
-                    rc.set('pre_auth_code', pre_auth_code, 1600)
+                    rc.set(pre_auth_code_key_name, pre_auth_code, 1600)
                 else:
                     response.code = 400
                     response.msg = "--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->"
@@ -463,7 +426,7 @@ def xcx_auth_process_oper(request, oper_type):
                 authorizer_appid = app_obj[0].authorization_appid
                 get_wx_info_data = {}
                 post_wx_info_data = {}
-                app_id = 'wx67e2fde0f694111c' # 三方平台的appid
+                app_id = 'wx6ba07e6ddcdc69b3'                    # 查看诸葛雷达_公众号的 appid
 
                 component_access_token_ret = create_component_access_token()
                 component_access_token = component_access_token_ret.data.get('component_access_token')
@@ -525,20 +488,27 @@ def xcx_auth_process_oper(request, oper_type):
 
 ## 生成请 第三方平台 自己 的component_access_token
 def create_component_access_token():
+
+    app_id = 'wx6ba07e6ddcdc69b3'                    # 查看诸葛雷达_公众号的 appid
+    app_secret = '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
 
-    component_verify_ticket = rc.get('ComponentVerifyTicket')
-    app_id = 'wx67e2fde0f694111c'
-    app_secret = '4a9690b43178a1287b2ef845158555ed'
+    ComponentVerifyTicket_key_name = 'ComponentVerifyTicket_%s' % (app_id)
+
+    component_verify_ticket = rc.get(ComponentVerifyTicket_key_name)
+    # app_id = 'wx6ba07e6ddcdc69b3'
+    # app_secret = '4a9690b43178a1287b2ef845158555ed'
+
     post_component_data = {
         'component_appid': app_id,
         'component_appsecret' : app_secret,
         'component_verify_ticket' : component_verify_ticket
     }
 
-
-    token_ret = rc.get('component_access_token')
+    component_access_token_key_name = 'component_access_token_%s' % (app_id)
+    token_ret = rc.get(component_access_token_key_name)
     print('--- Redis 里存储的 component_access_token---->>', token_ret)
 
     if not token_ret:
@@ -550,7 +520,7 @@ def create_component_access_token():
 
         if access_token:
             token_ret = access_token
-            rc.set('component_access_token', access_token, 7000)
+            rc.set(component_access_token_key_name, access_token, 7000)
         else:
             response.code = 400
             response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"

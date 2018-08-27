@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm,LoginBindingForm
+from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm, LoginBindingForm
 
 import time
 import datetime
@@ -21,6 +21,7 @@ from collections import OrderedDict
 import logging.handlers
 import redis
 
+
 # 从微信公众号接口中获取openid等信息
 def get_openid_info(get_token_data):
     oauth_url = 'https://api.weixin.qq.com/sns/oauth2/access_token'
@@ -28,21 +29,21 @@ def get_openid_info(get_token_data):
     ret = requests.get(oauth_url, params=get_token_data)
     ret_json = ret.json()
     print('---ret_json-->>', ret_json)
-    openid = ret_json['openid']  # 用户唯一标识
-    session_key = ret_json['session_key']  # 会话密钥
+    openid = ret_json['openid']              # 用户唯一标识
+    session_key = ret_json['session_key']    # 会话密钥
     access_token = ret_json['access_token']  # 会话密钥
 
     ret_data = {
         'openid': openid,
         'session_key': session_key,
-        'access_token' : access_token
+        'access_token': access_token
     }
 
     return ret_data
 
 
 @csrf_exempt
-def user_gongzhonghao_auth(request,company_id):
+def user_gongzhonghao_auth(request, company_id):
     response = Response.ResponseObj()
 
     if request.method == "GET":
@@ -62,11 +63,11 @@ def user_gongzhonghao_auth(request,company_id):
             if gongzhonghao_app_obj:
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
                 authorization_secret = gongzhonghao_app_obj.authorization_secret
-            appid = authorization_appid    #公众号的唯一标识
-            secret = authorization_secret  #公众号的appsecret
+            appid = authorization_appid    # 公众号的唯一标识
+            secret = authorization_secret  # 公众号的appsecret
 
             get_token_data = {
-                'appid': appid ,
+                'appid': appid,
                 'secret': secret,
                 'code': js_code,
                 'grant_type': 'authorization_code',
@@ -90,7 +91,7 @@ def user_gongzhonghao_auth(request,company_id):
                 obj = models.zgld_customer.objects.create(
                     token=token,
                     openid=openid,
-                    user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    user_type=user_type,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
                     # superior=customer_id,  #上级人。
                 )
 
@@ -127,9 +128,6 @@ def user_gongzhonghao_auth(request,company_id):
                 #     errcode = ret_json.get('errcode')
                 #     errmsg = ret_json.get('errmsg')
 
-
-
-
             ret_data = {
                 'cid': client_id,
                 'token': token
@@ -146,4 +144,16 @@ def user_gongzhonghao_auth(request,company_id):
         response.code = 402
         response.msg = "请求方式异常"
 
-    return  JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
+
+
+@csrf_exempt
+
+def create_gongzhonghao_auth_url(request):
+    appid = 'wxa77213c591897a13'
+    redirect_uri = 'https://api.zhugeyingxiao.com/admin/'
+    scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    state = 1 # 公司ID
+    component_appid = 'wx6ba07e6ddcdc69b3' # AppID
+
+    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=SCOPE&state=STATE&component_appid=%s#wechat_redirect' % ()
