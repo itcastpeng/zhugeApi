@@ -77,11 +77,11 @@ def open_weixin_gongzhonghao(request, oper_type):
                 ComponentVerifyTicket_key_name =  'ComponentVerifyTicket_%s' % (appid)
                 if ret == 0:
                     rc.set(ComponentVerifyTicket_key_name, ComponentVerifyTicket, 10000)
-                    print('--------授权公众号消息解密 ComponentVerifyTicket--------->>', ComponentVerifyTicket)
+                    print('--------授权-诸葛雷达_公众号消息解密 ComponentVerifyTicket--------->>', ComponentVerifyTicket)
 
                 else:
                     response.code = ret
-                    response.msg = "-------- 授权公众号消息解密  ------->"
+                    response.msg = "-------- 授权-诸葛雷达_公众号消息解密  ------->"
                     return JsonResponse(response.__dict__)
 
             except Exception as e:
@@ -125,7 +125,7 @@ def open_weixin_gongzhonghao(request, oper_type):
 
                     rc.set(authorizer_access_token_key_name, authorizer_access_token, 7000)
 
-                    ##################### 获取小程序授权方的authorizer_info信息 ##################
+                    ##################### 获取公众号授权方的authorizer_info信息 ##################
                     get_wx_info_data = {}
                     post_wx_info_data = {}
                     post_wx_info_data['component_appid'] = app_id
@@ -134,7 +134,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                     url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
                     authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取小程序授权方的authorizer_info信息 返回 ------------->',json.dumps(authorizer_info_ret.json()))
+                    print('----------- 获取_公众号授权方的authorizer_info信息 返回 ------------->',json.dumps(authorizer_info_ret.json()))
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
@@ -161,7 +161,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                             obj.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
-                                original_id=original_id,  # 小程序的原始ID
+                                original_id=original_id,  # 公众号的原始ID
                                 verify_type_info=verify_type_info,  # 是否 微信认证
 
                                 principal_name=principal_name,  # 主体名称
@@ -174,7 +174,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
 
-                        ########################### 修改小程序服务器域名 ######################################
+                        ########################### 修改公众号服务器域名 ######################################
 
                     else:
                         response.code = 400
@@ -328,8 +328,8 @@ def xcx_auth_process(request):
                     'step': '',
                     'ret_data': {
                         'authorization_appid': authorization_appid,  # 授权方appid
-                        'name': name,  # 小程序名称
-                        'principal_name': principal_name,  # 小程序主体名称
+                        'name': name,  # 公众号名称
+                        'principal_name': principal_name,  # 公众号主体名称
                         'head_img': head_img,  # 授权方头像
                         'verify_type_info': verify_type_info,  # 微信认证是否通过. True 为认证通过，Falsew为认证通过
                         'service_category': service_category,  #服务类目
@@ -395,7 +395,7 @@ def xcx_auth_process_oper(request, oper_type):
             forms_obj = UpdateInfoForm(request.POST)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
-                name = forms_obj.cleaned_data.get('name')  # 小程序名称
+                name = forms_obj.cleaned_data.get('name')  # 公众号名称
                 head_img = forms_obj.cleaned_data.get('head_img')  # 头像
                 introduce = forms_obj.cleaned_data.get('introduce')  # 介绍
                 service_category = forms_obj.cleaned_data.get('service_category')  # 服务类目
@@ -417,7 +417,7 @@ def xcx_auth_process_oper(request, oper_type):
 
     elif request.method == 'GET':
 
-        ###获取小程序基本信息
+        ###获取公众号基本信息
         if oper_type == 'xcx_get_authorizer_info':
             user_id = request.GET.get('user_id')
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -437,7 +437,7 @@ def xcx_auth_process_oper(request, oper_type):
                 url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
                 authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
-                print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
+                print('---------- 公众号帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
                 verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
@@ -462,7 +462,7 @@ def xcx_auth_process_oper(request, oper_type):
                     app_obj.update(
                             # authorization_appid=authorization_appid,  # 授权方appid
                             # authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
-                            original_id=original_id,  # 小程序的原始ID
+                            original_id=original_id,  # 公众号的原始ID
                             verify_type_info=verify_type_info,  # 是否 微信认证
 
                             principal_name=principal_name,  # 主体名称
@@ -471,13 +471,13 @@ def xcx_auth_process_oper(request, oper_type):
                             name=nick_name,  # 昵称
                             service_category=categories,  # 服务类目
                         )
-                    print('----------成功获取小程序帐号基本信息authorizer_info---------->>')
+                    print('----------成功获取公众号帐号基本信息authorizer_info---------->>')
                     response.code = 200
-                    response.msg = "成功获取小程序帐号基本信息authorizer_info"
+                    response.msg = "成功获取公众号帐号基本信息authorizer_info"
 
 
             else:
-                response.msg = '小程序不存在'
+                response.msg = '公众号不存在'
                 response.code = 302
 
 
@@ -549,20 +549,20 @@ class UpdateInfoForm(forms.Form):
     name = forms.CharField(
         required=True,
         error_messages={
-            'required': "小程序名称不能为空"
+            'required': "公众号名称不能为空"
         }
     )
 
     head_img = forms.CharField(
         required=True,
         error_messages={
-            'required': "小程序头像不能为空"
+            'required': "公众号头像不能为空"
         }
     )
     introduce = forms.CharField(
         required=False,
         error_messages={
-            'required': "小程序头像不能为空"
+            'required': "公众号头像不能为空"
         }
     )
 
