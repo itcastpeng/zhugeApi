@@ -242,14 +242,14 @@ def open_weixin_gongzhonghao(request, oper_type):
 ## 生成接入流程控制页面
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def xcx_auth_process(request):
+def gzh_auth_process(request):
     response = Response.ResponseObj()
     if request.method == "GET":
 
         user_id = request.GET.get('user_id')
 
         userprofile_obj =  models.zgld_admin_userprofile.objects.get(id=user_id)
-        obj = models.zgld_xiaochengxu_app.objects.filter(company_id=userprofile_obj.company_id)
+        obj = models.zgld_gongzhonghao_app.objects.filter(company_id=userprofile_obj.company_id)
 
         if not obj:
             response.code = 200
@@ -298,31 +298,6 @@ def xcx_auth_process(request):
                 }
             elif authorizer_refresh_token and name:  # 授权通过以及填写信息完毕展示授权完整信息。
 
-                release_obj = models.zgld_xiapchengxu_release.objects.filter(app_id=obj[0].id).order_by('-release_commit_date')
-
-
-                version_num = ''
-                release_time = ''
-                if release_obj:
-                    release_result = release_obj[0].release_result
-
-                    if release_result == 1:  # 上线成功
-                        audit_code_id = release_obj[0].audit_code_id
-                        upload_audit_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(id=audit_code_id)
-                        if upload_audit_obj:
-                            version_num = upload_audit_obj[0].version_num
-
-                        version_num =  version_num
-                        release_time = release_obj[0].release_commit_date.strftime('%Y-%m-%d %H:%M')
-
-                upload_audit_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj[0].id, audit_result=2,auditid__isnull=False).order_by(
-                    '-audit_commit_date')  #在审核中并且auditid 不能为空。
-                stay_version_num = ''
-                stay_audit_time = ''
-
-                if upload_audit_obj:
-                    stay_version_num = upload_audit_obj[0].version_num ,
-                    stay_audit_time = upload_audit_obj[0].audit_commit_date.strftime('%Y-%m-%d %H:%M')
 
                 response.data = {
                     'step': '',
@@ -333,10 +308,7 @@ def xcx_auth_process(request):
                         'head_img': head_img,  # 授权方头像
                         'verify_type_info': verify_type_info,  # 微信认证是否通过. True 为认证通过，Falsew为认证通过
                         'service_category': service_category,  #服务类目
-                        'version_num': version_num,  #上线版本号
-                        'release_time': release_time,   # 上线时间
-                        'stay_version_num': stay_version_num,  #代上线-版本号
-                        'stay_audit_time': stay_audit_time,    #代上线-审核时间
+
 
                     }
                 }
@@ -354,7 +326,7 @@ def xcx_auth_process(request):
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def xcx_auth_process_oper(request, oper_type):
+def gzh_auth_process_oper(request, oper_type):
     response = Response.ResponseObj()
 
     if request.method == "POST":
@@ -369,14 +341,14 @@ def xcx_auth_process_oper(request, oper_type):
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
                 company_id = user_obj.company_id
-                objs = models.zgld_xiaochengxu_app.objects.filter(user_id=user_id)
+                objs = models.zgld_gongzhonghao_app.objects.filter(user_id=user_id)
                 if objs:
                     objs.update(
                         authorization_appid=authorization_appid,
                         company_id=company_id
                     )
                 else:
-                    models.zgld_xiaochengxu_app.objects.create(
+                    models.zgld_gongzhonghao_app.objects.create(
                         user_id=user_id,
                         company_id=company_id,
                         authorization_appid=authorization_appid,
@@ -400,7 +372,7 @@ def xcx_auth_process_oper(request, oper_type):
                 introduce = forms_obj.cleaned_data.get('introduce')  # 介绍
                 service_category = forms_obj.cleaned_data.get('service_category')  # 服务类目
 
-                objs = models.zgld_xiaochengxu_app.objects.filter(user_id=user_id)
+                objs = models.zgld_gongzhonghao_app.objects.filter(user_id=user_id)
                 if objs:
                     objs.update(
                         name=name,
@@ -421,7 +393,7 @@ def xcx_auth_process_oper(request, oper_type):
         if oper_type == 'xcx_get_authorizer_info':
             user_id = request.GET.get('user_id')
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            app_obj =   models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+            app_obj =   models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
             if app_obj:
                 authorizer_appid = app_obj[0].authorization_appid
                 get_wx_info_data = {}
@@ -440,8 +412,7 @@ def xcx_auth_process_oper(request, oper_type):
                 print('---------- 公众号帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
-                                               'id'] == 0 else False
+                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
                 # ---->预留代码
                 principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                 qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码

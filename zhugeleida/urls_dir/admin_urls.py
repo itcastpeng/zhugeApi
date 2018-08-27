@@ -34,6 +34,10 @@ urlpatterns = [
     url(r'^xcx_auth_process/update/(?P<oper_type>\w+)$', open_weixin.xcx_auth_process_oper),
     url(r'^xcx_auth_process$', open_weixin.xcx_auth_process),
 
+    # 公众号第三方进入认证
+    url(r'^gzh_auth_process/update/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.gzh_auth_process_oper),
+    url(r'^gzh_auth_process$', open_weixin_gongzhonghao.gzh_auth_process),
+
     # 小程序-批量上线
     url(r'^xcx_app$', xcx_app.xcx_app),
 
