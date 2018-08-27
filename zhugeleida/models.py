@@ -29,6 +29,20 @@ class zgld_company(models.Model):
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
 
+
+
+# 官网模板
+class zgld_website_template(models.Model):
+    name = models.CharField(verbose_name="公司名称", max_length=128)
+    template_content = models.TextField(verbose_name='官网内容',default='[]')
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "公司官网模板"
+        app_label = "zhugeleida"
+
+
+
 #企业App应用
 class zgld_app(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')

@@ -39,6 +39,56 @@ class WebsiteAddForm(forms.Form):
             return company_id
 
 
+class WebsiteTemplateUpdateForm(forms.Form):
+    # print('添加部门')
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "用户名id不能为空"
+        }
+    )
+
+
+    template_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "官网模板id不能为空"
+        }
+    )
+
+    template_content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "官网内容信息不能为空"
+        }
+    )
+
+
+    def clean_template_id(self):
+        template_id = self.data['template_id']
+        company_obj = models.zgld_website_template.objects.filter(id=template_id)
+        if not company_obj:
+            self.add_error('template_id', '官网ID不存在')
+        else:
+            return template_id
+
+class WebsiteTemplateAddForm(forms.Form):
+    # print('添加部门')
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "用户名id不能为空"
+        }
+    )
+
+
+    template_content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "官网内容信息不能为空"
+        }
+    )
+
 
 
 # 更新用户信息
