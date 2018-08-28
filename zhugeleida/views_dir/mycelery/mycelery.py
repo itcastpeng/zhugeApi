@@ -122,7 +122,6 @@ def create_user_or_customer_qr_code(request):
 
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    get_token_data = {}
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     if not customer_id:
@@ -136,34 +135,6 @@ def create_user_or_customer_qr_code(request):
     get_qr_data = {}
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    # get_token_data['appid'] = Conf['appid']
-    # get_token_data['secret'] = Conf['appsecret']
-    # get_token_data['grant_type'] = 'client_credential'
-    # company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-    # import redis
-
-    # key_name = "company_%s_xiaochengxu_token" % (company_id)
-    # token_ret = rc.get(key_name)
-    # print('---token_ret---->>', token_ret)
-    #
-    # if not token_ret:
-    #     # {"errcode": 0, "errmsg": "created"}
-    #     token_ret = requests.get(Conf['qr_token_url'], params=get_token_data)
-    #     token_ret_json = token_ret.json()
-    #     print('-----token_ret_json------>', token_ret_json)
-    #     if not token_ret_json.get('access_token'):
-    #         response.code = token_ret_json['errcode']
-    #         response.msg = "生成小程序二维码未验证通过"
-    #         return response
-    #
-    #     access_token = token_ret_json['access_token']
-    #     print('---- access_token --->>', token_ret_json)
-    #     get_qr_data['access_token'] = access_token
-    #
-    #     rc.set(key_name, access_token, 7000)
-    #
-    # else:
-    #     get_qr_data['access_token'] = token_ret
     userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
     company_id = userprofile_obj.company_id
     obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
