@@ -238,154 +238,157 @@ def dai_xcx_oper(request, oper_type):
                 if objs:
                     for obj in objs:
 
-                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,audit_result=2).order_by('-upload_code_date')
+                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id).order_by('-upload_code_date')
                         if upload_code_obj:
                                 upload_code_obj = upload_code_obj[0]
-                                print('------------ 已有正在审核中的的代码 - auditid | id ------------------>>', upload_code_obj.auditid,'|',upload_code_obj.id)
-                                continue
+                                auditid = upload_code_obj.auditid
+                                upload_result = upload_code_obj.upload_result
+                                if auditid  or upload_result != 0:
+                                    print('------------ 已有正在审核中的的代码 或者上传的代码失败 - auditid | id ------------------>>', auditid,'|',upload_code_obj.id)
+                                    continue
 
-                        authorizer_refresh_token = obj.authorizer_refresh_token
-                        authorizer_appid = obj.authorization_appid
+                                authorizer_refresh_token = obj.authorizer_refresh_token
+                                authorizer_appid = obj.authorization_appid
 
-                        key_name = '%s_authorizer_access_token' % (authorizer_appid)
-                        authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+                                key_name = '%s_authorizer_access_token' % (authorizer_appid)
+                                authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-                        if not authorizer_access_token:
-                            data = {
-                                'key_name': key_name,
-                                'authorizer_refresh_token': authorizer_refresh_token,
-                                'authorizer_appid': authorizer_appid
-                            }
-                            authorizer_access_token_result = create_authorizer_access_token(data)
-                            if authorizer_access_token_result.code == 200:
-                                authorizer_access_token = authorizer_access_token_result.data
-                            else:
-                                return JsonResponse(authorizer_access_token.__dict__)
+                                if not authorizer_access_token:
+                                    data = {
+                                        'key_name': key_name,
+                                        'authorizer_refresh_token': authorizer_refresh_token,
+                                        'authorizer_appid': authorizer_appid
+                                    }
+                                    authorizer_access_token_result = create_authorizer_access_token(data)
+                                    if authorizer_access_token_result.code == 200:
+                                        authorizer_access_token = authorizer_access_token_result.data
+                                    else:
+                                        return JsonResponse(authorizer_access_token.__dict__)
 
-                        ## 获取小程序的第三方提交代码的页面配置
-                        get_page_url = 'https://api.weixin.qq.com/wxa/get_page'
-                        get_page_data = {
-                            'access_token': authorizer_access_token,
-                        }
-                        page_data_ret = requests.get(get_page_url, params=get_page_data)
-                        page_data_ret = page_data_ret.json()
-                        errcode = page_data_ret.get('errcode')
-                        errmsg = page_data_ret.get('errmsg')
-                        page_list = page_data_ret.get('page_list')
+                                ## 获取小程序的第三方提交代码的页面配置
+                                get_page_url = 'https://api.weixin.qq.com/wxa/get_page'
+                                get_page_data = {
+                                    'access_token': authorizer_access_token,
+                                }
+                                page_data_ret = requests.get(get_page_url, params=get_page_data)
+                                page_data_ret = page_data_ret.json()
+                                errcode = page_data_ret.get('errcode')
+                                errmsg = page_data_ret.get('errmsg')
+                                page_list = page_data_ret.get('page_list')
 
-                        print('-------- 第三方提交代码的页面配置 page_data_ret 返回------>>', page_data_ret)
-                        if errcode == 0:
+                                print('-------- 第三方提交代码的页面配置 page_data_ret 返回------>>', page_data_ret)
+                                if errcode == 0:
 
-                            print('-----page_list--->>', page_list)
-                            # -----page_list--->> ['pages/index/index', 'pages/logs/logs']
+                                    print('-----page_list--->>', page_list)
+                                    # -----page_list--->> ['pages/index/index', 'pages/logs/logs']
 
 
-                        else:
-                            response.code = errcode
-                            response.msg = '获取第三方-页面配置报错: %s' % (errmsg)
-                            return JsonResponse(response.__dict__)
+                                else:
+                                    response.code = errcode
+                                    response.msg = '获取第三方-页面配置报错: %s' % (errmsg)
+                                    return JsonResponse(response.__dict__)
 
-                        # 获取授权小程序帐号的可选类目
-                        get_category_url = 'https://api.weixin.qq.com/wxa/get_category'
-                        get_category_data = {
-                            'access_token': authorizer_access_token,
-                        }
-                        page_category_ret = requests.get(get_category_url, params=get_category_data)
-                        page_category_ret = page_category_ret.json()
-                        errcode = page_category_ret.get('errcode')
-                        errmsg = page_category_ret.get('errmsg')
-                        category_list = page_category_ret.get('category_list')
+                                # 获取授权小程序帐号的可选类目
+                                get_category_url = 'https://api.weixin.qq.com/wxa/get_category'
+                                get_category_data = {
+                                    'access_token': authorizer_access_token,
+                                }
+                                page_category_ret = requests.get(get_category_url, params=get_category_data)
+                                page_category_ret = page_category_ret.json()
+                                errcode = page_category_ret.get('errcode')
+                                errmsg = page_category_ret.get('errmsg')
+                                category_list = page_category_ret.get('category_list')
 
-                        print('-------- 获取授权小程序帐号的可选类目 page_category_ret 返回------>>', page_category_ret)
-                        if errcode == 0:
-                            print('----- 可选类目 category_list--->>', category_list)
-                            # -----category_list--->> [{'first_class': 'IT科技', 'second_class': '硬件与设备', 'first_id': 210, 'second_id': 211}]
-                            response.code = 200
-                            response.msg = '提交审核代码成功'
+                                print('-------- 获取授权小程序帐号的可选类目 page_category_ret 返回------>>', page_category_ret)
+                                if errcode == 0:
+                                    print('----- 可选类目 category_list--->>', category_list)
+                                    # -----category_list--->> [{'first_class': 'IT科技', 'second_class': '硬件与设备', 'first_id': 210, 'second_id': 211}]
+                                    response.code = 200
+                                    response.msg = '提交审核代码成功'
 
-                        else:
-                            response.code = errcode
-                            response.msg = '获取第三方-页面配置报错: %s' % (errmsg)
-                            return JsonResponse(response.__dict__)
+                                else:
+                                    response.code = errcode
+                                    response.msg = '获取第三方-页面配置报错: %s' % (errmsg)
+                                    return JsonResponse(response.__dict__)
 
-                        submit_audit_url = 'https://api.weixin.qq.com/wxa/submit_audit'
-                        item_list = []
+                                submit_audit_url = 'https://api.weixin.qq.com/wxa/submit_audit'
+                                item_list = []
 
-                        # -----page_list--->> ['pages/index/index', 'pages/logs/logs']
-                        item_dict = {
-                            'address': page_list[0],
-                            'first_class': category_list[0].get('first_class'),
-                            'second_class': category_list[0].get('second_class'),
-                            'first_id': category_list[0].get('first_id'),
-                            'second_id': category_list[0].get('second_id'),
-                            'tag': '名片',
-                            'title': '名片'
-                        }
+                                # -----page_list--->> ['pages/index/index', 'pages/logs/logs']
+                                item_dict = {
+                                    'address': page_list[0],
+                                    'first_class': category_list[0].get('first_class'),
+                                    'second_class': category_list[0].get('second_class'),
+                                    'first_id': category_list[0].get('first_id'),
+                                    'second_id': category_list[0].get('second_id'),
+                                    'tag': '名片',
+                                    'title': '名片'
+                                }
 
-                        item_list.append(item_dict)
+                                item_list.append(item_dict)
 
-                        '''
-                        {'errcode': 0, 'errmsg': 'ok', 'page_list': ['pages/index/index', 'pages/logs/logs'] }
-            
-                        {'errcode': 0, 'errmsg': 'ok', 
-                             'category_list': [{
-                                    "first_class":"教育",
-                                    "second_class":"学历教育",
-                                    "third_class":"高等",
-                                    "first_id":3,
-                                    "second_id":4,
-                                    "third_id":5
-                                }]
-                             }
-            
-                        '''
+                                '''
+                                {'errcode': 0, 'errmsg': 'ok', 'page_list': ['pages/index/index', 'pages/logs/logs'] }
+                    
+                                {'errcode': 0, 'errmsg': 'ok', 
+                                     'category_list': [{
+                                            "first_class":"教育",
+                                            "second_class":"学历教育",
+                                            "third_class":"高等",
+                                            "first_id":3,
+                                            "second_id":4,
+                                            "third_id":5
+                                        }]
+                                     }
+                    
+                                '''
 
-                        get_submit_audit_data = {
-                            'access_token': authorizer_access_token,
-                        }
-                        post_submit_audit_data = {
-                            'item_list': item_list
-                        }
-                        post_submit_audit_data = json.dumps(post_submit_audit_data, ensure_ascii=False)
-                        print('---- json.dumps(post_submit_audit_data) --->>', post_submit_audit_data)
+                                get_submit_audit_data = {
+                                    'access_token': authorizer_access_token,
+                                }
+                                post_submit_audit_data = {
+                                    'item_list': item_list
+                                }
+                                post_submit_audit_data = json.dumps(post_submit_audit_data, ensure_ascii=False)
+                                print('---- json.dumps(post_submit_audit_data) --->>', post_submit_audit_data)
 
-                        submit_audit_ret = requests.post(submit_audit_url, params=get_submit_audit_data,
-                                                         data=post_submit_audit_data.encode('utf-8'))
+                                submit_audit_ret = requests.post(submit_audit_url, params=get_submit_audit_data,
+                                                                 data=post_submit_audit_data.encode('utf-8'))
 
-                        submit_audit_ret = submit_audit_ret.json()
-                        auditid = submit_audit_ret.get('auditid')
-                        errcode = submit_audit_ret.get('errcode')
-                        errmsg = submit_audit_ret.get('errmsg')
-                        now_time = datetime.datetime.now()
-                        print('-------- 代码包-提交审核 返回 submit_audit_ret 返回------>>', submit_audit_ret)
-                        if errmsg == 'ok':
+                                submit_audit_ret = submit_audit_ret.json()
+                                auditid = submit_audit_ret.get('auditid')
+                                errcode = submit_audit_ret.get('errcode')
+                                errmsg = submit_audit_ret.get('errmsg')
+                                now_time = datetime.datetime.now()
+                                print('-------- 代码包-提交审核 返回 submit_audit_ret 返回------>>', submit_audit_ret)
+                                if errmsg == 'ok':
 
-                            print('-----auditid--->>', auditid)
-                            audit_result = 2  # (2,'审核中')
-                            code_release_status = 4 # app 代码发布流程显示的状态。
-                            code_release_result = '成功'
-                            reason = ''
-                            response.code = 200
-                            response.msg = '提交审核代码成功'
+                                    print('-----auditid--->>', auditid)
+                                    audit_result = 2  # (2,'审核中')
+                                    code_release_status = 4 # app 代码发布流程显示的状态。
+                                    code_release_result = '成功'
+                                    reason = ''
+                                    response.code = 200
+                                    response.msg = '提交审核代码成功'
 
-                        else:
+                                else:
 
-                            audit_result = 3  # (3,'提交审核失败')
-                            code_release_status = 3  # app 代码发布流程显示的状态。
-                            response.code = errcode
-                            reason = '提交审核代码报错: %s : %s' % (errcode, errmsg)
-                            response.msg = reason
-                            code_release_result = reason
+                                    audit_result = 3  # (3,'提交审核失败')
+                                    code_release_status = 3  # app 代码发布流程显示的状态。
+                                    response.code = errcode
+                                    reason = '提交审核代码报错: %s : %s' % (errcode, errmsg)
+                                    response.msg = reason
+                                    code_release_result = reason
 
-                        obj.code_release_status = code_release_status
-                        obj.code_release_result = code_release_result
-                        obj.save()
+                                obj.code_release_status = code_release_status
+                                obj.code_release_result = code_release_result
+                                obj.save()
 
-                        upload_code_obj.auditid = auditid
-                        upload_code_obj.audit_commit_date = now_time
-                        upload_code_obj.audit_result = audit_result  # (2,'审核中')
-                        upload_code_obj.reason = reason  # (2,'审核中')
-                        upload_code_obj.save()
+                                upload_code_obj.auditid = auditid
+                                upload_code_obj.audit_commit_date = now_time
+                                upload_code_obj.audit_result = audit_result  # (2,'审核中')
+                                upload_code_obj.reason = reason  # (2,'审核中')
+                                upload_code_obj.save()
 
 
                 else:

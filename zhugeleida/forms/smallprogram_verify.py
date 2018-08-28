@@ -14,7 +14,7 @@ class SmallProgramAddForm(forms.Form):
             'required': "客户来源不能为空"
         }
     )
-    
+
 
     # state = forms.IntegerField(
     #     required=True,

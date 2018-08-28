@@ -29,7 +29,7 @@ def user_send_action_log(request):
     send_token_data = {}
 
     user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
-    print('---------->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
+    print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
     corp_id = user_obj.company.corp_id
 
     get_token_data['corpid'] = corp_id
@@ -41,31 +41,33 @@ def user_send_action_log(request):
     #     return response
 
     get_token_data['corpsecret'] = app_secret
-    print('get_token_data -->', get_token_data)
+    print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
 
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     key_name = "company_%s_leida_app_token" % (user_obj.company_id)
     token_ret = rc.get(key_name)
 
-    print('---token_ret---->>', token_ret)
+    print('-------  Redis缓存的 keyname |value -------->>',key_name,"|",token_ret)
 
     if not token_ret:
         ret = requests.get(Conf['token_url'], params=get_token_data)
 
         weixin_ret_data = ret.json()
-        print('----weixin_ret_data--->', weixin_ret_data)
+        errcode = weixin_ret_data.get('errcode')
+        errmsg = weixin_ret_data.get('errmsg')
+        access_token = weixin_ret_data.get('access_token')
+        print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
 
-        if weixin_ret_data['errcode'] == 0:
-            access_token = weixin_ret_data['access_token']
+        if errcode == 0:
+            rc.set(key_name, access_token, 7000)
             send_token_data['access_token'] = access_token
 
-            rc.set(key_name, access_token, 7000)
-
         else:
-            print('企业微信验证未能通过')
-            response.code = weixin_ret_data['errcode']
+            response.code = errcode
             response.msg = "企业微信验证未能通过"
+            print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
+
             return JsonResponse(response.__dict__)
 
     else:
@@ -83,20 +85,25 @@ def user_send_action_log(request):
         },
         "safe": 0
     }
-    print('post_send_data ==>', post_send_data)
+    print('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
 
     inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
 
-    weixin_ret_data = json.loads(inter_ret.text)
-    print('---- access_token --->>', weixin_ret_data)
+    weixin_ret_data = inter_ret.json()
+    errcode = weixin_ret_data.get('errcode')
+    errmsg = weixin_ret_data.get('errmsg')
 
-    if weixin_ret_data['errcode'] == 0:
+    print('---- 发送应用消息 【接口返回】 --->>', weixin_ret_data)
+
+    if errmsg == "ok":
         response.code = 200
         response.msg = '发送成功'
+        print('--------- 发送应用消息 【成功】----------->')
 
     else:
-        response.code = weixin_ret_data['errcode']
+        response.code = errcode
         response.msg = "企业微信验证未能通过"
+        print('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->',errcode,'|',errmsg)
 
     return JsonResponse(response.__dict__)
 

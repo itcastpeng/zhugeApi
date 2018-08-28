@@ -529,6 +529,7 @@ class zgld_user_customer_belonger(models.Model):
     source_type_choices = (
         (1, '扫码'),
         (2, '转发'),
+        (3, '搜索'),
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
