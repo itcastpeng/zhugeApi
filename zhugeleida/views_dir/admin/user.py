@@ -481,7 +481,7 @@ def user_oper(request, oper_type, o_id):
 
             if request.method == "POST":
 
-                user_id = request.GET.get('user_id')
+                user_id = request.POST.get('user_id')
                 user_obj = models.zgld_userprofile.objects.filter(id=user_id)
                 if user_obj:
                     # 生成企业用户二维码
