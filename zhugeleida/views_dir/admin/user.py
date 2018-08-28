@@ -494,13 +494,10 @@ def user_oper(request, oper_type, o_id):
                     }
 
                     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
-                    post_data = {
-                        'data': data_dict
-                    }
 
-                    print('--------mycelery 使用 request post_的数据 ------->>',post_data)
+                    print('--------mycelery 使用 request post_的数据 ------->>',data_dict)
 
-                    response_ret = requests.post(url , data=post_data)
+                    response_ret = requests.post(url , data=data_dict)
                     response_ret = json.loads(response_ret)
                     print('-------- mycelery/触发 celery  返回的结果 -------->>',response_ret)
 

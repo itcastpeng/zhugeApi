@@ -110,12 +110,15 @@ def create_user_or_customer_qr_code(request):
     data = request.GET.get('data')
     if data:
          data = json.loads(request.GET.get('data'))
-    else:
-         data = request.POST.get('data')
-         print('---- celery request.POST | data 数据 -->',request.POST , data)
+         user_id = data.get('user_id')
+         customer_id = data.get('customer_id', '')
 
-    user_id = data.get('user_id')
-    customer_id = data.get('customer_id','')
+    else:
+         # data = request.POST.get('user_id')
+         print('---- celery request.POST | data 数据 -->',request.POST, '|')
+         user_id = request.POST.get('user_id')
+         customer_id = request.POST.get('customer_id', '')
+
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
