@@ -105,8 +105,10 @@ def user_send_action_log(request):
 @csrf_exempt
 def create_user_or_customer_qr_code(request):
     response = ResponseObj()
+    print('---- celery request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
+
     data = json.loads(request.GET.get('data'))
-    print('---- celery request.GET | data 数据 -->', request.GET,'|',request.GET.get('data'))
+
 
     user_id = data.get('user_id')
     customer_id = data.get('customer_id','')
