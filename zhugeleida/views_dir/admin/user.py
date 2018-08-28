@@ -499,7 +499,7 @@ def user_oper(request, oper_type, o_id):
                     }
                     print(get_data)
 
-                    response_ret = requests.get(url, params=json.loads(get_data))
+                    response_ret = requests.get(url, params=json.dumps(get_data))
                     response_ret = json.loads(response_ret)
                     print('-------- mycelery/create_user_or_customer_qr_code 返回结果 -------->>',response_ret)
 
