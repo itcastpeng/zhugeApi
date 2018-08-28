@@ -9,11 +9,13 @@ import datetime
 class SmallProgramAddForm(forms.Form):
     # print('添加标签')
     source = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "客户来源不能为空"
         }
     )
+    
+
     # state = forms.IntegerField(
     #     required=True,
     #     error_messages={
