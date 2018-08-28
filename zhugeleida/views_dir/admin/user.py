@@ -502,7 +502,7 @@ def user_oper(request, oper_type, o_id):
 
                     print('-------- mycelery/触发 celery  返回的结果 -------->>',response_ret)
 
-                    qr_code =  response_ret.data.get('qr_code')
+                    qr_code =  response_ret['data'].get('qr_code')
                     response.data = {
                         'qr_code': qr_code
                     }
