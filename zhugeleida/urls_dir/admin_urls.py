@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
-    plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app
+    plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app,open_weixin_gongzhonghao
 
 urlpatterns = [
     url(r'^login$', login.login),
@@ -24,12 +24,19 @@ urlpatterns = [
     url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)$', access_rules.access_rules_oper),
     url(r'^access_rules', access_rules.access_rules),
 
-    # 微信认证
+    # 微信小程序通知
     url(r'^open_weixin/(?P<oper_type>\w+)', open_weixin.open_weixin),
+
+    # 微信公众号通知
+    url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)', open_weixin_gongzhonghao.open_weixin_gongzhonghao),
 
     # 小程序第三方进入认证
     url(r'^xcx_auth_process/update/(?P<oper_type>\w+)$', open_weixin.xcx_auth_process_oper),
     url(r'^xcx_auth_process$', open_weixin.xcx_auth_process),
+
+    # 公众号第三方进入认证
+    url(r'^gzh_auth_process/update/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.gzh_auth_process_oper),
+    url(r'^gzh_auth_process$', open_weixin_gongzhonghao.gzh_auth_process),
 
     # 小程序-批量上线
     url(r'^xcx_app$', xcx_app.xcx_app),
@@ -59,6 +66,10 @@ urlpatterns = [
     # 官网编辑
     url(r'website/(?P<oper_type>\w+)/(?P<o_id>\d+)', website.website_oper),
     url(r'website$', website.website),
+
+    # 官网模板管理
+    url(r'website_template/(?P<oper_type>\w+)/(?P<o_id>\d+)', website.website_template_oper),
+    url(r'website_template$', website.website_template),
 
     # 后台产品管理
     url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),

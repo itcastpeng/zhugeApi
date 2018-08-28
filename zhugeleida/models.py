@@ -29,6 +29,20 @@ class zgld_company(models.Model):
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
 
+
+
+# 官网模板
+class zgld_website_template(models.Model):
+    name = models.CharField(verbose_name="公司名称", max_length=128)
+    template_content = models.TextField(verbose_name='官网内容',default='[]')
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "公司官网模板"
+        app_label = "zhugeleida"
+
+
+
 #企业App应用
 class zgld_app(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
@@ -50,16 +64,32 @@ class zgld_app(models.Model):
 
 #企业公众号-App应用
 class zgld_gongzhonghao_app(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name="公众号授权的后台用户", null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属公司')
-    name = models.CharField(verbose_name="公众号名称", max_length=128)
-    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128,null=True)
-    authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128,null=True)
+    original_id = models.CharField(verbose_name='公众号原始唯一ID', max_length=64, null=True)
 
-    is_validate = models.BooleanField(verbose_name="验证应用secret是否通过", default=False)
+    head_img = models.CharField(verbose_name="授权方头像", max_length=256, null=True)
+    qrcode_url = models.CharField(verbose_name="二维码图片的URL", max_length=128, null=True)
+    name = models.CharField(verbose_name="公众号名称", max_length=128, null=True)
+    principal_name = models.CharField(verbose_name="公众号主体名称", max_length=128, null=True)
+
+    authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128, null=True)
+    authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128, null=True)
+    template_id = models.CharField(verbose_name="消息模板ID", max_length=128, null=True)
+    authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
+    verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)  # -1代表未认证，0代表微信认证
+    introduce = models.CharField(verbose_name="公众号介绍", max_length=1024, null=True)
+    service_category = models.CharField(verbose_name="服务类目", max_length=64, null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
 
     class Meta:
         verbose_name_plural = "公众号App应用"
         app_label = "zhugeleida"
+
+
 
 
 

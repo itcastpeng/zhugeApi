@@ -105,11 +105,21 @@ def user_send_action_log(request):
 @csrf_exempt
 def create_user_or_customer_qr_code(request):
     response = ResponseObj()
-    print('request -->', request.GET)
-    data = json.loads(request.GET.get('data'))
+    print('---- celery request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
-    user_id = data.get('user_id')
-    customer_id = data.get('customer_id','')
+    data = request.GET.get('data')
+    if data:
+         data = json.loads(request.GET.get('data'))
+         user_id = data.get('user_id')
+         customer_id = data.get('customer_id', '')
+
+    else:
+         # data = request.POST.get('user_id')
+         print('---- celery request.POST | data 数据 -->',request.POST, '|')
+         user_id = request.POST.get('user_id')
+         customer_id = request.POST.get('customer_id', '')
+
+
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
@@ -173,7 +183,8 @@ def create_user_or_customer_qr_code(request):
             'authorizer_appid': authorizer_appid,
 
         }
-        authorizer_access_token = create_authorizer_access_token(data) # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
+        authorizer_access_token_ret = create_authorizer_access_token(data)
+        authorizer_access_token = authorizer_access_token_ret.data # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
 
     get_qr_data['access_token'] = authorizer_access_token
 
@@ -194,10 +205,10 @@ def create_user_or_customer_qr_code(request):
 
 
     if  customer_id:
-        obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id)
+        user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id)
         user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
-        obj.qr_code=user_qr_code_path
-        obj.save()
+        user_obj.qr_code=user_qr_code_path
+        user_obj.save()
         print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
     else:
@@ -206,7 +217,7 @@ def create_user_or_customer_qr_code(request):
         user_obj.save()
         print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
-
+    response.data = {'qr_code': user_obj.qr_code}
     response.code = 200
     response.msg = "生成小程序二维码成功"
 

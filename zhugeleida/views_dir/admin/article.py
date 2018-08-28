@@ -128,7 +128,10 @@ def article_oper(request, oper_type, o_id):
                 if  tags_id_list:
                     obj.tags = tags_id_list
 
-                url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
+                # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
+                from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_auth_url
+
+                create_gongzhonghao_auth_url(data)
                 data = {
                     'url': url,
                     'article_id' : obj[0].id,

@@ -285,8 +285,7 @@ def deal_line_info(data):
         return follow_num
 
     elif index_type == 3:  # 浏览总数
-        browse_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,
-                                                          action=1).filter().count()  # 浏览名片的总数(包含着保存名片)
+        browse_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,action=1).filter(q1).count()  # 浏览名片的总数(包含着保存名片)
         return browse_num
 
     elif index_type == 4:  # 被转发总数

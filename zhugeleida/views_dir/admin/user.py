@@ -15,6 +15,8 @@ from  zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_q
 from zhugeapi_celery_project import tasks
 from django.db.models import Q
 
+
+
 # cerf  token验证 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -474,6 +476,44 @@ def user_oper(request, oper_type, o_id):
                     objs.update(status=status)
                     response.code = 200
                     response.msg = "修改成功"
+
+        elif oper_type == 'create_small_program_qr_code':
+
+            if request.method == "POST":
+
+                user_id = request.POST.get('user_id')
+                user_obj = models.zgld_userprofile.objects.filter(id=user_id)
+                if user_obj:
+                    # 生成企业用户二维码
+
+                    # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+
+                    data_dict = {
+                        'user_id': user_id,
+                        'customer_id': ''
+                    }
+
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+
+                    print('--------mycelery 使用 request post_的数据 ------->>',data_dict)
+
+                    response_ret = requests.post(url , data=data_dict)
+                    response_ret = response_ret.json()
+
+                    print('-------- mycelery/触发 celery  返回的结果 -------->>',response_ret)
+
+                    qr_code =  response_ret['data'].get('qr_code')
+                    response.data = {
+                        'qr_code': qr_code
+                    }
+                    response.code = 200
+                    response.msg = "生成用户二维码成功"
+
+                else:
+                    response.code = 301
+                    response.msg = "用户不存在"
+
+
 
     else:
         response.code = 402
