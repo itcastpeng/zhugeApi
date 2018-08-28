@@ -120,6 +120,7 @@ def create_user_or_customer_qr_code(request):
          customer_id = request.POST.get('customer_id', '')
 
 
+
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     get_token_data = {}
 
