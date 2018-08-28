@@ -14,12 +14,12 @@ class SmallProgramAddForm(forms.Form):
             'required': "客户来源不能为空"
         }
     )
-    state = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "验证的方式不能为空"
-        }
-    )
+    # state = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "验证的方式不能为空"
+    #     }
+    # )
 
     user_type = forms.IntegerField(
         required=True,
