@@ -497,11 +497,11 @@ def user_oper(request, oper_type, o_id):
                     get_data = {
                         'data': data_dict
                     }
-                    print('--------mycelery get_data ------->>',get_data)
+                    print('--------mycelery 使用 request get_的数据 ------->>',get_data)
 
                     response_ret = requests.get(url, params=get_data)
                     response_ret = json.loads(response_ret)
-                    print('-------- mycelery/create_user_or_customer_qr_code 返回结果 -------->>',response_ret)
+                    print('-------- mycelery/触发 celery  返回的结果 -------->>',response_ret)
 
                     qr_code =  response_ret.data.get('qr_code')
                     response.data = {
