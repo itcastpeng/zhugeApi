@@ -910,6 +910,10 @@ def create_authorizer_access_token(data):
         response.code = 200
         response.msg = "获取令牌成功"
         response.data = authorizer_access_token
+
+        # response.data = {
+        #     'authorizer_access_token' : authorizer_access_token
+        # }
         print('------ 获取令牌（authorizer_access_token）成功------>>',authorizer_access_token)
 
     else:

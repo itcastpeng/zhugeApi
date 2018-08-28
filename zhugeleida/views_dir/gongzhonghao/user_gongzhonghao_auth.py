@@ -52,8 +52,8 @@ def user_gongzhonghao_auth(request, company_id):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        print('request.GET -->', request.GET)
-        customer_id = request.GET.get('user_id')
+        print('---- request.GET -->', request.GET)
+
         company_id = company_id
         forms_obj = SmallProgramAddForm(request.GET)
 
@@ -161,7 +161,11 @@ def user_gongzhonghao_auth(request, company_id):
 
                         obj.nickname = nickname
                         obj.sex = sex
-
+                        obj.province = province
+                        obj.city = city
+                        obj.country = country
+                        obj.headimgurl = headimgurl
+                        obj.save()
 
                     else:
                         errcode = ret_json.get('errcode')
@@ -190,9 +194,10 @@ def user_gongzhonghao_auth(request, company_id):
 
 @csrf_exempt
 
-def create_gongzhonghao_auth_url(request):
+def create_gongzhonghao_auth_url(data):
     response = Response.ResponseObj()
-    company_id = request.GET.get('company_id')
+    company_id = data.get('company_id')
+
     gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
 
@@ -209,7 +214,8 @@ def create_gongzhonghao_auth_url(request):
     response.code = 200
     response.msg = "返回成功成功"
 
-    return JsonResponse(response.__dict__)
+
+    return response
 
 
 
