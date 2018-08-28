@@ -498,7 +498,8 @@ def user_oper(request, oper_type, o_id):
                     print('--------mycelery 使用 request post_的数据 ------->>',data_dict)
 
                     response_ret = requests.post(url , data=data_dict)
-                    response_ret = json.loads(response_ret)
+                    response_ret = response_ret.json()
+
                     print('-------- mycelery/触发 celery  返回的结果 -------->>',response_ret)
 
                     qr_code =  response_ret.data.get('qr_code')
