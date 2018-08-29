@@ -75,12 +75,12 @@ class GongzhonghaoAddForm(forms.Form):
 
 class LoginBindingForm(forms.Form):
     # print('添加标签')
-    source = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "客户来源不能为空"
-        }
-    )
+    # source = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "客户来源不能为空"
+    #     }
+    # )
 
 
 
@@ -99,4 +99,17 @@ class LoginBindingForm(forms.Form):
             'required': "文章ID不能为空"
         }
     )
+    level = forms.IntegerField(
+        # 客户上级对应的用户
+        required=True,
+        error_messages={
+            'required': "层级不能为空"
+        }
+    )
 
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "article_id 不能为空"
+        }
+    )
