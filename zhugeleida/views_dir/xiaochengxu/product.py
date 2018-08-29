@@ -131,6 +131,9 @@ def product(request, oper_type):
 
                 company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
 
+                # con = Q(Q('company_id', company_id) & Q(Q('user_id', user_id) | Q('user_id__isnull', True)))
+                # print('con -->', con)
+
                 con = Q()
                 q1 = Q()
                 q1.connector = 'and'
