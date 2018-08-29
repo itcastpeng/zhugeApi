@@ -10,6 +10,7 @@ from celery import Celery
 from celery.schedules import crontab
 
 app = Celery(
+    'tasks111',
     broker='redis://redis_host:6379/2',
     backend='redis://redis_host:6379/2',
     include=['zhugeapi_celery_project.tasks'],
