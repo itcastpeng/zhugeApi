@@ -258,8 +258,8 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                         level=level,
                     )
 
-                response.code = 200
-                response.msg = "返回成功"
+                    response.code = 200
+                    response.msg = "绑定成功"
 
 
             else:
