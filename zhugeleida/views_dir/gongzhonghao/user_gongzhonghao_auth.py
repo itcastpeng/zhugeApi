@@ -107,7 +107,7 @@ def user_gongzhonghao_auth(request):
 
                 if state == 'snsapi_base':
 
-                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/yulanwenzhang/%s?pid=%s&level=%s' % (article_id, pid,level)
+                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/yulanneirong/%s?pid=%s&level=%s' % (article_id, pid,level)
                     scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                     _state = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
 
@@ -205,7 +205,7 @@ def create_gongzhonghao_auth_url(data):
 
     appid = authorization_appid
 
-    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/yulanwenzhang/%s?pid=%s&level=%s' % (article_id,pid,level)
+    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/yulanneirong/%s?pid=%s&level=%s' % (article_id,pid,level)
 
     scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
@@ -235,10 +235,9 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 # source = forms_obj.cleaned_data.get('source')  # 1,代表扫码,2 代表转发
 
                 article_id = forms_obj.cleaned_data.get('article_id')  # 小程序用户ID
-                customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
+                customer_id = forms_obj.cleaned_data.get('user_id')    # 小程序用户ID
                 level = forms_obj.cleaned_data.get('level')  # 小程序用户ID
-
-                parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+                parent_id =forms_obj.cleaned_data.get('pid')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
 
                 article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
                     article_id=article_id,
