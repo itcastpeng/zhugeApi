@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm
+from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm,LoginBindingForm
 
 import time
 import datetime
@@ -64,15 +64,7 @@ def user_gongzhonghao_auth(request):
             appid = forms_obj.cleaned_data.get('appid')
             article_id = forms_obj.cleaned_data.get('article_id')
             pid = forms_obj.cleaned_data.get('pid')
-            # gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
-            #
-            # authorization_appid = ''
-            # authorization_secret = ''
-            # if gongzhonghao_app_obj:
-            #     authorization_appid = gongzhonghao_app_obj.authorization_appid
-            #     authorization_secret = gongzhonghao_app_obj.authorization_secret
-            # appid = authorization_appid    # 公众号的唯一标识
-            # secret = authorization_secret  # 公众号的appsecret
+            level = forms_obj.cleaned_data.get('level')
             component_appid = 'wx6ba07e6ddcdc69b3'
 
             component_access_token_ret = create_component_access_token()
@@ -115,7 +107,7 @@ def user_gongzhonghao_auth(request):
 
                 if state == 'snsapi_base':
 
-                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/yulanwenzhang/%s?pid=%s' % (article_id, pid)
+                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/yulanwenzhang/%s?pid=%s&level=%s' % (article_id, pid,level)
                     scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                     _state = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
 
@@ -201,10 +193,10 @@ def user_gongzhonghao_auth(request):
 
 
 @csrf_exempt
-
 def create_gongzhonghao_auth_url(data):
     response = Response.ResponseObj()
     pid = data.get('pid')
+    level = data.get('level')
     company_id = data.get('company_id')
     article_id = data.get('article_id')
 
@@ -213,7 +205,7 @@ def create_gongzhonghao_auth_url(data):
 
     appid = authorization_appid
 
-    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/yulanwenzhang/%s?pid=%s' % (article_id,pid)
+    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/yulanwenzhang/%s?pid=%s&level=%s' % (article_id,pid,level)
 
     scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
@@ -229,4 +221,54 @@ def create_gongzhonghao_auth_url(data):
     return response
 
 
+@csrf_exempt
+def user_gongzhonghao_auth_oper(request,oper_type):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        if oper_type == 'binding':
+            print('request.GET -->', request.GET)
+
+            forms_obj = LoginBindingForm(request.GET)
+            if forms_obj.is_valid():
+
+                # source = forms_obj.cleaned_data.get('source')  # 1,代表扫码,2 代表转发
+
+                article_id = forms_obj.cleaned_data.get('article_id')  # 小程序用户ID
+                customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
+                level = forms_obj.cleaned_data.get('level')  # 小程序用户ID
+
+                parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+
+                article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
+                    article_id=article_id,
+                    customer_id=customer_id,
+                    # customer_parent_id=parent_id
+                )
+
+                if article_to_customer_belonger_obj:
+                    response.code = 302
+                    response.msg = "文章和客户关系存在"
+
+                else:
+                    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.create(
+                        article_id=article_id,
+                        customer_id=customer_id,
+                        customer_parent_id=parent_id,
+                        level=level,
+                    )
+
+                response.code = 200
+                response.msg = "返回成功"
+
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+    else:
+        response.code = 402
+        response.msg = "请求方式异常"
+
+    return JsonResponse(response.__dict__)
 

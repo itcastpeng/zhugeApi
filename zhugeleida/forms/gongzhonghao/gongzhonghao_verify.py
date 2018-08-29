@@ -82,17 +82,11 @@ class LoginBindingForm(forms.Form):
         }
     )
 
-    # user_type = forms.IntegerField(
-    #     required=True,
-    #     error_messages={
-    #         'required': "客户访问类型不能为空"
-    #     }
-    # )
 
 
-    uid = forms.IntegerField(
+    pid = forms.IntegerField(
         # 客户上级对应的用户
-        required=True,
+        required=False,
         error_messages={
             'required': "用户ID不能为空"
         }
@@ -102,19 +96,7 @@ class LoginBindingForm(forms.Form):
         # 客户上级对应的用户
         required=True,
         error_messages={
-            'required': "客户ID不能为空"
+            'required': "文章ID不能为空"
         }
     )
-
-
-
-
-
-    # tag_user = forms.CharField(
-    #     required=True,
-    #     error_messages = {
-    #         'required': "关联用户不能为空"
-    #     }
-    #
-    # )
 
