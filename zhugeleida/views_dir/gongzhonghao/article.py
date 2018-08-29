@@ -93,7 +93,7 @@ def article(request,oper_type):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_customer)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 

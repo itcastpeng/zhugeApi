@@ -46,7 +46,7 @@ def login(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        print('request.GET -->', request.GET)
+        print('-------【小程序登录啦】 request.GET 数据是: ------->', request.GET)
         customer_id = request.GET.get('user_id')
         forms_obj = SmallProgramAddForm(request.GET)
 
@@ -58,11 +58,14 @@ def login(request):
             user_id = forms_obj.cleaned_data.get('uid')
             company_id = int(company_id) if company_id else ''
 
-            if not company_id or company_id == 2:  # 暂时修改 ，等审核后在注释。。
+            if not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
+                                # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
                 company_id = 1
+                print('--------- 没有company_id, ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id,company_id)
 
-            if not user_id:
+            if not user_id:     # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
                 user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
+                print('----------- 没有 uid,说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,user_id)
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             authorizer_appid = obj.authorization_appid
@@ -103,13 +106,15 @@ def login(request):
                 #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
                 # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
-                print('---------- crete successful ---->')
+                print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
 
             ret_data = {
                 'cid': client_id,
                 'token': token,
                 'uid': user_id
             }
+
+            print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>',json.dumps(ret_data))
             response.code = 200
             response.msg = "返回成功"
             response.data = ret_data
@@ -157,7 +162,7 @@ def login_oper(request,oper_type):
                     msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
                     models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)
 
-                    print('---------- 插入第一条用户和客户的对话信息 successful ---->')
+                    print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
 
                     # 异步生成小程序和企业用户对应的小程序二维码
                     data_dict = {'user_id': user_id,'customer_id': customer_id}

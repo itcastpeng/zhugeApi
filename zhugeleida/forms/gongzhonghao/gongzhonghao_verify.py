@@ -6,39 +6,59 @@ import datetime
 
 
 
-class SmallProgramAddForm(forms.Form):
+class GongzhonghaoAddForm(forms.Form):
     # print('添加标签')
-    source = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': "客户来源不能为空"
-        }
-    )
+    # source = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'required': "客户来源不能为空"
+    #     }
+    # )
 
 
-    user_type = forms.IntegerField(
+    state = forms.CharField(
         required=True,
         error_messages={
-            'required': "客户访问类型不能为空"
+            'required': "验证的方式不能为空"
         }
     )
+
+    # user_type = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "客户访问类型不能为空"
+    #     }
+    # )
     code = forms.CharField(
         required=True,
         error_messages={
-            'required': "js code 不能为空"
+            'required': "code不能为空"
         }
     )
 
-    uid = forms.IntegerField(
-        # 客户上级对应的用户
-        required=False,
+    # uid = forms.IntegerField(
+    #     # 客户上级对应的用户
+    #     required=False,
+    #
+    # )
 
+    appid = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "appid不能为空"
+        }
     )
-
-    company_id = forms.CharField(
+    pid = forms.CharField(
         required=False,
         error_messages={
-            'required': "公司id不能为空"
+            'required': "pid 不能为空"
+        }
+    )
+
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "article_id 不能为空"
         }
     )
 
