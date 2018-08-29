@@ -12,7 +12,7 @@ import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
-
+from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_auth_url
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -97,6 +97,7 @@ def article(request,oper_type):
 @account.is_token(models.zgld_admin_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    timestamp = str(int(time.time() * 1000))
 
     if request.method == "POST":
         if oper_type == "add":
@@ -129,14 +130,26 @@ def article_oper(request, oper_type, o_id):
                     obj.tags = tags_id_list
 
                 # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
-                from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_auth_url
 
-                create_gongzhonghao_auth_url(data)
+                user_id = request.GET.get('user_id')
+                company_id = obj.user.company_id
+                # token = obj.user.token
+                # rand_str = account.str_encrypt(timestamp + token)
+
                 data = {
-                    'url': url,
+                    'company_id' : company_id,
+                    'article_id': obj[0].id,
+                    'pid':  '',
+                }
+
+                auth_url_ret =  create_gongzhonghao_auth_url(data)
+                authorize_url = auth_url_ret.data.get('authorize_url')
+
+                qrcode_data = {
+                    'url': authorize_url,
                     'article_id' : obj[0].id,
                 }
-                response_ret = create_qrcode(data)
+                response_ret = create_qrcode(qrcode_data)
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
                 if pre_qrcode_url:
                     response = response_ret
@@ -198,13 +211,34 @@ def article_oper(request, oper_type, o_id):
                 if tags_id_list:
                     obj[0].tags = tags_id_list
 
-                url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
+                # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
+                # data = {
+                #     'url': url,
+                #     'article_id' : obj[0].id,
+                # }
+                # response_ret = create_qrcode(data)
+                # pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                company_id = obj.user.company_id
+                # token = obj.user.token
+                # rand_str = account.str_encrypt(timestamp + token)
+
                 data = {
-                    'url': url,
-                    'article_id' : obj[0].id,
+                    'company_id': company_id,
+                    'article_id': obj[0].id,
+                    'pid': '',
                 }
-                response_ret = create_qrcode(data)
+
+                auth_url_ret = create_gongzhonghao_auth_url(data)
+                authorize_url = auth_url_ret.data.get('authorize_url')
+
+                qrcode_data = {
+                    'url': authorize_url,
+                    'article_id': obj[0].id,
+                }
+                response_ret = create_qrcode(qrcode_data)
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+
+
                 if pre_qrcode_url:
                     response = response_ret
                 else:
