@@ -47,6 +47,12 @@ class WebsiteTemplateUpdateForm(forms.Form):
             'required': "用户名id不能为空"
         }
     )
+    name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "模板名不能为空"
+        }
+    )
 
 
     template_id = forms.CharField(
@@ -78,6 +84,12 @@ class WebsiteTemplateAddForm(forms.Form):
         required=True,
         error_messages={
             'required': "用户名id不能为空"
+        }
+    )
+    name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "模板名不能为空"
         }
     )
 

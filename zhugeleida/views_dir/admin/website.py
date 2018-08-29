@@ -144,6 +144,7 @@ def website_template_oper(request, oper_type,o_id):
             template_data = {
                 'user_id': request.GET.get('user_id'),
                 'template_id': o_id,
+                'name': request.POST.get('name'),
                 'template_content': request.POST.get('template_content'),
             }
 
@@ -152,7 +153,9 @@ def website_template_oper(request, oper_type,o_id):
             if forms_obj.is_valid():
                 template_id  =  forms_obj.cleaned_data.get('template_id')
                 template_content = forms_obj.cleaned_data.get('template_content')
+                name = forms_obj.cleaned_data.get('name')
                 obj = models.zgld_website_template.objects.get(id=template_id)
+                obj.name = name
                 obj.template_content = template_content
                 obj.save()
                 response.code = 200
@@ -169,6 +172,7 @@ def website_template_oper(request, oper_type,o_id):
         elif oper_type == "add":
             template_data = {
                 'user_id': request.GET.get('user_id'),
+                'name': request.POST.get('name'),
                 'template_content': request.POST.get('template_content'),
             }
 
@@ -176,8 +180,10 @@ def website_template_oper(request, oper_type,o_id):
 
             if forms_obj.is_valid():
                 template_content = forms_obj.cleaned_data.get('template_content')
+                name = forms_obj.cleaned_data.get('name')
                 obj = models.zgld_website_template.objects.create(
-                    template_content = template_content
+                    template_content = template_content,
+                    name =name
                 )
                 response.code = 200
                 response.msg = "保存成功"
