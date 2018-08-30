@@ -107,7 +107,7 @@ def user_gongzhonghao_auth(request):
 
                 if state == 'snsapi_base':
 
-                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/yulanneirong/%s?pid=%s&level=%s' % (article_id, pid,level)
+                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/#/yulanneirong/%s?pid=%s&level=%s' % (article_id, pid,level)
                     scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                     _state = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
 
@@ -205,7 +205,7 @@ def create_gongzhonghao_auth_url(data):
 
     appid = authorization_appid
 
-    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/yulanneirong/%s?pid=%s&level=%s' % (article_id,pid,level)
+    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/#/yulanneirong/%s?pid=%s&level=%s' % (article_id,pid,level)
 
     scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
