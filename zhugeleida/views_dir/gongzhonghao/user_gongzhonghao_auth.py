@@ -90,6 +90,7 @@ def user_gongzhonghao_auth(request):
                 user_type=1,  # 公众号
             )
 
+            # openid 存在数据库中
             if customer_objs:
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
@@ -110,95 +111,35 @@ def user_gongzhonghao_auth(request):
                     component_appid=component_appid
                 )
 
-            return redirect(redirect_url)
-
         # 非静默
         else:
             print('ret_data -->', ret_data)
-            pass
+            openid = ret_data['openid']  # 用户唯一标识
+            nickname = ret_data['nickname']  # 会话密钥
+            sex = ret_data['sex']  #
+            province = ret_data['province']  #
+            city = ret_data['city']  #
+            country = ret_data['country']    #
+            headimgurl = ret_data['headimgurl']  #
+            token = account.get_token(account.str_encrypt(openid))
+            obj = models.zgld_customer.objects.create(
+                token=token,
+                openid=openid,
+                user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                username=nickname,
+                sex=sex,
+                province=province,
+                city=city,
+                country=country,
+                headimgurl=headimgurl,
+            )
+            redirect_url = 'http://zhugeleida.zhugeyingxiao.com/admin/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
+                article_id=article_id,
+                token=token,
+                client_id=obj.id
+            )
 
-
-        # 如果openid存在一条数据
-
-
-
-        # else:
-        #
-        #     if state == 'snsapi_base':
-        #
-        #         redirect_uri = 'http://api.zhugeyingxiao.com/admin/gongzhonghao/yulanneirong/%s?relate=pid_%s|level_%s' % (article_id, pid,level)
-        #         scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-        #         _state = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-        #
-        #         authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
-        #         appid, redirect_uri, scope, _state, component_appid)
-        #
-        #         print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', authorize_url)
-        #         ret_data = {
-        #
-        #             'authorize_url': authorize_url,
-        #             'is_verify': False
-        #         }
-        #
-        #
-        #     elif state == 'snsapi_userinfo':
-        #         token = account.get_token(account.str_encrypt(openid))
-        #         obj = models.zgld_customer.objects.create(
-        #             token=token,
-        #             openid=openid,
-        #             user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-        #             # superior=customer_id,  #上级人。
-        #         )
-        #         client_id = obj.id
-        #
-        #
-        #         print('---------- 公众号-新用户创建成功 crete successful ---->')
-        #
-        #         get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
-        #         get_user_info_data = {
-        #             'access_token': access_token,
-        #             'openid': openid,
-        #             'lang': 'zh_CN',
-        #         }
-        #
-        #         ret = requests.get(get_user_info_url, params=get_user_info_data)
-        #         ret.encoding = 'utf-8'
-        #         ret_json = ret.json()
-        #         print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
-        #
-        #
-        #         if 'errcode' not  in  ret_json:
-        #
-        #             openid = ret_json['openid']  # 用户唯一标识
-        #             nickname = ret_json['nickname']  # 会话密钥
-        #             sex = ret_json['sex']  #
-        #             province = ret_json['province']  #
-        #             city = ret_json['city']  #
-        #             country = ret_json['country']    #
-        #             headimgurl = ret_json['headimgurl']  #
-        #
-        #             obj.username = nickname
-        #             obj.sex = sex
-        #             obj.province = province
-        #             obj.city = city
-        #             obj.country = country
-        #             obj.headimgurl = headimgurl
-        #             obj.save()
-        #
-        #         else:
-        #             errcode = ret_json.get('errcode')
-        #             errmsg = ret_json.get('errmsg')
-        #             print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>',errcode,"|",errmsg)
-        #
-        #         ret_data = {
-        #             'user_id': client_id,
-        #             'token': token,
-        #             'is_verify': True
-        #
-        #         }
-        #     response.code = 200
-        #     response.msg = "返回成功"
-        #     response.data = ret_data
+        return redirect(redirect_url)
 
     else:
         response.code = 402
