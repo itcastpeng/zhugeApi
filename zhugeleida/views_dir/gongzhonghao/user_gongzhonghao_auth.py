@@ -32,7 +32,7 @@ def get_openid_info(get_token_data):
     ret = requests.get(oauth_url, params=get_token_data)
     ret_json = ret.json()
 
-    print('------ 通过code换取access_token返回 ----->>', ret_json)
+    print('-------- 通过code换取 access_token、openid信息等  返回 ------->>', ret_json)
 
     openid = ret_json['openid']              # 授权用户唯一标识
     access_token = ret_json['access_token']  # 接口调用凭证
@@ -52,7 +52,7 @@ def user_gongzhonghao_auth(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        print('---- 公众号-登录验证 request.GET -->', request.GET)
+        print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
 
         forms_obj = GongzhonghaoAddForm(request.GET)
 
@@ -63,8 +63,8 @@ def user_gongzhonghao_auth(request):
             # user_type = forms_obj.cleaned_data.get('user_type')
             appid = forms_obj.cleaned_data.get('appid')
             article_id = forms_obj.cleaned_data.get('article_id')
-            pid = forms_obj.cleaned_data.get('pid')
-            level = forms_obj.cleaned_data.get('level')
+            pid = forms_obj.cleaned_data.get('pid','')
+            level = forms_obj.cleaned_data.get('level',)
             component_appid = 'wx6ba07e6ddcdc69b3'
 
             component_access_token_ret = create_component_access_token()
@@ -107,14 +107,14 @@ def user_gongzhonghao_auth(request):
 
                 if state == 'snsapi_base':
 
-                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/yulanneirong/%s?pid=%s&level=%s' % (article_id, pid,level)
+                    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/yulanneirong/%s?relate=pid_%s|level_%s' % (article_id, pid,level)
                     scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                     _state = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
 
                     authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
                     appid, redirect_uri, scope, _state, component_appid)
 
-                    print('------authorize_url------>>', authorize_url)
+                    print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', authorize_url)
                     ret_data = {
 
                         'authorize_url': authorize_url,
@@ -145,7 +145,7 @@ def user_gongzhonghao_auth(request):
                     ret = requests.get(get_user_info_url, params=get_user_info_data)
                     ret.encoding = 'utf-8'
                     ret_json = ret.json()
-                    print('--------- 【公众号】拉取用户信息 接口返回 ------->>', ret_json)
+                    print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
 
 
                     if 'errcode' not  in  ret_json:
@@ -205,14 +205,14 @@ def create_gongzhonghao_auth_url(data):
 
     appid = authorization_appid
 
-    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/yulanneirong/%s?pid=%s&level=%s' % (article_id,pid,level)
+    redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/yulanneirong/%s?relate=pid_%s|level_%s' % (article_id,pid,level)
 
     scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
     component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
     authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
-    print('------authorize_url------>>',authorize_url)
+    print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>',authorize_url)
     response.data = {'authorize_url': authorize_url }
     response.code = 200
     response.msg = "返回成功成功"
