@@ -175,6 +175,7 @@ def create_gongzhonghao_auth_url(data):
     # redirect_uri = 'http://api.zhugeyingxiao.com/gongzhonghao/yulanneirong/%s?relate=pid_%s|level_%s' % (article_id,pid,level)
     redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s' % (article_id,pid,level)
 
+    print('redirect_uri ------->', redirect_uri)
     scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
     component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
