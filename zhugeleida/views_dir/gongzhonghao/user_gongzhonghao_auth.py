@@ -60,7 +60,7 @@ def user_gongzhonghao_auth(request):
         state = request.GET.get('state')
         appid = request.GET.get('appid')
         relate = request.GET.get('relate')
-        article_id = relate.split('|')[0].split('_')[1]
+        article_id = relate.split('|')[0].split('_')[2]
         pid = relate.split('|')[1].split('_')[1]
         level = relate.split('|')[2].split('_')[1]
 
