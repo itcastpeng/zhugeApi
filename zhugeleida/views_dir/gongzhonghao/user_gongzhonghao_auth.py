@@ -137,7 +137,7 @@ def user_gongzhonghao_auth(request):
                 openid=openid,
                 user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
                 username=nickname,
-                sex=sex,
+                # sex=sex,
                 province=province,
                 city=city,
                 country=country,
