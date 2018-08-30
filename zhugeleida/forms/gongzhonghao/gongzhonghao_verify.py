@@ -56,7 +56,7 @@ class GongzhonghaoAddForm(forms.Form):
     )
 
     article_id = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "article_id 不能为空"
         }
