@@ -101,7 +101,6 @@ def user_gongzhonghao_auth(request):
                     client_id=client_id
                 )
 
-
             else:
                 redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s' % (article_id, pid, level)
                 redirect_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={scope}&component_appid={component_appid}#wechat_redirect'.format(
@@ -114,13 +113,24 @@ def user_gongzhonghao_auth(request):
         # 非静默
         else:
             print('ret_data -->', ret_data)
-            openid = ret_data['openid']  # 用户唯一标识
-            nickname = ret_data['nickname']  # 会话密钥
-            sex = ret_data['sex']  #
-            province = ret_data['province']  #
-            city = ret_data['city']  #
-            country = ret_data['country']    #
-            headimgurl = ret_data['headimgurl']  #
+            get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
+            get_user_info_data = {
+                'access_token': access_token,
+                'openid': openid,
+                'lang': 'zh_CN',
+            }
+
+            ret = requests.get(get_user_info_url, params=get_user_info_data)
+            ret.encoding = 'utf-8'
+            ret_json = ret.json()
+            print('-------------ret_json--------->', ret_json)
+            openid = ret_json['openid']  # 用户唯一标识
+            nickname = ret_json['nickname']  # 会话密钥
+            sex = ret_json['sex']  #
+            province = ret_json['province']  #
+            city = ret_json['city']  #
+            country = ret_json['country']    #
+            headimgurl = ret_json['headimgurl']  #
             token = account.get_token(account.str_encrypt(openid))
             obj = models.zgld_customer.objects.create(
                 token=token,
