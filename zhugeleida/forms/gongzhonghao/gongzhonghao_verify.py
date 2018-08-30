@@ -54,9 +54,15 @@ class GongzhonghaoAddForm(forms.Form):
             'required': "pid 不能为空"
         }
     )
+    level = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "pid 不能为空"
+        }
+    )
 
     article_id = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
             'required': "article_id 不能为空"
         }
