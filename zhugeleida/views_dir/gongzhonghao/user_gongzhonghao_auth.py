@@ -63,6 +63,7 @@ def user_gongzhonghao_auth(request):
         article_id = relate.split('|')[0].split('_')[2]
         pid = relate.split('|')[1].split('_')[1]
         level = relate.split('|')[2].split('_')[1]
+        uid = relate.split('|')[3].split('_')[1]
 
         component_appid = 'wx6ba07e6ddcdc69b3'
 
@@ -95,14 +96,20 @@ def user_gongzhonghao_auth(request):
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}'.format(
                     article_id=article_id,
                     token=token,
-                    client_id=client_id
+                    client_id=client_id,
+
+                    uid=uid,  # 文章作者-ID
+                    level=level,  # 所在层级
+                    pid=pid  # 目前所在的父级ID
+
+
                 )
 
             else:
-                redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s' % (article_id, pid, level)
+                redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s' % (article_id, pid,level,uid)
                 redirect_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={scope}&component_appid={component_appid}#wechat_redirect'.format(
                     appid=appid,
                     redirect_uri=redirect_uri,
@@ -129,6 +136,10 @@ def user_gongzhonghao_auth(request):
             if 'errcode' not in ret_json:
                 openid = ret_json['openid']  # 用户唯一标识
                 nickname = ret_json['nickname']  # 会话密钥
+
+                encodestr = base64.b64encode(nickname.encode('utf-8'))
+                customer_name = str(encodestr, 'utf-8')
+
                 sex = ret_json['sex']  #
                 province = ret_json['province']  #
                 city = ret_json['city']  #
@@ -139,7 +150,7 @@ def user_gongzhonghao_auth(request):
                     token=token,
                     openid=openid,
                     user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                    username=nickname,
+                    username=customer_name,
                     sex=sex,
                     province=province,
                     city=city,
@@ -148,13 +159,18 @@ def user_gongzhonghao_auth(request):
                 )
                 print('---------- 公众号-新用户创建成功 crete successful ---->')
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}'.format(
                     article_id=article_id,
                     token=token,
-                    client_id=obj.id
+                    client_id=obj.id,
+
+                    uid = uid,  # 文章作者-ID
+                    level = level,  # 所在层级
+                    pid = pid       # 目前所在的父级ID
                 )
                 data = {
                     'article_id' : article_id,
+                    'user_id' : uid,       # 文章作者-ID
                     'customer_id' : obj.id,
                     'level' : level,
                     'pid' : pid
@@ -183,6 +199,7 @@ def create_gongzhonghao_auth_url(data):
     level = data.get('level')
     company_id = data.get('company_id')
     article_id = data.get('article_id')
+    uid = data.get('uid')
 
     gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
@@ -191,7 +208,7 @@ def create_gongzhonghao_auth_url(data):
 
     # redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/gongzhonghao/yulanneirong/%s?relate=pid_%s|level_%s' % (article_id,pid,level)
     # redirect_uri = 'http://api.zhugeyingxiao.com/gongzhonghao/yulanneirong/%s?relate=pid_%s|level_%s' % (article_id,pid,level)
-    redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s' % (article_id,pid,level)
+    redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s' % (article_id,pid,level,uid)
 
     print('redirect_uri ------->', redirect_uri)
     scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
@@ -215,6 +232,7 @@ def binding_article_customer_relate(data):
 
     article_id = data.get('article_id')    # 公众号文章ID
     customer_id = data.get('customer_id')  # 公众号客户ID
+    user_id = data.get('user_id')  # 公众号客户ID
     level = data.get('level')  # 公众号层级
     parent_id = data.get('pid')  # 所属的父级的客户ID。为空代表第一级。
 
@@ -232,6 +250,7 @@ def binding_article_customer_relate(data):
         models.zgld_article_to_customer_belonger.objects.create(
             article_id=article_id,
             customer_id=customer_id,
+            user_id=user_id,
             customer_parent_id=parent_id,
             level=level,
         )

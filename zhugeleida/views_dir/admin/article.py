@@ -139,8 +139,10 @@ def article_oper(request, oper_type, o_id):
                 data = {
                     'company_id' : company_id,
                     'article_id': obj[0].id,
+                    'uid': user_id,
                     'pid':  '',
                     'level':  1,
+
                 }
 
                 auth_url_ret =  create_gongzhonghao_auth_url(data)
@@ -226,6 +228,7 @@ def article_oper(request, oper_type, o_id):
                 data = {
                     'company_id': company_id,
                     'article_id': obj[0].id,
+                    'uid': user_id,
                     'pid': '',
                     'level': 1,
                 }

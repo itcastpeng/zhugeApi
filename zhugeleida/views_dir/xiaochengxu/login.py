@@ -192,24 +192,24 @@ def login_oper(request,oper_type):
             page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
 
 
-            LOG_FILE = r'test.log'
-            handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
-            fmt = '%(asctime)s - %(levelname)s - %(message)s'
+            # LOG_FILE = r'test.log'
+            # handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
+            # fmt = '%(asctime)s - %(levelname)s - %(message)s'
 
-            formatter = logging.Formatter(fmt)  # 实例化formatter
-            handler.setFormatter(formatter)  # 为handler添加formatter
-
-            logger = logging.getLogger('test')  # 获取名为tst的logger
-            logger.addHandler(handler)  # 为logger添加handler
+            # formatter = logging.Formatter(fmt)  # 实例化formatter
+            # handler.setFormatter(formatter)  # 为handler添加formatter
+            #
+            # logger = logging.getLogger('test')  # 获取名为tst的logger
+            # logger.addHandler(handler)  # 为logger添加handler
 
             # logger.debug(log_info)
 
             encodestr = base64.b64encode(username.encode('utf-8'))
             customer_name = str(encodestr, 'utf-8')
 
-            logger.setLevel(logging.DEBUG)
-            log_info = "request.GET==> %s | b64encode:%s |request.POST==> %s" % (request.GET,customer_name,request.POST)
-            logger.info(log_info)
+            # logger.setLevel(logging.DEBUG)
+            # log_info = "request.GET==> %s | b64encode:%s |request.POST==> %s" % (request.GET,customer_name,request.POST)
+            # logger.info(log_info)
 
             objs = models.zgld_customer.objects.filter(
                 id = customer_id,

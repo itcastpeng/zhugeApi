@@ -5,9 +5,9 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
-import time
-import datetime
+from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,Forward_ArticleForm
+from zhugeleida.public.common import action_record
+from django.db.models import F
 import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
@@ -94,7 +94,7 @@ def article(request,oper_type):
 
 
 @csrf_exempt
-# @account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_customer)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -191,8 +191,12 @@ def article_oper(request, oper_type, o_id):
 
     else:
         if oper_type == 'myarticle':
+
+            customer_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id' : o_id,
+                'uid' : uid,   # 文章所属用户的ID
 
             }
 
@@ -201,48 +205,76 @@ def article_oper(request, oper_type, o_id):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
                 article_id = forms_obj.cleaned_data.get('article_id')
-
-                # order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
-                # field_dict = {
-                #     'id': '',
-                #     'user_id': '',
-                #     'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
-                #     # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
-                #     'title': '__contains',  # 按文章标题搜索
-                # }
-                # request_data = request.GET.copy()
-                # q = conditionCom(request_data, field_dict)
-
-
-                objs = models.zgld_article.objects.filter(id=article_id)
-                count = objs.count()
+                obj = models.zgld_article.objects.get(id=article_id)
+                objs = models.zgld_article.objects.filter(id=article_id).update(
+                    read_count=F('read_count') + 1)  #
 
                 # 获取所有数据
                 ret_data = []
                 # 获取第几页的数据
-                for obj in objs:
-                    print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
-                    ret_data.append({
-                        'id': obj.id,
-                        'title': obj.title,  # 文章标题
-                        'author': obj.user.username,  # 如果为原创显示,文章作者
-                        'avatar': obj.user.avatar,  # 用户的头像
-                        'summary': obj.summary,     # 摘要
-                        'create_date': obj.create_date,  # 文章创建时间
-                        'cover_url': obj.cover_picture,  # 文章图片链接
-                        'content': obj.content,  # 文章内容
-                        'tag_list': list(obj.tags.values('id', 'name')),
-                        'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
 
-                    })
+                print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
+                ret_data.append({
+                    'id': obj.id,
+                    'title': obj.title,  # 文章标题
+                    'author': obj.user.username,  # 如果为原创显示,文章作者
+                    'avatar': obj.user.avatar,  # 用户的头像
+                    'summary': obj.summary,     # 摘要
+                    'create_date': obj.create_date,  # 文章创建时间
+                    'cover_url': obj.cover_picture,  # 文章图片链接
+                    'content': obj.content,  # 文章内容
+                    'tag_list': list(obj.tags.values('id', 'name')),
+                    'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                })
+
+                if customer_id:
+                    customer_obj = models.zgld_customer.objects.filter(id=customer_id,user_type=1)
+                    if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
+                        remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
+                        data = request.GET.copy()
+                        data['action'] = 14
+                        response = action_record(data, remark)
+
                 response.code = 200
                 response.data = {
                     'ret_data': ret_data,
-                    'data_count': count,
+
                 }
+
+            else:
+                print('------- 公众号查看我的文章未能通过------->>',forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
 
 
+        elif oper_type == 'forward_article':
+
+            uid = request.GET.get('uid')
+            user_id  = request.GET.get('user_id')
+            request_data_dict = {
+                'article_id': o_id,
+                'uid': uid,  # 文章所属用户的ID
+                'user_id': user_id,  # 文章所属用户的ID
+            }
+
+            forms_obj = Forward_ArticleForm(request_data_dict)
+            if forms_obj.is_valid():
+                    article_id = o_id
+                    objs = models.zgld_article.objects.filter(id=article_id).update( forward_count=F('forward_count') + 1)  #
+
+                    remark = '%s' % (('转发了' + objs[0].title))
+                    data = request.GET.copy()
+                    data['action'] = 15
+                    response = action_record(data, remark)
+                    response.code = 200
+                    response.msg = "记录转发产品成功"
+            else:
+
+                print('------- 公众号-转发文章未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
 
 

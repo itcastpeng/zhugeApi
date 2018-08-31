@@ -14,6 +14,7 @@ def action_record(data,remark):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('user_id')  # 客户 id
+    # article_id = data.get('article_id')  # 客户 id
     action = data.get('action')
 
     if action in [0]: # 只发消息，不用记录日志。
@@ -30,6 +31,30 @@ def action_record(data,remark):
         tasks.user_send_action_log.delay(json.dumps(data))
         response.code = 200
         response.msg = '发送消息提示成功'
+
+    elif action in [14,15]:
+        # 创建访问日志
+        obj = models.zgld_accesslog.objects.create(
+            user_id=user_id,
+            customer_id=customer_id,
+            remark=remark,
+            action=action
+        )
+
+        customer_name = models.zgld_customer.objects.get(id=customer_id).username
+        company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+
+        customer_name = base64.b64decode(customer_name)
+        customer_name = str(customer_name, 'utf-8')
+
+        data['content'] = '%s%s' % (customer_name, remark)
+        # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
+        data['agentid'] = models.zgld_app.objects.get(id=company_id, app_type=1).agent_id
+
+        tasks.user_send_action_log.delay(json.dumps(data))
+        response.code = 200
+        response.msg = '发送消息提示成功'
+
 
     else:
         # 创建访问日志
