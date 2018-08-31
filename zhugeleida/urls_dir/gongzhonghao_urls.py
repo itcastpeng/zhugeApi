@@ -15,6 +15,7 @@ urlpatterns = [
     # 公众号文章管理
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
 
-
+    #企业微信JS-SDK使用权限签名算法
+    url(r'^enterprise_weixin_sign$', user_weixin_auth.enterprise_weixin_sign),
 
 ]
