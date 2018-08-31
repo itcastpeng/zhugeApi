@@ -81,7 +81,7 @@ def user_gongzhonghao_auth(request):
         ret_data = get_openid_info(get_token_data)
         openid = ret_data['openid']
         access_token = ret_data['access_token']
-
+        redirect_url = ''
         # 判断静默和非静默方式
         # 静默方式
         if state == 'snsapi_base':
@@ -95,7 +95,7 @@ def user_gongzhonghao_auth(request):
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/admin/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
                     article_id=article_id,
                     token=token,
                     client_id=client_id
@@ -109,6 +109,7 @@ def user_gongzhonghao_auth(request):
                     scope='snsapi_userinfo',
                     component_appid=component_appid
                 )
+                print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', redirect_url)
 
         # 非静默
         else:
@@ -123,32 +124,49 @@ def user_gongzhonghao_auth(request):
             ret = requests.get(get_user_info_url, params=get_user_info_data)
             ret.encoding = 'utf-8'
             ret_json = ret.json()
-            print('-------------ret_json--------->', ret_json)
-            openid = ret_json['openid']  # 用户唯一标识
-            nickname = ret_json['nickname']  # 会话密钥
-            sex = ret_json['sex']  #
-            province = ret_json['province']  #
-            city = ret_json['city']  #
-            country = ret_json['country']    #
-            headimgurl = ret_json['headimgurl']  #
-            token = account.get_token(account.str_encrypt(openid))
-            obj = models.zgld_customer.objects.create(
-                token=token,
-                openid=openid,
-                user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                username=nickname,
-                # sex=sex,
-                province=province,
-                city=city,
-                country=country,
-                headimgurl=headimgurl,
-            )
-            redirect_url = 'http://zhugeleida.zhugeyingxiao.com/admin/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
-                article_id=article_id,
-                token=token,
-                client_id=obj.id
-            )
+            print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
 
+            if 'errcode' not in ret_json:
+                openid = ret_json['openid']  # 用户唯一标识
+                nickname = ret_json['nickname']  # 会话密钥
+                sex = ret_json['sex']  #
+                province = ret_json['province']  #
+                city = ret_json['city']  #
+                country = ret_json['country']    #
+                headimgurl = ret_json['headimgurl']  #
+                token = account.get_token(account.str_encrypt(openid))
+                obj = models.zgld_customer.objects.create(
+                    token=token,
+                    openid=openid,
+                    user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    username=nickname,
+                    sex=sex,
+                    province=province,
+                    city=city,
+                    country=country,
+                    headimgurl=headimgurl,
+                )
+                print('---------- 公众号-新用户创建成功 crete successful ---->')
+
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}'.format(
+                    article_id=article_id,
+                    token=token,
+                    client_id=obj.id
+                )
+                data = {
+                    'article_id' : article_id,
+                    'customer_id' : obj.id,
+                    'level' : level,
+                    'pid' : pid
+                }
+                binding_article_customer_relate(data)
+
+            else:
+                errcode = ret_json.get('errcode')
+                errmsg = ret_json.get('errmsg')
+                print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+        print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>',redirect_url)
         return redirect(redirect_url)
 
     else:
@@ -158,7 +176,7 @@ def user_gongzhonghao_auth(request):
     return JsonResponse(response.__dict__)
 
 
-@csrf_exempt
+
 def create_gongzhonghao_auth_url(data):
     response = Response.ResponseObj()
     pid = data.get('pid')
@@ -190,6 +208,41 @@ def create_gongzhonghao_auth_url(data):
     return response
 
 
+
+def binding_article_customer_relate(data):
+
+    response = Response.ResponseObj()
+
+    article_id = data.get('article_id')    # 公众号文章ID
+    customer_id = data.get('customer_id')  # 公众号客户ID
+    level = data.get('level')  # 公众号层级
+    parent_id = data.get('pid')  # 所属的父级的客户ID。为空代表第一级。
+
+    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
+        article_id=article_id,
+        customer_id=customer_id,
+        # customer_parent_id=parent_id
+    )
+
+    if article_to_customer_belonger_obj:
+        response.code = 302
+        response.msg = "文章和客户关系存在"
+
+    else:
+        models.zgld_article_to_customer_belonger.objects.create(
+            article_id=article_id,
+            customer_id=customer_id,
+            customer_parent_id=parent_id,
+            level=level,
+        )
+
+        response.code = 200
+        response.msg = "绑定成功"
+
+    return response
+
+
+
 @csrf_exempt
 def user_gongzhonghao_auth_oper(request,oper_type):
     response = Response.ResponseObj()
@@ -219,7 +272,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                     response.msg = "文章和客户关系存在"
 
                 else:
-                    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.create(
+                    models.zgld_article_to_customer_belonger.objects.create(
                         article_id=article_id,
                         customer_id=customer_id,
                         customer_parent_id=parent_id,

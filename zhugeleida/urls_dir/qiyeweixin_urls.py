@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
-    qr_code_auth, follow_language, follow_info,tag_list
+    qr_code_auth, follow_language, follow_info,tag_list,article
 from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product
 
 urlpatterns = [
@@ -73,5 +73,10 @@ urlpatterns = [
     # 企业产品操作
     url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
     url(r'^product/(?P<oper_type>\w+)/', product.product),
+
+    # 企业微信端-文章管理
+    url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
+    url(r'^article/(?P<oper_type>\w+)/', article.article),
+
 
 ]
