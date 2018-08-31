@@ -494,6 +494,12 @@ class zgld_customer(models.Model):
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
     formid = models.TextField(verbose_name='formId(用于发送模板消息)',null=True,default="[]")
 
+    sex_choices = (
+        (1, "男"),
+        (2, "女"),
+    )
+    sex = models.IntegerField(choices=sex_choices, blank=True, null=True)
+
     headimgurl = models.CharField(verbose_name="用户头像url", max_length=256, default='statics/imgs/Avator.jpg')
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
