@@ -157,7 +157,7 @@ def user_gongzhonghao_auth(request):
                     'article_id' : article_id,
                     'customer_id' : obj.id,
                     'level' : level,
-                    'parent_id' : pid
+                    'pid' : pid
                 }
                 binding_article_customer_relate(data)
 
@@ -213,10 +213,10 @@ def binding_article_customer_relate(data):
 
     response = Response.ResponseObj()
 
-    article_id = data.get('article_id')  # 小程序用户ID
-    customer_id = data.get('user_id')  # 小程序用户ID
-    level = data.get('level')  # 小程序用户ID
-    parent_id = data.get('pid')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+    article_id = data.get('article_id')    # 公众号文章ID
+    customer_id = data.get('customer_id')  # 公众号客户ID
+    level = data.get('level')  # 公众号层级
+    parent_id = data.get('pid')  # 所属的父级的客户ID。为空代表第一级。
 
     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
         article_id=article_id,
