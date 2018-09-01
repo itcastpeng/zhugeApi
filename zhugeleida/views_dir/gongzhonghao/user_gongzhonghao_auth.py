@@ -329,8 +329,8 @@ def gongzhonghao_share_sign(request):
                     'key_name': authorizer_access_token_key_name,
                     'authorizer_refresh_token': authorizer_refresh_token,
                     'authorizer_appid': authorizer_appid,
-                    'app_id' :  'wx67e2fde0f694111c',
-                    'app_secret': '4a9690b43178a1287b2ef845158555ed'
+                    'app_id' :  'wx6ba07e6ddcdc69b3',
+                    'app_secret': '0bbed534062ceca2ec25133abe1eecba'
                 }
 
 
