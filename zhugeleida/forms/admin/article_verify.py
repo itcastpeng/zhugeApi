@@ -174,6 +174,7 @@ class MyarticleForm(forms.Form):
     #         'required': '用户ID不存在'
     #     }
     # )
+    
 
     def clean_article_id(self):
         article_id = self.data['article_id']
