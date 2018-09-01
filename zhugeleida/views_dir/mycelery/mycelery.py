@@ -45,7 +45,7 @@ def user_send_action_log(request):
     formatter = logging.Formatter(fmt)  # 实例化formatter
     handler.setFormatter(formatter)  # 为handler添加formatter
 
-    logger = logging.getLogger('test')  # 获取名为tst的logger
+    logger = logging.getLogger('user_send_action')  # 获取名为tst的logger
     logger.addHandler(handler)  # 为logger添加handler
 
     logger.info('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
