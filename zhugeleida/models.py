@@ -669,7 +669,9 @@ class zgld_accesslog(models.Model):
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
-    user = models.ForeignKey('zgld_userprofile', verbose_name=' 被访问的用户')
+    user = models.ForeignKey('zgld_userprofile', verbose_name=' 被访问的用户',null=True)
+    article = models.ForeignKey('zgld_article', verbose_name='文章',null=True)
+
     customer = models.ForeignKey('zgld_customer', verbose_name='访问的客户')
     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
     activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='accesslog', verbose_name='活动时间(客户活动)',

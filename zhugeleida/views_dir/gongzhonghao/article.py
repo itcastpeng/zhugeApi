@@ -5,7 +5,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,Forward_ArticleForm
+from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,Forward_ArticleForm
 from zhugeleida.public.common import action_record
 from django.db.models import F
 import json
@@ -192,11 +192,13 @@ def article_oper(request, oper_type, o_id):
     else:
         if oper_type == 'myarticle':
 
+            print('----- 公众号查看文章 request.GET myarticle----->>',request.GET)
             customer_id = request.GET.get('user_id')
-            uid = request.GET.get('uid')
+            user_id = request.GET.get('uid')
+
             request_data_dict = {
                 'article_id' : o_id,
-                'uid' : uid,   # 文章所属用户的ID
+                'uid': user_id,  # 文章所属用户的ID
 
             }
 
@@ -252,17 +254,18 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'forward_article':
 
             uid = request.GET.get('uid')
-            user_id  = request.GET.get('user_id')
+            customer_id  = request.GET.get('user_id')
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
-                'user_id': user_id,  # 文章所属用户的ID
+                'customer_id': customer_id,  # 文章所属用户的ID
             }
 
             forms_obj = Forward_ArticleForm(request_data_dict)
             if forms_obj.is_valid():
                     article_id = o_id
-                    objs = models.zgld_article.objects.filter(id=article_id).update( forward_count=F('forward_count') + 1)  #
+                    objs = models.zgld_article.objects.filter(id=article_id)
+                    objs.update( forward_count=F('forward_count') + 1)  #
 
                     remark = '%s' % (('转发了' + objs[0].title))
                     data = request.GET.copy()

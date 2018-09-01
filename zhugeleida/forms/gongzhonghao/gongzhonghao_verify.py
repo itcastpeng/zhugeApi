@@ -48,12 +48,12 @@ class GongzhonghaoAddForm(forms.Form):
             'required': "appid不能为空"
         }
     )
-    pid = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "pid 不能为空"
-        }
-    )
+    # pid = forms.CharField(
+    #     required=False,
+    #     error_messages={
+    #         'required': "pid 不能为空"
+    #     }
+    # )
     level = forms.CharField(
         required=False,
         error_messages={
@@ -117,5 +117,55 @@ class LoginBindingForm(forms.Form):
         required=True,
         error_messages={
             'required': "article_id 不能为空"
+        }
+    )
+
+
+class CreateShareUrl(forms.Form):
+    # print('添加标签')
+    # source = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "客户来源不能为空"
+    #     }
+    # )
+
+    uid = forms.IntegerField(
+        # 客户上级对应的用户
+        required=True,
+        error_messages={
+            'required': "所属用户ID不能为空"
+        }
+    )
+
+
+    pid = forms.IntegerField(
+        # 客户上级对应的用户
+        required=False,
+        error_messages={
+            'required': "用户ID不能为空"
+        }
+
+    )
+
+    level = forms.IntegerField(
+        # 客户上级对应的用户
+        required=True,
+        error_messages={
+            'required': "层级不能为空"
+        }
+    )
+
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "article_id 不能为空"
+        }
+    )
+
+    company_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "company_id 不能为空"
         }
     )

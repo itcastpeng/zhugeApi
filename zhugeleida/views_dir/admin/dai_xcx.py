@@ -857,6 +857,8 @@ def create_authorizer_access_token(data):
     authorizer_appid = data.get('authorizer_appid')
     authorizer_refresh_token = data.get('authorizer_refresh_token')
     key_name = data.get('key_name')
+    # app_id = data.get('app_id')
+    # app_secret = data.get('app_secret')
 
     app_id = 'wx67e2fde0f694111c'
     app_secret = '4a9690b43178a1287b2ef845158555ed'

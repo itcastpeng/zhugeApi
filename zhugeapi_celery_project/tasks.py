@@ -22,7 +22,7 @@ def user_send_action_log(data):
     post_data = {
         'data': data
     }
-    print('----------小程序访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
+    print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
     requests.post(url, data=post_data)
 
 

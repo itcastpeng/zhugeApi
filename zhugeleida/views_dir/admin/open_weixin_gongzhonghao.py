@@ -120,7 +120,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                 authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
                 authorizer_appid = access_token_ret['authorization_info'].get('authorizer_appid')
 
-                authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorization_appid)
+                authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
                 if authorizer_access_token and authorizer_refresh_token:
 
                     rc.set(authorizer_access_token_key_name, authorizer_access_token, 7000)
@@ -200,7 +200,12 @@ def open_weixin_gongzhonghao(request, oper_type):
             app_id = 'wx6ba07e6ddcdc69b3'  #诸葛雷达_公众号 appid
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-            response_ret =  create_component_access_token()
+            data_dict = {
+                'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+                'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+            }
+
+            response_ret =  create_component_access_token(data_dict)
             component_access_token = response_ret.data.get('component_access_token')
 
             get_pre_auth_data = {
@@ -400,7 +405,12 @@ def gzh_auth_process_oper(request, oper_type):
                 post_wx_info_data = {}
                 app_id = 'wx6ba07e6ddcdc69b3'                    # 查看诸葛雷达_公众号的 appid
 
-                component_access_token_ret = create_component_access_token()
+                data_dict = {
+                    'app_id' :  'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+                    'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+                }
+
+                component_access_token_ret = create_component_access_token(data_dict)
                 component_access_token = component_access_token_ret.data.get('component_access_token')
                 post_wx_info_data['component_appid'] = app_id
                 post_wx_info_data['authorizer_appid'] = authorizer_appid
@@ -458,19 +468,19 @@ def gzh_auth_process_oper(request, oper_type):
 
 
 ## 生成请 第三方平台 自己 的component_access_token
-def create_component_access_token():
+def create_component_access_token(data):
 
-    app_id = 'wx6ba07e6ddcdc69b3'                    # 查看诸葛雷达_公众号的 appid
-    app_secret = '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+    response = Response.ResponseObj()
+    app_id =data.get('app_id')
+    app_secret =data.get('app_secret')
+    # app_id = 'wx6ba07e6ddcdc69b3'                    # 查看诸葛雷达_公众号的 appid
+    # app_secret = '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    response = Response.ResponseObj()
 
     ComponentVerifyTicket_key_name = 'ComponentVerifyTicket_%s' % (app_id)
 
     component_verify_ticket = rc.get(ComponentVerifyTicket_key_name)
-    # app_id = 'wx6ba07e6ddcdc69b3'
-    # app_secret = '4a9690b43178a1287b2ef845158555ed'
 
     post_component_data = {
         'component_appid': app_id,
@@ -480,7 +490,7 @@ def create_component_access_token():
 
     component_access_token_key_name = 'component_access_token_%s' % (app_id)
     token_ret = rc.get(component_access_token_key_name)
-    print('--- Redis 里存储的 component_access_token---->>', token_ret)
+    print('----- Redis 里存储的 component_access_token ---->>', token_ret)
 
     if not token_ret:
         post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
@@ -498,12 +508,74 @@ def create_component_access_token():
             return JsonResponse(response.__dict__)
 
     response.data = {
-        'component_access_token'  : token_ret
+        'component_access_token'  : token_ret,
+
     }
     response.code = 200
 
     return response
 
+## 生成 公众号-authorizer_access_token
+def create_authorizer_access_token(data):
+    response = Response.ResponseObj()
+
+    authorizer_appid = data.get('authorizer_appid')  # 授权方appid
+    authorizer_refresh_token = data.get('authorizer_refresh_token')
+    key_name = data.get('key_name')
+    app_id = data.get('app_id')  # 三方平台的appid
+    app_secret = data.get('app_secret')
+
+    # app_id = 'wx67e2fde0f694111c'
+    # app_secret = '4a9690b43178a1287b2ef845158555ed'
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+    data_dict = {
+        'app_id': app_id,           # 查看诸葛雷达_公众号的 appid
+        'app_secret': app_secret,   # 查看诸葛雷达_公众号的AppSecret
+    }
+
+    response_ret = create_component_access_token(data_dict)
+    component_access_token = response_ret.data.get('component_access_token')
+
+
+    get_auth_token_data = {
+        'component_access_token': component_access_token
+    }
+
+    post_auth_token_data = {
+        'component_appid': app_id,
+        'authorizer_appid': authorizer_appid,
+        'authorizer_refresh_token': authorizer_refresh_token
+    }
+
+    authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
+    authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,
+                                        data=json.dumps(post_auth_token_data))
+    authorizer_info_ret = authorizer_info_ret.json()
+
+    print('-------获取（刷新）授权【公众号】的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)
+
+    authorizer_access_token = authorizer_info_ret.get('authorizer_access_token')
+    authorizer_refresh_token = authorizer_info_ret.get('authorizer_refresh_token')
+
+    if authorizer_access_token and authorizer_refresh_token:
+        rc.set(key_name, authorizer_access_token, 7000)
+        response.code = 200
+        response.msg = "获取令牌成功"
+        response.data = authorizer_access_token
+
+        # response.data = {
+        #     'authorizer_access_token' : authorizer_access_token
+        # }
+        print('------ 获取【公众号】令牌（authorizer_access_token）成功------>>',authorizer_access_token)
+
+    else:
+        print('------ 获取【公众号】令牌（authorizer_access_token）为空------>>')
+        response.code = 400
+        response.msg = "获取【公众号】令牌 authorizer_access_token为空"
+        return JsonResponse(response.__dict__)
+
+    return  response
 
 
 

@@ -14,8 +14,10 @@ def action_record(data,remark):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('user_id')  # 客户 id
-    # article_id = data.get('article_id')  # 客户 id
+    article_id = data.get('article_id')  # 客户 id
     action = data.get('action')
+
+    print('----- customer_id |  user_id | action ----->>',customer_id,user_id,action)
 
     if action in [0]: # 只发消息，不用记录日志。
         customer_name = models.zgld_customer.objects.get(id=customer_id).username
@@ -35,7 +37,8 @@ def action_record(data,remark):
     elif action in [14,15]:
         # 创建访问日志
         obj = models.zgld_accesslog.objects.create(
-            user_id=user_id,
+            # user_id=user_id,
+            article_id=article_id,
             customer_id=customer_id,
             remark=remark,
             action=action
@@ -46,10 +49,12 @@ def action_record(data,remark):
 
         customer_name = base64.b64decode(customer_name)
         customer_name = str(customer_name, 'utf-8')
+        print('------ 客户姓名 + 访问日志信息------->>', customer_name, remark)
 
         data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
         data['agentid'] = models.zgld_app.objects.get(id=company_id, app_type=1).agent_id
+        print('------------ 传给tasks.celery的 json.dumps 数据 ------------------>>', json.dumps(data))
 
         tasks.user_send_action_log.delay(json.dumps(data))
         response.code = 200
