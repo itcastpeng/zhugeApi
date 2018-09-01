@@ -264,9 +264,9 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
 
-                customer_id = request.GET.get('customer_id')
+                customer_id = request.GET.get('user_id')
                 uid = forms_obj.cleaned_data.get('uid')
-                pid = forms_obj.cleaned_data.get('pid')
+                # pid = forms_obj.cleaned_data.get('pid')
                 level = forms_obj.cleaned_data.get('level')
                 article_id = forms_obj.cleaned_data.get('article_id')
                 company_id =  forms_obj.cleaned_data.get('company_id')

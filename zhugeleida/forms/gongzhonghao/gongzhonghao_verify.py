@@ -48,12 +48,12 @@ class GongzhonghaoAddForm(forms.Form):
             'required': "appid不能为空"
         }
     )
-    pid = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "pid 不能为空"
-        }
-    )
+    # pid = forms.CharField(
+    #     required=False,
+    #     error_messages={
+    #         'required': "pid 不能为空"
+    #     }
+    # )
     level = forms.CharField(
         required=False,
         error_messages={
