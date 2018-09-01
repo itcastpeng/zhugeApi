@@ -192,11 +192,13 @@ def article_oper(request, oper_type, o_id):
     else:
         if oper_type == 'myarticle':
 
+            print('----- 公众号查看文章 request.GET myarticle----->>',request.GET)
             customer_id = request.GET.get('user_id')
+            user_id = request.GET.get('uid')
 
             request_data_dict = {
                 'article_id' : o_id,
-
+                'uid': user_id,  # 文章所属用户的ID
 
             }
 
