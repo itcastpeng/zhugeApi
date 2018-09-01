@@ -17,7 +17,7 @@ def action_record(data,remark):
     article_id = data.get('article_id')  # 客户 id
     action = data.get('action')
 
-    print('----- user_id |  customer_id | action ----->>',customer_id,user_id,action)
+    print('----- customer_id |  user_id | action ----->>',customer_id,user_id,action)
 
     if action in [0]: # 只发消息，不用记录日志。
         customer_name = models.zgld_customer.objects.get(id=customer_id).username

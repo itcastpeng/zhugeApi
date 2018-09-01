@@ -177,7 +177,7 @@ class Forward_ArticleForm(forms.Form):
         }
     )
 
-    user_id = forms.CharField(
+    customer_id = forms.CharField(
         required=True,
         error_messages={
             'required': '客户ID不存在'

@@ -254,11 +254,11 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'forward_article':
 
             uid = request.GET.get('uid')
-            user_id  = request.GET.get('user_id')
+            customer_id  = request.GET.get('user_id')
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
-                'user_id': user_id,  # 文章所属用户的ID
+                'customer_id': customer_id,  # 文章所属用户的ID
             }
 
             forms_obj = Forward_ArticleForm(request_data_dict)
