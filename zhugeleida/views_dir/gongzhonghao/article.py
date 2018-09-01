@@ -264,7 +264,8 @@ def article_oper(request, oper_type, o_id):
             forms_obj = Forward_ArticleForm(request_data_dict)
             if forms_obj.is_valid():
                     article_id = o_id
-                    objs = models.zgld_article.objects.filter(id=article_id).update( forward_count=F('forward_count') + 1)  #
+                    objs = models.zgld_article.objects.filter(id=article_id)
+                    objs.update( forward_count=F('forward_count') + 1)  #
 
                     remark = '%s' % (('转发了' + objs[0].title))
                     data = request.GET.copy()
