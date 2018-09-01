@@ -14,8 +14,10 @@ def action_record(data,remark):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('user_id')  # 客户 id
-    # article_id = data.get('article_id')  # 客户 id
+    article_id = data.get('article_id')  # 客户 id
     action = data.get('action')
+
+    print('----- user_id |  customer_id | action ----->>',customer_id,user_id,action)
 
     if action in [0]: # 只发消息，不用记录日志。
         customer_name = models.zgld_customer.objects.get(id=customer_id).username
@@ -35,14 +37,15 @@ def action_record(data,remark):
     elif action in [14,15]:
         # 创建访问日志
         obj = models.zgld_accesslog.objects.create(
-            user_id=user_id,
+            # user_id=user_id,
+            article_id=article_id,
             customer_id=customer_id,
             remark=remark,
             action=action
         )
 
         customer_name = models.zgld_customer.objects.get(id=customer_id).username
-        company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+        company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
 
         customer_name = base64.b64decode(customer_name)
         customer_name = str(customer_name, 'utf-8')
