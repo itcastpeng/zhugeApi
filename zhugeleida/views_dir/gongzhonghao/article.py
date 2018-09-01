@@ -5,7 +5,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,Forward_ArticleForm
+from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,Forward_ArticleForm
 from zhugeleida.public.common import action_record
 from django.db.models import F
 import json

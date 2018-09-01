@@ -61,7 +61,13 @@ def user_gongzhonghao_auth(request):
         company_id = relate.split('|')[4].split('_')[2]
 
         component_appid = 'wx6ba07e6ddcdc69b3'
-        component_access_token_ret = create_component_access_token()
+
+        data_dict = {
+            'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+            'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+        }
+
+        component_access_token_ret = create_component_access_token(data_dict)
         component_access_token = component_access_token_ret.data.get('component_access_token')
 
         get_token_data = {
