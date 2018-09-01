@@ -206,12 +206,7 @@ class MyarticleForm(forms.Form):
         }
     )
 
-    uid = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '用户ID不存在'
-        }
-    )
+
 
     def clean_article_id(self):
         article_id = self.data['article_id']

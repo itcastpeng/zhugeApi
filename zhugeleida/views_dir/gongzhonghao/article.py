@@ -196,7 +196,7 @@ def article_oper(request, oper_type, o_id):
             uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id' : o_id,
-                'uid' : uid,   # 文章所属用户的ID
+
 
             }
 
