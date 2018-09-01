@@ -315,8 +315,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 authorizer_appid = objs[0].authorization_appid
                 authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
 
-                authorizer_access_token = rc.get(
-                    authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+                authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
                 if not authorizer_access_token:
                     data = {
@@ -331,15 +330,18 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                     if authorizer_access_token_result.code == 200:
                         authorizer_access_token = authorizer_access_token_result.data
 
-                key_name = "company_%s_jsapi_ticket" % (company_id)
+                key_name = "company_%s_gongzhonghao_jsapi_ticket" % (company_id)
                 ticket_ret = rc.get(key_name)
                 print('--- 从redis里取出 %s : ---->>' % (key_name), ticket_ret)
                 jsapi_ticket = ticket_ret
 
                 if not ticket_ret:
-                    get_jsapi_ticket_url = 'https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket'
+                    # get_jsapi_ticket_url = 'https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket'
+                    get_jsapi_ticket_url = 'https://api.weixin.qq.com/cgi-bin/ticket/getticket'
+
                     get_ticket_data = {
-                        'access_token': authorizer_access_token
+                        'access_token': authorizer_access_token,
+                        'type' : 'jsapi'
                     }
                     jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
                     print('=========== 权限签名 jsapi_ticket_ret 接口返回 ==========>', jsapi_ticket_ret.json())
