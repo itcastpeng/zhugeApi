@@ -12,12 +12,12 @@ import datetime
 import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
-from zhugeapi_celery_project import tasks
-from zhugeleida.public.common import action_record
+import random
+from  publicFunc.account import str_sha_encrypt
 import base64
 import json
-
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_component_access_token
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token,create_component_access_token
+import string
 import redis
 
 # 从微信公众号接口中获取openid等信息
@@ -297,6 +297,93 @@ def create_gongzhonghao_share_auth_url(request):
         response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
+
+
+
+#生成JS-SDK使用权限签名算法
+@csrf_exempt
+@account.is_token(models.zgld_customer)
+def gongzhonghao_share_sign(request):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        '''
+        生成签名之前必须先了解一下jsapi_ticket，jsapi_ticket是H5应用调用企业微信JS接口的临时票据。
+        正常情况下，jsapi_ticket的有效期为7200秒，通过access_token来获取
+        '''
+
+        company_id = request.GET.get('company_id')
+
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+        objs = models.zgld_gongzhonghao_app.objects.filter(id=company_id)
+        if objs:
+            authorizer_refresh_token = objs[0].authorizer_refresh_token
+            authorizer_appid = objs[0].authorization_appid
+            authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
+            authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+            if not authorizer_access_token:
+                data = {
+                    'key_name': authorizer_access_token_key_name,
+                    'authorizer_refresh_token': authorizer_refresh_token,
+                    'authorizer_appid': authorizer_appid
+                }
+
+
+                authorizer_access_token_result = create_authorizer_access_token(data)
+                if authorizer_access_token_result.code == 200:
+                    authorizer_access_token = authorizer_access_token_result.data
+
+
+            key_name = "company_%s_jsapi_ticket" % (company_id)
+            ticket_ret = rc.get(key_name)
+            print('--- 从redis里取出 %s : ---->>' % (key_name), ticket_ret)
+            jsapi_ticket = ticket_ret
+
+            if not ticket_ret:
+                get_jsapi_ticket_url =  'https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket'
+                get_ticket_data  = {
+                    'access_token' : authorizer_access_token
+                }
+                jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
+                print('=========== 权限签名 jsapi_ticket_ret 接口返回 ==========>', jsapi_ticket_ret.json())
+                jsapi_ticket_ret = jsapi_ticket_ret.json()
+                ticket = jsapi_ticket_ret.get('ticket')
+                errmsg = jsapi_ticket_ret.get('errmsg')
+                if errmsg != "ok":
+                    response.code = 402
+                    response.msg = "没有生成生成签名所需的jsapi_ticket"
+                    print('-------- 生成签名所需的jsapi_ticket ----------->>')
+                    return JsonResponse(response.__dict__)
+                else:
+                    rc.set(key_name, ticket, 7000)
+                    jsapi_ticket = ticket
+
+            noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
+            timestamp = int(time.time())
+            url = 'http://zhugeleida.zhugeyingxiao.com/'
+            sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket,noncestr,timestamp,url)
+            signature = str_sha_encrypt(sha_string.encode('utf-8'))
+
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'signature': signature,
+                'timestamp': timestamp,
+                'nonceStr': noncestr,
+                'appid': authorizer_appid
+            }
+
+
+
+        else:
+            response.code = 301
+            response.msg = "没有请求数据"
+
+    return JsonResponse(response.__dict__)
+
 
 
 
