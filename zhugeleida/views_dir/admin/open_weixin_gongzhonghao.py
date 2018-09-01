@@ -518,9 +518,9 @@ def create_component_access_token(data):
 ## 生成 公众号-authorizer_access_token
 def create_authorizer_access_token(data):
     response = Response.ResponseObj()
+
     authorizer_appid = data.get('authorizer_appid')  # 授权方appid
     authorizer_refresh_token = data.get('authorizer_refresh_token')
-
     key_name = data.get('key_name')
     app_id = data.get('app_id')  # 三方平台的appid
     app_secret = data.get('app_secret')

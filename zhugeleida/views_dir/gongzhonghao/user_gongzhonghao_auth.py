@@ -309,7 +309,7 @@ def gongzhonghao_share_sign(request):
     if request.method == "GET":
         '''
         生成签名之前必须先了解一下jsapi_ticket，jsapi_ticket是H5应用调用企业微信JS接口的临时票据。
-        正常情况下，jsapi_ticket的有效期为7200秒，通过access_token来获取
+        正常情况下，jsapi_ticket的有效期为7200秒，通过 access_token 来获取
         '''
 
         company_id = request.GET.get('company_id')
@@ -328,7 +328,9 @@ def gongzhonghao_share_sign(request):
                 data = {
                     'key_name': authorizer_access_token_key_name,
                     'authorizer_refresh_token': authorizer_refresh_token,
-                    'authorizer_appid': authorizer_appid
+                    'authorizer_appid': authorizer_appid,
+                    'app_id' :  'wx67e2fde0f694111c',
+                    'app_secret': '4a9690b43178a1287b2ef845158555ed'
                 }
 
 
