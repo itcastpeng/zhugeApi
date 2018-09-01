@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^work_gongzhonghao_auth$', user_gongzhonghao_auth.user_gongzhonghao_auth),
 
     # 微信公众号-JS-SDK使用权限签名算法
-    url(r'^work_gongzhonghao_auth/gongzhonghao_share_sign$', user_gongzhonghao_auth.gongzhonghao_share_sign),
+    url(r'^work_gongzhonghao_auth/(?P<oper_type>\w+)$', user_gongzhonghao_auth.user_gongzhonghao_auth_oper),
 
     # url(r'^work_gongzhonghao_auth/(?P<oper_type>\w+)$', user_gongzhonghao_auth.user_gongzhonghao_auth_oper),
     #代公众号-生成公众号认证URl
