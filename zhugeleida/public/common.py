@@ -45,7 +45,7 @@ def action_record(data,remark):
         )
 
         customer_name = models.zgld_customer.objects.get(id=customer_id).username
-        company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
+        company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
 
         customer_name = base64.b64decode(customer_name)
         customer_name = str(customer_name, 'utf-8')

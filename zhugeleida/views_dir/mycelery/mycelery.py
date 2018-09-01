@@ -13,6 +13,8 @@ import redis
 from collections import OrderedDict
 from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token
 
+import logging.handlers
+
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
 def user_send_action_log(request):
@@ -35,13 +37,26 @@ def user_send_action_log(request):
     get_token_data['corpid'] = corp_id
     # app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, name='AI雷达').app_secret
     app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, app_type=1).app_secret
-    # if not app_secret:
-    #     response.code = 404
-    #     response.msg = "数据库不存在corpsecret"
-    #     return response
+
+
+    LOG_FILE = r'user_send_action.log'
+    handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
+    fmt = '%(asctime)s - %(levelname)s - %(message)s'
+    formatter = logging.Formatter(fmt)  # 实例化formatter
+    handler.setFormatter(formatter)  # 为handler添加formatter
+
+    logger = logging.getLogger('test')  # 获取名为tst的logger
+    logger.addHandler(handler)  # 为logger添加handler
+
+    logger.info('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
+
+    # log_info = "request.GET==> %s | b64encode:%s |request.POST==> %s" % (request.GET,customer_name,request.POST)
+    # logger.info(log_info)
+
 
     get_token_data['corpsecret'] = app_secret
     print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
+    logger.info('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
 
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
@@ -49,6 +64,7 @@ def user_send_action_log(request):
     token_ret = rc.get(key_name)
 
     print('-------  Redis缓存的 keyname |value -------->>',key_name,"|",token_ret)
+    logger.info('-------  Redis缓存的 keyname |value -------->>',key_name,"|",token_ret)
 
     if not token_ret:
         ret = requests.get(Conf['token_url'], params=get_token_data)
@@ -58,6 +74,7 @@ def user_send_action_log(request):
         errmsg = weixin_ret_data.get('errmsg')
         access_token = weixin_ret_data.get('access_token')
         print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
+        logger.info('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
 
         if errcode == 0:
             rc.set(key_name, access_token, 7000)
@@ -67,6 +84,7 @@ def user_send_action_log(request):
             response.code = errcode
             response.msg = "企业微信验证未能通过"
             print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
+            logger.info('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
 
             return JsonResponse(response.__dict__)
 
@@ -86,6 +104,7 @@ def user_send_action_log(request):
         "safe": 0
     }
     print('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
+    logger.info('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
 
     inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
 
@@ -94,6 +113,8 @@ def user_send_action_log(request):
     errmsg = weixin_ret_data.get('errmsg')
 
     print('---- 发送应用消息 【接口返回】 --->>', weixin_ret_data)
+    logger.info('---- 发送应用消息 【接口返回】 --->>', json.dumps(weixin_ret_data))
+
 
     if errmsg == "ok":
         response.code = 200
@@ -104,6 +125,7 @@ def user_send_action_log(request):
         response.code = errcode
         response.msg = "企业微信验证未能通过"
         print('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->',errcode,'|',errmsg)
+        logger.info('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->',errcode,'|',errmsg)
 
     return JsonResponse(response.__dict__)
 
