@@ -138,7 +138,7 @@ def article_oper(request, oper_type, o_id):
 
                 data = {
                     'company_id' : company_id,
-                    'article_id': obj[0].id,
+                    'article_id': obj.id,
                     'uid': user_id,
                     'pid':  '',
                     'level':  1,
