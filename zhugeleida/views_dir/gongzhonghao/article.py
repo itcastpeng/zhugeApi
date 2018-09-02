@@ -272,7 +272,7 @@ def article_oper(request, oper_type, o_id):
                     data['action'] = 15
                     response = action_record(data, remark)
                     response.code = 200
-                    response.msg = "记录转发产品成功"
+                    response.msg = "记录转发文章成功"
             else:
 
                 print('------- 公众号-转发文章未能通过------->>', forms_obj.errors)
