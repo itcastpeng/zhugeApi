@@ -790,7 +790,7 @@ class zgld_article_tag(models.Model):
 #公众号-文章和查看客户之间的绑定关系表
 class zgld_article_to_customer_belonger(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')
-    user_id = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
+    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
 
     level = models.IntegerField(verbose_name='客户所在层级',null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)

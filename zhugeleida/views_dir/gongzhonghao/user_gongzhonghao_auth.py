@@ -248,7 +248,7 @@ def binding_article_customer_relate(data):
         models.zgld_article_to_customer_belonger.objects.create(
             article_id=article_id,
             customer_id=customer_id,
-            user_id=user_id,
+            # user_id=user_id,
             customer_parent_id=parent_id,
             level=level,
         )
