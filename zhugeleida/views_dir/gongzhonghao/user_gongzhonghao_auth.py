@@ -104,7 +104,6 @@ def user_gongzhonghao_auth(request):
                     level=level,  # 所在层级
                     pid=pid,  # 目前所在的父级ID
                     company_id=company_id,
-
                 )
 
             else:
