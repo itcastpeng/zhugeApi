@@ -94,8 +94,13 @@ def user_gongzhonghao_auth(request):
             if customer_objs:
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
+                if not uid: # 代表预览的后台分享出去的链接
+                    article_url = '/gongzhonghao/yulanneirong/'
+                else:     #代表是雷达用户分享出去的。
+                    article_url = '/gongzhonghao/leidawenzhang/'
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                    article_url=article_url,
                     article_id=article_id,
                     token=token,
                     client_id=client_id,
@@ -157,7 +162,13 @@ def user_gongzhonghao_auth(request):
                 )
                 print('---------- 公众号-新用户创建成功 crete successful ---->')
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                if not uid:  # 代表预览的后台分享出去的链接
+                    article_url = '/gongzhonghao/yulanneirong/'
+                else:  # 代表是雷达用户分享出去的。
+                    article_url = '/gongzhonghao/leidawenzhang/'
+
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                    article_url=article_url,
                     article_id=article_id,
                     token=token,
                     client_id=obj.id,
@@ -392,6 +403,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 response.code = 301
                 response.msg = "没有请求数据"
 
+        # 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
         elif oper_type == 'redirect_share_url':
 
             if request.method == "GET":
