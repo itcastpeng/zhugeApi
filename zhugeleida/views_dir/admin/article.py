@@ -12,7 +12,7 @@ import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
-from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_auth_url
+from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -145,7 +145,7 @@ def article_oper(request, oper_type, o_id):
 
                 }
 
-                auth_url_ret =  create_gongzhonghao_auth_url(data)
+                auth_url_ret =  create_gongzhonghao_yulan_auth_url(data)
                 authorize_url = auth_url_ret.data.get('authorize_url')
 
                 qrcode_data = {
@@ -233,7 +233,7 @@ def article_oper(request, oper_type, o_id):
                     'level': 1,
                 }
 
-                auth_url_ret = create_gongzhonghao_auth_url(data)
+                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
                 authorize_url = auth_url_ret.data.get('authorize_url')
 
                 qrcode_data = {

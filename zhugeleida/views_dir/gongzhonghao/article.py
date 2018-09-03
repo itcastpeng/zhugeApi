@@ -229,7 +229,7 @@ def article_oper(request, oper_type, o_id):
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
                 })
 
-                if customer_id:
+                if customer_id and user_id:
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id,user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
                         remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
@@ -264,15 +264,17 @@ def article_oper(request, oper_type, o_id):
             forms_obj = Forward_ArticleForm(request_data_dict)
             if forms_obj.is_valid():
                     article_id = o_id
+
                     objs = models.zgld_article.objects.filter(id=article_id)
                     objs.update( forward_count=F('forward_count') + 1)  #
 
-                    remark = '%s' % (('转发了' + objs[0].title))
-                    data = request.GET.copy()
-                    data['action'] = 15
-                    response = action_record(data, remark)
-                    response.code = 200
-                    response.msg = "记录转发文章成功"
+                    if  uid:
+                        remark = '%s' % (('转发了' + objs[0].title))
+                        data = request.GET.copy()
+                        data['action'] = 15
+                        response = action_record(data, remark)
+                        response.code = 200
+                        response.msg = "记录转发文章成功"
             else:
 
                 print('------- 公众号-转发文章未能通过------->>', forms_obj.errors)
