@@ -5,7 +5,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
+from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
 import time
 import datetime
 import json
@@ -216,7 +216,7 @@ def article_oper(request, oper_type, o_id):
                 # q = conditionCom(request_data, field_dict)
 
 
-                objs = models.zgld_article.objects.filter(id=article_id)
+                objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)
                 count = objs.count()
 
                 # 获取所有数据
@@ -228,6 +228,7 @@ def article_oper(request, oper_type, o_id):
                         'id': obj.id,
                         'title': obj.title,  # 文章标题
                         'author': obj.user.username,  # 如果为原创显示,文章作者
+                        'company_id': obj.company_id, # 公司ID
                         'avatar': obj.user.avatar,  # 用户的头像
                         'summary': obj.summary,     # 摘要
                         'create_date': obj.create_date,  # 文章创建时间

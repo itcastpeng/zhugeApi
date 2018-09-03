@@ -27,6 +27,7 @@ def article(request,oper_type):
             forms_obj = ArticleSelectForm(request.GET)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                user_id = request.GET.get('user_id')
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -34,16 +35,17 @@ def article(request,oper_type):
 
                 field_dict = {
                     'id': '',
-                    'user_id' : '',
                     'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
                                             # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
                     'title': '__contains',  # 按文章标题搜索
                 }
 
                 request_data = request.GET.copy()
-
+                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
                 q = conditionCom(request_data, field_dict)
+                q.add(Q(**{'company_id': company_id}), Q.AND)
+
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
                 if tag_list:
                     q.add(Q(**{'tags__in': tag_list}), Q.AND)
@@ -285,7 +287,7 @@ def article_oper(request, oper_type, o_id):
                 # q = conditionCom(request_data, field_dict)
 
 
-                objs = models.zgld_article.objects.filter(id=article_id)
+                objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)
                 count = objs.count()
 
                 # 获取所有数据
@@ -298,6 +300,7 @@ def article_oper(request, oper_type, o_id):
                         'title': obj.title,  # 文章标题
                         'author': obj.user.username,  # 如果为原创显示,文章作者
                         'avatar': obj.user.avatar,  # 用户的头像
+                        'company_id': obj.company_id,
                         'summary': obj.summary,     # 摘要
                         'create_date': obj.create_date,  # 文章创建时间
                         'cover_url': obj.cover_picture,  # 文章图片链接
