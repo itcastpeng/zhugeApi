@@ -248,7 +248,7 @@ def binding_article_customer_relate(data):
         models.zgld_article_to_customer_belonger.objects.create(
             article_id=article_id,
             customer_id=customer_id,
-            user_id=user_id,
+            # user_id=user_id,
             customer_parent_id=parent_id,
             level=level,
         )
@@ -296,7 +296,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
                 print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
 
-                response.data = {'share_url': share_url }
+                response.data = {'share_url': 'www.baidu.com' }
                 response.code = 200
                 response.msg = "返回成功"
 
