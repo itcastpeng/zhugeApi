@@ -285,7 +285,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             if forms_obj.is_valid():
 
                 customer_id = request.GET.get('user_id')
-                uid = forms_obj.cleaned_data.get('uid')   # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
+                uid = forms_obj.cleaned_data.get('uid') # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
                 # pid = forms_obj.cleaned_data.get('pid')
                 level = forms_obj.cleaned_data.get('level')
                 article_id = forms_obj.cleaned_data.get('article_id')

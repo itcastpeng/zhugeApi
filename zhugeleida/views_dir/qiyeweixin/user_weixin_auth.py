@@ -154,7 +154,7 @@ def work_weixin_auth_oper(request,oper_type):
                 from urllib.parse import quote
                 bianma_share_url = quote(share_url, 'utf-8')
 
-                share_url = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
+                share_url = 'http://zhugeyingxiao.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
                 print('------ 【雷达企业用户】正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
 
                 response.data = {'share_url': share_url}
