@@ -266,7 +266,7 @@ def article_oper(request, oper_type, o_id):
             user_id = request.GET.get('user_id')
             request_data_dict = {
                 'article_id' : o_id,
-                'uid': user_id,  # 文章所属用户的ID
+                # 'uid': user_id,  # 文章所属用户的ID
             }
 
             forms_obj = MyarticleForm(request_data_dict)
