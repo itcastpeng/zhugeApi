@@ -131,7 +131,8 @@ def work_weixin_auth_oper(request,oper_type):
 
                 user_id = request.GET.get('user_id') #企业雷达用户ID
                 article_id = forms_obj.cleaned_data.get('article_id')
-                company_id =  forms_obj.cleaned_data.get('company_id')
+                user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                company_id = user_obj.company_id
 
                 gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
                 authorization_appid = gongzhonghao_app_obj.authorization_appid

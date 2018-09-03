@@ -163,9 +163,9 @@ class CreateShareUrl(forms.Form):
         }
     )
 
-    company_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "company_id 不能为空"
-        }
-    )
+    # company_id = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "company_id 不能为空"
+    #     }
+    # )
