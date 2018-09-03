@@ -89,6 +89,13 @@ def article(request,oper_type):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
+
+            else:
+                # print("验证不通过")
+                print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
 
 
@@ -243,6 +250,14 @@ def article_oper(request, oper_type, o_id):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
+
+
+            else:
+                # print("验证不通过")
+                print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
 
 
