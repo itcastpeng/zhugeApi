@@ -175,8 +175,9 @@ def user_gongzhonghao_auth(request):
                     'level' : level,
                     'pid' : pid
                 }
+                if uid: # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。
 
-                binding_article_customer_relate(data)
+                    binding_article_customer_relate(data)
 
             else:
                 errcode = ret_json.get('errcode')
@@ -193,15 +194,16 @@ def user_gongzhonghao_auth(request):
     return JsonResponse(response.__dict__)
 
 
-
-def create_gongzhonghao_auth_url(data):
+# 用于后台生成预览授权的二维码。
+def create_gongzhonghao_yulan_auth_url(data):
     response = Response.ResponseObj()
     pid = data.get('pid')
     level = data.get('level')
     company_id = data.get('company_id')
     article_id = data.get('article_id')
     # uid = data.get('uid')
-    uid = ''
+    uid = ''  # 后台生成预览二维码时，此时用户UID 就是admin_userprofile 的用户ID不要分享出去。
+
     gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
 
@@ -248,7 +250,7 @@ def binding_article_customer_relate(data):
         models.zgld_article_to_customer_belonger.objects.create(
             article_id=article_id,
             customer_id=customer_id,
-            # user_id=user_id,  # 暂时关上。
+            user_id=user_id,  # 暂时关上。
             customer_parent_id=parent_id,
             level=level,
         )
@@ -271,7 +273,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             if forms_obj.is_valid():
 
                 customer_id = request.GET.get('user_id')
-                uid = forms_obj.cleaned_data.get('uid')
+                uid = forms_obj.cleaned_data.get('uid') # 企业雷达用户ID
                 # pid = forms_obj.cleaned_data.get('pid')
                 level = forms_obj.cleaned_data.get('level')
                 article_id = forms_obj.cleaned_data.get('article_id')
