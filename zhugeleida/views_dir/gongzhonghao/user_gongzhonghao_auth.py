@@ -403,23 +403,30 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 response.code = 301
                 response.msg = "没有请求数据"
 
-        # 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
-        elif oper_type == 'redirect_share_url':
-
-            if request.method == "GET":
-                share_url = request.GET.get('share_url')
-
-                from urllib.parse import unquote
-                redirect_url = unquote(share_url, 'utf-8')
-
-                print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
-                return redirect(redirect_url)
-
-            else:
-                response.code = 401
-                response.msg = "请求方式异常"
 
         return JsonResponse(response.__dict__)
 
+
+
+@csrf_exempt
+def user_gongzhonghao_redirect_share_url(request):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        # 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
+
+        share_url = request.GET.get('share_url')
+        from urllib.parse import unquote
+        redirect_url = unquote(share_url, 'utf-8')
+
+        print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
+        return redirect(redirect_url)
+
+    else:
+        response.code = 401
+        response.msg = "请求方式异常"
+
+
+    return JsonResponse(response.__dict__)
 
 
