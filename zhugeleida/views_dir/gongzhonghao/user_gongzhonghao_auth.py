@@ -293,7 +293,8 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 state = 'snsapi_base'
                 component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
-                share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
+                # share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
+                share_url = 'http://zhugeleida.zhugeyingxiao.com/'
                 print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
 
                 response.data = {'share_url': share_url}
