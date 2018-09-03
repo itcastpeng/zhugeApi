@@ -200,8 +200,8 @@ def create_gongzhonghao_auth_url(data):
     level = data.get('level')
     company_id = data.get('company_id')
     article_id = data.get('article_id')
-    uid = data.get('uid')
-
+    # uid = data.get('uid')
+    uid = ''
     gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
 
@@ -294,7 +294,11 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
                 share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
-                share_url = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(share_url)
+
+                from urllib.parse import quote
+                bianma_share_url = quote(share_url, 'utf-8')
+
+                share_url = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
                 print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
 
                 response.data = {'share_url': share_url}
@@ -388,10 +392,14 @@ def user_gongzhonghao_auth_oper(request,oper_type):
         elif oper_type == 'redirect_share_url':
 
             if request.method == "GET":
-                redirect_url = request.GET.get('share_url')
+                share_url = request.GET.get('share_url')
+
+                from urllib.parse import unquote
+                redirect_url = unquote(share_url, 'utf-8')
 
                 print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
                 return redirect(redirect_url)
+
             else:
                 response.code = 401
                 response.msg = "请求方式异常"
