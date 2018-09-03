@@ -115,8 +115,12 @@ def article_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
 
+                user_id = request.GET.get('user_id')
+                company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+
                 dict_data = {
-                    'user_id': request.GET.get('user_id'),
+                    'user_id': user_id,
+                    'company_id': company_id,
                     'title' :forms_obj.cleaned_data['title'],
                     'summary' :forms_obj.cleaned_data['summary'],
                     'content' :forms_obj.cleaned_data['content'],
@@ -131,8 +135,6 @@ def article_oper(request, oper_type, o_id):
 
                 # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
 
-                user_id = request.GET.get('user_id')
-                company_id = obj.user.company_id
                 # token = obj.user.token
                 # rand_str = account.str_encrypt(timestamp + token)
 
@@ -221,7 +223,7 @@ def article_oper(request, oper_type, o_id):
                 # }
                 # response_ret = create_qrcode(data)
                 # pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
-                company_id = obj[0].user.company_id
+                company_id = obj[0].company_id
                 # token = obj.user.token
                 # rand_str = account.str_encrypt(timestamp + token)
 

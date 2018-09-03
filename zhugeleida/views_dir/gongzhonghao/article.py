@@ -30,10 +30,11 @@ def article(request,oper_type):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+                user_id = request.GET.get('user_id')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
 
                 field_dict = {
                     'id': '',
-                    'user_id' : '',
+                    # 'user_id' : '',
                     'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
                                             # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
                     'title': '__contains',  # 按文章标题搜索
@@ -41,15 +42,15 @@ def article(request,oper_type):
 
                 request_data = request.GET.copy()
 
-
+                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
                 q = conditionCom(request_data, field_dict)
+                q.add(Q(**{'company_id': company_id}), Q.AND)
+
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
                 if tag_list:
                     q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
-                objs = models.zgld_article.objects.filter(q).order_by(order)
-
-
+                objs = models.zgld_article.objects.select_related('user','company').filter(q).order_by(order)
                 count = objs.count()
 
                 if length != 0:
@@ -62,7 +63,7 @@ def article(request,oper_type):
                 ret_data = []
                 # 获取第几页的数据
                 for obj in objs:
-                    print('-----obj.tags.values---->', obj.tags.values('id','name'))
+                    print('----- obj.tags.values---->', obj.tags.values('id','name'))
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,       # 文章标题
@@ -79,8 +80,8 @@ def article(request,oper_type):
                         'tag_list' :  list(obj.tags.values('id','name')),
                         'insert_ads' : json.loads(obj.insert_ads)  if obj.insert_ads else '' # 插入的广告语
 
-
                     })
+
                 response.code = 200
                 response.data = {
                     'ret_data': ret_data,

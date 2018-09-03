@@ -26,14 +26,14 @@ def article(request,oper_type):
             forms_obj = ArticleSelectForm(request.GET)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-
+                user_id = request.GET.get('user_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
 
                 field_dict = {
                     'id': '',
-                    'user_id' : '',
+                    # 'user_id' : '',
                     'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
                                             # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
                     'title': '__contains',  # 按文章标题搜索
@@ -41,13 +41,16 @@ def article(request,oper_type):
 
                 request_data = request.GET.copy()
 
+                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
                 q = conditionCom(request_data, field_dict)
+                q.add(Q(**{'company_id': company_id }), Q.AND)
+
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
                 if tag_list:
                     q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
-                objs = models.zgld_article.objects.filter(q).order_by(order)
+                objs = models.zgld_article.objects.select_related('company','user').filter(q).order_by(order)
 
 
                 count = objs.count()
