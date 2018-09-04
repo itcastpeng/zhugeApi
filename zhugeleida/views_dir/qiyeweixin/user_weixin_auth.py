@@ -139,7 +139,7 @@ def work_weixin_auth_oper(request,oper_type):
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
                 level = 1
                 uid = user_id  # 文章所属用户ID，在这里指的是雷达用户 转发的这个文章，他就是这个所属的用户。
-                pid =  user_id # 文章所属父级ID。
+                pid =  ''      # 文章所属父级ID。为空代表是雷达用户分享出去的。
 
 
                 appid = authorization_appid

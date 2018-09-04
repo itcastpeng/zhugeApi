@@ -201,11 +201,11 @@ def article_oper(request, oper_type, o_id):
 
             print('----- 公众号查看文章 request.GET myarticle----->>',request.GET)
             customer_id = request.GET.get('user_id')
-            user_id = request.GET.get('uid')
+            uid = request.GET.get('uid')
 
             request_data_dict = {
                 'article_id' : o_id,
-                'uid': user_id,  # 文章所属用户的ID
+                'uid': uid,  # 文章所属用户的ID
 
             }
 
@@ -236,7 +236,7 @@ def article_oper(request, oper_type, o_id):
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
                 })
 
-                if customer_id and user_id:
+                if customer_id and uid: ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id,user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
                         remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
@@ -276,7 +276,7 @@ def article_oper(request, oper_type, o_id):
                     objs.update( forward_count=F('forward_count') + 1)  #
 
                     if  uid:
-                        remark = '%s' % (('转发了《' + objs[0].title +'》'))
+                        remark = '%s' % (('分享转发了您的文章《' + objs[0].title +'》,帮您进一步扩大了传播效果'))
                         data = request.GET.copy()
                         data['action'] = 15
                         response = action_record(data, remark)
@@ -314,7 +314,6 @@ def article_oper(request, oper_type, o_id):
                         )
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
-
 
 
             else:
