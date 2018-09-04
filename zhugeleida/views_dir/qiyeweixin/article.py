@@ -5,13 +5,15 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
+from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,ThreadPictureForm,EffectRankingByLevelForm
+
+
 import time
 import datetime
 import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
-
+import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -259,6 +261,77 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
             return JsonResponse(response.__dict__)
+
+        elif oper_type == 'thread_base_info':  # 脉络图
+            user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+            request_data_dict = {
+                'article_id': o_id,
+                'uid': uid,  # 文章所属用户的ID
+            }
+
+            forms_obj = ThreadPictureForm(request_data_dict)
+            if forms_obj.is_valid():
+                article_id = forms_obj.cleaned_data.get('article_id')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(article_id=article_id,
+                                                                        user_id=user_id
+                                                                        ).order_by('-level')
+                if objs:
+                    level_num = objs[0].level
+                    title  =  objs[0].article.title
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+                        'level_num': level_num,
+                        'article_id': article_id,
+                        'title': title
+                    }
+                else:
+                    response.code = 302
+                    response.msg = '返回为空'
+
+
+        elif oper_type == 'customer_effect_ranking_by_level':
+
+            level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+            request_data_dict = {
+                'article_id': o_id,
+                'uid': uid,  # 文章所属用户的ID
+                'level': level,  # 文章所属用户的ID
+            }
+
+            forms_obj = EffectRankingByLevelForm(request_data_dict)
+            if forms_obj.is_valid():
+                article_id = forms_obj.cleaned_data.get('article_id')
+
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article','user','customer').filter(article_id=article_id,
+                                                                        user_id=user_id
+                                                                        ).order_by('-level')
+                ret_data = []
+                if objs:
+                    level_num = objs[0].level
+
+                    for l in range(1,level_num):
+                        objs.filter(level=l)
+                        for obj in objs:
+
+                            stay_time = obj.stay_time
+                            username =  obj.customer.username
+                            username = base64.b64decode(username)
+                            print('------- jie -------->>', str(username, 'utf-8'))
+                            username = str(username, 'utf-8')
+
+                            data_dict = {
+                             'article_id' : obj.id,
+                             'user_id' : obj.user_id,
+                             'customer_name' : username,
+                             'level' : level,
+                             'stay_time' : stay_time,
+
+
+                            }
 
 
     return JsonResponse(response.__dict__)
