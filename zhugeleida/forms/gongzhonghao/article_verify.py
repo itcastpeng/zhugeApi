@@ -196,6 +196,40 @@ class Forward_ArticleForm(forms.Form):
         else:
             return article_id
 
+class StayTime_ArticleForm(forms.Form):
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    uid = forms.CharField(
+        required=False,
+        error_messages={
+            'required': '文章所属用户ID不存在'
+        }
+    )
+
+    customer_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '客户ID不存在'
+        }
+    )
+
+    def clean_article_id(self):
+        article_id = self.data['article_id']
+
+        objs = models.zgld_article.objects.filter(
+            id=article_id
+        )
+
+        if not objs:
+            self.add_error('article_id', '文章不存在')
+        else:
+            return article_id
+
 
 # 判断是否是数字
 class MyarticleForm(forms.Form):

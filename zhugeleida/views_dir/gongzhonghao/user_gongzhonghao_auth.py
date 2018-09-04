@@ -290,7 +290,7 @@ def binding_article_customer_relate(data):
 
 #公众号文章生成分享的url
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def user_gongzhonghao_auth_oper(request,oper_type):
     response = Response.ResponseObj()
 

@@ -5,7 +5,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,Forward_ArticleForm
+from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,StayTime_ArticleForm,Forward_ArticleForm
 from zhugeleida.public.common import action_record
 from django.db.models import F
 import json
@@ -287,6 +287,41 @@ def article_oper(request, oper_type, o_id):
                 print('------- 公众号-转发文章未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'staytime':
+            uid = request.GET.get('uid')
+            customer_id = request.GET.get('user_id')
+            request_data_dict = {
+                'article_id': o_id,
+                'uid': uid,  # 文章所属用户的ID
+                'customer_id': customer_id,  # 文章所属用户的ID
+            }
+
+            forms_obj = StayTime_ArticleForm(request_data_dict)
+            if forms_obj.is_valid():
+                article_id = o_id
+                if uid: # 说明是雷达客户分享出去的文章
+
+                    objs = models.zgld_article_access_log.objects.filter(article_id=article_id,customer_id=customer_id)
+                    if objs:
+                        objs.update(stay_time=F('stay_time') + 30)  #
+                    else:
+                        models.zgld_article_access_log.objects.create(
+                            article_id=article_id,
+                            customer_id=customer_id,
+                            user_id=uid,
+                            stay_time=30
+                        )
+                    response.code = 200
+                    response.msg = "记录客户查看文章时间成功"
+            else:
+
+                print('------- 公众号-记录查看文章时间未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+
 
 
 
