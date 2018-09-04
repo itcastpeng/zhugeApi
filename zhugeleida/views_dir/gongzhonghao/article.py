@@ -276,7 +276,7 @@ def article_oper(request, oper_type, o_id):
                     objs.update( forward_count=F('forward_count') + 1)  #
 
                     if  uid:
-                        remark = '%s' % (('转发了' + objs[0].title))
+                        remark = '%s' % (('转发了《' + objs[0].title +'》'))
                         data = request.GET.copy()
                         data['action'] = 15
                         response = action_record(data, remark)
