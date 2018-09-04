@@ -797,6 +797,7 @@ class zgld_article_to_customer_belonger(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',
                                         related_name="article_customer_parent", null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         unique_together = [
