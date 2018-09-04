@@ -314,6 +314,9 @@ def article_oper(request, oper_type, o_id):
                         )
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
+
+
+
             else:
 
                 print('------- 公众号-记录查看文章时间未能通过------->>', forms_obj.errors)
