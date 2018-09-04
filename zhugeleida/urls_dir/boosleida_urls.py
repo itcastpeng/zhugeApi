@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.boosleida import boosleida
+# from zhugeleida.views_dir.boosleida import boosleida
 
 urlpatterns = [
     # 文章的标签管理
