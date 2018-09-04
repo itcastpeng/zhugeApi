@@ -812,7 +812,6 @@ class zgld_article_access_log(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
     user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
-
     stay_time = models.IntegerField(verbose_name='停留时长')
 
     class Meta:
