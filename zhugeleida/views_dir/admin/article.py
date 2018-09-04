@@ -324,8 +324,17 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
+        elif oper_type == 'thread_picture':
+            user_id = request.GET.get('user_id')
+            request_data_dict = {
+                'article_id': o_id,
+                # 'uid': user_id,  # 文章所属用户的ID
+            }
 
-
+            forms_obj = MyarticleForm(request_data_dict)
+            if forms_obj.is_valid():
+                article_id = forms_obj.cleaned_data.get('article_id')
+                models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id).order_by('-level').values('id','level')
 
 
     return JsonResponse(response.__dict__)

@@ -276,7 +276,7 @@ def article_oper(request, oper_type, o_id):
                     objs.update( forward_count=F('forward_count') + 1)  #
 
                     if  uid:
-                        remark = '%s' % (('转发了《' + objs[0].title +'》'))
+                        remark = '%s' % (('分享转发了您的文章《' + objs[0].title +'》,帮您进一步扩大传播效果'))
                         data = request.GET.copy()
                         data['action'] = 15
                         response = action_record(data, remark)
@@ -314,7 +314,6 @@ def article_oper(request, oper_type, o_id):
                         )
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
-
 
 
             else:

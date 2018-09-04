@@ -795,8 +795,7 @@ class zgld_article_to_customer_belonger(models.Model):
 
     level = models.IntegerField(verbose_name='客户所在层级',null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
-    customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',
-                                        related_name="article_customer_parent", null=True)
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级', related_name="article_customer_parent", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -811,7 +810,7 @@ class zgld_article_to_customer_belonger(models.Model):
 class zgld_article_access_log(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
-    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
+    # user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
     stay_time = models.IntegerField(verbose_name='停留时长')
 
     class Meta:
