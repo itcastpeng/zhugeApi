@@ -37,7 +37,7 @@ def action_record(data,remark):
     elif action in [14,15]:
         # 创建访问日志
         obj = models.zgld_accesslog.objects.create(
-            # user_id=user_id,
+            user_id=user_id,
             article_id=article_id,
             customer_id=customer_id,
             remark=remark,
