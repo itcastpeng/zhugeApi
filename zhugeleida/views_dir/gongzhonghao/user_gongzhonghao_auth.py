@@ -111,6 +111,22 @@ def user_gongzhonghao_auth(request):
                     company_id=company_id,
                 )
 
+                data = {
+                    'article_id': article_id,
+                    'user_id': uid,  # 文章作者-ID
+                    'customer_id': client_id,
+                    'level': level,
+                    'pid': pid
+                }
+                if uid:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。
+                    customer_username =  customer_objs[0].username
+                    if customer_username:
+                        customer_username = base64.b64decode(customer_username)
+                        customer_username = str(customer_username, 'utf-8')
+
+                    print('--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (uid,client_id,customer_username), '|', json.dumps(data))
+                    binding_article_customer_relate(data)
+
             else:
                 redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id, pid,level,uid,company_id)
                 redirect_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={scope}&component_appid={component_appid}#wechat_redirect'.format(
@@ -186,7 +202,7 @@ def user_gongzhonghao_auth(request):
                     'pid' : pid
                 }
                 if uid: # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。
-
+                    print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (uid,obj.id,customer_name), '|', json.dumps(data))
                     binding_article_customer_relate(data)
 
             else:
