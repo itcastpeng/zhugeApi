@@ -9,13 +9,17 @@ urlpatterns = [
     # 代公众号 - 登录认证
     url(r'^work_gongzhonghao_auth$', user_gongzhonghao_auth.user_gongzhonghao_auth),
 
+    # 分享去的文章链接当点击后跳转。
+    url(r'^work_gongzhonghao_auth/redirect_share_url$', user_gongzhonghao_auth.user_gongzhonghao_redirect_share_url),
+
     # 微信公众号-JS-SDK使用权限签名算法
     url(r'^work_gongzhonghao_auth/(?P<oper_type>\w+)$', user_gongzhonghao_auth.user_gongzhonghao_auth_oper),
+
 
     # url(r'^work_gongzhonghao_auth/(?P<oper_type>\w+)$', user_gongzhonghao_auth.user_gongzhonghao_auth_oper),
     #代公众号-生成公众号认证URl
     # url(r'^create_gongzhonghao_auth_url/(?P<company_id>\d+)', user_gongzhonghao_auth.create_gongzhonghao_auth_url),
     # 公众号文章管理
-    url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
+    url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
 
 ]

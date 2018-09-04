@@ -5,7 +5,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
+from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
 import time
 import datetime
 import json
@@ -26,14 +26,14 @@ def article(request,oper_type):
             forms_obj = ArticleSelectForm(request.GET)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-
+                user_id = request.GET.get('user_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
 
                 field_dict = {
                     'id': '',
-                    'user_id' : '',
+                    # 'user_id' : '',
                     'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
                                             # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
                     'title': '__contains',  # 按文章标题搜索
@@ -41,13 +41,16 @@ def article(request,oper_type):
 
                 request_data = request.GET.copy()
 
+                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
                 q = conditionCom(request_data, field_dict)
+                q.add(Q(**{'company_id': company_id }), Q.AND)
+
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
                 if tag_list:
                     q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
-                objs = models.zgld_article.objects.filter(q).order_by(order)
+                objs = models.zgld_article.objects.select_related('company','user').filter(q).order_by(order)
 
 
                 count = objs.count()
@@ -86,6 +89,13 @@ def article(request,oper_type):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
+
+            else:
+                # print("验证不通过")
+                print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
 
 
@@ -213,7 +223,7 @@ def article_oper(request, oper_type, o_id):
                 # q = conditionCom(request_data, field_dict)
 
 
-                objs = models.zgld_article.objects.filter(id=article_id)
+                objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)
                 count = objs.count()
 
                 # 获取所有数据
@@ -225,6 +235,7 @@ def article_oper(request, oper_type, o_id):
                         'id': obj.id,
                         'title': obj.title,  # 文章标题
                         'author': obj.user.username,  # 如果为原创显示,文章作者
+                        'company_id': obj.company_id, # 公司ID
                         'avatar': obj.user.avatar,  # 用户的头像
                         'summary': obj.summary,     # 摘要
                         'create_date': obj.create_date,  # 文章创建时间
@@ -239,10 +250,15 @@ def article_oper(request, oper_type, o_id):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
+
+
+            else:
+                # print("验证不通过")
+                print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
-
-
-
 
 
     return JsonResponse(response.__dict__)

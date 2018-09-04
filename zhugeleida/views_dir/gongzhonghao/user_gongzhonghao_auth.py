@@ -94,8 +94,13 @@ def user_gongzhonghao_auth(request):
             if customer_objs:
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
+                if not uid: # 代表预览的后台分享出去的链接
+                    article_url = '/gongzhonghao/yulanneirong/'
+                else:     #代表是雷达用户分享出去的。
+                    article_url = '/gongzhonghao/leidawenzhang/'
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                    article_url=article_url,
                     article_id=article_id,
                     token=token,
                     client_id=client_id,
@@ -104,7 +109,6 @@ def user_gongzhonghao_auth(request):
                     level=level,  # 所在层级
                     pid=pid,  # 目前所在的父级ID
                     company_id=company_id,
-
                 )
 
             else:
@@ -158,7 +162,13 @@ def user_gongzhonghao_auth(request):
                 )
                 print('---------- 公众号-新用户创建成功 crete successful ---->')
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/yulanneirong/{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                if not uid:  # 代表预览的后台分享出去的链接
+                    article_url = '/gongzhonghao/yulanneirong/'
+                else:  # 代表是雷达用户分享出去的。
+                    article_url = '/gongzhonghao/leidawenzhang/'
+
+                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                    article_url=article_url,
                     article_id=article_id,
                     token=token,
                     client_id=obj.id,
@@ -261,6 +271,8 @@ def binding_article_customer_relate(data):
     return response
 
 
+
+#公众号文章生成分享的url
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def user_gongzhonghao_auth_oper(request,oper_type):
@@ -273,7 +285,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             if forms_obj.is_valid():
 
                 customer_id = request.GET.get('user_id')
-                uid = forms_obj.cleaned_data.get('uid') # 企业雷达用户ID
+                uid = forms_obj.cleaned_data.get('uid') # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
                 # pid = forms_obj.cleaned_data.get('pid')
                 level = forms_obj.cleaned_data.get('level')
                 article_id = forms_obj.cleaned_data.get('article_id')
@@ -391,22 +403,30 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 response.code = 301
                 response.msg = "没有请求数据"
 
-        elif oper_type == 'redirect_share_url':
-
-            if request.method == "GET":
-                share_url = request.GET.get('share_url')
-
-                from urllib.parse import unquote
-                redirect_url = unquote(share_url, 'utf-8')
-
-                print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
-                return redirect(redirect_url)
-
-            else:
-                response.code = 401
-                response.msg = "请求方式异常"
 
         return JsonResponse(response.__dict__)
 
+
+
+@csrf_exempt
+def user_gongzhonghao_redirect_share_url(request):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        # 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
+
+        share_url = request.GET.get('share_url')
+        from urllib.parse import unquote
+        redirect_url = unquote(share_url, 'utf-8')
+
+        print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
+        return redirect(redirect_url)
+
+    else:
+        response.code = 401
+        response.msg = "请求方式异常"
+
+
+    return JsonResponse(response.__dict__)
 
 

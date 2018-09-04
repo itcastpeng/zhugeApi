@@ -8,7 +8,7 @@ from zhugeleida.forms.role_verify import RoleAddForm, RoleUpdateForm, RoleSelect
 import datetime
 import json
 import requests
-from publicFunc.condition_com import conditionCom
+from zhugeleida.forms.qiyeweixin.qiyeweixin_auth_verify import CreateShareUrl
 from ..conf import *
 import os
 import redis
@@ -118,6 +118,56 @@ def work_weixin_auth(request, company_id):
 
 
 
+@csrf_exempt
+@account.is_token(models.zgld_userprofile)
+def work_weixin_auth_oper(request,oper_type):
+    response = Response.ResponseObj()
+
+    if request.method == "GET":
+        if oper_type == 'create_gongzhonghao_share_auth_url':
+
+            forms_obj = CreateShareUrl(request.GET)
+            if forms_obj.is_valid():
+
+                user_id = request.GET.get('user_id') #企业雷达用户ID
+                article_id = forms_obj.cleaned_data.get('article_id')
+                user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                company_id = user_obj.company_id
+
+                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
+                authorization_appid = gongzhonghao_app_obj.authorization_appid
+                level = 1
+                uid = user_id  # 文章所属用户ID，在这里指的是雷达用户 转发的这个文章，他就是这个所属的用户。
+                pid =  user_id # 文章所属父级ID。
+
+
+                appid = authorization_appid
+                redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id,pid,level,uid,company_id)
+
+                print('--------  【雷达企业用户】嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
+                scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+                state = 'snsapi_base'
+                component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+
+                share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
+
+                from urllib.parse import quote
+                bianma_share_url = quote(share_url, 'utf-8')
+
+                share_url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
+                # share_url = 'http://zhugeleida.zhugeyingxiao.com/YYYYY/'
+                print('------ 【雷达企业用户】正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
+
+                response.data = {'share_url': share_url}
+                response.code = 200
+                response.msg = "返回成功"
+
+            else:
+                print('---------- 【雷达企业用户】生成 分享的公众号文章链接 未通过验证 --------->>',forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+    return JsonResponse(response.__dict__)
 
 
 #生成JS-SDK使用权限签名算法
@@ -202,8 +252,6 @@ def enterprise_weixin_sign(request):
             'nonceStr': noncestr,
             'appId': corpid
         }
-
-
 
     else:
         response.code = 402

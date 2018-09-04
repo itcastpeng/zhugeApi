@@ -750,6 +750,7 @@ class zgld_template_article_tag(models.Model):
 #公众号-文章表
 class zgld_article(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
+    company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
     title = models.CharField(verbose_name='文章标题', max_length=128)
     summary = models.CharField(verbose_name='文章摘要', max_length=255)
     status_choices = ( (1,'已发'),
