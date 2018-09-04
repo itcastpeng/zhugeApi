@@ -811,12 +811,14 @@ class zgld_article_to_customer_belonger(models.Model):
 class zgld_article_access_log(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章',)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
-    stay_time = models.CharField(verbose_name='停留时长', max_length=64)
+    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
+    stay_time = models.IntegerField(verbose_name='停留时长')
 
     class Meta:
 
         verbose_name_plural = "文章查看用户停留时间表"
         app_label = "zhugeleida"
+
 
 #公众号-明片插件
 class zgld_plugin_mingpian(models.Model):

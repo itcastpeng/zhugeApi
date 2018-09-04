@@ -340,7 +340,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        ##生成JS-SDK使用权限签名算法
+        ##生成公众号JS-SDK使用权限签名算法
         elif  oper_type == 'gongzhonghao_share_sign':
             '''
             生成签名之前必须先了解一下jsapi_ticket，jsapi_ticket是H5应用调用企业微信JS接口的临时票据。
@@ -348,7 +348,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             '''
 
             company_id = request.GET.get('company_id')
-            print('------- 公众号 签名算法 request.GET--------->',request.GET)
+            print('------- 公众号 签名算法 request.GET --------->',request.GET)
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
             objs = models.zgld_gongzhonghao_app.objects.filter(id=company_id)
