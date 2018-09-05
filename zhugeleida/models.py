@@ -811,16 +811,16 @@ class zgld_article_to_customer_belonger(models.Model):
 
 
 #公众号-文章查看用户停留时间表
-# class zgld_article_access_log(models.Model):
-#     article = models.ForeignKey('zgld_article',verbose_name='文章',)
-#     customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
-#     # user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
-#     stay_time = models.IntegerField(verbose_name='停留时长')
-#
-#     class Meta:
-#
-#         verbose_name_plural = "文章查看用户停留时间表"
-#         app_label = "zhugeleida"
+class zgld_article_access_log(models.Model):
+    article = models.ForeignKey('zgld_article',verbose_name='文章')
+    customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
+    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
+    stay_time = models.IntegerField(verbose_name='停留时长(秒)',default=0)
+
+    class Meta:
+
+        verbose_name_plural = "用户查看文章停留时间日志表"
+        app_label = "zhugeleida"
 
 
 

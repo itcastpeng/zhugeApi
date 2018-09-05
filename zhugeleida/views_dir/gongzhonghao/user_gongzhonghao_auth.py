@@ -264,8 +264,9 @@ def binding_article_customer_relate(data):
 
     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
         article_id=article_id,
-        customer_id=customer_id,
         user_id=user_id,
+        customer_id=customer_id,
+        customer_parent = parent_id
 
     )
 

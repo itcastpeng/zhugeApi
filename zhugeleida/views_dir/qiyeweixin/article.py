@@ -5,7 +5,8 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm,ThreadPictureForm,EffectRankingByLevelForm
+from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, \
+    ArticleUpdateForm,MyarticleForm,ThreadPictureForm,EffectRankingByLevelForm,QueryCustomerTransmitForm
 
 
 import time
@@ -295,21 +296,33 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
         elif oper_type == 'customer_effect_ranking_by_level':
 
             level = request.GET.get('level')
             user_id = request.GET.get('user_id')
-            uid = request.GET.get('uid')
+            # uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id': o_id,
-                'uid': uid,  # 文章所属用户的ID
+                # 'uid': uid,  # 文章所属用户的ID
                 'level': level,  # 文章所属用户的ID
             }
 
             forms_obj = EffectRankingByLevelForm(request_data_dict)
             if forms_obj.is_valid():
-                article_id = forms_obj.cleaned_data.get('article_id')
+                # objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=2, user_id=1).values_list(
+                #                                                                                                'customer_id',
+                #                                                                                                'customer__username',
+                #                                                                                                'customer_parent_id',
+                #                                                                                                'level'
+                #
+                #                                                                                                )
+                # print('---- 字典 ------->\n',list(objs))
 
+
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                level = forms_obj.cleaned_data.get('level')
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article','user','customer').filter(
                                                                         article_id=article_id,
                                                                         user_id=user_id
@@ -317,43 +330,130 @@ def article_oper(request, oper_type, o_id):
 
                 ret_data = []
                 if objs:
-                    level_num = objs[0].level
+                        level_num = objs[0].level
+                        print('---- A objs.count --->',objs.count())
+                        objs = objs.filter(level=level)
+                        print('---- B objs.count --->', objs.count())
 
-                    for l in range(1,level_num):
-                        objs.filter(level=l)
-                        level_ret_data = []
                         for obj in objs:
+
+
 
                             stay_time = obj.stay_time
                             username =  obj.customer.username
                             username = base64.b64decode(username)
-                            print('------- jie -------->>', str(username, 'utf-8'))
+                            # print('------- jie -------->>', str(username, 'utf-8'))
                             username = str(username, 'utf-8')
-
+                            area = obj.customer.province + obj.customer.city
                             data_dict = {
-                             'article_id' : obj.id,
-                             'user_id' : obj.user_id,
+                             'article_id' : obj.article_id,
+                             'uid' : obj.user_id,
+                             'user_name' : obj.user.username,
+                             'customer_id' : obj.customer_id,
                              'customer_name' : username,
-                             'level' : level,
-                             'stay_time' : stay_time,
+                             'customer_headimgurl' : obj.customer.headimgurl,
+                             'sex' : obj.customer.get_sex_display(),
+                             'area' : area,
+                             'read_count' : obj.read_count,
+                             'stay_time': stay_time,
+                             'level' : level
                             }
-                            level_ret_data.append(data_dict)
-                            print('----- level_ret_data --------->?',level_ret_data)
 
-                        ret_data.append(level_ret_data)
+                            # level_ret_data.append(data_dict)
+                            # print('----- level_ret_data --------->?',level_ret_data)
 
-                        print('------ret_data------->>',ret_data)
+                            ret_data.append(data_dict)
+
+                        print('------ ret_data ------->>',ret_data)
                         response.code = 200
                         response.msg = '返回成功'
                         response.data = {
+                            'level' : level,
                             'ret_data': ret_data,
-                            'article_id': article_id,
-
+                            'article_id': article_id
                         }
 
             else:
                 print('------- 未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
+        elif oper_type == 'query_customer_transmit_path':
+
+            level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('customer_id')
+            request_data_dict = {
+                'article_id': o_id,
+                'customer_id': customer_id,  # 文章所属用户的ID
+                'level': level,  # 文章所属用户的ID
+            }
+
+            forms_obj = QueryCustomerTransmitForm(request_data_dict)
+            if forms_obj.is_valid():
+
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                level = forms_obj.cleaned_data.get('level')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(
+                    article_id=article_id,
+                    user_id=user_id
+                ).order_by('-level')
+
+                ret_data = []
+                if objs:
+                    level_num = objs[0].level
+                    customer_parent_id = objs.filter(customer_id=customer_id,level=level)[0].customer_parent_id
+
+                    for l in range(int(level)-1,0,-1):
+                        _objs = objs.filter(level=l)
+                        print('------ objs ------>>',_objs.values_list('customer_id','user_id','level'))
+
+                        for obj in _objs:
+                                customerId = obj.customer_id
+
+                                if customerId == customer_parent_id:
+
+                                    stay_time = obj.stay_time
+                                    username = obj.customer.username
+                                    username = base64.b64decode(username)
+                                    username = str(username, 'utf-8')
+                                    area = obj.customer.province + obj.customer.city
+                                    data_dict = {
+                                        'article_id': obj.article_id,
+                                        'uid': obj.user_id,
+                                        'user_name': obj.user.username,
+                                        'customer_id': obj.customer_id,
+                                        'customer_name': username,
+                                        'customer_headimgurl': obj.customer.headimgurl,
+                                        'sex': obj.customer.get_sex_display(),
+                                        'area': area,
+                                        'read_count': obj.read_count,
+                                        'stay_time': stay_time,
+                                        'level': level
+                                    }
+
+                                    ret_data.append(data_dict)
+                                    customer_parent_id = obj.customer_parent_id
+                                    print('---- customer_parent_id --->>',customer_parent_id)
+                                    break
+
+                        print('------ ret_data ------->>', ret_data)
+
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+                        'level': level,
+                        'ret_data': ret_data,
+                        'article_id': article_id
+                    }
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
     return JsonResponse(response.__dict__)

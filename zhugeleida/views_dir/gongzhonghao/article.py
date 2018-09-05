@@ -236,7 +236,7 @@ def article_oper(request, oper_type, o_id):
                     'tag_list': list(obj.tags.values('id', 'name')),
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
                 })
-
+                article_access_log_id = ''
                 if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
 
                     models.zgld_article_to_customer_belonger.objects.filter(user_id=uid,
@@ -251,10 +251,20 @@ def article_oper(request, oper_type, o_id):
                         data = request.GET.copy()
                         data['action'] = 14
                         response = action_record(data, remark)
+                    ## 先记录一个用户查看文章的日志
+                    article_access_log_obj = models.zgld_article_access_log.objects.create(
+                        article_id=article_id,
+                        customer_id=customer_id,
+                        user_id=uid,
+                    )
+                    article_access_log_id = article_access_log_obj.id
+
+
 
                 response.code = 200
                 response.data = {
                     'ret_data': ret_data,
+                    'article_access_log_id': article_access_log_id,
 
                 }
 
@@ -305,27 +315,52 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'staytime':
             uid = request.GET.get('uid')
             customer_id = request.GET.get('user_id')
+            parent_id = request.GET.get('parent_id')
+            article_access_log_id = request.GET.get('article_access_log_id')
+
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
                 'customer_id': customer_id,  # 文章所属用户的ID
+                'parent_id': parent_id,  # 文章所属用户的ID
+                'article_access_log_id': article_access_log_id,  # 文章日志ID
             }
 
             forms_obj = StayTime_ArticleForm(request_data_dict)
             if forms_obj.is_valid():
                 article_id = o_id
                 if uid:  # 说明是雷达客户分享出去的文章
+                    q = Q()
+                    q.add(Q(**{'article_id': article_id}), Q.AND)
+                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
+                    q.add(Q(**{'user_id': uid}), Q.AND)
 
-                    objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id, customer_id=customer_id,user_id=uid)
+                    if  parent_id:
+                        q.add(Q(**{'parent_id': parent_id}), Q.AND)
+                    else:
+                        q.add(Q(**{'parent_id_is_null': True}), Q.AND)
+
+
+                    objs = models.zgld_article_to_customer_belonger.objects.filter(q)
                     if objs:
-                        objs.update(stay_time=F('stay_time') + 30)  #
+                        objs.update(stay_time=F('stay_time') + 10)  #
                     else:
                         models.zgld_article_to_customer_belonger.objects.create(
                             article_id=article_id,
                             customer_id=customer_id,
                             user_id=uid,
-                            stay_time=30
+                            # stay_time=0
                         )
+
+                    article_access_log_obj = models.zgld_article_access_log.objects.filter(
+                        id = article_access_log_id,
+                    )
+                    if article_access_log_obj:
+                        article_access_log_obj.update(stay_time=F('stay_time') + 10)  #
+
+
+
+
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
 

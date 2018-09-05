@@ -249,6 +249,19 @@ class StayTime_ArticleForm(forms.Form):
         }
     )
 
+    parent_id = forms.CharField(
+        required=False,
+        error_messages={
+            'required': '父ID不存在'
+        }
+    )
+    article_access_log_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '用户查看文章日志记录ID'
+        }
+    )
+
     def clean_article_id(self):
         article_id = self.data['article_id']
 
