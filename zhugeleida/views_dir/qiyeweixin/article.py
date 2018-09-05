@@ -290,6 +290,10 @@ def article_oper(request, oper_type, o_id):
                     response.code = 302
                     response.msg = '返回为空'
 
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == 'customer_effect_ranking_by_level':
 
@@ -306,15 +310,18 @@ def article_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                objs = models.zgld_article_to_customer_belonger.objects.select_related('article','user','customer').filter(article_id=article_id,
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article','user','customer').filter(
+                                                                        article_id=article_id,
                                                                         user_id=user_id
                                                                         ).order_by('-level')
+
                 ret_data = []
                 if objs:
                     level_num = objs[0].level
 
                     for l in range(1,level_num):
                         objs.filter(level=l)
+                        level_ret_data = []
                         for obj in objs:
 
                             stay_time = obj.stay_time
@@ -329,9 +336,24 @@ def article_oper(request, oper_type, o_id):
                              'customer_name' : username,
                              'level' : level,
                              'stay_time' : stay_time,
-
-
                             }
+                            level_ret_data.append(data_dict)
+                            print('----- level_ret_data --------->?',level_ret_data)
 
+                        ret_data.append(level_ret_data)
+
+                        print('------ret_data------->>',ret_data)
+                        response.code = 200
+                        response.msg = '返回成功'
+                        response.data = {
+                            'ret_data': ret_data,
+                            'article_id': article_id,
+
+                        }
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
