@@ -353,7 +353,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
 
             if '#' in location_href:
                 location_href = location_href.split('#')[0]
-                print('--------- location_href --------->>',location_href)   
+                print('--------- location_href --------->>',location_href)
 
 
             print('------- 公众号 签名算法 request.GET --------->',request.GET)
@@ -409,7 +409,8 @@ def user_gongzhonghao_auth_oper(request,oper_type):
 
                 noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
                 timestamp = int(time.time())
-                url = 'http://zhugeleida.zhugeyingxiao.com/'
+                # url = 'http://zhugeleida.zhugeyingxiao.com/'
+                url = location_href
                 sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket, noncestr, timestamp, url)
                 signature = str_sha_encrypt(sha_string.encode('utf-8'))
 
