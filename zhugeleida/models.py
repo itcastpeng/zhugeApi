@@ -277,7 +277,7 @@ class zgld_access_rules(models.Model):
 # 企业用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
-    login_user = models.CharField(verbose_name="(登录)用户名", max_length=32)
+    login_user = models.CharField(verbose_name="(登录)用户名", max_length=32,null=True)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
@@ -286,10 +286,10 @@ class zgld_userprofile(models.Model):
         (1, "男"),
         (2, "女"),
     )
-    gender = models.SmallIntegerField(choices=gender_choices, default=1)
+    gender = models.SmallIntegerField(choices=gender_choices, default=1,null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     department = models.ManyToManyField('zgld_department', verbose_name='所属部门')
-    position = models.CharField(verbose_name='职位信息', max_length=128)
+    position = models.CharField(verbose_name='职位信息', max_length=128,null=True)
     # role = models.ForeignKey("zgld_role", verbose_name="角色")
 
     telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)

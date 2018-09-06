@@ -6,7 +6,8 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, \
-    ArticleUpdateForm,MyarticleForm,ThreadPictureForm,EffectRankingByLevelForm,QueryCustomerTransmitForm
+    ArticleUpdateForm,MyarticleForm,ThreadPictureForm,EffectRankingByLevelForm,QueryCustomerTransmitForm,HideCustomerDataForm
+
 
 
 import time
@@ -472,8 +473,86 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        # 每个文章的潜在客户+
+        # 每个文章的潜在客户的访问数据和访问日志
         elif oper_type == 'hide_customer_data':
-            pass
+            # level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            # uid = request.GET.get('uid')
+            request_data_dict = {
+                'article_id': o_id,
+                # 'uid': user_id,  # 文章所属用户的ID
+                # 'level': level,  # 文章所属用户的ID
+            }
+
+            forms_obj = HideCustomerDataForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                # level = forms_obj.cleaned_data.get('level')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(
+                    article_id=article_id,
+                    user_id=user_id
+                ).order_by('-stay_time')
+
+                total_number_read = objs.count()
+
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+                ret_data = []
+                if objs:
+
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+
+                    count = objs.count()
+
+                    for obj in objs:
+                        stay_time = obj.stay_time
+                        username = obj.customer.username
+                        username = base64.b64decode(username)
+                        # print('------- jie -------->>', str(username, 'utf-8'))
+                        username = str(username, 'utf-8')
+                        area = obj.customer.province + obj.customer.city
+                        data_dict = {
+                            'article_id': obj.article_id,
+                            'uid': obj.user_id,
+                            'user_name': obj.user.username,     #雷达用户姓名
+                            'customer_id': obj.customer_id,     #客户ID
+                            'customer_name': username,          # 客户姓名
+                            'customer_headimgurl': obj.customer.headimgurl, # 客户头像
+                            'sex': obj.customer.get_sex_display(),   # 性别
+                            'area': area,   # 地区
+                            'read_count': obj.read_count,       # 阅读次数
+                            'forward_count': obj.forward_count, # 转发次数
+                            'stay_time': stay_time,       # 停留时间
+                            'level': obj.level            # 所在层级
+                        }
+
+                        # level_ret_data.append(data_dict)
+                        # print('----- level_ret_data --------->?',level_ret_data)
+
+                        ret_data.append(data_dict)
+
+                    print('------ ret_data ------->>', ret_data)
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+                        # 'level_num': level_num,
+                        'ret_data': ret_data,
+                        'article_id': article_id,
+                        'count': count,
+                        'total_number_read': total_number_read # 浏览总数
+
+                    }
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
