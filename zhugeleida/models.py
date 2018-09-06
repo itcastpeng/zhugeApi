@@ -664,7 +664,8 @@ class zgld_accesslog(models.Model):
         (13, '授权访问'),
 
         (14,'查看文章'),
-        (15,'转发文章'),
+        (15,'转发文章到朋友'),
+        (16,'转发文章到朋友圈'),
 
     )
 
@@ -804,7 +805,7 @@ class zgld_article_to_customer_belonger(models.Model):
 
     class Meta:
         unique_together = [
-            ('article', 'customer','user'),
+            ('article', 'customer','user','customer_parent'),
         ]
         verbose_name_plural = "文章和查看客户之间绑定关系表"
         app_label = "zhugeleida"
@@ -819,6 +820,7 @@ class zgld_article_access_log(models.Model):
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',
                                         related_name="article_customer_parent_log", null=True)
     stay_time = models.IntegerField(verbose_name='停留时长(秒)',default=0)
+    last_access_date = models.DateTimeField(verbose_name="最后访问时间", null=True)
 
     class Meta:
 

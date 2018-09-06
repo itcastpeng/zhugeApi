@@ -12,7 +12,7 @@ from django.db.models import F
 import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
-
+import datetime
 
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
@@ -253,11 +253,15 @@ def article_oper(request, oper_type, o_id):
                         data['action'] = 14
                         response = action_record(data, remark)
                     ## 先记录一个用户查看文章的日志
+
+                    now_date_time = datetime.datetime.now()
+
                     article_access_log_obj = models.zgld_article_access_log.objects.create(
                         article_id=article_id,
                         customer_id=customer_id,
                         user_id=uid,
                         customer_parent_id=parent_id,
+                        last_access_date=now_date_time
                     )
                     article_access_log_id = article_access_log_obj.id
 
@@ -358,8 +362,12 @@ def article_oper(request, oper_type, o_id):
                     article_access_log_obj = models.zgld_article_access_log.objects.filter(
                         id = article_access_log_id,
                     )
+                    now_date_time = datetime.datetime.now()
                     if article_access_log_obj:
-                        article_access_log_obj.update(stay_time=F('stay_time') + 10)  #
+                        article_access_log_obj.update(
+                            stay_time=F('stay_time') + 10,
+                            last_access_date=now_date_time
+                        )  #
 
 
                     response.code = 200

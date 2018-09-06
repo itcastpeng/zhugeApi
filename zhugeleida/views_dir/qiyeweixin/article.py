@@ -263,7 +263,8 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
-        elif oper_type == 'thread_base_info':  # 脉络图
+        ## 客户基本信息和所看到的所有文章数据展示
+        elif oper_type == 'customer_base_info':  # 脉络图
             user_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
             request_data_dict = {
@@ -296,7 +297,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        ## 客户展示分级影响力。按level 展示出相对数据
         elif oper_type == 'customer_effect_ranking_by_level':
 
             level = request.GET.get('level')
@@ -307,6 +308,8 @@ def article_oper(request, oper_type, o_id):
                 # 'uid': uid,  # 文章所属用户的ID
                 'level': level,  # 文章所属用户的ID
             }
+
+
 
             forms_obj = EffectRankingByLevelForm(request_data_dict)
             if forms_obj.is_valid():
@@ -328,16 +331,27 @@ def article_oper(request, oper_type, o_id):
                                                                         user_id=user_id
                                                                         ).order_by('-level')
 
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
 
 
                 ret_data = []
                 if objs:
                         level_num = objs[0].level
-                        print('---- A objs.count --->',objs.count())
-                        objs = objs.filter(level=level)
-                        print('---- B objs.count --->', objs.count())
+
+                        if int(level) != 0:
+                            objs = objs.filter(level=level).order_by('-stay_time')
+
                         if int(level) == 0 and level_num:
-                            level_num = 1
+                            objs = objs.filter(level=1).order_by('-stay_time')
+                            level = int(level) + 1
+
+                        if length != 0:
+                            start_line = (current_page - 1) * length
+                            stop_line = start_line + length
+                            objs = objs[start_line: stop_line]
+
+                        count = objs.count()
 
                         for obj in objs:
 
@@ -370,9 +384,10 @@ def article_oper(request, oper_type, o_id):
                         response.code = 200
                         response.msg = '返回成功'
                         response.data = {
-                            'level' : level,
+                            'level_num' : level_num,
                             'ret_data': ret_data,
-                            'article_id': article_id
+                            'article_id': article_id,
+                            'count' : count,
                         }
 
             else:
@@ -380,7 +395,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        ## 查询客户最短的层级
         elif oper_type == 'query_customer_transmit_path':
 
             level = request.GET.get('level')
@@ -457,6 +472,8 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        # 每个文章的潜在客户+
+        elif oper_type == 'hide_customer_data':
+            pass
 
     return JsonResponse(response.__dict__)
