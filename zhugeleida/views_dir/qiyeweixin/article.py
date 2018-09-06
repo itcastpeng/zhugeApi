@@ -328,16 +328,18 @@ def article_oper(request, oper_type, o_id):
                                                                         user_id=user_id
                                                                         ).order_by('-level')
 
+
+
                 ret_data = []
                 if objs:
                         level_num = objs[0].level
                         print('---- A objs.count --->',objs.count())
                         objs = objs.filter(level=level)
                         print('---- B objs.count --->', objs.count())
+                        if int(level) == 0 and level_num:
+                            level_num = 1
 
                         for obj in objs:
-
-
 
                             stay_time = obj.stay_time
                             username =  obj.customer.username
@@ -454,6 +456,7 @@ def article_oper(request, oper_type, o_id):
                 print('------- 未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
 
 
     return JsonResponse(response.__dict__)

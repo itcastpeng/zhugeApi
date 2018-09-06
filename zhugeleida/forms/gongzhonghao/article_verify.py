@@ -207,9 +207,16 @@ class MyarticleForm(forms.Form):
         )
 
         uid = forms.CharField(
-            required=False,
+            required=True,
             error_messages={
                 'required': '文章所属用户ID不存在'
+            }
+        )
+
+        parent_id = forms.CharField(
+            required=False,
+            error_messages={
+                'required': '父ID不存在'
             }
         )
 

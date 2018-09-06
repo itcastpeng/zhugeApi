@@ -202,11 +202,12 @@ def article_oper(request, oper_type, o_id):
             print('----- 公众号查看文章 request.GET myarticle----->>', request.GET)
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
+            parent_id = request.GET.get('pid')
 
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
-
+                'parent_id' : parent_id
             }
 
             forms_obj = MyarticleForm(request_data_dict)
@@ -239,11 +240,11 @@ def article_oper(request, oper_type, o_id):
                 article_access_log_id = ''
                 if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
 
-                    models.zgld_article_to_customer_belonger.objects.filter(user_id=uid,
+                    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(user_id=uid,
                                                                             customer_id=customer_id,
-                                                                            article_id=article_id).update(
-                                                                                read_count=F('read_count') + 1
-                                                                            )
+                                                                            customer_parent_id=parent_id,
+                                                                            article_id=article_id)
+                    article_to_customer_belonger_obj.update(read_count=F('read_count') + 1)
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
@@ -256,6 +257,7 @@ def article_oper(request, oper_type, o_id):
                         article_id=article_id,
                         customer_id=customer_id,
                         user_id=uid,
+                        customer_parent_id=parent_id,
                     )
                     article_access_log_id = article_access_log_obj.id
 
@@ -315,7 +317,7 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'staytime':
             uid = request.GET.get('uid')
             customer_id = request.GET.get('user_id')
-            parent_id = request.GET.get('parent_id')
+            parent_id = request.GET.get('pid')
             article_access_log_id = request.GET.get('article_access_log_id')
 
             request_data_dict = {
@@ -336,29 +338,28 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
                     if  parent_id:
-                        q.add(Q(**{'parent_id': parent_id}), Q.AND)
+                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
                     else:
-                        q.add(Q(**{'parent_id_is_null': True}), Q.AND)
+                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
 
                     objs = models.zgld_article_to_customer_belonger.objects.filter(q)
                     if objs:
                         objs.update(stay_time=F('stay_time') + 10)  #
-                    else:
-                        models.zgld_article_to_customer_belonger.objects.create(
-                            article_id=article_id,
-                            customer_id=customer_id,
-                            user_id=uid,
-                            # stay_time=0
-                        )
+                    # else:
+                    #     models.zgld_article_to_customer_belonger.objects.create(
+                    #         article_id=article_id,
+                    #         customer_id=customer_id,
+                    #         user_id=uid,
+                    #         customer_parent_id=parent_id
+                    #         # stay_time=0
+                    #     )
 
                     article_access_log_obj = models.zgld_article_access_log.objects.filter(
                         id = article_access_log_id,
                     )
                     if article_access_log_obj:
                         article_access_log_obj.update(stay_time=F('stay_time') + 10)  #
-
-
 
 
                     response.code = 200
