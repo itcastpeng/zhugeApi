@@ -264,8 +264,9 @@ def binding_article_customer_relate(data):
 
     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
         article_id=article_id,
-        customer_id=customer_id,
         user_id=user_id,
+        customer_id=customer_id,
+        customer_parent = parent_id
 
     )
 
@@ -349,6 +350,13 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             '''
 
             company_id = request.GET.get('company_id')
+            location_href = request.GET.get('location_href')
+
+            if '#' in location_href:
+                location_href = location_href.split('#')[0]
+                print('--------- location_href --------->>',location_href)
+
+
             print('------- 公众号 签名算法 request.GET --------->',request.GET)
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
@@ -402,7 +410,8 @@ def user_gongzhonghao_auth_oper(request,oper_type):
 
                 noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
                 timestamp = int(time.time())
-                url = 'http://zhugeleida.zhugeyingxiao.com/'
+                # url = 'http://zhugeleida.zhugeyingxiao.com/'
+                url = location_href
                 sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket, noncestr, timestamp, url)
                 signature = str_sha_encrypt(sha_string.encode('utf-8'))
 
@@ -435,6 +444,8 @@ def user_gongzhonghao_redirect_share_url(request):
         share_url = request.GET.get('share_url')
         from urllib.parse import unquote
         redirect_url = unquote(share_url, 'utf-8')
+
+
 
         print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
         return redirect(redirect_url)

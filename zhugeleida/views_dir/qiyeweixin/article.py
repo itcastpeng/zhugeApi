@@ -5,13 +5,17 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
+from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm,ArticleSelectForm, \
+    ArticleUpdateForm,MyarticleForm,ThreadPictureForm,EffectRankingByLevelForm,QueryCustomerTransmitForm,HideCustomerDataForm
+
+
+
 import time
 import datetime
 import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
-
+import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -260,5 +264,295 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
+        ## 客户基本信息和所看到的所有文章数据展示
+        elif oper_type == 'customer_base_info':  # 脉络图
+            user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+            request_data_dict = {
+                'article_id': o_id,
+                'uid': uid,  # 文章所属用户的ID
+            }
+
+            forms_obj = ThreadPictureForm(request_data_dict)
+            if forms_obj.is_valid():
+                article_id = forms_obj.cleaned_data.get('article_id')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(article_id=article_id,
+                                                                        user_id=user_id
+                                                                        ).order_by('-level')
+                if objs:
+                    level_num = objs[0].level
+                    title  =  objs[0].article.title
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+                        'level_num': level_num,
+                        'article_id': article_id,
+                        'title': title
+                    }
+                else:
+                    response.code = 302
+                    response.msg = '返回为空'
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        ## 客户展示分级影响力。按level 展示出相对数据
+        elif oper_type == 'customer_effect_ranking_by_level':
+
+            level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            # uid = request.GET.get('uid')
+            request_data_dict = {
+                'article_id': o_id,
+                # 'uid': uid,  # 文章所属用户的ID
+                'level': level,  # 文章所属用户的ID
+            }
+
+
+
+            forms_obj = EffectRankingByLevelForm(request_data_dict)
+            if forms_obj.is_valid():
+                # objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=2, user_id=1).values_list(
+                #                                                                                                'customer_id',
+                #                                                                                                'customer__username',
+                #                                                                                                'customer_parent_id',
+                #                                                                                                'level'
+                #
+                #                                                                                                )
+                # print('---- 字典 ------->\n',list(objs))
+
+
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                level = forms_obj.cleaned_data.get('level')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article','user','customer').filter(
+                                                                        article_id=article_id,
+                                                                        user_id=user_id
+                                                                        ).order_by('-level')
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+
+                ret_data = []
+                if objs:
+                        level_num = objs[0].level
+
+                        if int(level) != 0:
+                            objs = objs.filter(level=level).order_by('-stay_time')
+
+                        if int(level) == 0 and level_num:
+                            objs = objs.filter(level=1).order_by('-stay_time')
+                            level = int(level) + 1
+
+                        if length != 0:
+                            start_line = (current_page - 1) * length
+                            stop_line = start_line + length
+                            objs = objs[start_line: stop_line]
+
+                        count = objs.count()
+
+                        for obj in objs:
+
+                            stay_time = obj.stay_time
+                            username =  obj.customer.username
+                            username = base64.b64decode(username)
+                            # print('------- jie -------->>', str(username, 'utf-8'))
+                            username = str(username, 'utf-8')
+                            area = obj.customer.province + obj.customer.city
+                            data_dict = {
+                             'article_id' : obj.article_id,
+                             'uid' : obj.user_id,
+                             'user_name' : obj.user.username,
+                             'customer_id' : obj.customer_id,
+                             'customer_name' : username,
+                             'customer_headimgurl' : obj.customer.headimgurl,
+                             'sex' : obj.customer.get_sex_display(),
+                             'area' : area,
+                             'read_count' : obj.read_count,
+                             'stay_time': stay_time,
+                             'level' : level
+                            }
+
+                            # level_ret_data.append(data_dict)
+                            # print('----- level_ret_data --------->?',level_ret_data)
+
+                            ret_data.append(data_dict)
+
+                        print('------ ret_data ------->>',ret_data)
+                        response.code = 200
+                        response.msg = '返回成功'
+                        response.data = {
+                            'level_num' : level_num,
+                            'ret_data': ret_data,
+                            'article_id': article_id,
+                            'count' : count,
+                        }
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        ## 查询客户最短的层级
+        elif oper_type == 'query_customer_transmit_path':
+
+            level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('customer_id')
+            request_data_dict = {
+                'article_id': o_id,
+                'customer_id': customer_id,  # 文章所属用户的ID
+                'level': level,  # 文章所属用户的ID
+            }
+
+            forms_obj = QueryCustomerTransmitForm(request_data_dict)
+            if forms_obj.is_valid():
+
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                level = forms_obj.cleaned_data.get('level')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(
+                    article_id=article_id,
+                    user_id=user_id
+                ).order_by('-level')
+
+                ret_data = []
+                if objs:
+                    level_num = objs[0].level
+                    customer_parent_id = objs.filter(customer_id=customer_id,level=level)[0].customer_parent_id
+
+                    for l in range(int(level)-1,0,-1):
+                        _objs = objs.filter(level=l)
+                        print('------ objs ------>>',_objs.values_list('customer_id','user_id','level'))
+
+                        for obj in _objs:
+                                customerId = obj.customer_id
+
+                                if customerId == customer_parent_id:
+
+                                    stay_time = obj.stay_time
+                                    username = obj.customer.username
+                                    username = base64.b64decode(username)
+                                    username = str(username, 'utf-8')
+                                    area = obj.customer.province + obj.customer.city
+                                    data_dict = {
+                                        'article_id': obj.article_id,
+                                        'uid': obj.user_id,
+                                        'user_name': obj.user.username,
+                                        'customer_id': obj.customer_id,
+                                        'customer_name': username,
+                                        'customer_headimgurl': obj.customer.headimgurl,
+                                        'sex': obj.customer.get_sex_display(),
+                                        'area': area,
+                                        'read_count': obj.read_count,
+                                        'stay_time': stay_time,
+                                        'level': level
+                                    }
+
+                                    ret_data.append(data_dict)
+                                    customer_parent_id = obj.customer_parent_id
+                                    print('---- customer_parent_id --->>',customer_parent_id)
+                                    break
+
+                        print('------ ret_data ------->>', ret_data)
+
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+                        'level': level,
+                        'ret_data': ret_data,
+                        'article_id': article_id
+                    }
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 每个文章的潜在客户的访问数据和访问日志
+        elif oper_type == 'hide_customer_data':
+            # level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            # uid = request.GET.get('uid')
+            request_data_dict = {
+                'article_id': o_id,
+                # 'uid': user_id,  # 文章所属用户的ID
+                # 'level': level,  # 文章所属用户的ID
+            }
+
+            forms_obj = HideCustomerDataForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                # level = forms_obj.cleaned_data.get('level')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(
+                    article_id=article_id,
+                    user_id=user_id
+                ).order_by('-stay_time')
+
+                total_number_read = objs.count()
+
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+                ret_data = []
+                if objs:
+
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+
+                    count = objs.count()
+
+                    for obj in objs:
+                        stay_time = obj.stay_time
+                        username = obj.customer.username
+                        username = base64.b64decode(username)
+                        # print('------- jie -------->>', str(username, 'utf-8'))
+                        username = str(username, 'utf-8')
+                        area = obj.customer.province + obj.customer.city
+                        data_dict = {
+                            'article_id': obj.article_id,
+                            'uid': obj.user_id,
+                            'user_name': obj.user.username,     #雷达用户姓名
+                            'customer_id': obj.customer_id,     #客户ID
+                            'customer_name': username,          # 客户姓名
+                            'customer_headimgurl': obj.customer.headimgurl, # 客户头像
+                            'sex': obj.customer.get_sex_display(),   # 性别
+                            'area': area,   # 地区
+                            'read_count': obj.read_count,       # 阅读次数
+                            'forward_count': obj.forward_count, # 转发次数
+                            'stay_time': stay_time,       # 停留时间
+                            'level': obj.level            # 所在层级
+                        }
+
+                        # level_ret_data.append(data_dict)
+                        # print('----- level_ret_data --------->?',level_ret_data)
+
+                        ret_data.append(data_dict)
+
+                    print('------ ret_data ------->>', ret_data)
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+                        # 'level_num': level_num,
+                        'ret_data': ret_data,
+                        'article_id': article_id,
+                        'count': count,
+                        'total_number_read': total_number_read # 浏览总数
+
+                    }
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)

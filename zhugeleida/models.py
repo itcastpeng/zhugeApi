@@ -277,7 +277,7 @@ class zgld_access_rules(models.Model):
 # 企业用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
-    login_user = models.CharField(verbose_name="(登录)用户名", max_length=32)
+    login_user = models.CharField(verbose_name="(登录)用户名", max_length=32,null=True)
     password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
 
     username = models.CharField(verbose_name="成员姓名", max_length=32)
@@ -286,10 +286,10 @@ class zgld_userprofile(models.Model):
         (1, "男"),
         (2, "女"),
     )
-    gender = models.SmallIntegerField(choices=gender_choices, default=1)
+    gender = models.SmallIntegerField(choices=gender_choices, default=1,null=True)
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     department = models.ManyToManyField('zgld_department', verbose_name='所属部门')
-    position = models.CharField(verbose_name='职位信息', max_length=128)
+    position = models.CharField(verbose_name='职位信息', max_length=128,null=True)
     # role = models.ForeignKey("zgld_role", verbose_name="角色")
 
     telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
@@ -664,7 +664,8 @@ class zgld_accesslog(models.Model):
         (13, '授权访问'),
 
         (14,'查看文章'),
-        (15,'转发文章'),
+        (15,'转发文章到朋友'),
+        (16,'转发文章到朋友圈'),
 
     )
 
@@ -795,6 +796,8 @@ class zgld_article_to_customer_belonger(models.Model):
 
     level = models.IntegerField(verbose_name='客户所在层级',null=True)
     stay_time = models.IntegerField(verbose_name='停留时长',default=0)
+    read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
+    forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
 
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级', related_name="article_customer_parent", null=True)
@@ -802,23 +805,27 @@ class zgld_article_to_customer_belonger(models.Model):
 
     class Meta:
         unique_together = [
-            ('article', 'customer','user'),
+            ('article', 'customer','user','customer_parent'),
         ]
         verbose_name_plural = "文章和查看客户之间绑定关系表"
         app_label = "zhugeleida"
 
 
 #公众号-文章查看用户停留时间表
-# class zgld_article_access_log(models.Model):
-#     article = models.ForeignKey('zgld_article',verbose_name='文章',)
-#     customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
-#     # user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
-#     stay_time = models.IntegerField(verbose_name='停留时长')
-#
-#     class Meta:
-#
-#         verbose_name_plural = "文章查看用户停留时间表"
-#         app_label = "zhugeleida"
+class zgld_article_access_log(models.Model):
+    article = models.ForeignKey('zgld_article',verbose_name='文章')
+    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID")
+
+    customer = models.ForeignKey('zgld_customer', verbose_name="查看的客户")
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',
+                                        related_name="article_customer_parent_log", null=True)
+    stay_time = models.IntegerField(verbose_name='停留时长(秒)',default=0)
+    last_access_date = models.DateTimeField(verbose_name="最后访问时间", null=True)
+
+    class Meta:
+
+        verbose_name_plural = "用户查看文章停留时间日志表"
+        app_label = "zhugeleida"
 
 
 

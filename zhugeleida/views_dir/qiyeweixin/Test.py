@@ -1,32 +1,9 @@
-import os
-
-@app.route('/', methods=['GET', 'POST'])
-def index():  # 一个分片上传后被调用
-    if request.method == 'POST':
-        upload_file = request.files['file']
-        task = request.form.get('task_id')           # 获取文件唯一标识符
-        chunk = request.form.get('chunk', 0)        # 获取该分片在所有分片中的序号
-        filename = '%s%s' % (task, chunk)           # 构成该分片唯一标识符
-        upload_file.save('./upload/%s' % filename)  # 保存分片到本地
-
-    return rt('./index.html')
+from urllib.parse import unquote
 
 
-@app.route('/success', methods=['GET'])
-def upload_success():  # 所有分片均上传完后被调用
-    target_filename = request.args.get('filename')  # 获取上传文件的文件名
-    task = request.args.get('task_id')  # 获取文件的唯一标识符
-    chunk = 0  # 分片序号
-    with open('./upload/%s' % target_filename, 'wb') as target_file:  # 创建新文件
-        while True:
-            try:
-                filename = './upload/%s%d' % (task, chunk)
-                source_file = open(filename, 'rb')     # 按序打开每个分片
-                target_file.write(source_file.read())  # 读取分片内容写入新文件
-                source_file.close()
-            except IOError:
-                break
-            chunk += 1
-            os.remove(filename)  # 删除该分片，节约空间
 
-    return rt('./index.html')
+share_url = 'share_url=https%3A%2F%2F%2Fopen.weixin.qq.com%2Fc%2Fconnect%2Foauth2%2Fauthorize%3Fappid%3Dwxa77213c591897a13%26redirect_uri%3Dhttp%3A%2F%2F%2Fapi.zhugeyingxiao.com%2Fz%2Fzhugeleida%2Fgongzhonghao%2Fwork_gongzhonghao_auth%3Frelate%3Darticle_id_1%7Cpid_854%7Clevel_2%7Cuid_55%7Ccompany_id_1%26response_type%3Dcode%26scope%3Dsnsapi_base%26state%3Dsnsapi_base%26component_appid%3Dwx6ba07e6ddcdc69b3%23wechat_redirect]'
+
+redirect_url = unquote(share_url, 'utf-8')
+
+print(redirect_url)

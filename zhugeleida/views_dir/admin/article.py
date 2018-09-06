@@ -324,8 +324,9 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
-        elif oper_type == 'thread_picture':
+        elif oper_type == 'thread_base_info': # 脉络图
             user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id': o_id,
                 # 'uid': user_id,  # 文章所属用户的ID
@@ -334,7 +335,12 @@ def article_oper(request, oper_type, o_id):
             forms_obj = MyarticleForm(request_data_dict)
             if forms_obj.is_valid():
                 article_id = forms_obj.cleaned_data.get('article_id')
-                models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id).order_by('-level').values('id','level')
+                models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id,user_id=uid).order_by('-level').values('id','level')
+
+            else:
+                print('------- 未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
 
     return JsonResponse(response.__dict__)

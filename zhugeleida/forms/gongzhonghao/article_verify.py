@@ -196,6 +196,44 @@ class Forward_ArticleForm(forms.Form):
         else:
             return article_id
 
+
+
+class MyarticleForm(forms.Form):
+        article_id = forms.CharField(
+            required=True,
+            error_messages={
+                'required': '文章ID不能为空'
+            }
+        )
+
+        uid = forms.CharField(
+            required=True,
+            error_messages={
+                'required': '文章所属用户ID不存在'
+            }
+        )
+
+        parent_id = forms.CharField(
+            required=False,
+            error_messages={
+                'required': '父ID不存在'
+            }
+        )
+
+        def clean_article_id(self):
+            article_id = self.data['article_id']
+
+            objs = models.zgld_article.objects.filter(
+                id=article_id
+            )
+
+            if not objs:
+                self.add_error('article_id', '文章不存在')
+            else:
+                return article_id
+
+
+
 class StayTime_ArticleForm(forms.Form):
     article_id = forms.CharField(
         required=True,
@@ -218,35 +256,18 @@ class StayTime_ArticleForm(forms.Form):
         }
     )
 
-    def clean_article_id(self):
-        article_id = self.data['article_id']
-
-        objs = models.zgld_article.objects.filter(
-            id=article_id
-        )
-
-        if not objs:
-            self.add_error('article_id', '文章不存在')
-        else:
-            return article_id
-
-
-# 判断是否是数字
-class MyarticleForm(forms.Form):
-    article_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '文章ID不能为空'
-        }
-    )
-
-    uid = forms.CharField(
+    parent_id = forms.CharField(
         required=False,
         error_messages={
-            'required': '文章所属用户ID不存在'
+            'required': '父ID不存在'
         }
     )
-
+    article_access_log_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '用户查看文章日志记录ID'
+        }
+    )
 
     def clean_article_id(self):
         article_id = self.data['article_id']
@@ -259,3 +280,4 @@ class MyarticleForm(forms.Form):
             self.add_error('article_id', '文章不存在')
         else:
             return article_id
+
