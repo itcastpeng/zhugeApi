@@ -206,7 +206,7 @@ class Forward_ArticleForm(forms.Form):
 
 
 class MyarticleForm(forms.Form):
-        article_id = forms.CharField(
+        article_id = forms.IntegerField(
             required=True,
             error_messages={
                 'required': '文章ID不能为空'
