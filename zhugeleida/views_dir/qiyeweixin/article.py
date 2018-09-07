@@ -489,13 +489,12 @@ def article_oper(request, oper_type, o_id):
 
                 article_id = forms_obj.cleaned_data.get('article_id')
                 # level = forms_obj.cleaned_data.get('level')
-                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(
-                    article_id=article_id,
-                    user_id=user_id
-                ).order_by('-stay_time')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user','customer').filter(article_id=article_id,user_id=user_id).order_by('-stay_time')
 
-                total_number_read = objs.count()
+                from django.db.models import Max, Avg, F, Q, Min, Count
+
+                total_customer_num = objs.annotate(read_count=Count("read_count"))
+                total_read_num = objs.values_list('customer_id').distinct().count()
 
 
                 current_page = forms_obj.cleaned_data['current_page']
