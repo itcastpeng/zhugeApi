@@ -173,14 +173,21 @@ class Forward_ArticleForm(forms.Form):
     uid = forms.CharField(
         required=False,
         error_messages={
-            'required': '文章所属用户ID不存在'
+            'required': '文章所属用户ID不能为空'
         }
     )
 
     customer_id = forms.CharField(
         required=True,
         error_messages={
-            'required': '客户ID不存在'
+            'required': '客户ID不能为空'
+        }
+    )
+
+    forward_type = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '转发类型不能为空'
         }
     )
 

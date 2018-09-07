@@ -286,29 +286,50 @@ def article_oper(request, oper_type, o_id):
 
             uid = request.GET.get('uid')
             customer_id = request.GET.get('user_id')
+            parent_id = request.GET.get('pid')
+            forward_type = request.GET.get('forward_type')
+
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
                 'customer_id': customer_id,  # 文章所属用户的ID
+                'forward_type': forward_type,  # 文章所属用户的ID
+
             }
 
             forms_obj = Forward_ArticleForm(request_data_dict)
             if forms_obj.is_valid():
                 article_id = o_id
+                forward_type = forms_obj.cleaned_data.get('forward_type')
 
                 objs = models.zgld_article.objects.filter(id=article_id)
                 objs.update(forward_count=F('forward_count') + 1)  #
 
                 if uid:
-                    models.zgld_article_to_customer_belonger.objects.filter(user_id=uid,
-                                                                            customer_id=customer_id,
-                                                                            article_id=article_id).update(
-                                                                                 forward_count=F('forward_count') + 1
-                                                                            )
+                    q = Q()
+                    q.add(Q(**{'article_id': article_id}), Q.AND)
+                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
+                    q.add(Q(**{'user_id': uid}), Q.AND)
 
-                    remark = '%s' % (('分享转发了您的文章《' + objs[0].title + '》,帮您进一步扩大了传播效果'))
+                    if  parent_id:
+                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+                    else:
+                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(forward_count=F('forward_count') + 1)
+                    action = ''
+                    place= ''
+                    if int(forward_type) == 1:  # 1 转发朋友
+                        action = 15
+                        place= '分享给【朋友】'
+
+                    elif int(forward_type == 2): # 3转发朋友圈
+                        action = 16
+                        place = '分享到【朋友圈】'
+
+                    remark = '转发了您的文章《%s》%s,帮您进一步扩大了传播效果' % (objs[0].title,place)
                     data = request.GET.copy()
-                    data['action'] = 15
+                    data['action'] = action
                     response = action_record(data, remark)
                     response.code = 200
                     response.msg = "记录转发文章成功"
