@@ -214,9 +214,9 @@ def article_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
-                article_id = forms_obj.cleaned_data.get('article_id')
+                article_id = int(forms_obj.cleaned_data.get('article_id'))
 
-                zgld_article_objs = models.zgld_article.objects.filter(id=int(article_id))
+                zgld_article_objs = models.zgld_article.objects.filter(id=article_id)
 
                 obj = zgld_article_objs[0]
 
