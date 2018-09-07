@@ -54,7 +54,7 @@ def action_record(data,remark):
         data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
         data['agentid'] = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
-        print('------------ 传给tasks.celery的 json.dumps 数据 ------------------>>', json.dumps(data))
+        print('------------ [公众号] 传给tasks.celery的 json.dumps 数据 ------------------>>', json.dumps(data))
 
         tasks.user_send_action_log.delay(json.dumps(data))
         response.code = 200

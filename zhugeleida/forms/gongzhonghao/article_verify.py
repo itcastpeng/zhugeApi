@@ -171,7 +171,7 @@ class Forward_ArticleForm(forms.Form):
     )
 
     uid = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
             'required': '文章所属用户ID不能为空'
         }

@@ -331,7 +331,7 @@ def article_oper(request, oper_type, o_id):
                         action = 15
                         place= '分享给【朋友】'
 
-                    elif int(forward_type == 2): # 3转发朋友圈
+                    elif int(forward_type) == 2: # 3转发朋友圈
                         action = 16
                         place = '分享到【朋友圈】'
 
@@ -378,7 +378,7 @@ def article_oper(request, oper_type, o_id):
 
                     objs = models.zgld_article_to_customer_belonger.objects.filter(q)
                     if objs:
-                        objs.update(stay_time=F('stay_time') + 10)  #
+                        objs.update(stay_time=F('stay_time') + 5)  #
                     # else:
                     #     models.zgld_article_to_customer_belonger.objects.create(
                     #         article_id=article_id,
@@ -394,7 +394,7 @@ def article_oper(request, oper_type, o_id):
                     now_date_time = datetime.datetime.now()
                     if article_access_log_obj:
                         article_access_log_obj.update(
-                            stay_time=F('stay_time') + 10,
+                            stay_time=F('stay_time') + 5,
                             last_access_date=now_date_time
                         )  #
 
