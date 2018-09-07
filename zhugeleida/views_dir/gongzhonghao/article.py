@@ -216,7 +216,7 @@ def article_oper(request, oper_type, o_id):
 
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                zgld_article_objs = models.zgld_article.objects.filter(id=article_id)
+                zgld_article_objs = models.zgld_article.objects.filter(id=int(article_id))
 
                 obj = zgld_article_objs[0]
 
