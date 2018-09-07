@@ -141,3 +141,23 @@ def create_qrcode(data):
 
 
     return response
+
+
+## 把秒数换换成 时|分|秒
+def  conversion_seconds_hms(seconds):
+
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    time = 0
+    if not h and not m and s:
+        print("%s秒" % (s))
+        time = "%s秒" % (s)
+    elif not h and m and s:
+        print("%s分%s秒" % (m, s))
+        time = "%s分%s秒" % (m, s)
+
+    elif h and m and s:
+        print("%s时%s分%s秒" % (h, m, s))
+        time = "%s时%s分%s秒" % (h, m, s)
+    return time
+

@@ -325,15 +325,21 @@ def article_oper(request, oper_type, o_id):
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(forward_count=F('forward_count') + 1)
+
+
                     action = ''
                     place= ''
                     if int(forward_type) == 1:  # 1 转发朋友
                         action = 15
                         place= '分享给【朋友】'
+                        models.zgld_article_to_customer_belonger.objects.filter(q).update(
+                            forward_friend_count=F('forward_friend_count') + 1)
 
                     elif int(forward_type) == 2: # 3转发朋友圈
                         action = 16
                         place = '分享到【朋友圈】'
+                        models.zgld_article_to_customer_belonger.objects.filter(q).update(
+                            forward_friend_circle_count=F('forward_friend_circle_count') + 1)
 
                     remark = '转发了您的文章《%s》%s,帮您进一步扩大了传播效果' % (objs[0].title,place)
                     data = request.GET.copy()
