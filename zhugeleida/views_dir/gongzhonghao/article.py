@@ -214,7 +214,7 @@ def article_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
-                article_id = int(forms_obj.cleaned_data.get('article_id'))
+                article_id = forms_obj.cleaned_data.get('article_id')
 
                 zgld_article_objs = models.zgld_article.objects.filter(id=article_id)
 
@@ -240,10 +240,18 @@ def article_oper(request, oper_type, o_id):
                 article_access_log_id = ''
                 if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
 
-                    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(user_id=uid,
-                                                                            customer_id=customer_id,
-                                                                            customer_parent_id=parent_id,
-                                                                            article_id=article_id)
+                    q = Q()
+                    q.add(Q(**{'article_id': article_id}), Q.AND)
+                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
+                    q.add(Q(**{'user_id': uid}), Q.AND)
+
+                    if parent_id:
+                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+                    else:
+                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+
+                    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
+
                     article_to_customer_belonger_obj.update(read_count=F('read_count') + 1)
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
