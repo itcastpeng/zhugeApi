@@ -210,7 +210,7 @@ def article_oper(request, oper_type, o_id):
                 user_id = request.GET.get('user_id')
                 article_id = forms_obj.cleaned_data['article_id']
                 obj = models.zgld_article.objects.filter(
-                    id=article_id, user_id=user_id
+                    id=article_id
                 )
                 obj.update(**dict_data)
 
