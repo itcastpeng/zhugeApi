@@ -41,7 +41,7 @@ def article(request,oper_type):
                 }
 
                 request_data = request.GET.copy()
-                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+                company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
                 q = conditionCom(request_data, field_dict)
                 q.add(Q(**{'company_id': company_id}), Q.AND)
