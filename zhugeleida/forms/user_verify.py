@@ -42,10 +42,10 @@ class UserAddForm(forms.Form):
     #     })
 
     company_id = forms.IntegerField(
-        required=False,
-        # error_messages={
-        #     'required': '公司不能为空'
-        # }
+        required=True,
+        error_messages={
+            'required': '公司不能为空'
+        }
     )
     position = forms.CharField(
         required=True,
@@ -77,9 +77,10 @@ class UserAddForm(forms.Form):
     # 查询用户名判断是否存在
     def clean_username(self):
         username = self.data['username']
+        company_id = self.data['company_id']
         # print(username)
         objs = models.zgld_userprofile.objects.filter(
-            username=username,
+            username=username,company_id=company_id
         )
         if objs:
             self.add_error('username', '用户名已存在')

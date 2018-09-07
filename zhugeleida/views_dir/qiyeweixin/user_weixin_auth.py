@@ -62,7 +62,9 @@ def work_weixin_auth(request, company_id):
 
         get_code_data['code'] = code
         get_code_data['access_token'] = access_token
-        code_ret = requests.get(Conf['code_url'], params=get_code_data)
+        code_url =  'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo'
+        code_ret = requests.get(code_url, params=get_code_data)
+
         code_ret_json = code_ret.json()
         print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
 

@@ -34,7 +34,7 @@ def action_record(data,remark):
         response.code = 200
         response.msg = '发送消息提示成功'
 
-    elif action in [14,15]:
+    elif action in [14,15,16]:
         # 创建访问日志
         obj = models.zgld_accesslog.objects.create(
             user_id=user_id,
@@ -53,7 +53,7 @@ def action_record(data,remark):
 
         data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
-        data['agentid'] = models.zgld_app.objects.get(id=company_id, app_type=1).agent_id
+        data['agentid'] = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
         print('------------ 传给tasks.celery的 json.dumps 数据 ------------------>>', json.dumps(data))
 
         tasks.user_send_action_log.delay(json.dumps(data))
