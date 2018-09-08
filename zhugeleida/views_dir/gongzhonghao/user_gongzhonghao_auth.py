@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm,LoginBindingForm,CreateShareUrl
 
 import time
-import datetime
+from django.db.models import Q
 
 import requests
 from publicFunc.condition_com import conditionCom
@@ -259,16 +259,21 @@ def binding_article_customer_relate(data):
     article_id = data.get('article_id')    # 公众号文章ID
     customer_id = data.get('customer_id')  # 公众号客户ID
     user_id = data.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
-    level = data.get('level')  # 公众号层级
-    parent_id = data.get('pid')  # 所属的父级的客户ID。为空代表第一级。
+    level = data.get('level')      # 公众号层级
+    parent_id = data.get('pid')    # 所属的父级的客户ID。为空代表第一级。
 
-    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(
-        article_id=article_id,
-        user_id=user_id,
-        customer_id=customer_id,
-        customer_parent = parent_id
+    q = Q()
+    q.add(Q(**{'article_id': article_id}), Q.AND)
+    q.add(Q(**{'customer_id': customer_id}), Q.AND)
+    q.add(Q(**{'user_id': user_id}), Q.AND)
+    q.add(Q(**{'level': level}), Q.AND)
 
-    )
+    if parent_id:
+        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+    else:
+        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+
+    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
 
     if article_to_customer_belonger_obj:
         response.code = 302

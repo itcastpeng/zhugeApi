@@ -798,7 +798,8 @@ class zgld_article_to_customer_belonger(models.Model):
     stay_time = models.IntegerField(verbose_name='停留时长',default=0)
     read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
-
+    forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
+    forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级', related_name="article_customer_parent", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
