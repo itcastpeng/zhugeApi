@@ -385,6 +385,7 @@ def gzh_auth_process_oper(request, oper_type):
                         introduce=introduce,
                         service_category=service_category
                     )
+
                 response.code = 200
                 response.msg = "修改成功"
             else:
