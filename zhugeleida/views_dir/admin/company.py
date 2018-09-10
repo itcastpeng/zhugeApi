@@ -165,10 +165,11 @@ def company_oper(request, oper_type, o_id):
                     account_expired_time = datetime_offset_by_month(charging_start_time,1)
                 elif   open_length_time == 2:  # (2, "三个月"),
                     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time,3)
+                    account_expired_time = datetime_offset_by_month(charging_start_time,2)
                 elif open_length_time == 3:  # (2, "三个月"),
                     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time, 6)
+                    account_expired_time = datetime_offset_by_month(charging_start_time, 3)
+
                 elif open_length_time == 4:  # (2, "三个月"),
                     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
                     account_expired_time = datetime_offset_by_month(charging_start_time, 12)
@@ -215,10 +216,11 @@ def company_oper(request, oper_type, o_id):
                     account_expired_time = datetime_offset_by_month(charging_start_time, 1)
                 elif open_length_time == 2:  # (2, "三个月"),
                     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time, 3)
+                    account_expired_time = datetime_offset_by_month(charging_start_time, 2)
                 elif open_length_time == 3:  # (2, "三个月"),
                     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time, 6)
+                    account_expired_time = datetime_offset_by_month(charging_start_time, 3)
+
                 elif open_length_time == 4:  # (2, "三个月"),
                     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
                     account_expired_time = datetime_offset_by_month(charging_start_time, 12)
