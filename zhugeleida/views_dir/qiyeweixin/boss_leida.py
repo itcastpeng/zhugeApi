@@ -199,8 +199,7 @@ def home_page_oper(request, oper_type):
                     forward_num = user_forward_queryset.get('forward_num')
 
 
-                    call_phone_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, # 拨打电话
-                                                                            action=10).count()
+
                     call_phone_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,  # 拨打电话
                                                                           action=10).count()
 
