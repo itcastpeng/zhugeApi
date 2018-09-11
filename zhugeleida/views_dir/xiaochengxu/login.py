@@ -227,7 +227,7 @@ def login_oper(request,oper_type):
                 id = customer_id,
             )
             if objs:
-                objs.update( company_id = company_id,
+                objs.update(
                              username = customer_name,
                              headimgurl=headimgurl,
                              # formid = formid,

@@ -340,6 +340,7 @@ def company_oper(request, oper_type, o_id):
                 data = {
                     'corp_id': corp_id,
                     'tongxunlu_secret': tongxunlu_secret,
+                    'company_id': company_id,
                 }
                 result_validate = validate_tongxunlu(data)
                 is_validate = False

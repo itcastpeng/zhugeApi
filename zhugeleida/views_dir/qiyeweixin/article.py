@@ -71,6 +71,19 @@ def article(request, oper_type):
                 # 获取第几页的数据
                 for obj in objs:
                     print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
+
+                    article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                           'customer').filter(
+                        article_id=obj.id, user_id=user_id).order_by('-stay_time')
+
+                    total_forward_num_dict = article_to_customer_belonger_objs.aggregate(forward_num=Sum('forward_count'))
+                    forward_count =  total_forward_num_dict.get('forward_num')
+
+                    total_read_num_dict = article_to_customer_belonger_objs.aggregate(read_num=Sum('read_count'))
+                    read_count = total_read_num_dict.get('read_num')
+
+
+
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,  # 文章标题
@@ -80,8 +93,8 @@ def article(request, oper_type):
                         'source': obj.get_source_display(),  # 状态
                         'author': obj.user.username,  # 如果为原创显示,文章作者
                         'avatar': obj.user.avatar,  # 用户的头像
-                        'read_count': obj.read_count,  # 被阅读数量
-                        'forward_count': obj.forward_count,  # 被转发个数
+                        'read_count': read_count,  # 被阅读数量
+                        'forward_count': forward_count ,  # 被转发个数
                         'create_date': obj.create_date,  # 文章创建时间
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'tag_list': list(obj.tags.values('id', 'name')),
@@ -124,7 +137,7 @@ def article_oper(request, oper_type, o_id):
             forms_obj = ArticleAddForm(article_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
+                print('====== forms_obj.cleaned_data ====>>', forms_obj.cleaned_data)
 
                 dict_data = {
                     'user_id': request.GET.get('user_id'),
@@ -525,8 +538,8 @@ def article_oper(request, oper_type, o_id):
                             'sex_text': obj.customer.get_sex_display(),  # 性别
                             'sex': obj.customer.sex,  # 性别
                             'area': area,  # 地区
-                            'read_count': obj.read_count,  # 阅读次数
-                            'forward_count': obj.forward_count,  # 转发次数
+                            # 'read_count': obj.read_count,  # 阅读次数
+                            # 'forward_count': obj.forward_count,  # 转发次数
                             'stay_time': stay_time,  # 停留时间
                             'level': obj.level,  # 所在层级
                             'pid': obj.customer_parent_id
@@ -545,7 +558,7 @@ def article_oper(request, oper_type, o_id):
                         'ret_data': ret_data,
                         'article_id': article_id,
                         'total_customer_num': total_customer_num,  # 浏览人数
-                        'total_read_num': total_read_num,  # 浏览总数
+                        'total_read_num': total_read_num,          # 浏览总数
                         'count': count,  # 数据总条数
                     }
 
@@ -722,8 +735,7 @@ def article_oper(request, oper_type, o_id):
                                 'pid': obj.customer_parent_id,
                             }
 
-                            # level_ret_data.append(data_dict)
-                            # print('----- level_ret_data --------->?',level_ret_data)
+
 
                             ret_data.append(data_dict)
 

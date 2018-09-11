@@ -154,7 +154,7 @@ def article_oper(request, oper_type, o_id):
 
                 qrcode_data = {
                     'url': authorize_url,
-                    'article_id' : obj[0].id,
+                    'article_id' : obj.id,
                 }
                 response_ret = create_qrcode(qrcode_data)
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
