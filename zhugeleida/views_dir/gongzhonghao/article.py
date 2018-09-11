@@ -252,9 +252,6 @@ def article_oper(request, oper_type, o_id):
 
                     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
                     article_to_customer_belonger_obj.update(read_count=F('read_count') + 1)
-                    models.zgld_article.objects.create(
-
-                    )
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的

@@ -505,11 +505,11 @@ def article_oper(request, oper_type, o_id):
                                                                                        'customer').filter(
                     article_id=article_id, user_id=user_id).order_by('-stay_time')
 
-                total_customer_num = objs.values_list('customer_id').distinct().count()
-                total_read_num = objs.aggregate(total_read_num=Sum('read_count'))
-                total_read_num = total_read_num.get('total_read_num')
-                if not  total_read_num:
-                    total_read_num = 0
+                # total_customer_num = objs.values_list('customer_id').distinct().count()
+                # total_read_num = objs.aggregate(total_read_num=Sum('read_count'))
+                # total_read_num = total_read_num.get('total_read_num')
+                # if not  total_read_num:
+                #     total_read_num = 0
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -522,8 +522,6 @@ def article_oper(request, oper_type, o_id):
                         stop_line = start_line + length
                         objs = objs[start_line: stop_line]
 
-                    # print('---- count --->', objs.all())
-                    #
 
                     for obj in objs:
                         stay_time = obj.stay_time
@@ -534,6 +532,8 @@ def article_oper(request, oper_type, o_id):
                         # print('------- jie -------->>', str(username, 'utf-8'))
                         username = str(username, 'utf-8')
                         area = obj.customer.province + obj.customer.city
+
+
                         data_dict = {
                             'article_id': obj.article_id,
                             'uid': obj.user_id,
@@ -544,8 +544,8 @@ def article_oper(request, oper_type, o_id):
                             'sex_text': obj.customer.get_sex_display(),  # 性别
                             'sex': obj.customer.sex,  # 性别
                             'area': area,  # 地区
-                            # 'read_count': obj.read_count,  # 阅读次数
-                            # 'forward_count': obj.forward_count,  # 转发次数
+                            'read_count': obj.read_count,  # 阅读次数
+                            'forward_count': obj.forward_count,  # 转发次数
                             'stay_time': stay_time,  # 停留时间
                             'level': obj.level,  # 所在层级
                             'pid': obj.customer_parent_id
@@ -563,8 +563,8 @@ def article_oper(request, oper_type, o_id):
                         # 'level_num': level_num,
                         'ret_data': ret_data,
                         'article_id': article_id,
-                        'total_customer_num': total_customer_num,  # 浏览人数
-                        'total_read_num': total_read_num,          # 浏览总数
+                        # 'total_customer_num': total_customer_num,  # 浏览人数
+                        # 'total_read_num': total_read_num,          # 浏览总数
                         'count': count,  # 数据总条数
                     }
 
