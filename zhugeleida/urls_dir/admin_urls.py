@@ -52,7 +52,7 @@ urlpatterns = [
     url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)', role.role_oper),
     url(r'^role$', role.role),
 
-    # 公司操作
+    # 公司操作 + 验证雷达AI APP秘钥添加。
     url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)', company.company_oper),
     url(r'^company$', company.company),
 
