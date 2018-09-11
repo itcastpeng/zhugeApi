@@ -119,7 +119,10 @@ def validate_agent(data):
                 if errmsg == 'ok':
                     print('--------- 设置应用 set_agent_ret 成功 ----------->>')
                 else:
+                    response.code = weixin_ret_data['errcode']
+                    response.msg = "设置应用报错:%s" % (errmsg)
                     print('--------- 设置应用 set_agent_ret 失败 ----------->>')
+                    return response
 
 
 
@@ -153,7 +156,6 @@ def validate_tongxunlu(data):
     print('---- 企业微信验证 通讯录同步应用的secret  --->', ret_json)
     if ret_json['errcode'] == 0:
 
-
         company_obj = models.zgld_company.objects.filter(id=company_id)
         if company_obj:
             get_token_data = {}
@@ -186,7 +188,11 @@ def validate_tongxunlu(data):
             department_list_ret = requests.get(department_list_url, params=get_user_data)
 
             department_list_ret = department_list_ret.json()
+            errcode = department_list_ret.get('errcode')
+            errmsg = department_list_ret.get('errmsg')
             department_list = department_list_ret.get('department')
+
+
             print('-------- 获取部门列表 接口返回----------->>', json.dumps(department_list_ret))
 
             if department_list:
@@ -242,14 +248,19 @@ def validate_tongxunlu(data):
                                 tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
                                 print('------- 同步成功并生成用户二维码成功 json.dumps(data_dict) -------->>',json.dumps(data_dict))
 
-                        response.code = 200
+                        response.code = 0
                         response.msg = "同步成功并生成用户二维码成功"
 
                     else:
+                        response.code = errcode
+                        response.msg =  errmsg
+
                         print('---- 获取部门成员 [报错]：------>', errcode, "|", errmsg)
 
-        response.code = 0
-        response.msg = '企业微信验证'
+            else:
+                response.code =  errcode
+                response.msg = errmsg
+
         print("=========企业微信验证 通讯录同步应用的secret-通过======>",corp_id,'|',tongxunlu_secret)
 
     else:
