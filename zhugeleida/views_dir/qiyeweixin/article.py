@@ -549,6 +549,8 @@ def article_oper(request, oper_type, o_id):
                         'count': count,  # 数据总条数
                     }
 
+
+
             else:
                 print('------- 未能通过------->>', forms_obj.errors)
                 response.code = 301
@@ -724,6 +726,7 @@ def article_oper(request, oper_type, o_id):
                             # print('----- level_ret_data --------->?',level_ret_data)
 
                             ret_data.append(data_dict)
+
                         response.code = 200
                         response.data = {
                             'ret_data': ret_data,

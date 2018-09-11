@@ -166,6 +166,7 @@ def user_gongzhonghao_auth(request):
                 headimgurl = ret_json['headimgurl']  #
                 token = account.get_token(account.str_encrypt(openid))
                 obj = models.zgld_customer.objects.create(
+                    company_id=company_id,
                     token=token,
                     openid=openid,
                     user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),

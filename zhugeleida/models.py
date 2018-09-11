@@ -16,8 +16,8 @@ class zgld_company(models.Model):
 
     open_length_time_choices = (
         (1, "一个月"),
-        (2, "三个月"),
-        (3, "半年"),
+        (2, "二个月"),
+        (3, "三个月"),
         (4, "一年"),
         (5, "二年")
     )
@@ -489,6 +489,7 @@ class zgld_tag(models.Model):
 
 # 小程序-客户管理
 class zgld_customer(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='文章所属公司')
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
@@ -551,12 +552,19 @@ class zgld_user_customer_belonger(models.Model):
 class zgld_user_customer_flowup(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
-    last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后留言时间和用户跟进用语的写入。
+    last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
+    is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
+    is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
+    is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
+        unique_together = [
+            ('customer', 'user'),
+        ]
         app_label = "zhugeleida"
 
 
@@ -665,7 +673,7 @@ class zgld_accesslog(models.Model):
 
         (14,'查看文章'),
         (15,'转发文章到朋友'),
-        (16,'转发文章到朋友圈'),
+        (16,'转发文章到朋友圈')
 
     )
 
