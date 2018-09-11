@@ -77,10 +77,14 @@ def article(request, oper_type):
                         article_id=obj.id, user_id=user_id).order_by('-stay_time')
 
                     total_forward_num_dict = article_to_customer_belonger_objs.aggregate(forward_num=Sum('forward_count'))
-                    forward_count =  total_forward_num_dict.get('forward_num')
+                    forward_count = total_forward_num_dict.get('forward_num')
+                    if not  forward_count:
+                        forward_count = 0
 
                     total_read_num_dict = article_to_customer_belonger_objs.aggregate(read_num=Sum('read_count'))
-                    read_count = total_read_num_dict.get('read_num')
+                    read_count =  total_read_num_dict.get('read_num')
+                    if not read_count:
+                        read_count = 0
 
 
 
@@ -504,6 +508,8 @@ def article_oper(request, oper_type, o_id):
                 total_customer_num = objs.values_list('customer_id').distinct().count()
                 total_read_num = objs.aggregate(total_read_num=Sum('read_count'))
                 total_read_num = total_read_num.get('total_read_num')
+                if not  total_read_num:
+                    total_read_num = 0
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -716,7 +722,8 @@ def article_oper(request, oper_type, o_id):
                             print('------ forward_customer_read_num ------>',forward_customer_read_num)
 
                             forward_customer_read_num = forward_customer_read_num.get('forward_customer_read_num')
-
+                            if not  forward_customer_read_num:
+                                forward_customer_read_num = 0
 
                             data_dict = {
                                 'article_id': obj.article_id,
