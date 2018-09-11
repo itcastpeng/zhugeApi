@@ -562,9 +562,9 @@ class zgld_user_customer_flowup(models.Model):
 
     class Meta:
         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
-        unique_together = [
-            ('customer', 'user'),
-        ]
+        # unique_together = [
+        #     ('customer', 'user'),
+        # ]
         app_label = "zhugeleida"
 
 
