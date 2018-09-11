@@ -9,6 +9,9 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
 import base64
+from django.db.models import F
+import json
+from django.db.models import Q
 
 import json
 from zhugeleida import models
@@ -255,7 +258,7 @@ def chat_oper(request, oper_type, o_id):
                 customer_id = int(request.GET.get('user_id'))
                 user_id =  request.POST.get('u_id')
                 msg = request.POST.get('msg')
-                send_type = request.POST.get('send_type')
+                send_type = int(request.POST.get('send_type'))
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
@@ -263,8 +266,19 @@ def chat_oper(request, oper_type, o_id):
                     msg=msg,
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=send_type,
+                    send_type=send_type
                 )
+
+                flow_up_obj = models.zgld_user_customer_flowup.objects.filter(user_id=user_id, customer_id=customer_id)
+                if send_type == 2 and flow_up_obj: # 用戶發消息給客戶，修改最後跟進-時間
+                    # flow_up_obj.is_user_msg = True
+                    # flow_up_obj.last_activity_time = datetime.datetime.now()
+                    # flow_up_obj.save()
+                    flow_up_obj.update(
+                        is_customer_msg_num=F('is_customer_msg_num') + 1,
+                        last_activity_time = datetime.datetime.now()
+                    )
+
 
                 # user_new_msg_count = models.zgld_chatinfo.objects.filter(
                 #         userprofile_id=user_id,

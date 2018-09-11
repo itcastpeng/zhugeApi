@@ -97,6 +97,7 @@ def login(request):
             else:
                 token = account.get_token(account.str_encrypt(openid))
                 obj = models.zgld_customer.objects.create(
+                    company_id=company_id,
                     token=token,
                     openid=openid,
                     user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
@@ -147,6 +148,7 @@ def login_oper(request,oper_type):
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
                 parent_id = request.GET.get('pid','')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
 
+
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
 
                 if user_customer_belonger_obj:
@@ -158,6 +160,16 @@ def login_oper(request,oper_type):
                     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
                     obj.customer_parent_id = parent_id    #上级人。
                     obj.save()
+
+                    user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                    company_id = user_obj.company_id
+                    objs = models.zgld_customer.objects.filter(
+                        id=customer_id,
+                    )
+                    if objs:
+                        objs.update(company_id=company_id)
+
+
                     #插入第一条用户和客户的对话信息
                     msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
                     models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)
@@ -215,7 +227,8 @@ def login_oper(request,oper_type):
                 id = customer_id,
             )
             if objs:
-                objs.update( username = customer_name,
+                objs.update( company_id = company_id,
+                             username = customer_name,
                              headimgurl=headimgurl,
                              # formid = formid,
                              city =city,

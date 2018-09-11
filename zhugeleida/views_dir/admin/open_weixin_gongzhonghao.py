@@ -385,6 +385,7 @@ def gzh_auth_process_oper(request, oper_type):
                         introduce=introduce,
                         service_category=service_category
                     )
+
                 response.code = 200
                 response.msg = "修改成功"
             else:
@@ -395,7 +396,7 @@ def gzh_auth_process_oper(request, oper_type):
     elif request.method == 'GET':
 
         ###获取公众号基本信息
-        if oper_type == 'xcx_get_authorizer_info':
+        if oper_type == 'gzh_get_authorizer_info':
             user_id = request.GET.get('user_id')
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
             app_obj =   models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
