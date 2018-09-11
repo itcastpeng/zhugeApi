@@ -735,8 +735,7 @@ def article_oper(request, oper_type, o_id):
                                 'pid': obj.customer_parent_id,
                             }
 
-                            # level_ret_data.append(data_dict)
-                            # print('----- level_ret_data --------->?',level_ret_data)
+
 
                             ret_data.append(data_dict)
 
