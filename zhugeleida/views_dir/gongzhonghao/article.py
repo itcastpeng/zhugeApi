@@ -215,8 +215,8 @@ def article_oper(request, oper_type, o_id):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
                 article_id = forms_obj.cleaned_data.get('article_id')
-
                 zgld_article_objs = models.zgld_article.objects.filter(id=article_id)
+                zgld_article_objs.update(read_count=F('read_count') + 1)
 
                 obj = zgld_article_objs[0]
 
@@ -251,8 +251,10 @@ def article_oper(request, oper_type, o_id):
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
                     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
-
                     article_to_customer_belonger_obj.update(read_count=F('read_count') + 1)
+                    models.zgld_article.objects.create(
+
+                    )
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
