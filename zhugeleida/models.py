@@ -517,7 +517,7 @@ class zgld_customer(models.Model):
     city = models.CharField(max_length=32, verbose_name='客户所在城市', blank=True, null=True)
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
-    expedted_pr = models.CharField(verbose_name='预计成交概率', max_length=64, blank=True, null=True)
+    expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=1, null=True)
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -554,6 +554,7 @@ class zgld_user_customer_flowup(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
     last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
+
     is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
     is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
     is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
