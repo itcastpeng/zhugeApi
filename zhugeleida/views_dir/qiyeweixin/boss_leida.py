@@ -572,10 +572,17 @@ def deal_sale_ranking_data(data, q):
 
     if type == 'customer_data': # 按客户人数
         user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
-                                                                                                'customer_parent').filter(
-            q).values('user_id', 'user__username', 'user__avatar').annotate(have_customer_num=Count('customer'))
+                                                                                                'customer_parent').filter(q)
 
-        ranking_data = list(user_customer_belonger_objs)
+        user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(have_customer_num=Count('customer'))
+
+        user_have_customer_num_list = list(user_have_customer_num_list_objs)
+
+        for user_dict in user_customer_belonger_objs:
+            pass
+
+
+        ranking_data = ''
 
     elif type == 'follow_num': # 按跟进人数
 

@@ -319,11 +319,17 @@ def article_oper(request, oper_type, o_id):
 
             level = request.GET.get('level')
             user_id = request.GET.get('user_id')
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
+
             # uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id': o_id,
                 # 'uid': uid,  # 文章所属用户的ID
                 'level': level,  # 文章所属用户的ID
+                'current_page': current_page,
+                'length' : length
+
             }
 
             forms_obj = EffectRankingByLevelForm(request_data_dict)
@@ -489,9 +495,13 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'hide_customer_data':
             # level = request.GET.get('level')
             user_id = request.GET.get('user_id')
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
             # uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id': o_id,
+                'current_page': current_page,
+                'length': length,
                 # 'uid': user_id,  # 文章所属用户的ID
                 # 'level': level,  # 文章所属用户的ID
             }
@@ -580,11 +590,15 @@ def article_oper(request, oper_type, o_id):
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
             parent_id = request.GET.get('pid')
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
 
             request_data_dict = {
                 'article_id': o_id,
                 'customer_id': customer_id,
                 'user_id': user_id,  # 文章所属用户的ID
+                'current_page': current_page,
+                'length': length,
             }
 
             forms_obj = ArticleAccessLogForm(request_data_dict)
@@ -666,11 +680,15 @@ def article_oper(request, oper_type, o_id):
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
             parent_id = request.GET.get('pid')
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
 
             request_data_dict = {
                 'article_id': o_id,
                 'customer_id': customer_id,
                 'user_id': user_id,  # 文章所属用户的ID
+                'current_page':current_page,
+                'length':length,
 
             }
 
