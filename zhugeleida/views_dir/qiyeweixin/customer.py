@@ -236,6 +236,11 @@ def customer_oper(request, oper_type, o_id):
                                                            follow_info=info)
 
                 expedted_pr = forms_obj.cleaned_data['expedted_pr']
+                if 'NaN' in expedted_pr:
+                    expedted_pr = 0
+                else:
+                    expedted_pr = int(expedted_pr)
+
                 obj = models.zgld_customer.objects.get(id=o_id)
                 obj.expedted_pr = expedted_pr
                 obj.save()
