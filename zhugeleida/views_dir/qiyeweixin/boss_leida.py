@@ -211,17 +211,10 @@ def home_page_oper(request, oper_type):
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
                 company_id = user_obj[0].company_id
-                # days = forms_obj.data.get('days')  #  'days': 7 | 15 | 30
-
-                # user_ids = models.zgld_userprofile.objects.select_related('company').filter(company_id=company_id).values_list('id')
-                # user_list = []
-                # if user_ids:
-                #     for u_id in user_ids: user_list.append(u_id[0])
 
                 data = request.POST.copy()
-                # data['user_list'] = user_list
+
                 data['company_id'] = company_id
-                index_type = int(data.get('index_type')) if data.get('index_type') else ''
 
                 ret_data = {}
                 for index in ['index_type_1', 'index_type_2', 'index_type_2', 'index_type_3', 'index_type_4']:
@@ -585,22 +578,6 @@ def deal_search_time(data, q):
         browse_num=Count('popularity'))
     browse_num = customer_num_dict.get('browse_num')
 
-    # follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list, last_follow_time__isnull=False)
-    # follow_num = 0
-    # if follow_customer_folowup_obj:
-    #     follow_id_list = []
-    #     for f_obj in follow_customer_folowup_obj:
-    #         follow_id_list.append(f_obj.id)
-    #     follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup_id__in=follow_id_list).filter(q).count()
-    #
-    # browse_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,
-    #                                                   action=1).filter(q).count()  # 浏览名片的总数(包含着保存名片)
-
-    # q1 = Q()
-    # q1.add(Q(**{'action': 1}), Q.AND)
-    # q1.add(Q(**{'action': 6}), Q.AND)
-    # forward_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,action=6).filter(q).count()  # 被转发的总数-不包括转发产品
-    # saved_total_num = models.zgld_accesslog.objects.filter(user_id__in=user_list, action=8).filter(q).count()  # 保存手机号
     follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(
         q).count()
 
@@ -608,12 +585,7 @@ def deal_search_time(data, q):
         praise_num=Count('praise'))  # 被点赞总数
     praise_num = user_pop_queryset.get('praise_num')
 
-    # q_chat = Q()
-    # q_chat.add(Q(**{'send_type': 1}), Q.AND)  # 大于等于
-    # q_chat.add(Q(**{'company_id': company_id}), Q.AND)  # 大于等于
-    # q_chat.add(Q(**{'send_type': 2}), Q.AND)
-
-    comm_num_of_customer = models.zgld_user_customer_flowup.objects.filter(user__company_id=company_id,
+    comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                            is_customer_msg_num__gte=1,
                                                                            is_user_msg_num__gte=1).count()
 
@@ -662,8 +634,8 @@ def deal_line_info(data):
         return customer_num
 
     elif index_type == 2:  # 咨询客户数
-        comm_num_of_customer = models.zgld_user_customer_flowup.objects.filter(user__company_id=company_id,
-                                                                               is_customer_product_num__gte=1).count()
+        comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+                                                                                 is_customer_product_num__gte=1).count()
         return comm_num_of_customer
 
 
@@ -702,8 +674,7 @@ def deal_sale_ranking_data(data, q):
     if type == 'customer_data':  # 按客户人数
 
         user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
-                                                                                                'customer_parent').filter(
-            q)
+                                                                                                'customer_parent').filter(q)
 
         user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
                                                                               'user__avatar').annotate(
@@ -714,10 +685,6 @@ def deal_sale_ranking_data(data, q):
 
     elif type == 'follow_num':  # 按跟进人数
 
-        # models.zgld_user_customer_flowup.objects.filter(company_id=company_id).filter(q)\
-        #     .zgld_follow_info_set.select_related('user_customer_flowup').filter(user_customer_flowup__user_id=obj.user_id)
-
-        # user_customer_flowup__user__company_id
         follow_info_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(
             user_customer_flowup__user__company_id=company_id).filter(q)
 
@@ -804,11 +771,9 @@ def deal_sale_ranking_data(data, q):
                                                                                                 'customer_parent').filter(
             user__company_id=company_id).filter(q)
 
-        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(
-            have_customer_num=Count('customer'))
+        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(have_customer_num=Count('customer'))
 
         ranking_data = []
-
         for user_dict in customer_list_objs:
             user_id = user_dict.get('user_id')
             customer_list_objs = user_customer_belonger_objs.filter(
@@ -846,12 +811,12 @@ def deal_customer_flowup_info(data):
     query_user_id = data.get('query_user_id')
     customer_id = data.get('customer_id')
 
-    flowup_obj = models.zgld_user_customer_flowup.objects.select_related('user', 'customer').filter(
+    flowup_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
         user_id=query_user_id, customer_id=customer_id).order_by('create_date')
 
     last_interval_msg = '还未跟进过'
-    if flowup_obj:
-        last_follow_time = flowup_obj[0].last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
+    if flowup_objs:
+        last_follow_time = flowup_objs[0].last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
         if not last_follow_time:
             last_interval_msg = '还未跟进过'
             customer_status = '还未跟进过'

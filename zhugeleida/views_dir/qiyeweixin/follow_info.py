@@ -21,10 +21,12 @@ def follow_info(request, ):
         # 获取参数 页数 默认1
         forms_obj = FollowInfoSelectForm(request.GET)
         if forms_obj.is_valid():
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')
+            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('customer_id')
 
             field_dict = {
                 'user_id': '',
@@ -33,27 +35,19 @@ def follow_info(request, ):
             q = conditionCom(request, field_dict)
             print('q -->', q)
 
-            customer_flowup_objs = models.zgld_user_customer_flowup.objects.filter(q).order_by(order)  # 查询出有user用户关联的信心表
+            customer_flowup_objs = models.zgld_user_customer_belonger.objects.filter(q).order_by(order)  # 查询出有user用户关联的信心表
+
             objs = models.zgld_follow_info.objects.filter(user_customer_flowup_id=customer_flowup_objs[0].id).order_by(order)
-            print('----objs -->>>>',objs[0].create_date)
+
             count = objs.count()
             ret_list = []
             if objs:
                 if length != 0:
-                    print('current_page -->', current_page)
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
 
                 for obj in objs:
-
-
-                    # ret_list  = 'user_customer_flowup__customer__headimgurl',
-                    #                                 'user_customer_flowup__user__avatar',
-                    #                                 'user_customer_flowup__user__username',
-                    #                                  'user_customer_flowup__user_id',
-                    #                                  'user_customer_flowup__customer_id',
-                    #                                 'follow_info', 'create_date')
 
                     ret_list.append({
                         'user_customer_flowup__customer__headimgurl':  customer_flowup_objs[0].customer.headimgurl,
@@ -62,7 +56,6 @@ def follow_info(request, ):
                         'user_customer_flowup__customer_id' :  customer_flowup_objs[0].customer_id,
                         'follow_info': obj.follow_info,
                         'create_date': obj.create_date
-
                     })
 
 
@@ -97,28 +90,23 @@ def follow_info_oper(request, oper_type, o_id):
             forms_obj = FollowInfoAddForm(language_data)
             if forms_obj.is_valid():
                 now_time = datetime.datetime.now()
-                follow_data = {
-                    "user_id": forms_obj.cleaned_data.get('user_id'),
-                    "customer_id": forms_obj.cleaned_data.get('customer_id'),
-                }
-                obj = models.zgld_user_customer_flowup.objects.filter(**follow_data)
-                obj_num = obj.count()
+                user_id =  forms_obj.cleaned_data.get('user_id')
+                customer_id =  forms_obj.cleaned_data.get('customer_id')
+                follow_info =  forms_obj.cleaned_data.get('follow_info')
 
-                if obj_num == 0:  # 判断关系表是否有记录。
-                    follow_data['last_follow_time'] = now_time
-                    models.zgld_user_customer_flowup.objects.create(**follow_data)
+                objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
 
-                elif obj_num == 1:
-                    obj.update(last_follow_time=now_time)
+                if objs:
+                    objs.update(last_follow_time=now_time)
+
+                    models.zgld_follow_info.objects.create(user_customer_flowup_id=objs[0].id,
+                                                           follow_info=follow_info
+                                                           )
 
                 else:
                     response.code = 307
                     response.msg = "用户-客户关系表数据重复"
 
-                if response.code != 307:
-                    print('______obj.id______>>', obj[0].id, forms_obj.cleaned_data['follow_info'])
-                    models.zgld_follow_info.objects.create(user_customer_flowup_id=obj[0].id,
-                                                           follow_info=forms_obj.cleaned_data['follow_info'])
                     response.code = 200
                     response.msg = "添加成功"
 

@@ -502,7 +502,7 @@ class zgld_customer(models.Model):
     sex = models.IntegerField(choices=sex_choices, blank=True, null=True)
 
     headimgurl = models.CharField(verbose_name="用户头像url", max_length=256, default='statics/imgs/Avator.jpg')
-    expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
+    # expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True, help_text="格式yyyy-mm-dd")
     token = models.CharField(verbose_name="token值", max_length=32, null=True, blank=True)
 
     user_type_choices = (
@@ -517,7 +517,7 @@ class zgld_customer(models.Model):
     city = models.CharField(max_length=32, verbose_name='客户所在城市', blank=True, null=True)
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
-    expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=1, null=True)
+    # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -541,20 +541,11 @@ class zgld_user_customer_belonger(models.Model):
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属父级',related_name="customer_parent" ,null=True, blank=True)
-    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
+    expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)
 
-    class Meta:
-        verbose_name_plural = "客户所属用户-关系绑定表"
-        app_label = "zhugeleida"
-
-
-# 用户-客户跟进信息-关系绑定表
-class zgld_user_customer_flowup(models.Model):
-    user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
-    customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
     last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
-
     is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
     is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
     is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
@@ -562,11 +553,41 @@ class zgld_user_customer_flowup(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
-        verbose_name_plural = "用户-客户跟进信息-关系绑定表"
-        # unique_together = [
-        #     ('customer', 'user'),
-        # ]
+        verbose_name_plural = "客户所属用户关系|跟进信息绑定表"
         app_label = "zhugeleida"
+
+# 跟进-消息详情表
+class zgld_follow_info(models.Model):
+    user_customer_flowup = models.ForeignKey('zgld_user_customer_belonger', verbose_name='跟进客户|用户绑定')
+    follow_info = models.CharField(verbose_name='跟进发送信息', max_length=256, null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "跟进-消息详情表"
+        app_label = "zhugeleida"
+
+
+
+# 用户-客户跟进信息-关系绑定表
+# class zgld_user_customer_flowup(models.Model):
+#     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
+#     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
+#
+#     last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
+#     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
+#
+#     is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
+#     is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
+#     is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
+#
+#     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+#
+#     class Meta:
+#         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
+#         # unique_together = [
+#         #     ('customer', 'user'),
+#         # ]
+#         app_label = "zhugeleida"
 
 
 # 用户被赞【是否靠谱】
@@ -594,17 +615,6 @@ class zgld_up_down_sign(models.Model):
             ('customer', 'user'),
         ]
         verbose_name_plural = "用户签名顶或踩表"
-        app_label = "zhugeleida"
-
-
-# 跟进-消息详情表
-class zgld_follow_info(models.Model):
-    user_customer_flowup = models.ForeignKey('zgld_user_customer_flowup', verbose_name='跟进客户|用户绑定')
-    follow_info = models.CharField(verbose_name='跟进发送信息', max_length=256, null=True)
-    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = "跟进-消息详情表"
         app_label = "zhugeleida"
 
 
@@ -684,8 +694,7 @@ class zgld_accesslog(models.Model):
 
     customer = models.ForeignKey('zgld_customer', verbose_name='访问的客户')
     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
-    activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='accesslog', verbose_name='活动时间(客户活动)',
-                                      null=True)  # 代表客户活动日志最后一条记录的时间
+    # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='accesslog', verbose_name='活动时间(客户活动)',null=True)  # 代表客户活动日志最后一条记录的时间
     is_new_msg = models.BooleanField(default=True, verbose_name='是否为新日志')
     create_date = models.DateTimeField(auto_now_add=True)
 

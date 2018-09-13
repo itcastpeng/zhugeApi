@@ -33,7 +33,7 @@ def customer(request):
                 'belonger__username': '__contains',   #归属人
                 'superior__username': '__contains',   #上级人
                 'expected_time': '__contains',     #预测成交时间
-                'expedted_pr' : '__contains',      #预测成交概率
+                # 'expedted_pr' : '__contains',      #预测成交概率
                 'source'  : '',
                 'create_date': '',
             }
@@ -73,20 +73,22 @@ def customer(request):
                     sex = info_obj[0].sex if info_obj else ''
 
                     belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
-                    print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
+                    # print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
                     day_interval =  datetime.datetime.today() - obj.create_date
 
                     encodestr = base64.b64decode(obj.username)
                     customer_name = str(encodestr, 'utf-8')
 
+                    expedted_pr = belonger_obj.expedted_pr
+                    expected_time = belonger_obj.expected_time
 
                     ret_data.append({
                         'id': obj.id,
                         'username': customer_name,
                         'headimgurl': obj.headimgurl,
-                        'expected_time': obj.expected_time,  # 预计成交时间
-                        'expedted_pr': obj.expedted_pr,  # 预计成交概率
-                        'ai_pr': obj.expedted_pr or '',  # AI 预计成交概率
+                        'expected_time': expected_time,  # 预计成交时间
+                        'expedted_pr': expedted_pr,  # 预计成交概率
+                        'ai_pr':  expedted_pr,  # AI 预计成交概率
 
                         'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': customer_name,  # 备注名
@@ -162,45 +164,37 @@ def customer_oper(request, oper_type, o_id):
             form_data = {
                 'user_id': request.GET.get('user_id'),
                 'customer_id': o_id,
-                'expected_time': request.POST.get('expected_time'),
-
+                'expected_time': request.POST.get('expected_time')
             }
 
             forms_obj = Customer_UpdateExpectedTime_Form(form_data)
             if forms_obj.is_valid():
                 print('-----forms_obj.cleaned_data------->>',forms_obj.cleaned_data)
                 now_time = datetime.datetime.now()
-                follow_data = {
-                    "user_id": forms_obj.cleaned_data.get('user_id'),
-                    "customer_id": forms_obj.cleaned_data.get('customer_id'),
-                }
-                obj = models.zgld_user_customer_flowup.objects.filter(**follow_data)
-                obj_num = obj.count()
-                if obj_num == 0:  # 判断关系表是否有记录。
-                    follow_data['last_follow_time'] = now_time
-                    models.zgld_user_customer_flowup.objects.create(**follow_data)
-                elif obj_num == 1:
-                    obj.update(last_follow_time=now_time)
+                user_id = forms_obj.cleaned_data.get('user_id')
+                customer_id = forms_obj.cleaned_data.get('customer_id'),
+                expected_time =  forms_obj.cleaned_data.get('expected_time')
+
+                objs = models.zgld_user_customer_belonger.objects.filter(user_id,customer_id)
+
+                if objs:  # 判断关系表是否有记录。
+                    objs.update(
+                        last_follow_time=now_time,
+                        expected_time = expected_time
+                    )
+                    info = '更新预计成交日期: %s' % (expected_time)
+                    models.zgld_follow_info.objects.create(user_customer_flowup_id=objs[0].id, follow_info=info)
+                    response.code = 200
+                    response.msg = "添加成功"
+
                 else:
                     response.code = 307
-                    response.msg = "用户-客户关系表数据重复"
-
-                if response.code != 307:
-                    info = '更新预计成交日期: %s' % (forms_obj.cleaned_data['expected_time'])
-                    models.zgld_follow_info.objects.create(user_customer_flowup_id=obj[0].id,
-                                                           follow_info=info)
-
-
-                expected_time = form_data['expected_time']
-                obj = models.zgld_customer.objects.get(id=o_id)
-                obj.expected_time = expected_time
-                obj.save()
-                response.code = 200
-                response.msg = "添加成功"
+                    response.msg = "用户-客户关系不存在"
 
             else:
+                print('---- 未通过 --->>')
                 response.code = 303
-                response.msg = json.loads(forms_obj.errors.as_json())
+                response.msg =  forms_obj.errors.as_json()
 
         elif oper_type == "update_expected_pr":
 
@@ -213,40 +207,32 @@ def customer_oper(request, oper_type, o_id):
             forms_obj = Customer_UpdateExpedtedPr_Form(form_data)
             if forms_obj.is_valid():
                 print(forms_obj.cleaned_data)
-
+                user_id = request.GET.get('user_id')
+                customer_id = request.GET.get('customer_id')
                 now_time = datetime.datetime.now()
-                follow_data = {
-                    "user_id": forms_obj.cleaned_data.get('user_id'),
-                    "customer_id": forms_obj.cleaned_data.get('customer_id'),
-                }
-                obj = models.zgld_user_customer_flowup.objects.filter(**follow_data)
-                obj_num = obj.count()
-                if obj_num == 0:  # 判断关系表是否有记录。
-                    follow_data['last_follow_time'] = now_time
-                    models.zgld_user_customer_flowup.objects.create(**follow_data)
-                elif obj_num == 1:
-                    obj.update(last_follow_time=now_time)
+                expedted_pr = forms_obj.cleaned_data.get('expedted_pr')
+                objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
+
+                if objs:
+                    if 'NaN' in expedted_pr:
+                        expedted_pr = 0
+                    else:
+                        expedted_pr = int(expedted_pr)
+
+                    objs.update(
+                        last_follow_time=now_time,
+                        expedted_pr=expedted_pr
+                    )
+
+                    info = '更新预计成交率为: %s' % (expedted_pr)
+                    models.zgld_follow_info.objects.create(user_customer_flowup_id=objs[0].id,follow_info=info)
+
+                    response.code = 200
+                    response.msg = "添加成功"
+
                 else:
                     response.code = 307
-                    response.msg = "用户-客户关系表数据重复"
-
-                if response.code != 307:
-                    info = '更新预计成交率为: %s' % (forms_obj.cleaned_data['expedted_pr'])
-                    models.zgld_follow_info.objects.create(user_customer_flowup_id=obj[0].id,
-                                                           follow_info=info)
-
-                expedted_pr = forms_obj.cleaned_data['expedted_pr']
-                if 'NaN' in expedted_pr:
-                    expedted_pr = 0
-                else:
-                    expedted_pr = int(expedted_pr)
-
-                obj = models.zgld_customer.objects.get(id=o_id)
-                obj.expedted_pr = expedted_pr
-                obj.save()
-
-                response.code = 200
-                response.msg = "添加成功"
+                    response.msg = "用户-客户关系不存在"
 
             else:
                 response.code = 303

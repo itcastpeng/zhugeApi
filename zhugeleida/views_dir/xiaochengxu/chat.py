@@ -269,12 +269,12 @@ def chat_oper(request, oper_type, o_id):
                     send_type=send_type
                 )
 
-                flow_up_obj = models.zgld_user_customer_flowup.objects.filter(user_id=user_id, customer_id=customer_id)
-                if send_type == 2 and flow_up_obj: # 用戶發消息給客戶，修改最後跟進-時間
+                flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+                if send_type == 2 and flow_up_objs: # 用戶發消息給客戶，修改最後跟進-時間
                     # flow_up_obj.is_user_msg = True
                     # flow_up_obj.last_activity_time = datetime.datetime.now()
                     # flow_up_obj.save()
-                    flow_up_obj.update(
+                    flow_up_objs.update(
                         is_customer_msg_num=F('is_customer_msg_num') + 1,
                         last_activity_time = datetime.datetime.now()
                     )

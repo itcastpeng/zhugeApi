@@ -188,36 +188,23 @@ def chat_oper(request, oper_type, o_id):
                 msg = data.get('msg')
                 send_type = int(data.get('send_type'))
 
-                flow_up_obj = models.zgld_user_customer_flowup.objects.filter(user_id=user_id, customer_id=customer_id)
-                # update(read_count=F('read_count') + 1)
+                flow_up_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
 
                 if send_type == 1 and flow_up_obj: # 用戶發消息給客戶，修改最後跟進-時間
                     flow_up_obj.update(
                         is_user_msg_num=F('is_user_msg_num') + 1,
                         last_follow_time = datetime.datetime.now()
                     )
-                    # flow_up_obj.is_customer_msg = True
-                    # flow_up_obj.last_follow_time=datetime.datetime.now()
-                    # flow_up_obj.save()
-
-                # elif send_type == 2: # 客戶發消息給用戶，修改最後活動-時間
-                #     flow_up_obj.last_activity_time = datetime.datetime.now()
-                #     flow_up_obj.save()
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
                 models.zgld_chatinfo.objects.create(
                         msg=msg,
                         userprofile_id=user_id,
                         customer_id=customer_id,
-                        send_type=send_type,
-
+                        send_type=send_type
                 )
 
-                # remark = ':%s' % (msg)
-                # data = request.GET.copy()
-                # data['action'] = 0
-                # data['uid'] = user_id
-                # response = action_record(data, remark)
+
 
                 data['customer_id'] = customer_id
                 data['user_id'] = user_id

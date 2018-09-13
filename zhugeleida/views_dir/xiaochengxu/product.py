@@ -254,11 +254,11 @@ def product(request, oper_type):
                     )
 
                 ## 记录客户咨询产品
-                flow_up_obj = models.zgld_user_customer_flowup.objects.filter(user_id=user_id, customer_id=customer_id)
+                flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
                 # update(read_count=F('read_count') + 1)
 
-                if flow_up_obj:  # 用戶發消息給客戶，修改最後跟進-時間
-                    flow_up_obj.update(
+                if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
+                    flow_up_objs.update(
                         is_customer_product_num=F('is_customer_product_num') + 1,
                         last_activity_time=datetime.datetime.now()
                     )
