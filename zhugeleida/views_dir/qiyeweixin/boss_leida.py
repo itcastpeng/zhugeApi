@@ -15,6 +15,7 @@ from django.db.models import Q
 from django.db.models import Sum
 from django import forms
 import json
+import base64
 
 
 # cerf  token验证 用户展示模块
@@ -70,6 +71,65 @@ def home_page(request):
         }
 
     return JsonResponse(response.__dict__)
+
+
+# 验证指标的传参
+class QueryHaveCustomerDetailForm(forms.Form):
+    days = forms.CharField(
+        required=True,
+        error_messages={
+            # 'required': "天数不能为空",
+            'invalid': "天数不能为空",
+        }
+    )
+    query_user_id = forms.CharField(
+        required=True,
+        error_messages={
+            # 'required': "类型不能为空",
+            'invalid': "查询用户ID不能为空"
+        }
+    )
+
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "页显示数量类型错误"
+        }
+    )
+
+    # def clean_article_id(self):
+    #     article_id = self.data['article_id']
+    #
+    #     objs = models.zgld_article.objects.filter(
+    #         id=article_id
+    #     )
+    #
+    #     if not objs:
+    #         self.add_error('article_id', '文章不存在')
+    #     else:
+    #         return article_id
+
+    def clean_current_page(self):
+        if not self.data.get('current_page'):
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+
+        return current_page
+
+    def clean_length(self):
+        if not self.data.get('length'):
+            length = 10
+        else:
+            length = int(self.data['length'])
+
+        return length
 
 
 # 验证数据指标的传参
@@ -292,7 +352,7 @@ def home_page_oper(request, oper_type):
                 q1 = Q()
                 data = {'type': 'customer_data'}
 
-                q1.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
+                q1.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等
                 ret_data['total_num_have_customer'] = deal_sale_ranking_data(data, q1)
 
                 # 昨天数据
@@ -335,6 +395,7 @@ def home_page_oper(request, oper_type):
                     'ret_data': ret_data
                 }
 
+
         elif oper_type == "hudong_pinlv_customer_num":
 
             user_id = request.GET.get('user_id')
@@ -343,7 +404,7 @@ def home_page_oper(request, oper_type):
             ret_data = {}
 
             for type in ['follow_num', 'consult_num']:
-                data = {'type': type,'company_id':company_id}
+                data = {'type': type, 'company_id': company_id}
                 ret_dict = {}
 
                 # # 汇总数据
@@ -398,22 +459,22 @@ def home_page_oper(request, oper_type):
             # for  pr in  in ['1_50','51_80','81_99','100']:
             ret_dict = {}
             q2 = Q()
-            data = { 'type' : 'expect_chengjiaolv',
-                     'company_id': company_id
-                   }
+            data = {'type': 'expect_chengjiaolv',
+                    'company_id': company_id
+                    }
 
-            q2.add(Q(**{'customer__expedted_pr__gte': 1 }), Q.AND)  # 大于等于
-            q2.add(Q(**{'customer__expedted_pr__lte': 50 }), Q.AND)
+            q2.add(Q(**{'customer__expedted_pr__gte': 1}), Q.AND)  # 大于等于
+            q2.add(Q(**{'customer__expedted_pr__lte': 50}), Q.AND)
             ret_dict['1_50_pr'] = deal_sale_ranking_data(data, q2)
 
             q3 = Q()
-            q3.add(Q(**{'customer__expedted_pr__gte': 51 }), Q.AND)  # 大于等于
-            q3.add(Q(**{'customer__expedted_pr__lte': 80 }), Q.AND)
+            q3.add(Q(**{'customer__expedted_pr__gte': 51}), Q.AND)  # 大于等于
+            q3.add(Q(**{'customer__expedted_pr__lte': 80}), Q.AND)
             ret_dict['51_80_pr'] = deal_sale_ranking_data(data, q3)
 
             q4 = Q()
-            q4.add(Q(**{'customer__expedted_pr__gte': 81 }), Q.AND)  # 大于等于
-            q4.add(Q(**{'customer__expedted_pr__lte': 99 }), Q.AND)
+            q4.add(Q(**{'customer__expedted_pr__gte': 81}), Q.AND)  # 大于等于
+            q4.add(Q(**{'customer__expedted_pr__lte': 99}), Q.AND)
             ret_dict['81_99_pr'] = deal_sale_ranking_data(data, q4)
 
             q5 = Q()
@@ -427,8 +488,76 @@ def home_page_oper(request, oper_type):
             }
 
     elif request.method == "POST":
-        pass
 
+        if oper_type == 'query_have_customer_detail_people':
+
+            days = request.POST.get('days')
+            query_user_id = request.POST.get('query_user_id')
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
+
+            request_data_dict = {
+                'days': days,
+                'query_user_id': query_user_id,
+                'current_page': current_page,  # 文章所属用户的ID
+                'length': length,
+            }
+
+            forms_obj = QueryHaveCustomerDetailForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+                now_time = datetime.now()
+                q1 = Q()
+                q1.add(Q(**{'user_id': query_user_id}), Q.AND)  # 大于等于
+                if int(days) != 0:  # 为0 是查询所有的用户。
+
+                    days = int(days)
+                    start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
+                    stop_time = now_time.strftime("%Y-%m-%d")
+                    q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+
+                objs = models.zgld_user_customer_belonger.objects.filter(q1)
+
+                if objs:
+
+                    count = objs.count()
+                    objs = objs.values('customer_id', 'customer__expedted_pr', 'customer__expected_time',
+                                       'customer__username',
+                                       'customer__headimgurl',
+                                       'customer__sex')
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+
+                    customer_list = []
+                    for customer_dict in objs:
+                        customer_id = customer_dict.get('customer_id')
+
+                        data = {
+                            'query_user_id': query_user_id,
+                            'customer_id': customer_id,
+                        }
+                        last_interval_msg = deal_customer_flowup_info(data)
+
+                        customer__username = customer_dict.get('customer__username')
+                        customer_name = base64.b64decode(customer__username)
+                        customer_name = str(customer_name, 'utf-8')
+                        customer_dict['customer__username'] = customer_name
+                        customer_dict['customer_status'] = last_interval_msg
+                        customer_list.append(customer_dict)
+
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': customer_list,
+                        'count': count
+
+                    }
 
 
     else:
@@ -570,51 +699,177 @@ def deal_sale_ranking_data(data, q):
 
     ranking_data = ''
 
-    if type == 'customer_data': # 按客户人数
+    if type == 'customer_data':  # 按客户人数
+
         user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
-                                                                                                'customer_parent').filter(q)
+                                                                                                'customer_parent').filter(
+            q)
 
-        user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(have_customer_num=Count('customer'))
+        user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
+                                                                              'user__avatar').annotate(
+            have_customer_num=Count('customer'))
 
-        user_have_customer_num_list = list(user_have_customer_num_list_objs)
-
-        for user_dict in user_customer_belonger_objs:
-            pass
+        ranking_data = list(user_have_customer_num_list_objs)
 
 
-        ranking_data = ''
-
-    elif type == 'follow_num': # 按跟进人数
+    elif type == 'follow_num':  # 按跟进人数
 
         # models.zgld_user_customer_flowup.objects.filter(company_id=company_id).filter(q)\
         #     .zgld_follow_info_set.select_related('user_customer_flowup').filter(user_customer_flowup__user_id=obj.user_id)
 
         # user_customer_flowup__user__company_id
-        follow_info_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(user_customer_flowup__user__company_id=company_id).filter(q).values(
-                                                   'user_customer_flowup__user_id',
-                                                   'user_customer_flowup__user__avatar',
-                                                   'user_customer_flowup__user__username'
-                                                   ).annotate(follow_num=Count('user_customer_flowup__customer_id'))
-        ranking_data = list(follow_info_objs)
+        follow_info_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(
+            user_customer_flowup__user__company_id=company_id).filter(q)
+
+        follow_info_list_objs = follow_info_objs.values(
+            'user_customer_flowup__user_id',
+            'user_customer_flowup__user__avatar',
+            'user_customer_flowup__user__username'
+        ).annotate(follow_num=Count('user_customer_flowup__customer_id'))
+
+        ranking_data = []
+
+        for user_dict in follow_info_list_objs:
+            user_id = user_dict.get('user_customer_flowup__user_id')
+            customer_list_objs = follow_info_objs.filter(
+                user_customer_flowup__user_id=user_id,
+            ).values('customer_id', 'customer__username', 'customer__headimgurl', 'customer__sex',
+                     'user_customer_flowup__customer__expected_time', 'user_customer_flowup__customer__expedted_pr')
+
+            customer_list = []
+            for customer_dict in customer_list_objs:
+                customer_id = customer_dict.get('customer_id')
+                data = {
+                    'query_user_id': user_id,
+                    'customer_id': customer_id,
+                }
+                last_interval_msg = deal_customer_flowup_info(data)
+
+                customer__username = customer_dict.get('customer__username')
+                customer_name = base64.b64decode(customer__username)
+                customer_name = str(customer_name, 'utf-8')
+                customer_dict['customer__username'] = customer_name
+                customer_dict['customer_status'] = last_interval_msg
+                customer_list.append(customer_dict)
+
+            user_dict['have_customer_people'] = customer_list
+
+            ranking_data.append(user_dict)
+
+
 
     elif type == 'consult_num':  # 按咨询人数
 
         chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id).filter(q).values(
-                                                     'userprofile_id',
-                                                     'userprofile__avatar',
-                                                     'userprofile__username'
+            userprofile__company_id=company_id).filter(q)
+
+        chatinfo_list_objs = chatinfo_objs.values(
+            'userprofile_id',
+            'userprofile__avatar',
+            'userprofile__username'
         ).annotate(chat_customer_num=Count('customer_id'))
-        ranking_data = list(chatinfo_objs)
+        ranking_data = []
+
+        for user_dict in chatinfo_list_objs:
+            user_id = user_dict.get('userprofile_id')
+            customer_list_objs = chatinfo_objs.filter(
+                user_customer_flowup__user_id=user_id,
+            ).values('customer_id', 'customer__username', 'customer__headimgurl', 'customer__sex',
+                     'customer__expected_time', 'customer__expedted_pr').distinct()
+
+            customer_list = []
+            for customer_dict in customer_list_objs:
+                customer_id = customer_dict.get('customer_id')
+                data = {
+                    'query_user_id': user_id,
+                    'customer_id': customer_id,
+                }
+                last_interval_msg = deal_customer_flowup_info(data)
+
+                customer__username = customer_dict.get('customer__username')
+                customer_name = base64.b64decode(customer__username)
+                customer_name = str(customer_name, 'utf-8')
+                customer_dict['customer__username'] = customer_name
+                customer_dict['customer_status'] = last_interval_msg
+                customer_list.append(customer_dict)
+
+            user_dict['have_customer_people'] = customer_list
+
+            ranking_data.append(user_dict)
+
 
     elif type == 'expect_chengjiaolv':
 
         user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
-                                                                                                'customer_parent').filter(user__company_id=company_id).filter(
-            q).values('user_id', 'user__username' ,'user__avatar').annotate(have_customer_num=Count('customer'))
+                                                                                                'customer_parent').filter(
+            user__company_id=company_id).filter(q)
 
-        ranking_data = list(user_customer_belonger_objs)
+        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(
+            have_customer_num=Count('customer'))
 
+        ranking_data = []
 
+        for user_dict in customer_list_objs:
+            user_id = user_dict.get('user_id')
+            customer_list_objs = user_customer_belonger_objs.filter(
+                user_id=user_id,
+            ).values('customer_id', 'customer__username', 'customer__headimgurl', 'customer__sex',
+                     'customer__expedted_pr', 'customer__expected_time')
+
+            customer_list = []
+            for customer_dict in customer_list_objs:
+                customer_id = customer_dict.get('customer_id')
+                data = {
+                    'query_user_id': user_id,
+                    'customer_id': customer_id,
+                }
+                last_interval_msg = deal_customer_flowup_info(data)
+
+                customer__username = customer_dict.get('customer__username')
+                customer_name = base64.b64decode(customer__username)
+                customer_name = str(customer_name, 'utf-8')
+                customer_dict['customer__username'] = customer_name
+                customer_dict['customer_status'] = last_interval_msg
+                customer_list.append(customer_dict)
+
+            user_dict['have_customer_people'] = customer_list
+
+            ranking_data.append(user_dict)
+
+        # ranking_data = list(user_customer_belonger_objs)
 
     return ranking_data
+
+
+def deal_customer_flowup_info(data):
+    now_time = datetime.now()
+    query_user_id = data.get('query_user_id')
+    customer_id = data.get('customer_id')
+
+    flowup_obj = models.zgld_user_customer_flowup.objects.select_related('user', 'customer').filter(
+        user_id=query_user_id, customer_id=customer_id).order_by('create_date')
+
+    last_interval_msg = '还未跟进过'
+    if flowup_obj:
+        last_follow_time = flowup_obj[0].last_follow_time  # 关联的跟进表是否有记录值，没有的话说明没有跟进记录。
+        if not last_follow_time:
+            last_interval_msg = '还未跟进过'
+            customer_status = '还未跟进过'
+
+        elif last_follow_time:
+
+            day_interval = (now_time - last_follow_time).days
+            if int(day_interval) == 0:
+                last_interval_msg = '今天跟进'
+                customer_status = '今天跟进'
+
+            else:
+                if int(day_interval) == 1:
+                    last_interval_msg = '昨天跟进'
+                    customer_status = '昨天已跟进'
+                else:
+                    day_interval = day_interval - 1
+                    last_interval_msg = '%s天前跟进过' % (day_interval)
+                    customer_status = last_follow_time.strftime('%Y-%m-%d')
+
+    return last_interval_msg
