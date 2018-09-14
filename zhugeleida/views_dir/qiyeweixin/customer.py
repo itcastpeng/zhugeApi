@@ -175,7 +175,7 @@ def customer_oper(request, oper_type, o_id):
                 customer_id = forms_obj.cleaned_data.get('customer_id'),
                 expected_time =  forms_obj.cleaned_data.get('expected_time')
 
-                objs = models.zgld_user_customer_belonger.objects.filter(user_id,customer_id)
+                objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
 
                 if objs:  # 判断关系表是否有记录。
                     objs.update(
@@ -199,7 +199,6 @@ def customer_oper(request, oper_type, o_id):
         elif oper_type == "update_expected_pr":
 
             form_data = {
-
                 'customer_id': o_id,
                 'expedted_pr': request.POST.get('expedted_pr')
             }
@@ -207,10 +206,11 @@ def customer_oper(request, oper_type, o_id):
             forms_obj = Customer_UpdateExpedtedPr_Form(form_data)
             if forms_obj.is_valid():
                 print(forms_obj.cleaned_data)
-                user_id = request.GET.get('user_id')
-                customer_id = request.GET.get('customer_id')
+                user_id = forms_obj.cleaned_data.get('user_id')
+                customer_id = forms_obj.cleaned_data.get('customer_id')
                 now_time = datetime.datetime.now()
                 expedted_pr = forms_obj.cleaned_data.get('expedted_pr')
+
                 objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
 
                 if objs:
