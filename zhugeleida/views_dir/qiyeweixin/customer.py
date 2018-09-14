@@ -206,7 +206,7 @@ def customer_oper(request, oper_type, o_id):
             forms_obj = Customer_UpdateExpedtedPr_Form(form_data)
             if forms_obj.is_valid():
                 print(forms_obj.cleaned_data)
-                user_id = forms_obj.cleaned_data.get('user_id')
+                user_id = request.GET.get('user_id')
                 customer_id = forms_obj.cleaned_data.get('customer_id')
                 now_time = datetime.datetime.now()
                 expedted_pr = forms_obj.cleaned_data.get('expedted_pr')
