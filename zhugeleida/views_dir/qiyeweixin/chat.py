@@ -59,6 +59,9 @@ def chat(request):
                 customer_name = str(customer_name, 'utf-8')
                 content = obj.content
 
+                if not content:
+                    continue
+
                 _content = json.loads(content)
                 info_type = _content.get('info_type')
                 if info_type:
@@ -159,6 +162,9 @@ def chat_oper(request, oper_type, o_id):
                     customer_name = base64.b64decode(obj.customer.username)
                     customer_name = str(customer_name, 'utf-8')
                     content = obj.content
+
+                    if not content:
+                        continue
 
                     _content = json.loads(content)
                     info_type = _content.get('info_type')

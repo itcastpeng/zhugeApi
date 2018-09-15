@@ -66,7 +66,8 @@ def dai_xcx_oper(request, oper_type):
 
                         ext_json['extAppid'] = authorizer_appid
                         ext_json['ext'] = {
-                            'company_id': obj.company_id
+                            'company_id': obj.company_id,
+                            'user_version': user_version
                         }
 
                         user_version = user_version
@@ -799,8 +800,21 @@ def relase_code(data):
     if errmsg == "ok":
         xcx_app_obj.code_release_status = 7
         xcx_app_obj.code_release_result = '成功'
+
+        # 目前版本号
+        upload_audit_obj =  models.zgld_xiapchengxu_upload_audit.objects.filter(auditid=auditid)
+
+        if  upload_audit_obj:
+            upload_audit_obj = upload_audit_obj[0]
+            now_version_num = upload_audit_obj.version_num
+            xcx_app_obj.version_num = now_version_num
+
+
         release_result = 1  # 上线成功
         reason = ''
+
+
+
         response.code = 200
         response.msg = '上线成功'
 

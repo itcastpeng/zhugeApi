@@ -93,8 +93,6 @@ def chat(request):
                 info_type = _content.get('info_type')
 
 
-
-
                 if info_type:
                     info_type = int(info_type)
 
