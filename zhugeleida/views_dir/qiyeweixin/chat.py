@@ -57,35 +57,65 @@ def chat(request):
 
                 customer_name = base64.b64decode(obj.customer.username)
                 customer_name = str(customer_name, 'utf-8')
+                content = obj.content
+
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+                if info_type:
+                    info_type = int(info_type)
+
+                    if info_type == 1:
+                        msg = _content.get('msg')
+                        msg = base64.b64decode(msg)
+                        msg = str(msg, 'utf-8')
+                        _content['msg'] = msg
+
+                base_info_dict = {
+                    'customer_id': obj.customer_id,
+                    'customer_avatar': obj.customer.headimgurl,
+                    'user_id': obj.userprofile_id,
+                    'src': obj.customer.headimgurl,
+                    'name': customer_name,
+                    'dateTime': obj.create_date,
+                    # 'msg': obj.msg,
+                    # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                    'send_type': obj.send_type
+                }
+                base_info_dict.update(_content)
+
+                ret_data_list.append(base_info_dict)
 
 
-                if  obj.info_type == 1:  # 如果为聊信息。
-                    ret_data_list.append({
-                         'customer_id': obj.customer.id,
-                         'customer_avatar': obj.customer.headimgurl,
-                         'user_id': obj.userprofile.id,
-                         'src': obj.customer.headimgurl,
-                         'name': customer_name,
-                         'dateTime': obj.create_date,
-                         'msg': obj.msg,
-                         'send_type': obj.send_type,
-                         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                    })
-                elif obj.info_type == 2:  # 如果为产品咨询。
-                    ret_data_list.append({
-                         'customer_id': obj.customer.id,
-                         'customer_avatar': obj.customer.headimgurl,
-                         'user_id': obj.userprofile.id,
-                         'src': obj.customer.headimgurl,
-                         'name': customer_name,
-                         'dateTime': obj.create_date,
 
-                         'product_cover_url': obj.product_cover_url,
-                         'product_name': obj.product_name,
-                         'product_price': obj.product_price,
-                         'info_type': obj.info_type,      # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                         'send_type': obj.send_type,
-                    })
+
+
+                # if  obj.info_type == 1:  # 如果为聊信息。
+                #     ret_data_list.append({
+                #          'customer_id': obj.customer.id,
+                #          'customer_avatar': obj.customer.headimgurl,
+                #          'user_id': obj.userprofile.id,
+                #          'src': obj.customer.headimgurl,
+                #          'name': customer_name,
+                #          'dateTime': obj.create_date,
+                #          'msg': obj.msg,
+                #          'send_type': obj.send_type,
+                #          'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                #     })
+                # elif obj.info_type == 2:  # 如果为产品咨询。
+                #     ret_data_list.append({
+                #          'customer_id': obj.customer.id,
+                #          'customer_avatar': obj.customer.headimgurl,
+                #          'user_id': obj.userprofile.id,
+                #          'src': obj.customer.headimgurl,
+                #          'name': customer_name,
+                #          'dateTime': obj.create_date,
+                #
+                #          'product_cover_url': obj.product_cover_url,
+                #          'product_name': obj.product_name,
+                #          'product_price': obj.product_price,
+                #          'info_type': obj.info_type,      # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                #          'send_type': obj.send_type,
+                #     })
 
             ret_data_list.reverse()
             response.code = 200
@@ -140,7 +170,6 @@ def chat_oper(request, oper_type, o_id):
                             msg = base64.b64decode(msg)
                             msg = str(msg, 'utf-8')
                             _content['msg'] = msg
-                    # content_dict =
 
                     base_info_dict = {
                         'customer_id': obj.customer_id,
@@ -153,10 +182,9 @@ def chat_oper(request, oper_type, o_id):
                         # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
                         'send_type': obj.send_type
                     }
-                    # base_info_dict =
+                    base_info_dict.update(_content)
 
-
-                    # ret_data_list.append()
+                    ret_data_list.append(base_info_dict)
 
                     # if obj.info_type == 1:  # 如果为聊信息。
                     #     ret_data_list.append({

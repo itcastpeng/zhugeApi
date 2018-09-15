@@ -75,11 +75,19 @@ class ChatPostForm(forms.Form):
     )
 
     msg = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "消息不能为空"
+        }
+    )
+
+    content = forms.CharField(
         required=True,
         error_messages={
             'required': "消息不能为空"
         }
     )
+
 
     # msg = request.POST.get('msg')
     # send_type = request.POST.get('send_type')

@@ -99,6 +99,12 @@ class ChatPostForm(forms.Form):
             'required': "消息不能为空"
         }
     )
+    msg = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "消息不能为空"
+        }
+    )
 
     # # 判断用户id是否存在
     # def clean_user_id(self):
