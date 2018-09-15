@@ -128,34 +128,69 @@ def chat_oper(request, oper_type, o_id):
 
                     customer_name = base64.b64decode(obj.customer.username)
                     customer_name = str(customer_name, 'utf-8')
+                    content = obj.content
 
-                    if obj.info_type == 1:  # 如果为聊信息。
-                        ret_data_list.append({
-                            'customer_id': obj.customer.id,
-                            'customer_avatar': obj.customer.headimgurl,
-                            'user_id': obj.userprofile.id,
-                            'src': obj.customer.headimgurl,
-                            'name': customer_name,
-                            'dateTime': obj.create_date,
-                            'msg': obj.msg,
-                            'send_type': obj.send_type,
-                            'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                        })
-                    elif obj.info_type == 2:  # 如果为产品咨询。
-                        ret_data_list.append({
-                            'customer_id': obj.customer.id,
-                            'customer_avatar': obj.customer.headimgurl,
-                            'user_id': obj.userprofile.id,
-                            'src': obj.customer.headimgurl,
-                            'name': customer_name,
-                            'dateTime': obj.create_date,
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
+                    if info_type:
+                        info_type = int(info_type)
 
-                            'product_cover_url': obj.product_cover_url,
-                            'product_name': obj.product_name,
-                            'product_price': obj.product_price,
-                            'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                            'send_type': obj.send_type,
-                        })
+                        if info_type == 1:
+                            msg = _content.get('msg')
+                            msg = base64.b64decode(msg)
+                            msg = str(msg, 'utf-8')
+                            _content['msg'] = msg
+                    # content_dict =
+
+                    base_info_dict = {
+                        'customer_id': obj.customer_id,
+                        'customer_avatar': obj.customer.headimgurl,
+                        'user_id': obj.userprofile_id,
+                        'src': obj.customer.headimgurl,
+                        'name': customer_name,
+                        'dateTime': obj.create_date,
+                        # 'msg': obj.msg,
+                        # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                        'send_type': obj.send_type
+                    }
+                    # base_info_dict =
+
+
+                    # ret_data_list.append()
+
+                    # if obj.info_type == 1:  # 如果为聊信息。
+                    #     ret_data_list.append({
+                    #         'customer_id': obj.customer.id,
+                    #         'customer_avatar': obj.customer.headimgurl,
+                    #         'user_id': obj.userprofile.id,
+                    #         'src': obj.customer.headimgurl,
+                    #         'name': customer_name,
+                    #         'dateTime': obj.create_date,
+                    #
+                    #         'msg': obj.msg,
+                    #         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                    #
+                    #         'send_type': obj.send_type,
+                    #
+                    #     })
+                    # elif obj.info_type == 2:  # 如果为产品咨询。
+                    #     ret_data_list.append({
+                    #         'customer_id': obj.customer.id,
+                    #         'customer_avatar': obj.customer.headimgurl,
+                    #         'user_id': obj.userprofile.id,
+                    #         'src': obj.customer.headimgurl,
+                    #         'name': customer_name,
+                    #         'dateTime': obj.create_date,
+                    #
+                    #         'product_cover_url': obj.product_cover_url,
+                    #         'product_name': obj.product_name,
+                    #         'product_price': obj.product_price,
+                    #         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                    #
+                    #         'send_type': obj.send_type,
+                    #
+                    #
+                    #     })
 
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
@@ -185,7 +220,7 @@ def chat_oper(request, oper_type, o_id):
                 data = request.POST.copy()
                 user_id = int(data.get('user_id'))
                 customer_id = int(data.get('customer_id'))
-                msg = data.get('msg')
+                content = data.get('content')
                 send_type = int(data.get('send_type'))
 
                 flow_up_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
@@ -196,15 +231,59 @@ def chat_oper(request, oper_type, o_id):
                         last_follow_time = datetime.datetime.now()
                     )
 
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+                if info_type:
+                    info_type = int(info_type)
+
+                    if info_type == 1:
+                        msg = _content.get('msg')
+                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+                        _content['msg'] = msg
+                        content = json.dumps(_content)
+
+                '''
+                content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。
+                
+                content = {
+                    'info_type' :  1 , # 1代表发送的文字\表情\ 或 话术库里的自定义(文字表情)。
+                    'msg': '这个信息是文字\表情'
+                }
+                
+                content = {
+                     'info_type' : 2 , # 2代表发送的产品咨询  3代表发送的电话号码  4代表发送的图片|截图  5、视频
+                     'product_cover_url': 'statics/zhugeleida/imgs/chat/2d49ecd2-9180-11e8-a32d-8e2edea1cc9c.png',
+                     'product_name': '产品名字',
+                     'product_price': '产品价格',
+                }
+                content = {
+                     'info_type' : 3   ,   # 3代表客户要触发事件要电话号码  
+                     'msg': '您好,请问能否告诉我您的手机号?|您好,请问能否加下您的微信?'
+                     ......
+                }
+                
+                content = {
+                     'info_type' : 4  ,   # 4代表发送的图片|截图
+                     'url': 'statics/zhugeleida/imgs/chat/xxxx.jnp'
+                     ......
+                }
+                content = {
+                     'info_type' : 5  ,   # 4代表发送的 视频
+                     'url': 'statics/zhugeleida/imgs/chat/YYYY.mp4'
+                     ......
+                }                
+                         
+                '''
+
+
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
                 models.zgld_chatinfo.objects.create(
-                        msg=msg,
+                        content=content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=send_type
                 )
-
-
 
                 data['customer_id'] = customer_id
                 data['user_id'] = user_id

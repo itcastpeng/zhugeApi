@@ -536,21 +536,21 @@ def home_page_oper(request, oper_type):
 
             q2.add(Q(**{'expedted_pr__gte': 1}), Q.AND)  # 大于等于
             q2.add(Q(**{'expedted_pr__lte': 50}), Q.AND)
-            ret_dict['1_50_pr'] = deal_sale_ranking_data(data, q2)
+            ret_dict['pr_1_50'] = deal_sale_ranking_data(data, q2)
 
             q3 = Q()
             q3.add(Q(**{'expedted_pr__gte': 51}), Q.AND)  # 大于等于
             q3.add(Q(**{'expedted_pr__lte': 80}), Q.AND)
-            ret_dict['51_80_pr'] = deal_sale_ranking_data(data, q3)
+            ret_dict['pr_51_80'] = deal_sale_ranking_data(data, q3)
 
             q4 = Q()
             q4.add(Q(**{'expedted_pr__gte': 81}), Q.AND)  # 大于等于
             q4.add(Q(**{'expedted_pr__lte': 99}), Q.AND)
-            ret_dict['81_99_pr'] = deal_sale_ranking_data(data, q4)
+            ret_dict['pr_81_99'] = deal_sale_ranking_data(data, q4)
 
             q5 = Q()
             q5.add(Q(**{'expedted_pr': 100}), Q.AND)  # 大于等于
-            ret_dict['100_pr'] = deal_sale_ranking_data(data, q5)
+            ret_dict['pr_100'] = deal_sale_ranking_data(data, q5)
 
             response.code = 200
             response.msg = '查询成功'

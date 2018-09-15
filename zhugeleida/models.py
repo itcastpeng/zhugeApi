@@ -715,6 +715,7 @@ class zgld_chatinfo(models.Model):
     userprofile = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True, blank=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True, blank=True)
     msg = models.TextField(u'消息', null=True, blank=True)
+    content = models.TextField(verbose_name='消息', null=True, blank=True)
 
     info_type_choices = (
                         (1,'chat_people_info'),     #客户和用户之间的聊天信息
