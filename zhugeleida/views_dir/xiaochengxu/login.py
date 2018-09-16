@@ -78,7 +78,8 @@ def login(request):
 
 
             # if  version_num: # 有版本号(从ext 里读取的)
-            online_version_num = obj.version_num
+            # online_version_num = obj.version_num
+            online_version_num = '1.0'
             if version_num != online_version_num: # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
                 is_release_version_num = False    # 不相等说明要隐藏按钮。
                 print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',(company_id,online_version_num,version_num))
