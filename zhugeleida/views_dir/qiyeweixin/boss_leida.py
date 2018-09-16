@@ -33,7 +33,7 @@ def home_page(request):
         q = conditionCom(request, field_dict)
 
         user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
-        print('------user_obj----->', user_obj)
+        #print('------user_obj----->', user_obj)
 
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
@@ -280,7 +280,7 @@ def home_page_oper(request, oper_type):
             }
 
         if oper_type == "line_info":
-            print('request.POST', request.POST)
+            #print('request.POST', request.POST)
 
             forms_obj = LineInfoForm(request.POST)
 
@@ -363,7 +363,7 @@ def home_page_oper(request, oper_type):
                 # ret_list.append(_ret_dict)
                 # # ret_dict['nearly_fifteen_days'] = ret_list
                 ret_data['index_type_5'] = _ret_dict
-                print('------ ret_data ------->>>', ret_data)
+                #print('------ ret_data ------->>>', ret_data)
 
                 # if index_type == 6: #客户与我的互动
                 # ret_data = {}
@@ -388,7 +388,7 @@ def home_page_oper(request, oper_type):
                 view_website_num = int(view_website_num)
                 total = sum([view_mingpian, view_product_num, view_website_num])
 
-                print('--- total ----->', total)
+                #print('--- total ----->', total)
                 _ret_dict = {
                     'view_mingpian': '{:.2f}'.format(view_mingpian / total * 100),
                     'view_product_num': '{:.2f}'.format(view_product_num / total * 100),
@@ -651,9 +651,9 @@ def home_page_oper(request, oper_type):
                         try:
                             username = base64.b64decode(obj.customer.username)
                             customer_name = str(username, 'utf-8')
-                            print('----- 解密b64decode username----->', username)
+                            #print('----- 解密b64decode username----->', username)
                         except Exception as e:
-                            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
+                            #print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                             customer_name = '客户ID%s' % (obj.customer_id)
 
                         ret_data.append({
@@ -720,15 +720,15 @@ def home_page_oper(request, oper_type):
                 elif type == 'follow':
                     q1.add(Q(**{'user_customer_flowup__user_id': query_user_id}), Q.AND)  # 大于等于
                     customer_id_list_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(q1).values_list('user_customer_flowup__customer_id').distinct()
-                print('---- customer_id_list_objs --->>',customer_id_list_objs)
+                #print('---- customer_id_list_objs --->>',customer_id_list_objs)
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
-                    print('--- start_line ------>',start_line,stop_line)
+                    #print('--- start_line ------>',start_line,stop_line)
                     customer_id_list_objs = customer_id_list_objs[start_line: stop_line]
 
                 customer_id_list = [ c[0] for c  in list(customer_id_list_objs) ]
-                print('----customer_id_list----->>',customer_id_list)
+                #print('----customer_id_list----->>',customer_id_list)
 
                 q2 = Q()
                 q2.add(Q(**{'customer_id__in': customer_id_list}), Q.AND)
@@ -764,9 +764,9 @@ def home_page_oper(request, oper_type):
                         try:
                             username = base64.b64decode(obj.customer.username)
                             customer_name = str(username, 'utf-8')
-                            print('----- 解密b64decode username----->', username)
+                            #print('----- 解密b64decode username----->', username)
                         except Exception as e:
-                            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
+                            #print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                             customer_name = '客户ID%s' % (obj.customer_id)
 
                         ret_data.append({
@@ -814,7 +814,7 @@ def deal_search_time(data, q):
 
     customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
     # customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
-    print('-----customer_num----->', customer_num)
+    #print('-----customer_num----->', customer_num)
 
     customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).aggregate(
         browse_num=Count('popularity'))
@@ -867,7 +867,7 @@ def deal_line_info(data):
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
     q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
-    print('---->start_time', start_time)
+    #print('---->start_time', start_time)
 
     if index_type == 1:  # 客户总数
 
