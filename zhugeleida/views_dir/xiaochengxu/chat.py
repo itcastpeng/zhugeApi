@@ -307,7 +307,7 @@ def chat_oper(request, oper_type, o_id):
         elif oper_type == 'history_chatinfo_store_content':
 
             request.GET.get('')
-            models.zgld_chatinfo.objects.filter()
+            models.zgld_chatinfo.objects.all().values('id','')
 
 
 
