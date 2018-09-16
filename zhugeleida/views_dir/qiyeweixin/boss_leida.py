@@ -320,7 +320,7 @@ def home_page_oper(request, oper_type):
                             data['stop_time'] = stop_time
                             ret_list.append({'statics_date': start_time, 'value': deal_line_info(data)})
 
-                        print('------- ret_list ------->>', ret_list)
+                        #print('------- ret_list ------->>', ret_list)
                         if day == 7:
                             ret_dict['nearly_seven_days'] = ret_list
                         elif day == 15:
@@ -982,7 +982,7 @@ def deal_sale_ranking_data(data, q):
         ).annotate(have_customer_num=Count('customer_id', 'userprofile_id'))
         # .values('userprofile_id','userprofile__avatar','userprofile__username','have_customer_num')
 
-        print('---- list(chatinfo_list_objs)---------??', chatinfo_list_objs)
+        #print('---- list(chatinfo_list_objs)---------??', chatinfo_list_objs)
 
         ranking_data = list(chatinfo_list_objs)
 
