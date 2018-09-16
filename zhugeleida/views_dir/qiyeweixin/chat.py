@@ -277,6 +277,11 @@ def chat_oper(request, oper_type, o_id):
                         _content['msg'] = msg
                         content = json.dumps(_content)
 
+                    elif info_type == 3:
+                        msg = '您好,请问能否告诉我您的手机号?'
+                        _content['msg'] = msg
+                        content = json.dumps(_content)
+
                 '''
                 content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。
                 
@@ -286,7 +291,7 @@ def chat_oper(request, oper_type, o_id):
                 }
                 
                 content = {
-                     'info_type' : 2 , # 2代表发送的产品咨询  3代表发送的电话号码  4代表发送的图片|截图  5、视频
+                     'info_type' : 2 , # 2代表发送的产品咨询  
                      'product_cover_url': 'statics/zhugeleida/imgs/chat/2d49ecd2-9180-11e8-a32d-8e2edea1cc9c.png',
                      'product_name': '产品名字',
                      'product_price': '产品价格',

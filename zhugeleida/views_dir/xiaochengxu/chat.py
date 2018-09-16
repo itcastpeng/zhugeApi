@@ -304,6 +304,14 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == 'history_chatinfo_store_content':
+
+            request.GET.get('')
+            models.zgld_chatinfo.objects.filter()
+
+
+
+
         return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':
@@ -364,6 +372,9 @@ def chat_oper(request, oper_type, o_id):
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == '':
+            pass
 
 
     else:
