@@ -306,11 +306,49 @@ def chat_oper(request, oper_type, o_id):
 
         elif oper_type == 'history_chatinfo_store_content':
 
-            request.GET.get('')
-            models.zgld_chatinfo.objects.all().values('id','')
+
+            # models.zgld_chatinfo.objects.all().values('id','info_type','msg','product_cover_url','product_name','product_price')
+            objs = models.zgld_chatinfo.objects.all()
+
+            for obj in objs:
+                chat_id = obj.id
+                info_type = obj.info_type
+                msg = obj.msg
+                product_cover_url = obj.product_cover_url
+                product_name = obj.product_name
+                product_price = obj.product_price
+
+                if info_type == 1:  # msg
+
+                    if msg:
+                        print('------ 【msg】 chat_id ------>>',chat_id)
+                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+
+                        _content = {
+                            'info_type': 1,
+                            'msg': msg
+                        }
+                        obj.content = json.dumps(_content)
+                        obj.save()
+
+                elif info_type == 2:
+
+                    if product_name and product_cover_url:
+                        print('------ 【product】 chat_id ------>>', chat_id)
+
+                        _content = {
+                            'info_type': 2,  # 2代表发送的产品咨询  3代表发送的电话号码  4代表发送的图片|截图  5、视频
+                            'product_cover_url': product_cover_url ,
+                            'product_name': product_name,
+                            'product_price': product_price
+                        }
+                        obj.content = json.dumps(_content)
+                        obj.save()
 
 
-
+            response.code = 200
+            response.msg = '成功'
 
         return JsonResponse(response.__dict__)
 
@@ -373,6 +411,7 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 解密接收手机发送的手机号
         elif oper_type == '':
             pass
 
