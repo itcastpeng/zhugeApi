@@ -339,6 +339,21 @@ def mingpian_oper(request, oper_type):
                 else:
                     mingpian_avatar =  obj.avatar
 
+                qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
+                qr_code = ''
+                if qr_obj:
+                    qr_code =  qr_obj[0].qr_code
+                    print('----- customer_belonger poster 页面二维码 ------>>',qr_code)
+
+                    if not  qr_code: # 如果为空的话,则使用雷达用户的二维码
+                        qr_code =  obj.qr_code
+
+
+                else:
+                    print('---用户-客户对应绑定关系不存在--->>')
+
+
+
                 ret_data = {
                     'user_id': obj.id,
                     'user_avatar': mingpian_avatar,
@@ -346,7 +361,7 @@ def mingpian_oper(request, oper_type):
                     'position': obj.position,
                     'mingpian_phone': obj.mingpian_phone,
                     'company': obj.company.name,
-                    'qr_code_url':   obj.qr_code,
+                    'qr_code_url':   qr_code,
                 }
                 response.data = ret_data
                 response.msg = "请求成功"

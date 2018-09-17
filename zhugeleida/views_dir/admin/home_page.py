@@ -216,7 +216,7 @@ def deal_search_time(data,q):
     print('-----customer_num----->',customer_num)
 
 
-    follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list,
+    follow_customer_folowup_obj = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list,
                                                                                   last_follow_time__isnull=False)
     follow_num = 0
     if follow_customer_folowup_obj:
@@ -272,8 +272,8 @@ def deal_line_info(data):
         customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q1).values_list('customer_id').distinct().count()  # 已获取客户数
         return customer_num
 
-    elif index_type == 2:  # 跟进总数
-        follow_customer_folowup_obj = models.zgld_user_customer_flowup.objects.filter(user_id__in=user_list, last_follow_time__isnull=False)
+    elif index_type == 2:  # 跟进总数  last_follow_time__isnull
+        follow_customer_folowup_obj = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,last_follow_time__isnull=False)
 
         follow_num = 0
         if follow_customer_folowup_obj:

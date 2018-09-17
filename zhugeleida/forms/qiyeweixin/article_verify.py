@@ -145,7 +145,7 @@ class ArticleSelectForm(forms.Form):
 
 
     def clean_current_page(self):
-        if 'current_page' not in self.data:
+        if not self.data.get('current_page'):
             current_page = 1
         else:
             current_page = int(self.data['current_page'])
@@ -153,10 +153,11 @@ class ArticleSelectForm(forms.Form):
 
 
     def clean_length(self):
-        if 'length' not in self.data:
+        if not self.data.get('length'):
             length = 10
         else:
             length = int(self.data['length'])
+
         return length
 
 
@@ -254,14 +255,14 @@ class EffectRankingByLevelForm(forms.Form):
     )
 
     def clean_current_page(self):
-        if 'current_page' not in self.data:
+        if not self.data.get('current_page'):
             current_page = 1
         else:
             current_page = int(self.data['current_page'])
         return current_page
 
     def clean_length(self):
-        if 'length' not in self.data:
+        if not self.data.get('length'):
             length = 20
         else:
             length = int(self.data['length'])
@@ -323,14 +324,14 @@ class QueryCustomerTransmitForm(forms.Form):
             return article_id
 
     def clean_current_page(self):
-        if 'current_page' not in self.data:
+        if not self.data.get('current_page'):
             current_page = 1
         else:
             current_page = int(self.data['current_page'])
         return current_page
 
     def clean_length(self):
-        if 'length' not in self.data:
+        if not self.data.get('length'):
             length = 20
         else:
             length = int(self.data['length'])
@@ -380,14 +381,14 @@ class HideCustomerDataForm(forms.Form):
             return article_id
 
     def clean_current_page(self):
-        if 'current_page' not in self.data:
+        if not self.data.get('current_page'):
             current_page = 1
         else:
             current_page = int(self.data['current_page'])
         return current_page
 
     def clean_length(self):
-        if 'length' not in self.data:
+        if not self.data.get('length'):
             length = 10
         else:
             length = int(self.data['length'])
@@ -443,14 +444,15 @@ class ArticleAccessLogForm(forms.Form):
             return article_id
 
     def clean_current_page(self):
-        if 'current_page' not in self.data:
+        if not self.data.get('current_page'):
             current_page = 1
         else:
             current_page = int(self.data['current_page'])
         return current_page
 
     def clean_length(self):
-        if 'length' not in self.data:
+        if not self.data.get('length'):
+
             length = 10
         else:
             length = int(self.data['length'])
@@ -505,14 +507,14 @@ class ArticleForwardInfoForm(forms.Form):
             return article_id
 
     def clean_current_page(self):
-        if 'current_page' not in self.data:
+        if not self.data.get('current_page'):
             current_page = 1
         else:
             current_page = int(self.data['current_page'])
         return current_page
 
     def clean_length(self):
-        if 'length' not in self.data:
+        if not self.data.get('length'):
             length = 10
         else:
             length = int(self.data['length'])

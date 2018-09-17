@@ -43,19 +43,7 @@ class Customer_UpdateExpectedTime_Form(forms.Form):
         else:
             return customer_id
 
-    def clean_user_id(self):
 
-        user_id = self.data['user_id']
-        objs = models.zgld_userprofile.objects.filter(
-            id=user_id,
-        )
-        print('-------->>',objs)
-
-        if not objs:
-            print('--用户名不xxxxxx存在------>>', objs[0])
-            self.add_error('username', '用户名不xxxxxx存在')
-        else:
-            return user_id
 
 class Customer_UpdateExpedtedPr_Form(forms.Form):
 

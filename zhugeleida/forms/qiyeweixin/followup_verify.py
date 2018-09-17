@@ -143,17 +143,17 @@ class FollowInfoSelectForm(forms.Form):
             length = int(self.data['length'])
         return length
 
-    def clean_user_id(self):
-
-        user_id = self.data['user_id']
-
-        objs = models.zgld_userprofile.objects.filter(
-            id=user_id,
-        )
-        if not objs:
-            self.add_error('username', '用户名不存在')
-        else:
-            return user_id
+    # def clean_user_id(self):
+    #
+    #     user_id = self.data['user_id']
+    #
+    #     objs = models.zgld_userprofile.objects.filter(
+    #         id=user_id,
+    #     )
+    #     if not objs:
+    #         self.add_error('username', '用户名不存在')
+    #     else:
+    #         return user_id
 
     # 判断客户是否存在
     def clean_customer_id(self):
@@ -161,7 +161,7 @@ class FollowInfoSelectForm(forms.Form):
         info_obj = models.zgld_customer.objects.filter(id=customer_id)
 
         if not info_obj:
-            self.add_error('customer_id', '客户不存在')
+            self.add_error('customer_id', '客户ID不存在')
         else:
             return customer_id
 

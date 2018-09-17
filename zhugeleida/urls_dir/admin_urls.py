@@ -41,7 +41,7 @@ urlpatterns = [
     # 小程序-批量上线
     url(r'^xcx_app$', xcx_app.xcx_app),
 
-    # 代写小程序发布
+    # 代小程序发布
     url(r'^dai_xcx/(?P<oper_type>\w+)$', dai_xcx.dai_xcx_oper),
 
     # 用户操作

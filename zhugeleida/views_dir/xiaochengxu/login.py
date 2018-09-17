@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm,LoginBindingForm
+from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm, LoginBindingForm
 
 import time
 import datetime
@@ -19,7 +19,8 @@ import json
 import redis
 from collections import OrderedDict
 import logging.handlers
-from zhugeleida.views_dir.admin.dai_xcx  import create_component_access_token
+from zhugeleida.views_dir.admin.dai_xcx import create_component_access_token
+
 
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -40,7 +41,6 @@ def get_openid_info(get_token_data):
     return ret_data
 
 
-
 @csrf_exempt
 def login(request):
     response = Response.ResponseObj()
@@ -48,6 +48,8 @@ def login(request):
     if request.method == "GET":
         print('-------【小程序登录啦】 request.GET 数据是: ------->', request.GET)
         customer_id = request.GET.get('user_id')
+        version_num = request.GET.get('user_version')
+
         forms_obj = SmallProgramAddForm(request.GET)
 
         if forms_obj.is_valid():
@@ -58,32 +60,42 @@ def login(request):
             user_id = forms_obj.cleaned_data.get('uid')
             company_id = int(company_id) if company_id else ''
 
+            is_release_version_num = True
             if not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
-                                # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
+                # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
                 company_id = 1
-                print('--------- 没有company_id, ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id,company_id)
+                is_release_version_num = False
+                print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
+                      user_id, company_id)
 
-            if not user_id:     # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
-                user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
-                print('----------- 没有 uid,说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,user_id)
+                if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
+                    user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
+                    print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,
+                          user_id)
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             authorizer_appid = obj.authorization_appid
             component_appid = 'wx67e2fde0f694111c'
 
+            # if  version_num: # 有版本号(从ext 里读取的)
+            # online_version_num = obj.version_num
+            online_version_num = '1.0'
+            if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
+                is_release_version_num = False  # 不相等说明要隐藏按钮。
+                print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',
+                      (company_id, online_version_num, version_num))
 
             component_access_token = create_component_access_token()
             get_token_data = {
-                'appid': authorizer_appid,     #授权小程序的AppID
-                'js_code': js_code,            #登录时获取的 code
+                'appid': authorizer_appid,  # 授权小程序的AppID
+                'js_code': js_code,  # 登录时获取的 code
                 'grant_type': 'authorization_code',
-                'component_appid': component_appid,               # 第三方平台appid
+                'component_appid': component_appid,  # 第三方平台appid
                 'component_access_token': component_access_token  # 第三方平台的 component_access_token
             }
 
             ret_data = get_openid_info(get_token_data)
             openid = ret_data['openid']
-
 
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
@@ -100,11 +112,11 @@ def login(request):
                     company_id=company_id,
                     token=token,
                     openid=openid,
-                    user_type=user_type,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    user_type=user_type,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
                     # superior=customer_id,  #上级人。
                 )
 
-                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                # models.zgld_information.objects.filter(customer_id=obj.id,source=source)
                 # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
                 print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
@@ -112,10 +124,11 @@ def login(request):
             ret_data = {
                 'cid': client_id,
                 'token': token,
-                'uid': user_id
+                'uid': user_id,
+                'is_release_version_num': is_release_version_num
             }
 
-            print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>',json.dumps(ret_data))
+            print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
             response.code = 200
             response.msg = "返回成功"
             response.data = ret_data
@@ -128,11 +141,12 @@ def login(request):
         response.code = 402
         response.msg = "请求方式异常"
 
-    return  JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
+
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def login_oper(request,oper_type):
+def login_oper(request, oper_type):
     response = Response.ResponseObj()
 
     if request.method == "GET":
@@ -143,13 +157,13 @@ def login_oper(request,oper_type):
             if forms_obj.is_valid():
 
                 # user_type = forms_obj.cleaned_data.get('user_type')
-                source = forms_obj.cleaned_data.get('source')   #1,代表扫码,2 代表转发
-                user_id = forms_obj.cleaned_data.get('uid') # 所属的企业用户的ID
+                source = forms_obj.cleaned_data.get('source')  # 1,代表扫码,2 代表转发
+                user_id = forms_obj.cleaned_data.get('uid')  # 所属的企业用户的ID
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
-                parent_id = request.GET.get('pid','')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+                parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
 
-
-                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+                                                                                               user_id=user_id)
 
                 if user_customer_belonger_obj:
                     response.code = 302
@@ -157,8 +171,9 @@ def login_oper(request,oper_type):
 
                 else:
 
-                    obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id,user_id=user_id,source=source)
-                    obj.customer_parent_id = parent_id    #上级人。
+                    obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,
+                                                                            source=source)
+                    obj.customer_parent_id = parent_id  # 上级人。
                     obj.save()
 
                     user_obj = models.zgld_userprofile.objects.get(id=user_id)
@@ -169,15 +184,25 @@ def login_oper(request,oper_type):
                     if objs:
                         objs.update(company_id=company_id)
 
+                    # 插入第一条用户和客户的对话信息
+                    msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name, obj.user.username)
+                    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+                                                        msg=msg)
 
-                    #插入第一条用户和客户的对话信息
-                    msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name,obj.user.username)
-                    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id,customer_id=customer_id,msg=msg)
-
-                    print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
+                    # _content = { 'info_type': 1 }
+                    # encodestr = base64.b64encode(msg.encode('utf-8'))
+                    # msg = str(encodestr, 'utf-8')
+                    # _content['msg'] = msg
+                    # content = json.dumps(_content)
+                    #
+                    #
+                    # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+                    #                                     content=content)
+                    #
+                    # print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
 
                     # 异步生成小程序和企业用户对应的小程序二维码
-                    data_dict = {'user_id': user_id,'customer_id': customer_id}
+                    data_dict = {'user_id': user_id, 'customer_id': customer_id}
                     tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
 
                     response.code = 200
@@ -197,12 +222,11 @@ def login_oper(request,oper_type):
             country = request.POST.get('country')
             province = request.POST.get('province')
 
-            gender = request.POST.get('gender')  #1代表男
+            gender = request.POST.get('gender')  # 1代表男
             language = request.POST.get('language')
-            username =  request.POST.get('nickName')
+            username = request.POST.get('nickName')
             # formid =  request.POST.get('formId')
             page_info = int(request.POST.get('page')) if request.POST.get('page') else ''
-
 
             # LOG_FILE = r'test.log'
             # handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
@@ -224,20 +248,20 @@ def login_oper(request,oper_type):
             # logger.info(log_info)
 
             objs = models.zgld_customer.objects.filter(
-                id = customer_id,
+                id=customer_id,
             )
             if objs:
                 objs.update(
-                             username = customer_name,
-                             headimgurl=headimgurl,
-                             # formid = formid,
-                             city =city,
-                             country=country,
-                             province = province,
-                             language = language,
+                    username=customer_name,
+                    headimgurl=headimgurl,
+                    # formid = formid,
+                    city=city,
+                    country=country,
+                    province=province,
+                    language=language,
                 )
 
-                models.zgld_information.objects.create(sex=gender,customer_id=objs[0].id)
+                models.zgld_information.objects.create(sex=gender, customer_id=objs[0].id)
 
                 # (1, '查看名片详情'),
                 # (2, '查看产品列表'),
@@ -248,22 +272,22 @@ def login_oper(request,oper_type):
 
                 remark = ''
                 if page_info == 1:
-                   remark = '已向您授权访问【名片详情】页面'
+                    remark = '已向您授权访问【名片详情】页面'
 
                 elif page_info == 2:
-                   remark = '已向您授权访问【产品列表】页面'
+                    remark = '已向您授权访问【产品列表】页面'
 
                 elif page_info == 3:
-                   remark = '已向您授权访问【产品详情】页面'
+                    remark = '已向您授权访问【产品详情】页面'
                 elif page_info == 4:
-                   remark = '已向您授权访问【公司官网】页面'
+                    remark = '已向您授权访问【公司官网】页面'
 
                 data = request.GET.copy()
                 print('data --> request.GET.copy() -->', data)
-                data['action'] = 13   # 代表用客户授权访问
+                data['action'] = 13  # 代表用客户授权访问
                 response = action_record(data, remark)
 
-                response.data = { 'ret_data' : username + ' 已向您授权登录页面' }
+                response.data = {'ret_data': username + ' 已向您授权登录页面'}
                 response.code = 200
                 response.msg = "保存成功"
             else:
@@ -291,9 +315,7 @@ def login_oper(request,oper_type):
                 # print('============ Exist_formid_json  now_form_id_list =====>>',exist_formid_json,'=====>','\n',now_form_id_json)
                 objs.update(formid=json.dumps(now_form_id_json))
 
-
                 response.code = 200
                 response.msg = "保存成功"
-
 
     return JsonResponse(response.__dict__)

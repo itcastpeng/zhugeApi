@@ -78,53 +78,84 @@ def chat(request):
                 customer_name = str(customer_name, 'utf-8')
                 phone = obj.userprofile.mingpian_phone  if obj.userprofile.mingpian_phone else obj.userprofile.wechat_phone
                 wechat = obj.userprofile.wechat if obj.userprofile.wechat else obj.userprofile.wechat_phone
+
+                is_first_info = False
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
+                    is_first_info =  True
 
-                    ret_data_list.append({
-                        'customer_id': obj.customer.id,
-                        'user_id': obj.userprofile.id,
-                        'customer': customer_name,
-                        'user_avatar': mingpian_avatar,
-                        'customer_headimgurl': obj.customer.headimgurl,
-                        'dateTime': obj.create_date,
-                        'msg': obj.msg,
-                        'send_type': obj.send_type,
-                        'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                        'is_first_info': True,       # 是否为第一条的信息
-                    })
-                elif obj.info_type == 2: # 如果为产品咨询。
-                    print('------first_info.get----->', first_info[0].get('id'))
-                    ret_data_list.append({
-                        'customer_id': obj.customer.id,
-                        'from_user_name': customer_name,
-                        'user_id': obj.userprofile.id,
-                        'customer': customer_name,
-                        'user_avatar': mingpian_avatar,
-                        'customer_headimgurl': obj.customer.headimgurl,
-                        'dateTime': obj.create_date,
-                        'product_cover_url': obj.product_cover_url,
-                        'product_name': obj.product_name,
-                        'product_price': obj.product_price,
-                        'info_type': obj.info_type,  #   (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                        'send_type': obj.send_type,
-                        'is_first_info': False,  # 是否为第一条的信息
 
-                    })
 
-                else:
+                content = obj.content
+                if not content:
+                    continue
 
-                    ret_data_list.append({
-                        'customer_id': obj.customer.id,
-                        'user_id': obj.userprofile.id,
-                        'customer': customer_name,
-                        'user_avatar': mingpian_avatar,
-                        'customer_headimgurl': obj.customer.headimgurl,
-                        'dateTime': obj.create_date,
-                        'msg': obj.msg,
-                        'info_type': obj.info_type,
-                        'send_type': obj.send_type, # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                        'is_first_info': False,     # 是否为第一条的信息
-                    })
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+
+
+                if info_type:
+                    info_type = int(info_type)
+
+                    if info_type == 1:
+                        msg = _content.get('msg')
+                        msg = base64.b64decode(msg)
+                        msg = str(msg, 'utf-8')
+                        _content['msg'] = msg
+
+                base_info_dict = {
+                    'customer_id': obj.customer.id,
+                    'from_user_name': customer_name,
+                    'user_id': obj.userprofile.id,
+                    'customer': customer_name,
+                    'user_avatar': mingpian_avatar,
+                    'customer_headimgurl': obj.customer.headimgurl,
+                    'dateTime': obj.create_date,
+
+                    'send_type': obj.send_type,
+                    'is_first_info': is_first_info,     #是否为第一条的信息
+                }
+
+                base_info_dict.update(_content)
+
+                ret_data_list.append(base_info_dict)
+
+
+                # elif obj.info_type == 2: # 如果为产品咨询。
+                #     print('------first_info.get----->', first_info[0].get('id'))
+                #     ret_data_list.append({
+                #         'customer_id': obj.customer.id,
+                #         'from_user_name': customer_name,
+                #         'user_id': obj.userprofile.id,
+                #         'customer': customer_name,
+                #         'user_avatar': mingpian_avatar,
+                #         'customer_headimgurl': obj.customer.headimgurl,
+                #         'dateTime': obj.create_date,
+                #
+                #         'product_cover_url': obj.product_cover_url,
+                #         'product_name': obj.product_name,
+                #         'product_price': obj.product_price,
+                #
+                #         'info_type': obj.info_type,  #   (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                #         'send_type': obj.send_type,
+                #         'is_first_info': False,  # 是否为第一条的信息
+                #     })
+                #
+                # else:
+                #
+                #     ret_data_list.append({
+                #         'customer_id': obj.customer.id,
+                #         'user_id': obj.userprofile.id,
+                #         'customer': customer_name,
+                #         'user_avatar': mingpian_avatar,
+                #         'customer_headimgurl': obj.customer.headimgurl,
+                #         'dateTime': obj.create_date,
+                #
+                #         'msg': obj.msg,
+                #         'info_type': obj.info_type,
+                #
+                #         'send_type': obj.send_type, # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                #         'is_first_info': False,     # 是否为第一条的信息
+                #     })
 
             ret_data_list.reverse()
             response.code = 200
@@ -178,27 +209,56 @@ def chat_oper(request, oper_type, o_id):
                         mingpian_avatar = mingpian_avatar_obj[0].photo_url
                     else:
 
-                        # if obj.userprofile.avatar.startswith("http"):
-                        #     mingpian_avatar = obj.userprofile.avatar
-                        # else:
                         mingpian_avatar =  obj.userprofile.avatar
 
                     customer_name = base64.b64decode(obj.customer.username)
                     customer_name = str(customer_name, 'utf-8')
 
 
-                    ret_data_list.append({
-                                'customer_id': obj.customer.id,
-                                'user_id': obj.userprofile.id,
-                                'user_avator' :  mingpian_avatar,
-                                'customer_headimgurl':  obj.customer.headimgurl,
-                                'customer': customer_name,
-                                'dateTime': obj.create_date,
-                                'msg':       obj.msg,
-                                'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                                'is_first_info': False,  # 是否为第一条的信息
-                                'info_type': obj.info_type, # 消息的类型
-                            })
+                    content = obj.content
+                    if not content:
+                        continue
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
+                    if info_type:
+                        info_type = int(info_type)
+
+                        if info_type == 1:
+                            msg = _content.get('msg')
+                            msg = base64.b64decode(msg)
+                            msg = str(msg, 'utf-8')
+                            _content['msg'] = msg
+
+                    base_info_dict = {
+                        'customer_id': obj.customer_id,
+                        'user_id': obj.userprofile_id,
+                        'user_avator' :  mingpian_avatar,
+                        'customer_headimgurl':  obj.customer.headimgurl,
+                        'customer': customer_name,
+                        'dateTime': obj.create_date,
+                        # 'msg':       obj.msg,
+                        'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                        'is_first_info': False,      # 是否为第一条的信息
+                        # 'info_type': obj.info_type, # 消息的类型
+
+                    }
+
+                    base_info_dict.update(_content)
+
+                    ret_data_list.append(base_info_dict)
+
+                    # ret_data_list.append({
+                                # 'customer_id': obj.customer.id,
+                                # 'user_id': obj.userprofile.id,
+                                # 'user_avator' :  mingpian_avatar,
+                                # 'customer_headimgurl':  obj.customer.headimgurl,
+                                # 'customer': customer_name,
+                                # 'dateTime': obj.create_date,
+                                # 'msg':       obj.msg,
+                                # 'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                                # 'is_first_info': False,  # 是否为第一条的信息
+                                # 'info_type': obj.info_type, # 消息的类型
+                            # })
 
 
                 ret_data_list.reverse()
@@ -244,6 +304,52 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == 'history_chatinfo_store_content':
+
+
+            # models.zgld_chatinfo.objects.all().values('id','info_type','msg','product_cover_url','product_name','product_price')
+            objs = models.zgld_chatinfo.objects.all()
+
+            for obj in objs:
+                chat_id = obj.id
+                info_type = obj.info_type
+                msg = obj.msg
+                product_cover_url = obj.product_cover_url
+                product_name = obj.product_name
+                product_price = obj.product_price
+
+                if info_type == 1:  # msg
+
+                    if msg:
+                        print('------ 【msg】 chat_id ------>>',chat_id)
+                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+
+                        _content = {
+                            'info_type': 1,
+                            'msg': msg
+                        }
+                        obj.content = json.dumps(_content)
+                        obj.save()
+
+                elif info_type == 2:
+
+                    if product_name and product_cover_url:
+                        print('------ 【product】 chat_id ------>>', chat_id)
+
+                        _content = {
+                            'info_type': 2,  # 2代表发送的产品咨询  3代表发送的电话号码  4代表发送的图片|截图  5、视频
+                            'product_cover_url': product_cover_url ,
+                            'product_name': product_name,
+                            'product_price': product_price
+                        }
+                        obj.content = json.dumps(_content)
+                        obj.save()
+
+
+            response.code = 200
+            response.msg = '成功'
+
         return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':
@@ -257,48 +363,57 @@ def chat_oper(request, oper_type, o_id):
                 print('----send_msg--->>',request.POST)
                 customer_id = int(request.GET.get('user_id'))
                 user_id =  request.POST.get('u_id')
-                msg = request.POST.get('msg')
+                content = request.POST.get('content')
                 send_type = int(request.POST.get('send_type'))
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
+
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+                msg = ''
+                if info_type:
+                    info_type = int(info_type)
+
+                    if info_type == 1:
+                        msg = _content.get('msg')
+                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+                        _content['msg'] = msg
+                        content = json.dumps(_content)
+
                 models.zgld_chatinfo.objects.create(
-                    msg=msg,
+                    content=content,
                     userprofile_id=user_id,
                     customer_id=customer_id,
                     send_type=send_type
                 )
 
-                flow_up_obj = models.zgld_user_customer_flowup.objects.filter(user_id=user_id, customer_id=customer_id)
-                if send_type == 2 and flow_up_obj: # 用戶發消息給客戶，修改最後跟進-時間
-                    # flow_up_obj.is_user_msg = True
-                    # flow_up_obj.last_activity_time = datetime.datetime.now()
-                    # flow_up_obj.save()
-                    flow_up_obj.update(
+                flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+                if send_type == 2 and flow_up_objs: # 用戶發消息給客戶，修改最後跟進-時間
+                    flow_up_objs.update(
                         is_customer_msg_num=F('is_customer_msg_num') + 1,
                         last_activity_time = datetime.datetime.now()
                     )
 
-
-                # user_new_msg_count = models.zgld_chatinfo.objects.filter(
-                #         userprofile_id=user_id,
-                #         customer_id=customer_id,
-                #
-                # ).count()
-                # if user_new_msg_count > 0: # 说明有未读的消息
-
-                remark = ':%s' % (msg)
-                data = request.GET.copy()
-                data['action'] = 0  # 代表用客户咨询产品
-                data['uid'] = user_id
-                response = action_record(data, remark)
+                if info_type == 1:  # 发送的图文消息
+                    remark = ':%s' % (msg)
+                    data = request.GET.copy()
+                    data['action'] = 0  # 代表用客户咨询产品
+                    data['uid'] = user_id
+                    response = action_record(data, remark)
 
                 response.code = 200
                 response.msg = 'send msg successful'
+
             else:
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+        # 解密接收手机发送的手机号
+        elif oper_type == '':
+            pass
 
 
     else:

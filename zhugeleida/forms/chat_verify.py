@@ -93,8 +93,14 @@ class ChatPostForm(forms.Form):
         }
     )
 
-    msg = forms.CharField(
+    content = forms.CharField(
         required=True,
+        error_messages={
+            'required': "消息不能为空"
+        }
+    )
+    msg = forms.CharField(
+        required=False,
         error_messages={
             'required': "消息不能为空"
         }
