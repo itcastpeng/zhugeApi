@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.user_verify import UserAddForm, UserUpdateForm, UserSelectForm
+from zhugeleida.forms.user_verify import UserAddForm, UserUpdateForm, UserSelectForm,ScanCodeToAddUserForm
 import json
 from ..conf import *
 import requests
@@ -24,6 +24,7 @@ def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = UserSelectForm(request.GET)
+        type = request.GET.get('type')
 
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
@@ -42,7 +43,6 @@ def user(request):
                 'department':  '',                # 部门搜索，按ID
                 'status':  '',                    # (1, "启用"),   (2, "未启用"),
                 # 'last_login_date': ''
-
             }
 
             q = conditionCom(request, field_dict)
@@ -60,81 +60,148 @@ def user(request):
             # else:  #管理员，展示出自己公司的用户
             q.add(Q(**{"company_id": company_id}), Q.AND)
 
-            objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
-            count = objs.count()
+            if type == 'temp_user':
+                objs = models.zgld_temp_userprofile.objects.select_related('company').filter(q).order_by(order)
+                count = objs.count()
 
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                    ret_data = []
+                    department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id', 'name')
+                    department_list_all = list(department_objs) if department_objs else []
+                    if objs:
+
+                        for obj in objs:
+
+                            departmane_list = obj.department
+                            if departmane_list:
+                                departmane_list = json.loads(departmane_list)
+                                department_name_list = []
+                                for department_dict in department_list_all:
+
+                                    id = department_dict.get('id')
+                                    name = department_dict.get('name')
+                                    if id in  departmane_list:
+                                        department_name_list.append(name)
+
+                                department = ', '.join(department_name_list)
 
 
 
-            ret_data = []
+                                # print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
 
-            department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id','name')
-            department_list =  list(department_objs)  if department_objs else []
+                                # department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
+                                # department_id = [i[0] for i in departmane_objs.values_list('id')]
 
-            if objs:
-                mingpian_available_num = objs[0].company.mingpian_available_num
-                for obj in objs:
-                    print('oper_user_username -->', obj)
+                                ret_data.append({
+                                    'temp_user_id': obj.id,
 
-                    department = ''
-                    department_id = []
-                    departmane_objs = obj.department.all()
-                    print('departmane_objs -->', departmane_objs)
-                    if departmane_objs:
-                        print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
-                        department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
-                        department_id = [i[0] for i in departmane_objs.values_list('id')]
+                                    'username': obj.username,
+                                    'create_date': obj.create_date,
+
+                                    'position': obj.position,
+                                    'wechat': obj.wechat,  # 代表注册企业微信注册时的电话
+                                    'mingpian_phone': obj.mingpian_phone,   # 名片显示的手机号
+                                    'wechat_phone': obj.wechat_phone,               # 代表注册企业微信注册时的电话
+
+                                    'company': obj.company.name,
+                                    'company_id': obj.company_id,
+                                    'department': department,
+                                    'department_id': departmane_list,
 
 
-                    mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
+                                })
+                                #  查询成功 返回200 状态码
 
-                    mingpian_avatar = ''
-                    if mingpian_avatar_obj:
-                        mingpian_avatar =  mingpian_avatar_obj[0].photo_url
-                    else:
+                            response.code = 200
+                            response.msg = '查询成功'
+                            response.data = {
+                                'ret_data': ret_data,
+                                'data_count': count,
+                                'department_list': department_list_all
+                            }
 
-                        if obj.avatar.startswith("http"):
-                            mingpian_avatar = obj.avatar
+
+
+            else:
+                objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
+
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+
+                ret_data = []
+
+                department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id','name')
+                department_list =  list(department_objs)  if department_objs else []
+
+                if objs:
+                    mingpian_available_num = objs[0].company.mingpian_available_num
+                    for obj in objs:
+                        print('oper_user_username -->', obj)
+
+                        department = ''
+                        department_id = []
+                        departmane_objs = obj.department.all()
+                        print('departmane_objs -->', departmane_objs)
+                        if departmane_objs:
+                            #print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
+                            department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
+                            department_id = [i[0] for i in departmane_objs.values_list('id')]
+
+
+                        mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=obj.id, photo_type=2).order_by('-create_date')
+
+                        mingpian_avatar = ''
+                        if mingpian_avatar_obj:
+                            mingpian_avatar =  mingpian_avatar_obj[0].photo_url
                         else:
-                            mingpian_avatar =  obj.avatar
 
-                    ret_data.append({
-                        'id': obj.id,
-                        'userid': obj.userid,
-                        'username': obj.username,
-                        'create_date': obj.create_date,
-                        'last_login_date': obj.last_login_date,
-                        'position': obj.position,
-                        'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
-                        'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
-                        'status': obj.get_status_display(),
-                        'avatar': mingpian_avatar,          # 头像
-                        'qr_code': obj.qr_code,
-                        'company': obj.company.name,
-                        'company_id': obj.company_id,
-                        'department' : department,
-                        'department_id' : department_id,
-                        'gender': obj.gender,
+                            if obj.avatar.startswith("http"):
+                                mingpian_avatar = obj.avatar
+                            else:
+                                mingpian_avatar =  obj.avatar
 
-                    })
-                    #  查询成功 返回200 状态码
+                        ret_data.append({
+                            'id': obj.id,
+                            'userid': obj.userid,
+                            'username': obj.username,
+                            'create_date': obj.create_date,
+                            'last_login_date': obj.last_login_date,
+                            'position': obj.position,
+                            'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
+                            'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
+                            'status': obj.get_status_display(),
+                            'avatar': mingpian_avatar,          # 头像
+                            'qr_code': obj.qr_code,
+                            'company': obj.company.name,
+                            'company_id': obj.company_id,
+                            'department' : department,
+                            'department_id' : department_id,
+                            'gender': obj.gender,
+
+                        })
+                        #  查询成功 返回200 状态码
                     response.code = 200
                     response.msg = '查询成功'
                     response.data = {
                         'ret_data': ret_data,
                         'mingpian_available_num': mingpian_available_num,
                         'data_count': count,
-                        'department_list' : department_list,
-
+                        'department_list' : department_list
                     }
 
-            else:
-                response.code = 301
-                response.msg = "产品为空"
+
+                else:
+                    response.code = 301
+                    response.msg = "产品为空"
 
         else:
             response.code = 402
@@ -293,63 +360,79 @@ def user_oper(request, oper_type, o_id):
 
         elif oper_type == "delete":
             # 删除 ID
-            print(request.GET.get('user_id'), o_id)
+            type = request.GET.get('type')
 
-            if str(request.GET.get('user_id')) == str(o_id):
-                response.msg = '不允许删除自己'
-                response.code = 305
+
+
+            if type == 'temp_user':
+                user_objs = models.zgld_temp_userprofile.objects.filter(id=o_id)
+                if user_objs:
+                    user_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
+
 
             else:
-                user_objs = models.zgld_userprofile.objects.filter(id=o_id)
-                if user_objs:
+                if str(request.GET.get('user_id')) == str(o_id):
+                    response.msg = '不允许删除自己'
+                    response.code = 305
 
-                    get_token_data = {}
-                    get_user_data = {}
-                    get_token_data['corpid'] = user_objs[0].company.corp_id
-                    get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
-
-                    import redis
-                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
-                    token_ret = rc.get(key_name)
-
-                    print('---token_ret---->>', token_ret)
-
-                    if not token_ret:
-                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                        ret_json = ret.json()
-                        access_token = ret_json['access_token']
-                        get_user_data['access_token'] = access_token
-
-                        rc.set(key_name, access_token, 7000)
-                    else:
-                        get_user_data['access_token'] = token_ret
-
-                    userid = user_objs[0].userid
-                    if userid:
-                        get_user_data['userid'] = userid
-                        ret = requests.get(Conf['delete_user_url'], params=get_user_data)
-
-                        weixin_ret = json.loads(ret.text)
-
-                        if weixin_ret['errcode'] == 0:
-                            user_objs.delete()
-                            response.code = 200
-                            response.msg = "删除成功"
-                        else:
-                            rc.delete(key_name)
-                            response.code = weixin_ret['errcode']
-                            response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
-
-
-                    else:
-                        response.code = '302'
-                        response.msg = "userid不存在"
                 else:
-                    response.code = 302
-                    response.msg = '用户ID不存在'
+                    user_objs = models.zgld_userprofile.objects.filter(id=o_id)
+                    if user_objs:
+
+                        get_token_data = {}
+                        get_user_data = {}
+                        get_token_data['corpid'] = user_objs[0].company.corp_id
+                        get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
+
+                        import redis
+                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                        key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
+                        token_ret = rc.get(key_name)
+
+                        print('---token_ret---->>', token_ret)
+
+                        if not token_ret:
+                            ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                            ret_json = ret.json()
+                            access_token = ret_json['access_token']
+                            get_user_data['access_token'] = access_token
+
+                            rc.set(key_name, access_token, 7000)
+                        else:
+                            get_user_data['access_token'] = token_ret
+
+                        userid = user_objs[0].userid
+                        if userid:
+                            get_user_data['userid'] = userid
+                            ret = requests.get(Conf['delete_user_url'], params=get_user_data)
+
+                            weixin_ret = json.loads(ret.text)
+
+                            if weixin_ret['errcode'] == 0:
+                                user_objs.delete()
+                                response.code = 200
+                                response.msg = "删除成功"
+                            else:
+                                rc.delete(key_name)
+                                response.code = weixin_ret['errcode']
+                                response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
+
+
+                        else:
+                            response.code = '302'
+                            response.msg = "userid不存在"
+                    else:
+                        response.code = 302
+                        response.msg = '用户ID不存在'
 
         elif oper_type == "update":
+
+            type = request.GET.get('type')
+
+            user_id =  request.GET.get('user_id')
+            webchat =  request.GET.get('webchat')
 
             # 获取ID 用户名 及 角色
             form_data = {
@@ -365,8 +448,6 @@ def user_oper(request, oper_type, o_id):
                 'mingpian_phone': request.POST.get('mingpian_phone')
             }
 
-            print("request.POST.getlist('department_id') -->", request.POST.get('department_id'))
-
             forms_obj = UserUpdateForm(form_data)
 
             if forms_obj.is_valid():
@@ -381,75 +462,95 @@ def user_oper(request, oper_type, o_id):
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
-                print('-------department_ids------->>', type(department_id))
-                #  查询数据库  用户id
-                user_objs = models.zgld_userprofile.objects.filter(id=o_id)
-                #  更新用户 数据
-                if user_objs:
+                if type == 'temp_user':
 
-                    print(user_objs[0].company.corp_id, user_objs[0].company.tongxunlu_secret)
-                    get_token_data = {}
-                    post_user_data = {}
-                    get_user_data = {}
-                    get_token_data['corpid'] = user_objs[0].company.corp_id
-                    get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
-
-                    import redis
-                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
-                    token_ret = rc.get(key_name)
-
-                    print('---token_ret---->>', token_ret)
-
-                    if not token_ret:
-                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                        ret_json = ret.json()
-                        access_token = ret_json['access_token']
-                        get_user_data['access_token'] = access_token
-
-                        rc.set(key_name, access_token, 7000)
-
-                    else:
-                        get_user_data['access_token'] = token_ret
-
-                    if len(department_id) == 0:
-                        department_id = [1]
-                    post_user_data['userid'] = user_objs[0].userid
-                    post_user_data['name'] = username
-                    post_user_data['position'] = position
-                    post_user_data['department'] = department_id
-                    post_user_data['mobile'] = wechat_phone
-                    ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
-                    print(ret.text)
-
-                    if department_id[0] == 1 and len(department_id) == 1:
-                        department_id = []
-
-                    print('------ManToMany department_id ----->')
-                    weixin_ret = json.loads(ret.text)
-                    if weixin_ret['errmsg'] == 'updated':
-
-                        user_objs.update(
+                    temp_userprofile_objs = models.zgld_temp_userprofile.objects.filter(id=user_id)
+                    if temp_userprofile_objs:
+                        temp_userprofile_objs.update(
                             username=username,
-                            # role_id=role_id,
+                            webchat=webchat,
                             company_id=company_id,
                             position=position,
                             wechat_phone=wechat_phone,
                             mingpian_phone=mingpian_phone,
                         )
 
-                        user_obj = user_objs[0]
-                        user_obj.department = department_id
-                        user_obj.save()
-                        response.code = 200
-                        response.msg = "修改成功"
-                    else:
-                        response.code = weixin_ret['errcode']
-                        response.msg = "修改成功"
+                    user_obj = temp_userprofile_objs[0]
+                    user_obj.department = department_id
+                    user_obj.save()
+                    response.code = 200
+                    response.msg = "修改成功"
+
 
                 else:
-                    response.code = 303
-                    response.msg = json.loads(forms_obj.errors.as_json())
+
+                    user_objs = models.zgld_userprofile.objects.filter(id=o_id)
+
+                    if user_objs:
+
+                        print(user_objs[0].company.corp_id, user_objs[0].company.tongxunlu_secret)
+                        get_token_data = {}
+                        post_user_data = {}
+                        get_user_data = {}
+                        get_token_data['corpid'] = user_objs[0].company.corp_id
+                        get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
+
+                        import redis
+                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                        key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
+                        token_ret = rc.get(key_name)
+
+                        print('---token_ret---->>', token_ret)
+
+                        if not token_ret:
+                            ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                            ret_json = ret.json()
+                            access_token = ret_json['access_token']
+                            get_user_data['access_token'] = access_token
+
+                            rc.set(key_name, access_token, 7000)
+
+                        else:
+                            get_user_data['access_token'] = token_ret
+
+                        if len(department_id) == 0:
+                            department_id = [1]
+                        post_user_data['userid'] = user_objs[0].userid
+                        post_user_data['name'] = username
+                        post_user_data['position'] = position
+                        post_user_data['department'] = department_id
+                        post_user_data['mobile'] = wechat_phone
+                        ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
+                        print(ret.text)
+
+                        if department_id[0] == 1 and len(department_id) == 1:
+                            department_id = []
+
+                        print('------ManToMany department_id ----->')
+                        weixin_ret = json.loads(ret.text)
+                        if weixin_ret['errmsg'] == 'updated':
+
+                            user_objs.update(
+                                username=username,
+                                # role_id=role_id,
+                                company_id=company_id,
+                                position=position,
+                                wechat_phone=wechat_phone,
+                                mingpian_phone=mingpian_phone,
+                            )
+
+                            user_obj = user_objs[0]
+                            user_obj.department = department_id
+                            user_obj.save()
+                            response.code = 200
+                            response.msg = "修改成功"
+                        else:
+                            response.code = weixin_ret['errcode']
+                            response.msg = "修改成功"
+
+                    else:
+                        response.code = 303
+                        response.msg = json.loads(forms_obj.errors.as_json())
 
             else:
                 print("验证不通过")
@@ -608,8 +709,239 @@ def user_oper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = "公司不存在"
+
+
+        # 用户添加自己的信息入临时库
+        elif oper_type == 'scan_code_to_add_user':
+            user_id = request.GET.get('user_id')
+
+            userprofile_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+            company_id = userprofile_obj.company_id
+
+            form_data = {
+                'user_id': user_id,
+                'company_id': company_id,
+                'username': request.POST.get('username'),
+                'position': request.POST.get('position'),
+                'wechat': request.POST.get('wechat'),
+                'wechat_phone': request.POST.get('wechat_phone'),       ## 微信绑定的手机号
+                'mingpian_phone': request.POST.get('mingpian_phone')    # 名片显示的手机号
+
+            }
+
+            #  创建 form验证 实例（参数默认转成字典）
+            forms_obj = ScanCodeToAddUserForm(form_data)
+
+            if forms_obj.is_valid():
+                print("验证通过")
+
+                depart_id_list = []
+                department_id = request.POST.get('department_id')
+                print('-----department_id---->', department_id)
+
+                if department_id:
+                    depart_id_list = json.loads(department_id)
+
+                username = forms_obj.cleaned_data.get('username')
+
+                position = forms_obj.cleaned_data.get('position')
+                wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
+                mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
+
+
+                # if len(depart_id_list) == 0:
+                #     depart_id_list = [1]
+
+                obj = models.zgld_temp_userprofile.objects.create(
+
+                    username=username,
+                    company_id=company_id,
+                    position=position,
+                    wechat_phone=wechat_phone,
+                    mingpian_phone=mingpian_phone,
+
+                )
+
+                obj.department = depart_id_list
+                obj.save()
+
+                response.code = 200
+                response.msg = "添加用户成功"
+
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 管理员审核用户【批量】入库
+        elif oper_type == 'approval_storage_user_info':
+
+            user_id_list = request.POST.get('user_id_list')
+            if user_id_list:
+                user_id_list = json.loads(user_id_list)
+
+                temp_userprofile_objs =models.zgld_temp_userprofile.objects.filter(id__in=user_id_list)
+                if temp_userprofile_objs:
+
+                    for temp_obj in temp_userprofile_objs:
+                        company_id = temp_obj.company_id
+                        department_id_list = [ d[0] for d in   temp_obj.department.values_list('id') ]
+
+
+                        if len(department_id_list) == 0:
+                            department_id_list = [1]
+
+
+                        print("验证通过")
+                        userid = str(int(time.time() * 1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
+                        password = '123456'
+
+                        available_user_num = models.zgld_company.objects.filter(id=company_id)[0].mingpian_available_num
+                        used_user_num = models.zgld_userprofile.objects.filter(company_id=company_id).count()  #
+
+                        print('-----超过明片最大开通数------>>', available_user_num, used_user_num)
+                        if int(used_user_num) >= int(available_user_num):  # 开通的用户数量 等于 == 该公司最大可用名片数
+                            response.code = 302
+                            response.msg = "超过明片最大开通数,请您联系管理员"
+                            return JsonResponse(response.__dict__)
+
+                        elif int(used_user_num) < int(available_user_num):  # 开通的用户数量 小于 < 该公司最大可用名片数,才能继续开通
+
+                            token = account.get_token(account.str_encrypt(password))
+
+                            username = temp_obj.username
+                            position = temp_obj.position
+                            wechat= temp_obj.wechat
+                            wechat_phone= temp_obj.wechat_phone
+                            mingpian_phone= temp_obj.mingpian_phone
+
+                            temp_user_info_dict = {
+                                'userid': userid,
+                                'password': account.str_encrypt(password),
+                                'token': token,
+                                'username': username,
+                                'company_id':company_id,
+                                'position': position,
+                                'wechat':  wechat,
+                                'wechat_phone': wechat_phone,
+                                'mingpian_phone': mingpian_phone,
+
+                            }
+
+                            company_obj = models.zgld_company.objects.get(id=company_id)
+                            get_token_data = {}
+                            post_user_data = {}
+                            get_user_data = {}
+                            get_token_data['corpid'] = company_obj.corp_id
+                            get_token_data['corpsecret'] = company_obj.tongxunlu_secret
+
+                            import redis
+                            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                            key_name = "company_%s_tongxunlu_token" % (company_id)
+                            token_ret = rc.get(key_name)
+
+                            print('---token_ret---->>', token_ret)
+
+                            if not token_ret:
+                                ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                                ret_json = ret.json()
+                                print('--------ret_json-->>', ret_json)
+
+                                access_token = ret_json['access_token']
+                                get_user_data['access_token'] = access_token
+
+                                rc.set(key_name, access_token, 7000)
+
+                            else:
+                                get_user_data['access_token'] = token_ret
+
+                            post_user_data['userid'] = userid
+                            post_user_data['name'] = username
+                            post_user_data['position'] = position
+                            post_user_data['mobile'] = wechat_phone
+                            post_user_data['department'] = department_id_list
+                            add_user_url = Conf['add_user_url']
+
+                            print('-------->>', json.dumps(post_user_data))
+
+                            ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+                            print('-----requests----->>', ret.text)
+
+                            weixin_ret = json.loads(ret.text)
+                            if weixin_ret.get('errmsg') == 'created':  # 在企业微信中创建用户成功
+
+                                obj = models.zgld_userprofile.objects.create(**temp_user_info_dict)
+                                if len(department_id_list) == 1  and department_id_list[0] == 1:
+                                    department_id_list = []
+
+                                obj.department = department_id_list
+                                obj.save()
+
+                                # 生成企业用户二维码
+                                data_dict = {'user_id': obj.id, 'customer_id': ''}
+                                tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+
+                                response.code = 200
+                                response.msg = "添加用户成功"
+
+                            else:
+                                rc.delete(key_name)
+                                response.code = weixin_ret['errcode']
+                                response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
+
+
+                else:
+                    response.code = 301
+                    response.msg =  '用户临时表无数据'
+
+
+
+
+    elif request.method == 'GET':
+
+        # 生成 扫描的用户二维码
+        if  oper_type == "create_scan_code":
+            user_id = request.GET.get('user_id')
+            from zhugeleida.public.common import create_scan_code_userinfo_qrcode
+            obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+
+            token = obj.token
+            timestamp = str(int(time.time() * 1000))
+
+            rand_str = account.str_encrypt(timestamp + token)
+            timestamp = timestamp
+
+            url = 'http://zhugeleida.zhugeyingxiao.com/xxx?rand_str=%s&timestamp=%s&user_id=%d' % (
+            rand_str, timestamp, int(user_id))
+            data = {
+                'url': url,
+                'admin_uid': user_id
+
+            }
+            response_ret  = create_scan_code_userinfo_qrcode(data)
+
+            qrcode_url = response_ret.data.get('qrcode_url')
+            if qrcode_url:
+                response = response_ret
+                response.code = 200
+                response.msg = "添加成功"
+                print('---- create_code_to_add_user url -->', url)
+
+
+
+            else:
+                response.code = 302
+                response.msg = "用户不存在"
+
+
+
+
+
+
     else:
         response.code = 402
         response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
+
+

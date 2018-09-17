@@ -177,6 +177,39 @@ class UpdateForm(forms.Form):
 
 
 
+# 更新
+class SwitchAdminUserForm(forms.Form):
+    switch_admin_user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "切换的用户ID不能为空"
+        }
+    )
+
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "切换的用户ID不能为空"
+        }
+
+    )
+
+    def clean_switch_admin_user_id(self):
+        switch_admin_user_id = self.data.get('switch_admin_user_id')
+        user_id = self.data.get('user_id')
+        switch_admin_user_obj = models.zgld_admin_userprofile.objects.filter(id=switch_admin_user_id)
+
+
+        if not switch_admin_user_obj:
+            self.add_error('switch_admin_user_id', '切换的用户不存在')
+
+        elif int(user_id) == int(switch_admin_user_id):
+            self.add_error('switch_admin_user_id', '自己不必切换自己')
+
+        else:
+            return switch_admin_user_id
+
+
 # 判断是否是数字
 class SelectForm(forms.Form):
     current_page = forms.IntegerField(

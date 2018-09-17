@@ -81,6 +81,13 @@ class AuditCodeInfoForm(forms.Form):
     #         else:
     #             return app_id
 
+class RevertCodeReleaseForm(forms.Form):
+    app_ids_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "小程序app id不能为空"
+        }
+    )
 
 
 

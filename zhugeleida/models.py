@@ -114,7 +114,12 @@ class zgld_xiaochengxu_app(models.Model):
         (6, '审核未通过'),
 
         (7, '上线成功'),
-        (8, '上线失败')
+        (8, '上线失败'),
+        (9, '审核撤回成功'),
+        (10, '审核撤回失败'),
+        (11, '版本回退成功'),
+        (12, '版本回退失败'),
+
     )
     code_release_status = models.SmallIntegerField(verbose_name='代码发布流程状态', null=True, choices=code_release_status_choice)
     code_release_result = models.CharField(verbose_name='结果',max_length=1024,null=True)
@@ -336,6 +341,30 @@ class zgld_userprofile(models.Model):
         # unique_together = (("userid", "company"),)
         verbose_name_plural = "用户表"
         app_label = "zhugeleida"
+
+
+# 企业用户临时表
+class zgld_temp_userprofile(models.Model):
+
+    username = models.CharField(verbose_name="成员姓名", max_length=32)
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    department = models.CharField(max_length=64,verbose_name='所属部门')
+    position = models.CharField(verbose_name='职位信息', max_length=128,null=True)
+
+    #telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
+    wechat = models.CharField(verbose_name='微信号', max_length=64, null=True)
+    wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
+    mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        # unique_together = (("userid", "company"),)
+        verbose_name_plural = "用户临时表"
+        app_label = "zhugeleida"
+
 
 
 # 用户标签

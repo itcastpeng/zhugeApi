@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.admin.admin_userprofile import AddForm, UpdateForm, SelectForm
+from zhugeleida.forms.admin.admin_userprofile import AddForm, UpdateForm, SelectForm,SwitchAdminUserForm
 import json
 
 
@@ -83,6 +83,7 @@ def admin_userprofile(request):
 def admin_userprofile_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
+
         if oper_type == "add":
             form_data = {
                 'login_user': request.POST.get('login_user'),
@@ -171,8 +172,6 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 print("验证不通过")
                 # print(forms_obj.errors)
                 response.code = 301
-                # print(forms_obj.errors.as_json())
-                #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == "update_status":
@@ -192,6 +191,49 @@ def admin_userprofile_oper(request, oper_type, o_id):
                     objs.update(status=status)
                     response.code = 200
                     response.msg = "修改成功"
+
+        elif oper_type == "switch_admin_user":
+            print('----->',request.POST)
+
+            user_id =  request.GET.get('user_id')
+            form_data = {
+                'user_id' :  user_id,
+                'switch_admin_user_id': o_id,  # 要切换的用户ID
+
+            }
+
+            forms_obj = SwitchAdminUserForm(form_data)
+            if forms_obj.is_valid():
+                print("验证通过")
+
+                switch_admin_user_id = forms_obj.cleaned_data.get('switch_admin_user_id')
+
+                #  查询数据库  用户id
+                obj = models.zgld_admin_userprofile.objects.get(
+                    id=switch_admin_user_id
+                )
+
+                response.data = {
+                    'token': obj.token,
+                    'user_id': obj.id,
+                    'company_name': obj.company.name,
+                    'company_id': obj.company_id,
+                    'role_id': obj.role_id,
+                    'role_name': obj.role.name,
+                    'avatar': obj.avatar,
+
+                }
+
+                response.code = 200
+                response.msg = "获取成功"
+
+
+            else:
+                print("--- 验证不通过 --->")
+                # print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
     else:
         response.code = 402
