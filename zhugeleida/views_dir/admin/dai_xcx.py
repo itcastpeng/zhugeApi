@@ -396,7 +396,7 @@ def dai_xcx_oper(request, oper_type):
                     response.code = 301
                     response.msg = '没有需要提交审核的小程序'
 
-
+        #发布代码
         elif oper_type == 'relase_code':
 
             forms_obj = RelaseCodeInfoForm(request.POST)
@@ -458,6 +458,7 @@ def dai_xcx_oper(request, oper_type):
                     response.code = 301
                     response.msg = '没有正在审核中的代码'
 
+        # 撤销审核
         elif oper_type == 'undocode_audit':
             forms_obj = AuditCodeInfoForm(request.POST)
             if forms_obj.is_valid():
@@ -535,8 +536,59 @@ def dai_xcx_oper(request, oper_type):
                 response.msg = "未验证通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == 'revert_code_release':
+            forms_obj = RevertCodeReleaseForm(request.POST)
+
+            if forms_obj.is_valid():
+                user_id = request.GET.get('user_id')  # 账户
+                app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
+
+                app_ids_list = json.loads(app_ids_list)
+                objs = models.zgld_xiaochengxu_app.objects.filter(id__in=app_ids_list)
+                if objs:
+                    for obj in objs:
+                        authorizer_refresh_token = obj.authorizer_refresh_token
+                        authorizer_appid = obj.authorization_appid
+                        now_time = datetime.datetime.now()
+                        # upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
+                        #                                                                       audit_result=2,
+                        #                                                                       auditid__isnull=False).order_by(
+                        #     '-upload_code_date')
+
+                        release_obj = models.zgld_xiapchengxu_release.objects.filter(app_id=obj.id,release_result=2)
+
+                        if release_obj: 
+                            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+                            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                            if not authorizer_access_token:
+                                data = {
+                                    'key_name': key_name,
+                                    'authorizer_refresh_token': authorizer_refresh_token,
+                                    'authorizer_appid': authorizer_appid
+                                }
+                                authorizer_access_token_result = create_authorizer_access_token(data)
+                                if authorizer_access_token_result.code == 200:
+                                    authorizer_access_token = authorizer_access_token_result.data
+                                else:
+                                    return JsonResponse(authorizer_access_token.__dict__)
+
+                            get_wx_info_data = {
+                                'access_token': authorizer_access_token
+                            }
+
+                            url = 'https://api.weixin.qq.com/wxa/revertcoderelease'
+
+                            authorizer_info_ret = requests.get(url, params=get_wx_info_data)
+
+                            print('----------- 版库中的所有小程序代码模版 返回 ------------->', json.dumps(authorizer_info_ret.json()))
+
+
+
+
     elif  request.method == "GET":
 
+        #获取模板列表
         if oper_type == "template_list":
 
             gettemplate_list_url = 'https://api.weixin.qq.com/wxa/gettemplatelist'

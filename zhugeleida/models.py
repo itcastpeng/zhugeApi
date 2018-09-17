@@ -165,7 +165,7 @@ class zgld_xiapchengxu_upload_audit(models.Model):
         (2,'审核中'),
         (3,'提交审核代码失败'),
         (4,'审核撤回成功'),
-        (5,'审核撤回失败'),
+        (5,'审核撤回失败')
     )
     audit_result = models.SmallIntegerField(verbose_name='审核结果',null=True,choices=audit_result_type)
     reason = models.CharField(verbose_name='审核失败原因',max_length=1024,null=True)
@@ -188,7 +188,9 @@ class zgld_xiapchengxu_release(models.Model):
     # release_reply_date = models.DateTimeField(verbose_name="发布回复时间", null=True)
     release_result_type = (
         (1,'上线通过'),
-        (2,'上线失败')
+        (2,'上线失败'),
+        (3, '版本回退成功'),
+        (4, '版本回退失败'),
     )
     release_result = models.SmallIntegerField(verbose_name='发布结果',null=True,choices=release_result_type)
     reason = models.CharField(verbose_name='上线失败原因',max_length=1024,null=True)
