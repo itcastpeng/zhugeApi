@@ -144,7 +144,7 @@ def create_scan_code_userinfo_qrcode(data):
 
     qr_code_name = '/admin_uid_%s_%s_qrCode.jpg' % (admin_uid, now_time)
     path_qr_code_name = BASE_DIR + qr_code_name
-    qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
+    qr_url = 'statics/zhugeleida/imgs/admin/qrcode%s' % (qr_code_name)
 
     img.save(path_qr_code_name)
     response.data = {'qrcode_url': qr_url}
