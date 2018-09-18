@@ -14,6 +14,79 @@ def mobile_validate(value):
         raise ValidationError('手机号码格式错误') #如果没有匹配到主动触发一个错误
 
 
+
+class ScanCodeToAddUserForm(forms.Form):
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "用户名不能为空"
+        }
+    )
+
+    username = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "用户名不能为空"
+        }
+    )
+
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '公司不能为空'
+        }
+    )
+
+    position = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "职位不能为空"
+        }
+    )
+
+    wechat_phone = forms.CharField(
+        required=True,
+        validators=[mobile_validate, ],        # 应用咱们自己定义的规则
+    )
+
+    wechat = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "微信不能为空"
+        }
+    )
+
+    mingpian_phone = forms.CharField(
+        required=True,
+        validators=[mobile_validate, ],  # 应用咱们自己定义的规则
+    )
+
+
+
+    # 查询用户名判断是否存在
+    def clean_username(self):
+        username = self.data['username']
+        company_id = self.data['company_id']
+        # print(username)
+        objs = models.zgld_temp_userprofile.objects.filter(
+            username=username,company_id=company_id
+        )
+        if objs:
+            self.add_error('username', '用户名已存在')
+        else:
+            return username
+
+    # 返回加密后的密码
+    # def clean_password(self):
+    #     return account.str_encrypt(self.data['password'])
+
+    # 获取公司id
+
+
+
+
+
 # 添加用户信息
 class UserAddForm(forms.Form):
     user_id = forms.CharField(

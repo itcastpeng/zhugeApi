@@ -129,6 +129,17 @@ def xcx_app(request):
                             app_status = 8
                             status_text = '上线失败'
                             reason =  release_obj[0].reason
+
+                        elif status == 3:
+                            app_status = 11
+                            status_text = '版本回退成功'
+                            reason =  release_obj[0].reason
+
+                        elif status == 4:
+                            app_status = 12
+                            status_text = '版本回退失败'
+                            reason = release_obj[0].reason
+
                 else:
                     version_num = ''
                     template_id = ''

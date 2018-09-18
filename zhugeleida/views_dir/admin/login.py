@@ -55,6 +55,7 @@ def login(request):
                 'avatar':  userprofile_obj.avatar,
                 'last_login_date': last_login_date,
                 'is_reset_password': is_reset_password,
+                'weChatQrCode':userprofile_obj.company.weChatQrCode
             }
 
             userprofile_obj.last_login_date = datetime.datetime.now()

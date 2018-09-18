@@ -28,11 +28,6 @@ def department(request):
         role_id = admin_userobj.role_id
         company_id = admin_userobj.company_id
 
-        # if role_id == 1:  # 超级管理员,展示出所有的企业用户
-        #    pass
-        #
-        # else:  #管理员，展示出自己公司的用户
-
         q = conditionCom(request, field_dict)
         q.add(Q(**{"company_id": company_id}), Q.AND)
 

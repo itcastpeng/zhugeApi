@@ -126,6 +126,32 @@ def create_qrcode(data):
     response.msg = '生成文章体验二维码成功'
     print('---------生成文章体验二维码成功--------->>', qr_url)
 
+    return response
+
+def create_scan_code_userinfo_qrcode(data):
+    url = data.get('url')
+    admin_uid = data.get('admin_uid')
+
+    response = Response.ResponseObj()
+    qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3)
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image()
+    img.show()
+
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qrcode')
+
+    qr_code_name = '/admin_uid_%s_%s_qrCode.jpg' % (admin_uid, now_time)
+    path_qr_code_name = BASE_DIR + qr_code_name
+    qr_url = 'statics/zhugeleida/imgs/admin/qrcode%s' % (qr_code_name)
+
+    img.save(path_qr_code_name)
+    response.data = {'qrcode_url': qr_url}
+    response.code = 200
+    response.msg = '生成文章体验二维码成功'
+    print('---------生成文章体验二维码成功--------->>', qr_url)
+
 
     return response
 

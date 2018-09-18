@@ -50,16 +50,19 @@ def company(request):
             ret_data = []
             # 获取第几页的数据
             for obj in objs:
+                open_length_ = obj.open_length_time
 
                 ret_data.append({
                     'name': obj.name,
                     'company_id': obj.id,
                     'charging_start_time': obj.charging_start_time,
                     'open_length_time': obj.open_length_time,
+                    'account_expired_time': obj.account_expired_time,
                     'mingpian_available_num': obj.mingpian_available_num ,
+
                     'remarks':  obj.remarks,
                     'corp_id': obj.corp_id,
-                    'tongxunlu_secret': obj.tongxunlu_secret,
+                    # 'tongxunlu_secret': obj.tongxunlu_secret,
                     'create_date': obj.create_date,
                 })
             response.code = 200
@@ -327,7 +330,8 @@ def company_oper(request, oper_type, o_id):
             company_data = {
                 'company_id': o_id,
                 'corp_id': request.POST.get('corp_id').strip(),
-                'tongxunlu_secret': request.POST.get('tongxunlu_secret').strip()
+                'tongxunlu_secret': request.POST.get('tongxunlu_secret').strip(),
+                'weChatQrCode': request.POST.get('weChatQrCode')
             }
 
             forms_obj = TongxunluAddForm(company_data)
@@ -336,11 +340,13 @@ def company_oper(request, oper_type, o_id):
                 company_id  =  forms_obj.cleaned_data.get('company_id')
                 corp_id =  forms_obj.cleaned_data.get('corp_id')
                 tongxunlu_secret =  forms_obj.cleaned_data.get('tongxunlu_secret')
+                weChatQrCode =  forms_obj.cleaned_data.get('weChatQrCode')
 
                 data = {
                     'corp_id': corp_id,
                     'tongxunlu_secret': tongxunlu_secret,
                     'company_id': company_id,
+
                 }
                 result_validate = validate_tongxunlu(data)
                 is_validate = False
@@ -353,7 +359,8 @@ def company_oper(request, oper_type, o_id):
                 obj.update(
                     is_validate = is_validate,
                     corp_id = corp_id,
-                    tongxunlu_secret = tongxunlu_secret
+                    tongxunlu_secret = tongxunlu_secret,
+                    weChatQrCode=weChatQrCode
                 )
                 response.code = 200
                 response.msg = "添加成功"

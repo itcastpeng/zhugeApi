@@ -13,7 +13,7 @@ from django import forms
 import datetime
 from django.conf import settings
 import os
-from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,RelaseCodeInfoForm,AuditCodeInfoForm,GetAuditForm
+from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,RelaseCodeInfoForm,AuditCodeInfoForm,GetAuditForm,RevertCodeReleaseForm
 
 
 
@@ -536,6 +536,7 @@ def dai_xcx_oper(request, oper_type):
                 response.msg = "未验证通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        #代码回滚
         elif oper_type == 'revert_code_release':
             forms_obj = RevertCodeReleaseForm(request.POST)
 
@@ -550,14 +551,11 @@ def dai_xcx_oper(request, oper_type):
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
                         now_time = datetime.datetime.now()
-                        # upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
-                        #                                                                       audit_result=2,
-                        #                                                                       auditid__isnull=False).order_by(
-                        #     '-upload_code_date')
-
-                        release_obj = models.zgld_xiapchengxu_release.objects.filter(app_id=obj.id,release_result=2)
-
-                        if release_obj: 
+                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
+                                                                                              auditid__isnull=False).order_by(
+                            '-audit_commit_date')
+                        if upload_code_obj:
+                            upload_code_obj = upload_code_obj[0]
                             key_name = '%s_authorizer_access_token' % (authorizer_appid)
                             authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
@@ -580,10 +578,37 @@ def dai_xcx_oper(request, oper_type):
                             url = 'https://api.weixin.qq.com/wxa/revertcoderelease'
 
                             authorizer_info_ret = requests.get(url, params=get_wx_info_data)
+                            authorizer_info_ret = authorizer_info_ret.json()
+                            print('----------- 版库中的所有小程序代码模版 返回 ------------->', json.dumps(authorizer_info_ret))
+                            errmsg = authorizer_info_ret.get('errmsg')
+                            errcode = authorizer_info_ret.get('errcode')
 
-                            print('----------- 版库中的所有小程序代码模版 返回 ------------->', json.dumps(authorizer_info_ret.json()))
+                            reason=''
+                            if errmsg == 'ok':
 
+                                release_result = 3  # (4,'审核撤回成功'),
+                                response.code = 200
+                                response.msg = '小程序版本回退成功'
+                                print('-------- 小程序版本回退成功 --------->>')
 
+                            else:
+                                response.code = 304
+                                response.msg = '小程序版本回退失败'
+                                release_result = 4  # (5,'审核撤回失败'),
+                                reason = '版本撤回失败:%s | %s' % (errcode,errmsg)
+                                print('-------- 小程序版本撤回失败  errcode | errmsg   --------->>', errcode, errmsg)
+
+                            models.zgld_xiapchengxu_release.objects.create(
+                                app_id=authorizer_appid,
+                                audit_code_id=upload_code_obj.id,
+                                release_result=release_result,
+                                release_commit_date=now_time,
+                                reason=reason
+                            )
+
+                        else:
+                            response.code = 302
+                            response.msg = '没有符合的正在审核过得的代码'
 
 
     elif  request.method == "GET":

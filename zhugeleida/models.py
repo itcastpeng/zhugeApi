@@ -12,6 +12,7 @@ class zgld_company(models.Model):
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
     charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)
     is_validate = models.BooleanField(verbose_name="验证通讯录secret是否通过",default=False)
+    weChatQrCode = models.CharField(verbose_name='企业微信二维码', max_length=256, default='')
     remarks = models.TextField(verbose_name="备注",null=True)
 
     open_length_time_choices = (
@@ -114,7 +115,12 @@ class zgld_xiaochengxu_app(models.Model):
         (6, '审核未通过'),
 
         (7, '上线成功'),
-        (8, '上线失败')
+        (8, '上线失败'),
+        (9, '审核撤回成功'),
+        (10, '审核撤回失败'),
+        (11, '版本回退成功'),
+        (12, '版本回退失败'),
+
     )
     code_release_status = models.SmallIntegerField(verbose_name='代码发布流程状态', null=True, choices=code_release_status_choice)
     code_release_result = models.CharField(verbose_name='结果',max_length=1024,null=True)
@@ -336,6 +342,30 @@ class zgld_userprofile(models.Model):
         # unique_together = (("userid", "company"),)
         verbose_name_plural = "用户表"
         app_label = "zhugeleida"
+
+
+# 企业用户临时表
+class zgld_temp_userprofile(models.Model):
+
+    username = models.CharField(verbose_name="成员姓名", max_length=32)
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    department = models.CharField(max_length=64,verbose_name='所属部门')
+    position = models.CharField(verbose_name='职位信息', max_length=128,null=True)
+
+    #telephone = models.CharField(verbose_name='座机号', max_length=20, blank=True, null=True)
+    wechat = models.CharField(verbose_name='微信号', max_length=64, null=True)
+    wechat_phone = models.CharField(verbose_name='微信绑定的手机号', max_length=20, blank=True, null=True)
+    mingpian_phone = models.CharField(verbose_name='名片展示手机号', max_length=20, blank=True, null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        # unique_together = (("userid", "company"),)
+        verbose_name_plural = "用户临时表"
+        app_label = "zhugeleida"
+
 
 
 # 用户标签
@@ -945,3 +975,19 @@ class zgld_plugin_goods_order(models.Model):
     class Meta:
         verbose_name_plural = "插件-商品-订单表"
         app_label = "zhugeleida"
+
+
+
+# 后台管理 - 话术分组管理
+class zgld_talk_group_management(models.Model):
+    groupName = models.CharField(verbose_name='话术分组名称', max_length=64)
+    userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
+    companyName = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+# 后台管理 - 话术详情管理
+class zgld_speech_details_management(models.Model):
+    contentWords = models.CharField(verbose_name='话术内容', max_length=128)
+    sendNum = models.IntegerField(verbose_name='发送次数', default=0)
+    talkGroupName = models.ForeignKey(to='zgld_talk_group_management', verbose_name='分组名称', null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
