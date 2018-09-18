@@ -183,7 +183,12 @@ class TongxunluAddForm(forms.Form):
             'required': "通讯录secret不能为空"
         }
     )
-
+    weChatQrCode = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "企业微信二维码不能为空"
+        }
+    )
 
 
     def clean_company_id(self):

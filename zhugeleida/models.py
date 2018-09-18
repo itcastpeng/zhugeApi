@@ -12,6 +12,7 @@ class zgld_company(models.Model):
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
     charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)
     is_validate = models.BooleanField(verbose_name="验证通讯录secret是否通过",default=False)
+    weChatQrCode = models.CharField(verbose_name='企业微信二维码', max_length=256, default='')
     remarks = models.TextField(verbose_name="备注",null=True)
 
     open_length_time_choices = (
