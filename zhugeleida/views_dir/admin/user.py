@@ -82,11 +82,11 @@ def user(request):
                                 department_name_list = []
                                 for department_dict in department_list_all:
 
-                                    id = department_dict.get('id')
+                                    id =  int(department_dict.get('id'))  if  department_dict .get('id') else ''
                                     name = department_dict.get('name')
                                     if id in  departmane_list:
                                         department_name_list.append(name)
-
+                                print('--- department --->',departmane_list,department_name_list)
                                 department = ', '.join(department_name_list)
 
 
@@ -123,8 +123,6 @@ def user(request):
                                 'data_count': count,
                                 'department_list': department_list_all
                             }
-
-
 
             else:
                 objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
@@ -363,13 +361,15 @@ def user_oper(request, oper_type, o_id):
             type = request.GET.get('type')
 
 
-
             if type == 'temp_user':
                 user_objs = models.zgld_temp_userprofile.objects.filter(id=o_id)
                 if user_objs:
                     user_objs.delete()
                     response.code = 200
                     response.msg = "删除成功"
+                else:
+                    response.code = 302
+                    response.msg = '用户ID不存在'
 
 
             else:
@@ -429,10 +429,15 @@ def user_oper(request, oper_type, o_id):
 
         elif oper_type == "update":
 
-            type = request.GET.get('type')
+            print('-------->>',request.POST)
+            type = request.POST.get('type')
 
             user_id =  request.GET.get('user_id')
-            webchat =  request.GET.get('webchat')
+            wechat =  request.GET.get('wechat')
+            wechat_phone = request.POST.get('phone')
+            if request.POST.get('wechat_phone'):
+                wechat_phone = request.POST.get('wechat_phone')
+            department_id = request.POST.get('department_id')
 
             # 获取ID 用户名 及 角色
             form_data = {
@@ -443,8 +448,8 @@ def user_oper(request, oper_type, o_id):
                 # 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
-                'department_id': request.POST.get('department_id'),
-                'wechat_phone': request.POST.get('phone'),
+                'department_id': department_id,
+                'wechat_phone': wechat_phone,
                 'mingpian_phone': request.POST.get('mingpian_phone')
             }
 
@@ -458,23 +463,26 @@ def user_oper(request, oper_type, o_id):
                 # role_id = forms_obj.cleaned_data.get('role_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
-                department_id = forms_obj.cleaned_data.get('department_id')
+
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
                 if type == 'temp_user':
 
-                    temp_userprofile_objs = models.zgld_temp_userprofile.objects.filter(id=user_id)
+                    temp_userprofile_objs = models.zgld_temp_userprofile.objects.filter(id=o_id)
                     if temp_userprofile_objs:
                         temp_userprofile_objs.update(
                             username=username,
-                            webchat=webchat,
+
                             company_id=company_id,
                             position=position,
+
+                            wechat=wechat,
                             wechat_phone=wechat_phone,
                             mingpian_phone=mingpian_phone,
                         )
 
+                    print('-- department_id --->',department_id)
                     user_obj = temp_userprofile_objs[0]
                     user_obj.department = department_id
                     user_obj.save()
@@ -785,8 +793,8 @@ def user_oper(request, oper_type, o_id):
 
                     for temp_obj in temp_userprofile_objs:
                         company_id = temp_obj.company_id
-                        department_id_list = [ d[0] for d in   temp_obj.department.values_list('id') ]
 
+                        department_id_list = json.loads(temp_obj.department)
 
                         if len(department_id_list) == 0:
                             department_id_list = [1]
