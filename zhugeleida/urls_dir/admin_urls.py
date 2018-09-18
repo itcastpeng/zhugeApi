@@ -2,7 +2,8 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
-    plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app,open_weixin_gongzhonghao
+    plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
+    speechDetailsManagement
 
 urlpatterns = [
     url(r'^login$', login.login),
@@ -94,5 +95,13 @@ urlpatterns = [
     # 文章的标签管理
     url(r'^article_tag/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article_tag.article_tag_oper),
     url(r'^article_tag$', article_tag.article_tag),
+
+    # 话术分组管理
+    url(r'^talkGroupManageShow', talkGroupManagement.talkGroupManageShow),
+    url(r'^talkGroupManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),
+
+    # 话术详情管理
+    url(r'^speechDetailsManageShow', speechDetailsManagement.speechDetailsManageShow),
+    url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 
 ]

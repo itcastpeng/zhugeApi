@@ -974,3 +974,19 @@ class zgld_plugin_goods_order(models.Model):
     class Meta:
         verbose_name_plural = "插件-商品-订单表"
         app_label = "zhugeleida"
+
+
+
+# 后台管理 - 话术分组管理
+class zgld_talk_group_management(models.Model):
+    groupName = models.CharField(verbose_name='话术分组名称', max_length=64)
+    userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
+    companyName = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+# 后台管理 - 话术详情管理
+class zgld_speech_details_management(models.Model):
+    contentWords = models.CharField(verbose_name='话术内容', max_length=128)
+    sendNum = models.IntegerField(verbose_name='发送次数', default=0)
+    talkGroupName = models.ForeignKey(to='zgld_talk_group_management', verbose_name='分组名称', null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
