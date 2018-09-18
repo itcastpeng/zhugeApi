@@ -471,9 +471,11 @@ def xcx_auth_process_oper(request, oper_type):
                 post_wx_info_data['authorizer_appid'] = authorizer_appid
                 get_wx_info_data['component_access_token'] = component_access_token
 
-                url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+                # url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+                url = 'https://api.weixin.qq.com/cgi-bin/account/getaccountbasicinfo'
                 authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
+
                 print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 

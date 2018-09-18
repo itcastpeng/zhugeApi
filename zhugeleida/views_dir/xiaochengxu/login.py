@@ -78,8 +78,8 @@ def login(request):
             component_appid = 'wx67e2fde0f694111c'
 
             # if  version_num: # 有版本号(从ext 里读取的)
-            # online_version_num = obj.version_num
-            online_version_num = '1.0'
+            online_version_num = obj.version_num
+
             if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
                 is_release_version_num = False  # 不相等说明要隐藏按钮。
                 print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',
@@ -186,20 +186,20 @@ def login_oper(request, oper_type):
 
                     # 插入第一条用户和客户的对话信息
                     msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name, obj.user.username)
-                    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
-                                                        msg=msg)
-
-                    # _content = { 'info_type': 1 }
-                    # encodestr = base64.b64encode(msg.encode('utf-8'))
-                    # msg = str(encodestr, 'utf-8')
-                    # _content['msg'] = msg
-                    # content = json.dumps(_content)
-                    #
-                    #
                     # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
-                    #                                     content=content)
-                    #
-                    # print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
+                    #                                     msg=msg)
+
+                    _content = { 'info_type': 1 }
+                    encodestr = base64.b64encode(msg.encode('utf-8'))
+                    msg = str(encodestr, 'utf-8')
+                    _content['msg'] = msg
+                    content = json.dumps(_content)
+
+
+                    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+                                                        content=content)
+
+                    print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
 
                     # 异步生成小程序和企业用户对应的小程序二维码
                     data_dict = {'user_id': user_id, 'customer_id': customer_id}

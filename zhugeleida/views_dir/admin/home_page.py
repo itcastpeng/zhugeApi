@@ -35,15 +35,12 @@ def home_page(request):
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
         mingpian_available_num = user_obj[0].company.mingpian_available_num  # 可开通名片数量
-        user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()  #  # 员工总数
-        available_days = (user_obj[0].company.account_expired_time - datetime.now()).days     #还剩多天可以用
-        used_days = (datetime.now() - user_obj[0].company.create_date).days           #用户使用了多少天了
+        user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()    #  # 员工总数
+        available_days = (user_obj[0].company.account_expired_time - datetime.now()).days     # 还剩多天可以用
+        used_days = (datetime.now() - user_obj[0].company.create_date).days                     #用户使用了多少天了
 
-        user_ids = models.zgld_userprofile.objects.select_related('company').filter(company_id=company_id).values_list('id')
-        user_list = []
-        if user_ids:
-            for u_id in user_ids: user_list.append(u_id[0])
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).values_list('customer_id').distinct().count()  # 已获取客户数
+
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).count()  # 已获取客户数
 
 
         ret_data = {
@@ -53,6 +50,7 @@ def home_page(request):
             'user_count': user_count,  # 员工总数
             'expired_time': user_obj[0].company.account_expired_time.strftime("%Y-%m-%d"),  # 过期时间
             'open_up_date': user_obj[0].company.create_date.strftime("%Y-%m-%d"),  # 开通时间
+
             'available_days': available_days,  # 可用天数
             'used_days': used_days,         # 剩余可用天数
             'customer_num': customer_num,   # 已获取客户数
