@@ -919,7 +919,7 @@ def user_oper(request, oper_type, o_id):
             rand_str = account.str_encrypt(timestamp + token)
             timestamp = timestamp
 
-            url = 'http://zhugeleida.zhugeyingxiao.com/xxx?rand_str=%s&timestamp=%s&user_id=%d' % (
+            url = 'http://zhugeleida.zhugeyingxiao.com/gongzhonghao/zhuceyonghu?rand_str=%s&timestamp=%s&user_id=%d' % (
             rand_str, timestamp, int(user_id))
             data = {
                 'url': url,
