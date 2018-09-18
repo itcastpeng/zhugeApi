@@ -50,16 +50,19 @@ def company(request):
             ret_data = []
             # 获取第几页的数据
             for obj in objs:
+                open_length_ = obj.open_length_time
 
                 ret_data.append({
                     'name': obj.name,
                     'company_id': obj.id,
                     'charging_start_time': obj.charging_start_time,
                     'open_length_time': obj.open_length_time,
+                    'account_expired_time': obj.account_expired_time,
                     'mingpian_available_num': obj.mingpian_available_num ,
+
                     'remarks':  obj.remarks,
                     'corp_id': obj.corp_id,
-                    'tongxunlu_secret': obj.tongxunlu_secret,
+                    # 'tongxunlu_secret': obj.tongxunlu_secret,
                     'create_date': obj.create_date,
                 })
             response.code = 200
