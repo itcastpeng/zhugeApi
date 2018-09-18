@@ -762,7 +762,7 @@ def user_oper(request, oper_type, o_id):
 
                 )
 
-                obj.department = depart_id_list
+                obj.department = json.dumps(depart_id_list)
                 obj.save()
 
                 response.code = 200

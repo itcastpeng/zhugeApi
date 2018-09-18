@@ -69,7 +69,7 @@ class ScanCodeToAddUserForm(forms.Form):
         username = self.data['username']
         company_id = self.data['company_id']
         # print(username)
-        objs = models.zgld_userprofile.objects.filter(
+        objs = models.zgld_temp_userprofile.objects.filter(
             username=username,company_id=company_id
         )
         if objs:
