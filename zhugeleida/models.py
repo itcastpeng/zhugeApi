@@ -991,4 +991,4 @@ class zgld_speech_details_management(models.Model):
     sendNum = models.IntegerField(verbose_name='发送次数', default=0)
     talkGroupName = models.ForeignKey(to='zgld_talk_group_management', verbose_name='分组名称', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-
+    userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
