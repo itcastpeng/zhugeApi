@@ -44,6 +44,7 @@ def speechDetailsManageShow(request):
                         sendNum = obj.sendNum
                     otherList.append({
                         'o_id':obj.id,
+                        'p_id':obj.talkGroupName.id,
                         'contentWords': obj.contentWords,  # 分组名
                         'sendNum': sendNum,  # 用户
                         'talkGroupName': obj.talkGroupName.groupName,  # 公司名
