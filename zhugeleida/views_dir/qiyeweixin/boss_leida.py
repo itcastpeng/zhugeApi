@@ -248,21 +248,21 @@ def home_page_oper(request, oper_type):
             start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
             ret_data['yesterday_data'] = deal_search_time(data, q2)
 
             q3 = Q()
             start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
             ret_data['nearly_seven_days'] = deal_search_time(data, q3)
 
             q4 = Q()
             start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
             # 今日新增
@@ -433,7 +433,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q2.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['yesterday_new_customer'] = deal_sale_ranking_data(data, q2)
 
                 q3 = Q()
@@ -441,7 +441,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q3.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['nearly_seven_new_customer'] = deal_sale_ranking_data(data, q3)
 
                 q4 = Q()
@@ -449,7 +449,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q4.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['nearly_fifteen_new_customer'] = deal_sale_ranking_data(data, q4)
 
                 q5 = Q()
@@ -457,7 +457,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q5.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q5.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q5.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['nearly_thirty_new_customer'] = deal_sale_ranking_data(data, q5)
 
                 response.code = 200
@@ -489,7 +489,7 @@ def home_page_oper(request, oper_type):
                 start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
 
 
 
@@ -499,21 +499,21 @@ def home_page_oper(request, oper_type):
                 start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_seven_data'] = deal_sale_ranking_data(data, q3)
 
                 q4 = Q()
                 start_time = (now_time - timedelta(days=15)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_fifteen_data'] = deal_sale_ranking_data(data, q4)
 
                 q5 = Q()
                 start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q5.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q5.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
 
                 ret_data[type] = ret_dict
@@ -597,7 +597,7 @@ def home_page_oper(request, oper_type):
                         start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
                         stop_time = now_time.strftime("%Y-%m-%d")
                         q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                        q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                        q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)
 
                 if expedted_pr:
                     if expedted_pr == '1_50_pr':
@@ -713,7 +713,7 @@ def home_page_oper(request, oper_type):
                     start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
                     stop_time = now_time.strftime("%Y-%m-%d")
                     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                    q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                    q1.add(Q(**{'create_date__ltee': stop_time}), Q.AND)
 
                 customer_id_list_objs = ''
                 if type == 'chat':
@@ -872,7 +872,7 @@ def deal_line_info(data):
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
+    q1.add(Q(**{'create_date__ltee': stop_time}), Q.AND)  # 小于
     #print('---->start_time', start_time)
 
     if index_type == 1:  # 客户总数
@@ -950,7 +950,7 @@ def deal_sale_ranking_data(data, q):
 
 
     elif type == 'consult_num':  # 按咨询人数
-     
+
 
         chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id).filter(q).filter(send_type=2)
