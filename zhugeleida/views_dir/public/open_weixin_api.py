@@ -12,6 +12,7 @@ def api_authorizer_token(component_access_token, component_appid, authorizer_app
         "authorizer_appid": authorizer_appid,
         "authorizer_refresh_token": authorizer_refresh_token,
     }
+    print('post_data -->', post_data)
     ret = requests.post(url, data=post_data)
 
     print('获取（刷新）授权公众号或小程序的接口调用凭据（令牌） -->', ret.json())
