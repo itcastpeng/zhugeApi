@@ -940,7 +940,7 @@ def deal_sale_ranking_data(data, q):
                 user_id = objs[i]['user_id']
                 user__username = objs[i]['user__username']
                 user__avatar = objs[i]['user__avatar']
-                user__sex = objs[i]['user__sex']
+                user__gender = objs[i]['user__gender']
 
                 for j in range(i - 1, -1, -1):
                     if objs[j]['have_customer_num'] < temp:
@@ -948,7 +948,7 @@ def deal_sale_ranking_data(data, q):
                         objs[j + 1]['user_id'] = objs[j]['user_id']
                         objs[j + 1]['user__username'] = objs[j]['user__username']
                         objs[j + 1]['user__avatar'] = objs[j]['user__avatar']
-                        objs[j + 1]['user__sex'] = objs[j]['user__sex']
+                        objs[j + 1]['user__gender'] = objs[j]['user__gender']
 
                         index = j  # 记下应该插入的位置
                     else:
@@ -958,7 +958,7 @@ def deal_sale_ranking_data(data, q):
                     objs[index]['user_id'] = user_id
                     objs[index]['user__username'] = user__username
                     objs[index]['user__avatar'] = user__avatar
-                    objs[index]['user__sex'] = user__sex
+                    objs[index]['user__gender'] = user__gender
 
         ranking_data = objs
 
