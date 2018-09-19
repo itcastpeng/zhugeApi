@@ -34,7 +34,11 @@ def speechDetailsManageShow(request):
                 print('q -->', q)
                 objs = models.zgld_speech_details_management.objects.filter(q).order_by(order)
                 if groupSearch:
-                    objs = objs.filter(talkGroupName_id=groupSearch)
+                    if groupSearch == 'groupSearch':
+                        objs = objs.filter(talkGroupName_id__isnull=True)
+                    else:
+                        objs = objs.filter(talkGroupName_id=groupSearch)
+
                 objsCount = objs.count()
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -45,12 +49,17 @@ def speechDetailsManageShow(request):
                     sendNum = 0
                     if obj.sendNum:
                         sendNum = obj.sendNum
+                    talkGroupNameId = ''
+                    groupName = ''
+                    if obj.talkGroupName:
+                        groupName = obj.talkGroupName.groupName
+                        talkGroupNameId = obj.talkGroupName.id
                     otherList.append({
                         'o_id':obj.id,
-                        'p_id':obj.talkGroupName.id,
+                        'p_id':talkGroupNameId,
                         'contentWords': obj.contentWords,  # 分组名
                         'sendNum': sendNum,  # 用户
-                        'talkGroupName': obj.talkGroupName.groupName,  # 公司名
+                        'talkGroupName': groupName,  # 公司名
                         'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S')  # 创建时间
                     })
 
@@ -77,6 +86,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
         form_data = {
             'o_id':o_id,
             'contentWords': request.POST.get('contentWords'),
+            'userProfile': request.POST.get('userProfile'),  # 归属用户
             'talkGroupName': request.POST.get('talkGroupName'),
         }
         if oper_type == "add":
@@ -86,7 +96,8 @@ def speechDetailsManageOper(request, oper_type, o_id):
                 print("验证通过")
                 obj = models.zgld_speech_details_management.objects.create(
                     contentWords=forms_obj.cleaned_data.get('contentWords'),
-                    talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName')
+                    talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName'),
+                    userProfile_id=forms_obj.cleaned_data.get('userProfile'),
                 )
                 response.code = 200
                 response.msg = "添加成功"
@@ -107,7 +118,8 @@ def speechDetailsManageOper(request, oper_type, o_id):
                 if objs:
                     objs.update(
                         contentWords=forms_obj.cleaned_data.get('contentWords'),
-                        talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName')
+                        talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName'),
+                        userProfile_id=forms_obj.cleaned_data.get('userProfile')
                     )
                     response.code = 200
                     response.msg = "修改成功"
