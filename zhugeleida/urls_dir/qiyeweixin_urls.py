@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
-    qr_code_auth, follow_language, follow_info,tag_list,article
+    qr_code_auth, follow_language, follow_info,tag_list,article, talkGroupManagement, speechDetailsManagement
 from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product
 
 urlpatterns = [
@@ -79,5 +79,11 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
     url(r'^article/(?P<oper_type>\w+)/', article.article),
 
+    # 话术分组管理
+    url(r'^talkGroupManageShow', talkGroupManagement.talkGroupManageShow),
+    # url(r'^talkGroupManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),
 
+    # 话术详情管理
+    url(r'^speechDetailsManageShow', speechDetailsManagement.speechDetailsManageShow),
+    # url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 ]
