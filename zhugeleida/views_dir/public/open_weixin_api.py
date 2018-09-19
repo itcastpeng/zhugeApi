@@ -3,7 +3,7 @@ import requests
 
 # 获取（刷新）授权公众号或小程序的接口调用凭据（令牌）
 def api_authorizer_token(component_access_token, component_appid, authorizer_appid, authorizer_refresh_token):
-    url = "https:// api.weixin.qq.com /cgi-bin/component/api_authorizer_token?component_access_token={component_access_token}".format(
+    url = "https://api.weixin.qq.com /cgi-bin/component/api_authorizer_token?component_access_token={component_access_token}".format(
         component_access_token=component_access_token
     )
     post_data = {
