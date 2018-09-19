@@ -490,6 +490,9 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
                 q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+
+
+
                 ret_dict['yesterday_data'] = deal_sale_ranking_data(data, q2)
 
                 q3 = Q()
@@ -704,7 +707,7 @@ def home_page_oper(request, oper_type):
                 q1 = Q()
 
 
-                if   days:  # 为0是查询所有的用户。
+                if  days:  # 为0是查询所有的用户。
 
                     days = int(days)
                     start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
@@ -715,8 +718,11 @@ def home_page_oper(request, oper_type):
                 customer_id_list_objs = ''
                 if type == 'chat':
                     q1.add(Q(**{'userprofile_id': query_user_id}), Q.AND)  # 大于等于
+                    q1.add(Q(**{'send_type': 2}), Q.AND)  # 大于等于
+
                     customer_id_list_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(q1).values_list(
                         'customer_id').distinct()
+
                 elif type == 'follow':
                     q1.add(Q(**{'user_customer_flowup__user_id': query_user_id}), Q.AND)  # 大于等于
                     customer_id_list_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(q1).values_list('user_customer_flowup__customer_id').distinct()
@@ -938,38 +944,13 @@ def deal_sale_ranking_data(data, q):
             'user_customer_flowup__user__username'
         ).annotate(have_customer_num=Count('user_customer_flowup__customer_id', 'user_customer_flowup__user_id'))
 
-        # ranking_data = []
-        #
-        # for user_dict in follow_info_list_objs:
-        #     user_id = user_dict.get('user_customer_flowup__user_id')
-        #     customer_list_objs = follow_info_objs.filter(
-        #         user_customer_flowup__user_id=user_id,
-        #     ).values('customer_id', 'customer__username', 'customer__headimgurl', 'customer__sex',
-        #              'user_customer_flowup__expected_time', 'user_customer_flowup__expedted_pr')
-        #
-        #     customer_list = []
-        #     for customer_dict in customer_list_objs:
-        #         customer_id = customer_dict.get('customer_id')
-        #         data = {
-        #             'query_user_id': user_id,
-        #             'customer_id': customer_id,
-        #         }
-        #         last_interval_msg = deal_customer_flowup_info(data)
-        #
-        #         customer__username = customer_dict.get('customer__username')
-        #         customer_name = base64.b64decode(customer__username)
-        #         customer_name = str(customer_name, 'utf-8')
-        #         customer_dict['customer__username'] = customer_name
-        #         customer_dict['customer_status'] = last_interval_msg
-        #         customer_list.append(customer_dict)
-        #
-        #     user_dict['have_customer_people'] = customer_list
 
         ranking_data = list(follow_info_list_objs)
 
 
 
     elif type == 'consult_num':  # 按咨询人数
+        q.add(Q(**{'send_type': 2}), Q.AND)
 
         chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id).filter(q)
