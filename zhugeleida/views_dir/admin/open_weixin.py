@@ -481,8 +481,12 @@ def xcx_auth_process_oper(request, oper_type):
                 url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
                 authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
-                open_weixin_api.api_authorizer_token(component_access_token, component_appid, authorizer_appid, authorizer_refresh_token)
-                # open_weixin_api.getcategory()
+
+                # 获取接口调用凭据
+                authorizer_access_token = open_weixin_api.api_authorizer_token(component_access_token, component_appid, authorizer_appid, authorizer_refresh_token)
+
+                # 获取类目信息
+                open_weixin_api.getcategory(authorizer_access_token)
                 print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
