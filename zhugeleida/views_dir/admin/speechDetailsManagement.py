@@ -20,6 +20,7 @@ def speechDetailsManageShow(request):
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
             if forms_obj.is_valid():
+                groupSearch = request.GET.get('groupSearch')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
@@ -32,6 +33,8 @@ def speechDetailsManageShow(request):
                 q = conditionCom(request, field_dict)
                 print('q -->', q)
                 objs = models.zgld_speech_details_management.objects.filter(q).order_by(order)
+                if groupSearch:
+                    objs = objs.filter(talkGroupName_id=groupSearch)
                 objsCount = objs.count()
                 if length != 0:
                     start_line = (current_page - 1) * length
