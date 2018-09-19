@@ -24,9 +24,11 @@ def api_authorizer_token(component_access_token, component_appid, authorizer_app
 
 # 获取小程序设置的类目信息
 def getcategory(access_token):
+
     url = 'https://api.weixin.qq.com/cgi-bin/wxopen/getcategory?access_token={access_token}'.format(
         access_token=access_token
     )
+    print('url -->', url)
 
     ret = requests.get(url)
 
