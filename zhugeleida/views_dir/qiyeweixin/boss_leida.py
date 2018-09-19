@@ -1059,7 +1059,7 @@ def deal_sale_ranking_data(data, q):
                                                                                                 'customer_parent').filter(
             user__company_id=company_id).filter(q)
 
-        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(
+        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username','user__gender' ,'user__avatar').annotate(
             have_customer_num=Count('customer'))
 
 
