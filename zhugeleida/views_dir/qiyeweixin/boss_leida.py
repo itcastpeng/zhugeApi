@@ -713,7 +713,7 @@ def home_page_oper(request, oper_type):
                     start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
                     stop_time = now_time.strftime("%Y-%m-%d")
                     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                    q1.add(Q(**{'create_date__ltee': stop_time}), Q.AND)
+                    q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)
 
                 customer_id_list_objs = ''
                 if type == 'chat':
