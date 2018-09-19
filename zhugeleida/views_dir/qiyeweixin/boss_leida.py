@@ -872,7 +872,7 @@ def deal_line_info(data):
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__ltee': stop_time}), Q.AND)  # 小于
+    q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)  # 小于
     #print('---->start_time', start_time)
 
     if index_type == 1:  # 客户总数
