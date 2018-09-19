@@ -30,6 +30,8 @@ def getcategory(access_token):
     #     access_token=access_token
     # )
 
+    "https://api.weixin.qq.com/cgi-bin/wxopen/getcategory?access_token=13_RuzOk-5g-ytAoTTCFqkTAGdmtl2WnjwEOszlZn16Oi5ATiOT1TyWhJRa9P_16kMDZ8hy9fBUlbLuJ263ve3gFM-p-3VeFMe3xXT3HeKpGB20Js6EduT27IfBTFRUuvMDk_NE6S3dc6noId56JFLfAIDAWC"
+
     url = "https://api.weixin.qq.com/cgi-bin/wxopen/getallcategories?access_token={access_token}".format(
         access_token=access_token
     )
