@@ -923,12 +923,12 @@ def deal_sale_ranking_data(data, q):
 
     if type == 'customer_data':  # 按客户人数
 
-        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
+        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer','user__gender',
                                                                                                 'customer_parent').filter(
             q)
 
         user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
-                                                                              'user__avatar').annotate(
+                                                                              'user__avatar','user__gender').annotate(
             have_customer_num=Count('customer'))
 
 
@@ -1045,9 +1045,9 @@ def deal_sale_ranking_data(data, q):
 
                     objs[index]['have_customer_num'] = temp
                     objs[index]['userprofile_id'] = userprofile_id
-                    objs[index]['user_customer_flowup__user__avatar'] = userprofile__avatar
-                    objs[index]['user_customer_flowup__user__gender'] = userprofile__username
-                    objs[index]['user_customer_flowup__user__username'] = userprofile__gender
+                    objs[index]['userprofile__avatar'] = userprofile__avatar
+                    objs[index]['userprofile__username'] = userprofile__username
+                    objs[index]['userprofile__gender'] = userprofile__gender
 
 
         ranking_data = objs
