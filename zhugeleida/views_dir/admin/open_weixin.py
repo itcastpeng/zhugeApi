@@ -472,7 +472,7 @@ def xcx_auth_process_oper(request, oper_type):
                 get_wx_info_data['component_access_token'] = component_access_token
 
                 url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-                
+
                 authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
 
