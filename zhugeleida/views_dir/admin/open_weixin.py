@@ -461,14 +461,18 @@ def xcx_auth_process_oper(request, oper_type):
             user_id = request.GET.get('user_id')
             company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
             app_obj = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+
             if app_obj:
                 authorizer_appid = app_obj[0].authorization_appid       # 授权方appid
-                authorizer_refresh_token = app_obj[0].authorizer_refresh_token       # 授权方appid
+                authorizer_refresh_token = app_obj[0].authorizer_refresh_token       # 授权方的刷新令牌
+                # authorizer_refresh_token = component_access_token_ret.data.get('authorizer_refresh_token')  # 授权方的刷新令牌
+
                 get_wx_info_data = {}
                 post_wx_info_data = {}
 
                 component_access_token_ret = create_component_access_token()
                 component_access_token = component_access_token_ret.data.get('component_access_token')
+
 
                 post_wx_info_data['component_appid'] = component_appid
                 post_wx_info_data['authorizer_appid'] = authorizer_appid            # 授权方appid
