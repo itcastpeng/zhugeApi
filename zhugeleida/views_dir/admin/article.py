@@ -395,6 +395,7 @@ def article_oper(request, oper_type, o_id):
                         if result:
                             print('result--> ',result)
                             other.get('children').append(result[0])
+
                 if flag:
                     otherList.append({              # 用户级
                         'name':username,

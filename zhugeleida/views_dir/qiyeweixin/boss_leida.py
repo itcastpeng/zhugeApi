@@ -490,9 +490,6 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
                 q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
-
-
-
                 ret_dict['yesterday_data'] = deal_sale_ranking_data(data, q2)
 
                 q3 = Q()
@@ -934,7 +931,37 @@ def deal_sale_ranking_data(data, q):
                                                                               'user__avatar').annotate(
             have_customer_num=Count('customer'))
 
-        ranking_data = list(user_have_customer_num_list_objs)
+
+        objs = list(user_have_customer_num_list_objs)
+
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                user_id = objs[i]['user_id']
+                user__username = objs[i]['user__username']
+                user__avatar = objs[i]['user__avatar']
+                user__sex = objs[i]['user__sex']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['user_id'] = objs[j]['user_id']
+                        objs[j + 1]['user__username'] = objs[j]['user__username']
+                        objs[j + 1]['user__avatar'] = objs[j]['user__avatar']
+                        objs[j + 1]['user__sex'] = objs[j]['user__sex']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['user_id'] = user_id
+                    objs[index]['user__username'] = user__username
+                    objs[index]['user__avatar'] = user__avatar
+                    objs[index]['user__sex'] = user__sex
+
+        ranking_data = objs
+
 
 
     elif type == 'follow_num':  # 按跟进人数
@@ -950,8 +977,35 @@ def deal_sale_ranking_data(data, q):
         ).annotate(have_customer_num=Count('user_customer_flowup__customer_id', 'user_customer_flowup__user_id'))
 
 
-        ranking_data = list(follow_info_list_objs)
+        objs = list(follow_info_list_objs)
 
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                user_customer_flowup__user_id = objs[i]['user_customer_flowup__user_id']
+                user_customer_flowup__user__avatar = objs[i]['user_customer_flowup__user__avatar']
+                user_customer_flowup__user__gender = objs[i]['user_customer_flowup__user__gender']
+                user_customer_flowup__user__username = objs[i]['user_customer_flowup__user__username']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['user_customer_flowup__user_id'] = objs[j]['user_customer_flowup__user_id']
+                        objs[j + 1]['user_customer_flowup__user__avatar'] = objs[j]['user_customer_flowup__user__avatar']
+                        objs[j + 1]['user_customer_flowup__user__gender'] = objs[j]['user_customer_flowup__user__gender']
+                        objs[j + 1]['user_customer_flowup__user__username'] = objs[j]['user_customer_flowup__user__username']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['user_customer_flowup__user_id'] = user_customer_flowup__user_id
+                    objs[index]['user_customer_flowup__user__avatar'] = user_customer_flowup__user__avatar
+                    objs[index]['user_customer_flowup__user__gender'] = user_customer_flowup__user__gender
+                    objs[index]['user_customer_flowup__user__username'] = user_customer_flowup__user__username
+
+        ranking_data = objs
 
 
     elif type == 'consult_num':  # 按咨询人数
@@ -966,11 +1020,37 @@ def deal_sale_ranking_data(data, q):
             'userprofile__username',
             'userprofile__gender',
         ).annotate(have_customer_num=Count('customer_id', 'userprofile_id'))
-        # .values('userprofile_id','userprofile__avatar','userprofile__username','have_customer_num')
 
-        #print('---- list(chatinfo_list_objs)---------??', chatinfo_list_objs)
+        objs = list(chatinfo_list_objs)
 
-        ranking_data = list(chatinfo_list_objs)
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                userprofile_id = objs[i]['userprofile_id']
+                userprofile__avatar = objs[i]['userprofile__avatar']
+                userprofile__username = objs[i]['userprofile__username']
+                userprofile__gender = objs[i]['userprofile__gender']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['userprofile_id'] = objs[j]['userprofile_id']
+                        objs[j + 1]['userprofile__avatar'] = objs[j]['userprofile__avatar']
+                        objs[j + 1]['userprofile__username'] = objs[j]['userprofile__username']
+                        objs[j + 1]['userprofile__gender'] = objs[j]['userprofile__gender']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['userprofile_id'] = userprofile_id
+                    objs[index]['user_customer_flowup__user__avatar'] = userprofile__avatar
+                    objs[index]['user_customer_flowup__user__gender'] = userprofile__username
+                    objs[index]['user_customer_flowup__user__username'] = userprofile__gender
+
+
+        ranking_data = objs
 
 
     elif type == 'expect_chengjiaolv':
@@ -982,7 +1062,38 @@ def deal_sale_ranking_data(data, q):
         customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(
             have_customer_num=Count('customer'))
 
-        ranking_data = list(customer_list_objs)
+
+
+        objs = list(customer_list_objs)
+
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                user_id = objs[i]['user_id']
+                user__username = objs[i]['user__username']
+                user__avatar = objs[i]['user__avatar']
+                user__gender = objs[i]['user__gender']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['user_id'] = objs[j]['user_id']
+                        objs[j + 1]['user__username'] = objs[j]['user__username']
+                        objs[j + 1]['user__avatar'] = objs[j]['user__avatar']
+                        objs[j + 1]['user__gender'] = objs[j]['user__gender']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['user_id'] = user_id
+                    objs[index]['user__username'] = user__username
+                    objs[index]['user__avatar'] = user__avatar
+                    objs[index]['user__gender'] = user__gender
+
+            ranking_data = objs
+
 
     return ranking_data
 
