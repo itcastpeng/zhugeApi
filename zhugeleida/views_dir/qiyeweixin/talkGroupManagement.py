@@ -43,7 +43,6 @@ def talkGroupManageShow(request):
                 if obj.companyName:
                     companyName = obj.companyName.name
                 otherList.append({
-                    'o_id': obj.id,
                     'groupName': obj.groupName,                 # 分组名
                     'userProfile': obj.userProfile.username,    # 用户
                     'companyName': companyName,                 # 公司名

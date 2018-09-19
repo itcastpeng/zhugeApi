@@ -10,7 +10,6 @@ import json
 import redis
 import xml.etree.cElementTree as ET
 from django import forms
-from zhugeleida.views_dir.public import open_weixin_api
 
 ## 第三方平台接入
 @csrf_exempt
@@ -457,36 +456,26 @@ def xcx_auth_process_oper(request, oper_type):
 
         ###获取小程序基本信息
         if oper_type == 'xcx_get_authorizer_info':
-            component_appid = "wx67e2fde0f694111c"      # 第三方平台appid
             user_id = request.GET.get('user_id')
-            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            app_obj = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
-
+            company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            app_obj =   models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
             if app_obj:
-                authorizer_appid = app_obj[0].authorization_appid       # 授权方appid
-                authorizer_refresh_token = app_obj[0].authorizer_refresh_token       # 授权方的刷新令牌
-                # authorizer_refresh_token = component_access_token_ret.data.get('authorizer_refresh_token')  # 授权方的刷新令牌
-
+                authorizer_appid = app_obj[0].authorization_appid
                 get_wx_info_data = {}
                 post_wx_info_data = {}
+                app_id = 'wx67e2fde0f694111c' # 三方平台的appid
 
                 component_access_token_ret = create_component_access_token()
                 component_access_token = component_access_token_ret.data.get('component_access_token')
-
-
-                post_wx_info_data['component_appid'] = component_appid
-                post_wx_info_data['authorizer_appid'] = authorizer_appid            # 授权方appid
+                post_wx_info_data['component_appid'] = app_id
+                post_wx_info_data['authorizer_appid'] = authorizer_appid
                 get_wx_info_data['component_access_token'] = component_access_token
 
                 url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+
                 authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
 
-                # 获取接口调用凭据
-                authorizer_access_token = open_weixin_api.api_authorizer_token(component_access_token, component_appid, authorizer_appid, authorizer_refresh_token)
-
-                # 获取类目信息
-                open_weixin_api.getcategory(authorizer_access_token)
                 print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 

@@ -50,29 +50,32 @@ def company(request):
             ret_data = []
             # 获取第几页的数据
             for obj in objs:
+                # print('---- obj.account_expired_time --->>',obj.account_expired_time,'|',datetime.datetime.now())
 
                 available_days = (obj.account_expired_time - datetime.datetime.now()).days  # 还剩多天可以用
                 used_days = (datetime.datetime.now() - obj.create_date).days  # 用户使用了多少天了
 
                 customer_num = models.zgld_user_customer_belonger.objects.filter(
                     user__company_id=obj.id).count()  # 已获取客户数
+                user_count = models.zgld_userprofile.objects.filter(company_id=obj.id).count()  # # 员工总数
 
                 ret_data.append({
                     'name': obj.name,
                     'company_id': obj.id,
-                    'charging_start_time': obj.charging_start_time,
+                    'charging_start_time': obj.charging_start_time.strftime('%Y-%m-%d'),
                     'open_length_time': obj.open_length_time,
                     'mingpian_available_num': obj.mingpian_available_num ,
 
                     'remarks':  obj.remarks,
                     'corp_id': obj.corp_id,
                     # 'tongxunlu_secret': obj.tongxunlu_secret,
-                    'create_date': obj.create_date,
+                    'create_date': obj.create_date.strftime('%Y-%m-%d'),
 
-                    'customer_num': customer_num,
-                    'available_days': available_days, #
+                    'user_count': user_count,        # 用户总数
+                    'customer_num': customer_num,    # 拥有的客户数量
+                    'available_days': available_days, #剩余天数
                     'used_days': used_days,
-                    'account_expired_time': obj.account_expired_time,
+                    'account_expired_time': obj.account_expired_time.strftime('%Y-%m-%d'),
 
 
                 })

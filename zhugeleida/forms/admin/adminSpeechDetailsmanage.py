@@ -13,10 +13,16 @@ class AddForm(forms.Form):
             'required': "话术内容不能为空"
         }
     )
-    talkGroupName = forms.IntegerField(
+    userProfile = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "分组名称不能为空"
+            'required': "用户名称不能为空"
+        }
+    )
+    talkGroupName = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "分组名称类型错误"
         }
     )
 
@@ -32,6 +38,12 @@ class UpdateForm(forms.Form):
         required=True,
         error_messages={
             'required': "分组名称不能为空"
+        }
+    )
+    userProfile = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "用户名称不能为空"
         }
     )
 

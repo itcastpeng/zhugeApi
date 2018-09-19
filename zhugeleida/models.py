@@ -579,6 +579,7 @@ class zgld_user_customer_belonger(models.Model):
 
     last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
+
     is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
     is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
     is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
@@ -990,4 +991,4 @@ class zgld_speech_details_management(models.Model):
     sendNum = models.IntegerField(verbose_name='发送次数', default=0)
     talkGroupName = models.ForeignKey(to='zgld_talk_group_management', verbose_name='分组名称', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-
+    userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)

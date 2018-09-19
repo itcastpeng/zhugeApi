@@ -201,7 +201,7 @@ class QueryHudongHaveCustomerDetailPeopleForm(forms.Form):
 
     def clean_length(self):
         if not self.data.get('length'):
-            length = 10
+            length = 5
         else:
             length = int(self.data['length'])
 
@@ -248,21 +248,21 @@ def home_page_oper(request, oper_type):
             start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
             ret_data['yesterday_data'] = deal_search_time(data, q2)
 
             q3 = Q()
             start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
             ret_data['nearly_seven_days'] = deal_search_time(data, q3)
 
             q4 = Q()
             start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
             # 今日新增
@@ -433,7 +433,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q2.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['yesterday_new_customer'] = deal_sale_ranking_data(data, q2)
 
                 q3 = Q()
@@ -441,7 +441,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q3.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['nearly_seven_new_customer'] = deal_sale_ranking_data(data, q3)
 
                 q4 = Q()
@@ -449,7 +449,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q4.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['nearly_fifteen_new_customer'] = deal_sale_ranking_data(data, q4)
 
                 q5 = Q()
@@ -457,7 +457,7 @@ def home_page_oper(request, oper_type):
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q5.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
                 q5.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q5.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_data['nearly_thirty_new_customer'] = deal_sale_ranking_data(data, q5)
 
                 response.code = 200
@@ -489,28 +489,28 @@ def home_page_oper(request, oper_type):
                 start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['yesterday_data'] = deal_sale_ranking_data(data, q2)
 
                 q3 = Q()
                 start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_seven_data'] = deal_sale_ranking_data(data, q3)
 
                 q4 = Q()
                 start_time = (now_time - timedelta(days=15)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_fifteen_data'] = deal_sale_ranking_data(data, q4)
 
                 q5 = Q()
                 start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
                 stop_time = now_time.strftime("%Y-%m-%d")
                 q5.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                q5.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
 
                 ret_data[type] = ret_dict
@@ -594,7 +594,7 @@ def home_page_oper(request, oper_type):
                         start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
                         stop_time = now_time.strftime("%Y-%m-%d")
                         q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-                        q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+                        q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)
 
                 if expedted_pr:
                     if expedted_pr == '1_50_pr':
@@ -704,7 +704,7 @@ def home_page_oper(request, oper_type):
                 q1 = Q()
 
 
-                if   days:  # 为0是查询所有的用户。
+                if  days:  # 为0是查询所有的用户。
 
                     days = int(days)
                     start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
@@ -715,17 +715,16 @@ def home_page_oper(request, oper_type):
                 customer_id_list_objs = ''
                 if type == 'chat':
                     q1.add(Q(**{'userprofile_id': query_user_id}), Q.AND)  # 大于等于
+                    q1.add(Q(**{'send_type': 2}), Q.AND)  # 大于等于
+
                     customer_id_list_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(q1).values_list(
                         'customer_id').distinct()
+
                 elif type == 'follow':
                     q1.add(Q(**{'user_customer_flowup__user_id': query_user_id}), Q.AND)  # 大于等于
                     customer_id_list_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(q1).values_list('user_customer_flowup__customer_id').distinct()
                 #print('---- customer_id_list_objs --->>',customer_id_list_objs)
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    #print('--- start_line ------>',start_line,stop_line)
-                    customer_id_list_objs = customer_id_list_objs[start_line: stop_line]
+
 
                 customer_id_list = [ c[0] for c  in list(customer_id_list_objs) ]
                 #print('----customer_id_list----->>',customer_id_list)
@@ -734,10 +733,19 @@ def home_page_oper(request, oper_type):
                 q2.add(Q(**{'customer_id__in': customer_id_list}), Q.AND)
                 q2.add(Q(**{'user_id': query_user_id}), Q.AND)
                 objs = models.zgld_user_customer_belonger.objects.filter(q2)
+                print('--- [query_hudong_have_customer_detail_people] customer_id_list ---->',customer_id_list)
+
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    #print('--- start_line ------>',start_line,stop_line)
+                    objs = objs[start_line: stop_line]
 
                 if objs:
 
-                    count = objs.count()
+
                     ret_data = []
 
                     for obj in objs:
@@ -866,7 +874,7 @@ def deal_line_info(data):
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
+    q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)  # 小于
     #print('---->start_time', start_time)
 
     if index_type == 1:  # 客户总数
@@ -915,15 +923,45 @@ def deal_sale_ranking_data(data, q):
 
     if type == 'customer_data':  # 按客户人数
 
-        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
+        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer','user__gender',
                                                                                                 'customer_parent').filter(
             q)
 
         user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
-                                                                              'user__avatar').annotate(
+                                                                              'user__avatar','user__gender').annotate(
             have_customer_num=Count('customer'))
 
-        ranking_data = list(user_have_customer_num_list_objs)
+
+        objs = list(user_have_customer_num_list_objs)
+
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                user_id = objs[i]['user_id']
+                user__username = objs[i]['user__username']
+                user__avatar = objs[i]['user__avatar']
+                user__gender = objs[i]['user__gender']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['user_id'] = objs[j]['user_id']
+                        objs[j + 1]['user__username'] = objs[j]['user__username']
+                        objs[j + 1]['user__avatar'] = objs[j]['user__avatar']
+                        objs[j + 1]['user__gender'] = objs[j]['user__gender']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['user_id'] = user_id
+                    objs[index]['user__username'] = user__username
+                    objs[index]['user__avatar'] = user__avatar
+                    objs[index]['user__gender'] = user__gender
+
+        ranking_data = objs
+
 
 
     elif type == 'follow_num':  # 按跟进人数
@@ -938,41 +976,43 @@ def deal_sale_ranking_data(data, q):
             'user_customer_flowup__user__username'
         ).annotate(have_customer_num=Count('user_customer_flowup__customer_id', 'user_customer_flowup__user_id'))
 
-        # ranking_data = []
-        #
-        # for user_dict in follow_info_list_objs:
-        #     user_id = user_dict.get('user_customer_flowup__user_id')
-        #     customer_list_objs = follow_info_objs.filter(
-        #         user_customer_flowup__user_id=user_id,
-        #     ).values('customer_id', 'customer__username', 'customer__headimgurl', 'customer__sex',
-        #              'user_customer_flowup__expected_time', 'user_customer_flowup__expedted_pr')
-        #
-        #     customer_list = []
-        #     for customer_dict in customer_list_objs:
-        #         customer_id = customer_dict.get('customer_id')
-        #         data = {
-        #             'query_user_id': user_id,
-        #             'customer_id': customer_id,
-        #         }
-        #         last_interval_msg = deal_customer_flowup_info(data)
-        #
-        #         customer__username = customer_dict.get('customer__username')
-        #         customer_name = base64.b64decode(customer__username)
-        #         customer_name = str(customer_name, 'utf-8')
-        #         customer_dict['customer__username'] = customer_name
-        #         customer_dict['customer_status'] = last_interval_msg
-        #         customer_list.append(customer_dict)
-        #
-        #     user_dict['have_customer_people'] = customer_list
 
-        ranking_data = list(follow_info_list_objs)
+        objs = list(follow_info_list_objs)
 
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                user_customer_flowup__user_id = objs[i]['user_customer_flowup__user_id']
+                user_customer_flowup__user__avatar = objs[i]['user_customer_flowup__user__avatar']
+                user_customer_flowup__user__gender = objs[i]['user_customer_flowup__user__gender']
+                user_customer_flowup__user__username = objs[i]['user_customer_flowup__user__username']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['user_customer_flowup__user_id'] = objs[j]['user_customer_flowup__user_id']
+                        objs[j + 1]['user_customer_flowup__user__avatar'] = objs[j]['user_customer_flowup__user__avatar']
+                        objs[j + 1]['user_customer_flowup__user__gender'] = objs[j]['user_customer_flowup__user__gender']
+                        objs[j + 1]['user_customer_flowup__user__username'] = objs[j]['user_customer_flowup__user__username']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['user_customer_flowup__user_id'] = user_customer_flowup__user_id
+                    objs[index]['user_customer_flowup__user__avatar'] = user_customer_flowup__user__avatar
+                    objs[index]['user_customer_flowup__user__gender'] = user_customer_flowup__user__gender
+                    objs[index]['user_customer_flowup__user__username'] = user_customer_flowup__user__username
+
+        ranking_data = objs
 
 
     elif type == 'consult_num':  # 按咨询人数
 
+
         chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id).filter(q)
+            userprofile__company_id=company_id).filter(q).filter(send_type=2)
 
         chatinfo_list_objs = chatinfo_objs.values(
             'userprofile_id',
@@ -980,11 +1020,37 @@ def deal_sale_ranking_data(data, q):
             'userprofile__username',
             'userprofile__gender',
         ).annotate(have_customer_num=Count('customer_id', 'userprofile_id'))
-        # .values('userprofile_id','userprofile__avatar','userprofile__username','have_customer_num')
 
-        #print('---- list(chatinfo_list_objs)---------??', chatinfo_list_objs)
+        objs = list(chatinfo_list_objs)
 
-        ranking_data = list(chatinfo_list_objs)
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                userprofile_id = objs[i]['userprofile_id']
+                userprofile__avatar = objs[i]['userprofile__avatar']
+                userprofile__username = objs[i]['userprofile__username']
+                userprofile__gender = objs[i]['userprofile__gender']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['userprofile_id'] = objs[j]['userprofile_id']
+                        objs[j + 1]['userprofile__avatar'] = objs[j]['userprofile__avatar']
+                        objs[j + 1]['userprofile__username'] = objs[j]['userprofile__username']
+                        objs[j + 1]['userprofile__gender'] = objs[j]['userprofile__gender']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['userprofile_id'] = userprofile_id
+                    objs[index]['userprofile__avatar'] = userprofile__avatar
+                    objs[index]['userprofile__username'] = userprofile__username
+                    objs[index]['userprofile__gender'] = userprofile__gender
+
+
+        ranking_data = objs
 
 
     elif type == 'expect_chengjiaolv':
@@ -993,10 +1059,41 @@ def deal_sale_ranking_data(data, q):
                                                                                                 'customer_parent').filter(
             user__company_id=company_id).filter(q)
 
-        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__avatar').annotate(
+        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username','user__gender' ,'user__avatar').annotate(
             have_customer_num=Count('customer'))
 
-        ranking_data = list(customer_list_objs)
+
+
+        objs = list(customer_list_objs)
+
+        for i in range(1, len(objs)):
+            if objs[i]['have_customer_num'] > objs[i - 1]['have_customer_num']:
+                temp = objs[i]['have_customer_num']
+                user_id = objs[i]['user_id']
+                user__username = objs[i]['user__username']
+                user__avatar = objs[i]['user__avatar']
+                user__gender = objs[i]['user__gender']
+
+                for j in range(i - 1, -1, -1):
+                    if objs[j]['have_customer_num'] < temp:
+                        objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
+                        objs[j + 1]['user_id'] = objs[j]['user_id']
+                        objs[j + 1]['user__username'] = objs[j]['user__username']
+                        objs[j + 1]['user__avatar'] = objs[j]['user__avatar']
+                        objs[j + 1]['user__gender'] = objs[j]['user__gender']
+
+                        index = j  # 记下应该插入的位置
+                    else:
+                        break
+
+                    objs[index]['have_customer_num'] = temp
+                    objs[index]['user_id'] = user_id
+                    objs[index]['user__username'] = user__username
+                    objs[index]['user__avatar'] = user__avatar
+                    objs[index]['user__gender'] = user__gender
+
+            ranking_data = objs
+
 
     return ranking_data
 
