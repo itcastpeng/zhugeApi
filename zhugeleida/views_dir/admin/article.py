@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm,ArticleSelectForm, ArticleUpdateForm,MyarticleForm
 import time
 import datetime
-import json
+import json, base64
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
@@ -94,6 +94,39 @@ def article(request,oper_type):
 
     return JsonResponse(response.__dict__)
 
+# 递归 脉络图
+def init_data(user_id, article_id, o_id=None):
+    datadict = []
+    if o_id:
+        objs = models.zgld_article_to_customer_belonger.objects.filter(customer_parent_id=o_id).filter(
+            article_id=article_id).filter(user_id=user_id)
+        for obj in objs:
+            if obj.customer_parent.id == obj.customer.id:
+                continue
+            decode_username = base64.b64decode(obj.customer_parent.username)
+            username = str(decode_username, 'utf-8')
+            parentId = obj.customer.id
+            result = init_data(user_id, article_id, parentId)
+            flag = True
+            # print('result=====> ',result)
+            for other in datadict:
+                if username in other.get('name'):
+                    flag = False
+                    if result:
+                        print(result)
+                        other.get('children').append(result[0])
+            if flag:
+                if result:
+                    datadict.append({
+                        'name':username,
+                        'children': result
+                    })
+                else:
+                    datadict.append({
+                        'name': username,
+                    })
+
+    return datadict
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -342,5 +375,45 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        # 脉络图 统计文章 转载情况
+        elif oper_type == 'contextDiagram':
+            objs = models.zgld_article_to_customer_belonger.objects.select_related('user').filter(customer_parent__isnull=True).values(
+                'article_id', 'user_id', 'user__username', 'article', 'customer')
+            otherList = []
+            for obj in objs:
+                print(obj.get('user__username'))
+                username = obj.get('user__username')
+                o_id = obj.get('customer')
+                user_id = obj.get('user_id')
+                article_id = obj.get('article_id')
+                flag = True
+                result = init_data(user_id, article_id, o_id)           # 递归子级
+                # print('result====== 》 ',result)
+                for other in otherList:
+                    if username in other.get('name'):
+                        flag = False
+                        if result:
+                            print('result--> ',result)
+                            other.get('children').append(result[0])
+                if flag:
+                    otherList.append({              # 用户级
+                        'name':username,
+                        'children': result
+                    })
+            dataList = {                    # 顶端 首级
+                'name':'诸葛雷达',
+                'children':otherList
+            }
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'dataList':dataList
+            }
+        else:
+            response.code = 402
+            response.msg = '请求异常'
     return JsonResponse(response.__dict__)
+
+
+
+
