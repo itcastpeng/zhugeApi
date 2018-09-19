@@ -950,10 +950,10 @@ def deal_sale_ranking_data(data, q):
 
 
     elif type == 'consult_num':  # 按咨询人数
-        q.add(Q(**{'send_type': 2}), Q.AND)
+     
 
         chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id).filter(q)
+            userprofile__company_id=company_id).filter(q).filter(send_type=2)
 
         chatinfo_list_objs = chatinfo_objs.values(
             'userprofile_id',
