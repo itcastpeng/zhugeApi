@@ -6,6 +6,7 @@ def api_authorizer_token(component_access_token, component_appid, authorizer_app
     url = "https://api.weixin.qq.com /cgi-bin/component/api_authorizer_token?component_access_token={component_access_token}".format(
         component_access_token=component_access_token
     )
+    print('url -->', url)
     post_data = {
         "component_appid": component_appid,
         "authorizer_appid": authorizer_appid,
