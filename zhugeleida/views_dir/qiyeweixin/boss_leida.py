@@ -738,6 +738,8 @@ def home_page_oper(request, oper_type):
                 objs = models.zgld_user_customer_belonger.objects.filter(q2)
                 print('--- [query_hudong_have_customer_detail_people] customer_id_list ---->',customer_id_list)
 
+                count = objs.count()
+
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
@@ -746,7 +748,7 @@ def home_page_oper(request, oper_type):
 
                 if objs:
 
-                    count = objs.count()
+
                     ret_data = []
 
                     for obj in objs:
