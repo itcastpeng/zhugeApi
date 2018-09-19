@@ -201,7 +201,7 @@ class QueryHudongHaveCustomerDetailPeopleForm(forms.Form):
 
     def clean_length(self):
         if not self.data.get('length'):
-            length = 10
+            length = 5
         else:
             length = int(self.data['length'])
 
@@ -727,11 +727,7 @@ def home_page_oper(request, oper_type):
                     q1.add(Q(**{'user_customer_flowup__user_id': query_user_id}), Q.AND)  # 大于等于
                     customer_id_list_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(q1).values_list('user_customer_flowup__customer_id').distinct()
                 #print('---- customer_id_list_objs --->>',customer_id_list_objs)
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    #print('--- start_line ------>',start_line,stop_line)
-                    customer_id_list_objs = customer_id_list_objs[start_line: stop_line]
+
 
                 customer_id_list = [ c[0] for c  in list(customer_id_list_objs) ]
                 #print('----customer_id_list----->>',customer_id_list)
@@ -740,6 +736,13 @@ def home_page_oper(request, oper_type):
                 q2.add(Q(**{'customer_id__in': customer_id_list}), Q.AND)
                 q2.add(Q(**{'user_id': query_user_id}), Q.AND)
                 objs = models.zgld_user_customer_belonger.objects.filter(q2)
+                print('--- [query_hudong_have_customer_detail_people] customer_id_list ---->',customer_id_list)
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    #print('--- start_line ------>',start_line,stop_line)
+                    objs = objs[start_line: stop_line]
 
                 if objs:
 
