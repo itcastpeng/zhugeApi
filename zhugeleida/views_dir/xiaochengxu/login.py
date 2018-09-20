@@ -100,16 +100,20 @@ def login(request):
 
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
-                user_type=user_type,
+                user_type=user_type
             )
             # 如果openid存在一条数据
             if customer_objs:
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
+                customer_objs.update(
+                    session_key= session_key
+                )
 
             else:
                 token = account.get_token(account.str_encrypt(openid))
                 obj = models.zgld_customer.objects.create(
+                    session_key=session_key,
                     company_id=company_id,
                     token=token,
                     openid=openid,

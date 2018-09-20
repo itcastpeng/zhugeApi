@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
 import base64
 from django.db.models import F
 import json
@@ -413,8 +413,43 @@ def chat_oper(request, oper_type, o_id):
                 response.data = json.loads(forms_obj.errors.as_json())
 
         # 解密接收手机发送的手机号
-        elif oper_type == '':
-            pass
+        elif oper_type == 'encrypted_phone_number':
+
+            forms_obj = EncryptedPhoneNumberForm(request.POST)
+            if forms_obj.is_valid():
+                response = Response.ResponseObj()
+                customer_id = request.GET.get('user_id')
+
+                user_id = request.POST.get('u_id')
+                encryptedData = request.POST.get('encryptedData')
+                iv = request.POST.get('iv')
+
+                objs =  models.zgld_userprofile.objects.filter(id=user_id)
+                if objs:
+                    obj =objs[0]
+                    customer_obj = models.zgld_customer.objects.get(customer_id=customer_id)
+                    session_key = customer_obj.session_key
+                    company_id = obj.company_id
+                    xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+                    authorization_appid = ''
+                    if xiaochengxu_app_objs:
+                        authorization_appid = xiaochengxu_app_objs[0].authorization_appid
+
+                    appId = authorization_appid
+                    sessionKey = session_key
+                    encryptedData = encryptedData
+                    iv =  iv
+                    from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
+                    pc = WXBizDataCrypt(appId, sessionKey)
+
+                    print ('------ pc.decrypt(encryptedData) ------->>',pc.decrypt(encryptedData, iv))
+
+                    response.code = 200
+                    response.msg = '查询成功'
+                    # response.data = {
+                    #     'chatinfo_count': chatinfo_count,
+                    # }
+
 
 
     else:
