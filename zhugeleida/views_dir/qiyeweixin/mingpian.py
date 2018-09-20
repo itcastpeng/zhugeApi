@@ -247,8 +247,8 @@ def mingpian_oper(request, oper_type):
             user_id = request.GET.get('user_id')
             user_obj = models.zgld_userprofile.objects.filter(id=user_id)
             if user_obj:
-                # 生成企业用户二维码
 
+                # 生成企业用户二维码
                 # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
                 data_dict = {

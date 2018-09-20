@@ -59,9 +59,13 @@ def chat(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-            global phone,wechat
 
+            phone = ''
+            wechat = ''
             ret_data_list = []
+            phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
+            wechat = objs[0].userprofile.wechat if objs[0].userprofile.wechat else objs[0].userprofile.wechat_phone
+
             for obj in objs:
 
                 mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
@@ -77,8 +81,6 @@ def chat(request):
 
                 customer_name = base64.b64decode(obj.customer.username)
                 customer_name = str(customer_name, 'utf-8')
-                phone = obj.userprofile.mingpian_phone  if obj.userprofile.mingpian_phone else obj.userprofile.wechat_phone
-                wechat = obj.userprofile.wechat if obj.userprofile.wechat else obj.userprofile.wechat_phone
 
                 is_first_info = False
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
@@ -120,44 +122,6 @@ def chat(request):
 
                 ret_data_list.append(base_info_dict)
 
-
-                # elif obj.info_type == 2: # 如果为产品咨询。
-                #     print('------first_info.get----->', first_info[0].get('id'))
-                #     ret_data_list.append({
-                #         'customer_id': obj.customer.id,
-                #         'from_user_name': customer_name,
-                #         'user_id': obj.userprofile.id,
-                #         'customer': customer_name,
-                #         'user_avatar': mingpian_avatar,
-                #         'customer_headimgurl': obj.customer.headimgurl,
-                #         'dateTime': obj.create_date,
-                #
-                #         'product_cover_url': obj.product_cover_url,
-                #         'product_name': obj.product_name,
-                #         'product_price': obj.product_price,
-                #
-                #         'info_type': obj.info_type,  #   (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                #         'send_type': obj.send_type,
-                #         'is_first_info': False,  # 是否为第一条的信息
-                #     })
-                #
-                # else:
-                #
-                #     ret_data_list.append({
-                #         'customer_id': obj.customer.id,
-                #         'user_id': obj.userprofile.id,
-                #         'customer': customer_name,
-                #         'user_avatar': mingpian_avatar,
-                #         'customer_headimgurl': obj.customer.headimgurl,
-                #         'dateTime': obj.create_date,
-                #
-                #         'msg': obj.msg,
-                #         'info_type': obj.info_type,
-                #
-                #         'send_type': obj.send_type, # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                #         'is_first_info': False,     # 是否为第一条的信息
-                #     })
-
             ret_data_list.reverse()
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
@@ -167,9 +131,7 @@ def chat(request):
                 'wechat': wechat,
                 'data_count': count,
             }
-            if not ret_data_list:
-                # 没有新消息
-                response.msg = 'No new data'
+
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -247,19 +209,6 @@ def chat_oper(request, oper_type, o_id):
                     base_info_dict.update(_content)
 
                     ret_data_list.append(base_info_dict)
-
-                    # ret_data_list.append({
-                                # 'customer_id': obj.customer.id,
-                                # 'user_id': obj.userprofile.id,
-                                # 'user_avator' :  mingpian_avatar,
-                                # 'customer_headimgurl':  obj.customer.headimgurl,
-                                # 'customer': customer_name,
-                                # 'dateTime': obj.create_date,
-                                # 'msg':       obj.msg,
-                                # 'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                                # 'is_first_info': False,  # 是否为第一条的信息
-                                # 'info_type': obj.info_type, # 消息的类型
-                            # })
 
 
                 ret_data_list.reverse()
