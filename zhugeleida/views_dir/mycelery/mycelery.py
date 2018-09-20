@@ -39,19 +39,6 @@ def user_send_action_log(request):
     app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, app_type=1).app_secret
 
 
-    # LOG_FILE = r'user_send_action.log'
-    # handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes= 500 *1024 * 1024, backupCount=2, encoding='utf-8')  # 实例化handler
-    # fmt = '%(asctime)s - %(levelname)s - %(message)s'
-    # formatter = logging.Formatter(fmt)  # 实例化formatter
-    # handler.setFormatter(formatter)  # 为handler添加formatter
-
-    # logger = logging.getLogger('user_send_action')  # 获取名为tst的logger
-    # logger.addHandler(handler)  # 为logger添加handler
-    # logger.info('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
-
-    # log_info = "request.GET==> %s | b64encode:%s |request.POST==> %s" % (request.GET,customer_name,request.POST)
-    # logger.info(log_info)
-
 
     get_token_data['corpsecret'] = app_secret
     print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)

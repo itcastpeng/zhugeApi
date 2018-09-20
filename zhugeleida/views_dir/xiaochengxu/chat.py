@@ -304,6 +304,7 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+
         elif oper_type == 'history_chatinfo_store_content':
 
 
@@ -371,13 +372,13 @@ def chat_oper(request, oper_type, o_id):
 
                 _content = json.loads(content)
                 info_type = _content.get('info_type')
-                msg = ''
+                _msg = ''
                 if info_type:
                     info_type = int(info_type)
 
                     if info_type == 1:
-                        msg = _content.get('msg')
-                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        _msg = _content.get('msg')
+                        encodestr = base64.b64encode(_msg.encode('utf-8'))
                         msg = str(encodestr, 'utf-8')
                         _content['msg'] = msg
                         content = json.dumps(_content)
@@ -397,7 +398,7 @@ def chat_oper(request, oper_type, o_id):
                     )
 
                 if info_type == 1:  # 发送的图文消息
-                    remark = ':%s' % (msg)
+                    remark = ':%s' % (_msg)
                     data = request.GET.copy()
                     data['action'] = 0  # 代表用客户咨询产品
                     data['uid'] = user_id

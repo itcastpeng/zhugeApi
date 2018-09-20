@@ -558,6 +558,7 @@ def home_page_oper(request, oper_type):
                 'ret_data': ret_dict
             }
 
+
     elif request.method == "POST":
 
         # 查询预计成交率客户信息 | 查询按客户\新增客户(天数)具体信息

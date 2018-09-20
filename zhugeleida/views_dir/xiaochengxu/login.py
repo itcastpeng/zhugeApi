@@ -96,6 +96,7 @@ def login(request):
 
             ret_data = get_openid_info(get_token_data)
             openid = ret_data['openid']
+            session_key = ret_data['session_key']
 
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,

@@ -275,7 +275,7 @@ def product(request, oper_type):
 
                 remark = '向您咨询产品'
                 data = request.GET.copy()
-                data['action'] = 2  # 咨询产品
+                data['action'] = 7 # 咨询产品
                 response = action_record(data, remark)
                 response.code = 200
                 response.msg = "咨询产品返回成功"
