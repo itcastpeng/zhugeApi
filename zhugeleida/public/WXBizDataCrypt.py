@@ -9,13 +9,15 @@ class WXBizDataCrypt:
 
     def decrypt(self, encryptedData, iv):
         # base64 decode
+        print('------- self._unpad(cipher.decrypt(encryptedData)) ------->>', encryptedData, '|')
+
         sessionKey = base64.b64decode(self.sessionKey)
         encryptedData = base64.b64decode(encryptedData)
 
         iv = base64.b64decode(iv)
 
         cipher = AES.new(sessionKey, AES.MODE_CBC, iv)
-        print('------- self._unpad(cipher.decrypt(encryptedData)) ------->>',encryptedData,'|' ,self._unpad(cipher.decrypt(encryptedData)))
+
         decrypted = json.loads(self._unpad(cipher.decrypt(encryptedData)))
 
         if decrypted['watermark']['appid'] != self.appId:
