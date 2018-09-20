@@ -13,7 +13,7 @@ import json
 # 话术分组管理查询
 # cerf  token验证 用户展示模块
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_userprofile)
 def talkGroupManageShow(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -65,7 +65,7 @@ def talkGroupManageShow(request):
 #  话术分组管理操作
 #  csrf  token验证
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_userprofile)
 def talkGroupManageOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":

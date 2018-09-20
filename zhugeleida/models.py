@@ -986,6 +986,7 @@ class zgld_talk_group_management(models.Model):
     userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
     companyName = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
 # 后台管理 - 话术详情管理
 class zgld_speech_details_management(models.Model):
     contentWords = models.CharField(verbose_name='话术内容', max_length=128)

@@ -137,7 +137,7 @@ def work_weixin_auth_oper(request,oper_type):
                 user_obj = models.zgld_userprofile.objects.get(id=user_id)
                 company_id = user_obj.company_id
 
-                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
+                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
                 level = 1
                 uid = user_id  # 文章所属用户ID，在这里指的是雷达用户 转发的这个文章，他就是这个所属的用户。

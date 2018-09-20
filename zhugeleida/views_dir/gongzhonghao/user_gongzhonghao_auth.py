@@ -236,7 +236,7 @@ def create_gongzhonghao_yulan_auth_url(data):
     # uid = data.get('uid')
     uid = ''  # 后台生成预览二维码时，此时用户UID 就是admin_userprofile 的用户ID不要分享出去。
 
-    gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
+    gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
 
     appid = authorization_appid
@@ -320,7 +320,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 article_id = forms_obj.cleaned_data.get('article_id')
                 company_id =  forms_obj.cleaned_data.get('company_id')
 
-                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(id=company_id)
+                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
                 if level:
                     level = int(level) + 1

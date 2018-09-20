@@ -11,7 +11,7 @@ from zhugeleida.forms.qiyeweixin.mingpian_verify import MingPianPhoneUpdateForm,
 import json
 from django.db.models import Q
 import os
-
+import requests
 
 # 展示企业微信的用户名片的个性签名,标签,
 @csrf_exempt
@@ -242,6 +242,39 @@ def mingpian_oper(request, oper_type):
             response.code = 200
             response.msg = '保存成功'
 
+        elif oper_type == 'create_small_program_qr_code':
+
+            user_id = request.GET.get('user_id')
+            user_obj = models.zgld_userprofile.objects.filter(id=user_id)
+            if user_obj:
+                # 生成企业用户二维码
+
+                # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+
+                data_dict = {
+                    'user_id': user_id,
+                    'customer_id': ''
+                }
+
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+
+                print('--------mycelery 使用 request post_的数据 ------->>', data_dict)
+
+                response_ret = requests.post(url, data=data_dict)
+                response_ret = response_ret.json()
+
+                print('-------- mycelery/触发 celery  返回的结果 -------->>', response_ret)
+
+                qr_code = response_ret['data'].get('qr_code')
+                response.data = {
+                    'qr_code': qr_code
+                }
+                response.code = 200
+                response.msg = "生成用户二维码成功"
+
+            else:
+                response.code = 301
+                response.msg = "用户不存在"
 
 
     elif request.method == "GET":
