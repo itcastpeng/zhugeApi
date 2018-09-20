@@ -42,10 +42,13 @@ def speechDetailsManageShow(request):
                     sendNum = 0
                     if obj.sendNum:
                         sendNum = obj.sendNum
+                    groupName = ''
+                    if obj.talkGroupName:
+                        groupName = obj.talkGroupName.groupName
                     otherList.append({
                         'contentWords': obj.contentWords,  # 分组名
                         'sendNum': sendNum,  # 用户
-                        'talkGroupName': obj.talkGroupName.groupName,  # 公司名
+                        'talkGroupName': groupName,  # 公司名
                         'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S')  # 创建时间
                     })
 
