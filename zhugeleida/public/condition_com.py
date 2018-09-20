@@ -161,8 +161,8 @@ def validate_tongxunlu(data):
             get_token_data = {}
             post_user_data = {}
             get_user_data = {}
-            get_token_data['corpid'] = company_obj[0].corp_id
-            get_token_data['corpsecret'] = company_obj[0].tongxunlu_secret
+            get_token_data['corpid'] = corp_id
+            get_token_data['corpsecret'] = tongxunlu_secret
 
             import redis
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)

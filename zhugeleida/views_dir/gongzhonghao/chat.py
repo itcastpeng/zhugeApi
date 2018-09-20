@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
+from zhugeleida.forms.gongzhonghao.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
 import base64
 from django.db.models import F
 import json
@@ -34,7 +34,6 @@ def chat(request):
             response = Response.ResponseObj()
             customer_id = request.GET.get('user_id')
             user_id = request.GET.get('u_id')
-            # send_type = request.GET.get('send_type')
 
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
@@ -70,9 +69,6 @@ def chat(request):
                     mingpian_avatar = mingpian_avatar_obj[0].photo_url
                 else:
 
-                    # if obj.userprofile.avatar.startswith("http"):
-                    #     mingpian_avatar = obj.userprofile.avatar
-                    # else:
                     mingpian_avatar =  obj.userprofile.avatar
 
                 customer_name = base64.b64decode(obj.customer.username)
@@ -83,8 +79,6 @@ def chat(request):
                 is_first_info = False
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
                     is_first_info =  True
-
-
 
                 content = obj.content
                 if not content:
@@ -113,50 +107,13 @@ def chat(request):
                     'dateTime': obj.create_date,
 
                     'send_type': obj.send_type,
-                    'is_first_info': is_first_info,     #是否为第一条的信息
+                    'is_first_info': is_first_info,       #是否为第一条的信息
                 }
 
                 base_info_dict.update(_content)
 
                 ret_data_list.append(base_info_dict)
 
-
-                # elif obj.info_type == 2: # 如果为产品咨询。
-                #     print('------first_info.get----->', first_info[0].get('id'))
-                #     ret_data_list.append({
-                #         'customer_id': obj.customer.id,
-                #         'from_user_name': customer_name,
-                #         'user_id': obj.userprofile.id,
-                #         'customer': customer_name,
-                #         'user_avatar': mingpian_avatar,
-                #         'customer_headimgurl': obj.customer.headimgurl,
-                #         'dateTime': obj.create_date,
-                #
-                #         'product_cover_url': obj.product_cover_url,
-                #         'product_name': obj.product_name,
-                #         'product_price': obj.product_price,
-                #
-                #         'info_type': obj.info_type,  #   (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                #         'send_type': obj.send_type,
-                #         'is_first_info': False,  # 是否为第一条的信息
-                #     })
-                #
-                # else:
-                #
-                #     ret_data_list.append({
-                #         'customer_id': obj.customer.id,
-                #         'user_id': obj.userprofile.id,
-                #         'customer': customer_name,
-                #         'user_avatar': mingpian_avatar,
-                #         'customer_headimgurl': obj.customer.headimgurl,
-                #         'dateTime': obj.create_date,
-                #
-                #         'msg': obj.msg,
-                #         'info_type': obj.info_type,
-                #
-                #         'send_type': obj.send_type, # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                #         'is_first_info': False,     # 是否为第一条的信息
-                #     })
 
             ret_data_list.reverse()
             response.code = 200
@@ -245,21 +202,7 @@ def chat_oper(request, oper_type, o_id):
                     }
 
                     base_info_dict.update(_content)
-
                     ret_data_list.append(base_info_dict)
-
-                    # ret_data_list.append({
-                                # 'customer_id': obj.customer.id,
-                                # 'user_id': obj.userprofile.id,
-                                # 'user_avator' :  mingpian_avatar,
-                                # 'customer_headimgurl':  obj.customer.headimgurl,
-                                # 'customer': customer_name,
-                                # 'dateTime': obj.create_date,
-                                # 'msg':       obj.msg,
-                                # 'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                                # 'is_first_info': False,  # 是否为第一条的信息
-                                # 'info_type': obj.info_type, # 消息的类型
-                            # })
 
 
                 ret_data_list.reverse()
@@ -306,51 +249,6 @@ def chat_oper(request, oper_type, o_id):
                 response.data = json.loads(forms_obj.errors.as_json())
 
 
-        elif oper_type == 'history_chatinfo_store_content':
-
-
-            # models.zgld_chatinfo.objects.all().values('id','info_type','msg','product_cover_url','product_name','product_price')
-            objs = models.zgld_chatinfo.objects.all()
-
-            for obj in objs:
-                chat_id = obj.id
-                info_type = obj.info_type
-                msg = obj.msg
-                product_cover_url = obj.product_cover_url
-                product_name = obj.product_name
-                product_price = obj.product_price
-
-                if info_type == 1:  # msg
-
-                    if msg:
-                        print('------ 【msg】 chat_id ------>>',chat_id)
-                        encodestr = base64.b64encode(msg.encode('utf-8'))
-                        msg = str(encodestr, 'utf-8')
-
-                        _content = {
-                            'info_type': 1,
-                            'msg': msg
-                        }
-                        obj.content = json.dumps(_content)
-                        obj.save()
-
-                elif info_type == 2:
-
-                    if product_name and product_cover_url:
-                        print('------ 【product】 chat_id ------>>', chat_id)
-
-                        _content = {
-                            'info_type': 2,  # 2代表发送的产品咨询  3代表发送的电话号码  4代表发送的图片|截图  5、视频
-                            'product_cover_url': product_cover_url ,
-                            'product_name': product_name,
-                            'product_price': product_price
-                        }
-                        obj.content = json.dumps(_content)
-                        obj.save()
-
-
-            response.code = 200
-            response.msg = '成功'
 
         return JsonResponse(response.__dict__)
 
@@ -391,17 +289,17 @@ def chat_oper(request, oper_type, o_id):
                     send_type=send_type
                 )
 
-                flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-                if send_type == 2 and flow_up_objs: # 用戶發消息給客戶，修改最後跟進-時間
-                    flow_up_objs.update(
-                        is_customer_msg_num=F('is_customer_msg_num') + 1,
-                        last_activity_time = datetime.datetime.now()
-                    )
+                # flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+                # if send_type == 2 and flow_up_objs: # 用戶發消息給客戶，修改最後跟進-時間
+                #     flow_up_objs.update(
+                #         is_customer_msg_num=F('is_customer_msg_num') + 1,
+                #         last_activity_time = datetime.datetime.now()
+                #     )
 
-                if info_type == 1:  # 发送的图文消息
+                if info_type == 1:  # 发送的文字消息
                     remark = ':%s' % (_msg)
                     data = request.GET.copy()
-                    data['action'] = 0  # 代表用客户咨询产品
+                    data['action'] = 0  # 代表发送客户聊天信息
                     data['uid'] = user_id
                     response = action_record(data, remark)
 
