@@ -427,7 +427,7 @@ def chat_oper(request, oper_type, o_id):
                 objs =  models.zgld_userprofile.objects.filter(id=user_id)
                 if objs:
                     obj =objs[0]
-                    customer_obj = models.zgld_customer.objects.get(customer_id=customer_id)
+                    customer_obj = models.zgld_customer.objects.get(id=customer_id)
                     session_key = customer_obj.session_key
                     company_id = obj.company_id
                     xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
