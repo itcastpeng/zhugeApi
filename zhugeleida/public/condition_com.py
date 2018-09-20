@@ -244,9 +244,9 @@ def validate_tongxunlu(data):
                                 #     obj.department = department_list
 
                                 # 生成企业用户二维码
-                                data_dict = {'user_id': obj.id, 'customer_id': ''}
-                                tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
-                                print('------- 同步成功并生成用户二维码成功 json.dumps(data_dict) -------->>',json.dumps(data_dict))
+                                # data_dict = {'user_id': obj.id, 'customer_id': ''}
+                                # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+                                # print('------- 同步成功并生成用户二维码成功 json.dumps(data_dict) -------->>',json.dumps(data_dict))
 
                         response.code = 0
                         response.msg = "同步成功并生成用户二维码成功"

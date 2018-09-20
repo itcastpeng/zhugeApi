@@ -718,7 +718,6 @@ def user_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = "公司不存在"
 
-
         # 用户添加自己的信息入临时库
         elif oper_type == 'scan_code_to_add_user':
             user_id = request.GET.get('user_id')
