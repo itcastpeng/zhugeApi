@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article
+from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article,chat
 
 
 urlpatterns = [
@@ -14,6 +14,10 @@ urlpatterns = [
 
     # 微信公众号-JS-SDK使用权限签名算法
     url(r'^work_gongzhonghao_auth/(?P<oper_type>\w+)$', user_gongzhonghao_auth.user_gongzhonghao_auth_oper),
+
+    # 实时聊天
+    url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
+    url(r'^chat$', chat.chat),
 
 
     # 公众号文章管理
