@@ -106,6 +106,26 @@ class ChatPostForm(forms.Form):
     #         return user_id
 
 
+class EncryptedPhoneNumberForm(forms.Form):
+    u_id = forms.CharField(
+        required=True,
+        error_messages= {
+            'invalid': "用户ID不能为空",
+        }
+    )
+
+    encryptedData = forms.CharField(
+        required=True,
+        error_messages= {
+            'invalid': "encryptedData不能为空",
+        }
+    )
+    iv = forms.CharField(
+        required=True,
+        error_messages= {
+            'invalid': "iv不能为空",
+        }
+    )
 
 
 class ChatGetForm(forms.Form):

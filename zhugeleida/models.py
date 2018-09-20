@@ -526,6 +526,7 @@ class zgld_customer(models.Model):
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
+    session_key =  models.CharField(verbose_name='会话密钥', max_length=128,null=True)
     formid = models.TextField(verbose_name='formId(用于发送模板消息)',null=True,default="[]")
 
     sex_choices = (

@@ -7,11 +7,12 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
 import base64
 from django.db.models import F
 import json
 from django.db.models import Q
+from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
 
 import json
 from zhugeleida import models
@@ -304,6 +305,7 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+
         elif oper_type == 'history_chatinfo_store_content':
 
 
@@ -371,13 +373,13 @@ def chat_oper(request, oper_type, o_id):
 
                 _content = json.loads(content)
                 info_type = _content.get('info_type')
-                msg = ''
+                _msg = ''
                 if info_type:
                     info_type = int(info_type)
 
                     if info_type == 1:
-                        msg = _content.get('msg')
-                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        _msg = _content.get('msg')
+                        encodestr = base64.b64encode(_msg.encode('utf-8'))
                         msg = str(encodestr, 'utf-8')
                         _content['msg'] = msg
                         content = json.dumps(_content)
@@ -397,7 +399,7 @@ def chat_oper(request, oper_type, o_id):
                     )
 
                 if info_type == 1:  # 发送的图文消息
-                    remark = ':%s' % (msg)
+                    remark = ':%s' % (_msg)
                     data = request.GET.copy()
                     data['action'] = 0  # 代表用客户咨询产品
                     data['uid'] = user_id
@@ -412,8 +414,69 @@ def chat_oper(request, oper_type, o_id):
                 response.data = json.loads(forms_obj.errors.as_json())
 
         # 解密接收手机发送的手机号
-        elif oper_type == '':
-            pass
+        elif oper_type == 'encrypted_phone_number':
+
+            forms_obj = EncryptedPhoneNumberForm(request.POST)
+            if forms_obj.is_valid():
+                response = Response.ResponseObj()
+                customer_id = request.GET.get('user_id')
+
+                print('---- request.POST --->>',json.dumps(request.POST))
+
+                user_id = request.POST.get('u_id')
+                encryptedData = request.POST.get('encryptedData')
+                iv = request.POST.get('iv')
+
+                objs =  models.zgld_userprofile.objects.filter(id=user_id)
+                if objs:
+                    obj =objs[0]
+                    customer_obj = models.zgld_customer.objects.get(id=customer_id)
+                    session_key = customer_obj.session_key
+                    company_id = obj.company_id
+                    xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+                    authorization_appid = ''
+                    if xiaochengxu_app_objs:
+                        authorization_appid = xiaochengxu_app_objs[0].authorization_appid
+
+                    print('----- authorization_appid ----->>',authorization_appid,session_key,'\n',encryptedData,iv)
+                    pc = WXBizDataCrypt(authorization_appid, session_key)
+                    ret =  pc.decrypt(encryptedData, iv)
+                    print('------ pc.decrypt(encryptedData) ------->>', ret)
+
+                    phoneNumber = ret.get('phoneNumber')
+
+
+                    # { 'phoneNumber': '17326681685',
+                    #   'purePhoneNumber': '17326681685', 'countryCode': '86',
+                    #   'watermark': {'timestamp': 1537415579, 'appid': 'wx1add8692a23b5976'}}
+
+
+                    if phoneNumber:
+                        _msg = '我的手机号是: %s' % (phoneNumber)
+
+                        encodestr = base64.b64encode(_msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+                        _content =  {
+                           'info_type' : 1,
+                           'msg' : msg
+                        }
+                        content = json.dumps(_content)
+
+                        models.zgld_chatinfo.objects.create(
+                            content=content,
+                            userprofile_id=user_id,
+                            customer_id=customer_id,
+                            send_type=2
+                        )
+
+                        response.code = 200
+                        response.msg = '获取成功'
+                        response.data = {
+                             'phoneNumber': phoneNumber,
+                         }
+                    else:
+                        response.code = 200
+                        response.msg = '获取失败'
 
 
     else:
