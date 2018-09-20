@@ -9,6 +9,6 @@ urlpatterns = [
     url(r'^xiaochengxu/', include('zhugeleida.urls_dir.xiaochengxu_urls')),
     url(r'^mycelery/', include('zhugeleida.urls_dir.celery_urls')),
     url(r'^public/', include('zhugeleida.urls_dir.public_urls')),
-    url(r'^boosleida/', include('zhugeleida.urls_dir.boosleida_urls')),
+    url(r'^boosleida/', include('zhugeleida.urls_dir.boosleida_urls'))
 
 ]
