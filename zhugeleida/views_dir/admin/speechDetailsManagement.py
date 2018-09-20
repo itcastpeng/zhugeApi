@@ -86,7 +86,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
         form_data = {
             'o_id':o_id,
             'contentWords': request.POST.get('contentWords'),
-            'userProfile': request.POST.get('userProfile'),  # 归属用户
+            'userProfile': request.GET.get('user_id'),  # 归属用户
             'talkGroupName': request.POST.get('talkGroupName'),
         }
         if oper_type == "add":
