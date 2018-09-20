@@ -371,7 +371,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             print('------- 公众号 签名算法 request.GET --------->',request.GET)
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-            objs = models.zgld_gongzhonghao_app.objects.filter(id=company_id)
+            objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
             if objs:
                 authorizer_refresh_token = objs[0].authorizer_refresh_token
                 authorizer_appid = objs[0].authorization_appid
