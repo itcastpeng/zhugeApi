@@ -68,7 +68,7 @@ def login(request):
                 print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
                       user_id, company_id)
 
-                if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
+            if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
                     user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
                     print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,
                           user_id)
