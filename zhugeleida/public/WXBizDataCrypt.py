@@ -20,7 +20,10 @@ class WXBizDataCrypt:
         if decrypted['watermark']['appid'] != self.appId:
             raise Exception('Invalid Buffer')
 
+        print('---- decrypted | cipher ---->>',decrypted,'|',cipher)
+
         return decrypted
+
 
     def _unpad(self, s):
         return s[:-ord(s[len(s)-1:])]

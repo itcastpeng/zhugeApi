@@ -12,6 +12,7 @@ import base64
 from django.db.models import F
 import json
 from django.db.models import Q
+from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
 
 import json
 from zhugeleida import models
@@ -420,6 +421,8 @@ def chat_oper(request, oper_type, o_id):
                 response = Response.ResponseObj()
                 customer_id = request.GET.get('user_id')
 
+                print('---- request.POST --->>',json.dumps(request.POST))
+
                 user_id = request.POST.get('u_id')
                 encryptedData = request.POST.get('encryptedData')
                 iv = request.POST.get('iv')
@@ -435,21 +438,45 @@ def chat_oper(request, oper_type, o_id):
                     if xiaochengxu_app_objs:
                         authorization_appid = xiaochengxu_app_objs[0].authorization_appid
 
-                    appId = authorization_appid
-                    sessionKey = session_key
-                    encryptedData = encryptedData
-                    iv =  iv
-                    from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
-                    pc = WXBizDataCrypt(appId, sessionKey)
+                    print('----- authorization_appid ----->>',authorization_appid,session_key,'\n',encryptedData,iv)
+                    pc = WXBizDataCrypt(authorization_appid, session_key)
+                    ret =  pc.decrypt(encryptedData, iv)
+                    print('------ pc.decrypt(encryptedData) ------->>', ret)
 
-                    print ('------ pc.decrypt(encryptedData) ------->>',pc.decrypt(encryptedData, iv))
+                    phoneNumber = ret.get('phoneNumber')
 
-                    response.code = 200
-                    response.msg = '查询成功'
-                    # response.data = {
-                    #     'chatinfo_count': chatinfo_count,
-                    # }
 
+                    # { 'phoneNumber': '17326681685',
+                    #   'purePhoneNumber': '17326681685', 'countryCode': '86',
+                    #   'watermark': {'timestamp': 1537415579, 'appid': 'wx1add8692a23b5976'}}
+
+
+                    if phoneNumber:
+                        _msg = '我的手机号是: %s' % (phoneNumber)
+
+                        encodestr = base64.b64encode(_msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+                        _content =  {
+                           'info_type' : 1,
+                           'msg' : msg
+                        }
+                        content = json.dumps(_content)
+
+                        models.zgld_chatinfo.objects.create(
+                            content=content,
+                            userprofile_id=user_id,
+                            customer_id=customer_id,
+                            send_type=2
+                        )
+
+                        response.code = 200
+                        response.msg = '获取成功'
+                        response.data = {
+                             'phoneNumber': phoneNumber,
+                         }
+                    else:
+                        response.code = 200
+                        response.msg = '获取失败'
 
 
     else:
