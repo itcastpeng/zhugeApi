@@ -521,7 +521,7 @@ def user_oper(request, oper_type, o_id):
                         else:
                             get_user_data['access_token'] = token_ret
 
-                        if len(department_id) == 0:
+                        if len(forms_obj.cleaned_data.get('department_id')) == 0:
                             department_id = [1]
                         post_user_data['userid'] = user_objs[0].userid
                         post_user_data['name'] = username
