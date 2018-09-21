@@ -221,7 +221,7 @@ def article_oper(request, oper_type, o_id):
 
                 obj = zgld_article_objs[0]
                 insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
-                if insert_ads and insert_ads.get('mingpian_id') == 3:
+                if insert_ads and insert_ads.get('mingpian_id'):
                     zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
                     insert_ads['username'] = zgld_userprofile_obj.username
                     insert_ads['avatar'] = zgld_userprofile_obj.avatar
