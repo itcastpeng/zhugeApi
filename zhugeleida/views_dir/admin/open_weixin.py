@@ -24,6 +24,8 @@ def open_weixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
+            user_id = request.GET.get('user_id')
+
             # postdata =  request.POST.get('postdata')
 
             postdata = request.body.decode(encoding='UTF-8')
@@ -87,6 +89,9 @@ def open_weixin(request, oper_type):
             except Exception as e:
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
+
+                userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
+                company_id   =  userprofile_obj.company_id
 
                 app_id = 'wx67e2fde0f694111c'
                 if auth_code:
@@ -152,7 +157,8 @@ def open_weixin(request, oper_type):
                             categories = ''
 
                     if original_id:
-                        obj = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
+                        obj = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+
                         if obj:
                             obj.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
