@@ -492,11 +492,11 @@ def user_oper(request, oper_type, o_id):
 
                 else:
 
-                    user_objs = models.zgld_userprofile.objects.filter(id=o_id)
+                    user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=o_id)
 
                     if user_objs:
 
-                        print(user_objs[0].company.corp_id, user_objs[0].company.tongxunlu_secret)
+                        # print(user_objs[0].company.corp_id, user_objs[0].company.tongxunlu_secret)
                         get_token_data = {}
                         post_user_data = {}
                         get_user_data = {}
@@ -521,13 +521,14 @@ def user_oper(request, oper_type, o_id):
                         else:
                             get_user_data['access_token'] = token_ret
 
-                        if len(department_id) == 0:
+                        if len(forms_obj.cleaned_data.get('department_id')) == 0:
                             department_id = [1]
                         post_user_data['userid'] = user_objs[0].userid
                         post_user_data['name'] = username
                         post_user_data['position'] = position
                         post_user_data['department'] = department_id
                         post_user_data['mobile'] = wechat_phone
+                        print(Conf['update_user_url'], get_user_data, post_user_data)
                         ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
                         print(ret.text)
 
