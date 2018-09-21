@@ -113,7 +113,6 @@ def article_oper(request, oper_type, o_id):
                 'summary': request.POST.get('summary'),
                 'content': request.POST.get('content'),
                 'cover_picture': request.POST.get('cover_picture'),
-
             }
 
             forms_obj = ArticleAddForm(article_data)
@@ -210,6 +209,8 @@ def article_oper(request, oper_type, o_id):
                 'parent_id' : parent_id
             }
 
+
+
             forms_obj = MyarticleForm(request_data_dict)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
@@ -219,12 +220,21 @@ def article_oper(request, oper_type, o_id):
                 zgld_article_objs.update(read_count=F('read_count') + 1)
 
                 obj = zgld_article_objs[0]
+                insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                if insert_ads and insert_ads.get('mingpian_id') == 3:
+                    zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
+                    insert_ads['username'] = zgld_userprofile_obj.username
+                    insert_ads['avatar'] = zgld_userprofile_obj.avatar
+                    insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
+                    insert_ads['position'] = zgld_userprofile_obj.position
+                    insert_ads['webchat_code'] = zgld_userprofile_obj.qr_code       # 展示企业微信二维码
 
                 # 获取所有数据
                 ret_data = []
                 # 获取第几页的数据
 
-                print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
+                tag_list = list(obj.tags.values('id', 'name'))
+                print('-----obj.tags.values---->', tag_list)
                 ret_data.append({
                     'id': obj.id,
                     'title': obj.title,  # 文章标题
@@ -234,8 +244,8 @@ def article_oper(request, oper_type, o_id):
                     'create_date': obj.create_date,  # 文章创建时间
                     'cover_url': obj.cover_picture,  # 文章图片链接
                     'content': obj.content,  # 文章内容
-                    'tag_list': list(obj.tags.values('id', 'name')),
-                    'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                    'tag_list': tag_list,
+                    'insert_ads': insert_ads
                 })
                 article_access_log_id = ''
                 if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
@@ -250,8 +260,7 @@ def article_oper(request, oper_type, o_id):
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
-                    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
-                    article_to_customer_belonger_obj.update(read_count=F('read_count') + 1)
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
@@ -271,8 +280,6 @@ def article_oper(request, oper_type, o_id):
                         last_access_date=now_date_time
                     )
                     article_access_log_id = article_access_log_obj.id
-
-
 
                 response.code = 200
                 response.data = {
