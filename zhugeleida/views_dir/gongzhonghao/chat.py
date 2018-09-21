@@ -58,9 +58,13 @@ def chat(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-            global phone,wechat
+            phone = ''
+            wechat = ''
 
             ret_data_list = []
+            phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
+            wechat = objs[0].userprofile.wechat if objs[0].userprofile.wechat else objs[0].userprofile.wechat_phone
+
             for obj in objs:
 
                 mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
@@ -73,8 +77,7 @@ def chat(request):
 
                 customer_name = base64.b64decode(obj.customer.username)
                 customer_name = str(customer_name, 'utf-8')
-                phone = obj.userprofile.mingpian_phone  if obj.userprofile.mingpian_phone else obj.userprofile.wechat_phone
-                wechat = obj.userprofile.wechat if obj.userprofile.wechat else obj.userprofile.wechat_phone
+
 
                 is_first_info = False
                 if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
@@ -264,7 +267,7 @@ def chat_oper(request, oper_type, o_id):
                 customer_id = int(request.GET.get('user_id'))
                 user_id =  request.POST.get('u_id')
                 content = request.POST.get('content')
-                send_type = int(request.POST.get('send_type'))
+                send_type = 2
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
@@ -286,7 +289,7 @@ def chat_oper(request, oper_type, o_id):
                     content=content,
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=send_type
+                    send_type=2
                 )
 
 
