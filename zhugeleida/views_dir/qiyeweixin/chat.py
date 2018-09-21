@@ -257,7 +257,7 @@ def chat_oper(request, oper_type, o_id):
                 content = data.get('content')
                 send_type = int(data.get('send_type'))
 
-                flow_up_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+                flow_up_obj = models.zgld_user_customer_belonger.objects.select_related('user','customer').filter(user_id=user_id, customer_id=customer_id)
 
                 if send_type == 1 and flow_up_obj: # 用戶發消息給客戶，修改最後跟進-時間
                     flow_up_obj.update(
@@ -324,9 +324,17 @@ def chat_oper(request, oper_type, o_id):
                         send_type=send_type
                 )
 
-                data['customer_id'] = customer_id
-                data['user_id'] = user_id
-                tasks.user_send_template_msg_to_customer.delay(json.dumps(data))
+                flow_up_obj = flow_up_obj[0]
+                user_type = flow_up_obj.customer.user_type
+                if user_type == 2:
+
+                    data['customer_id'] = customer_id
+                    data['user_id'] = user_id
+                    tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
+                elif user_type == 1:
+                    #
+                    pass
+
 
                 response.code = 200
                 response.msg = 'send msg successful'
