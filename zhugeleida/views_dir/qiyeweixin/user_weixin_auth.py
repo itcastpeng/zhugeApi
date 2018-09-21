@@ -108,12 +108,16 @@ def work_weixin_auth(request, company_id):
 
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&' + 'id=' + str(
                     user_profile_obj.id) + '&' + 'avatar=' + avatar
+
+                print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                      userid, "\n", redirect_url)
+
                 return redirect(redirect_url)
 
-            print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|", userid,"\n",redirect_url)
 
-        print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>',userid,company_id)
-        return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+        else:
+            print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>',userid,company_id)
+            return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
     else:
         response.code = 402
