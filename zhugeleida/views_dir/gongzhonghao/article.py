@@ -247,6 +247,7 @@ def article_oper(request, oper_type, o_id):
                     'tag_list': tag_list,
                     'insert_ads': insert_ads
                 })
+                print('ret_data -->', ret_data)
                 article_access_log_id = ''
                 if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
 
