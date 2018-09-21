@@ -114,7 +114,6 @@ def work_weixin_auth(request, company_id):
 
                 return redirect(redirect_url)
 
-
         else:
             print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>',userid,company_id)
             return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
