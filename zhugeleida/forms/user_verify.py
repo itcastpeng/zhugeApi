@@ -153,7 +153,8 @@ class UserAddForm(forms.Form):
         company_id = self.data['company_id']
         # print(username)
         objs = models.zgld_userprofile.objects.filter(
-            username=username,company_id=company_id
+            username=username,
+            company_id=company_id
         )
         if objs:
             self.add_error('username', '用户名已存在')
@@ -252,10 +253,12 @@ class UserUpdateForm(forms.Form):
     # 查询用户名判断是否存在
     def clean_username(self):
         username = self.data['username']
+        company_id = self.data['company_id']
         o_id = self.data['o_id']
         # print(username)
         objs = models.zgld_userprofile.objects.filter(
             username=username,
+            company_id=company_id
         ).exclude(id=o_id)
 
         if objs:
