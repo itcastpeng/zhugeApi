@@ -129,6 +129,7 @@ def chat(request):
                 }
 
         else:
+
             response.code = 402
             response.msg = "请求异常"
             response.data = json.loads(forms_obj.errors.as_json())

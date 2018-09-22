@@ -39,10 +39,10 @@ def tongxunlu(request):
                 }
 
                 q = conditionCom(request, field_dict)
-                source = request.GET.get('customer__source')
 
-                if source:
-                    q.add(Q(**{'source': source}), Q.AND)
+                # source = request.GET.get('customer__source')
+                # if source:
+                #     q.add(Q(**{'source': source}), Q.AND)
 
                 # if order == '-customer__expedted_pr':
                 # order = '-expedted_pr'
@@ -114,13 +114,16 @@ def tongxunlu(request):
                             'customer_username': customer_name,
                             'headimgurl': obj.customer.headimgurl,
                             'expected_time': obj.expected_time,  # 预计成交时间
-                            'expedted_pr': obj.expedted_pr,  # 预计成交概率
+                            'expedted_pr': obj.expedted_pr,      # 预计成交概率
                             # 'ai_pr': ai_pr,  # AI 预计成交概率
-
 
                             'last_follow_time': last_interval_msg,  # 最后跟进时间
                             'last_activity_time': last_activity_msg,  # 最后活动时间
                             'follow_status': customer_status,  # 跟进状态
+
+                            'article_id': obj.article_id,
+                            'title': obj.article.title,
+
                         })
 
                     response.code = 200
