@@ -218,30 +218,7 @@ def login_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'control_mingan_info':
-            mingan_info = {
-                "mingpian" : {
-                    "mingpian1": "转发",
-                    "mingpian2": "转发到好友或群聊",
-                    "mingpian3": "生成名片海报"
-                },
-                "chanpin": {
-                    "chanpin1": "在线咨询",
-                    "chanpin2": "转发到朋友"
-                },
-                "poster"  : {
-                "poster1" : "保存名片海报",
-                "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
-                },
-                "button_msg": {
-                    "msg" :"保存名片"
-                }
-            }
 
-            # mingan_info = json.dumps(mingan_info)
-            response.code = 200
-            response.data = mingan_info
-            response.msg = "返回成功成功"
 
 
 
@@ -371,7 +348,11 @@ def login_oper_control(request):
             "poster"  : {
             "poster1" : "保存名片海报",
             "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
+            },
+            "button_msg": {
+                "msg": "保存名片"
             }
+
         }
 
         # mingan_info = json.dumps(mingan_info)
