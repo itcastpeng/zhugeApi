@@ -73,7 +73,7 @@ def contact(request):
                         msg = str(msg, 'utf-8')
 
                     elif info_type == 2:
-                        msg = _content.get('product_name')
+                        msg ='向您咨询:' +  _content.get('product_name')
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,
