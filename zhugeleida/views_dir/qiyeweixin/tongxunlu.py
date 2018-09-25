@@ -238,6 +238,8 @@ def tongxunlu(request):
                             'expected_time':  obj.expected_time,  # 预计成交时间
                             'expedted_pr':  obj.expedted_pr  ,   # 预计成交概率
                             # 'ai_pr': ai_pr,  # AI 预计成交概率
+                            'customer_source': obj.customer.user_type,
+                            'customer_source_text': obj.customer.get_user_type_display(),
 
                             'source': obj.source ,  # 来源
                             'last_follow_time': last_interval_msg,  # 最后跟进时间
