@@ -261,8 +261,6 @@ def open_weixin(request, oper_type):
 
 
 
-
-
                         ########################## 绑定微信用户为小程序体验者 ###############################
                         bind_tester_url = 'https://api.weixin.qq.com/wxa/bind_tester'
                         get_bind_tester_data = {
