@@ -83,7 +83,7 @@ def yuZhiFu(request):
         'total_fee': amount,
         'spbill_create_ip': spbillIp,
         'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
-        'trade_type': 'NATIVE'
+        'trade_type': 'JSAPI'
         }
     stringSignTemp = shengchengsign(result_data)
     result_data['sign'] = md5(stringSignTemp).upper()
