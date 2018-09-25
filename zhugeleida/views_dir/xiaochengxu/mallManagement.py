@@ -107,7 +107,7 @@ def yuZhiFu(request):
         'signType': 'MD5'
     }
     stringSignTemp = shengchengsign(data_dict)
-    data_dict['sign'] = md5(stringSignTemp).upper()
+    data_dict['paySign'] = md5(stringSignTemp).upper()
     response.code = 200
     response.data = data_dict
     return JsonResponse(response.__dict__)
