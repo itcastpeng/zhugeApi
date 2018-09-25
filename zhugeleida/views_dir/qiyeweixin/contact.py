@@ -67,13 +67,15 @@ def contact(request):
                 msg = ''
                 if info_type:
                     info_type = int(info_type)
-                    if info_type == 1:
+                    if info_type == 1 or info_type == 3:
                         msg = _content.get('msg')
                         msg = base64.b64decode(msg)
                         msg = str(msg, 'utf-8')
 
                     elif info_type == 2:
                         msg ='向您咨询:' +  _content.get('product_name')
+
+               
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,
