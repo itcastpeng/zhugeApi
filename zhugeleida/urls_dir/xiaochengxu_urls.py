@@ -39,7 +39,7 @@ urlpatterns = [
     url(r'website$',website.website),
 
     # 小程序支付操作
-    url(r'pay', wxpay.pay),
+    url(r'pay$', wxpay.pay),
     # url(r'toXml$', mallManagement.toXml),
     # url(r'^mallOper/(?P<oper_type>\w+)$', mallManagement.mallOper),
 
