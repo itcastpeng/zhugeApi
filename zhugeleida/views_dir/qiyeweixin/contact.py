@@ -8,7 +8,7 @@ from publicFunc import deal_time
 from zhugeleida.forms.contact_verify import ContactSelectForm
 import base64
 from zhugeleida import models
-
+import json
 
 # 获取用户聊天的信息列表
 @csrf_exempt
@@ -57,16 +57,36 @@ def contact(request):
                     print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                     customer_name = '客户ID%s' % (obj.customer_id)
 
-                ret_data_list.append({
+                content = obj.content
+
+                if not content:
+                    continue
+
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+                msg = ''
+                if info_type:
+                    info_type = int(info_type)
+                    if info_type == 1:
+                        msg = _content.get('msg')
+                        msg = base64.b64decode(msg)
+                        msg = str(msg, 'utf-8')
+
+                    elif info_type == 2:
+                        msg = _content.get('product_name')
+
+                base_info_dict = {
                     'customer_id': obj.customer_id,
                     'customer_source' : obj.customer.user_type,
                     'customer_source_text' : obj.customer.get_user_type_display(),
                     'src': obj.customer.headimgurl,
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
-                    'msg': obj.msg,
+                    'msg': msg,
+                }
 
-                })
+                ret_data_list.append(base_info_dict)
+
 
             response.code = 200
             response.data = {
