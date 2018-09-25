@@ -44,6 +44,7 @@ def action(request, oper_type):
                 q.add(Q(**{'user_id': user_id}), Q.AND)
                 if customer_id:
                     q.add(Q(**{'customer_id': customer_id}), Q.AND)
+
                 create_date__gte = request.GET.get('create_date__gte')
                 create_date__lt = request.GET.get('create_date__lt')
                 action = request.GET.get('action')

@@ -269,7 +269,7 @@ def product(request, oper_type):
 
                 if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
                     flow_up_objs.update(
-                        is_customer_product_num=F('is_customer_product_num') + 1,
+                        is_customer_product_num=F('is_customer_msg_num') + 1,
                         last_activity_time=datetime.datetime.now()
                     )
 

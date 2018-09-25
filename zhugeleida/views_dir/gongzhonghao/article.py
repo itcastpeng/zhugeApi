@@ -14,6 +14,7 @@ from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 import datetime
 
+
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
 def article(request, oper_type):
@@ -206,10 +207,8 @@ def article_oper(request, oper_type, o_id):
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
-                'parent_id' : parent_id
+                'parent_id': parent_id
             }
-
-
 
             forms_obj = MyarticleForm(request_data_dict)
             if forms_obj.is_valid():
@@ -227,7 +226,7 @@ def article_oper(request, oper_type, o_id):
                     insert_ads['avatar'] = zgld_userprofile_obj.avatar
                     insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
                     insert_ads['position'] = zgld_userprofile_obj.position
-                    insert_ads['webchat_code'] = zgld_userprofile_obj.qr_code       # 展示企业微信二维码
+                    insert_ads['webchat_code'] = zgld_userprofile_obj.qr_code  # 展示企业微信二维码
 
                 # 获取所有数据
                 ret_data = []
@@ -261,7 +260,9 @@ def article_oper(request, oper_type, o_id):
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
-                    models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(
+                        read_count=F('read_count') + 1, last_activity_time=datetime.datetime.now())
+
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
@@ -326,29 +327,29 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'customer_id': customer_id}), Q.AND)
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
-                    if  parent_id:
+                    if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
-                    models.zgld_article_to_customer_belonger.objects.filter(q).update(forward_count=F('forward_count') + 1)
-
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(
+                        forward_count=F('forward_count') + 1)
 
                     action = ''
-                    place= ''
+                    place = ''
                     if int(forward_type) == 1:  # 1 转发朋友
                         action = 15
-                        place= '分享给【朋友】'
+                        place = '分享给【朋友】'
                         models.zgld_article_to_customer_belonger.objects.filter(q).update(
                             forward_friend_count=F('forward_friend_count') + 1)
 
-                    elif int(forward_type) == 2: # 3转发朋友圈
+                    elif int(forward_type) == 2:  # 3转发朋友圈
                         action = 16
                         place = '分享到【朋友圈】'
                         models.zgld_article_to_customer_belonger.objects.filter(q).update(
                             forward_friend_circle_count=F('forward_friend_circle_count') + 1)
 
-                    remark = '转发了您的文章《%s》%s,帮您进一步扩大了传播效果' % (objs[0].title,place)
+                    remark = '转发了您的文章《%s》%s,帮您进一步扩大了传播效果' % (objs[0].title, place)
                     data = request.GET.copy()
                     data['action'] = action
                     response = action_record(data, remark)
@@ -383,11 +384,10 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'customer_id': customer_id}), Q.AND)
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
-                    if  parent_id:
+                    if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-
 
                     objs = models.zgld_article_to_customer_belonger.objects.filter(q)
                     if objs:
@@ -402,7 +402,7 @@ def article_oper(request, oper_type, o_id):
                     #     )
 
                     article_access_log_obj = models.zgld_article_access_log.objects.filter(
-                        id = article_access_log_id,
+                        id=article_access_log_id,
                     )
                     now_date_time = datetime.datetime.now()
                     if article_access_log_obj:
@@ -410,7 +410,6 @@ def article_oper(request, oper_type, o_id):
                             stay_time=F('stay_time') + 5,
                             last_access_date=now_date_time
                         )  #
-
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
@@ -421,6 +420,5 @@ def article_oper(request, oper_type, o_id):
                 print('------- 公众号-记录查看文章时间未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
     return JsonResponse(response.__dict__)

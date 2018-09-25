@@ -63,74 +63,76 @@ def chat(request):
             phone = ''
             wechat = ''
             ret_data_list = []
-            phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
-            wechat = objs[0].userprofile.wechat if objs[0].userprofile.wechat else objs[0].userprofile.wechat_phone
+            if objs:
 
-            for obj in objs:
+                phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
+                wechat = objs[0].userprofile.wechat if objs[0].userprofile.wechat else objs[0].userprofile.wechat_phone
 
-                mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
-                mingpian_avatar = ''
-                if mingpian_avatar_obj:
-                    mingpian_avatar = mingpian_avatar_obj[0].photo_url
-                else:
+                for obj in objs:
 
-                    # if obj.userprofile.avatar.startswith("http"):
-                    #     mingpian_avatar = obj.userprofile.avatar
-                    # else:
-                    mingpian_avatar =  obj.userprofile.avatar
+                    mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
+                    mingpian_avatar = ''
+                    if mingpian_avatar_obj:
+                        mingpian_avatar = mingpian_avatar_obj[0].photo_url
+                    else:
 
-                customer_name = base64.b64decode(obj.customer.username)
-                customer_name = str(customer_name, 'utf-8')
+                        # if obj.userprofile.avatar.startswith("http"):
+                        #     mingpian_avatar = obj.userprofile.avatar
+                        # else:
+                        mingpian_avatar =  obj.userprofile.avatar
 
-                is_first_info = False
-                if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
-                    is_first_info =  True
+                    customer_name = base64.b64decode(obj.customer.username)
+                    customer_name = str(customer_name, 'utf-8')
 
-
-
-                content = obj.content
-                if not content:
-                    continue
-
-                _content = json.loads(content)
-                info_type = _content.get('info_type')
+                    is_first_info = False
+                    if obj.id == first_info[0].get('id'): # 判断第一条问候语数据
+                        is_first_info =  True
 
 
-                if info_type:
-                    info_type = int(info_type)
 
-                    if info_type == 1:
-                        msg = _content.get('msg')
-                        msg = base64.b64decode(msg)
-                        msg = str(msg, 'utf-8')
-                        _content['msg'] = msg
+                    content = obj.content
+                    if not content:
+                        continue
 
-                base_info_dict = {
-                    'customer_id': obj.customer.id,
-                    'from_user_name': customer_name,
-                    'user_id': obj.userprofile.id,
-                    'customer': customer_name,
-                    'user_avatar': mingpian_avatar,
-                    'customer_headimgurl': obj.customer.headimgurl,
-                    'dateTime': obj.create_date,
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
 
-                    'send_type': obj.send_type,
-                    'is_first_info': is_first_info,     #是否为第一条的信息
+
+                    if info_type:
+                        info_type = int(info_type)
+
+                        if info_type == 1:
+                            msg = _content.get('msg')
+                            msg = base64.b64decode(msg)
+                            msg = str(msg, 'utf-8')
+                            _content['msg'] = msg
+
+                    base_info_dict = {
+                        'customer_id': obj.customer.id,
+                        'from_user_name': customer_name,
+                        'user_id': obj.userprofile.id,
+                        'customer': customer_name,
+                        'user_avatar': mingpian_avatar,
+                        'customer_headimgurl': obj.customer.headimgurl,
+                        'dateTime': obj.create_date,
+
+                        'send_type': obj.send_type,
+                        'is_first_info': is_first_info,     #是否为第一条的信息
+                    }
+
+                    base_info_dict.update(_content)
+
+                    ret_data_list.append(base_info_dict)
+
+                ret_data_list.reverse()
+                response.code = 200
+                response.msg = '分页获取-全部聊天消息成功'
+                response.data = {
+                    'ret_data': ret_data_list,
+                    'mingpian_phone': phone,
+                    'wechat': wechat,
+                    'data_count': count,
                 }
-
-                base_info_dict.update(_content)
-
-                ret_data_list.append(base_info_dict)
-
-            ret_data_list.reverse()
-            response.code = 200
-            response.msg = '分页获取-全部聊天消息成功'
-            response.data = {
-                'ret_data': ret_data_list,
-                'mingpian_phone': phone,
-                'wechat': wechat,
-                'data_count': count,
-            }
 
         else:
             response.code = 402
@@ -378,6 +380,10 @@ def chat_oper(request, oper_type, o_id):
 
                 objs =  models.zgld_userprofile.objects.filter(id=user_id)
                 if objs:
+                    models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                        is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
+
+
                     obj =objs[0]
                     customer_obj = models.zgld_customer.objects.get(id=customer_id)
                     session_key = customer_obj.session_key

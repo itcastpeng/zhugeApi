@@ -192,40 +192,6 @@ def chat_oper(request, oper_type, o_id):
 
                     ret_data_list.append(base_info_dict)
 
-                    # if obj.info_type == 1:  # 如果为聊信息。
-                    #     ret_data_list.append({
-                    #         'customer_id': obj.customer.id,
-                    #         'customer_avatar': obj.customer.headimgurl,
-                    #         'user_id': obj.userprofile.id,
-                    #         'src': obj.customer.headimgurl,
-                    #         'name': customer_name,
-                    #         'dateTime': obj.create_date,
-                    #
-                    #         'msg': obj.msg,
-                    #         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                    #
-                    #         'send_type': obj.send_type,
-                    #
-                    #     })
-                    # elif obj.info_type == 2:  # 如果为产品咨询。
-                    #     ret_data_list.append({
-                    #         'customer_id': obj.customer.id,
-                    #         'customer_avatar': obj.customer.headimgurl,
-                    #         'user_id': obj.userprofile.id,
-                    #         'src': obj.customer.headimgurl,
-                    #         'name': customer_name,
-                    #         'dateTime': obj.create_date,
-                    #
-                    #         'product_cover_url': obj.product_cover_url,
-                    #         'product_name': obj.product_name,
-                    #         'product_price': obj.product_price,
-                    #         'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                    #
-                    #         'send_type': obj.send_type,
-                    #
-                    #
-                    #     })
-
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
                 print('--- list(msg_obj) -->>', ret_data_list)
@@ -257,7 +223,7 @@ def chat_oper(request, oper_type, o_id):
                 content = data.get('content')
                 send_type = int(data.get('send_type'))
 
-                flow_up_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+                flow_up_obj = models.zgld_user_customer_belonger.objects.select_related('user','customer').filter(user_id=user_id, customer_id=customer_id)
 
                 if send_type == 1 and flow_up_obj: # 用戶發消息給客戶，修改最後跟進-時間
                     flow_up_obj.update(
@@ -324,9 +290,17 @@ def chat_oper(request, oper_type, o_id):
                         send_type=send_type
                 )
 
-                data['customer_id'] = customer_id
-                data['user_id'] = user_id
-                tasks.user_send_template_msg_to_customer.delay(json.dumps(data))
+                flow_up_obj = flow_up_obj[0]
+                user_type = flow_up_obj.customer.user_type
+                if user_type == 2:
+
+                    data['customer_id'] = customer_id
+                    data['user_id'] = user_id
+                    tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
+                elif user_type == 1:
+                    #
+                    pass
+
 
                 response.code = 200
                 response.msg = 'send msg successful'

@@ -571,6 +571,7 @@ class zgld_user_customer_belonger(models.Model):
         (1, '扫码'),
         (2, '转发'),
         (3, '搜索'),
+        (4, '公众号文章'),
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
@@ -582,7 +583,7 @@ class zgld_user_customer_belonger(models.Model):
     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
 
     is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
-    is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
+    # is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
     is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -591,9 +592,10 @@ class zgld_user_customer_belonger(models.Model):
         verbose_name_plural = "客户所属用户关系|跟进信息绑定表"
         app_label = "zhugeleida"
 
+
 # 跟进-消息详情表
 class zgld_follow_info(models.Model):
-    user_customer_flowup = models.ForeignKey('zgld_user_customer_belonger', verbose_name='跟进客户|用户绑定')
+    user_customer_flowup = models.ForeignKey('zgld_user_customer_belonger', verbose_name='跟进客户|用户绑定',null=True)
     follow_info = models.CharField(verbose_name='跟进发送信息', max_length=256, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -602,27 +604,6 @@ class zgld_follow_info(models.Model):
         app_label = "zhugeleida"
 
 
-
-# 用户-客户跟进信息-关系绑定表
-# class zgld_user_customer_flowup(models.Model):
-#     user = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True)
-#     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
-#
-#     last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
-#     last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
-#
-#     is_customer_msg_num = models.IntegerField(default=0, verbose_name='是否是客户发的新消息个数')
-#     is_customer_product_num = models.IntegerField(default=0, verbose_name='是否是客户咨询产品的消息个数')
-#     is_user_msg_num = models.IntegerField(default=0, verbose_name='是否是用户发的新消息个数')
-#
-#     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-#
-#     class Meta:
-#         verbose_name_plural = "用户-客户跟进信息-关系绑定表"
-#         # unique_together = [
-#         #     ('customer', 'user'),
-#         # ]
-#         app_label = "zhugeleida"
 
 
 # 用户被赞【是否靠谱】
@@ -847,6 +828,8 @@ class zgld_article_tag(models.Model):
 class zgld_article_to_customer_belonger(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')
     user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',related_name="article_customer_parent", null=True)
 
     level = models.IntegerField(verbose_name='客户所在层级',null=True)
     stay_time = models.IntegerField(verbose_name='停留时长',default=0)
@@ -854,8 +837,12 @@ class zgld_article_to_customer_belonger(models.Model):
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
-    customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
-    customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级', related_name="article_customer_parent", null=True)
+
+    expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
+    expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)
+    last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
+    last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:

@@ -116,7 +116,8 @@ def user_gongzhonghao_auth(request):
                     'user_id': uid,  # 文章作者-ID
                     'customer_id': client_id,
                     'level': level,
-                    'pid': pid
+                    'pid': pid,
+                    'company_id': company_id,
                 }
                 pid = int(pid) if pid else ''
                 customer_id = int(client_id)
@@ -267,6 +268,7 @@ def binding_article_customer_relate(data):
     user_id = data.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
     level = data.get('level')      # 公众号层级
     parent_id = data.get('pid')    # 所属的父级的客户ID。为空代表第一级。
+    company_id = data.get('company_id')    # 所属的父级的客户ID。为空代表第一级。
 
     q = Q()
     q.add(Q(**{'article_id': article_id}), Q.AND)
@@ -293,6 +295,18 @@ def binding_article_customer_relate(data):
             customer_parent_id=parent_id,
             level=level,
         )
+
+        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+                                                                                       user_id=user_id)
+
+        if user_customer_belonger_obj:
+            response.code = 302
+            response.msg = "关系存在"
+
+        else:
+
+            obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+            # obj.customer_parent_id = parent_id  # 上级人。
 
         response.code = 200
         response.msg = "绑定成功"
