@@ -241,7 +241,7 @@ def tongxunlu(request):
                             'customer_source': obj.customer.user_type,
                             'customer_source_text': obj.customer.get_user_type_display(),
 
-                            'source': obj.source ,                    # 来源
+                            'source': obj.source ,                        # 来源
                             'source_text': obj.get_source_display() ,     # 来源
                             'last_follow_time': last_interval_msg,    # 最后跟进时间
                             'last_activity_time': last_activity_msg,  # 最后活动时间

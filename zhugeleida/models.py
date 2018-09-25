@@ -838,10 +838,10 @@ class zgld_article_to_customer_belonger(models.Model):
     forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
 
-    expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
-    expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)
-    last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
-    last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
+    # expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
+    # expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)
+    # last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
+    # last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

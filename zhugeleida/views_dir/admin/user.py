@@ -942,10 +942,6 @@ def user_oper(request, oper_type, o_id):
                 response.msg = "用户不存在"
 
 
-
-
-
-
     else:
         response.code = 402
         response.msg = "请求异常"
