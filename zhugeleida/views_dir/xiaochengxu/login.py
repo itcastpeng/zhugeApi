@@ -232,6 +232,9 @@ def login_oper(request, oper_type):
                 "poster"  : {
                 "poster1" : "保存名片海报",
                 "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
+                },
+                "button_msg": {
+                    "msg" :"保存名片"
                 }
             }
 

@@ -65,6 +65,7 @@ def contact(request):
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
                     'msg': obj.msg,
+
                 })
 
             response.code = 200
