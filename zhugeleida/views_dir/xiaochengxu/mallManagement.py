@@ -74,7 +74,7 @@ def yuZhiFu(request):
     goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
     print('goodsIntroduce===========> ',goodsIntroduce)
     result_data = {
-        'appid': 'wx202b03ae2fbf636f', # appid
+        'appid': 'wx1add8692a23b5976', # appid
         'mch_id': '1513325051', # 商户号
         'nonce_str': timeStamp,      # 32位随机值
         # 'sign': '',             # 签名
