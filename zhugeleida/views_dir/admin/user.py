@@ -536,7 +536,7 @@ def user_oper(request, oper_type, o_id):
                         post_user_data['department'] = department_id
                         post_user_data['mobile'] = wechat_phone
                         print('------- 请求发送的数据 ----->>' ,get_user_data,department_id ,"|" ,json.dumps(post_user_data))
-                        ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
+                        ret = requests.post(Conf['update_user_url'], params=get_user_data, data=post_user_data)
                         weixin_ret = ret.json()
 
                         print('------- 请求返回的数据----->>', weixin_ret)
