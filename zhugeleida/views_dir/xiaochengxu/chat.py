@@ -62,6 +62,7 @@ def chat(request):
 
             phone = ''
             wechat = ''
+            mingpian_avatar = ''
             ret_data_list = []
             if objs:
 
@@ -112,10 +113,11 @@ def chat(request):
                         'from_user_name': customer_name,
                         'user_id': obj.userprofile.id,
                         'customer': customer_name,
+
                         'position' : obj.userprofile.position,
                         'user_name' : obj.userprofile.username,
                         'user_avatar': mingpian_avatar,
-                        
+
                         'customer_headimgurl': obj.customer.headimgurl,
                         'dateTime': obj.create_date,
 
@@ -135,6 +137,9 @@ def chat(request):
                     'mingpian_phone': phone,
                     'wechat': wechat,
                     'data_count': count,
+                    'position': objs[0].userprofile.position,
+                    'user_name': objs[0].userprofile.username,
+                    'user_avatar': mingpian_avatar,
                 }
 
         else:
