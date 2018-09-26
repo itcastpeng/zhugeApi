@@ -558,7 +558,7 @@ def user_oper(request, oper_type, o_id):
                                 # role_id=role_id,
                                 company_id=company_id,
                                 position=position,
-                                wechat_phone=wechat_phone,
+                                # wechat_phone=wechat_phone,
                                 # mingpian_phone=mingpian_phone
                             )
 
