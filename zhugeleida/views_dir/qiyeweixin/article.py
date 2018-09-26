@@ -126,6 +126,7 @@ def article(request, oper_type):
 @account.is_token(models.zgld_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    print('========================================================================')
 
     if request.method == "POST":
         if oper_type == "add":
