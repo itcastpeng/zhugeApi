@@ -552,14 +552,14 @@ def user_oper(request, oper_type, o_id):
                         errmsg =weixin_ret.get('errmsg')
 
                         if weixin_ret['errmsg'] == 'updated':
-                            print('----wechat_phone--->>',wechat_phone,mingpian_phone)
+                            # print('----wechat_phone--->>',wechat_phone,mingpian_phone)
                             user_objs.update(
                                 username=username,
                                 # role_id=role_id,
-                                company_id=company_id,
+                                # company_id=company_id,
                                 position=position,
-                                # wechat_phone=wechat_phone,
-                                # mingpian_phone=mingpian_phone
+                                wechat_phone=wechat_phone,
+                                mingpian_phone=mingpian_phone
                             )
 
                             user_obj = user_objs[0]
