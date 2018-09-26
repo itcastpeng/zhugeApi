@@ -80,6 +80,7 @@ def user(request):
                             if departmane_list:
                                 departmane_list = json.loads(departmane_list)
                                 department_name_list = []
+                                print('---- department_list_all -->>',department_list_all)
                                 for department_dict in department_list_all:
 
                                     id =  int(department_dict.get('id'))  if  department_dict.get('id') else ''
