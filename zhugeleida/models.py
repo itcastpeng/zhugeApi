@@ -981,3 +981,32 @@ class zgld_speech_details_management(models.Model):
     talkGroupName = models.ForeignKey(to='zgld_talk_group_management', verbose_name='分组名称', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
+
+# 小程序 - 商品分类管理
+class zgld_goods_classification_management(models.Model):
+    classificationName = models.CharField(verbose_name='分类名称', max_length=128)
+    goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
+    parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
+
+# 小程序 - 商品管理
+class zgld_goods_management(models.Model):
+    goodsName = models.CharField(verbose_name='分类名称', max_length=128)
+    parentName = models.ForeignKey(to='zgld_goods_classification_management', verbose_name='归属分类', null=True, blank=True)
+    goodsPrice = models.IntegerField(verbose_name='商品单价', default=0)
+    salesNum = models.IntegerField(verbose_name='销量', default=0)
+    inventoryNum = models.IntegerField(verbose_name='库存', default=0)
+    commissionFee = models.IntegerField(verbose_name='佣金提成', default=0)
+    status_choices = (
+        (1, '已上架'),
+        (2, '未上架'),
+        (3, '已售罄')
+    )
+    goodsStatus = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", auto_now_add=True)
+    xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
+    shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
+    kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
+
