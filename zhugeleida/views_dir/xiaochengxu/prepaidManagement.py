@@ -91,7 +91,7 @@ def yuZhiFu(request):
         # 'body': goodsIntroduce,
         'body': 'zhuge-vip',            # 描述
         'out_trade_no': getWxPayOrderId,# 订单号
-        'total_fee': 0.01,              # 金额
+        'total_fee': '1',              # 金额
         'spbill_create_ip': spbillIp,   # 终端IP
         'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
         'trade_type': 'JSAPI'
@@ -108,7 +108,7 @@ def yuZhiFu(request):
     DOMTree = xmldom.parseString(ret.text)
     collection = DOMTree.documentElement
     # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
-
+    print('---------> ',collection.getElementsByTagName("prepay_id"))
     prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
 
 
