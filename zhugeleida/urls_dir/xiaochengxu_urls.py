@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag_customer,user_weixin_auth,customer
-from zhugeleida.views_dir.xiaochengxu import login,mingpian,product, mallManagement
+from zhugeleida.views_dir.xiaochengxu import login,mingpian,product, prepaidManagement
 from zhugeleida.views_dir.xiaochengxu  import chat,website
 
 
@@ -40,7 +40,7 @@ urlpatterns = [
     url(r'website$',website.website),
 
     # 小程序支付操作
-    url(r'pay$', mallManagement.pay),       # 回调信息
-    url(r'yuZhiFu', mallManagement.yuZhiFu),# 预支付
+    url(r'pay$', prepaidManagement.pay),       # 回调信息
+    url(r'yuZhiFu', prepaidManagement.yuZhiFu),# 预支付
 
 ]
