@@ -804,6 +804,9 @@ def article_oper(request, oper_type, o_id):
                 'dataList': dataList,
                 'article_title': article_title
             }
+        else:
+            response.code = 402
+            response.msg = '请求异常'
 
 
     return JsonResponse(response.__dict__)
