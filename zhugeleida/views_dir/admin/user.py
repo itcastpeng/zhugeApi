@@ -82,11 +82,12 @@ def user(request):
                                 department_name_list = []
                                 for department_dict in department_list_all:
 
-                                    id =  int(department_dict.get('id'))  if  department_dict .get('id') else ''
+                                    id =  int(department_dict.get('id'))  if  department_dict.get('id') else ''
                                     name = department_dict.get('name')
                                     if id in  departmane_list:
                                         department_name_list.append(name)
                                 print('--- department --->',departmane_list,department_name_list)
+
                                 department = ', '.join(department_name_list)
 
 
