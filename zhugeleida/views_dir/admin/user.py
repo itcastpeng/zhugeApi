@@ -85,8 +85,9 @@ def user(request):
 
                                     id =  department_dict.get('id')
                                     name = department_dict.get('name')
-                                    
-                                    if id in  departmane_list:
+                                    print('id----->>',id,'|',departmane_list)
+
+                                    if str(id) in  departmane_list:
                                         department_name_list.append(name)
 
 
