@@ -75,23 +75,22 @@ def yuZhiFu(request):
     user_id = request.GET.get('user_id')
     # print('user_id----------> ',user_id)
     userObjs = models.zgld_customer.objects.filter(id=user_id)
-    nonce_str = generateRandomStamping()   # 时间戳
     getWxPayOrderId = str(int(time.time())) # 订单号
-    # amount = request.GET.get('amount')
-    spbillIp = request.GET.get('spbillIp')
-    goodsIntroduce = request.GET.get('goodsIntroduce')
+    amount = request.GET.get('amount')      # 金额
+    spbillIp = request.GET.get('spbillIp')  # 终端ip
+    # goodsIntroduce = request.GET.get('goodsIntroduce')    #
     url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'
-    goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
+    # goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
     # print('timeStamp===========> ',timeStamp)
     result_data = {
         'appid': 'wx1add8692a23b5976',  # appid
         'mch_id': '1513325051',         # 商户号
-        'nonce_str': nonce_str,         # 32位随机值
-        'openid':userObjs[0].openid,
+        'nonce_str': generateRandomStamping(),         # 32位随机值
+        'openid': userObjs[0].openid,
         # 'body': goodsIntroduce,
         'body': 'zhuge-vip',            # 描述
         'out_trade_no': getWxPayOrderId,# 订单号
-        'total_fee': '1',              # 金额
+        'total_fee': amount,              # 金额
         'spbill_create_ip': spbillIp,   # 终端IP
         'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
         'trade_type': 'JSAPI'
@@ -111,12 +110,12 @@ def yuZhiFu(request):
     print('---------> ',collection.getElementsByTagName("prepay_id"))
     prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
 
-
+    print('prepay_id-----------> ',prepay_id)
     # timeStamp = generateRandomStamping()  # 时间戳
     data_dict = {
         # 'appId' : 'wx1add8692a23b5976',
         'timeStamp': int(time.time()),
-        'nonceStr':nonce_str,
+        'nonceStr':generateRandomStamping(),
         'package': 'prepay_id=' + prepay_id,
         'signType': 'MD5'
     }
