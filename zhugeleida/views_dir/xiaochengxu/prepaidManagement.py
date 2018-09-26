@@ -77,7 +77,7 @@ def yuZhiFu(request):
     userObjs = models.zgld_customer.objects.filter(id=user_id)
     nonce_str = generateRandomStamping()   # 时间戳
     getWxPayOrderId = str(int(time.time())) # 订单号
-    amount = request.GET.get('amount')
+    # amount = request.GET.get('amount')
     spbillIp = request.GET.get('spbillIp')
     goodsIntroduce = request.GET.get('goodsIntroduce')
     url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'
@@ -89,10 +89,10 @@ def yuZhiFu(request):
         'nonce_str': nonce_str,         # 32位随机值
         'openid':userObjs[0].openid,
         # 'body': goodsIntroduce,
-        'body': 'zhuge-vip',
-        'out_trade_no': getWxPayOrderId,
-        'total_fee': amount,
-        'spbill_create_ip': spbillIp,
+        'body': 'zhuge-vip',            # 描述
+        'out_trade_no': getWxPayOrderId,# 订单号
+        'total_fee': 0.01,              # 金额
+        'spbill_create_ip': spbillIp,   # 终端IP
         'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
         'trade_type': 'JSAPI'
         }
@@ -100,11 +100,11 @@ def yuZhiFu(request):
     result_data['sign'] = md5(stringSignTemp).upper()
     xml_data = toXml(result_data)
     # print('result_data-----------> ',result_data)
-    # print('xml_data------------------> ',xml_data)
+    print('xml_data------------------> ',xml_data)
     ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
     ret.encoding = 'utf8'
 
-    # print('-ret.text------------>',ret.text)
+    print('-ret.text------------>',ret.text)
     DOMTree = xmldom.parseString(ret.text)
     collection = DOMTree.documentElement
     # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
@@ -114,10 +114,10 @@ def yuZhiFu(request):
 
     # timeStamp = generateRandomStamping()  # 时间戳
     data_dict = {
-        'appId' : 'wx1add8692a23b5976',
+        # 'appId' : 'wx1add8692a23b5976',
         'timeStamp': int(time.time()),
         'nonceStr':nonce_str,
-        'package': prepay_id,
+        'package': 'prepay_id=' + prepay_id,
         'signType': 'MD5'
     }
 
