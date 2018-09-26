@@ -448,6 +448,8 @@ def user_oper(request, oper_type, o_id):
                 wechat_phone = request.POST.get('wechat_phone')
             mingpian_phone =  request.POST.get('mingpian_phone')
             department_id = request.POST.get('department_id')
+            if department_id:
+                department_id = json.loads(department_id)
 
             # 获取ID 用户名 及 角色
             form_data = {
