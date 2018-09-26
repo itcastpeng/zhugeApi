@@ -261,7 +261,7 @@ def user_oper(request, oper_type, o_id):
                 used_user_num  = models.zgld_userprofile.objects.filter(company_id=company_id).count() #
 
 
-                print('-----超过明片最大开通数------>>',available_user_num,used_user_num)
+                print('----- 超过明片最大开通数 ------>>',available_user_num,used_user_num)
                 if  int(used_user_num) >= int(available_user_num): # 开通的用户数量 等于 == 该公司最大可用名片数
                     response.code = 302
                     response.msg = "超过明片最大开通数,请您联系管理员"

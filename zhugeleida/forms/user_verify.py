@@ -77,6 +77,19 @@ class ScanCodeToAddUserForm(forms.Form):
         else:
             return username
 
+    def clean_wechat_phone(self):
+        wechat_phone = self.data['wechat_phone']
+        company_id = self.data['company_id']
+        # print(username)
+        objs = models.zgld_userprofile.objects.filter(
+            wechat_phone=wechat_phone,company_id=company_id
+        )
+        if objs:
+            self.add_error('wechat_phone', '微信绑定的手机号已存在')
+        else:
+            return wechat_phone
+
+
     # 返回加密后的密码
     # def clean_password(self):
     #     return account.str_encrypt(self.data['password'])
