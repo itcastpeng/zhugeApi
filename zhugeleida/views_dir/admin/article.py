@@ -438,18 +438,25 @@ def article_oper(request, oper_type, o_id):
             q.add(Q(article_id=article_id), Q.AND)
             if uid:
                 q.add(Q(user_id=uid), Q.AND)
-            article_title, result_data = mailuotu(q)
+            objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id)
+            if objs:
 
-            dataList = {                    # 顶端 首级
-                'name': article_title,
-                'children': result_data
-            }
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {
-                'dataList': dataList,
-                'article_title': article_title
-            }
+                article_title, result_data = mailuotu(q)
+
+                dataList = {                    # 顶端 首级
+                    'name': article_title,
+                    'children': result_data
+                }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'dataList': dataList,
+                    'article_title': article_title
+                }
+            else:
+                response.code = 301
+                response.msg = '该文章无查看'
+                response.data = {}
         else:
             response.code = 402
             response.msg = '请求异常'
