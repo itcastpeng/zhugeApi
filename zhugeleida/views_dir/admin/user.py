@@ -79,17 +79,22 @@ def user(request):
                             departmane_list = obj.department
                             if departmane_list:
                                 departmane_list = json.loads(departmane_list)
+                                if len(departmane_list) != 0:
+                                    departmane_list = [int(i) for i in departmane_list]
+                                else:
+                                    departmane_list = []
+
                                 department_name_list = []
-                                print('---- department_list_all -->>',department_list_all)
+                                # print('---- department_list_all -->>',department_list_all)
                                 for department_dict in department_list_all:
 
                                     id =  department_dict.get('id')
                                     name = department_dict.get('name')
-                                    print('id----->>',id,'|',departmane_list)
+                                    # print('id----->>',id,'|',departmane_list)
 
                                     if int(id) in  departmane_list:
                                         department_name_list.append(name)
-                                print('--- department --->',departmane_list,department_name_list)
+                                # print('--- department --->',departmane_list,department_name_list)
 
                                 department = ', '.join(department_name_list)
 
