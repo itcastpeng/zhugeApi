@@ -200,12 +200,6 @@ class UserUpdateForm(forms.Form):
         }
     )
 
-    user_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "用户ID不能为空"
-        }
-    )
 
     username = forms.CharField(
         required=True,
@@ -219,12 +213,7 @@ class UserUpdateForm(forms.Form):
     #     error_messages={
     #         'required': '角色不能为空'
     #     })
-    company_id = forms.IntegerField(
-        required=True,
-        # error_messages={
-        #     'required': '公司不能为空'
-        # }
-    )
+
     position = forms.CharField(
         required=True,
         error_messages={
@@ -232,13 +221,7 @@ class UserUpdateForm(forms.Form):
         }
     )
 
-    department_id = forms.CharField(
-        required=False,
-        error_messages={
-            'required': '部门不能为空'
-        }
 
-    )
     wechat_phone = forms.CharField(
         required=True,
         validators=[mobile_validate, ],  # 应用咱们自己定义的规则

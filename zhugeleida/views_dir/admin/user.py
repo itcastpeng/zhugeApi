@@ -80,18 +80,16 @@ def user(request):
                             if departmane_list:
                                 departmane_list = json.loads(departmane_list)
                                 department_name_list = []
-                                print('---- department_list_all -->>',department_list_all)
+                                # print('---- department_list_all -->>',department_list_all)
                                 for department_dict in department_list_all:
 
                                     id =  department_dict.get('id')
                                     name = department_dict.get('name')
-                                    print('id----->>',id,'|',departmane_list)
+                                    # print('id----->>',id,'|',departmane_list)
 
                                     if str(id) in  departmane_list:
                                         department_name_list.append(name)
-
-
-                                print('--- department --->',departmane_list,department_name_list)
+                                # print('--- department --->',departmane_list,department_name_list)
 
                                 department = ', '.join(department_name_list)
 
@@ -436,13 +434,14 @@ def user_oper(request, oper_type, o_id):
         elif oper_type == "update":
 
             print('-------->>',request.POST)
-            type = request.POST.get('type')
+            type = request.GET.get('type')
 
             user_id =  request.GET.get('user_id')
-            wechat =  request.GET.get('wechat')
+            wechat =  request.POST.get('wechat')
             wechat_phone = request.POST.get('phone')
             if request.POST.get('wechat_phone'):
                 wechat_phone = request.POST.get('wechat_phone')
+            mingpian_phone =  request.POST.get('mingpian_phone')
             department_id = request.POST.get('department_id')
 
             # 获取ID 用户名 及 角色
@@ -450,13 +449,12 @@ def user_oper(request, oper_type, o_id):
                 'o_id': o_id,
                 'user_id': request.GET.get('user_id'),
                 'username': request.POST.get('username'),
-                'password': request.POST.get('password'),
-                # 'role_id': request.POST.get('role_id'),
                 'company_id': request.POST.get('company_id'),
                 'position': request.POST.get('position'),
-                'department_id': department_id,
+
                 'wechat_phone': wechat_phone,
-                'mingpian_phone': request.POST.get('mingpian_phone')
+                'mingpian_phone': mingpian_phone,
+
             }
 
             forms_obj = UserUpdateForm(form_data)
@@ -479,10 +477,7 @@ def user_oper(request, oper_type, o_id):
                     if temp_userprofile_objs:
                         temp_userprofile_objs.update(
                             username=username,
-
-                            company_id=company_id,
                             position=position,
-
                             wechat=wechat,
                             wechat_phone=wechat_phone,
                             mingpian_phone=mingpian_phone,
