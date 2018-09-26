@@ -75,18 +75,18 @@ def yuZhiFu(request):
     user_id = request.GET.get('user_id')
     # print('user_id----------> ',user_id)
     userObjs = models.zgld_customer.objects.filter(id=user_id)
-    timeStamp = generateRandomStamping()   # 时间戳
+    nonce_str = generateRandomStamping()   # 时间戳
     getWxPayOrderId = str(int(time.time())) # 订单号
     amount = request.GET.get('amount')
     spbillIp = request.GET.get('spbillIp')
     goodsIntroduce = request.GET.get('goodsIntroduce')
     url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'
     goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
-    # print('goodsIntroduce===========> ',goodsIntroduce)
+    # print('timeStamp===========> ',timeStamp)
     result_data = {
         'appid': 'wx1add8692a23b5976',  # appid
         'mch_id': '1513325051',         # 商户号
-        'nonce_str': timeStamp,         # 32位随机值
+        'nonce_str': nonce_str,         # 32位随机值
         'openid':userObjs[0].openid,
         'body': goodsIntroduce,
         'out_trade_no': getWxPayOrderId,
@@ -98,7 +98,7 @@ def yuZhiFu(request):
     stringSignTemp = shengchengsign(result_data)
     result_data['sign'] = md5(stringSignTemp).upper()
     xml_data = toXml(result_data)
-
+    print('result_data-----------> ',result_data)
     # print('xml_data------------------> ',xml_data)
     ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
     ret.encoding = 'utf8'
@@ -113,9 +113,9 @@ def yuZhiFu(request):
 
     # timeStamp = generateRandomStamping()  # 时间戳
     data_dict = {
-        'appId' : 'wx202b03ae2fbf636f',
-        'timeStamp': '20180925160609',
-        'nonceStr':timeStamp,
+        'appId' : 'wx1add8692a23b5976',
+        'timeStamp': int(time.time()),
+        'nonceStr':nonce_str,
         'package': prepay_id,
         'signType': 'MD5'
     }
