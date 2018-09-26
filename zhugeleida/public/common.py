@@ -140,11 +140,11 @@ def create_scan_code_userinfo_qrcode(data):
     img.show()
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qrcode')
+    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
 
     qr_code_name = '/admin_uid_%s_%s_qrCode.jpg' % (admin_uid, now_time)
     path_qr_code_name = BASE_DIR + qr_code_name
-    qr_url = 'statics/zhugeleida/imgs/admin/qrcode%s' % (qr_code_name)
+    qr_url = 'statics/zhugeleida/imgs/admin/qr_code%s' % (qr_code_name)
 
     img.save(path_qr_code_name)
     response.data = {'qrcode_url': qr_url}
