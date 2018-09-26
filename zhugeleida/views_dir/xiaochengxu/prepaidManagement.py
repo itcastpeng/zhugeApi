@@ -88,7 +88,8 @@ def yuZhiFu(request):
         'mch_id': '1513325051',         # 商户号
         'nonce_str': nonce_str,         # 32位随机值
         'openid':userObjs[0].openid,
-        'body': goodsIntroduce,
+        # 'body': goodsIntroduce,
+        'body': 'zhuge-vip',
         'out_trade_no': getWxPayOrderId,
         'total_fee': amount,
         'spbill_create_ip': spbillIp,
@@ -98,7 +99,7 @@ def yuZhiFu(request):
     stringSignTemp = shengchengsign(result_data)
     result_data['sign'] = md5(stringSignTemp).upper()
     xml_data = toXml(result_data)
-    print('result_data-----------> ',result_data)
+    # print('result_data-----------> ',result_data)
     # print('xml_data------------------> ',xml_data)
     ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
     ret.encoding = 'utf8'
@@ -121,7 +122,7 @@ def yuZhiFu(request):
     }
 
     stringSignTemp = shengchengsign(data_dict)
-    # print('stringSignTemp----> ',stringSignTemp)
+    print('stringSignTemp----> ',stringSignTemp)
     data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
     print('data_dict-->', data_dict)
 
