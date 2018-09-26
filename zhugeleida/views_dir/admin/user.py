@@ -475,7 +475,7 @@ def user_oper(request, oper_type, o_id):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
 
-                wechat_phone =   request.POST.get.get('wechat_phone')
+                wechat_phone =   request.POST.get('wechat_phone')
                 mingpian_phone = request.POST.get('mingpian_phone')
 
                 if type == 'temp_user':
