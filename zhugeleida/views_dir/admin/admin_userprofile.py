@@ -213,6 +213,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                     id=switch_admin_user_id
                 )
 
+
                 response.data = {
                     'token': obj.token,
                     'user_id': obj.id,
@@ -221,6 +222,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                     'role_id': obj.role_id,
                     'role_name': obj.role.name,
                     'avatar': obj.avatar,
+                    'weChatQrCode' : obj.company.weChatQrCode
 
                 }
 

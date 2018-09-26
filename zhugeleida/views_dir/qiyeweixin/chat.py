@@ -283,23 +283,25 @@ def chat_oper(request, oper_type, o_id):
 
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
-                models.zgld_chatinfo.objects.create(
+                obj = models.zgld_chatinfo.objects.create(
                         content=content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=send_type
                 )
+                # if flow_up_obj:
+                #     flow_up_obj = flow_up_obj[0]
+                #     user_type = flow_up_obj.customer.user_type
+                user_type = obj.customer.user_type
 
-                flow_up_obj = flow_up_obj[0]
-                user_type = flow_up_obj.customer.user_type
-                if user_type == 2:
-
+                if customer_id and user_id and user_type == 2:
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
                     tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
-                elif user_type == 1:
-                    #
-                    pass
+
+                elif  user_type == 1 and customer_id and user_id:
+                        #
+                     pass
 
 
                 response.code = 200

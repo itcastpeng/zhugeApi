@@ -226,6 +226,7 @@ def product(request, oper_type):
                 product_cover_url = json.loads(picture_obj.content).get('cover_data')[0]['data'][0]   # 产品价格
                 product_price = picture_obj.price   # 产品价格
                 product_name =  picture_obj.name    #产品民称
+                product_id =  picture_obj.id    #产品民称
 
                 new_product_cover_filename = str(uuid.uuid1())
                 exit_product_cover_path = BASE_DIR + '/' +  product_cover_url
@@ -248,7 +249,8 @@ def product(request, oper_type):
                     'info_type' : 2,  # (2,'product_info')   #客户和用户之间的产品咨询
                     'product_name' : product_name,
                     'product_price' : product_price,
-                    'product_cover_url' : static_product_cover_url
+                    'product_cover_url' : static_product_cover_url,
+                    'product_id' : product_id
                 }
                 content = json.dumps(_content)
 

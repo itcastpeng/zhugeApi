@@ -73,32 +73,32 @@ def pay(request):
 # @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     user_id = request.GET.get('user_id')
-    print('user_id----------> ',user_id)
+    # print('user_id----------> ',user_id)
     userObjs = models.zgld_customer.objects.filter(id=user_id)
-    timeStamp = generateRandomStamping()   # 时间戳
     getWxPayOrderId = str(int(time.time())) # 订单号
-    amount = request.GET.get('amount')
-    spbillIp = request.GET.get('spbillIp')
-    goodsIntroduce = request.GET.get('goodsIntroduce')
+    amount = request.GET.get('amount')      # 金额
+    spbillIp = request.GET.get('spbillIp')  # 终端ip
+    # goodsIntroduce = request.GET.get('goodsIntroduce')    #
     url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'
-    goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
-    print('goodsIntroduce===========> ',goodsIntroduce)
+    # goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
+    # print('timeStamp===========> ',timeStamp)
     result_data = {
         'appid': 'wx1add8692a23b5976',  # appid
         'mch_id': '1513325051',         # 商户号
-        'nonce_str': timeStamp,         # 32位随机值
-        'openid':userObjs[0].openid,
-        'body': goodsIntroduce,
-        'out_trade_no': getWxPayOrderId,
-        'total_fee': amount,
-        'spbill_create_ip': spbillIp,
+        'nonce_str': generateRandomStamping(),         # 32位随机值
+        'openid': userObjs[0].openid,
+        # 'body': goodsIntroduce,
+        'body': 'zhuge-vip',            # 描述
+        'out_trade_no': getWxPayOrderId,# 订单号
+        'total_fee': amount,              # 金额
+        'spbill_create_ip': spbillIp,   # 终端IP
         'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
         'trade_type': 'JSAPI'
         }
     stringSignTemp = shengchengsign(result_data)
     result_data['sign'] = md5(stringSignTemp).upper()
     xml_data = toXml(result_data)
-
+    # print('result_data-----------> ',result_data)
     print('xml_data------------------> ',xml_data)
     ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
     ret.encoding = 'utf8'
@@ -106,19 +106,26 @@ def yuZhiFu(request):
     print('-ret.text------------>',ret.text)
     DOMTree = xmldom.parseString(ret.text)
     collection = DOMTree.documentElement
-    # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码链接
-
+    # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
+    print('---------> ',collection.getElementsByTagName("prepay_id"))
     prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
-    timeStamp = generateRandomStamping()  # 时间戳
+
+    print('prepay_id-----------> ',prepay_id)
+    # timeStamp = generateRandomStamping()  # 时间戳
     data_dict = {
-        'appId' : 'wx202b03ae2fbf636f',
-        'timeStamp': '20180925160609',
-        'nonceStr':timeStamp,
-        'package': prepay_id,
+        # 'appId' : 'wx1add8692a23b5976',
+        'timeStamp': int(time.time()),
+        'nonceStr':generateRandomStamping(),
+        'package': 'prepay_id=' + prepay_id,
         'signType': 'MD5'
     }
+
     stringSignTemp = shengchengsign(data_dict)
-    data_dict['paySign'] = md5(stringSignTemp).upper()
+    print('stringSignTemp----> ',stringSignTemp)
+    data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
+    print('data_dict-->', data_dict)
+
+
     response.code = 200
     response.data = data_dict
     return JsonResponse(response.__dict__)

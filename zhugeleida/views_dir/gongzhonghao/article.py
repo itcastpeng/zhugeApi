@@ -261,8 +261,10 @@ def article_oper(request, oper_type, o_id):
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(
-                        read_count=F('read_count') + 1, last_activity_time=datetime.datetime.now())
-
+                        read_count=F('read_count') + 1)
+                    zgld_article_objs.update(
+                        status = 1
+                    )
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的

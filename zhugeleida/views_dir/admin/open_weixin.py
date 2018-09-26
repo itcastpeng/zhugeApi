@@ -172,6 +172,7 @@ def open_weixin(request, oper_type):
                                 name=nick_name,          # 昵称
                                 service_category=categories,  # 服务类目
                             )
+
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
@@ -199,11 +200,65 @@ def open_weixin(request, oper_type):
                         if errcode == 0:
                             response.code = 200
                             response.msg = "修改小程序服务器域名成功"
-                            print('---------授权 appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
+                            print('---------授权appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
+                            print ('---------授权appid: %s, 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
+
+
+                        ########################## 组合模板并添加至帐号下的个人模板库 ###############################
+                        get_template_add_data = {'access_token': authorizer_access_token}
+
+                        template_add_url = 'https://api.weixin.qq.com/cgi-bin/wxopen/template/add'
+                        '''
+                            keyword_id_list : [25, 22, 11]
+                            {
+                                "keyword_id": 25,
+                                "name": "回复者",
+                                "example": "徐志娟"
+                            }
+                            {
+                                "keyword_id": 22,
+                                "name": "回复时间",
+                                "example": "2018-6-22 10:48:37"
+                            }
+                            {
+                                "keyword_id": 11,
+                                "name": "回复内容",
+                                "example": "您直接提交相关信息即可"
+                            }                            
+                        
+                        '''
+                        post_template_add_data = {
+                            'id': 'AT0782',
+                            "keyword_id_list": [25, 22, 11]
+                        }
+                        add_ret = requests.post(template_add_url, params=get_template_add_data,data=json.dumps(post_template_add_data))
+                        add_ret = add_ret.json()
+
+                        errcode = add_ret.get('errcode')
+                        errmsg = add_ret.get('errmsg')
+                        list = add_ret.get('list')
+
+                        print('------- 组合模板并添加至帐号下的个人模板库[接口返回] ---->', json.dumps(add_ret))
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "组合模板添加成功"
+                            if list:
+                                list_ret = list[0]
+                                template_id = list_ret.get('template_id')
+                                obj.update(
+                                    template_id=template_id
+                                )
+
+                            print('---------授权appid: %s , 组合模板并添加 【成功】------------>>' % (authorization_appid))
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 组合模板并添加 【失败】------------>>' % (authorization_appid),errmsg, '|', errcode)
+
 
 
                         ########################## 绑定微信用户为小程序体验者 ###############################
@@ -224,7 +279,7 @@ def open_weixin(request, oper_type):
                         response.code = 400
                         response.msg = "获取帐号基本信息 authorizer_info信息为空"
                         return JsonResponse(response.__dict__)
-                    ######################### end ############################################
+                        ######################### end ############################################
 
                 else:
                     print('------ 令牌（authorizer_access_token）为空------>>')
