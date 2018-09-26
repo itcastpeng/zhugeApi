@@ -112,8 +112,10 @@ def chat(request):
                         'from_user_name': customer_name,
                         'user_id': obj.userprofile.id,
                         'customer': customer_name,
+                        'position' : obj.userprofile.position,
                         'user_name' : obj.userprofile.username,
                         'user_avatar': mingpian_avatar,
+                        
                         'customer_headimgurl': obj.customer.headimgurl,
                         'dateTime': obj.create_date,
 
