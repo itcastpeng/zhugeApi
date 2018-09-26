@@ -966,7 +966,6 @@ class zgld_plugin_goods_order(models.Model):
         app_label = "zhugeleida"
 
 
-
 # 后台管理 - 话术分组管理
 class zgld_talk_group_management(models.Model):
     groupName = models.CharField(verbose_name='话术分组名称', max_length=64)
@@ -1009,4 +1008,3 @@ class zgld_goods_management(models.Model):
     xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
     kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
-

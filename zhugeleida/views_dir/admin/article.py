@@ -159,6 +159,30 @@ def init_data(user_id, pid=None):
     # print('result_data -->', result_data)
     return result_data
 
+def mailuotu(q):
+    count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
+        'user',
+        'article'
+    ).filter(q).values('user_id', 'user__username', 'article__title').annotate(Count('user'))
+
+    result_data = []
+    for obj in count_objs:
+        user_id = obj['user_id']
+        username = obj['user__username']
+        print('user_id -->', user_id)
+        print('username -->', username)
+
+        children_data = init_data(user_id)
+        tmp = {'name': username}
+        if children_data:
+            tmp['children'] = children_data
+        result_data.append(tmp)
+
+    print('result_data -->', result_data)
+
+    article_title = count_objs[0]['article__title']
+    return article_title, result_data
+
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def article_oper(request, oper_type, o_id):
@@ -414,28 +438,8 @@ def article_oper(request, oper_type, o_id):
             q.add(Q(article_id=article_id), Q.AND)
             if uid:
                 q.add(Q(user_id=uid), Q.AND)
+            article_title, result_data = mailuotu(q)
 
-            count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
-                'user',
-                'article'
-            ).filter(q).values('user_id', 'user__username', 'article__title').annotate(Count('user'))
-
-            result_data = []
-            for obj in count_objs:
-                user_id = obj['user_id']
-                username = obj['user__username']
-                print('user_id -->', user_id)
-                print('username -->', username)
-
-                children_data = init_data(user_id)
-                tmp = {'name': username}
-                if children_data:
-                    tmp['children'] = children_data
-                result_data.append(tmp)
-
-            print('result_data -->', result_data)
-
-            article_title = count_objs[0]['article__title']
             dataList = {                    # 顶端 首级
                 'name': article_title,
                 'children': result_data
