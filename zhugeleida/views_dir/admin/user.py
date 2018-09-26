@@ -535,15 +535,19 @@ def user_oper(request, oper_type, o_id):
                         post_user_data['position'] = position
                         post_user_data['department'] = department_id
                         post_user_data['mobile'] = wechat_phone
-                        print(Conf['update_user_url'], get_user_data, post_user_data)
+                        print('------- 请求发送的数据 ----->>' ,get_user_data, post_user_data)
                         ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
-                        print(ret.text)
+                        weixin_ret = ret.json()
+
+                        print('------- 请求返回的数据----->>', weixin_ret)
 
                         if department_id[0] == 1 and len(department_id) == 1:
                             department_id = []
 
-                        print('------ManToMany department_id ----->')
-                        weixin_ret = json.loads(ret.text)
+
+                        errcode = weixin_ret.get('errcode')
+                        errmsg =weixin_ret.get('errmsg')
+
                         if weixin_ret['errmsg'] == 'updated':
 
                             user_objs.update(
@@ -561,8 +565,8 @@ def user_oper(request, oper_type, o_id):
                             response.code = 200
                             response.msg = "修改成功"
                         else:
-                            response.code = weixin_ret['errcode']
-                            response.msg = "修改成功"
+                            response.code = errcode
+                            response.msg = errmsg
 
                     else:
                         response.code = 303
