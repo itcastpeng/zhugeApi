@@ -4,8 +4,12 @@ import requests
 import xml.dom.minidom as xmldom
 import qrcode
 import uuid, time, json
+from zhugeleida import models
 from publicFunc import Response
+from publicFunc import account
 from django.http import JsonResponse
+import requests
+from django.db.models import Q
 # ==========商户KEY============
 KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
 
@@ -64,7 +68,13 @@ def pay(request):
     response.code = 200
     return JsonResponse(response.__dict__)
 
+
+# @csrf_exempt
+# @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
+    user_id = request.GET.get('user_id')
+    print('user_id----------> ',user_id)
+    userObjs = models.zgld_customer.objects.filter(id=user_id)
     timeStamp = generateRandomStamping()   # 时间戳
     getWxPayOrderId = str(int(time.time())) # 订单号
     amount = request.GET.get('amount')
@@ -74,10 +84,10 @@ def yuZhiFu(request):
     goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
     print('goodsIntroduce===========> ',goodsIntroduce)
     result_data = {
-        'appid': 'wx1add8692a23b5976', # appid
-        'mch_id': '1513325051', # 商户号
-        'nonce_str': timeStamp,      # 32位随机值
-        # 'sign': '',             # 签名
+        'appid': 'wx1add8692a23b5976',  # appid
+        'mch_id': '1513325051',         # 商户号
+        'nonce_str': timeStamp,         # 32位随机值
+        'openid':userObjs[0].openid,
         'body': goodsIntroduce,
         'out_trade_no': getWxPayOrderId,
         'total_fee': amount,
@@ -92,7 +102,8 @@ def yuZhiFu(request):
     print('xml_data------------------> ',xml_data)
     ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
     ret.encoding = 'utf8'
-    # print('-ret.text------------>',ret.text)
+
+    print('-ret.text------------>',ret.text)
     DOMTree = xmldom.parseString(ret.text)
     collection = DOMTree.documentElement
     # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码链接
