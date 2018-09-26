@@ -755,6 +755,7 @@ def user_oper(request, oper_type, o_id):
                 position = forms_obj.cleaned_data.get('position')
                 wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
+                wechat = request.POST.get('wechat')
 
 
                 # if len(depart_id_list) == 0:
@@ -767,6 +768,7 @@ def user_oper(request, oper_type, o_id):
                     position=position,
                     wechat_phone=wechat_phone,
                     mingpian_phone=mingpian_phone,
+                    wechat=wechat,
 
                 )
 
