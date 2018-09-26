@@ -475,8 +475,8 @@ def user_oper(request, oper_type, o_id):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
 
-                wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
-                mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
+                wechat_phone =   request.POST.get.get('wechat_phone')
+                mingpian_phone = request.POST.get('mingpian_phone')
 
                 if type == 'temp_user':
 
@@ -552,14 +552,14 @@ def user_oper(request, oper_type, o_id):
                         errmsg =weixin_ret.get('errmsg')
 
                         if weixin_ret['errmsg'] == 'updated':
-
+                            print('----wechat_phone--->>',wechat_phone,mingpian_phone)
                             user_objs.update(
                                 username=username,
                                 # role_id=role_id,
                                 company_id=company_id,
                                 position=position,
                                 wechat_phone=wechat_phone,
-                                mingpian_phone=mingpian_phone,
+                                # mingpian_phone=mingpian_phone
                             )
 
                             user_obj = user_objs[0]
