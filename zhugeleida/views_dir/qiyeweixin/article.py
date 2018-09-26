@@ -790,13 +790,6 @@ def article_oper(request, oper_type, o_id):
             q.add(Q(article_id=article_id), Q.AND)
             if uid:
                 q.add(Q(user_id=uid), Q.AND)
-
-            article_id = o_id  # 文章id
-            uid = request.GET.get('uid')
-            q = Q()
-            q.add(Q(article_id=article_id), Q.AND)
-            if uid:
-                q.add(Q(user_id=uid), Q.AND)
             article_title, result_data = mailuotu(q)
 
             dataList = {  # 顶端 首级
