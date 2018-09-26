@@ -784,6 +784,7 @@ def article_oper(request, oper_type, o_id):
 
         # 脉络图 统计文章 转载情况
         elif oper_type == 'contextDiagram':
+            print('=======================脉络图=-====================')
             article_id = o_id  # 文章id
             uid = request.GET.get('uid')
             q = Q()
