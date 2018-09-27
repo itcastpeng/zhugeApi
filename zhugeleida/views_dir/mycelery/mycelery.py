@@ -226,97 +226,111 @@ def create_user_or_customer_qr_code(request):
 @csrf_exempt
 def  create_user_or_customer_poster(request):
 
-    response = ResponseObj()
-    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
-    print('---->', BASE_DIR)
 
-    # option = webdriver.ChromeOptions()
-    # mobileEmulation = {'deviceName': 'iPhone 6'}
-    # option.add_experimental_option('mobileEmulation', mobileEmulation)
-    # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
-    platform = sys.platform  # 获取平台
-    phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
+   response = ResponseObj()
+   # objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+   objs = models.zgld_user_customer_belonger.objects.all()[:10]
 
-    if 'linux' in platform:
-        phantomjs_path = phantomjs_path + '/phantomjs'
+   for obj in objs:
+        # response = ResponseObj()
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
+        print('---->', BASE_DIR)
 
-    else:
-        phantomjs_path = phantomjs_path + '/phantomjs.exe'
+        # option = webdriver.ChromeOptions()
+        # mobileEmulation = {'deviceName': 'iPhone 6'}
+        # option.add_experimental_option('mobileEmulation', mobileEmulation)
+        # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
-    print('----- phantomjs_path ----->>', phantomjs_path)
+        platform = sys.platform  # 获取平台
+        phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
-    driver = webdriver.PhantomJS(phantomjs_path)
-    driver.implicitly_wait(10)
+        if 'linux' in platform:
+            phantomjs_path = phantomjs_path + '/phantomjs'
 
-    customer_id = request.GET.get('customer_id')
-    user_id = request.GET.get('user_id')
-
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
-
-    print('----海报的静态页面[大韩资助]-->', url)
-
-    try:
-        driver.get(url)
-        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
-        if customer_id:
-            user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
-            user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
         else:
-            user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
-            user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
+            phantomjs_path = phantomjs_path + '/phantomjs.exe'
+
+        print('----- phantomjs_path ----->>', phantomjs_path)
+
+        driver = webdriver.PhantomJS(phantomjs_path)
+        driver.implicitly_wait(10)
+
+        # customer_id = request.GET.get('customer_id')
+        # user_id = request.GET.get('user_id')
+
+        customer_id = obj.customer_id
+        user_id = obj.user_id
+        print('--- customer_id | user_id --------->>',customer_id,user_id)
+
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
+
+        print('----海报的静态页面[大韩资助]-->', url)
+
+        try:
+            driver.get(url)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+            if customer_id:
+                user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
+                user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
+            else:
+                user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
+                user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
 
 
-        driver.save_screenshot(BASE_DIR + user_poster_file_temp)
-        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
+            driver.save_screenshot(BASE_DIR + user_poster_file_temp)
+            driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
-        element = driver.find_element_by_id("jietu")
-        print(element.location)  # 打印元素坐标
-        print(element.size)  # 打印元素大小
+            element = driver.find_element_by_id("jietu")
+            print(element.location)  # 打印元素坐标
+            print(element.size)  # 打印元素大小
 
-        left = element.location['x']
-        top = element.location['y']
-        right = element.location['x'] + element.size['width']
-        bottom = element.location['y'] + element.size['height']
+            left = element.location['x']
+            top = element.location['y']
+            right = element.location['x'] + element.size['width']
+            bottom = element.location['y'] + element.size['height']
 
-        im = Image.open(BASE_DIR + user_poster_file_temp)
-        im = im.crop((left, top, right, bottom))
+            im = Image.open(BASE_DIR + user_poster_file_temp)
+            im = im.crop((left, top, right, bottom))
 
-        print(len(im.split()))  # test
-        if len(im.split()) == 4:
-            # prevent IOError: cannot write mode RGBA as BMP
-            r, g, b, a = im.split()
-            im = Image.merge("RGB", (r, g, b))
-            im.save(BASE_DIR + user_poster_file)
-        else:
-            im.save(BASE_DIR + user_poster_file)
+            print(len(im.split()))  # test
+            if len(im.split()) == 4:
+                # prevent IOError: cannot write mode RGBA as BMP
+                r, g, b, a = im.split()
+                im = Image.merge("RGB", (r, g, b))
+                im.save(BASE_DIR + user_poster_file)
+            else:
+                im.save(BASE_DIR + user_poster_file)
 
-        poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
-        if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-        print('--------- 生成海报URL -------->', poster_url)
+            poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+            if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
+            print('--------- 生成海报URL -------->', poster_url)
 
-        objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
-        if objs:
-            objs.update(
-                poster_url= poster_url
-            )
+            obj.poster_url = poster_url
+            obj.save()
 
-        ret_data = {
-            'user_id': user_id,
-            'poster_url': poster_url,
-        }
-        print('-----save_poster ret_data --->>', ret_data)
-        response.data = ret_data
-        response.msg = "请求成功"
-        response.code = 200
+            # objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
+            # if objs:
+            #     objs.update(
+            #         poster_url= poster_url
+            #     )
 
-    except Exception as e:
-        response.msg = "PhantomJS截图失败"
-        response.code = 400
-        driver.quit()
+            ret_data = {
+                'user_id': user_id,
+                'poster_url': poster_url,
+            }
+            print('-----save_poster ret_data --->>', ret_data)
+            response.data = ret_data
+            response.msg = "请求成功"
+            response.code = 200
 
-    return JsonResponse(response.__dict__)
+        except Exception as e:
+            response.msg = "PhantomJS截图失败"
+            response.code = 400
+            driver.quit()
+
+   return JsonResponse(response.__dict__)
 
 
 
