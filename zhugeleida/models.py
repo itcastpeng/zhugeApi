@@ -982,6 +982,7 @@ class zgld_speech_details_management(models.Model):
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
 
+
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
     classificationName = models.CharField(verbose_name='分类名称', max_length=128)
@@ -989,6 +990,7 @@ class zgld_goods_classification_management(models.Model):
     parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
+    level = models.IntegerField(verbose_name='分类等级', default=1)
 
 # 小程序 - 商品管理
 class zgld_goods_management(models.Model):
@@ -1018,3 +1020,62 @@ class zgld_shangcheng_jichushezhi(models.Model):
     shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
     lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
     yognjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
+
+# 小程序 - 订单管理
+class zgld_shangcheng_dingdan_guanli(models.Model):
+    orderNumber = models.IntegerField(verbose_name='订单号', null=True, blank=True)
+    goodsPicture = models.CharField(verbose_name='商品图片', max_length=128, null=True, blank=True)
+    goodsName = models.CharField(verbose_name='商品名字', max_length=64)
+    unitRiceNum = models.CharField(verbose_name='单价/数量', max_length=64, null=True, blank=True)
+    countNum = models.IntegerField(verbose_name='总价', default=0)
+    yingFuKuan = models.IntegerField(verbose_name='应付款', default=0)
+    youHui = models.IntegerField(verbose_name='优惠', default=0)
+    yewuUser = models.ForeignKey(to=zgld_userprofile, verbose_name='业务员', null=True, blank=True)
+    yongJin = models.IntegerField(verbose_name='佣金', default=0)
+    peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
+    shouHuoRen = models.CharField(verbose_name='收货人', max_length=128, null=True, blank=True)
+    order_status = (
+        (1, '等待到款'),
+        (2, '正在配货'),
+        (3, '等待移仓'),
+        (4, '正在移仓'),
+        (5, '已配货'),
+        (6, '已发货'),
+        (7, '已送达'),
+        (8, '交易成功'),
+        (9, '交易未成功'),
+        (10, '取消'),
+        (11, '等待处理'),
+    )
+    theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=11)
+
+# 退款单管理
+class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
+    orderNumber = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单号', null=True, blank=True)
+    tuiKuanYuanYin = models.CharField(verbose_name='退款原因', max_length=256, null=True, blank=True)
+    tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
+    shengChengDateTime = models.DateTimeField(verbose_name='生成时间', auto_now_add=True)
+    tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', auto_now_add=False)
+    tuikuan_status = (
+        (1, '退款中'),
+        (2, '退款中, 等待卖家收货'),
+        (3, '退款完成'),
+        (4, '退款失败')
+    )
+    tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
+
+# 员工订单统计
+class zgld_yuangong_dingdan_tongji(models.Model):
+    touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
+    employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
+    employeesPhone = models.IntegerField(verbose_name='(员工/业务员)电话', null=True, blank=True)
+    bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
+    numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
+    ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
+
+
+
+
+
+
+
