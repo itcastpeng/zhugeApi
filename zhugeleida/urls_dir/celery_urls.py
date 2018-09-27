@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^create_user_or_customer_qr_code', mycelery.create_user_or_customer_qr_code),     # 生成小程序二维码
     url(r'^create_user_or_customer_poster', mycelery.create_user_or_customer_poster),     # 生成小程序的海报
 
+
     url(r'^user_send_template_msg', mycelery.user_send_template_msg),     # 发送模板消息
     url(r'^get_latest_audit_status_and_release_code$', mycelery.get_latest_audit_status_and_release_code),     # 定时检测代小程序发布审核状态
 
