@@ -105,7 +105,7 @@ def work_weixin_auth(request, company_id):
             response.code = 403
             response.msg = '账户过期'
             print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (company_id, company_name, account_expired_time))
-            return redirect('http://zhugeleida.zhugeyingxiao.com/expire_page/index')
+            return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
 
         # 如果用户存在
