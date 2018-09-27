@@ -209,7 +209,6 @@ def article_oper(request, oper_type, o_id):
             forms_obj = ArticleAddForm(article_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
 
                 user_id = request.GET.get('user_id')
                 company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -253,7 +252,7 @@ def article_oper(request, oper_type, o_id):
                 response_ret = create_qrcode(qrcode_data)
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
                 if pre_qrcode_url:
-                    response = response_ret
+                    response.data = {'pre_qrcode_url':pre_qrcode_url, 'article_id': obj.id, }
                     response.code = 200
                     response.msg = "添加成功"
 
