@@ -79,6 +79,11 @@ def user(request):
                             departmane_list = obj.department
                             if departmane_list:
                                 departmane_list = json.loads(departmane_list)
+                                if len(departmane_list) != 0:
+                                    departmane_list = [int(i) for i in departmane_list]
+                                else:
+                                    departmane_list = []
+
                                 department_name_list = []
                                 # print('---- department_list_all -->>',department_list_all)
                                 for department_dict in department_list_all:
@@ -87,7 +92,7 @@ def user(request):
                                     name = department_dict.get('name')
                                     # print('id----->>',id,'|',departmane_list)
 
-                                    if str(id) in  departmane_list:
+                                    if int(id) in  departmane_list:
                                         department_name_list.append(name)
                                 # print('--- department --->',departmane_list,department_name_list)
 
@@ -154,7 +159,7 @@ def user(request):
                         departmane_objs = obj.department.all()
                         print('departmane_objs -->', departmane_objs)
                         if departmane_objs:
-                            #print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
+                            print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
                             department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
                             department_id = [i[0] for i in departmane_objs.values_list('id')]
 
@@ -256,7 +261,7 @@ def user_oper(request, oper_type, o_id):
                 used_user_num  = models.zgld_userprofile.objects.filter(company_id=company_id).count() #
 
 
-                print('-----超过明片最大开通数------>>',available_user_num,used_user_num)
+                print('----- 超过明片最大开通数 ------>>',available_user_num,used_user_num)
                 if  int(used_user_num) >= int(available_user_num): # 开通的用户数量 等于 == 该公司最大可用名片数
                     response.code = 302
                     response.msg = "超过明片最大开通数,请您联系管理员"
@@ -443,6 +448,8 @@ def user_oper(request, oper_type, o_id):
                 wechat_phone = request.POST.get('wechat_phone')
             mingpian_phone =  request.POST.get('mingpian_phone')
             department_id = request.POST.get('department_id')
+            if department_id:
+                department_id = json.loads(department_id)
 
             # 获取ID 用户名 及 角色
             form_data = {
@@ -468,7 +475,7 @@ def user_oper(request, oper_type, o_id):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
 
-                wechat_phone = forms_obj.cleaned_data.get('wechat_phone')
+                wechat_phone =   forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
                 if type == 'temp_user':
@@ -522,31 +529,37 @@ def user_oper(request, oper_type, o_id):
                         else:
                             get_user_data['access_token'] = token_ret
 
-                        if len(forms_obj.cleaned_data.get('department_id')) == 0:
+                        if len(department_id) == 0:
                             department_id = [1]
+
                         post_user_data['userid'] = user_objs[0].userid
                         post_user_data['name'] = username
                         post_user_data['position'] = position
                         post_user_data['department'] = department_id
                         post_user_data['mobile'] = wechat_phone
-                        print(Conf['update_user_url'], get_user_data, post_user_data)
+                        # print('------- 请求发送的数据 ----->>' ,get_user_data, department_id ,"\n" ,post_user_data,json.dumps(post_user_data))
                         ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
-                        print(ret.text)
+
+                        weixin_ret = ret.json()
+
+                        print('------- 请求返回的数据----->>', weixin_ret)
 
                         if department_id[0] == 1 and len(department_id) == 1:
                             department_id = []
 
-                        print('------ManToMany department_id ----->')
-                        weixin_ret = json.loads(ret.text)
-                        if weixin_ret['errmsg'] == 'updated':
 
+                        errcode = weixin_ret.get('errcode')
+                        errmsg =weixin_ret.get('errmsg')
+
+                        if weixin_ret['errmsg'] == 'updated':
+                            # print('----wechat_phone--->>',wechat_phone,mingpian_phone)
                             user_objs.update(
                                 username=username,
                                 # role_id=role_id,
-                                company_id=company_id,
+                                # company_id=company_id,
                                 position=position,
                                 wechat_phone=wechat_phone,
-                                mingpian_phone=mingpian_phone,
+                                mingpian_phone=mingpian_phone
                             )
 
                             user_obj = user_objs[0]
@@ -555,8 +568,8 @@ def user_oper(request, oper_type, o_id):
                             response.code = 200
                             response.msg = "修改成功"
                         else:
-                            response.code = weixin_ret['errcode']
-                            response.msg = "修改成功"
+                            response.code = errcode
+                            response.msg = errmsg
 
                     else:
                         response.code = 303

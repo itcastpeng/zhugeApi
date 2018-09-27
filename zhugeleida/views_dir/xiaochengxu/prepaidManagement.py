@@ -113,7 +113,7 @@ def yuZhiFu(request):
     print('prepay_id-----------> ',prepay_id)
     # timeStamp = generateRandomStamping()  # 时间戳
     data_dict = {
-        # 'appId' : 'wx1add8692a23b5976',
+        'appId' : 'wx1add8692a23b5976',
         'timeStamp': int(time.time()),
         'nonceStr':generateRandomStamping(),
         'package': 'prepay_id=' + prepay_id,

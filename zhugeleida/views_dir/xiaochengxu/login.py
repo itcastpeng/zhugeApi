@@ -350,7 +350,7 @@ def login_oper_control(request):
             "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
             },
             "button_msg": {
-                "msg": "保存名片"
+                "msg": "发送手机号"
             }
 
         }

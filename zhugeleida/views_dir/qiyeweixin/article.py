@@ -9,7 +9,7 @@ from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm, ArticleSe
     HideCustomerDataForm, ArticleAccessLogForm,ArticleForwardInfoForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
-
+from zhugeleida.views_dir.admin.article import mailuotu
 import time
 import datetime
 import json
@@ -126,7 +126,6 @@ def article(request, oper_type):
 @account.is_token(models.zgld_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-
     if request.method == "POST":
         if oper_type == "add":
             article_data = {
@@ -781,5 +780,36 @@ def article_oper(request, oper_type, o_id):
                 print(forms_obj.errors)
                 response.code = 301
                 response.msg = forms_obj.errors.as_json()
+
+        # 脉络图 统计文章 转载情况
+        elif oper_type == 'contextDiagram':
+            article_id = o_id  # 文章id
+            uid = request.GET.get('uid')
+            objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id)
+            if objs:
+                q = Q()
+                q.add(Q(article_id=article_id), Q.AND)
+                if uid:
+                    q.add(Q(user_id=uid), Q.AND)
+                article_title, result_data = mailuotu(q)
+
+                dataList = {  # 顶端 首级
+                    'name': article_title,
+                    'children': result_data
+                }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'dataList': dataList,
+                    'article_title': article_title
+                }
+            else:
+                response.code = 301
+                response.msg = '该文章无查看'
+                response.data = {}
+        else:
+            response.code = 402
+            response.msg = '请求异常'
+
 
     return JsonResponse(response.__dict__)
