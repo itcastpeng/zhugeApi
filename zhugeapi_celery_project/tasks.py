@@ -64,6 +64,7 @@ def user_send_template_msg_to_customer(data):
 @app.task
 def kill_phantomjs_process():
     pids = psutil.pids()
+
     for pid in pids:
         # print(pid)
         p = psutil.Process(pid)
