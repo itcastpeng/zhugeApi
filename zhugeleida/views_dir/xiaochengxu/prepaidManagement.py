@@ -53,8 +53,8 @@ def shengchengsign(result_data, KEY):
     return stringSignTemp
 
 def pay(request):
-    print('回调=-----> ',request.GET)
-    print('回调=-----> ',request.POST)
+    print('回调=--GET---> ',request.GET)
+    print('回调=--POST---> ',request.POST)
     response.code = 200
     return JsonResponse(response.__dict__)
 
