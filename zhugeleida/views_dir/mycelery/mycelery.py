@@ -243,11 +243,11 @@ def  create_user_or_customer_poster(request):
 
     else:
         phantomjs_path = phantomjs_path + '/phantomjs.exe'
+
     print('----- phantomjs_path ----->>', phantomjs_path)
 
     driver = webdriver.PhantomJS(phantomjs_path)
     driver.implicitly_wait(10)
-
 
     customer_id = request.GET.get('customer_id')
     user_id = request.GET.get('user_id')
@@ -605,3 +605,4 @@ def get_latest_audit_status_and_release_code(request):
         response.msg = '查询最新一次提交的审核状态-执行完成'
 
     return JsonResponse(response.__dict__)
+

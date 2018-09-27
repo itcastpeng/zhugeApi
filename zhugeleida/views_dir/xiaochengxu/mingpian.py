@@ -389,8 +389,12 @@ def mingpian_oper(request, oper_type):
                 poster_url = qr_obj[0].poster_url
 
                 if not poster_url:
+
                     data_dict = {'user_id': user_id, 'customer_id': customer_id}
                     tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
+                    response.msg = "去生成海报URl"
+                    response.code = 200
 
                 else:
 
@@ -486,8 +490,6 @@ def mingpian_oper(request, oper_type):
                 #     response.code = 400
                 #     driver.quit()
 
-                data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
 
         else:
