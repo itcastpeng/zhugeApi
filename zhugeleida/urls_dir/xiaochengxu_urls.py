@@ -49,7 +49,7 @@ urlpatterns = [
 
     # 小程序 - 商品管理
     url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品分类 管理查询
-    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品 分类管理 操作
+    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品 管理 操作
 
     # 小程序 - 商城基础设置
     url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品 分类管理 操作

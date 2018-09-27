@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.mallManage_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
 
-# 展示单个的名片信息
+# 商城展示
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def mallManagementShow(request):
@@ -25,13 +25,21 @@ def mallManagementShow(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
             for obj in objs:
+                groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)
+                parentGroup_id = obj.parentName_id
+                parentGroup_name = obj.parentName.classificationName
+                if groupObjs[0].parentClassification_id:
+                    parent_group_name = groupObjs[0].parentClassification.classificationName
+                    parentGroup_name = parent_group_name + ' > ' + parentGroup_name
+
                 xianshangjiaoyi = '否'
                 if obj.xianshangjiaoyi:
                     xianshangjiaoyi = '是'
                 otherData.append({
+                    'id':obj.id,
                     'goodsName':obj.goodsName,
-                    'parentName_id':obj.parentName.id,
-                    'parentName':obj.parentName.classificationName,
+                    'parentName_id':parentGroup_id,
+                    'parentName':parentGroup_name,
                     'goodsPrice':obj.goodsPrice,
                     'inventoryNum':obj.inventoryNum,
                     'goodsStatus':obj.get_goodsStatus_display(),
@@ -45,7 +53,7 @@ def mallManagementShow(request):
     return JsonResponse(response.__dict__)
 
 
-# 展示全部的名片、记录各种动作到日志中
+# 商城操作
 @csrf_exempt
 # @account.is_token(models.zgld_customer)
 def mallManagementOper(request, oper_type, o_id):
