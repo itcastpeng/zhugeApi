@@ -177,27 +177,28 @@ def company_oper(request, oper_type, o_id):
                 open_length_time = forms_obj.cleaned_data.get('open_length_time')
 
                 account_expired_time = datetime.datetime.now()
-                if open_length_time == 1: # (1, "一个月"),
-                    charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time,1)
-                elif   open_length_time == 2:  # (2, "三个月"),
-                    charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time,2)
-                elif open_length_time == 3:  # (2, "三个月"),
-                    charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time, 3)
+                # if open_length_time == 1: # (1, "一个月"),
+                charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
+                account_expired_time = datetime_offset_by_month(charging_start_time,open_length_time)
 
-                elif open_length_time == 4:  # (2, "三个月"),
-                    charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time, 12)
-                elif open_length_time == 5:  # (2, "三个月"),
-                    charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
-                    account_expired_time = datetime_offset_by_month(charging_start_time, 24)
+                # elif   open_length_time == 2:  # (2, "三个月"),
+                #     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
+                #     account_expired_time = datetime_offset_by_month(charging_start_time,2)
+                # elif open_length_time == 3:  # (2, "三个月"),
+                #     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
+                #     account_expired_time = datetime_offset_by_month(charging_start_time, 3)
+                #
+                # elif open_length_time == 4:  # (2, "三个月"),
+                #     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
+                #     account_expired_time = datetime_offset_by_month(charging_start_time, 12)
+                # elif open_length_time == 5:  # (2, "三个月"),
+                #     charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
+                #     account_expired_time = datetime_offset_by_month(charging_start_time, 24)
 
                 company_data = {
                     'name': request.POST.get('name'),
-                    'charging_start_time': charging_start_time,  #开始付费时间
-                    'open_length_time': open_length_time,        #开通时长
+                    'charging_start_time': charging_start_time,    #开始付费时间
+                    'open_length_time': open_length_time,          #开通时长
                     'mingpian_available_num':  request.POST.get('mingpian_available_num'),
                     'account_expired_time' : account_expired_time, #账户过期时间
                     'remarks' : request.POST.get('remarks')
