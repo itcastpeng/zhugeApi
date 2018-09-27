@@ -226,8 +226,6 @@ def create_user_or_customer_qr_code(request):
 @csrf_exempt
 def  create_user_or_customer_poster(request):
 
-
-
    response = ResponseObj()
    # objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
    objs = models.zgld_user_customer_belonger.objects.all()[:10]
