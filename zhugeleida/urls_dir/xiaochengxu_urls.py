@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag_customer,user_weixin_auth,customer
-from zhugeleida.views_dir.xiaochengxu import login,mingpian,product, prepaidManagement, goodsClassification, mallManagement
+from zhugeleida.views_dir.xiaochengxu import login,mingpian,product, prepaidManagement, goodsClassification, mallManagement, shangchengjichushezhi
 from zhugeleida.views_dir.xiaochengxu  import chat,website
 
 
@@ -50,5 +50,8 @@ urlpatterns = [
     # 小程序 - 商品管理
     url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品分类 管理查询
     url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品 分类管理 操作
+
+    # 小程序 - 商城基础设置
+    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品 分类管理 操作
 
 ]

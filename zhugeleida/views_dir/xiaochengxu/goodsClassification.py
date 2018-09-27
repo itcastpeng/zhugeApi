@@ -36,7 +36,6 @@ def init_data(user_id, pid=None):
     return result_data
 
 
-# 展示单个的名片信息
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def goodsClassShow(request):
@@ -46,9 +45,11 @@ def goodsClassShow(request):
         # if forms_obj.is_valid():
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
-        data_result = init_data(user_id)
+
         if singleUser:
             data_result = init_data(user_id, singleUser)
+        else:
+            data_result = init_data(user_id)
         response.code = 200
         response.msg = '查询成功'
         response.data = data_result
