@@ -10,8 +10,7 @@ from publicFunc import account
 from django.http import JsonResponse
 import requests
 from django.db.models import Q
-# ==========商户KEY============
-KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
+
 
 response = Response.ResponseObj()
 def md5(string):
@@ -24,17 +23,8 @@ def toXml(params):
     xml = []
     for k in sorted(params.keys()):
         v = params.get(k)
-        # if k == 'body':
-        #     body = params.get(k)
-        #     print('body------> ',type(body))
-        #     v = body.decode('utf-8')
-        # print('v========> ',v)
         if k == 'detail' and not v.startswith('<![CDATA['):
             v = '<![CDATA[{}]]>'.format(v)
-
-        # if k == 'body':
-        #     # v = v.encode('utf8')
-        #     v = parse.quote(v)
         xml.append('<{key}>{value}</{key}>'.format(key=k, value=v))
     return '<xml>{}</xml>'.format(''.join(xml))
 
@@ -49,7 +39,7 @@ def generateRandomStamping():
 #     img.save('hello.png')
 
 # 生成 签名
-def shengchengsign(result_data):
+def shengchengsign(result_data, KEY):
     ret = []
     for k in sorted(result_data.keys()):
         if (k != 'sign') and (k != '') and (result_data[k] is not None):
@@ -72,22 +62,26 @@ def pay(request):
 # @csrf_exempt
 # @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
+    url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
+    getWxPayOrderId = str(int(time.time()))                  # 订单号
+
     user_id = request.GET.get('user_id')
-    # print('user_id----------> ',user_id)
     userObjs = models.zgld_customer.objects.filter(id=user_id)
-    getWxPayOrderId = str(int(time.time())) # 订单号
+    jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(userProfile_id=user_id)
+
+    # ==========商户KEY============
+    KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'          # 商户秘钥KEY
+    # KEY = jiChuSheZhiObjs[0].shangHuMiYao           # 商户秘钥真实数据KEY
+
     amount = request.GET.get('amount')      # 金额
     spbillIp = request.GET.get('spbillIp')  # 终端ip
-    # goodsIntroduce = request.GET.get('goodsIntroduce')    #
-    url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'
-    # goodsIntroduce = goodsIntroduce.encode(encoding='utf8')
-    # print('timeStamp===========> ',timeStamp)
+
     result_data = {
+        # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,     # 商户号真实数据
         'appid': 'wx1add8692a23b5976',  # appid
-        'mch_id': '1513325051',         # 商户号
+        'mch_id': '1513325051',                        # 商户号
         'nonce_str': generateRandomStamping(),         # 32位随机值
         'openid': userObjs[0].openid,
-        # 'body': goodsIntroduce,
         'body': 'zhuge-vip',            # 描述
         'out_trade_no': getWxPayOrderId,# 订单号
         'total_fee': amount,              # 金额
@@ -95,11 +89,10 @@ def yuZhiFu(request):
         'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
         'trade_type': 'JSAPI'
         }
-    stringSignTemp = shengchengsign(result_data)
+    stringSignTemp = shengchengsign(result_data, KEY)
     result_data['sign'] = md5(stringSignTemp).upper()
     xml_data = toXml(result_data)
-    # print('result_data-----------> ',result_data)
-    print('xml_data------------------> ',xml_data)
+
     ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
     ret.encoding = 'utf8'
 
@@ -107,11 +100,9 @@ def yuZhiFu(request):
     DOMTree = xmldom.parseString(ret.text)
     collection = DOMTree.documentElement
     # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
-    print('---------> ',collection.getElementsByTagName("prepay_id"))
     prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
 
-    print('prepay_id-----------> ',prepay_id)
-    # timeStamp = generateRandomStamping()  # 时间戳
+    # print('prepay_id-----------> ',prepay_id)
     data_dict = {
         'appId' : 'wx1add8692a23b5976',
         'timeStamp': int(time.time()),
@@ -120,8 +111,7 @@ def yuZhiFu(request):
         'signType': 'MD5'
     }
 
-    stringSignTemp = shengchengsign(data_dict)
-    print('stringSignTemp----> ',stringSignTemp)
+    stringSignTemp = shengchengsign(data_dict, KEY)
     data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
     print('data_dict-->', data_dict)
 

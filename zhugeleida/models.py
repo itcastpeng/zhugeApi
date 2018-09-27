@@ -1008,3 +1008,12 @@ class zgld_goods_management(models.Model):
     xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
     kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
+
+# 小程序 - 商城基础设置
+class zgld_shangcheng_jichushezhi(models.Model):
+    shangChengName = models.CharField(verbose_name='商城名称', max_length=32, null=True, blank=True)
+    userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
+    shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
+    shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
+    lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
+    yognjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
