@@ -221,48 +221,46 @@ def article_oper(request, oper_type, o_id):
         if oper_type == 'myarticle':
             request_data_dict = {
                 'article_id': o_id,
-
             }
-
+            user_id = request.GET.get('user_id')
             forms_obj = MyarticleForm(request_data_dict)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                # order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
-                # field_dict = {
-                #     'id': '',
-                #     'user_id': '',
-                #     'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
-                #     # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
-                #     'title': '__contains',  # 按文章标题搜索
-                # }
-                # request_data = request.GET.copy()
-                # q = conditionCom(request_data, field_dict)
-
                 objs = models.zgld_article.objects.select_related('user', 'company').filter(id=article_id)
                 count = objs.count()
 
+                obj = objs[0]
                 # 获取所有数据
-                ret_data = []
-                # 获取第几页的数据
-                for obj in objs:
-                    print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
-                    ret_data.append({
-                        'id': obj.id,
-                        'title': obj.title,  # 文章标题
-                        'author': obj.user.username,  # 如果为原创显示,文章作者
-                        'company_id': obj.company_id,  # 公司ID
-                        'avatar': obj.user.avatar,  # 用户的头像
-                        'summary': obj.summary,  # 摘要
-                        'create_date': obj.create_date,  # 文章创建时间
-                        'cover_url': obj.cover_picture,  # 文章图片链接
-                        'content': obj.content,  # 文章内容
-                        'tag_list': list(obj.tags.values('id', 'name')),
-                        'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                if insert_ads and insert_ads.get('mingpian'):
+                    zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
+                    insert_ads['username'] = zgld_userprofile_obj.username
+                    insert_ads['avatar'] = zgld_userprofile_obj.avatar
+                    insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
+                    insert_ads['position'] = zgld_userprofile_obj.position
+                    insert_ads['webchat_code'] = zgld_userprofile_obj.qr_code  # 企业用户个人二维码[小程序]
 
-                    })
+
+                ret_data = []
+                tag_list = list(obj.tags.values('id', 'name'))
+
+                ret_data.append({
+                    'id': obj.id,
+                    'title': obj.title,  # 文章标题
+                    'author': obj.user.username,  # 如果为原创显示,文章作者
+                    'company_id': obj.company_id,  # 公司ID
+                    'avatar': obj.user.avatar,  # 用户的头像
+                    'summary': obj.summary,  # 摘要
+                    'create_date': obj.create_date,  # 文章创建时间
+                    'cover_url': obj.cover_picture,  # 文章图片链接
+                    'content': obj.content,  # 文章内容
+                    'tag_list': tag_list,
+                    'insert_ads': insert_ads  # 插入的广告语
+                })
+
                 response.code = 200
                 response.data = {
                     'ret_data': ret_data,
