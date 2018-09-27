@@ -37,6 +37,19 @@ def create_user_or_customer_small_program_qr_code(data):
 
     requests.get(url, params=get_data)
 
+# 企业用户生成小程序海报
+@app.task
+def create_user_or_customer_small_program_poster(data):
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
+    get_data = {
+        'data': data
+    }
+    print(get_data)
+
+    requests.get(url, params=get_data)
+
+
+
 # 发送模板消息。
 @app.task
 def user_send_template_msg_to_customer(data):

@@ -3,7 +3,7 @@ from zhugeleida import models
 from zhugeleida.views_dir.conf import Conf
 from django.views.decorators.csrf import csrf_exempt
 
-import requests
+
 import json
 from publicFunc.Response import ResponseObj
 from django.http import JsonResponse
@@ -12,8 +12,13 @@ import datetime
 import redis
 from collections import OrderedDict
 from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token
-
+import sys
 import logging.handlers
+from django.conf import settings
+from selenium import webdriver
+import requests
+from PIL import Image
+from zhugeapi_celery_project import tasks
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
@@ -195,17 +200,125 @@ def create_user_or_customer_qr_code(request):
         user_obj.save()
         print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
+        ## 一并生成海报
+        data_dict = {'user_id': user_id, 'customer_id': customer_id}
+        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
+
     else:
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
         user_obj.save()
         print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
+        # 生成客户的海报
+        data_dict = {'user_id': user_id, 'customer_id': ''}
+        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
+
     response.data = {'qr_code': user_obj.qr_code}
     response.code = 200
     response.msg = "生成小程序二维码成功"
 
     return JsonResponse(response.__dict__)
+
+
+@csrf_exempt
+def  create_user_or_customer_poster(request):
+
+    response = ResponseObj()
+    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
+    print('---->', BASE_DIR)
+
+    # option = webdriver.ChromeOptions()
+    # mobileEmulation = {'deviceName': 'iPhone 6'}
+    # option.add_experimental_option('mobileEmulation', mobileEmulation)
+    # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
+
+    platform = sys.platform  # 获取平台
+    phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
+
+    if 'linux' in platform:
+        phantomjs_path = phantomjs_path + '/phantomjs'
+
+    else:
+        phantomjs_path = phantomjs_path + '/phantomjs.exe'
+    print('----- phantomjs_path ----->>', phantomjs_path)
+
+    driver = webdriver.PhantomJS(phantomjs_path)
+    driver.implicitly_wait(10)
+
+
+    customer_id = request.GET.get('customer_id')
+    user_id = request.GET.get('user_id')
+
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%d&uid=%d' % (int(customer_id), int(user_id))
+
+    print('----海报的静态页面[大韩资助]-->', url)
+
+    try:
+        driver.get(url)
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+        if customer_id:
+            user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
+            user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
+        else:
+            user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
+            user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
+
+
+        driver.save_screenshot(BASE_DIR + user_poster_file_temp)
+        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
+
+        element = driver.find_element_by_id("jietu")
+        print(element.location)  # 打印元素坐标
+        print(element.size)  # 打印元素大小
+
+        left = element.location['x']
+        top = element.location['y']
+        right = element.location['x'] + element.size['width']
+        bottom = element.location['y'] + element.size['height']
+
+        im = Image.open(BASE_DIR + user_poster_file_temp)
+        im = im.crop((left, top, right, bottom))
+
+        print(len(im.split()))  # test
+        if len(im.split()) == 4:
+            # prevent IOError: cannot write mode RGBA as BMP
+            r, g, b, a = im.split()
+            im = Image.merge("RGB", (r, g, b))
+            im.save(BASE_DIR + user_poster_file)
+        else:
+            im.save(BASE_DIR + user_poster_file)
+
+        poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+        if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
+        print('--------- 生成海报URL -------->', poster_url)
+
+        objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
+        if objs:
+            objs.update(
+                poster_url= poster_url
+            )
+
+        ret_data = {
+            'user_id': user_id,
+            'poster_url': poster_url,
+        }
+        print('-----save_poster ret_data --->>', ret_data)
+        response.data = ret_data
+        response.msg = "请求成功"
+        response.code = 200
+
+    except Exception as e:
+        response.msg = "PhantomJS截图失败"
+        response.code = 400
+        driver.quit()
+
+    return JsonResponse(response.__dict__)
+
+
 
 
 
@@ -469,7 +582,6 @@ def user_send_gongzhonghao_template_msg(request):
             print('---- Template Msg 客户不存在---->>')
 
     return JsonResponse(response.__dict__)
-
 
 
 
