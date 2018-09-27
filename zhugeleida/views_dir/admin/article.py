@@ -368,16 +368,6 @@ def article_oper(request, oper_type, o_id):
 
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                # order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
-                # field_dict = {
-                #     'id': '',
-                #     'user_id': '',
-                #     'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
-                #     # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
-                #     'title': '__contains',  # 按文章标题搜索
-                # }
-                # request_data = request.GET.copy()
-                # q = conditionCom(request_data, field_dict)
 
 
                 objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)

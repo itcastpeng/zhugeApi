@@ -67,7 +67,7 @@ def company(request):
                     'mingpian_available_num': obj.mingpian_available_num ,
 
                     'remarks':  obj.remarks,
-                    'corp_id': obj.corp_id,
+                    # 'corp_id': obj.corp_id,
                     # 'tongxunlu_secret': obj.tongxunlu_secret,
                     'create_date': obj.create_date.strftime('%Y-%m-%d'),
 
