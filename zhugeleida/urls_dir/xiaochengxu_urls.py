@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import  user,quanxian,tag_customer,user_weixin_auth,customer
-from zhugeleida.views_dir.xiaochengxu import login,mingpian,product, prepaidManagement, goodsClassification, mallManagement
+from zhugeleida.views_dir.xiaochengxu import login,mingpian,product, prepaidManagement, goodsClassification, mallManagement, shangchengjichushezhi
 from zhugeleida.views_dir.xiaochengxu  import chat,website
 
 
@@ -25,6 +25,7 @@ urlpatterns = [
 
     #访问小程序的名片\并记录访问功能。
     url(r'^mingpian$',mingpian.mingpian),
+    url(r'^mingpian/poster_html$', mingpian.mingpian_poster_html_oper),
     url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
 
     #查看产品 + 查看竞价产品 + 转发竞价产品 + 咨询产品。
@@ -49,6 +50,9 @@ urlpatterns = [
 
     # 小程序 - 商品管理
     url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品分类 管理查询
-    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品 分类管理 操作
+    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品 管理 操作
+
+    # 小程序 - 商城基础设置
+    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品 分类管理 操作
 
 ]

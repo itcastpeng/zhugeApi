@@ -349,6 +349,7 @@ def user_oper(request, oper_type, o_id):
                         data_dict ={ 'user_id': obj.id, 'customer_id':'' }
                         tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
+
                         response.code = 200
                         response.msg = "添加用户成功"
 

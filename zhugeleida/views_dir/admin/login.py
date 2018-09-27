@@ -26,40 +26,54 @@ def login(request):
     if userprofile_objs:
         if userprofile_objs.filter(status=1):
             # 如果有数据 查询第一条对象
+
             userprofile_obj = userprofile_objs[0]
             # 如果没有token 则生成 token
             is_reset_password = userprofile_obj.is_reset_password
+            company_id = userprofile_obj.company_id
 
-            if not userprofile_obj.token:
-                token = account.get_token(account.str_encrypt(password))
-                userprofile_obj.token = token
+            company_obj = models.zgld_company.objects.get(id=company_id)
+            account_expired_time = company_obj.account_expired_time
+
+            if datetime.datetime.now() <= account_expired_time:
+                if not userprofile_obj.token:
+                    token = account.get_token(account.str_encrypt(password))
+                    userprofile_obj.token = token
+                else:
+                    token = userprofile_obj.token
+
+
+
+                response.code = 200
+                response.msg = '登录成功'
+
+                last_login_date_obj = userprofile_obj.last_login_date
+                last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
+
+                response.data = {
+                    'token': token,
+                    'user_id': userprofile_obj.id,
+                    'set_avatar': userprofile_obj.avatar,
+                    'company_name' : userprofile_obj.company.name,
+                    'company_id' : userprofile_obj.company_id,
+                    'role_id': userprofile_obj.role_id,
+                    'role_name': userprofile_obj.role.name,
+                    'avatar':  userprofile_obj.avatar,
+                    'last_login_date': last_login_date,
+                    'is_reset_password': is_reset_password,
+                    'weChatQrCode':userprofile_obj.company.weChatQrCode
+                }
+
+                userprofile_obj.last_login_date = datetime.datetime.now()
+                userprofile_obj.save()
+
             else:
-                token = userprofile_obj.token
+                company_name = company_obj.name
+                response.code = 403
+                response.msg = '账户过期'
+                print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (company_id, company_name, account_expired_time))
 
 
-
-            response.code = 200
-            response.msg = '登录成功'
-
-            last_login_date_obj = userprofile_obj.last_login_date
-            last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
-
-            response.data = {
-                'token': token,
-                'user_id': userprofile_obj.id,
-                'set_avatar': userprofile_obj.avatar,
-                'company_name' : userprofile_obj.company.name,
-                'company_id' : userprofile_obj.company_id,
-                'role_id': userprofile_obj.role_id,
-                'role_name': userprofile_obj.role.name,
-                'avatar':  userprofile_obj.avatar,
-                'last_login_date': last_login_date,
-                'is_reset_password': is_reset_password,
-                'weChatQrCode':userprofile_obj.company.weChatQrCode
-            }
-
-            userprofile_obj.last_login_date = datetime.datetime.now()
-            userprofile_obj.save()
         else:
             response.code = 306
             response.msg = "账户未启用"

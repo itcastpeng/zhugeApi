@@ -10,14 +10,19 @@ from django.db.models import Q
 from django.db.models import F
 
 
-def init_data(user_id, pid=None):
+def init_data(user_id, pid=None, level=1):
     """
     获取权限数据
     :param pid:  权限父级id
     :return:
     """
     result_data = []
-    objs = models.zgld_goods_classification_management.objects.filter(userProfile_id=user_id).filter(parentClassification_id=pid)
+    print('level------> ',level)
+    objs = models.zgld_goods_classification_management.objects.filter(
+        userProfile_id=user_id,
+        parentClassification_id=pid,
+        # level=level
+    )
     for obj in objs:
         current_data = {
             'name': obj.classificationName,
@@ -27,7 +32,8 @@ def init_data(user_id, pid=None):
         }
         # if selected_list and obj.id in selected_list:
         #     current_data['checked'] = True
-        children_data = init_data(user_id, obj.id)
+        print('obj.id---------> ',obj.id)
+        children_data = init_data(user_id, pid=obj.id, level=level+1)
         if children_data:
             current_data['children'] = children_data
         result_data.append(current_data)
@@ -35,8 +41,6 @@ def init_data(user_id, pid=None):
     # print('result_data -->', result_data)
     return result_data
 
-
-# 展示单个的名片信息
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def goodsClassShow(request):
@@ -46,9 +50,11 @@ def goodsClassShow(request):
         # if forms_obj.is_valid():
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
-        data_result = init_data(user_id)
+
         if singleUser:
             data_result = init_data(user_id, singleUser)
+        else:
+            data_result = init_data(user_id)
         response.code = 200
         response.msg = '查询成功'
         response.data = data_result
@@ -59,6 +65,7 @@ def goodsClassShow(request):
         #     response.data = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
+
 
 
 @csrf_exempt
@@ -78,13 +85,17 @@ def goodsClassOper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 print('==验证成功==')
                 parentClassName_id = forms_obj.cleaned_data.get('parentClassification_id')
+                level = 1
                 if parentClassName_id:
+                    level = 2
                     parentClassNameObjs = models.zgld_goods_classification_management.objects.filter(id=parentClassName_id)
                     if not parentClassNameObjs:
                         response.code = 301
                         response.msg = '无此父级'
                         return JsonResponse(response.__dict__)
-                models.zgld_goods_classification_management.objects.create(**forms_obj.cleaned_data)
+                objs = models.zgld_goods_classification_management.objects
+                objsId = objs.create(**forms_obj.cleaned_data)
+                objs.filter(id=objsId.id).update(level=level)
                 response.code = 200
                 response.msg = '添加成功'
                 response.data = {}
@@ -103,13 +114,17 @@ def goodsClassOper(request, oper_type, o_id):
                         response.code = 301
                         response.msg = '无此父级'
                         return JsonResponse(response.__dict__)
-
                 formObj = forms_obj.cleaned_data
+                parentClassification_id = formObj.get('parentClassification_id')
+                level = 1
+                if parentClassification_id:
+                    level = 2
                 models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
                     classificationName=formObj.get('classificationName'),
                     goodsNum=formObj.get('goodsNum'),
-                    parentClassification_id=formObj.get('parentClassification_id'),
-                    userProfile_id=dataDict.get('userProfile_id')
+                    parentClassification_id=parentClassification_id,
+                    userProfile_id=dataDict.get('userProfile_id'),
+                    level=level
                 )
                 response.code = 200
                 response.msg = '修改成功'
