@@ -333,7 +333,7 @@ class zgld_userprofile(models.Model):
     voice = models.CharField(verbose_name='语音介绍', null=True, max_length=128)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
-    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, auto_now_add=True,)
+    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True)
 
     def __str__(self):
         return self.username
