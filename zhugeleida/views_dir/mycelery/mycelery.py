@@ -252,7 +252,7 @@ def  create_user_or_customer_poster(request):
     customer_id = request.GET.get('customer_id')
     user_id = request.GET.get('user_id')
 
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%d&uid=%d' % (int(customer_id), int(user_id))
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%d&uid=%d' % (customer_id, user_id)
 
     print('----海报的静态页面[大韩资助]-->', url)
 
