@@ -580,10 +580,12 @@ def mingpian_poster_html_oper(request):
     qr_code = ''
     if  user_id and customer_id :
          qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-         qr_code = qr_obj[0].qr_code
+         qr_code =  "/" + qr_obj[0].qr_code
+         print('--- 从 customer_belonger 里 --->>qr_code',qr_code)
 
     elif user_id and  not customer_id:
-         qr_code = obj.qr_code
+         qr_code = "/" +  obj.qr_code
+         print('--- 从 zgld_userprofile 里 --->>qr_code',qr_code)
 
     ret_data = {
         'user_id': obj.id,
