@@ -549,8 +549,10 @@ def user_send_gongzhonghao_template_msg(request):
             post_template_data = {
                 'touser' : openid,
                 'template_id': template_id,
-                'page':  path,
-                'appid':  authorizer_appid,
+                "miniprogram": {
+                    "appid": authorizer_appid,
+                    "pagepath": path,
+                },
                 'data' : data
             }
 
