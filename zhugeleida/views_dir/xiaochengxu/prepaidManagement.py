@@ -52,6 +52,8 @@ def shengchengsign(result_data, KEY):
     )
     return stringSignTemp
 
+
+@csrf_exempt
 def payback(request):
     print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
     print('回调=--POST--POSTPOSTPOSTPOSTPOS回调回调回调回调回调T-> ',request.POST)
@@ -59,6 +61,7 @@ def payback(request):
     response.data = ''
     response.msg = ''
     return JsonResponse(response.__dict__)
+
 
 
 @csrf_exempt
@@ -104,7 +107,7 @@ def yuZhiFu(request):
             'out_trade_no': getWxPayOrderId,                # 订单号
             'total_fee': total_fee,                            # 金额
             'spbill_create_ip': client_ip,                   # 终端IP
-            'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
+            'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/payback',
             'trade_type': 'JSAPI'
             }
         print('result_data-------> ',result_data)
