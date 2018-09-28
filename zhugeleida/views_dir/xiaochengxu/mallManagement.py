@@ -59,6 +59,8 @@ def mallManagementShow(request):
                     'xianshangjiaoyi':xianshangjiaoyi,
                     'shichangjiage':obj.shichangjiage,
                     'kucunbianhao':obj.kucunbianhao,
+                    'topLunBoTu': obj.topLunBoTu,  # 顶部轮播图
+                    'detailePicture' : obj.detailePicture,  # 详情图片
                 })
             response.code = 200
             response.msg = '查询成功'
@@ -77,15 +79,13 @@ def mallManagementOper(request, oper_type, o_id):
         'goodsName':request.POST.get('goodsName'),                    # 商品名称
         'parentName':request.POST.get('parentName'),                  # 父级分类
         'goodsPrice':request.POST.get('goodsPrice'),                  # 商品标价
-        # 'salesNum':request.POST.get('salesNum'),                    # 商品销量
         'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
         'goodsStatus':request.POST.get('goodsStatus'),                # 商品状态
-        # 'commissionFee':request.POST.get('commissionFee'),          # 佣金提成
-        # 'createDate':request.POST.get('createDate'),                # 创建时间
-        # 'shelvesCreateDate':request.POST.get('shelvesCreateDate'),  # 上架时间
         'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),        # 是否线上交易
         'shichangjiage':request.POST.get('shichangjiage'),            # 市场价格
         'kucunbianhao':request.POST.get('kucunbianhao'),              # 库存编号
+        'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
+        'detailePicture':request.POST.get('detailePicture'),          # 详情图片
     }
     if request.method == "POST":
         if oper_type == 'add':
@@ -101,7 +101,9 @@ def mallManagementOper(request, oper_type, o_id):
                     xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
                     shichangjiage=formObjs.get('shichangjiage'),
                     kucunbianhao=formObjs.get('kucunbianhao'),
-                    goodsStatus=formObjs.get('goodsStatus')
+                    goodsStatus=formObjs.get('goodsStatus'),
+                    topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
+                    detailePicture=resultData.get('detailePicture'),  # 详情图片
                 )
                 response.code = 200
                 response.msg = '添加成功'
@@ -119,7 +121,9 @@ def mallManagementOper(request, oper_type, o_id):
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
                     kucunbianhao=formObjs.get('kucunbianhao'),
-                    goodsStatus=formObjs.get('goodsStatus')
+                    goodsStatus=formObjs.get('goodsStatus'),
+                    topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
+                    detailePicture=resultData.get('detailePicture'),  # 详情图片
                 )
             response.code = 200
             response.msg = '修改成功'
