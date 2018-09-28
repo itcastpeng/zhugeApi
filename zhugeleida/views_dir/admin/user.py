@@ -566,6 +566,10 @@ def user_oper(request, oper_type, o_id):
                             user_obj.save()
                             response.code = 200
                             response.msg = "修改成功"
+
+                            # 生成海报
+                            data_dict = {'user_id': user_id, 'customer_id': ''}
+                            tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
                         else:
                             response.code = errcode
                             response.msg = errmsg

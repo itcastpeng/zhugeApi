@@ -12,6 +12,8 @@ import json
 from django.db.models import Q
 import os
 import requests
+from zhugeapi_celery_project import tasks
+
 
 # 展示企业微信的用户名片的个性签名,标签,
 @csrf_exempt
@@ -113,6 +115,7 @@ def mingpian_oper(request, oper_type):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     if request.method == "POST":
 
+        # 保存手机号
         if oper_type == 'save_phone':
 
             forms_obj = MingPianPhoneUpdateForm(request.POST)
@@ -126,6 +129,10 @@ def mingpian_oper(request, oper_type):
                 if objs:
                     objs.update(mingpian_phone=mingpian_phone, is_show_phone=is_show_phone)
 
+                    # 生成海报
+                    data_dict = {'user_id': user_id, 'customer_id': ''}
+                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
                     response.code = 200
                     response.msg = '保存成功'
 
@@ -134,6 +141,7 @@ def mingpian_oper(request, oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 保存个人信息
         elif oper_type == 'save_info':
 
             forms_obj = MingPianInfoUpdateForm(request.POST)
@@ -166,15 +174,17 @@ def mingpian_oper(request, oper_type):
                     company_obj = models.zgld_company.objects.filter(id=objs[0].company_id)
                     company_obj.update(area=area, address=address)
 
-                if not  avator_picture_url.startswith('http'):
-                    avator_objs = models.zgld_user_photo.objects.filter(user_id=user_id,photo_type=2)
-                    if  avator_objs:
+                if not avator_picture_url.startswith('http'):
+                    avator_objs = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2)
+                    if avator_objs:
                         avator_objs.update(photo_url=avator_picture_url)
 
                     else:
                         models.zgld_user_photo.objects.create(user_id=user_id, photo_url=avator_picture_url, photo_type=2)
 
-
+                # 生成海报
+                data_dict = {'user_id': user_id, 'customer_id': ''}
+                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
                 response.code = 200
                 response.msg = '保存成功'
@@ -184,48 +194,50 @@ def mingpian_oper(request, oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'save_sign':
+        # 签名
+        # elif oper_type == 'save_sign':
+        #
+        #     user_id = request.GET.get('user_id')
+        #     mingpian_sign = request.POST.get('sign')
+        #
+        #     objs = models.zgld_userprofile.objects.filter(id=user_id)
+        #
+        #     if objs:
+        #         objs.update(sign=mingpian_sign)
+        #         response.code = 200
+        #         response.msg = '保存成功'
 
-            user_id = request.GET.get('user_id')
-            mingpian_sign = request.POST.get('sign')
+        # elif oper_type == "upload_photo":
+        #
+        #     upload_file = request.FILES['file']
+        #     task = request.POST.get('task_id')  # 获取文件唯一标识符
+        #     chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
+        #     filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
+        #
+        #     IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo','tmp') + filename
+        #     with open(IMG_PATH_FILES, 'wb+') as destination:
+        #         for chunk in upload_file.chunks():
+        #             destination.write(chunk)
+        #
+        # elif oper_type == 'delete_photo':
+        #     print('--------->>',request.POST)
+        #     user_id = request.GET.get('user_id')
+        #     photo_id = request.POST.get('photo_id')
+        #
+        #     objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)
+        #
+        #     if objs:
+        #         IMG_PATH = BASE_DIR  + '/' + objs[0].photo_url
+        #         print('-----IMG_PATH--->>',IMG_PATH)
+        #         if os.path.exists(IMG_PATH):os.remove(IMG_PATH)
+        #         objs.delete()
+        #         response.code = 200
+        #         response.msg = '删除成功'
+        #     else:
+        #         response.code = 302
+        #         response.msg = '删除数据不存在'
 
-            objs = models.zgld_userprofile.objects.filter(id=user_id)
-
-            if objs:
-                objs.update(sign=mingpian_sign)
-                response.code = 200
-                response.msg = '保存成功'
-
-        elif oper_type == "upload_photo":
-
-            upload_file = request.FILES['file']
-            task = request.POST.get('task_id')  # 获取文件唯一标识符
-            chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
-            filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
-
-            IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo','tmp') + filename
-            with open(IMG_PATH_FILES, 'wb+') as destination:
-                for chunk in upload_file.chunks():
-                    destination.write(chunk)
-
-        elif oper_type == 'delete_photo':
-            print('--------->>',request.POST)
-            user_id = request.GET.get('user_id')
-            photo_id = request.POST.get('photo_id')
-
-            objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)
-
-            if objs:
-                IMG_PATH = BASE_DIR  + '/' + objs[0].photo_url
-                print('-----IMG_PATH--->>',IMG_PATH)
-                if os.path.exists(IMG_PATH):os.remove(IMG_PATH)
-                objs.delete()
-                response.code = 200
-                response.msg = '删除成功'
-            else:
-                response.code = 302
-                response.msg = '删除数据不存在'
-
+        # 意见反馈
         elif oper_type == 'feedback':
             user_id = request.GET.get('user_id')
             content = request.POST.get('content')
@@ -275,6 +287,7 @@ def mingpian_oper(request, oper_type):
             else:
                 response.code = 301
                 response.msg = "用户不存在"
+
 
 
     elif request.method == "GET":
