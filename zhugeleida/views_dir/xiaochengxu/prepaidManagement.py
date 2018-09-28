@@ -83,11 +83,13 @@ def yuZhiFu(request):
         # ==========商户KEY============
         KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
-        goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
+        # goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
+        # total_fee = goodsObjs[0].goodsPrice
+        total_fee = 1
         dingdanhao = str(int(time.time())) + str(random.randint(10, 99)) + '0000' + str(xiaochengxu_id) + str(goodsId)
         print('订单号 ------------------------ > ', dingdanhao)
         getWxPayOrderId =  str(int(time.time()))# 订单号
-        print('goodsObjs[0].goodsPrice-=---------> ',goodsObjs[0].goodsPrice )
+
         # client_ip, port = request.get_host().split(':')
         client_ip = '0.0.0.0'
         print('client_ip, port--------> ',client_ip)
@@ -100,7 +102,7 @@ def yuZhiFu(request):
             'openid': userObjs[0].openid,
             'body': 'zhuge-vip',                            # 描述
             'out_trade_no': getWxPayOrderId,                # 订单号
-            'total_fee': goodsObjs[0].goodsPrice,                            # 金额
+            'total_fee': total_fee,                            # 金额
             'spbill_create_ip': client_ip,                   # 终端IP
             'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
             'trade_type': 'JSAPI'
