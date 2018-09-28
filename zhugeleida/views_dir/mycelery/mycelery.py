@@ -532,7 +532,7 @@ def user_send_gongzhonghao_template_msg(request):
                 'template_id': template_id,
                 "miniprogram": {
                     "appid": authorizer_appid,
-                    "pagepath": path,
+                    # "pagepath": path,
                 },
                 'data' : data
             }
