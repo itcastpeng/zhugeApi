@@ -85,7 +85,7 @@ def yuZhiFu(request):
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
         # goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
         # total_fee = goodsObjs[0].goodsPrice
-        total_fee = 1
+        total_fee = 10
         dingdanhao = str(int(time.time())) + str(random.randint(10, 99)) + '0000' + str(xiaochengxu_id) + str(goodsId)
         print('订单号 ------------------------ > ', dingdanhao)
         getWxPayOrderId =  str(int(time.time()))# 订单号
