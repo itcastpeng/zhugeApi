@@ -52,7 +52,7 @@ def shengchengsign(result_data, KEY):
     )
     return stringSignTemp
 
-def pay(request):
+def payback(request):
     print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
     print('回调=--POST--POSTPOSTPOSTPOSTPOS回调回调回调回调回调T-> ',request.POST)
     response.code = 200
@@ -83,13 +83,16 @@ def yuZhiFu(request):
         # ==========商户KEY============
         KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
-        goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
-        dingdanhao = str(int(time.time())) + str(random.randint(10, 99) + str(0000) + xiaochengxu_id + goodsId)
+        # goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
+        # total_fee = goodsObjs[0].goodsPrice * 100
+        total_fee = int(0.01 * 100)
+        print('total_fee=========> ',total_fee)
+        dingdanhao = str(int(time.time())) + str(random.randint(10, 99)) + '0000' + str(xiaochengxu_id) + str(goodsId)
         print('订单号 ------------------------ > ', dingdanhao)
-        getWxPayOrderId =  dingdanhao# 订单号
-        print('goodsObjs[0].goodsPrice-=---------> ',goodsObjs[0].goodsPrice )
-        client_ip, port = request.get_host().split(':')
-        print('client_ip, port--------> ',client_ip, port)
+        getWxPayOrderId =  str(int(time.time()))# 订单号
+
+        client_ip = '0.0.0.0'
+        print('client_ip, port--------> ',client_ip)
         result_data = {
             'appid': 'wx1add8692a23b5976',                  # appid
             # 'appid': appid,                                 # 真实数据appid
@@ -99,11 +102,12 @@ def yuZhiFu(request):
             'openid': userObjs[0].openid,
             'body': 'zhuge-vip',                            # 描述
             'out_trade_no': getWxPayOrderId,                # 订单号
-            'total_fee': goodsObjs[0].goodsPrice,                            # 金额
+            'total_fee': total_fee,                            # 金额
             'spbill_create_ip': client_ip,                   # 终端IP
             'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
             'trade_type': 'JSAPI'
             }
+        print('result_data-------> ',result_data)
         stringSignTemp = shengchengsign(result_data, KEY)
         result_data['sign'] = md5(stringSignTemp).upper()
         xml_data = toXml(result_data)
@@ -113,6 +117,7 @@ def yuZhiFu(request):
         DOMTree = xmldom.parseString(ret.text)
         collection = DOMTree.documentElement
         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+        print('return_code----------> ',return_code)
         if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
             # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
             prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付

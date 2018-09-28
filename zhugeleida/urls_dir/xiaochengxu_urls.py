@@ -41,7 +41,7 @@ urlpatterns = [
     url(r'website$',website.website),
 
     # 小程序支付操作
-    url(r'pay$', prepaidManagement.pay),                                    # 回调信息
+    url(r'payback', prepaidManagement.payback),                                    # 回调信息
     url(r'yuZhiFu', prepaidManagement.yuZhiFu),                             # 预支付
 
     # 小程序 - 商品分类管理
