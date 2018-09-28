@@ -307,7 +307,7 @@ def create_user_or_customer_poster(request):
         except Exception as e:
             response.msg = "PhantomJS截图失败"
             response.code = 400
-    driver.quit()
+            driver.quit()
     return JsonResponse(response.__dict__)
 
 
