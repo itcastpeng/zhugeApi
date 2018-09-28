@@ -504,7 +504,8 @@ def user_send_gongzhonghao_template_msg(request):
             openid = customer_obj[0].openid
 
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-
+            xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            appid = xiaochengxu_app_obj.authorization_appid
             # 留言回复通知
             '''
             您好，您咨询商家的问题已回复
@@ -531,8 +532,8 @@ def user_send_gongzhonghao_template_msg(request):
                 'touser' : openid,
                 'template_id': template_id,
                 "miniprogram": {
-                    "appid": authorizer_appid,
-                    # "pagepath": path,
+                    "appid": appid,
+                    "pagepath": path,
                 },
                 'data' : data
             }
