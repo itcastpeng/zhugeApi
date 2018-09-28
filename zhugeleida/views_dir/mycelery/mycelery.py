@@ -223,7 +223,9 @@ def create_user_or_customer_poster(request):
     user_id = request.GET.get('user_id')
     print('--- customer_id | user_id --------->>', customer_id, user_id)
 
-    if not user_id: # 如果没有传user_id则表示异常
+    objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+
+    if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
     else:
@@ -291,7 +293,7 @@ def create_user_or_customer_poster(request):
             poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
             print('--------- 生成海报URL -------->', poster_url)
-            models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id).update(
+            objs.update(
                 poster_url=poster_url
             )
 

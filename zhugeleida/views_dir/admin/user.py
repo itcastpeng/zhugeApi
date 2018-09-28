@@ -346,7 +346,7 @@ def user_oper(request, oper_type, o_id):
                         obj.department = depart_id_list
 
                         # 生成企业用户二维码
-                        data_dict ={ 'user_id': obj.id, 'customer_id':'' }
+                        data_dict ={ 'user_id': obj.id, 'customer_id': ''}
                         tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
 
@@ -370,7 +370,6 @@ def user_oper(request, oper_type, o_id):
             # 删除 ID
             type = request.GET.get('type')
 
-
             if type == 'temp_user':
                 user_objs = models.zgld_temp_userprofile.objects.filter(id=o_id)
                 if user_objs:
@@ -380,7 +379,6 @@ def user_oper(request, oper_type, o_id):
                 else:
                     response.code = 302
                     response.msg = '用户ID不存在'
-
 
             else:
                 if str(request.GET.get('user_id')) == str(o_id):
