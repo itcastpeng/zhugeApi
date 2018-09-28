@@ -65,8 +65,9 @@ def payback(request):
 
 
 # @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
+    print('===========----------------------')
     if request.method == 'POST':
         print('=========================================POST ')
         # spbillIp = request.POST.get('spbillIp')             # 终端ip
