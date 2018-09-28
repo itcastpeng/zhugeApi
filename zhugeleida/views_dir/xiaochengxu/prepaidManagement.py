@@ -8,7 +8,7 @@ from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
-import requests
+import requests, base64, datetime
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -55,27 +55,32 @@ def shengchengsign(result_data, KEY):
 
 @csrf_exempt
 def payback(request):
-    print('回调=--POST--==========================================-> ',request.body)
     resultBody = request.body
     DOMTree = xmldom.parseString(resultBody)
     collection = DOMTree.documentElement
-    mch_id = collection.getElementsByTagName("mch_id")[0].childNodes[0].data
-    return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-    appid = collection.getElementsByTagName("appid")[0].childNodes[0].data
-    openid = collection.getElementsByTagName("openid")[0].childNodes[0].data
-    cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data
-    out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data
+    mch_id = collection.getElementsByTagName("mch_id")[0].childNodes[0].data            # 商户号
+    return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data  # 状态
+    appid = collection.getElementsByTagName("appid")[0].childNodes[0].data              # 小程序appid
+    openid = collection.getElementsByTagName("openid")[0].childNodes[0].data            # 用户openid
+    cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data        # 钱数
+    out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
 
-
-    print('return_code---->',return_code)
-    print('mch_id---->',mch_id)
-    print('appid---->',appid)
-    print('openid---->',openid)
-    print('cash_fee---->',cash_fee)
-    print('out_trade_no---->',out_trade_no)
-
-
-
+    dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=out_trade_no)
+    if return_code == 'SUCCESS':
+        if dingDanobjs:
+            dingDanobjs.update(
+                theOrderStatus=8        # 支付成功 改订单状态成功
+            )
+        print('return_code---->',return_code)
+        print('mch_id---->',mch_id)
+        print('appid---->',appid)
+        print('openid---->',openid)
+        print('cash_fee---->',cash_fee)
+        print('out_trade_no---->',out_trade_no)
+    else:
+        dingDanobjs.update(
+            theOrderStatus=9  # 支付失败 改订单状态失败
+        )
     response.code = 200
     response.data = ''
     response.msg = ''
@@ -91,12 +96,11 @@ def yuZhiFu(request):
         #  参数
         goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
+        u_id = request.GET.get('u_id')
         xiaochengxu_id = request.POST.get('xiaochengxu_id')
-
-
         userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
-        # xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=xiaochengxu_id)       #真实数据appid
-        # appid = xiaochengxu_app[0].authorization_appid
+        xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=xiaochengxu_id)       #真实数据appid
+        appid = xiaochengxu_app[0].authorization_appid
 
         jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)
 
@@ -150,13 +154,32 @@ def yuZhiFu(request):
             }
             stringSignTemp = shengchengsign(data_dict, KEY)
             data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
+            company_id = xiaochengxu_app[0].company_id
+            # 预支付成功 创建订单
+            dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
+            date_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            print('date_time-------> ',date_time)
+            dingDanObjs.create(
+                shangpinguanli_id = goodsId,            # 商品ID
+                orderNumber = int(getWxPayOrderId),     # 订单号
+                countNum = total_fee,                   # 总价
+                yingFuKuan = total_fee,                 # 应付款
+                youHui = 0,                             # 优惠
+                yewuUser_id = u_id,                     # 业务
+                gongsimingcheng_id = company_id,        # 公司
+                yongJin = 0,                            # 佣金
+                peiSong = '',                           # 配送
+                shouHuoRen_id = user_id,                # 收货人
+                theOrderStatus = 1,                     # 订单状态
+                createDate=date_time
+            )
             response.code = 200
-            response.msg = '请求成功'
+            response.msg = '预支付请求成功'
             response.data = data_dict
             return JsonResponse(response.__dict__)
         else:
             response.code = 500
-            response.msg = '支付失败'
+            response.msg = '预支付失败'
             response.data = ''
             return JsonResponse(response.__dict__)
     else:

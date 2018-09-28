@@ -18,6 +18,7 @@ def jiChuSheZhiOper(request, oper_type):
             shangHuMiYao = request.POST.get('shangHuMiYao', '')
             lunbotu = request.POST.get('lunbotu', '')
             yongjin = request.POST.get('yongjin', '')
+            zhengshu = request.POST.get('zhengshu', '')
             if shangHuHao or shangHuMiYao:
                 response.code = 301
                 response.data = ''
@@ -46,7 +47,8 @@ def jiChuSheZhiOper(request, oper_type):
                             shangHuMiYao=shangHuMiYao,
                             lunbotu=lunbotu,
                             yongjin=yongjin,
-                            xiaochengxucompany_id=xiaochengxu[0].company_id
+                            xiaochengxucompany_id=xiaochengxu[0].company_id,
+                            zhengshu=zhengshu
                         )
                         response.msg = '修改成功'
                     else:
@@ -57,7 +59,8 @@ def jiChuSheZhiOper(request, oper_type):
                             lunbotu=lunbotu,
                             xiaochengxuApp_id=xiaochengxu[0].id,
                             yongjin=yongjin,
-                            xiaochengxucompany_id=xiaochengxu[0].company_id
+                            xiaochengxucompany_id=xiaochengxu[0].company_id,
+                            zhengshu=zhengshu
                         )
                         response.msg = '创建成功'
                     response.data = ''
