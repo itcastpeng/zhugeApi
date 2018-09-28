@@ -56,7 +56,7 @@ def shengchengsign(result_data, KEY):
 @csrf_exempt
 def payback(request):
     print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
-    print('回调=--POST--POSTPOSTPOSTPOSTPOS回调回调回调回调回调T-> ',request.POST)
+    print('回调=--POST--==========================================-> ',request.POST)
     response.code = 200
     response.data = ''
     response.msg = ''
