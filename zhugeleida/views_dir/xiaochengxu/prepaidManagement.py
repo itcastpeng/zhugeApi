@@ -85,7 +85,8 @@ def yuZhiFu(request):
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
         # goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
         # total_fee = goodsObjs[0].goodsPrice * 100
-        total_fee = 0.01 * 100
+        total_fee = int(0.01 * 100)
+        print('total_fee=========> ',total_fee)
         dingdanhao = str(int(time.time())) + str(random.randint(10, 99)) + '0000' + str(xiaochengxu_id) + str(goodsId)
         print('订单号 ------------------------ > ', dingdanhao)
         getWxPayOrderId =  str(int(time.time()))# 订单号
@@ -107,6 +108,7 @@ def yuZhiFu(request):
             'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
             'trade_type': 'JSAPI'
             }
+        print('result_data-------> ',result_data)
         stringSignTemp = shengchengsign(result_data, KEY)
         result_data['sign'] = md5(stringSignTemp).upper()
         xml_data = toXml(result_data)
@@ -116,6 +118,7 @@ def yuZhiFu(request):
         DOMTree = xmldom.parseString(ret.text)
         collection = DOMTree.documentElement
         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+        print('return_code----------> ',return_code)
         if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
             # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
             prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
