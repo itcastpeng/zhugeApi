@@ -11,7 +11,7 @@ import os
 import datetime
 import redis
 from collections import OrderedDict
-from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 import sys
 import logging.handlers
 from django.conf import settings
@@ -511,6 +511,7 @@ def user_send_gongzhonghao_template_msg(request):
                     'app_id': 'wx6ba07e6ddcdc69b3',
                     'app_secret': '0bbed534062ceca2ec25133abe1eecba'
                 }
+
                 authorizer_access_token_result = create_authorizer_access_token(data)
                 if authorizer_access_token_result.code == 200:
                     authorizer_access_token = authorizer_access_token_result.data
