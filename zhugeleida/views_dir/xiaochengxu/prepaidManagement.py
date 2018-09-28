@@ -64,10 +64,11 @@ def payback(request):
 
 
 
-@csrf_exempt
+# @csrf_exempt
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     if request.method == 'POST':
+        print('=========================================POST ')
         # spbillIp = request.POST.get('spbillIp')             # 终端ip
         # u_id = request.POST.get('u_id')
         url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
