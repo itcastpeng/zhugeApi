@@ -13,7 +13,6 @@ import os
 import signal
 
 
-
 #  小程序访问动作日志的发送到企业微信
 @app.task
 def user_send_action_log(data):
@@ -29,6 +28,10 @@ def user_send_action_log(data):
 # 企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
 @app.task
 def create_user_or_customer_small_program_qr_code(data):
+    """
+    :param data:    { 'user_id': '', 'customer_id':'' }         user_id 为用户ID    customer_id 为 客户ID
+    :return:
+    """
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
     get_data = {
         'data': data
@@ -36,6 +39,7 @@ def create_user_or_customer_small_program_qr_code(data):
     print(get_data)
 
     requests.get(url, params=get_data)
+
 
 # 企业用户生成小程序海报
 @app.task
@@ -47,7 +51,6 @@ def create_user_or_customer_small_program_poster(data):
     print(get_data)
 
     requests.get(url, params=get_data)
-
 
 
 # 发送模板消息。
@@ -94,11 +97,9 @@ def kill_phantomjs_process():
                     print ('----- Exception 没有如此进程!!!------>>')
 
 
-#获取查询最新一次提交的审核状态并记录到数据库
+# 获取查询最新一次提交的审核状态并记录到数据库
 @app.task
 def get_latest_audit_status_and_release_code():
-
-
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/get_latest_audit_status_and_release_code'
     get_data = {
 
