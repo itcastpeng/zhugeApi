@@ -116,10 +116,17 @@ def work_weixin_auth(request, company_id):
                 user_profile_obj.gender = gender
                 # user_profile_obj.email = email
                 user_profile_obj.avatar = avatar
-                user_profile_obj.save()
 
+                last_login_date = user_profile_obj.last_login_date
+                if not last_login_date: # 为空说明第一次登陆
+                    is_first_login = True
+                    user_profile_obj.last_login_date = datetime.datetime.now()
+                else:
+                    is_first_login = False
+
+                user_profile_obj.save()
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&id=' + str(
-                    user_profile_obj.id) + '&avatar=' + avatar
+                    user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login' + is_first_login
 
                 print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|", userid, "\n", redirect_url)
                 return redirect(redirect_url)
