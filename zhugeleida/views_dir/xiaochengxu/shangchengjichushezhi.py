@@ -4,10 +4,6 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, SelectForm
-import json,os,sys
-from django.db.models import Q
-from django.db.models import F
 
 
 @csrf_exempt
@@ -15,12 +11,13 @@ from django.db.models import F
 def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
     if request.method == "POST":
-        user_id = request.GET.get('user_id')
         if oper_type == 'addOrUpdate':
+            u_id = request.POST.get('u_id')
             shangChengName = request.POST.get('shangChengName', '')
             shangHuHao = request.POST.get('shangHuHao', '')
             shangHuMiYao = request.POST.get('shangHuMiYao', '')
             lunbotu = request.POST.get('lunbotu', '')
+            yongjin = request.POST.get('yongjin', '')
             if shangHuHao or shangHuMiYao:
                 response.code = 301
                 response.data = ''
@@ -33,19 +30,23 @@ def jiChuSheZhiOper(request, oper_type):
                 if not shangChengName:
                     response.msg = '设置支付配置前, 请先配置商城名称！'
                     return JsonResponse(response.__dict__)
-            if user_id:
+            if u_id:
                 if not shangChengName:
                     response.code = 301
                     response.msg = '请配置商城名称！'
                 else:
-                    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(userProfile_id=user_id)
+                    u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+                    xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+                    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
                     response.code = 200
                     if userObjs:
                         userObjs.update(
                             shangChengName=shangChengName,
                             shangHuHao=shangHuHao,
                             shangHuMiYao=shangHuMiYao,
-                            lunbotu=lunbotu
+                            lunbotu=lunbotu,
+                            yongjin=yongjin,
+                            xiaochengxucompany_id=xiaochengxu[0].company_id
                         )
                         response.msg = '修改成功'
                     else:
@@ -54,7 +55,9 @@ def jiChuSheZhiOper(request, oper_type):
                             shangHuHao=shangHuHao,
                             shangHuMiYao=shangHuMiYao,
                             lunbotu=lunbotu,
-                            userProfile_id=user_id
+                            xiaochengxuApp_id=xiaochengxu[0].id,
+                            yongjin=yongjin,
+                            xiaochengxucompany_id=xiaochengxu[0].company_id
                         )
                         response.msg = '创建成功'
                     response.data = ''

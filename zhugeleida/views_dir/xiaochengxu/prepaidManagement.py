@@ -10,7 +10,7 @@ from publicFunc import account
 from django.http import JsonResponse
 import requests
 from django.db.models import Q
-
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 response = Response.ResponseObj()
 def md5(string):
@@ -56,69 +56,81 @@ def pay(request):
     print('回调=--GET---> ',request.GET)
     print('回调=--POST---> ',request.POST)
     response.code = 200
+    response.data = ''
+    response.msg = ''
     return JsonResponse(response.__dict__)
 
 
-# @csrf_exempt
-# @account.is_token(models.zgld_customer)
+@csrf_exempt
+@account.is_token(models.zgld_customer)
 def yuZhiFu(request):
-    url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
-    getWxPayOrderId = str(int(time.time()))                  # 订单号
+    if request.method == 'POST':
+        url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
+        getWxPayOrderId = str(int(time.time())) + str(random.randint(10, 99)) # 订单号
+        user_id = request.GET.get('user_id')
+        xiaochengxu_id = request.POST.get('xiaochengxu_id')
+        u_id = request.POST.get('u_id')
+        userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
 
-    user_id = request.GET.get('user_id')
-    userObjs = models.zgld_customer.objects.filter(id=user_id)
-    jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(userProfile_id=user_id)
+        xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=xiaochengxu_id)
+        appid = xiaochengxu_app[0].authorization_appid
+        print('xiaochengxu_app-----> ',)
+        jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)
+        print('jiChuSheZhiObjs========> ',jiChuSheZhiObjs)
+        # ==========商户KEY============
+        KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
+        # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
+        amount = request.POST.get('amount')                  # 金额
+        spbillIp = request.POST.get('spbillIp')              # 终端ip
+        client_ip, port = request.get_host().split(':')
+        print('client_ip, port--------> ',client_ip, port)
+        result_data = {
+            'appid': 'wx1add8692a23b5976',                  # appid
+            # 'appid': appid,                                 # 真实数据appid
+            'mch_id': '1513325051',                         # 商户号
+            # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,      # 商户号真实数据
+            'nonce_str': generateRandomStamping(),          # 32位随机值
+            'openid': userObjs[0].openid,
+            'body': 'zhuge-vip',                            # 描述
+            'out_trade_no': getWxPayOrderId,                # 订单号
+            'total_fee': amount,                            # 金额
+            'spbill_create_ip': spbillIp,                   # 终端IP
+            'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
+            'trade_type': 'JSAPI'
+            }
+        stringSignTemp = shengchengsign(result_data, KEY)
+        result_data['sign'] = md5(stringSignTemp).upper()
+        xml_data = toXml(result_data)
 
-    # ==========商户KEY============
-    KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'          # 商户秘钥KEY
-    # KEY = jiChuSheZhiObjs[0].shangHuMiYao           # 商户秘钥真实数据KEY
-
-    amount = request.GET.get('amount')      # 金额
-    spbillIp = request.GET.get('spbillIp')  # 终端ip
-
-    result_data = {
-        # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,     # 商户号真实数据
-        'appid': 'wx1add8692a23b5976',  # appid
-        'mch_id': '1513325051',                        # 商户号
-        'nonce_str': generateRandomStamping(),         # 32位随机值
-        'openid': userObjs[0].openid,
-        'body': 'zhuge-vip',            # 描述
-        'out_trade_no': getWxPayOrderId,# 订单号
-        'total_fee': amount,              # 金额
-        'spbill_create_ip': spbillIp,   # 终端IP
-        'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
-        'trade_type': 'JSAPI'
-        }
-    stringSignTemp = shengchengsign(result_data, KEY)
-    result_data['sign'] = md5(stringSignTemp).upper()
-    xml_data = toXml(result_data)
-
-    ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
-    ret.encoding = 'utf8'
-
-    print('-ret.text------------>',ret.text)
-    DOMTree = xmldom.parseString(ret.text)
-    collection = DOMTree.documentElement
-    # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
-    prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
-
-    # print('prepay_id-----------> ',prepay_id)
-    data_dict = {
-        'appId' : 'wx1add8692a23b5976',
-        'timeStamp': int(time.time()),
-        'nonceStr':generateRandomStamping(),
-        'package': 'prepay_id=' + prepay_id,
-        'signType': 'MD5'
-    }
-
-    stringSignTemp = shengchengsign(data_dict, KEY)
-    data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
-    print('data_dict-->', data_dict)
-
-
-    response.code = 200
-    response.data = data_dict
-    return JsonResponse(response.__dict__)
-
-
+        ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
+        ret.encoding = 'utf8'
+        DOMTree = xmldom.parseString(ret.text)
+        collection = DOMTree.documentElement
+        return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+        if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
+            # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
+            prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
+            data_dict = {
+                'appId' : 'wx1add8692a23b5976',
+                'timeStamp': int(time.time()),
+                'nonceStr':generateRandomStamping(),
+                'package': 'prepay_id=' + prepay_id,
+                'signType': 'MD5'
+            }
+            stringSignTemp = shengchengsign(data_dict, KEY)
+            data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
+            response.code = 200
+            response.msg = '请求成功'
+            response.data = data_dict
+            return JsonResponse(response.__dict__)
+        else:
+            response.code = 500
+            response.msg = '支付失败'
+            response.data = ''
+            return JsonResponse(response.__dict__)
+    else:
+        response.code = 402
+        response.msg = '请求异常'
+        response.data = ''
+        return JsonResponse(response.__dict__)
 
