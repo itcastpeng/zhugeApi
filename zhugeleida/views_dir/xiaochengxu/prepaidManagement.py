@@ -68,6 +68,7 @@ def payback(request):
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     print('===========----------------------')
+    return JsonResponse(response.__dict__)
     # if request.method == 'POST':
     #     print('=========================================POST ')
         # # spbillIp = request.POST.get('spbillIp')             # 终端ip
