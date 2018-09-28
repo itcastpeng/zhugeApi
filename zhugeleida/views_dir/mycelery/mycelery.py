@@ -159,7 +159,6 @@ def create_user_or_customer_qr_code(request):
     authorizer_refresh_token = obj.authorizer_refresh_token
     authorizer_appid = obj.authorization_appid
 
-
     component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
     key_name = '%s_authorizer_access_token' % (authorizer_appid)
 
@@ -192,29 +191,22 @@ def create_user_or_customer_qr_code(request):
     with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
 
-
-    if  customer_id:
+    if customer_id:
         user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id)
         user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
         user_obj.qr_code=user_qr_code_path
         user_obj.save()
         print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
-        ## 一并生成海报
+        # 一并生成海报
         data_dict = {'user_id': user_id, 'customer_id': customer_id}
         tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-
-    else:
+    else:   # 没有 customer_id 说明不是在小程序中生成
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
         user_obj.save()
         print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
-
-        # 生成客户的海报
-        data_dict = {'user_id': user_id, 'customer_id': ''}
-        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-
 
     response.data = {'qr_code': user_obj.qr_code}
     response.code = 200
@@ -224,14 +216,19 @@ def create_user_or_customer_qr_code(request):
 
 
 @csrf_exempt
-def  create_user_or_customer_poster(request):
+def create_user_or_customer_poster(request):
 
-   response = ResponseObj()
-   # objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-   objs = models.zgld_user_customer_belonger.objects.all()
+    response = ResponseObj()
+    customer_id = request.GET.get('customer_id')
+    user_id = request.GET.get('user_id')
+    print('--- customer_id | user_id --------->>', customer_id, user_id)
 
-   for obj in objs:
-        # response = ResponseObj()
+    objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+
+    if not objs:  # 如果没有找到则表示异常
+        response.code = 500
+        response.msg = "传参异常"
+    else:
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
         print('---->', BASE_DIR)
 
@@ -254,16 +251,9 @@ def  create_user_or_customer_poster(request):
         driver = webdriver.PhantomJS(phantomjs_path)
         driver.implicitly_wait(10)
 
-        # customer_id = request.GET.get('customer_id')
-        # user_id = request.GET.get('user_id')
-
-        customer_id = obj.customer_id
-        user_id = obj.user_id
-        print('--- customer_id | user_id --------->>',customer_id,user_id)
-
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
-        print('----海报的静态页面[大韩资助]-->', url)
+        print('----url-->', url)
 
         try:
             driver.get(url)
@@ -275,7 +265,6 @@ def  create_user_or_customer_poster(request):
             else:
                 user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
                 user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
-
 
             driver.save_screenshot(BASE_DIR + user_poster_file_temp)
             driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
@@ -304,15 +293,9 @@ def  create_user_or_customer_poster(request):
             poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
             print('--------- 生成海报URL -------->', poster_url)
-
-            obj.poster_url = poster_url
-            obj.save()
-
-            # objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,customer_id=customer_id)
-            # if objs:
-            #     objs.update(
-            #         poster_url= poster_url
-            #     )
+            objs.update(
+                poster_url=poster_url
+            )
 
             ret_data = {
                 'user_id': user_id,
@@ -327,11 +310,7 @@ def  create_user_or_customer_poster(request):
             response.msg = "PhantomJS截图失败"
             response.code = 400
             driver.quit()
-
-   return JsonResponse(response.__dict__)
-
-
-
+    return JsonResponse(response.__dict__)
 
 
 # 小程序生成token，并然后发送模板消息
