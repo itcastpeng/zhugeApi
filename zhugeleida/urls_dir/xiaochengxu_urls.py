@@ -40,18 +40,18 @@ urlpatterns = [
     url(r'website$',website.website),
 
     # 小程序支付操作
-    url(r'pay$', prepaidManagement.pay),       # 回调信息
-    url(r'yuZhiFu', prepaidManagement.yuZhiFu),# 预支付
+    url(r'pay$', prepaidManagement.pay),                                    # 回调信息
+    url(r'yuZhiFu', prepaidManagement.yuZhiFu),                             # 预支付
 
     # 小程序 - 商品分类管理
-    url(r'goodsClassShow', goodsClassification.goodsClassShow),    # 商品分类 管理查询
-    url(r'^goodsClassOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper), # 商品 分类管理 操作
+    url(r'goodsClassShow', goodsClassification.goodsClassShow),             # 商品分类管理查询
+    url(r'^goodsClassOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper),      # 商品分类管理操作
 
     # 小程序 - 商品管理
-    url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品分类 管理查询
-    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品 管理 操作
+    url(r'mallManagementShow', mallManagement.mallManagementShow),          # 商品管理查询
+    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),   # 商品管理操作
 
     # 小程序 - 商城基础设置
-    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品 分类管理 操作
+    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),                # 商品基础设置
 
 ]

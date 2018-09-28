@@ -53,8 +53,8 @@ def shengchengsign(result_data, KEY):
     return stringSignTemp
 
 def pay(request):
-    print('回调=--GET---> ',request.GET)
-    print('回调=--POST---> ',request.POST)
+    print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
+    print('回调=--POST--POSTPOSTPOSTPOSTPOS回调回调回调回调回调T-> ',request.POST)
     response.code = 200
     response.data = ''
     response.msg = ''
@@ -65,23 +65,29 @@ def pay(request):
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     if request.method == 'POST':
+        # spbillIp = request.POST.get('spbillIp')             # 终端ip
+        # u_id = request.POST.get('u_id')
         url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
-        getWxPayOrderId = str(int(time.time())) + str(random.randint(10, 99)) # 订单号
+        #  参数
+        goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
         xiaochengxu_id = request.POST.get('xiaochengxu_id')
-        u_id = request.POST.get('u_id')
-        userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
 
+
+        userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
         xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=xiaochengxu_id)
         appid = xiaochengxu_app[0].authorization_appid
-        print('xiaochengxu_app-----> ',)
+
         jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)
-        print('jiChuSheZhiObjs========> ',jiChuSheZhiObjs)
+
         # ==========商户KEY============
         KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
-        amount = request.POST.get('amount')                  # 金额
-        spbillIp = request.POST.get('spbillIp')              # 终端ip
+        goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
+        dingdanhao = str(int(time.time())) + str(random.randint(10, 99) + str(0000) + xiaochengxu_id + goodsId)
+        print('订单号 ------------------------ > ', dingdanhao)
+        getWxPayOrderId =  dingdanhao# 订单号
+        print('goodsObjs[0].goodsPrice-=---------> ',goodsObjs[0].goodsPrice )
         client_ip, port = request.get_host().split(':')
         print('client_ip, port--------> ',client_ip, port)
         result_data = {
@@ -93,8 +99,8 @@ def yuZhiFu(request):
             'openid': userObjs[0].openid,
             'body': 'zhuge-vip',                            # 描述
             'out_trade_no': getWxPayOrderId,                # 订单号
-            'total_fee': amount,                            # 金额
-            'spbill_create_ip': spbillIp,                   # 终端IP
+            'total_fee': goodsObjs[0].goodsPrice,                            # 金额
+            'spbill_create_ip': client_ip,                   # 终端IP
             'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
             'trade_type': 'JSAPI'
             }
