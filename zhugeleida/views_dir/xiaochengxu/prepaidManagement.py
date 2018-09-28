@@ -57,6 +57,7 @@ def shengchengsign(result_data, KEY):
 def payback(request):
     print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
     print('回调=--POST--==========================================-> ',request.POST)
+    print('回调=--POST--==========================================-> ',request.body)
     response.code = 200
     response.data = ''
     response.msg = ''
