@@ -84,12 +84,13 @@ def yuZhiFu(request):
         KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
         goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
-        dingdanhao = str(int(time.time())) + str(random.randint(10, 99) + str(0000) + xiaochengxu_id + goodsId)
+        dingdanhao = str(int(time.time())) + str(random.randint(10, 99)) + '0000' + str(xiaochengxu_id) + str(goodsId)
         print('订单号 ------------------------ > ', dingdanhao)
-        getWxPayOrderId =  dingdanhao# 订单号
+        getWxPayOrderId =  str(int(time.time()))# 订单号
         print('goodsObjs[0].goodsPrice-=---------> ',goodsObjs[0].goodsPrice )
-        client_ip, port = request.get_host().split(':')
-        print('client_ip, port--------> ',client_ip, port)
+        # client_ip, port = request.get_host().split(':')
+        client_ip = '0.0.0.0'
+        print('client_ip, port--------> ',client_ip)
         result_data = {
             'appid': 'wx1add8692a23b5976',                  # appid
             # 'appid': appid,                                 # 真实数据appid
