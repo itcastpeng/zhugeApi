@@ -52,6 +52,8 @@ def shengchengsign(result_data, KEY):
     )
     return stringSignTemp
 
+
+@csrf_exempt
 def payback(request):
     print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
     print('回调=--POST--POSTPOSTPOSTPOSTPOS回调回调回调回调回调T-> ',request.POST)
@@ -61,8 +63,9 @@ def payback(request):
     return JsonResponse(response.__dict__)
 
 
-@csrf_exempt
+
 @account.is_token(models.zgld_customer)
+@csrf_exempt
 def yuZhiFu(request):
     if request.method == 'POST':
         # spbillIp = request.POST.get('spbillIp')             # 终端ip
