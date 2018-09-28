@@ -556,11 +556,11 @@ def user_send_gongzhonghao_template_msg(request):
                 'data' : data
             }
 
-            print('=========== 发送出去的【模板消息】请求数据 =======>>',post_template_data)
+            print('=========== 发送出去的【模板消息】请求数据 =======>>',json.dumps(post_template_data))
 
             # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
-
-            template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+            template_msg_url =  'https://api.weixin.qq.com/cgi-bin/message/template/send'
+            template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
 
             print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
