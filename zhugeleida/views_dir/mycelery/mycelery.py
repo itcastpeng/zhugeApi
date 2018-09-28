@@ -219,90 +219,96 @@ def create_user_or_customer_qr_code(request):
 def create_user_or_customer_poster(request):
 
     response = ResponseObj()
-    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
-    print('---->', BASE_DIR)
-
-    # option = webdriver.ChromeOptions()
-    # mobileEmulation = {'deviceName': 'iPhone 6'}
-    # option.add_experimental_option('mobileEmulation', mobileEmulation)
-    # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
-
-    platform = sys.platform  # 获取平台
-    phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
-
-    if 'linux' in platform:
-        phantomjs_path = phantomjs_path + '/phantomjs'
-
-    else:
-        phantomjs_path = phantomjs_path + '/phantomjs.exe'
-
-    print('----- phantomjs_path ----->>', phantomjs_path)
-
-    driver = webdriver.PhantomJS(phantomjs_path)
-    driver.implicitly_wait(10)
-
     customer_id = request.GET.get('customer_id')
     user_id = request.GET.get('user_id')
-    print('--- customer_id | user_id --------->>',customer_id, user_id)
+    if not user_id: # 如果没有传user_id则表示异常
+        response.code = 500
+        response.msg = "传参异常"
+    else:
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
+        print('---->', BASE_DIR)
 
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
+        # option = webdriver.ChromeOptions()
+        # mobileEmulation = {'deviceName': 'iPhone 6'}
+        # option.add_experimental_option('mobileEmulation', mobileEmulation)
+        # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
-    print('----url-->', url)
+        platform = sys.platform  # 获取平台
+        phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
-    try:
-        driver.get(url)
-        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        if 'linux' in platform:
+            phantomjs_path = phantomjs_path + '/phantomjs'
 
-        if customer_id:
-            user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
-            user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
         else:
-            user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
-            user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
+            phantomjs_path = phantomjs_path + '/phantomjs.exe'
 
-        driver.save_screenshot(BASE_DIR + user_poster_file_temp)
-        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
+        print('----- phantomjs_path ----->>', phantomjs_path)
 
-        element = driver.find_element_by_id("jietu")
-        print(element.location)  # 打印元素坐标
-        print(element.size)  # 打印元素大小
+        driver = webdriver.PhantomJS(phantomjs_path)
+        driver.implicitly_wait(10)
 
-        left = element.location['x']
-        top = element.location['y']
-        right = element.location['x'] + element.size['width']
-        bottom = element.location['y'] + element.size['height']
 
-        im = Image.open(BASE_DIR + user_poster_file_temp)
-        im = im.crop((left, top, right, bottom))
 
-        print(len(im.split()))  # test
-        if len(im.split()) == 4:
-            # prevent IOError: cannot write mode RGBA as BMP
-            r, g, b, a = im.split()
-            im = Image.merge("RGB", (r, g, b))
-            im.save(BASE_DIR + user_poster_file)
-        else:
-            im.save(BASE_DIR + user_poster_file)
+        print('--- customer_id | user_id --------->>',customer_id, user_id)
 
-        poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
-        if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-        print('--------- 生成海报URL -------->', poster_url)
-        models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id).update(
-            poster_url=poster_url
-        )
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
-        ret_data = {
-            'user_id': user_id,
-            'poster_url': poster_url,
-        }
-        print('-----save_poster ret_data --->>', ret_data)
-        response.data = ret_data
-        response.msg = "请求成功"
-        response.code = 200
+        print('----url-->', url)
 
-    except Exception as e:
-        response.msg = "PhantomJS截图失败"
-        response.code = 400
+        try:
+            driver.get(url)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+            if customer_id:
+                user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
+                user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
+            else:
+                user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
+                user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
+
+            driver.save_screenshot(BASE_DIR + user_poster_file_temp)
+            driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
+
+            element = driver.find_element_by_id("jietu")
+            print(element.location)  # 打印元素坐标
+            print(element.size)  # 打印元素大小
+
+            left = element.location['x']
+            top = element.location['y']
+            right = element.location['x'] + element.size['width']
+            bottom = element.location['y'] + element.size['height']
+
+            im = Image.open(BASE_DIR + user_poster_file_temp)
+            im = im.crop((left, top, right, bottom))
+
+            print(len(im.split()))  # test
+            if len(im.split()) == 4:
+                # prevent IOError: cannot write mode RGBA as BMP
+                r, g, b, a = im.split()
+                im = Image.merge("RGB", (r, g, b))
+                im.save(BASE_DIR + user_poster_file)
+            else:
+                im.save(BASE_DIR + user_poster_file)
+
+            poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+            if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
+            print('--------- 生成海报URL -------->', poster_url)
+            models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id).update(
+                poster_url=poster_url
+            )
+
+            ret_data = {
+                'user_id': user_id,
+                'poster_url': poster_url,
+            }
+            print('-----save_poster ret_data --->>', ret_data)
+            response.data = ret_data
+            response.msg = "请求成功"
+            response.code = 200
+
+        except Exception as e:
+            response.msg = "PhantomJS截图失败"
+            response.code = 400
     driver.quit()
     return JsonResponse(response.__dict__)
 
