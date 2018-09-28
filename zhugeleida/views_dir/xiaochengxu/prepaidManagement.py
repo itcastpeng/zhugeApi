@@ -64,8 +64,8 @@ def payback(request):
 
 
 
-@account.is_token(models.zgld_customer)
 @csrf_exempt
+@account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     if request.method == 'POST':
         # spbillIp = request.POST.get('spbillIp')             # 终端ip
@@ -107,7 +107,7 @@ def yuZhiFu(request):
             'out_trade_no': getWxPayOrderId,                # 订单号
             'total_fee': total_fee,                            # 金额
             'spbill_create_ip': client_ip,                   # 终端IP
-            'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/pay',
+            'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/payback',
             'trade_type': 'JSAPI'
             }
         print('result_data-------> ',result_data)
