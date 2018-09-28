@@ -496,7 +496,7 @@ def user_send_gongzhonghao_template_msg(request):
 
         post_template_data =  {}
 
-        key_name = '%s_authorizer_access_token' % (authorizer_appid)
+        key_name = 'authorizer_access_token_%s' % (authorizer_appid)
         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
@@ -523,7 +523,7 @@ def user_send_gongzhonghao_template_msg(request):
         if customer_obj and objs:
             openid = customer_obj[0].openid
 
-            path = '/pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
 
             # 留言回复通知
             '''
