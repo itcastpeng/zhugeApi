@@ -6,8 +6,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
-from django.db.models import Q
-from django.db.models import F
 
 
 def init_data(user_id, pid=None, level=1):
@@ -21,24 +19,18 @@ def init_data(user_id, pid=None, level=1):
     objs = models.zgld_goods_classification_management.objects.filter(
         userProfile_id=user_id,
         parentClassification_id=pid,
-        # level=level
+        level=level
     )
     for obj in objs:
         current_data = {
             'name': obj.classificationName,
-            # 'expand': True,
             'id': obj.id,
-            # 'checked': False
         }
-        # if selected_list and obj.id in selected_list:
-        #     current_data['checked'] = True
         print('obj.id---------> ',obj.id)
-        children_data = init_data(user_id, pid=obj.id, level=level+1)
+        children_data = init_data(user_id, pid=obj.id, level=2)
         if children_data:
             current_data['children'] = children_data
         result_data.append(current_data)
-
-    # print('result_data -->', result_data)
     return result_data
 
 @csrf_exempt
@@ -46,8 +38,6 @@ def init_data(user_id, pid=None, level=1):
 def goodsClassShow(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        # forms_obj = SelectForm(request.GET)
-        # if forms_obj.is_valid():
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
 
@@ -58,12 +48,6 @@ def goodsClassShow(request):
         response.code = 200
         response.msg = '查询成功'
         response.data = data_result
-
-        # else:
-        #     response.code = 402
-        #     response.msg = "请求异常"
-        #     response.data = json.loads(forms_obj.errors.as_json())
-
     return JsonResponse(response.__dict__)
 
 
@@ -76,10 +60,12 @@ def goodsClassOper(request, oper_type, o_id):
         dataDict = {
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
-            'parentClassification_id': request.POST.get('parentClassification', ''),
+            'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id', ''),
             'goodsNum': request.POST.get('goodsNum', ''),
-            'userProfile_id':request.GET.get('user_id')
+            'userProfile_id':request.GET.get('user_id'),
+            'parentClassification_id':request.POST.get('parentClassification')
         }
+        print('dataDict---------------> ',dataDict)
         if oper_type == 'add':
             forms_obj = AddForm(dataDict)
             if forms_obj.is_valid():
@@ -123,8 +109,8 @@ def goodsClassOper(request, oper_type, o_id):
                     classificationName=formObj.get('classificationName'),
                     goodsNum=formObj.get('goodsNum'),
                     parentClassification_id=parentClassification_id,
-                    userProfile_id=dataDict.get('userProfile_id'),
-                    level=level
+                    xiaochengxu_app_id=dataDict.get('xiaochengxu_app_id'),
+                    level=level,
                 )
                 response.code = 200
                 response.msg = '修改成功'
@@ -144,14 +130,8 @@ def goodsClassOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = '删除ID不存在！'
-
-
     else:
         response.code = 402
         response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
-
-
-
-

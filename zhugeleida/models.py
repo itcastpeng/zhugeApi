@@ -982,6 +982,16 @@ class zgld_speech_details_management(models.Model):
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
 
+# 小程序 - 商城基础设置
+class zgld_shangcheng_jichushezhi(models.Model):
+    shangChengName = models.CharField(verbose_name='商城名称', max_length=32, null=True, blank=True)
+    # userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
+    shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
+    shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
+    lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
+    yongjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
+    xiaochengxuApp = models.ForeignKey(to='zgld_xiaochengxu_app', verbose_name='小程序APP', null=True, blank=True)
+    xiaochengxucompany = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
 
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
@@ -989,7 +999,7 @@ class zgld_goods_classification_management(models.Model):
     goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
     parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
+    xiaochengxu_app = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)
     level = models.IntegerField(verbose_name='分类等级', default=1)
 
 # 小程序 - 商品管理
@@ -1012,17 +1022,10 @@ class zgld_goods_management(models.Model):
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
     kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
 
-# 小程序 - 商城基础设置
-class zgld_shangcheng_jichushezhi(models.Model):
-    shangChengName = models.CharField(verbose_name='商城名称', max_length=32, null=True, blank=True)
-    userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
-    shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
-    shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
-    lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
-    yognjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
 
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):
+    shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
     orderNumber = models.IntegerField(verbose_name='订单号', null=True, blank=True)
     goodsPicture = models.CharField(verbose_name='商品图片', max_length=128, null=True, blank=True)
     goodsName = models.CharField(verbose_name='商品名字', max_length=64)
@@ -1030,7 +1033,8 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     countNum = models.IntegerField(verbose_name='总价', default=0)
     yingFuKuan = models.IntegerField(verbose_name='应付款', default=0)
     youHui = models.IntegerField(verbose_name='优惠', default=0)
-    yewuUser = models.ForeignKey(to=zgld_userprofile, verbose_name='业务员', null=True, blank=True)
+    yewuUser = models.ForeignKey(to='zgld_userprofile', verbose_name='业务员', null=True, blank=True)
+    gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     yongJin = models.IntegerField(verbose_name='佣金', default=0)
     peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
     shouHuoRen = models.CharField(verbose_name='收货人', max_length=128, null=True, blank=True)
@@ -1066,8 +1070,10 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
 
 # 员工订单统计
 class zgld_yuangong_dingdan_tongji(models.Model):
+    dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
     touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
     employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
+    gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     employeesPhone = models.IntegerField(verbose_name='(员工/业务员)电话', null=True, blank=True)
     bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
     numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)

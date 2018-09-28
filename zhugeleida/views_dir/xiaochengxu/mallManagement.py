@@ -6,19 +6,32 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.mallManage_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
+from django.db.models import Q
+
 
 # 商城展示
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def mallManagementShow(request):
     response = Response.ResponseObj()
-    if request.method == "GET":  # 获取单个名片的信息
+    if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
             user_id = request.GET.get('user_id')
+            u_id = request.GET.get('u_id')
+            goodsGroup = request.GET.get('goodsGroup')
+            status = request.GET.get('status')
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            objs = models.zgld_goods_management.objects.filter(parentName__userProfile_id=user_id)
+            q = Q()
+            print('goodsGroup--> ',goodsGroup, 'status---> ',status)
+            if goodsGroup:
+                q.add(Q(parentName_id=goodsGroup), Q.AND)
+            if status:
+                q.add(Q(goodsStatus=status), Q.AND)
+            u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+            company_id = models.zgld_company.objects.filter(id=u_idObjs[0].company_id)
+            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app_id=company_id[0].id)
             otherData = []
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -61,18 +74,18 @@ def mallManagementOper(request, oper_type, o_id):
     resultData = {
         'user_id':request.GET.get('user_id'),
         'o_id':o_id,
-        'goodsName':request.POST.get('goodsName'),                  # 商品名称
-        'parentName':request.POST.get('parentName'),                # 父级分类
-        'goodsPrice':request.POST.get('goodsPrice'),                # 商品标价
+        'goodsName':request.POST.get('goodsName'),                    # 商品名称
+        'parentName':request.POST.get('parentName'),                  # 父级分类
+        'goodsPrice':request.POST.get('goodsPrice'),                  # 商品标价
         # 'salesNum':request.POST.get('salesNum'),                    # 商品销量
-        'inventoryNum':request.POST.get('inventoryNum'),            # 商品库存
-        'goodsStatus':request.POST.get('goodsStatus'),              # 商品状态
+        'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
+        'goodsStatus':request.POST.get('goodsStatus'),                # 商品状态
         # 'commissionFee':request.POST.get('commissionFee'),          # 佣金提成
         # 'createDate':request.POST.get('createDate'),                # 创建时间
         # 'shelvesCreateDate':request.POST.get('shelvesCreateDate'),  # 上架时间
-        'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),      # 是否线上交易
-        'shichangjiage':request.POST.get('shichangjiage'),          # 市场价格
-        'kucunbianhao':request.POST.get('kucunbianhao'),            # 库存编号
+        'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),        # 是否线上交易
+        'shichangjiage':request.POST.get('shichangjiage'),            # 市场价格
+        'kucunbianhao':request.POST.get('kucunbianhao'),              # 库存编号
     }
     if request.method == "POST":
         if oper_type == 'add':
@@ -121,7 +134,6 @@ def mallManagementOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = '删除ID不存在！'
-
     else:
         if oper_type == 'goodsStatus': # 查询商品状态
             objs = models.zgld_goods_management
