@@ -55,9 +55,27 @@ def shengchengsign(result_data, KEY):
 
 @csrf_exempt
 def payback(request):
-    print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
-    print('回调=--POST--==========================================-> ',request.POST)
     print('回调=--POST--==========================================-> ',request.body)
+    resultBody = request.body
+    DOMTree = xmldom.parseString(resultBody)
+    collection = DOMTree.documentElement
+    mch_id = collection.getElementsByTagName("mch_id")[0].childNodes[0].data
+    return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+    appid = collection.getElementsByTagName("appid")[0].childNodes[0].data
+    openid = collection.getElementsByTagName("openid")[0].childNodes[0].data
+    cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data
+    out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data
+
+
+    print('return_code---->',return_code)
+    print('mch_id---->',mch_id)
+    print('appid---->',appid)
+    print('openid---->',openid)
+    print('cash_fee---->',cash_fee)
+    print('out_trade_no---->',out_trade_no)
+
+
+
     response.code = 200
     response.data = ''
     response.msg = ''
@@ -69,9 +87,6 @@ def payback(request):
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     if request.method == 'POST':
-        print('=========================================POST ')
-        # spbillIp = request.POST.get('spbillIp')             # 终端ip
-        # u_id = request.POST.get('u_id')
         url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
         #  参数
         goodsId = request.POST.get('goodsId')                 # 商品ID
@@ -80,7 +95,7 @@ def yuZhiFu(request):
 
 
         userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
-        # xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=xiaochengxu_id)
+        # xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=xiaochengxu_id)       #真实数据appid
         # appid = xiaochengxu_app[0].authorization_appid
 
         jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)
@@ -88,16 +103,16 @@ def yuZhiFu(request):
         # ==========商户KEY============
         KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
         # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
-        # goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)
+        # goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)       # 真实单价
         # total_fee = goodsObjs[0].goodsPrice * 100
         total_fee = int(0.01 * 100)
-        print('total_fee=========> ',total_fee)
-        dingdanhao = str(int(time.time())) + str(random.randint(10, 99)) + '0000' + str(xiaochengxu_id) + str(goodsId)
-        print('订单号 ------------------------ > ', dingdanhao)
-        getWxPayOrderId =  str(int(time.time()))# 订单号
-
+        ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
+        shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
+        print('shijianchuoafter5=====> ',shijianchuoafter5)
+        dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99))  + str(xiaochengxu_id) + str(goodsId)
+        # print('订单号 ------------------------ > ', dingdanhao)
+        getWxPayOrderId =  dingdanhao                               # 订单号
         client_ip = '0.0.0.0'
-        print('client_ip, port--------> ',client_ip)
         result_data = {
             'appid': 'wx1add8692a23b5976',                  # appid
             # 'appid': appid,                                 # 真实数据appid
