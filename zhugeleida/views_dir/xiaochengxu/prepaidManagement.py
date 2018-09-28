@@ -68,8 +68,8 @@ def payback(request):
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     print('===========----------------------')
-    if request.method == 'POST':
-        print('=========================================POST ')
+    # if request.method == 'POST':
+    #     print('=========================================POST ')
         # # spbillIp = request.POST.get('spbillIp')             # 终端ip
         # # u_id = request.POST.get('u_id')
         # url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
@@ -144,9 +144,9 @@ def yuZhiFu(request):
         #     response.msg = '支付失败'
         #     response.data = ''
         #     return JsonResponse(response.__dict__)
-    else:
-        response.code = 402
-        response.msg = '请求异常'
-        response.data = ''
-        return JsonResponse(response.__dict__)
+    # else:
+    #     response.code = 402
+    #     response.msg = '请求异常'
+    #     response.data = ''
+    #     return JsonResponse(response.__dict__)
 
