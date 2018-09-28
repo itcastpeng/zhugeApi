@@ -221,6 +221,8 @@ def create_user_or_customer_poster(request):
     response = ResponseObj()
     customer_id = request.GET.get('customer_id')
     user_id = request.GET.get('user_id')
+    print('--- customer_id | user_id --------->>', customer_id, user_id)
+
     if not user_id: # 如果没有传user_id则表示异常
         response.code = 500
         response.msg = "传参异常"
@@ -246,10 +248,6 @@ def create_user_or_customer_poster(request):
 
         driver = webdriver.PhantomJS(phantomjs_path)
         driver.implicitly_wait(10)
-
-
-
-        print('--- customer_id | user_id --------->>',customer_id, user_id)
 
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
