@@ -159,7 +159,6 @@ def create_user_or_customer_qr_code(request):
     authorizer_refresh_token = obj.authorizer_refresh_token
     authorizer_appid = obj.authorization_appid
 
-
     component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
     key_name = '%s_authorizer_access_token' % (authorizer_appid)
 
@@ -192,29 +191,22 @@ def create_user_or_customer_qr_code(request):
     with open('%s' % (IMG_PATH), 'wb') as f:
         f.write(qr_ret.content)
 
-
-    if  customer_id:
+    if customer_id:
         user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id)
         user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
         user_obj.qr_code=user_qr_code_path
         user_obj.save()
         print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
-        ## 一并生成海报
+        # 一并生成海报
         data_dict = {'user_id': user_id, 'customer_id': customer_id}
         tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-
-    else:
+    else:   # 没有 customer_id 说明不是在小程序中生成
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
         user_obj.save()
         print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
-
-        # 生成客户的海报
-        data_dict = {'user_id': user_id, 'customer_id': ''}
-        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-
 
     response.data = {'qr_code': user_obj.qr_code}
     response.code = 200
