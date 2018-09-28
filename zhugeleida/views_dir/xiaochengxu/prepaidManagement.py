@@ -52,7 +52,7 @@ def shengchengsign(result_data, KEY):
     )
     return stringSignTemp
 
-def pay(request):
+def payback(request):
     print('回调=--GET--回调回调回调回调回GETGETGET调回调回GETGETGET调回调GETGET回调-> ',request.GET)
     print('回调=--POST--POSTPOSTPOSTPOSTPOS回调回调回调回调回调T-> ',request.POST)
     response.code = 200
@@ -91,7 +91,6 @@ def yuZhiFu(request):
         print('订单号 ------------------------ > ', dingdanhao)
         getWxPayOrderId =  str(int(time.time()))# 订单号
 
-        # client_ip, port = request.get_host().split(':')
         client_ip = '0.0.0.0'
         print('client_ip, port--------> ',client_ip)
         result_data = {
