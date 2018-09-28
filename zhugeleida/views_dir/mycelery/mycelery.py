@@ -513,19 +513,21 @@ def user_send_gongzhonghao_template_msg(request):
             消息回复：您有未读消息哦
             点击进入咨询页面
             '''
-            consult_info = ('%s-%s(%s)') %  (company_name,position,user_name)
+            consult_info = ('%s - %s【%s】') %  (company_name,user_name,position)
             data = {
                 'first': {
-                    'value': '您好,有什么可以帮助到您的吗?'  # 回复者
+                    'value': '您好,我叫“很高兴”！很高兴为您服务😬！'  # 回复者
                 },
                 'keyword1': {
-                    'value': consult_info   # 回复者
+                    'value': consult_info,
+                    "color": "#0000EE"
                 },
                 'keyword2': {
-                    'value': '您有未读消息哦'   # 回复时间
+                    'value': '您有未读消息哦',
+                    "color": "##9400D3"
                 },
                 'remark': {
-                    'value': '点击进入咨询页面'  #回复内容
+                    'value': '了解更多请点击进入【我的名片小程序】哦 😊🙈'  #回复内容
                 }
             }
             post_template_data = {
