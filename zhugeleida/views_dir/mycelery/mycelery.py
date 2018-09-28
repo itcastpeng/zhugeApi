@@ -523,7 +523,7 @@ def user_send_gongzhonghao_template_msg(request):
         if customer_obj and objs:
             openid = customer_obj[0].openid
 
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            path = '/pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
 
             # 留言回复通知
             '''
