@@ -35,7 +35,7 @@ def user_send_action_log(request):
     get_token_data = {}
     send_token_data = {}
 
-    user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
+    user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
     print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
     corp_id = user_obj.company.corp_id
 
@@ -496,19 +496,11 @@ def user_send_gongzhonghao_template_msg(request):
 
         post_template_data =  {}
 
-        component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
         key_name = '%s_authorizer_access_token' % (authorizer_appid)
         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
-            # data = {
-            #     'key_name' : key_name,
-            #     'authorizer_refresh_token': authorizer_refresh_token,
-            #     'authorizer_appid': authorizer_appid,
-            #
-            # }
             authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-
             authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
             if not authorizer_access_token:
@@ -529,17 +521,8 @@ def user_send_gongzhonghao_template_msg(request):
 
         if customer_obj and objs:
             openid = customer_obj[0].openid
-            post_template_data['touser'] = openid
-
-
-            post_template_data['template_id'] = template_id
 
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-            post_template_data['page'] = path
-
-
-            post_template_data['form_id'] = form_id
-
 
             # 留言回复通知
             '''
@@ -551,7 +534,7 @@ def user_send_gongzhonghao_template_msg(request):
             consult_info = ('%s-%s(%s)') %  (company_name,position,user_name)
             data = {
                 'first': {
-                    'value': '您好，有什么可以帮助到您的吗?'  # 回复者
+                    'value': '您好,有什么可以帮助到您的吗?'  # 回复者
                 },
                 'keyword1': {
                     'value': consult_info   # 回复者
@@ -563,9 +546,15 @@ def user_send_gongzhonghao_template_msg(request):
                     'value': '点击进入咨询页面'  #回复内容
                 }
             }
-            post_template_data['data'] = data
-            # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
-            print('===========post_template_data=======>>',post_template_data)
+            post_template_data = {
+                'touser' : openid,
+                'template_id': template_id,
+                'page':  path,
+                'appid':  authorizer_appid,
+                'data' : data
+            }
+
+            print('=========== 发送出去的【模板消息】请求数据 =======>>',post_template_data)
 
             # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
 
@@ -587,6 +576,8 @@ def user_send_gongzhonghao_template_msg(request):
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
+
+            flag = False
 
         else:
             response.msg = "客户不存在"
