@@ -119,10 +119,10 @@ def work_weixin_auth(request, company_id):
 
                 last_login_date = user_profile_obj.last_login_date
                 if not last_login_date: # 为空说明第一次登陆
-                    is_first_login = True
+                    is_first_login = 'Yes'
                     user_profile_obj.last_login_date = datetime.datetime.now()
                 else:
-                    is_first_login = False
+                    is_first_login = 'No'
 
                 user_profile_obj.save()
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&id=' + str(
