@@ -394,8 +394,9 @@ def user_send_template_msg(request):
 
             # post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
             post_template_data['template_id'] = template_id
-            # path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            
+            path = 'pages/mingpian/index' % (user_id)
+            # path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
             post_template_data['page'] = path
 
             if len(exist_formid_json) == 0:
