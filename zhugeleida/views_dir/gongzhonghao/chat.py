@@ -64,6 +64,9 @@ def chat(request):
             if objs:
                 phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
                 wechat = objs[0].userprofile.wechat if objs[0].userprofile.wechat else objs[0].userprofile.wechat_phone
+                company_id = objs[0].userprofile.company_id
+                company_name = objs[0].userprofile.company.name
+                user_name = objs[0].userprofile.username
 
                 for obj in objs:
 
@@ -108,7 +111,6 @@ def chat(request):
                         'user_avatar': mingpian_avatar,
                         'customer_headimgurl': obj.customer.headimgurl,
                         'dateTime': obj.create_date,
-
                         'send_type': obj.send_type,
                         'is_first_info': is_first_info,       #是否为第一条的信息
                     }
@@ -125,6 +127,9 @@ def chat(request):
                     'ret_data': ret_data_list,
                     'mingpian_phone': phone,
                     'wechat': wechat,
+                    'company_id': company_id,
+                    'company_name': company_name,
+                    'user_name': user_name,
                     'data_count': count,
                 }
 
