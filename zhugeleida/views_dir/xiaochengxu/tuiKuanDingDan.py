@@ -4,14 +4,13 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm 
+from zhugeleida.forms.xiaochengxu.tuiKuanDingDan_verify import AddForm, SelectForm
 import json, base64
-
 
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def theOrderShow(request):
+def tuiKuanDingDanShow(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
@@ -77,37 +76,24 @@ def theOrderShow(request):
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def theOrderOper(request, oper_type, o_id):
+def tuiKuanDingDanOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':
-        if oper_type == 'update':
+        if oper_type == 'add':
             otherData = {
-                'o_id': o_id,
-                # 'countPrice': obj.countPrice,
-                'yingFuKuan': request.POST.get('yingFuKuan'),
-                'youhui': request.POST.get('youhui'),
-                'yewuyuan_id': request.POST.get('yewuyuan_id'),
-                'yongjin': request.POST.get('yongjin'),
-                'peiSong': request.POST.get('peiSong'),
-                'shouHuoRen_id': request.POST.get('shouHuoRen_id'),
+                'orderNumber':request.POST.get('orderNumber'),
+                'tuiKuanYuanYin':request.POST.get('tuiKuanYuanYin'),
             }
-            forms_obj = UpdateForm(otherData)
+            forms_obj = AddForm(otherData)
             if forms_obj.is_valid():
                 print('验证通过')
-                print(forms_obj.cleaned_data)
-                dingDanId = forms_obj.cleaned_data.get('o_id')
-                models.zgld_shangcheng_dingdan_guanli.objects.filter(
-                    id=dingDanId
-                ).update(
-                    yingFuKuan=otherData.get('yingFuKuan'),
-                    youHui=otherData.get('youhui'),
-                    yewuUser_id=otherData.get('yewuyuan_id'),
-                    yongJin=otherData.get('yongjin'),
-                    peiSong=otherData.get('peiSong'),
-                    shouHuoRen_id=otherData.get('shouHuoRen_id')
+
+                models.zgld_shangcheng_tuikuan_dingdan_management.objects.create(
+
                 )
+
                 response.code = 200
-                response.msg = '修改成功'
+                response.msg = '添加成功'
                 response.data = ''
             else:
                 response.code = 301
