@@ -42,8 +42,7 @@ def goodsClassShow(request):
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
+        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
         xiaochengxu_id = userObjs[0].id
 
         groupObjs = models.zgld_goods_classification_management.objects
