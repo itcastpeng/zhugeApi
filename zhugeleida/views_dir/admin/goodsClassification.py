@@ -8,7 +8,7 @@ from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, 
 import json,os,sys
 
 
-def init_data(user_id, pid=None, level=1):
+def init_data(xiaochengxu_id, pid=None, level=1):
     """
     获取权限数据
     :param pid:  权限父级id
@@ -17,7 +17,8 @@ def init_data(user_id, pid=None, level=1):
     result_data = []
     print('level------> ',level)
     objs = models.zgld_goods_classification_management.objects.filter(
-        userProfile_id=user_id,
+        xiaochengxu_app_id=xiaochengxu_id,
+        # userProfile_id=user_id,
         parentClassification_id=pid,
         level=level
     )
@@ -27,24 +28,28 @@ def init_data(user_id, pid=None, level=1):
             'id': obj.id,
         }
         print('obj.id---------> ',obj.id)
-        children_data = init_data(user_id, pid=obj.id, level=2)
+        children_data = init_data(xiaochengxu_id, pid=obj.id, level=2)
         if children_data:
             current_data['children'] = children_data
         result_data.append(current_data)
     return result_data
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def goodsClassShow(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
+        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+        xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
+        xiaochengxu_id = userObjs[0].id
 
         if singleUser:
-            data_result = init_data(user_id, singleUser)
+            data_result = init_data(xiaochengxu_id, singleUser)
         else:
-            data_result = init_data(user_id)
+            data_result = init_data(xiaochengxu_id)
         response.code = 200
         response.msg = '查询成功'
         response.data = data_result
@@ -53,7 +58,7 @@ def goodsClassShow(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def goodsClassOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
@@ -121,12 +126,16 @@ def goodsClassOper(request, oper_type, o_id):
                 response.data = {}
 
         elif oper_type == 'delete':
-            goodsObjs = models.zgld_goods_classification_management.objects
-            objs = goodsObjs.filter(id=o_id)
+            objs = goodsObjs = models.zgld_goods_classification_management.objects.filter(id=o_id)
             if objs:
                 if goodsObjs.filter(parentClassification_id=o_id):
                     response.code = 301
                     response.msg = '含有子级,请先移除'
+                else:
+                    objs.delete()
+                    response.code = 200
+                    response.msg = '删除成功'
+
             else:
                 response.code = 301
                 response.msg = '删除ID不存在！'
