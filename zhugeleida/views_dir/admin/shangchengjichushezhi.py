@@ -75,8 +75,7 @@ def jiChuSheZhiOper(request, oper_type):
                 response.data = ''
             else:
                 response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-                response.data = ''
+                response.data = json.loads(forms_obj.errors.as_json())
         if oper_type == 'zhifupeizhi':
             resultData = {
                 'shangHuHao': request.POST.get('shangHuHao'),
@@ -105,8 +104,7 @@ def jiChuSheZhiOper(request, oper_type):
                 response.data = ''
             else:
                 response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-                response.data = ''
+                response.data = json.loads(forms_obj.errors.as_json())
 
         if oper_type == 'yongjinshezhi':
             resultData = {
@@ -128,8 +126,7 @@ def jiChuSheZhiOper(request, oper_type):
                 response.data = ''
             else:
                 response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-                response.data = ''
+                response.data = json.loads(forms_obj.errors.as_json())
     else:
         response.code = 402
         response.msg = "请求异常"
