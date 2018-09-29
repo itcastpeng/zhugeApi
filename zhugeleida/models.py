@@ -990,7 +990,7 @@ class zgld_shangcheng_jichushezhi(models.Model):
     yongjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
     xiaochengxuApp = models.ForeignKey(to='zgld_xiaochengxu_app', verbose_name='小程序APP', null=True, blank=True)
     xiaochengxucompany = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
-
+    zhengshu = models.TextField(verbose_name='证书', null=True, blank=True)
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
     classificationName = models.CharField(verbose_name='分类名称', max_length=128)
@@ -1059,14 +1059,15 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
 class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     orderNumber = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单号', null=True, blank=True)
     tuiKuanYuanYin = models.CharField(verbose_name='退款原因', max_length=256, null=True, blank=True)
-    tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
+    # tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
     shengChengDateTime = models.DateTimeField(verbose_name='生成时间', auto_now_add=True)
-    tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', auto_now_add=False)
+    tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', null=True, blank=True)
     tuikuan_status = (
-        (1, '退款中'),
+        (1, '退款中, 等待卖家确认'),
         (2, '退款中, 等待卖家收货'),
         (3, '退款完成'),
-        (4, '退款失败')
+        (4, '退款失败'),
+        (5, '退款中'),
     )
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
 

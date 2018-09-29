@@ -7,12 +7,12 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == 'addOrUpdate':
-            u_id = request.POST.get('u_id')
+            u_id = request.GET.get('user_id')
             shangChengName = request.POST.get('shangChengName', '')
             shangHuHao = request.POST.get('shangHuHao', '')
             shangHuMiYao = request.POST.get('shangHuMiYao', '')
@@ -36,7 +36,7 @@ def jiChuSheZhiOper(request, oper_type):
                     response.code = 301
                     response.msg = '请配置商城名称！'
                 else:
-                    u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+                    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=u_id)
                     xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
                     userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
                     response.code = 200
