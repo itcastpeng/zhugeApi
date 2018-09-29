@@ -27,7 +27,11 @@ class AddForm(forms.Form):
         if not objs:
             self.add_error('orderNumber', '无此订单！')
         else:
-            return orderNumber
+            tuiKuanObjs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=orderNumber)
+            if not tuiKuanObjs:
+                return orderNumber
+            else:
+                self.add_error('orderNumber', '该订单已退款, 请勿重复操作！')
 
 
 class SelectForm(forms.Form):

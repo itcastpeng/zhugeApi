@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 
 @csrf_exempt
-@account.is_token(models.zgld_userprofile)
+@account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
     if request.method == "POST":
