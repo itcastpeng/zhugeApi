@@ -132,7 +132,7 @@ def goodsClassOper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = parentData
-            
+
 
         elif oper_type == 'update':
             forms_obj = UpdateForm(dataDict)
@@ -166,9 +166,10 @@ def goodsClassOper(request, oper_type, o_id):
                 response.data = {}
 
         elif oper_type == 'delete':
-            objs = goodsObjs = models.zgld_goods_classification_management.objects.filter(id=o_id)
+            groupObjs = models.zgld_goods_classification_management.objects
+            objs = groupObjs.filter(id=o_id)
             if objs:
-                if goodsObjs.filter(parentClassification_id=o_id):
+                if groupObjs.filter(parentClassification_id=o_id):
                     response.code = 301
                     response.msg = '含有子级,请先移除'
                 else:

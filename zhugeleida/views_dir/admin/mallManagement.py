@@ -9,7 +9,7 @@ import json,os,sys
 from django.db.models import Q
 
 
-def mallManagement(request, user_id, goodsGroup, status):
+def mallManagement(request, user_id, goodsGroup, status, flag):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -23,7 +23,10 @@ def mallManagement(request, user_id, goodsGroup, status):
                 q.add(Q(parentName_id=goodsGroup), Q.AND)
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
-            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+            if flag == 'admin':
+                u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+            else:
+                u_idObjs = models.zgld_customer.objects.filter(id=user_id)
             objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id)
             otherData = []
             if length != 0:
@@ -73,7 +76,8 @@ def mallManagementShow(request):
     user_id = request.GET.get('user_id')
     goodsGroup = request.GET.get('goodsGroup')
     status = request.GET.get('status')
-    response = mallManagement(request, user_id, goodsGroup, status)
+    flag = 'admin'
+    response = mallManagement(request, user_id, goodsGroup, status, flag)
     return JsonResponse(response.__dict__)
 
 # 商城操作
