@@ -60,6 +60,7 @@ def jiChuSheZhiOper(request, oper_type):
                 response.data = ''
             else:
                 response.code = 301
+                response.msg = '未通过'
                 response.data = json.loads(forms_obj.errors.as_json())
         if oper_type == 'zhifupeizhi':
             print('==================')
