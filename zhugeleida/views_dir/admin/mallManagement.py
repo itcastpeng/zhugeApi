@@ -154,8 +154,10 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'update':
             forms_obj = UpdateForm(resultData)
             if forms_obj.is_valid():
+                print('======================')
                 formObjs = forms_obj.cleaned_data
                 print('formObjs------> ',formObjs)
+                print("formObjs.get('xianshangjiaoyi')==========> ",formObjs.get('xianshangjiaoyi'))
                 models.zgld_goods_management.objects.filter(id=o_id).update(
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
@@ -164,10 +166,14 @@ def mallManagementOper(request, oper_type, o_id):
                     goodsStatus=formObjs.get('goodsStatus'),
                     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
                     detailePicture=resultData.get('detailePicture'),  # 详情图片
+                    xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
                 )
-            response.code = 200
-            response.msg = '修改成功'
-            response.data = {}
+                response.code = 200
+                response.msg = '修改成功'
+                response.data = {}
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
         elif oper_type == 'delete':
             objs = models.zgld_goods_management.objects.filter(id=o_id)
             if objs:
