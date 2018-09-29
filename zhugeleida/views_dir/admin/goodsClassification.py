@@ -24,8 +24,8 @@ def init_data(xiaochengxu_id, pid=None, level=1):
     )
     for obj in objs:
         current_data = {
-            'name': obj.classificationName,
-            'id': obj.id,
+            'label': obj.classificationName,
+            'value': obj.id,
         }
         print('obj.id---------> ',obj.id)
         children_data = init_data(xiaochengxu_id, pid=obj.id, level=2)
@@ -41,20 +41,13 @@ def goodsClassShow(request):
     if request.method == "GET":
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
-
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
         xiaochengxu_id = userObjs[0].id
 
         groupObjs = models.zgld_goods_classification_management.objects
-        parentObjs = groupObjs.filter(parentClassification__isnull=True, xiaochengxu_app_id=xiaochengxu_id)
-        parentData = []
-        for parentObj in parentObjs:
-            parentData.append({
-                'parntId':parentObj.id,
-                'parentName':parentObj.classificationName
-            })
+        parentData = init_data(xiaochengxu_id)
         q = Q()
         if singleUser:
             q.add(Q(parentClassification_id=singleUser), Q.AND)
@@ -92,7 +85,7 @@ def goodsClassOper(request, oper_type, o_id):
         dataDict = {
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
-            'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id', ''),
+            'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id'),
             'userProfile_id':request.GET.get('user_id'),
             'parentClassification_id':request.POST.get('parentClassification')
         }
