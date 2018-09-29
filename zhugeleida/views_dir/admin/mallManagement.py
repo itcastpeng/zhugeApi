@@ -9,17 +9,12 @@ import json,os,sys
 from django.db.models import Q
 
 
-# 商城展示
-@csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
-def mallManagementShow(request):
+def mallManagement(request, user_id, goodsGroup, status):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
-            user_id = request.GET.get('user_id')
-            goodsGroup = request.GET.get('goodsGroup')
-            status = request.GET.get('status')
+
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             q = Q()
@@ -69,8 +64,17 @@ def mallManagementShow(request):
             response.code = 200
             response.msg = '查询成功'
             response.data = otherData
-    return JsonResponse(response.__dict__)
+    return response
 
+# 商城展示
+@csrf_exempt
+@account.is_token(models.zgld_admin_userprofile)
+def mallManagementShow(request):
+    user_id = request.GET.get('user_id')
+    goodsGroup = request.GET.get('goodsGroup')
+    status = request.GET.get('status')
+    response = mallManagement(request, user_id, goodsGroup, status)
+    return JsonResponse(response.__dict__)
 
 # 商城操作
 @csrf_exempt
