@@ -343,7 +343,7 @@ def open_weixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            global decryp_xml_tree
+            decryp_xml_tree = ''
             xml_tree = ET.fromstring(postdata)
             try:
                 '''
