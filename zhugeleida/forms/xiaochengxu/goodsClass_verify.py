@@ -19,11 +19,11 @@ class AddForm(forms.Form):
             'required': "父级分类类型错误"
         }
     )
-    goodsNum = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '商品总数不能为空'
-        })
+    # goodsNum = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': '商品总数不能为空'
+    #     })
 
     xiaochengxu_app_id = forms.IntegerField(
         required=True,
@@ -58,11 +58,7 @@ class UpdateForm(forms.Form):
             'required': "父级分类类型错误"
         }
     )
-    goodsNum = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '商品总数不能为空'
-        })
+
     xiaochengxu_app_id = forms.IntegerField(
         required=True,
         error_messages={

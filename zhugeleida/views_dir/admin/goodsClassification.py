@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
-
+from django.db.models import Q
 
 def init_data(xiaochengxu_id, pid=None, level=1):
     """
@@ -41,18 +41,45 @@ def goodsClassShow(request):
     if request.method == "GET":
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
+
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
         xiaochengxu_id = userObjs[0].id
 
+        groupObjs = models.zgld_goods_classification_management.objects
+        parentObjs = groupObjs.filter(parentClassification__isnull=True, xiaochengxu_app_id=xiaochengxu_id)
+        parentData = []
+        for parentObj in parentObjs:
+            parentData.append({
+                'parntId':parentObj.id,
+                'parentName':parentObj.classificationName
+            })
+        q = Q()
         if singleUser:
-            data_result = init_data(xiaochengxu_id, singleUser)
-        else:
-            data_result = init_data(xiaochengxu_id)
+            q.add(Q(parentClassification_id=singleUser), Q.AND)
+        objs = groupObjs.filter( xiaochengxu_app_id=xiaochengxu_id).filter(q)
+        otherData = []
+        for obj in objs:
+            countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+            classificationName = ''
+            parentClassification_id = ''
+            if obj.parentClassification_id:
+                parentClassification_id = obj.parentClassification_id
+                classificationName = obj.parentClassification.classificationName
+            otherData.append({
+                'groupId':obj.id,
+                'groupName':obj.classificationName,
+                'groupParentId':parentClassification_id,
+                'groupParent':classificationName,
+                'countNum':countNum
+            })
         response.code = 200
         response.msg = '查询成功'
-        response.data = data_result
+        response.data = {
+            'parentData':parentData,
+             'otherData':otherData
+        }
     return JsonResponse(response.__dict__)
 
 
@@ -66,7 +93,6 @@ def goodsClassOper(request, oper_type, o_id):
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
             'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id', ''),
-            'goodsNum': request.POST.get('goodsNum', ''),
             'userProfile_id':request.GET.get('user_id'),
             'parentClassification_id':request.POST.get('parentClassification')
         }
@@ -112,7 +138,6 @@ def goodsClassOper(request, oper_type, o_id):
                     level = 2
                 models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
                     classificationName=formObj.get('classificationName'),
-                    goodsNum=formObj.get('goodsNum'),
                     parentClassification_id=parentClassification_id,
                     xiaochengxu_app_id=dataDict.get('xiaochengxu_app_id'),
                     level=level,
