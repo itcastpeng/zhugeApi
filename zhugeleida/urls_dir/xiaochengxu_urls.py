@@ -55,4 +55,8 @@ urlpatterns = [
     # 员工订单管理
     url(r'theOrderShow', theOrderManagement.theOrderShow),                 # 订单管理查询
     url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
+
+    # 查询商品
+    url(r'theOrderShow', theOrderManagement.theOrderShow),                 # 订单管理查询
+
 ]
