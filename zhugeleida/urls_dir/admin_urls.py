@@ -113,6 +113,7 @@ urlpatterns = [
     url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品管理操作
 
     # 小程序 - 商城基础设置
+    url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商品基础查询
     url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品基础设置
 
 ]
