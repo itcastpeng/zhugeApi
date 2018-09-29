@@ -3,7 +3,9 @@ from django.conf.urls import url
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
-    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,enterprise_wechat_server_auth
+    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,enterprise_wechat_server_auth,\
+    theOrderManagement, tuiKuanDingDan
+
 
 urlpatterns = [
     url(r'^login$', login.login),
@@ -108,16 +110,29 @@ urlpatterns = [
     url(r'^speechDetailsManageShow', speechDetailsManagement.speechDetailsManageShow),
     url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 
-    # 后台 - 商品分类管理
+    # 小程序 - 商城基础设置
+    url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商品基础查询
+    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品基础设置
+
+    # 小程序 - 商品分类管理
     url(r'goodsClassShow', goodsClassification.goodsClassShow),  # 商品分类管理查询
     url(r'^goodsClassOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper),  # 商品分类管理操作
 
-    # 后台 - 商品管理
+    # 小程序 - 商品管理
     url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品管理查询
     url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品管理操作
 
-    # 后台 - 商城基础设置
-    url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商品基础查询
-    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品基础设置
+    # 订单管理
+    url(r'theOrderShow', theOrderManagement.theOrderShow),  # 订单管理查询
+    url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),  # 订单管理操作
+
+    # 退款单管理
+    url(r'tuiKuanDingDanShow', tuiKuanDingDan.tuiKuanDingDanShow),  # 退款订单管理查询
+    url(r'^tuiKuanDingDanOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),  # 退款订单管理操作
+
+    # 员工订单管理
+    # url(r'theOrderShow', theOrderManagement.theOrderShow),                 # 订单管理查询
+    # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
+
 
 ]
