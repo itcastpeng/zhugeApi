@@ -99,6 +99,12 @@ class UpdateForm(forms.Form):
             'required': "商品状态不能为空"
         }
     )
+    xianshangjiaoyi = forms.BooleanField(
+        required=False,
+        error_messages={
+            'required': "是否线上交易类型错误"
+        }
+    )
     kucunbianhao = forms.CharField(
         required=True,
         error_messages={
