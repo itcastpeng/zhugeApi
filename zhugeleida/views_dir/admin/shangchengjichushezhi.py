@@ -43,7 +43,7 @@ def jiChuSheZhiShow(request):
     return JsonResponse(response.__dict__)
 
 
-
+# 商城设置
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhiOper(request, oper_type):

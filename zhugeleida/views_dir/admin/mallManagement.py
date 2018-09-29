@@ -11,14 +11,13 @@ from django.db.models import Q
 
 # 商城展示
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def mallManagementShow(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
             user_id = request.GET.get('user_id')
-            u_id = request.GET.get('u_id')
             goodsGroup = request.GET.get('goodsGroup')
             status = request.GET.get('status')
             current_page = forms_obj.cleaned_data['current_page']
@@ -29,7 +28,7 @@ def mallManagementShow(request):
                 q.add(Q(parentName_id=goodsGroup), Q.AND)
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
-            u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
             company_id = models.zgld_company.objects.filter(id=u_idObjs[0].company_id)
             objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app_id=company_id[0].id)
             otherData = []
@@ -48,6 +47,12 @@ def mallManagementShow(request):
                 xianshangjiaoyi = '否'
                 if obj.xianshangjiaoyi:
                     xianshangjiaoyi = '是'
+                topLunBoTu = ''
+                if obj.topLunBoTu:
+                    topLunBoTu = json.loads(obj.topLunBoTu)
+                detailePicture = ''
+                if obj.detailePicture:
+                    detailePicture = json.loads(obj.detailePicture)
                 otherData.append({
                     'id':obj.id,
                     'goodsName':obj.goodsName,
@@ -59,8 +64,8 @@ def mallManagementShow(request):
                     'xianshangjiaoyi':xianshangjiaoyi,
                     'shichangjiage':obj.shichangjiage,
                     'kucunbianhao':obj.kucunbianhao,
-                    'topLunBoTu': obj.topLunBoTu,  # 顶部轮播图
-                    'detailePicture' : obj.detailePicture,  # 详情图片
+                    'topLunBoTu': topLunBoTu,  # 顶部轮播图
+                    'detailePicture' : detailePicture,  # 详情图片
                 })
             response.code = 200
             response.msg = '查询成功'
@@ -70,7 +75,7 @@ def mallManagementShow(request):
 
 # 商城操作
 @csrf_exempt
-# @account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def mallManagementOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     resultData = {

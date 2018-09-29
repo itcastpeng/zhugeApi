@@ -28,13 +28,13 @@ class AddForm(forms.Form):
     xiaochengxu_app_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '商城不能为空'
+            'required': '小程序ID不能为空'
         })
     def clean_xiaochengxu_app_id(self):
         xiaochengxu_app_id = self.data.get('xiaochengxu_app_id')
         objs = models.zgld_shangcheng_jichushezhi.objects.filter(id=xiaochengxu_app_id)
         if not objs:
-            self.add_error('xiaochengxu_app_id', '无此商城！')
+            self.add_error('xiaochengxu_app_id', '无此小程序！')
         else:
             return xiaochengxu_app_id
 
@@ -62,7 +62,7 @@ class UpdateForm(forms.Form):
     xiaochengxu_app_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '商城不能为空'
+            'required': '小程序不能为空'
         })
     def clean_o_id(self):
         o_id = self.data.get('o_id')
@@ -76,7 +76,7 @@ class UpdateForm(forms.Form):
         xiaochengxu_app_id = self.data.get('xiaochengxu_app_id')
         objs = models.zgld_shangcheng_jichushezhi.objects.filter(id=xiaochengxu_app_id)
         if not objs:
-            self.add_error('xiaochengxu_app_id', '无此商城！')
+            self.add_error('xiaochengxu_app_id', '无此小程序！')
         else:
             return xiaochengxu_app_id
 

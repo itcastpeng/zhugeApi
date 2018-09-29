@@ -41,7 +41,10 @@ def tuiKuanDingDanShow(request):
                 decode_username = base64.b64decode( obj.yewuUser.username)
                 username = str(decode_username, 'utf-8')
                 yewu = obj.yewuUser_id
-
+            shouhuorenusername = ''
+            if obj.shouHuoRen_id:
+                decode_username = base64.b64decode(obj.shouHuoRen.username)
+                shouhuorenusername = str(decode_username, 'utf-8')
             shangpinguanli = obj.shangpinguanli
             otherData.append({
                 'goodsName' : shangpinguanli.goodsName,
@@ -54,9 +57,9 @@ def tuiKuanDingDanShow(request):
                 'yongjin':obj.yongJin,
                 'peiSong':obj.peiSong,
                 'shouHuoRen_id':obj.shouHuoRen_id,
-                'shouHuoRen':obj.shouHuoRen.username,
+                'shouHuoRen':shouhuorenusername,
                 'status':obj.get_theOrderStatus_display(),
-                'createDate':obj.createDate
+                'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S')
             })
             response.code = 200
             response.msg = '查询成功'
