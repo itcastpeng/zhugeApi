@@ -212,7 +212,7 @@ def article_oper(request, oper_type, o_id):
 
             forms_obj = MyarticleForm(request_data_dict)
             if forms_obj.is_valid():
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                # print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
                 article_id = forms_obj.cleaned_data.get('article_id')
                 zgld_article_objs = models.zgld_article.objects.filter(id=article_id)
@@ -220,7 +220,7 @@ def article_oper(request, oper_type, o_id):
 
                 obj = zgld_article_objs[0]
                 insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
-                if insert_ads and insert_ads.get('mingpian_id'):
+                if insert_ads and insert_ads.get('mingpian'):
                     zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
                     insert_ads['username'] = zgld_userprofile_obj.username
                     insert_ads['avatar'] = zgld_userprofile_obj.avatar
@@ -233,7 +233,7 @@ def article_oper(request, oper_type, o_id):
                 # 获取第几页的数据
 
                 tag_list = list(obj.tags.values('id', 'name'))
-                print('-----obj.tags.values---->', tag_list)
+                # print('-----obj.tags.values---->', tag_list)
                 ret_data.append({
                     'id': obj.id,
                     'title': obj.title,  # 文章标题
@@ -246,7 +246,7 @@ def article_oper(request, oper_type, o_id):
                     'tag_list': tag_list,
                     'insert_ads': insert_ads
                 })
-                print('ret_data -->', ret_data)
+
                 article_access_log_id = ''
                 if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
 

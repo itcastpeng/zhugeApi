@@ -134,6 +134,52 @@ def login(request):
                 'is_release_version_num': is_release_version_num
             }
 
+            buttom_navigation_data_list = [
+                    {
+                        "default_url": "icon_mingpian_01.png",
+                        "selected_url": "icon_mingpian_02.png",
+                        "to_url": "pages/mingpian/index",
+                        "text": "名片",
+                        "order": 1
+                    },
+                    {
+                        "default_url": "chat.png",
+                        "selected_url": "chat.png",
+                        "to_url": "pages/mingpian/msg",
+                        "text": "咨询",
+                        "order": 2
+                    },
+                    {
+                        "default_url": "icon_guanwang_01.png",
+                        "selected_url": "icon_guanwang_02.png",
+                        "to_url": "pages/guanwang/index",
+                        "text": "官网",
+                        "order": 4
+                    }
+                ]
+            obj = models.zgld_company.objects.get(id=company_id)
+            shopping_type =  obj.shopping_type
+            shopping_info_dict =''
+            if shopping_type == 1:   # 1、代表产品
+                shopping_info_dict = {
+                        "default_url": "icon_chanpin_01.png",
+                        "selected_url": "icon_chanpin_02.png",
+                        "to_url": "pages/chanpin/index",
+                        "text": "产品",
+                        "order": 3
+                    }
+            elif shopping_type == 2: # 2、 代表商城
+                shopping_info_dict = {
+                        "default_url": "icon_store_01.png",
+                        "selected_url": "icon_store_02.png",
+                        "to_url": "pages/store/store",
+                        "text": "商城",
+                        "order": 3
+                    }
+
+            buttom_navigation_data_list.insert(2,shopping_info_dict)
+            ret_data['buttom_navigation_data'] = buttom_navigation_data_list
+
             print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
             response.code = 200
             response.msg = "返回成功"
@@ -350,7 +396,7 @@ def login_oper_control(request):
             "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
             },
             "button_msg": {
-                "msg": "保存名片"
+                "msg": "发送手机号"
             }
 
         }

@@ -118,6 +118,7 @@ def user_oper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = '用户ID不存在'
+
         elif oper_type == "update":
             # 获取ID 用户名 及 角色
             form_data = {

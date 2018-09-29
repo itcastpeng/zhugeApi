@@ -209,7 +209,6 @@ def article_oper(request, oper_type, o_id):
             forms_obj = ArticleAddForm(article_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
 
                 user_id = request.GET.get('user_id')
                 company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -253,7 +252,7 @@ def article_oper(request, oper_type, o_id):
                 response_ret = create_qrcode(qrcode_data)
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
                 if pre_qrcode_url:
-                    response = response_ret
+                    response.data = {'pre_qrcode_url':pre_qrcode_url, 'article_id': obj.id, }
                     response.code = 200
                     response.msg = "添加成功"
 
@@ -369,16 +368,6 @@ def article_oper(request, oper_type, o_id):
 
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                # order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
-                # field_dict = {
-                #     'id': '',
-                #     'user_id': '',
-                #     'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
-                #     # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
-                #     'title': '__contains',  # 按文章标题搜索
-                # }
-                # request_data = request.GET.copy()
-                # q = conditionCom(request_data, field_dict)
 
 
                 objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)

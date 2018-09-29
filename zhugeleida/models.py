@@ -15,14 +15,12 @@ class zgld_company(models.Model):
     weChatQrCode = models.CharField(verbose_name='企业微信二维码', max_length=256, default='')
     remarks = models.TextField(verbose_name="备注",null=True)
 
-    open_length_time_choices = (
-        (1, "一个月"),
-        (2, "二个月"),
-        (3, "三个月"),
-        (4, "一年"),
-        (5, "二年")
+    shopping_type_choice = (
+        (1,'产品'),
+        (2,'商城')
     )
-    open_length_time = models.SmallIntegerField(choices=open_length_time_choices, verbose_name="开通时长",null=True)
+    shopping_type = models.SmallIntegerField(verbose_name='购物类型',default=1, choices=shopping_type_choice)
+    open_length_time = models.SmallIntegerField(verbose_name="开通时长(按月份)",null=True)
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -333,7 +331,7 @@ class zgld_userprofile(models.Model):
     voice = models.CharField(verbose_name='语音介绍', null=True, max_length=128)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
-    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, auto_now_add=True,)
+    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True)
 
     def __str__(self):
         return self.username
@@ -575,6 +573,7 @@ class zgld_user_customer_belonger(models.Model):
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
+    poster_url = models.CharField(verbose_name='用户-客户-对应的二维码', max_length=128, null=True)
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属父级',related_name="customer_parent" ,null=True, blank=True)
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
     expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)

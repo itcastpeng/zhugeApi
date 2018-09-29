@@ -77,6 +77,19 @@ class ScanCodeToAddUserForm(forms.Form):
         else:
             return username
 
+    def clean_wechat_phone(self):
+        wechat_phone = self.data['wechat_phone']
+        company_id = self.data['company_id']
+        # print(username)
+        objs = models.zgld_userprofile.objects.filter(
+            wechat_phone=wechat_phone,company_id=company_id
+        )
+        if objs:
+            self.add_error('wechat_phone', '微信绑定的手机号已存在')
+        else:
+            return wechat_phone
+
+
     # 返回加密后的密码
     # def clean_password(self):
     #     return account.str_encrypt(self.data['password'])
@@ -200,12 +213,6 @@ class UserUpdateForm(forms.Form):
         }
     )
 
-    user_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "用户ID不能为空"
-        }
-    )
 
     username = forms.CharField(
         required=True,
@@ -219,12 +226,7 @@ class UserUpdateForm(forms.Form):
     #     error_messages={
     #         'required': '角色不能为空'
     #     })
-    company_id = forms.IntegerField(
-        required=True,
-        # error_messages={
-        #     'required': '公司不能为空'
-        # }
-    )
+
     position = forms.CharField(
         required=True,
         error_messages={
@@ -232,13 +234,7 @@ class UserUpdateForm(forms.Form):
         }
     )
 
-    department_id = forms.CharField(
-        required=False,
-        error_messages={
-            'required': '部门不能为空'
-        }
 
-    )
     wechat_phone = forms.CharField(
         required=True,
         validators=[mobile_validate, ],  # 应用咱们自己定义的规则

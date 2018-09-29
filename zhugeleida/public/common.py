@@ -2,13 +2,12 @@
 from zhugeleida import models
 from publicFunc import Response
 
-import datetime
 import json
 from zhugeapi_celery_project import tasks
 import base64
 import qrcode
 from django.conf import settings
-import os
+import os,datetime
 
 def action_record(data,remark):
     response = Response.ResponseObj()
@@ -18,86 +17,84 @@ def action_record(data,remark):
     action = data.get('action')
 
     print('----- customer_id |  user_id | action ----->>',customer_id,user_id,action)
+    company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
 
-    if action in [0]: # 只发消息，不用记录日志。
-        customer_name = models.zgld_customer.objects.get(id=customer_id).username
-        company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+    company_obj = models.zgld_company.objects.get(id=company_id)
+    agent_id = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
+    account_expired_time = company_obj.account_expired_time
 
-        customer_name = base64.b64decode(customer_name)
-        customer_name = str(customer_name, 'utf-8')
+    customer_name = models.zgld_customer.objects.get(id=customer_id).username
+    customer_name = base64.b64decode(customer_name)
+    customer_name = str(customer_name, 'utf-8')
 
-        data['content'] = '%s%s' % (customer_name, remark)
-        # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
-        data['agentid'] = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
+    if datetime.datetime.now() <= account_expired_time:
 
-        tasks.user_send_action_log.delay(json.dumps(data))
-        response.code = 200
-        response.msg = '发送消息提示成功'
-
-    elif action in [14,15,16]:
-        # 创建访问日志
-        models.zgld_accesslog.objects.create(
-            user_id=user_id,
-            article_id=article_id,
-            customer_id=customer_id,
-            remark=remark,
-            action=action
-        )
-
-        customer_name = models.zgld_customer.objects.get(id=customer_id).username
-        company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-
-        customer_name = base64.b64decode(customer_name)
-        customer_name = str(customer_name, 'utf-8')
-        print('------ 客户姓名 + 访问日志信息------->>', customer_name, remark)
-
-        data['content'] = '%s%s' % (customer_name, remark)
-        # data['agentid'] = models.zgld_app.objects.get(id=company_id, name='AI雷达').agent_id
-        data['agentid'] = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
-        print('------------ [公众号] 传给tasks.celery的 json.dumps 数据 ------------------>>', json.dumps(data))
-
-        tasks.user_send_action_log.delay(json.dumps(data))
-        response.code = 200
-        response.msg = '发送消息提示成功'
+        if action in [0]: # 只发消息，不用记录日志。
 
 
-    else:
-        # 创建访问日志
-        models.zgld_accesslog.objects.create(
-            user_id=user_id,
-            customer_id=customer_id,
-            remark=remark,
-            action=action
-        )
+            data['content'] = '%s%s' % (customer_name, remark)
+            data['agentid'] = agent_id
 
-        # 查询客户与用户是否已经建立关系
-        follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
-            user_id=user_id,
-            customer_id=customer_id
-        )
-        now_time = datetime.datetime.now()
-        if follow_objs:  # 已经有关系了
-            follow_obj = follow_objs[0]
-            follow_objs.update(
-                last_activity_time=now_time
-               )
+            tasks.user_send_action_log.delay(json.dumps(data))
+            response.code = 200
+            response.msg = '发送消息提示成功'
 
-            company_id = follow_obj.user.company_id
-            customer_name = follow_obj.customer.username
-
-            customer_name = base64.b64decode(customer_name)
-            customer_name = str(customer_name, 'utf-8')
+        elif action in [14,15,16]:
+            # 创建访问日志
+            models.zgld_accesslog.objects.create(
+                user_id=user_id,
+                article_id=article_id,
+                customer_id=customer_id,
+                remark=remark,
+                action=action
+            )
             print('------ 客户姓名 + 访问日志信息------->>', customer_name, remark)
 
-            data['content'] = '%s%s' % (customer_name,remark)
-            # data['agentid'] = models.zgld_app.objects.get(company_id=company_id, name='AI雷达').agent_id
-            data['agentid'] = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
+            data['content'] = '%s%s' % (customer_name, remark)
+            data['agentid'] = agent_id
+            print('------------ [公众号] 传给tasks.celery的 json.dumps 数据 ------------------>>', json.dumps(data))
 
-            print('------------ 传给tasks.celery的 json.dumps 数据 ------------------>>',json.dumps(data))
-            ret = tasks.user_send_action_log.delay(json.dumps(data))
-            print('--- 记录_动作日志_log ret -->', ret)
+            tasks.user_send_action_log.delay(json.dumps(data))
             response.code = 200
-            response.msg = '记录日志成功'
+            response.msg = '发送消息提示成功'
+
+        else:
+            # 创建访问日志
+            models.zgld_accesslog.objects.create(
+                user_id=user_id,
+                customer_id=customer_id,
+                remark=remark,
+                action=action
+            )
+
+            # 查询客户与用户是否已经建立关系
+            follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+                user_id=user_id,
+                customer_id=customer_id
+            )
+            now_time = datetime.datetime.now()
+            if follow_objs:  # 已经有关系了
+                follow_objs.update(
+                    last_activity_time=now_time
+                   )
+
+                print('------ 客户姓名 + 访问日志信息------->>', customer_name, remark)
+                data['content'] = '%s%s' % (customer_name,remark)
+                data['agentid'] = agent_id
+
+                print('------------ 传给tasks.celery的 json.dumps 数据 ------------------>>',json.dumps(data))
+                ret = tasks.user_send_action_log.delay(json.dumps(data))
+                print('--- 记录_动作日志_log ret -->', ret)
+
+                response.code = 200
+                response.msg = '记录日志成功'
+
+    else:
+        company_name = company_obj.name
+        response.code = 403
+        response.msg = '账户过期'
+        print('-------- 雷达账户过期: %s-%s | 过期时间:%s ------->>' % (company_id,company_name,account_expired_time))
+
 
     return response
 
@@ -140,11 +137,11 @@ def create_scan_code_userinfo_qrcode(data):
     img.show()
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qrcode')
+    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
 
     qr_code_name = '/admin_uid_%s_%s_qrCode.jpg' % (admin_uid, now_time)
     path_qr_code_name = BASE_DIR + qr_code_name
-    qr_url = 'statics/zhugeleida/imgs/admin/qrcode%s' % (qr_code_name)
+    qr_url = 'statics/zhugeleida/imgs/admin/qr_code%s' % (qr_code_name)
 
     img.save(path_qr_code_name)
     response.data = {'qrcode_url': qr_url}

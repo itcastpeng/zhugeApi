@@ -174,7 +174,62 @@ def open_weixin_gongzhonghao(request, oper_type):
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
 
-                        ########################### 修改公众号服务器域名 ######################################
+                        ########################### 公众号设置所属行业 ######################################
+                        get_industry_data = {'access_token': authorizer_access_token}
+
+                        api_set_industry_url  = 'https://api.weixin.qq.com/cgi-bin/template/api_set_industry'
+                        post_industry_data = {
+                            "industry_id1": "1", # IT科技 互联网|电子商务，
+                            "industry_id2": "2"
+                        }
+                        template_list_ret = requests.post(api_set_industry_url, params=get_industry_data,data=json.dumps(post_industry_data))
+                        template_list_ret = template_list_ret.json()
+                        errcode = template_list_ret.get('errcode')
+                        errmsg = template_list_ret.get('errmsg')
+
+                        print('---- 公众号设置所属行业【返回】 ---->',json.dumps(template_list_ret))
+
+                        # {"errcode": 0, "errmsg": "ok"}
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "公众号设置所属行业成功"
+
+                            print('---------授权appid: %s , 公众号设置所属行业 【成功】------------>>' % (authorization_appid))
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 公众号设置所属行业 【失败】------------>>' % (authorization_appid),errmsg, '|', errcode)
+
+                        ########### 添加模板ID到该公众号下 ##################
+                        # doc https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277
+                        # OPENTM202109783	咨询回复消息提醒	IT科技	互联网|电子商务
+                        api_add_template_url = 'https://api.weixin.qq.com/cgi-bin/template/api_add_template'
+
+                        post_add_template_data = {
+                            "template_id_short": "OPENTM202109783"
+                        }
+
+                        industry_ret = requests.post(api_add_template_url, params=get_industry_data, data=json.dumps(post_add_template_data))
+                        industry_ret = industry_ret.json()
+                        template_id = industry_ret.get('template_id')
+
+                        print('-------- 【公众号】添加模板ID到该账户下 返回 ---->', json.dumps(industry_ret))
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "公众号添加模板ID成功"
+                            obj.update(template_id=template_id)
+                            # {"errcode": 0, "errmsg": "ok", "template_id": "yIqr5W_MVshHlyjZIvEd8Lg0KI-nyrOlsTIWMyX_NME"}
+                            print('---------授权appid: %s , 公众号添加模板ID 【成功】------------>>' % (authorization_appid),)
+
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 公众号添加模板ID 【失败】------------>>' % (authorization_appid), errmsg,'|', errcode)
+
+
+
 
                     else:
                         response.code = 400

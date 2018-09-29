@@ -25,6 +25,7 @@ urlpatterns = [
 
     #访问小程序的名片\并记录访问功能。
     url(r'^mingpian$',mingpian.mingpian),
+    url(r'^mingpian/poster_html$', mingpian.mingpian_poster_html_oper),
     url(r'^mingpian/(?P<oper_type>\w+)', mingpian.mingpian_oper),
 
     #查看产品 + 查看竞价产品 + 转发竞价产品 + 咨询产品。
