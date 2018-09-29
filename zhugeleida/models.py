@@ -15,13 +15,11 @@ class zgld_company(models.Model):
     weChatQrCode = models.CharField(verbose_name='企业微信二维码', max_length=256, default='')
     remarks = models.TextField(verbose_name="备注",null=True)
 
-    # open_length_time_choices = (
-    #     (1, "一个月"),
-    #     (2, "二个月"),
-    #     (3, "三个月"),
-    #     (4, "一年"),
-    #     (5, "二年")
-    # )
+    shopping_type_choice = (
+        (1,'产品'),
+        (2,'商城')
+    )
+    shopping_type = models.SmallIntegerField(verbose_name='购物类型',default=1, choices=shopping_type_choice)
     open_length_time = models.SmallIntegerField(verbose_name="开通时长(按月份)",null=True)
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)

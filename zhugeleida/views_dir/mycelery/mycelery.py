@@ -523,7 +523,7 @@ def user_send_gongzhonghao_template_msg(request):
                     "color": "#0000EE"
                 },
                 'keyword2': {
-                    'value': '您有未读消息哦',
+                    'value': '您有未读消息',
                     "color": "#FF0000"
                 },
                 'remark': {
