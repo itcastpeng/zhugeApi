@@ -87,18 +87,17 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             forms_obj = AddForm(otherData)
             if forms_obj.is_valid():
                 print('验证通过')
-
+                formObjs = forms_obj.cleaned_data
                 models.zgld_shangcheng_tuikuan_dingdan_management.objects.create(
-
+                    orderNumber_id=formObjs.get('orderNumber'),
+                    tuiKuanYuanYin=formObjs.get('tuiKuanYuanYin')
                 )
-
                 response.code = 200
-                response.msg = '添加成功'
+                response.msg = '添加退款订单成功！'
                 response.data = ''
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
     else:
         response.code = 402
         response.msg = "请求异常"

@@ -36,7 +36,7 @@ def jiChuSheZhiOper(request, oper_type):
                     response.code = 301
                     response.msg = '请配置商城名称！'
                 else:
-                    u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+                    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=u_id)
                     xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
                     userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
                     response.code = 200
