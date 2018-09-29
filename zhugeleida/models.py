@@ -995,7 +995,7 @@ class zgld_shangcheng_jichushezhi(models.Model):
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
     classificationName = models.CharField(verbose_name='分类名称', max_length=128)
-    goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
+    # goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
     parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     xiaochengxu_app = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)

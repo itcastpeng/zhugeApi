@@ -58,14 +58,21 @@ def goodsClassShow(request):
         q = Q()
         if singleUser:
             q.add(Q(parentClassification_id=singleUser), Q.AND)
-        objs = groupObjs.filter(parentClassification__isnull=False, xiaochengxu_app_id=xiaochengxu_id).filter(q)
+        objs = groupObjs.filter( xiaochengxu_app_id=xiaochengxu_id).filter(q)
         otherData = []
         for obj in objs:
+            countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+            classificationName = ''
+            parentClassification_id = ''
+            if obj.parentClassification_id:
+                parentClassification_id = obj.parentClassification_id
+                classificationName = obj.parentClassification.classificationName
             otherData.append({
                 'groupId':obj.id,
                 'groupName':obj.classificationName,
-                'groupParentId':obj.parentClassification_id,
-                'groupParent':obj.parentClassification.classificationName
+                'groupParentId':parentClassification_id,
+                'groupParent':classificationName,
+                'countNum':countNum
             })
         response.code = 200
         response.msg = '查询成功'
@@ -86,7 +93,6 @@ def goodsClassOper(request, oper_type, o_id):
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
             'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id', ''),
-            'goodsNum': request.POST.get('goodsNum', ''),
             'userProfile_id':request.GET.get('user_id'),
             'parentClassification_id':request.POST.get('parentClassification')
         }
@@ -132,7 +138,6 @@ def goodsClassOper(request, oper_type, o_id):
                     level = 2
                 models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
                     classificationName=formObj.get('classificationName'),
-                    goodsNum=formObj.get('goodsNum'),
                     parentClassification_id=parentClassification_id,
                     xiaochengxu_app_id=dataDict.get('xiaochengxu_app_id'),
                     level=level,
