@@ -1060,14 +1060,15 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
 class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     orderNumber = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单号', null=True, blank=True)
     tuiKuanYuanYin = models.CharField(verbose_name='退款原因', max_length=256, null=True, blank=True)
-    tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
+    # tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
     shengChengDateTime = models.DateTimeField(verbose_name='生成时间', auto_now_add=True)
     tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', auto_now_add=False)
     tuikuan_status = (
-        (1, '退款中'),
+        (1, '退款中, 等待卖家确认'),
         (2, '退款中, 等待卖家收货'),
         (3, '退款完成'),
-        (4, '退款失败')
+        (4, '退款失败'),
+        (5, '退款中'),
     )
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
 

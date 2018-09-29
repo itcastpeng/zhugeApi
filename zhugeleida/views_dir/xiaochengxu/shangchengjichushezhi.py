@@ -7,12 +7,12 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_userprofile)
 def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
     if request.method == "POST":
         if oper_type == 'addOrUpdate':
-            u_id = request.POST.get('u_id')
+            u_id = request.GET.get('user_id')
             shangChengName = request.POST.get('shangChengName', '')
             shangHuHao = request.POST.get('shangHuHao', '')
             shangHuMiYao = request.POST.get('shangHuMiYao', '')
