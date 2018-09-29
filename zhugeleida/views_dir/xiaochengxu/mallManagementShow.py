@@ -6,17 +6,66 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm
 import json, base64
-from zhugeleida.views_dir.admin import mallManagement
+# from zhugeleida.views_dir.admin import mallManagement
 
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def mallManageShow(request):
-    user_id = request.GET.get('user_id')
-    goodsGroup = request.GET.get('goodsGroup')
-    status = request.GET.get('status')
-    flag = 'xiaochengxu'
-    response = mallManagement.mallManagement(request, user_id, goodsGroup, status, flag)
+    # response = mallManagement.mallManagement(request, uid, goodsGroup, status, flag)
+    response = Response.ResponseObj()
+    uid = request.GET.get('uid')
+    detaileId = request.GET.get('detaileId')
+    u_idObjs = models.zgld_customer.objects.filter(id=uid)
+    otherData = []
+    if detaileId:
+        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id).filter(id=detaileId)
+        for obj in objs:
+            groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)
+            xianshangjiaoyi = '否'
+            if obj.xianshangjiaoyi:
+                xianshangjiaoyi = '是'
+            topLunBoTu = ''
+            if obj.topLunBoTu:
+                topLunBoTu = json.loads(obj.topLunBoTu)
+            detailePicture = ''
+            if obj.detailePicture:
+                detailePicture = json.loads(obj.detailePicture)
+            parentGroup_id = obj.parentName_id
+            parentGroup_name = obj.parentName.classificationName
+            if groupObjs[0].parentClassification_id:
+                parent_group_name = groupObjs[0].parentClassification.classificationName
+                parentGroup_name = parent_group_name + ' > ' + parentGroup_name
+            otherData.append({
+                'id':obj.id,
+                'goodsName':obj.goodsName,
+                'parentName_id':parentGroup_id,
+                'parentName':parentGroup_name,
+                'goodsPrice':obj.goodsPrice,
+                'inventoryNum':obj.inventoryNum,
+                'goodsStatus':obj.get_goodsStatus_display(),
+                'xianshangjiaoyi':xianshangjiaoyi,
+                'shichangjiage':obj.shichangjiage,
+                'kucunbianhao':obj.kucunbianhao,
+                'topLunBoTu': topLunBoTu,  # 顶部轮播图
+                'detailePicture' : detailePicture,  # 详情图片
+                'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
+            })
+    else:
+        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id)
+        print(objs)
+        for obj in objs:
+            otherData.append({
+                'id':obj.id,
+                'goodsName': obj.goodsName,
+                'goodsPrice': obj.goodsPrice,
+                'topLunBoTu': obj.topLunBoTu
+            })
+
+    response.code = 200
+    response.msg = '查询成功'
+    response.data = otherData
     return JsonResponse(response.__dict__)
 
 

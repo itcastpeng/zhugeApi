@@ -169,7 +169,7 @@ def yuZhiFu(request):
                 gongsimingcheng_id = company_id,        # 公司
                 yongJin = 0,                            # 佣金
                 peiSong = '',                           # 配送
-                shouHuoRen_id = user_id,                # 收货人
+                shouHuoRen_id = u_id,                   # 收货人
                 theOrderStatus = 1,                     # 订单状态
                 createDate=date_time
             )

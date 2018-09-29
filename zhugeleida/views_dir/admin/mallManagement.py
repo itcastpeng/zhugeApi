@@ -63,6 +63,8 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                     'kucunbianhao':obj.kucunbianhao,
                     'topLunBoTu': topLunBoTu,  # 顶部轮播图
                     'detailePicture' : detailePicture,  # 详情图片
+                    'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                    'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
                 })
             response.code = 200
             response.msg = '查询成功'
@@ -79,6 +81,16 @@ def mallManagementShow(request):
     flag = 'admin'
     response = mallManagement(request, user_id, goodsGroup, status, flag)
     return JsonResponse(response.__dict__)
+
+def updateInitData(result_data,xiaochengxu_id, pid=None):
+    objs = models.zgld_goods_classification_management.objects.filter(
+        xiaochengxu_app_id=xiaochengxu_id,
+        id=pid,
+    )
+    for obj in objs:
+        parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id)
+        result_data.append(obj.id)
+    return result_data
 
 # 商城操作
 @csrf_exempt
@@ -99,6 +111,7 @@ def mallManagementOper(request, oper_type, o_id):
         'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
         'detailePicture':request.POST.get('detailePicture'),          # 详情图片
     }
+    user_id = request.GET.get('user_id')
     if request.method == "POST":
         if oper_type == 'add':
             forms_obj = AddForm(resultData)
@@ -123,6 +136,21 @@ def mallManagementOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'Beforeupdate':
+            goodsObjs = models.zgld_goods_management.objects.filter(id=o_id)
+            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
+            xiaochengxu_id = userObjs[0].id
+            objs = models.zgld_goods_classification_management.objects.filter(id=goodsObjs[0].parentName_id)
+            result_data = []
+            parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
+            parentData.append(goodsObjs[0].parentName_id)
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = parentData
+
+
         elif oper_type == 'update':
             forms_obj = UpdateForm(resultData)
             if forms_obj.is_valid():
@@ -165,7 +193,6 @@ def mallManagementOper(request, oper_type, o_id):
         else:
             response.code = 402
             response.msg = "请求异常"
-
     return JsonResponse(response.__dict__)
 
 
