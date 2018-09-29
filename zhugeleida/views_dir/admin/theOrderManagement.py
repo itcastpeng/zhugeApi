@@ -10,21 +10,22 @@ import json, base64
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def theOrderShow(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
-    u_id = request.GET.get('u_id')
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
 
-        # u_idObjs = models.zgld_customer.objects.filter(id=u_id)
-        # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+        print('u_idObjs--------> ',u_idObjs)
+        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
 
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(shouHuoRen_id=u_id) # 小程序用户只能查看自己的订单
-
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(
+            shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp=xiaochengxu_id
+        )
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
@@ -55,12 +56,12 @@ def theOrderShow(request):
                 'status':obj.get_theOrderStatus_display(),
                 'createDate':obj.createDate
             })
-        response.code = 200
-        response.msg = '查询成功'
-        response.data = {
-            'otherData':otherData,
-            'objsCount':objsCount,
-        }
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'otherData':otherData,
+                'objsCount':objsCount,
+            }
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
@@ -72,7 +73,7 @@ def theOrderShow(request):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def theOrderOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':

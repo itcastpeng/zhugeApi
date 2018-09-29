@@ -54,6 +54,7 @@ def jiChuSheZhiOper(request, oper_type):
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
         if oper_type == 'jichushezhi':
             resultData = {
+                'mallStatus' : request.POST.get('mallStatus'),          # 是否打开 商城 1为产品 2为商城
                 'shangChengName' : request.POST.get('shangChengName'),
                 'lunbotu' : request.POST.get('lunbotu'),
             }
@@ -61,6 +62,8 @@ def jiChuSheZhiOper(request, oper_type):
             if forms_obj.is_valid():
                 formObjs = forms_obj.cleaned_data
                 print('验证通过')
+                if int(resultData.get('mallStatus')) == 2:
+                    models.zgld_company.objects.filter(id=user_id).update(shopping_type=2)
                 if userObjs:
                     userObjs.update(
                         shangChengName=formObjs.get('shangChengName'),
