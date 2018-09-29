@@ -3,7 +3,7 @@ from django.conf.urls import url
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
-    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi
+    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,enterprise_wechat_server_auth
 
 urlpatterns = [
     url(r'^login$', login.login),
@@ -27,6 +27,10 @@ urlpatterns = [
 
     # 微信小程序通知
     url(r'^open_weixin/(?P<oper_type>\w+)', open_weixin.open_weixin),
+
+    # 企业微信服务商认证接入
+    url(r'^enterprise_wechat_server_auth/(?P<oper_type>\w+)', enterprise_wechat_server_auth.open_weixin),
+
 
     # 微信公众号通知
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)', open_weixin_gongzhonghao.open_weixin_gongzhonghao),
@@ -104,15 +108,15 @@ urlpatterns = [
     url(r'^speechDetailsManageShow', speechDetailsManagement.speechDetailsManageShow),
     url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 
-    # 小程序 - 商品分类管理
+    # 后台 - 商品分类管理
     url(r'goodsClassShow', goodsClassification.goodsClassShow),  # 商品分类管理查询
     url(r'^goodsClassOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper),  # 商品分类管理操作
 
-    # 小程序 - 商品管理
+    # 后台 - 商品管理
     url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品管理查询
     url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品管理操作
 
-    # 小程序 - 商城基础设置
+    # 后台 - 商城基础设置
     url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商品基础查询
     url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品基础设置
 

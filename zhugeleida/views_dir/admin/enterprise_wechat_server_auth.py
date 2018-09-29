@@ -10,14 +10,13 @@ import json
 import redis
 import xml.etree.cElementTree as ET
 from django import forms
-from zhugeleida.views_dir.public import open_weixin_api
 
 ## 第三方平台接入
 @csrf_exempt
 def open_weixin(request, oper_type):
     if request.method == "POST":
         response = Response.ResponseObj()
-        if oper_type == 'tongzhi':
+        if oper_type == 'get_ticket':
 
             print('------ 第三方 request.body tongzhi 通知内容 ------>>', request.body.decode(encoding='UTF-8'))
 
@@ -25,7 +24,8 @@ def open_weixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            # postdata =  request.POST.get('postdata')
+            user_id = request.GET.get('user_id')
+
 
             postdata = request.body.decode(encoding='UTF-8')
 
@@ -88,6 +88,9 @@ def open_weixin(request, oper_type):
             except Exception as e:
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
+
+                userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
+                company_id   =  userprofile_obj.company_id
 
                 app_id = 'wx67e2fde0f694111c'
                 if auth_code:
@@ -153,7 +156,8 @@ def open_weixin(request, oper_type):
                             categories = ''
 
                     if original_id:
-                        obj = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
+                        obj = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+
                         if obj:
                             obj.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
@@ -167,6 +171,7 @@ def open_weixin(request, oper_type):
                                 name=nick_name,          # 昵称
                                 service_category=categories,  # 服务类目
                             )
+
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
@@ -194,11 +199,65 @@ def open_weixin(request, oper_type):
                         if errcode == 0:
                             response.code = 200
                             response.msg = "修改小程序服务器域名成功"
-                            print('---------授权 appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
+                            print('---------授权appid: %s , 修改小程序服务器域名 【成功】------------>>' % (authorization_appid))
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('---------授权 appid: %s , 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
+                            print ('---------授权appid: %s, 修改小程序服务器域名 【失败】------------>>' % (authorization_appid),errmsg,'|',errcode)
+
+
+                        ########################## 组合模板并添加至帐号下的个人模板库 ###############################
+                        get_template_add_data = {'access_token': authorizer_access_token}
+
+                        template_add_url = 'https://api.weixin.qq.com/cgi-bin/wxopen/template/add'
+                        '''
+                            keyword_id_list : [25, 22, 11]
+                            {
+                                "keyword_id": 25,
+                                "name": "回复者",
+                                "example": "徐志娟"
+                            }
+                            {
+                                "keyword_id": 22,
+                                "name": "回复时间",
+                                "example": "2018-6-22 10:48:37"
+                            }
+                            {
+                                "keyword_id": 11,
+                                "name": "回复内容",
+                                "example": "您直接提交相关信息即可"
+                            }                            
+                        
+                        '''
+                        post_template_add_data = {
+                            'id': 'AT0782',
+                            "keyword_id_list": [25, 22, 11]
+                        }
+                        add_ret = requests.post(template_add_url, params=get_template_add_data,data=json.dumps(post_template_add_data))
+                        add_ret = add_ret.json()
+
+                        errcode = add_ret.get('errcode')
+                        errmsg = add_ret.get('errmsg')
+                        list = add_ret.get('list')
+
+                        print('------- 组合模板并添加至帐号下的个人模板库[接口返回] ---->', json.dumps(add_ret))
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "组合模板添加成功"
+                            if list:
+                                list_ret = list[0]
+                                template_id = list_ret.get('template_id')
+                                obj.update(
+                                    template_id=template_id
+                                )
+
+                            print('---------授权appid: %s , 组合模板并添加 【成功】------------>>' % (authorization_appid))
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 组合模板并添加 【失败】------------>>' % (authorization_appid),errmsg, '|', errcode)
+
 
 
                         ########################## 绑定微信用户为小程序体验者 ###############################
@@ -219,7 +278,7 @@ def open_weixin(request, oper_type):
                         response.code = 400
                         response.msg = "获取帐号基本信息 authorizer_info信息为空"
                         return JsonResponse(response.__dict__)
-                    ######################### end ############################################
+                        ######################### end ############################################
 
                 else:
                     print('------ 令牌（authorizer_access_token）为空------>>')
@@ -457,36 +516,26 @@ def xcx_auth_process_oper(request, oper_type):
 
         ###获取小程序基本信息
         if oper_type == 'xcx_get_authorizer_info':
-            component_appid = "wx67e2fde0f694111c"      # 第三方平台appid
             user_id = request.GET.get('user_id')
-            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            app_obj = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
-
+            company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            app_obj =   models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
             if app_obj:
-                authorizer_appid = app_obj[0].authorization_appid       # 授权方appid
-                authorizer_refresh_token = app_obj[0].authorizer_refresh_token       # 授权方的刷新令牌
-                # authorizer_refresh_token = component_access_token_ret.data.get('authorizer_refresh_token')  # 授权方的刷新令牌
-
+                authorizer_appid = app_obj[0].authorization_appid
                 get_wx_info_data = {}
                 post_wx_info_data = {}
+                app_id = 'wx67e2fde0f694111c' # 三方平台的appid
 
                 component_access_token_ret = create_component_access_token()
                 component_access_token = component_access_token_ret.data.get('component_access_token')
-
-
-                post_wx_info_data['component_appid'] = component_appid
-                post_wx_info_data['authorizer_appid'] = authorizer_appid            # 授权方appid
+                post_wx_info_data['component_appid'] = app_id
+                post_wx_info_data['authorizer_appid'] = authorizer_appid
                 get_wx_info_data['component_access_token'] = component_access_token
 
                 url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+
                 authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
 
-                # 获取接口调用凭据
-                authorizer_access_token = open_weixin_api.api_authorizer_token(component_access_token, component_appid, authorizer_appid, authorizer_refresh_token)
-
-                # 获取类目信息
-                open_weixin_api.getcategory(authorizer_access_token)
                 print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
@@ -537,13 +586,16 @@ def xcx_auth_process_oper(request, oper_type):
 
 
 ## 生成请 第三方平台 自己 的component_access_token
-def create_component_access_token():
+def create_suite_access_token():
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
 
-    component_verify_ticket = rc.get('ComponentVerifyTicket')
-    app_id = 'wx67e2fde0f694111c'
-    app_secret = '4a9690b43178a1287b2ef845158555ed'
+    suite_id = 'wx5d26a7a856b22bec'
+    Secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
+    key_name = 'suite_access_token_%s' % (suite_id)
+
+    suite_access_token = rc.get(key_name)
+
     post_component_data = {
         'component_appid': app_id,
         'component_appsecret' : app_secret,
@@ -578,7 +630,7 @@ def create_component_access_token():
 
 
 
-# 添加企业的产品
+
 class UpdateIDForm(forms.Form):
     authorization_appid = forms.CharField(
         required=True,
