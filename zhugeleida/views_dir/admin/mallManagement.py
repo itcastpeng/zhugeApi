@@ -29,8 +29,7 @@ def mallManagementShow(request):
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
             u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-            company_id = models.zgld_company.objects.filter(id=u_idObjs[0].company_id)
-            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app_id=company_id[0].id)
+            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id)
             otherData = []
             if length != 0:
                 start_line = (current_page - 1) * length

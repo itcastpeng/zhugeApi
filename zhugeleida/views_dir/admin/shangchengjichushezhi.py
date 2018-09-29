@@ -51,8 +51,7 @@ def jiChuSheZhiOper(request, oper_type):
     if request.method == "POST":
         user_id = request.GET.get('user_id')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
+        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
         if oper_type == 'jichushezhi':
             resultData = {
                 'shangChengName' : request.POST.get('shangChengName'),
