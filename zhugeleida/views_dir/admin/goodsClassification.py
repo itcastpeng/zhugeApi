@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
-
+from django.db.models import Q
 
 def init_data(xiaochengxu_id, pid=None, level=1):
     """
@@ -41,18 +41,38 @@ def goodsClassShow(request):
     if request.method == "GET":
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
+
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
         xiaochengxu_id = userObjs[0].id
 
+        groupObjs = models.zgld_goods_classification_management.objects
+        parentObjs = groupObjs.filter(parentClassification__isnull=True, xiaochengxu_app_id=xiaochengxu_id)
+        parentData = []
+        for parentObj in parentObjs:
+            parentData.append({
+                'parntId':parentObj.id,
+                'parentName':parentObj.classificationName
+            })
+        q = Q()
         if singleUser:
-            data_result = init_data(xiaochengxu_id, singleUser)
-        else:
-            data_result = init_data(xiaochengxu_id)
+            q.add(Q(parentClassification_id=singleUser), Q.AND)
+        objs = groupObjs.filter(parentClassification__isnull=False, xiaochengxu_app_id=xiaochengxu_id).filter(q)
+        otherData = []
+        for obj in objs:
+            otherData.append({
+                'groupId':obj.id,
+                'groupName':obj.classificationName,
+                'groupParentId':obj.parentClassification_id,
+                'groupParent':obj.parentClassification.classificationName
+            })
         response.code = 200
         response.msg = '查询成功'
-        response.data = data_result
+        response.data = {
+            'parentData':parentData,
+             'otherData':otherData
+        }
     return JsonResponse(response.__dict__)
 
 

@@ -18,11 +18,14 @@ def jiChuSheZhiShow(request):
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
         otherData = []
         for obj in userObjs:
+            lunbotu = ''
+            if obj.lunbotu:
+                lunbotu = json.loads(obj.lunbotu)
             otherData.append({
                 'shangChengName': obj.shangChengName,
                 'shangHuHao': obj.shangHuHao,
                 'shangHuMiYao': obj.shangHuMiYao,
-                'lunbotu': obj.lunbotu,
+                'lunbotu': lunbotu,
                 'yongjin': obj.yongjin,
                 'xiaochengxuApp': obj.xiaochengxuApp.name,
                 'xiaochengxuApp_id': obj.xiaochengxuApp_id,
