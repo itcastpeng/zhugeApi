@@ -177,7 +177,7 @@ def login(request):
                         "order": 3
                     }
 
-            buttom_navigation_data_list.insert(3,shopping_info_dict)
+            buttom_navigation_data_list.insert(2,shopping_info_dict)
             ret_data['buttom_navigation_data'] = buttom_navigation_data_list
 
             print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
