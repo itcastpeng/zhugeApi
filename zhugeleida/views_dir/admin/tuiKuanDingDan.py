@@ -42,7 +42,10 @@ def tuiKuanDingDanShow(request):
                 'tuiKuanYuanYin':obj.tuiKuanYuanYin,
                 'shengChengDateTime':obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuiKuanDateTime':tuikuan,
-                'tuiKuanStatus':obj.tuiKuanStatus
+                'tuiKuanStatus':obj.tuiKuanStatus,
+                'tuikuanzhanghao':'123456',
+                'tuikuanjine': obj.orderNumber.yingFuKuan,
+                'statusName':obj.get_tuiKuanStatus_display()
             })
             response.code = 200
             response.msg = '查询成功'
