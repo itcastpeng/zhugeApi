@@ -67,6 +67,7 @@ def theOrderShow(request):
                 countPrice = int(shangpinguanli.goodsPrice) * int(obj.unitRiceNum)
 
             otherData.append({
+                'id':obj.id,
                 'goodsName' : shangpinguanli.goodsName,
                 'goodsPrice':shangpinguanli.goodsPrice,
                 'countPrice':countPrice,
