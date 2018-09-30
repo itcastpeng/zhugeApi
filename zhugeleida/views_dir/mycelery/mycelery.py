@@ -11,7 +11,7 @@ import os
 import datetime
 import redis
 from collections import OrderedDict
-from zhugeleida.views_dir.admin.dai_xcx  import create_authorizer_access_token
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 import sys
 import logging.handlers
 from django.conf import settings
@@ -35,7 +35,7 @@ def user_send_action_log(request):
     get_token_data = {}
     send_token_data = {}
 
-    user_obj = models.zgld_userprofile.objects.filter(id=user_id)[0]
+    user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
     print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
     corp_id = user_obj.company.corp_id
 
@@ -373,8 +373,9 @@ def user_send_template_msg(request):
 
             # post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
             post_template_data['template_id'] = template_id
-            # path = 'pages/mingpian/index?source=2&uid=%s&pid=' % (user_id)
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            
+            path = 'pages/mingpian/index' % (user_id)
+            # path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
             post_template_data['page'] = path
 
             if len(exist_formid_json) == 0:
@@ -475,19 +476,11 @@ def user_send_gongzhonghao_template_msg(request):
 
         post_template_data =  {}
 
-        component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
-        key_name = '%s_authorizer_access_token' % (authorizer_appid)
+        key_name = 'authorizer_access_token_%s' % (authorizer_appid)
         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
-            # data = {
-            #     'key_name' : key_name,
-            #     'authorizer_refresh_token': authorizer_refresh_token,
-            #     'authorizer_appid': authorizer_appid,
-            #
-            # }
             authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-
             authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
             if not authorizer_access_token:
@@ -498,6 +491,7 @@ def user_send_gongzhonghao_template_msg(request):
                     'app_id': 'wx6ba07e6ddcdc69b3',
                     'app_secret': '0bbed534062ceca2ec25133abe1eecba'
                 }
+
                 authorizer_access_token_result = create_authorizer_access_token(data)
                 if authorizer_access_token_result.code == 200:
                     authorizer_access_token = authorizer_access_token_result.data
@@ -508,47 +502,49 @@ def user_send_gongzhonghao_template_msg(request):
 
         if customer_obj and objs:
             openid = customer_obj[0].openid
-            post_template_data['touser'] = openid
-
-
-            post_template_data['template_id'] = template_id
 
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-            post_template_data['page'] = path
-
-
-            post_template_data['form_id'] = form_id
-
-
+            xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            appid = xiaochengxu_app_obj.authorization_appid
             # 留言回复通知
             '''
             您好，您咨询商家的问题已回复
-            咨询名称：孕儿美摄影工作室张炬
+            咨询名称：孕儿美摄影工作室-张炬
             消息回复：您有未读消息哦
             点击进入咨询页面
             '''
-            consult_info = ('%s-%s(%s)') %  (company_name,position,user_name)
+            consult_info = ('%s - %s【%s】') %  (company_name,user_name,position)
             data = {
                 'first': {
-                    'value': '您好，有什么可以帮助到您的吗?'  # 回复者
+                    'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
                 },
                 'keyword1': {
-                    'value': consult_info   # 回复者
+                    'value': consult_info,
+                    "color": "#0000EE"
                 },
                 'keyword2': {
-                    'value': '您有未读消息哦'   # 回复时间
+                    'value': '您有未读消息',
+                    "color": "#FF0000"
                 },
                 'remark': {
-                    'value': '点击进入咨询页面'  #回复内容
+                    'value': '了解更多请点击进入【我的名片小程序】哦'  #回复内容
                 }
             }
-            post_template_data['data'] = data
-            # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
-            print('===========post_template_data=======>>',post_template_data)
+            post_template_data = {
+                'touser' : openid,
+                'template_id': template_id,
+                "miniprogram": {
+                    "appid": appid,
+                    "pagepath": path,
+                },
+                'data' : data
+            }
+
+            print('=========== 发送出去的【模板消息】请求数据 =======>>',json.dumps(post_template_data))
 
             # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
-
-            template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+            template_msg_url =  'https://api.weixin.qq.com/cgi-bin/message/template/send'
+            template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
 
             print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
@@ -566,6 +562,8 @@ def user_send_gongzhonghao_template_msg(request):
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
+
+            flag = False
 
         else:
             response.msg = "客户不存在"

@@ -7,10 +7,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
 from django.db.models import Q
-from django.db.models import F
 
-
-def init_data(user_id, pid=None, level=1):
+def init_data(xiaochengxu_id, pid=None, level=1):
     """
     获取权限数据
     :param pid:  权限父级id
@@ -19,67 +17,88 @@ def init_data(user_id, pid=None, level=1):
     result_data = []
     print('level------> ',level)
     objs = models.zgld_goods_classification_management.objects.filter(
-        userProfile_id=user_id,
+        xiaochengxu_app_id=xiaochengxu_id,
+        # userProfile_id=user_id,
         parentClassification_id=pid,
-        # level=level
+        level=level
     )
     for obj in objs:
         current_data = {
-            'name': obj.classificationName,
-            # 'expand': True,
-            'id': obj.id,
-            # 'checked': False
+            'label': obj.classificationName,
+            'value': obj.id,
         }
-        # if selected_list and obj.id in selected_list:
-        #     current_data['checked'] = True
         print('obj.id---------> ',obj.id)
-        children_data = init_data(user_id, pid=obj.id, level=level+1)
+        children_data = init_data(xiaochengxu_id, pid=obj.id, level=2)
         if children_data:
             current_data['children'] = children_data
         result_data.append(current_data)
-
-    # print('result_data -->', result_data)
     return result_data
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def goodsClassShow(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        # forms_obj = SelectForm(request.GET)
-        # if forms_obj.is_valid():
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')
+        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
+        xiaochengxu_id = userObjs[0].id
 
+        groupObjs = models.zgld_goods_classification_management.objects
+        parentData = init_data(xiaochengxu_id)
+        q = Q()
         if singleUser:
-            data_result = init_data(user_id, singleUser)
-        else:
-            data_result = init_data(user_id)
+            q.add(Q(parentClassification_id=singleUser), Q.AND)
+        objs = groupObjs.filter( xiaochengxu_app_id=xiaochengxu_id).filter(q)
+        otherData = []
+        for obj in objs:
+            countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+            classificationName = ''
+            parentClassification_id = ''
+            if obj.parentClassification_id:
+                parentClassification_id = obj.parentClassification_id
+                classificationName = obj.parentClassification.classificationName
+            otherData.append({
+                'groupId':obj.id,
+                'groupName':obj.classificationName,
+                'groupParentId':parentClassification_id,
+                'groupParent':classificationName,
+                'countNum':countNum
+            })
         response.code = 200
         response.msg = '查询成功'
-        response.data = data_result
-
-        # else:
-        #     response.code = 402
-        #     response.msg = "请求异常"
-        #     response.data = json.loads(forms_obj.errors.as_json())
-
+        response.data = {
+            'parentData':parentData,
+             'otherData':otherData
+        }
     return JsonResponse(response.__dict__)
 
+def updateInitData(result_data,xiaochengxu_id, pid=None):
+    objs = models.zgld_goods_classification_management.objects.filter(
+        xiaochengxu_app_id=xiaochengxu_id,
+        id=pid,
+    )
+    for obj in objs:
+        parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id)
+        result_data.append(obj.id)
+    return result_data
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def goodsClassOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
+        user_id = request.GET.get('user_id')
         dataDict = {
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
-            'parentClassification_id': request.POST.get('parentClassification', ''),
-            'goodsNum': request.POST.get('goodsNum', ''),
-            'userProfile_id':request.GET.get('user_id')
+            'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id'),
+            'userProfile_id':request.GET.get('user_id'),
+            'parentClassification_id':request.POST.get('parentClassification')
         }
+        print('dataDict---------------> ',dataDict)
         if oper_type == 'add':
             forms_obj = AddForm(dataDict)
             if forms_obj.is_valid():
@@ -102,6 +121,19 @@ def goodsClassOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'Beforeupdate':
+            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
+            xiaochengxu_id = userObjs[0].id
+            objs = models.zgld_goods_classification_management.objects.filter(id=o_id)
+            result_data = []
+            parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = parentData
+
+
         elif oper_type == 'update':
             forms_obj = UpdateForm(dataDict)
             if forms_obj.is_valid():
@@ -121,10 +153,9 @@ def goodsClassOper(request, oper_type, o_id):
                     level = 2
                 models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
                     classificationName=formObj.get('classificationName'),
-                    goodsNum=formObj.get('goodsNum'),
                     parentClassification_id=parentClassification_id,
-                    userProfile_id=dataDict.get('userProfile_id'),
-                    level=level
+                    xiaochengxu_app_id=dataDict.get('xiaochengxu_app_id'),
+                    level=level,
                 )
                 response.code = 200
                 response.msg = '修改成功'
@@ -135,23 +166,22 @@ def goodsClassOper(request, oper_type, o_id):
                 response.data = {}
 
         elif oper_type == 'delete':
-            goodsObjs = models.zgld_goods_classification_management.objects
-            objs = goodsObjs.filter(id=o_id)
+            groupObjs = models.zgld_goods_classification_management.objects
+            objs = groupObjs.filter(id=o_id)
             if objs:
-                if goodsObjs.filter(parentClassification_id=o_id):
+                if groupObjs.filter(parentClassification_id=o_id):
                     response.code = 301
                     response.msg = '含有子级,请先移除'
+                else:
+                    objs.delete()
+                    response.code = 200
+                    response.msg = '删除成功'
+
             else:
                 response.code = 301
                 response.msg = '删除ID不存在！'
-
-
     else:
         response.code = 402
         response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
-
-
-
-

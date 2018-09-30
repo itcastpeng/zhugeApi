@@ -469,9 +469,6 @@ def user_gongzhonghao_redirect_share_url(request):
         share_url = request.GET.get('share_url')
         from urllib.parse import unquote
         redirect_url = unquote(share_url, 'utf-8')
-
-
-
         print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
         return redirect(redirect_url)
 

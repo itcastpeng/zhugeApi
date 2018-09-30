@@ -19,18 +19,24 @@ class AddForm(forms.Form):
             'required': "父级分类类型错误"
         }
     )
-    goodsNum = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '商品总数不能为空'
-        })
-    userProfile_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "未登录！"
-        }
-    )
+    # goodsNum = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': '商品总数不能为空'
+    #     })
 
+    xiaochengxu_app_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '小程序ID不能为空'
+        })
+    def clean_xiaochengxu_app_id(self):
+        xiaochengxu_app_id = self.data.get('xiaochengxu_app_id')
+        objs = models.zgld_shangcheng_jichushezhi.objects.filter(id=xiaochengxu_app_id)
+        if not objs:
+            self.add_error('xiaochengxu_app_id', '无此小程序！')
+        else:
+            return xiaochengxu_app_id
 
 # 更新
 class UpdateForm(forms.Form):
@@ -52,12 +58,12 @@ class UpdateForm(forms.Form):
             'required': "父级分类类型错误"
         }
     )
-    goodsNum = forms.IntegerField(
+
+    xiaochengxu_app_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '商品总数不能为空'
+            'required': '小程序不能为空'
         })
-
     def clean_o_id(self):
         o_id = self.data.get('o_id')
         objs = models.zgld_goods_classification_management.objects.filter(id=o_id)
@@ -65,6 +71,14 @@ class UpdateForm(forms.Form):
             self.add_error('o_id', '修改ID不存在！')
         else:
             return o_id
+
+    def clean_xiaochengxu_app_id(self):
+        xiaochengxu_app_id = self.data.get('xiaochengxu_app_id')
+        objs = models.zgld_shangcheng_jichushezhi.objects.filter(id=xiaochengxu_app_id)
+        if not objs:
+            self.add_error('xiaochengxu_app_id', '无此小程序！')
+        else:
+            return xiaochengxu_app_id
 
 
 

@@ -405,6 +405,27 @@ def company_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '公司ID不存在'
 
+        elif oper_type == 'change_shopping_type':
+
+            shopping_type = request.POST.get('shopping_type')
+
+            if  shopping_type:
+                company_objs = models.zgld_company.objects.filter(id=o_id)
+
+                if company_objs:
+                    company_objs.update(
+                        shopping_type=shopping_type
+                    )
+                    response.code = 200
+                    response.msg = "设置成功"
+
+                else:
+                    response.code = 302
+                    response.msg = '公司不存在'
+            else:
+                response.code = 303
+                response.msg = '购物类型不能为空'
+
 
     else:
         response.code = 402
