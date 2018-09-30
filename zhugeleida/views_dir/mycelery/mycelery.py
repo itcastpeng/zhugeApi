@@ -11,7 +11,7 @@ import os
 import datetime
 import redis
 from collections import OrderedDict
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
+from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
 import sys
 import logging.handlers
 from django.conf import settings
