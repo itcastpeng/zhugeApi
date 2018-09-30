@@ -58,6 +58,9 @@ def theOrderShow(request):
                 decode_username = base64.b64decode(obj.shouHuoRen.username)
                 shouhuoren = str(decode_username, 'utf-8')
             shangpinguanli = obj.shangpinguanli
+            topLunBoTu = ''
+            if obj.shangpinguanli.topLunBoTu:
+                topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
             otherData.append({
                 'goodsName' : shangpinguanli.goodsName,
                 'goodsPrice':shangpinguanli.goodsPrice,
@@ -72,6 +75,7 @@ def theOrderShow(request):
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                'lunbotu':topLunBoTu,
             })
             response.code = 200
             response.msg = '查询成功'
