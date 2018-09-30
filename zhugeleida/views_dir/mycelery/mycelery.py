@@ -219,9 +219,15 @@ def create_user_or_customer_qr_code(request):
 def create_user_or_customer_poster(request):
 
     response = ResponseObj()
-    customer_id = request.GET.get('customer_id')
-    user_id = request.GET.get('user_id')
-    print('--- customer_id | user_id --------->>', customer_id, user_id)
+    # customer_id = request.GET.get('customer_id')
+    # user_id = request.GET.get('user_id')
+
+    print('---- celery request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
+
+    data = json.loads(request.GET.get('data'))
+    user_id = data.get('user_id')
+    customer_id = data.get('customer_id', '')
+    print('--- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
 
@@ -232,10 +238,6 @@ def create_user_or_customer_poster(request):
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
         print('---->', BASE_DIR)
 
-        # option = webdriver.ChromeOptions()
-        # mobileEmulation = {'deviceName': 'iPhone 6'}
-        # option.add_experimental_option('mobileEmulation', mobileEmulation)
-        # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
         platform = sys.platform  # 获取平台
         phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')

@@ -14,8 +14,10 @@ from django import forms
 ## 第三方平台接入
 @csrf_exempt
 def open_weixin(request, oper_type):
+    response = Response.ResponseObj()
+
     if request.method == "POST":
-        response = Response.ResponseObj()
+
         if oper_type == 'tongzhi':
 
             print('------ 第三方 request.body tongzhi 通知内容 ------>>', request.body.decode(encoding='UTF-8'))
@@ -61,9 +63,9 @@ def open_weixin(request, oper_type):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                appid = 'wx67e2fde0f694111c'
+                token = '5lokfwWTqHXnb58VCV'
+                encodingAESKey = 'HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt'
+                appid = 'wx81159f52aff62388'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
@@ -75,6 +77,7 @@ def open_weixin(request, oper_type):
                 print('-----decryp_xml -->', decryp_xml)
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                # rc.get('ComponentVerifyTicket')
 
                 if ret == 0:
                     rc.set('ComponentVerifyTicket', ComponentVerifyTicket, 10000)
@@ -333,7 +336,7 @@ def open_weixin(request, oper_type):
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
 
-        #企业微信服务器会定时（每十分钟）推送ticket。https://work.weixin.qq.com/api/doc#10982/推送suite_ticket
+        # 企业微信服务器会定时（每十分钟）推送ticket。https://work.weixin.qq.com/api/doc#10982/推送suite_ticket
         elif oper_type == 'get_ticket':
             print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
 
@@ -343,7 +346,7 @@ def open_weixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            decryp_xml_tree = ''
+
             xml_tree = ET.fromstring(postdata)
             try:
                 '''
@@ -355,25 +358,29 @@ def open_weixin(request, oper_type):
                 </xml>
 
                 '''
-                SuiteId = xml_tree.find("SuiteId").text   # 第三方应用的SuiteId
-                InfoType = xml_tree.find("InfoType").text   # suite_ticket
-                TimeStamp = xml_tree.find("TimeStamp").text  # 时间戳
-                SuiteTicket = xml_tree.find("SuiteTicket").text  # 时间戳
+                ToUserName = xml_tree.find("ToUserName").text
+                Encrypt = xml_tree.find("Encrypt").text
+                AppId = xml_tree.find("AppId").text
+
+                # print('----- 授权公众号授权 postdata---->>',postdata)
+
+                print('-- appid | ToUserName -->', AppId,"|",ToUserName)
+                print('-- encrypt -->', Encrypt)
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-                key_name = 'SuiteTicket_%s' % (SuiteId)
-                rc.set(key_name, SuiteTicket, 10000)
-                print('--------企业微信服务器 SuiteId | suite_ticket--------->>',SuiteId,'|', SuiteTicket)
+                # key_name = 'SuiteTicket_%s' % (SuiteId)
+                # rc.set(key_name, SuiteTicket, 10000)
+                # print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
 
 
 
             except Exception as e:
-                print('---报错-->>',e)
+                print('---报错-->>', e)
 
             return HttpResponse("success")
 
-        return JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
 
 
 ## 生成接入流程控制页面
