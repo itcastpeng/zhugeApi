@@ -17,9 +17,12 @@ def mallManageShow(request):
     uid = request.GET.get('uid')
     detaileId = request.GET.get('detaileId')
     u_idObjs = models.zgld_customer.objects.filter(id=uid)
+    xiaochengxu_id = u_idObjs[0].company_id
+    xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)
+    indexLunBoTu = xiaoChengXuObjs[0].lunbotu
     otherData = []
     if detaileId:
-        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id).filter(id=detaileId)
+        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=xiaochengxu_id).filter(id=detaileId)
         for obj in objs:
             groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)
             xianshangjiaoyi = '否'
@@ -47,25 +50,33 @@ def mallManageShow(request):
                 'xianshangjiaoyi':xianshangjiaoyi,
                 'shichangjiage':obj.shichangjiage,
                 'kucunbianhao':obj.kucunbianhao,
-                'topLunBoTu': topLunBoTu,  # 顶部轮播图
-                'detailePicture' : detailePicture,  # 详情图片
+                'topLunBoTu': topLunBoTu,                       # 顶部轮播图
+                'detailePicture' : detailePicture,              # 详情图片
                 'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
             })
     else:
-        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id)
+        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=xiaochengxu_id)
         print(objs)
         for obj in objs:
+            topLunBoTu = ''
+            if obj.topLunBoTu:
+                topLunBoTu = json.loads(obj.topLunBoTu)
             otherData.append({
                 'id':obj.id,
                 'goodsName': obj.goodsName,
                 'goodsPrice': obj.goodsPrice,
-                'topLunBoTu': obj.topLunBoTu
+                'topLunBoTu': topLunBoTu,
+                'shichangjiage': obj.shichangjiage,
             })
-
+    if indexLunBoTu:
+        indexLunBoTu = json.loads(indexLunBoTu)
     response.code = 200
     response.msg = '查询成功'
-    response.data = otherData
+    response.data = {
+        'indexLunBoTu':indexLunBoTu,
+        'otherData':otherData,
+    }
     return JsonResponse(response.__dict__)
 
 

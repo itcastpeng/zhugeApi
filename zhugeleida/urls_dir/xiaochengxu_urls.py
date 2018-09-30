@@ -52,7 +52,6 @@ urlpatterns = [
     url(r'tuiKuanDingDanShow', tuiKuanDingDan.tuiKuanDingDanShow),                 # 退款订单管理查询
     url(r'^tuiKuanDingDanOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),           # 退款订单管理操作
 
-
     # 查询商品
     url(r'mallManageShow', mallManagementShow.mallManageShow),                 # 订单管理查询
 
