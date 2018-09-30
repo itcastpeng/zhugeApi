@@ -39,6 +39,7 @@ def theOrderShow(request):
             if obj.yewuUser:
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
+
             countPrice = ''
             num = 1
             if obj.unitRiceNum:
@@ -46,8 +47,18 @@ def theOrderShow(request):
             if num and obj.shangpinguanli.goodsPrice:
                 countPrice = int(obj.shangpinguanli.goodsPrice) * int(num)
 
+            topLunBoTu = ''
+            if obj.shangpinguanli.topLunBoTu:
+                topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
             shangpinguanli = obj.shangpinguanli
+            shouhuoren = ''
+            shouHuoRen_id = ''
+            if obj.shouHuoRen_id:
+                shouHuoRen_id = obj.shouHuoRen_id
+                decode_username = base64.b64decode(obj.shouHuoRen.username)
+                shouhuoren = str(decode_username, 'utf-8')
             otherData.append({
+                'goodsPicture':topLunBoTu,
                 'id':obj.id,
                 'unitRiceNum':obj.unitRiceNum,
                 'goodsName' : shangpinguanli.goodsName,
@@ -59,10 +70,10 @@ def theOrderShow(request):
                 'yewuyuan':username,
                 'yongjin':obj.yongJin,
                 'peiSong':obj.peiSong,
-                'shouHuoRen_id':obj.shouHuoRen_id,
-                'shouHuoRen':obj.shouHuoRen.username,
+                'shouHuoRen_id':shouHuoRen_id,
+                'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
-                'createDate':obj.createDate
+                'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S')
             })
         response.code = 200
         response.msg = '查询成功'
