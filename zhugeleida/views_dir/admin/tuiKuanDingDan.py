@@ -9,25 +9,24 @@ import json, base64
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_admin_userprofile)
 def tuiKuanDingDanShow(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
-    u_id = request.GET.get('u_id')
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
 
-        if u_id:
-            u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
-            xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        # if u_id:
+        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
 
-            objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(
-                shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp=xiaochengxu_id
-            )
-        else:
-            objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(shouHuoRen_id=user_id)
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(
+            shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp=xiaochengxu_id
+        )
+        # else:
+        #     objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(shouHuoRen_id=user_id)
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
