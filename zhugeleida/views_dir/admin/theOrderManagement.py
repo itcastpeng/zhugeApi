@@ -150,7 +150,20 @@ def theOrderOper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = statusData
-
+        elif oper_type == 'selectYeWu':
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            company_id = objs[0].shangpinguanli.parentName.xiaochengxu_app.xiaochengxucompany_id
+            companyObjs = models.zgld_company.objects.filter(id=company_id)
+            yewuObjs = models.zgld_admin_userprofile.objects.filter(company_id=companyObjs[0].id)
+            otherData = []
+            for yewuObj in yewuObjs:
+                otherData.append({
+                    'value': yewuObj.id,
+                    'lable':yewuObj.login_user
+                })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = otherData
         else:
             response.code = 402
             response.msg = "请求异常"
