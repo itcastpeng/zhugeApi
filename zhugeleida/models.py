@@ -1055,6 +1055,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     )
     theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=11)
     createDate = models.DateTimeField(verbose_name="创建时间", null=True, blank=True)
+    stopDateTime = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)
 
 # 退款单管理
 class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
