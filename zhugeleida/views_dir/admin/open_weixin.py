@@ -6,10 +6,12 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
+from zhugeleida.public.crypto_ import  WXBizMsgCrypt_qiyeweixin
 import json
 import redis
 import xml.etree.cElementTree as ET
 from django import forms
+import sys
 
 ## 第三方平台接入
 @csrf_exempt
@@ -340,43 +342,43 @@ def open_weixin(request, oper_type):
         elif oper_type == 'get_ticket':
             print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
 
+            msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
-            msg_signature = request.GET.get('msg_signature')
+
 
             postdata = request.body.decode(encoding='UTF-8')
 
-
-            xml_tree = ET.fromstring(postdata)
-            try:
-                '''
-                <xml>
-                    <SuiteId><![CDATA[ww4asffe99e54c0f4c]]></SuiteId>
-                    <InfoType> <![CDATA[suite_ticket]]></InfoType>
-                    <TimeStamp>1403610513</TimeStamp>
-                    <SuiteTicket><![CDATA[asdfasfdasdfasdf]]></SuiteTicket>
-                </xml>
-
-                '''
-                ToUserName = xml_tree.find("ToUserName").text
-                Encrypt = xml_tree.find("Encrypt").text
-                AppId = xml_tree.find("AppId").text
-
-                # print('----- 授权公众号授权 postdata---->>',postdata)
-
-                print('-- appid | ToUserName -->', AppId,"|",ToUserName)
-                print('-- encrypt -->', Encrypt)
-
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-                # key_name = 'SuiteTicket_%s' % (SuiteId)
-                # rc.set(key_name, SuiteTicket, 10000)
-                # print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+            sToken = "5lokfwWTqHXnb58VCV"
+            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
+            sCorpID = "wx5d26a7a856b22bec"
+            decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
 
+            # xml_tree = ET.fromstring(postdata)
+            # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
+            # timestamp = "1538228121"
+            # nonce = "1537294388"
+            # sReqData = '<xml><ToUserName><![CDATA[wx5d26a7a856b22bec]]></ToUserName><Encrypt><![CDATA[uh2c6Yqs5f8nPcXQmTtxifpYEIX0Y5FV/nrsbAo4FGKdCPCLVA1p7XSDnC6XN5/1YiFE4ywFs2CvT0n1xHbJ4vSksICKqkPr0z9PtxhJDcbuhz7wgsUSLmEMeXWR1f6YVaOGkFKqa6YJ0lalvpGcS03RRwTuqb49VccfuV5KO4y3eabi6qQRh5QG6SHYKGPZmTfD32Q5GGgGhm4QH3ne/hUTLtMdk3CONblGcodRs5/iAArxfGCFxYADT9d/9Q6ZoNoLruYD66RPrX8AghjKE6KoCqNomsgLHbINJEBxkyEaTBd9qqJe+zoXJMXhyFJ6CsmfKRITwC/Lz32wZF0bF44fzhybguIyMOohxZEhyl1pJpwpgX5DjpjKs47jKf76]]></Encrypt><AgentID><![CDATA[]]></AgentID></xml>'
 
-            except Exception as e:
-                print('---报错-->>', e)
+            ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+            print(ret, sMsg)
+            if (ret != 0):
+                print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
+                sys.exit(1)
+
+            # 解密成功，sMsg即为xml格式的明文
+            xml_tree = ET.fromstring(sMsg)
+            SuiteTicket = xml_tree.find("SuiteTicket").text
+            SuiteId = xml_tree.find("SuiteId").text
+
+            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+            key_name = 'SuiteTicket_%s' % (SuiteId)
+            rc.set(key_name, SuiteTicket, 3000)
+            print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+
+
 
             return HttpResponse("success")
 
