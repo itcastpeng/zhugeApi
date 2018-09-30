@@ -38,8 +38,7 @@ def tuiKuanDingDanShow(request):
             username = ''
             yewu = ''
             if obj.yewuUser:
-                decode_username = base64.b64decode( obj.yewuUser.username)
-                username = str(decode_username, 'utf-8')
+
                 yewu = obj.yewuUser_id
             shouhuorenusername = ''
             if obj.shouHuoRen_id:
@@ -53,7 +52,7 @@ def tuiKuanDingDanShow(request):
                 'yingFuKuan':obj.yingFuKuan,
                 'youhui':obj.yongJin,
                 'yewuyuan_id':yewu,
-                'yewuyuan':username,
+                'yewuyuan':obj.yewuUser.username,
                 'yongjin':obj.yongJin,
                 'peiSong':obj.peiSong,
                 'shouHuoRen_id':obj.shouHuoRen_id,
