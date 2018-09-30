@@ -61,14 +61,20 @@ def theOrderShow(request):
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
                 topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+
+            countPrice = ''
+            if obj.unitRiceNum and shangpinguanli.goodsPrice:
+                countPrice = int(shangpinguanli.goodsPrice) * int(obj.unitRiceNum)
+
             otherData.append({
                 'goodsName' : shangpinguanli.goodsName,
                 'goodsPrice':shangpinguanli.goodsPrice,
-                'countPrice':obj.countPrice,
+                'countPrice':countPrice,
                 'yingFuKuan':obj.yingFuKuan,
                 'youhui':obj.yongJin,
                 'yewuyuan_id':yewu,
                 'yewuyuan':yewuUser,
+                'unitRiceNum':obj.unitRiceNum,
                 'yongjin':obj.yongJin,
                 'peiSong':obj.peiSong,
                 'shouHuoRen_id':obj.shouHuoRen_id,
@@ -77,12 +83,12 @@ def theOrderShow(request):
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'lunbotu':topLunBoTu,
             })
-            response.code = 200
-            response.msg = '查询成功'
             response.data = {
                 'otherData':otherData,
                 'objsCount':objsCount,
             }
+        response.msg = '查询成功'
+        response.code = 200
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
