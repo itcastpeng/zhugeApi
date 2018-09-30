@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.tuiKuanDingDan_verify import AddForm, SelectForm
 import json, base64
-
+from django.db.models import Q
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -17,13 +17,22 @@ def tuiKuanDingDanShow(request):
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
-
+        status = request.GET.get('status')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-
-        objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related('orderNumber').filter(
+        q = Q()
+        if status:
+            if int(status) == 3:
+                q.add(Q(tuiKuanStatus=3), Q.AND)
+            elif int(status) == 4:
+                q.add(Q(tuiKuanStatus=4), Q.AND)
+            else:
+                q.add(~Q(tuiKuanStatus=3) & ~Q(tuiKuanStatus=4), Q.AND)
+        objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related(
+            'orderNumber'
+        ).filter(
             orderNumber__shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp_id=xiaochengxu_id
-        )
+        ).filter(q)
 
         objsCount = objs.count()
         if length != 0:
@@ -47,12 +56,12 @@ def tuiKuanDingDanShow(request):
                 'tuikuanjine': obj.orderNumber.yingFuKuan,
                 'statusName':obj.get_tuiKuanStatus_display()
             })
-            response.code = 200
-            response.msg = '查询成功'
             response.data = {
                 'otherData':otherData,
                 'objsCount':objsCount,
             }
+        response.code = 200
+        response.msg = '查询成功'
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
