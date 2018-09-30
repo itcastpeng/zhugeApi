@@ -162,7 +162,6 @@ def yuZhiFu(request):
             dingDanObjs.create(
                 shangpinguanli_id = goodsId,            # 商品ID
                 orderNumber = int(getWxPayOrderId),     # 订单号
-                countNum = total_fee,                   # 总价
                 yingFuKuan = total_fee,                 # 应付款
                 youHui = 0,                             # 优惠
                 yewuUser_id = u_id,                     # 业务
