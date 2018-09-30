@@ -24,9 +24,11 @@ def theOrderShow(request):
         goodsName = request.GET.get('goodsName')
         start_createDate = request.GET.get('start_createDate')
         stop_createDate = request.GET.get('stop_createDate')
+        theOrderStatus = request.GET.get('theOrderStatus')
         if start_createDate and stop_createDate:
             q.add(Q(createDate__gte=start_createDate) & Q(createDate__lte=stop_createDate), Q.AND)
-
+        if theOrderStatus:
+            q.add(Q(theOrderStatus=theOrderStatus), Q.AND)
         if yewuyuan:
             q.add(Q(yewuUser_id=yewuyuan), Q.AND)
         if dingdanbianhao:
