@@ -22,12 +22,8 @@ def tuiKuanDingDanShow(request):
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
         q = Q()
         if status:
-            if int(status) == 3:
-                q.add(Q(tuiKuanStatus=3), Q.AND)
-            elif int(status) == 4:
-                q.add(Q(tuiKuanStatus=4), Q.AND)
-            else:
-                q.add(~Q(tuiKuanStatus=3) & ~Q(tuiKuanStatus=4), Q.AND)
+            q.add(Q(tuiKuanStatus=status), Q.AND)
+
         objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related(
             'orderNumber'
         ).filter(
