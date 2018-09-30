@@ -39,7 +39,10 @@ def theOrderShow(request):
                 decode_username = base64.b64decode( obj.yewuUser.username)
                 username = str(decode_username, 'utf-8')
                 yewu = obj.yewuUser_id
-
+            shouhuoren = ''
+            if obj.shouHuoRen:
+                decode_username = base64.b64decode(obj.shouHuoRen.username)
+                shouhuoren = str(decode_username, 'utf-8')
             shangpinguanli = obj.shangpinguanli
             otherData.append({
                 'goodsName' : shangpinguanli.goodsName,
@@ -52,9 +55,9 @@ def theOrderShow(request):
                 'yongjin':obj.yongJin,
                 'peiSong':obj.peiSong,
                 'shouHuoRen_id':obj.shouHuoRen_id,
-                'shouHuoRen':obj.shouHuoRen.username,
+                'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
-                'createDate':obj.createDate
+                'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
             })
             response.code = 200
             response.msg = '查询成功'
