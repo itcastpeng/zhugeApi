@@ -299,7 +299,6 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
-
         elif oper_type == 'forward_article':
 
             uid = request.GET.get('uid')
@@ -416,10 +415,8 @@ def article_oper(request, oper_type, o_id):
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
 
-
             else:
-
-                print('------- 公众号-记录查看文章时间未能通过------->>', forms_obj.errors)
+                # print('------- 公众号-记录查看文章时间未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
