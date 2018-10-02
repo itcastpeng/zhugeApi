@@ -38,6 +38,7 @@ def login(request):
             account_expired_time = company_obj.account_expired_time
 
             if datetime.datetime.now() <= account_expired_time:
+                print('用户没有过期,可以使用')
                 if not userprofile_obj.token:
                     token = account.get_token(account.str_encrypt(password))
                     userprofile_obj.token = token
@@ -63,6 +64,7 @@ def login(request):
                     'is_reset_password': is_reset_password,
                     'weChatQrCode':userprofile_obj.company.weChatQrCode
                 }
+                print('response.data  -->', response.data )
 
                 userprofile_obj.last_login_date = datetime.datetime.now()
                 userprofile_obj.save()
