@@ -71,13 +71,14 @@ def work_weixin_auth(request, company_id):
         user_ticket = code_ret_json.get('user_ticket')
         if not user_ticket:
             print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用access_token:==========>', code, "|", access_token)
-            return  HttpResponse('404')
+            return HttpResponse('404')
         else:
             print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code, "|", access_token, "|", user_ticket)
 
         post_userlist_data['user_ticket'] = user_ticket
         get_userlist_data['access_token'] = access_token
 
+        print("Conf['userlist_url'] -->", Conf['userlist_url'])
         user_list_ret = requests.post(Conf['userlist_url'], params=get_userlist_data,data=json.dumps(post_userlist_data))
         user_list_ret_json = user_list_ret.json()
 
