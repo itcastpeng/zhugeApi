@@ -32,19 +32,17 @@ def work_weixin_auth(request, company_id):
         post_userlist_data = {}
         get_userlist_data = {}
 
-
         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-        key_name = "company_%s_leida_app_token" % (company_id)
+        key_name = "company_%s_leida_app_token" % company_id
         token_ret = rc.get(key_name)
 
         company_obj = models.zgld_company.objects.get(id=company_id)
         account_expired_time = company_obj.account_expired_time
 
+        print('---------【企业微信】 从Redis 取出的 ------->>', key_name, "是:", token_ret)
 
-
-        print('---------【企业微信】 从Redis 取出的 ------->>',key_name,"是:", token_ret)
-
-        if not token_ret:
+        # if not token_ret:
+        if True:
             corpid = company_obj.corp_id
             corpsecret = company_obj.zgld_app_set.get(company_id=company_id,app_type=1).app_secret
 
@@ -62,23 +60,20 @@ def work_weixin_auth(request, company_id):
         else:
             access_token = token_ret
 
-
         get_code_data['code'] = code
         get_code_data['access_token'] = access_token
-        code_url =  'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo'
+        code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo'
         code_ret = requests.get(code_url, params=get_code_data)
 
         code_ret_json = code_ret.json()
         print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
 
-
         user_ticket = code_ret_json.get('user_ticket')
         if not user_ticket:
-            print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用access_token:==========>',code,"|",access_token)
+            print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用access_token:==========>', code, "|", access_token)
             return  HttpResponse('404')
         else:
-            print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code, "|", access_token,"|",user_ticket)
-
+            print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code, "|", access_token, "|", user_ticket)
 
         post_userlist_data['user_ticket'] = user_ticket
         get_userlist_data['access_token'] = access_token
@@ -99,14 +94,12 @@ def work_weixin_auth(request, company_id):
             company_id=company_id
         )
 
-
         if datetime.datetime.now() > account_expired_time:
             company_name = company_obj.name
             response.code = 403
             response.msg = '账户过期'
             print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (company_id, company_name, account_expired_time))
             return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
-
 
         # 如果用户存在
         if user_profile_objs:
@@ -140,7 +133,6 @@ def work_weixin_auth(request, company_id):
     else:
         response.code = 402
         response.msg = "请求方式异常"
-
 
 
 @csrf_exempt
