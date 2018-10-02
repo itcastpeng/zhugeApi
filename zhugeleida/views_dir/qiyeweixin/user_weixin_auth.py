@@ -104,6 +104,7 @@ def work_weixin_auth(request, company_id):
 
         # 如果用户存在
         if user_profile_objs:
+            print("---------------- 用户存在")
             user_profile_obj = user_profile_objs[0]
             redirect_url = ''
             if user_profile_obj.status == 1: #
@@ -134,6 +135,7 @@ def work_weixin_auth(request, company_id):
     else:
         response.code = 402
         response.msg = "请求方式异常"
+    return JsonResponse(response.__dict__)
 
 
 @csrf_exempt
@@ -270,7 +272,6 @@ def work_weixin_auth_oper(request,oper_type):
             else:
                 response.code = 301
                 response.msg = "没有公众号app"
-
 
     return JsonResponse(response.__dict__)
 
