@@ -82,6 +82,7 @@ def login(request):
         response.code = 401
         response.msg = "账号或密码错误"
 
+    print('调试登录 ->', response.__dict__)
     return JsonResponse(response.__dict__)
 
 
