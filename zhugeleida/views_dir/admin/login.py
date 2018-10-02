@@ -68,6 +68,7 @@ def login(request):
 
                 userprofile_obj.last_login_date = datetime.datetime.now()
                 userprofile_obj.save()
+                print('保存')
 
             else:
                 company_name = company_obj.name
