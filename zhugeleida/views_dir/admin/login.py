@@ -24,8 +24,10 @@ def login(request):
     )
 
     if userprofile_objs:
+        print('用户存在')
         if userprofile_objs.filter(status=1):
             # 如果有数据 查询第一条对象
+            print('用户已经启用')
 
             userprofile_obj = userprofile_objs[0]
             # 如果没有token 则生成 token
@@ -41,8 +43,6 @@ def login(request):
                     userprofile_obj.token = token
                 else:
                     token = userprofile_obj.token
-
-
 
                 response.code = 200
                 response.msg = '登录成功'
