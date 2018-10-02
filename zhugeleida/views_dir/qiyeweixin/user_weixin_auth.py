@@ -129,10 +129,12 @@ def work_weixin_auth(request, company_id):
                     user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
                 print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|", userid, "\n", redirect_url)
+                print('redirect_url -->', redirect_url)
                 return redirect(redirect_url)
 
         else:
             print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>',userid,company_id)
+            print('redirect_url --> http://zhugeleida.zhugeyingxiao.com/err_page')
             return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
     else:
