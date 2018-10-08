@@ -1005,7 +1005,7 @@ class zgld_goods_classification_management(models.Model):
 class zgld_goods_management(models.Model):
     goodsName = models.CharField(verbose_name='商品名称', max_length=128)
     parentName = models.ForeignKey(to='zgld_goods_classification_management', verbose_name='归属分类', null=True, blank=True)
-    goodsPrice = models.IntegerField(verbose_name='商品单价', default=0)
+    goodsPrice = models.FloatField(verbose_name='商品单价',max_length=64, default=0)
     salesNum = models.IntegerField(verbose_name='销量', default=0)
     inventoryNum = models.IntegerField(verbose_name='库存', default=0)
     commissionFee = models.IntegerField(verbose_name='佣金提成', default=0)
