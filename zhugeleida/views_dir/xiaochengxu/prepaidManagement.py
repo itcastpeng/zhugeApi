@@ -112,6 +112,7 @@ def yuZhiFu(request):
     if request.method == 'POST':
         url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
         #  参数
+        goodsNum = request.POST.get('goodsNum')
         goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
         u_id = request.POST.get('u_id')
@@ -176,7 +177,7 @@ def yuZhiFu(request):
                     'package': 'prepay_id=' + prepay_id,
                     'signType': 'MD5'
                 }
-                stringSignTemp = shengchengsign(data_dict, KEY)
+                stringSignTemp = shengchengsign(data_dict, SHANGHUKEY)
                 data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
                 # 预支付成功 创建订单
                 dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
