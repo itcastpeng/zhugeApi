@@ -71,7 +71,8 @@ def user_send_gongzhonghao_template_msg(data):
     get_data = {
         'data': data
     }
-    print(get_data)
+    print('-----发送公众号-模板消息---->>',get_data)
+
     requests.get(url, params=get_data)
 
 
