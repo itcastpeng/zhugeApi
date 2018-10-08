@@ -33,14 +33,14 @@ def theOrderShow(request):
             objs = objs[start_line: stop_line]
         otherData = []
         for obj in objs:
-            tuikuan = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id)
+            tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id)
             username = ''
             yewu = ''
             if obj.yewuUser:
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
             tuikuan = 0
-            if tuikuan:
+            if tuikuanObj:
                 tuikuan = 1
             # 总价
             # countPrice = 0
