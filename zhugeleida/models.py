@@ -1033,7 +1033,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     # goodsName = models.CharField(verbose_name='商品名字', max_length=64)
     unitRiceNum = models.IntegerField(verbose_name='数量', default=0)
     # countPrice = models.IntegerField(verbose_name='总价', default=0)
-    yingFuKuan = models.IntegerField(verbose_name='应付款', default=0)
+    yingFuKuan = models.FloatField(verbose_name='应付款', default=0)
     youHui = models.IntegerField(verbose_name='优惠', default=0)
     yewuUser = models.ForeignKey(to='zgld_userprofile', verbose_name='业务员', null=True, blank=True)
     gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)

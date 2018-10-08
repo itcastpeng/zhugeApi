@@ -145,7 +145,7 @@ def yuZhiFu(request):
                 # 'appid': appid,                               # 真实数据appid
                 'mch_id': '1513325051',                         # 商户号
                 # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,      # 商户号真实数据
-                'nonce_str': generateRandomStamping(),          # 32位随机值
+                'nonce_str': generateRandomStamping(),          # 32位随机值a
                 'openid': userObjs[0].openid,
                 'body': 'zhuge-vip',                            # 描述
                 'out_trade_no': getWxPayOrderId,                # 订单号
@@ -176,6 +176,7 @@ def yuZhiFu(request):
                     'package': 'prepay_id=' + prepay_id,
                     'signType': 'MD5'
                 }
+                print('total_fee===============>',total_fee)
                 stringSignTemp = shengchengsign(data_dict, SHANGHUKEY)
                 data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
                 # 预支付成功 创建订单
@@ -187,9 +188,9 @@ def yuZhiFu(request):
                 dingDanObjs.create(
                     shangpinguanli_id = goodsId,            # 商品ID
                     orderNumber = int(getWxPayOrderId),     # 订单号
-                    yingFuKuan = total_fee,                 # 应付款
+                    yingFuKuan = goodsObjs[0].goodsPrice,                 # 应付款
                     youHui = 0,                             # 优惠
-                    unitRiceNum=total_fee,                  # 数量
+                    unitRiceNum=goodsNum,                   # 数量
                     yewuUser_id = u_id,                     # 业务
                     gongsimingcheng_id = company_id,        # 公司
                     yongJin = commissionFee,                # 佣金
