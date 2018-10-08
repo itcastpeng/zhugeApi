@@ -716,7 +716,8 @@ import json
 
 
 url = ip +   '/zhugeleida/mycelery/user_send_gongzhonghao_template_msg' # 分页 聊天信息记录
-get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
+# get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
+get_data['data'] = json.dumps({'user_id': 60, 'customer_id' : 852})
 
 ret = requests.get(url, params=get_data)
 
