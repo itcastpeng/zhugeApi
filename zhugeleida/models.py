@@ -1039,12 +1039,12 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     shouHuoRen = models.ForeignKey(to='zgld_customer', verbose_name='收货人', max_length=128, null=True, blank=True)
     order_status = (
         (1, '等待到款'),
-        (2, '正在配货'),
-        (3, '等待移仓'),
-        (4, '正在移仓'),
-        (5, '已配货'),
-        (6, '已发货'),
-        (7, '已送达'),
+        # (2, '已收款'),
+        # (3, '等待移仓'),
+        # (4, '正在移仓'),
+        # (5, '已配货'),
+        # (6, '已发货'),
+        # (7, '已送达'),
         (8, '交易成功'),
         (9, '交易失败'),
         (10, '取消'),
@@ -1063,10 +1063,9 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', null=True, blank=True)
     tuikuan_status = (
         (1, '退款中, 等待卖家确认'),
-        (2, '退款中, 等待卖家收货'),
-        (3, '退款完成'),
-        (4, '退款失败'),
-        (5, '退款中'),
+        (2, '退款完成'),
+        (3, '退款失败'),
+        (4, '退款中'),
     )
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
