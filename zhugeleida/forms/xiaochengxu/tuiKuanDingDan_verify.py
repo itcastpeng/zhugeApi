@@ -6,7 +6,7 @@ import re
 import json
 from django.core.exceptions import ValidationError
 
-# 添加企业的产品
+# 添加退款单
 class AddForm(forms.Form):
     orderNumber = forms.IntegerField(
         required=True,
@@ -32,6 +32,12 @@ class AddForm(forms.Form):
                 return orderNumber
             else:
                 self.add_error('orderNumber', '该订单已退款, 请勿重复操作！')
+    def clean_tuiKuanYuanYin(self):
+        tuikuanyuanyin = self.data.get('tuiKuanYuanYin')
+        if len(tuikuanyuanyin) < 10:
+            self.add_error('tuiKuanYuanYin', '退款原因不可少于10字！')
+        else:
+            return tuikuanyuanyin
 
 
 class SelectForm(forms.Form):

@@ -40,9 +40,9 @@ def theOrderShow(request):
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
             # 总价
-            countPrice = 0
-            if obj.unitRiceNum and obj.shangpinguanli.goodsPrice:
-                countPrice = obj.shangpinguanli.goodsPrice * int(obj.unitRiceNum)
+            # countPrice = 0
+            # if obj.unitRiceNum and obj.shangpinguanli.goodsPrice:
+            #     countPrice = obj.shangpinguanli.goodsPrice * int(obj.unitRiceNum)
             # 轮播图
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
@@ -54,12 +54,15 @@ def theOrderShow(request):
                 decode_username = base64.b64decode(obj.shouHuoRen.username)
                 shouhuoren = str(decode_username, 'utf-8')
             shangpinguanli = obj.shangpinguanli
+            countPrice = 0
+            if obj.goodsPrice:
+                countPrice =  obj.goodsPrice * obj.unitRiceNum
             otherData.append({
                 'goodsPicture':topLunBoTu,
                 'id':obj.id,
                 'unitRiceNum':obj.unitRiceNum,
                 'goodsName' : shangpinguanli.goodsName,
-                'goodsPrice':shangpinguanli.goodsPrice,
+                'goodsPrice':obj.goodsPrice,
                 'countPrice':countPrice,
                 'yingFuKuan':obj.yingFuKuan,
                 'youhui':obj.yongJin,

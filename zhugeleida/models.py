@@ -1029,10 +1029,10 @@ class zgld_goods_management(models.Model):
 class zgld_shangcheng_dingdan_guanli(models.Model):
     shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
     orderNumber = models.CharField(verbose_name='订单号', max_length=128, null=True, blank=True)
+    goodsPrice = models.FloatField(verbose_name='商品单价', max_length=64, default=0)
     # goodsPicture = models.CharField(verbose_name='商品图片', max_length=128, null=True, blank=True)
     # goodsName = models.CharField(verbose_name='商品名字', max_length=64)
     unitRiceNum = models.IntegerField(verbose_name='数量', default=0)
-    # countPrice = models.IntegerField(verbose_name='总价', default=0)
     yingFuKuan = models.FloatField(verbose_name='应付款', default=0)
     youHui = models.IntegerField(verbose_name='优惠', default=0)
     yewuUser = models.ForeignKey(to='zgld_userprofile', verbose_name='业务员', null=True, blank=True)
