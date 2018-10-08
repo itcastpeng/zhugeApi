@@ -15,7 +15,7 @@ from django import forms
 
 ## 第三方平台接入
 @csrf_exempt
-def open_qiyeweixin(request, oper_type):
+def  open_qiyeweixin(request, oper_type):
     if request.method == "POST":
         response = Response.ResponseObj()
 
