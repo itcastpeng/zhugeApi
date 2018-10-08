@@ -124,14 +124,12 @@ def yuZhiFu(request):
             appid = xiaochengxu_app[0].authorization_appid
             company_id = xiaochengxu_app[0].company_id
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
-
             # ==========商户KEY============
             global SHANGHUKEY
             SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
             # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)       # 真实单价
-            total_fee = int(goodsObjs[0].goodsPrice * 100) * goodsNum
-
+            total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)
             # total_fee = int(0.01 * 100)
             ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
             shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
@@ -188,10 +186,10 @@ def yuZhiFu(request):
                 dingDanObjs.create(
                     shangpinguanli_id = goodsId,            # 商品ID
                     orderNumber = int(getWxPayOrderId),     # 订单号
-                    yingFuKuan = total_fee/100,             # 应付款
+                    yingFuKuan = float(total_fee)/100,             # 应付款
                     goodsPrice = goodsObjs[0].goodsPrice,   # 商品单价
                     youHui = 0,                             # 优惠
-                    unitRiceNum=goodsNum,                   # 数量
+                    unitRiceNum=int(goodsNum),                   # 数量
                     yewuUser_id = u_id,                     # 业务
                     gongsimingcheng_id = company_id,        # 公司
                     yongJin = commissionFee,                # 佣金
