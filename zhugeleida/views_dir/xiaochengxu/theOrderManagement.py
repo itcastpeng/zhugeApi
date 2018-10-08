@@ -26,7 +26,6 @@ def theOrderShow(request):
         if detailId:
             q.add(Q(id=detailId), Q.AND)
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=u_id) # 小程序用户只能查看自己的订单
-
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
@@ -34,11 +33,15 @@ def theOrderShow(request):
             objs = objs[start_line: stop_line]
         otherData = []
         for obj in objs:
+            tuikuan = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id)
             username = ''
             yewu = ''
             if obj.yewuUser:
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
+            tuikuan = 0
+            if tuikuan:
+                tuikuan = 1
             # 总价
             # countPrice = 0
             # if obj.unitRiceNum and obj.shangpinguanli.goodsPrice:
@@ -73,7 +76,8 @@ def theOrderShow(request):
                 'shouHuoRen_id':shouHuoRen_id,
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
-                'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S')
+                'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                'tuikuan':tuikuan
             })
         response.code = 200
         response.msg = '查询成功'

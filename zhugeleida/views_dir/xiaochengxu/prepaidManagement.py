@@ -118,7 +118,7 @@ def yuZhiFu(request):
         try:
             userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
 
-            u_idObjs = models.zgld_customer.objects.filter(id=u_id)
+            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=u_id)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)       #真实数据appid
             print('xiaochengxu_app=========> ',)
             appid = xiaochengxu_app[0].authorization_appid

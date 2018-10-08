@@ -1072,7 +1072,7 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
         (5, '退款中'),
     )
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
-
+    tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
 # 员工订单统计
 class zgld_yuangong_dingdan_tongji(models.Model):
     dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
