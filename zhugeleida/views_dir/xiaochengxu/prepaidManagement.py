@@ -39,17 +39,18 @@ def generateRandomStamping():
 #     img.save('hello.png')
 
 # 生成 签名
-def shengchengsign(result_data, KEY):
+def shengchengsign(result_data, KEY=None):
     ret = []
     for k in sorted(result_data.keys()):
         if (k != 'sign') and (k != '') and (result_data[k] is not None):
             ret.append('%s=%s' % (k, result_data[k]))
-
     stringA = '&'.join(ret)
-    stringSignTemp = '{stringA}&key={key}'.format(
-        stringA=stringA,
-        key=KEY
-    )
+    stringSignTemp = stringA
+    if KEY:
+        stringSignTemp = '{stringA}&key={key}'.format(
+            stringA=stringA,
+            key=KEY
+        )
     return stringSignTemp
 
 
@@ -64,19 +65,35 @@ def payback(request):
     openid = collection.getElementsByTagName("openid")[0].childNodes[0].data            # 用户openid
     cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data        # 钱数
     out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
-
+    print('out_trade_no==============out_trade_no===========================out_trade_no=====================>',out_trade_no)
     dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=out_trade_no)
     if return_code == 'SUCCESS':
         if dingDanobjs:
-            dingDanobjs.update(
-                theOrderStatus=8        # 支付成功 改订单状态成功
-            )
-        print('return_code---->',return_code)
-        print('mch_id---->',mch_id)
-        print('appid---->',appid)
-        print('openid---->',openid)
-        print('cash_fee---->',cash_fee)
-        print('out_trade_no---->',out_trade_no)
+            # 二次 查询是否付款成功
+            result_data = {
+                'appid': appid,                 # appid
+                'mch_id': mch_id,               # 商户号
+                'out_trade_no': out_trade_no,   # 订单号
+                'nonce_str': generateRandomStamping(),  # 32位随机值
+            }
+            url = 'https://api.mch.weixin.qq.com/pay/orderquery'
+            stringSignTemp = shengchengsign(result_data)
+            result_data['sign'] = md5(stringSignTemp).upper()
+            xml_data = toXml(result_data)
+            ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
+            ret.encoding = 'utf8'
+            DOMTree = xmldom.parseString(ret.text)
+            collection = DOMTree.documentElement
+            return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+            print('=======return_code========return_code===return_code======> ',return_code)
+            if return_code == 'SUCCESS':
+                dingDanobjs.update(
+                    theOrderStatus=8        # 支付成功 改订单状态成功
+                )
+            else:
+                dingDanobjs.update(
+                    theOrderStatus=9  # 支付失败 改订单状态失败
+                )
     else:
         dingDanobjs.update(
             theOrderStatus=9  # 支付失败 改订单状态失败
