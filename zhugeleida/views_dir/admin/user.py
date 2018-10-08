@@ -904,6 +904,7 @@ def user_oper(request, oper_type, o_id):
 
                                 obj.department = department_id_list
                                 obj.save()
+                                temp_obj.delete() # 删除已经通过审核的员工。
 
                                 # 生成企业用户二维码
                                 data_dict = {'user_id': obj.id, 'customer_id': ''}
