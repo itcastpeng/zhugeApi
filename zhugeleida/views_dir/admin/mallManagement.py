@@ -119,18 +119,18 @@ def mallManagementOper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 print('验证通过')
                 formObjs = forms_obj.cleaned_data
-                # models.zgld_goods_management.objects.create(
-                #     goodsName=formObjs.get('goodsName'),
-                #     parentName_id=formObjs.get('parentName'),
-                #     goodsPrice=formObjs.get('goodsPrice'),
-                #     inventoryNum=formObjs.get('inventoryNum'),
-                #     xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
-                #     shichangjiage=formObjs.get('shichangjiage'),
-                #     kucunbianhao=formObjs.get('kucunbianhao'),
-                #     goodsStatus=formObjs.get('goodsStatus'),
-                #     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
-                #     detailePicture=resultData.get('detailePicture'),  # 详情图片
-                # )
+                models.zgld_goods_management.objects.create(
+                    goodsName=formObjs.get('goodsName'),
+                    parentName_id=formObjs.get('parentName'),
+                    goodsPrice=formObjs.get('goodsPrice'),
+                    inventoryNum=formObjs.get('inventoryNum'),
+                    xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
+                    shichangjiage=formObjs.get('shichangjiage'),
+                    kucunbianhao=formObjs.get('kucunbianhao'),
+                    goodsStatus=formObjs.get('goodsStatus'),
+                    topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
+                    detailePicture=resultData.get('detailePicture'),  # 详情图片
+                )
                 response.code = 200
                 response.msg = '添加成功'
                 response.data = {}
@@ -159,6 +159,7 @@ def mallManagementOper(request, oper_type, o_id):
                 formObjs = forms_obj.cleaned_data
                 print('formObjs------> ',formObjs)
                 print("formObjs.get('xianshangjiaoyi')==========> ",formObjs.get('xianshangjiaoyi'))
+                print("formObjs.get('goodsPrice')==============> ",formObjs.get('goodsPrice'))
                 models.zgld_goods_management.objects.filter(id=o_id).update(
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
