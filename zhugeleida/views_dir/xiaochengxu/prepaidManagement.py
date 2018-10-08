@@ -65,10 +65,10 @@ def payback(request):
     openid = collection.getElementsByTagName("openid")[0].childNodes[0].data            # 用户openid
     cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data        # 钱数
     out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
-    print('out_trade_no==============out_trade_no===========================out_trade_no=====================>',out_trade_no)
     dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=out_trade_no)
     if return_code == 'SUCCESS':
         if dingDanobjs:
+            print('out_trade_no==============out_trade_no===========================out_trade_no=====================>',out_trade_no)
             # 二次 查询是否付款成功
             result_data = {
                 'appid': appid,                 # appid
@@ -78,6 +78,7 @@ def payback(request):
             }
             url = 'https://api.mch.weixin.qq.com/pay/orderquery'
             stringSignTemp = shengchengsign(result_data)
+            print('stringSignTemp============> ',stringSignTemp)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
             print('=======xml_data=========xml_data==========> ',xml_data)
@@ -155,6 +156,7 @@ def yuZhiFu(request):
                 }
             print('result_data-------> ',result_data)
             stringSignTemp = shengchengsign(result_data, KEY)
+            print('stringSignTemp----------------stringSignTemp------------->', stringSignTemp)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
 
