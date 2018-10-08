@@ -68,7 +68,6 @@ def payback(request):
     dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=out_trade_no)
     if return_code == 'SUCCESS':
         if dingDanobjs:
-            print('out_trade_no==============out_trade_no===========================out_trade_no=====================>',out_trade_no)
             # 二次 查询是否付款成功
             result_data = {
                 'appid': appid,                 # appid
@@ -77,11 +76,10 @@ def payback(request):
                 'nonce_str': generateRandomStamping(),  # 32位随机值
             }
             url = 'https://api.mch.weixin.qq.com/pay/orderquery'
-            stringSignTemp = shengchengsign(result_data)
-            print('stringSignTemp============> ',stringSignTemp)
+            KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
+            stringSignTemp = shengchengsign(result_data, KEY)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
-            print('=======xml_data=========xml_data==========> ',xml_data)
             ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
             ret.encoding = 'utf8'
             DOMTree = xmldom.parseString(ret.text)
@@ -142,7 +140,7 @@ def yuZhiFu(request):
             client_ip = '0.0.0.0'
             result_data = {
                 'appid': 'wx1add8692a23b5976',                  # appid
-                # 'appid': appid,                                 # 真实数据appid
+                # 'appid': appid,                               # 真实数据appid
                 'mch_id': '1513325051',                         # 商户号
                 # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,      # 商户号真实数据
                 'nonce_str': generateRandomStamping(),          # 32位随机值
