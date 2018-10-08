@@ -732,18 +732,15 @@ class zgld_chatinfo(models.Model):
     msg = models.TextField(u'消息', null=True, blank=True)
     content = models.TextField(verbose_name='消息', null=True, blank=True)
 
-    info_type_choices = (
-                        (1,'chat_people_info'),     #客户和用户之间的聊天信息
-                        (2,'chat_product_info')   #客户和用户之间的产品咨询
-    )
-    info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',choices=info_type_choices)
-    product_cover_url = models.CharField(verbose_name='产品封面URl', max_length=256, null=True)
-    product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
-    product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
+    # info_type_choices = (
+    #                     (1,'chat_people_info'),     #客户和用户之间的聊天信息
+    #                     (2,'chat_product_info')     #客户和用户之间的产品咨询
+    # )
+    # info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',choices=info_type_choices)
+    # product_cover_url = models.CharField(verbose_name='产品封面URl', max_length=256, null=True)
+    # product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
+    # product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
 
-    # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
-    #                                   verbose_name='最后活动时间(客户发起对话)', null=True)
-    # follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:

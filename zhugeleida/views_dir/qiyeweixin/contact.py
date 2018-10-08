@@ -77,6 +77,13 @@ def contact(request):
 
                     elif info_type == 3:
                         msg = _content.get('msg')
+                _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                    userprofile_id=obj.userprofile_id,
+                    customer_id=obj.customer_id,
+                    is_user_new_msg=True,
+                    send_type=2
+                    )
+                _count = _objs.count()
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,
@@ -86,6 +93,7 @@ def contact(request):
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
                     'msg': msg,
+                    'count' :_count
                 }
 
                 ret_data_list.append(base_info_dict)
@@ -98,3 +106,26 @@ def contact(request):
             }
 
     return JsonResponse(response.__dict__)
+
+@csrf_exempt
+@account.is_token(models.zgld_userprofile)
+def contact_oper(request,oper_type):
+
+    # 查询聊天信息数量
+    response = Response.ResponseObj()
+    if  oper_type == 'query_num':
+
+        response = Response.ResponseObj()
+        user_id = request.GET.get('user_id')
+        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+        chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile__company_id=company_id,send_type=2, is_user_new_msg=True).count()
+
+        response.code = 200
+        response.msg = '查询成功'
+        response.data = {
+            'chatinfo_count': chatinfo_count,
+        }
+
+    else:
+        response.code = 302
+        response.msg = "请求异常"
