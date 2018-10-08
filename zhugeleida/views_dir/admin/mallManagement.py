@@ -102,7 +102,7 @@ def mallManagementOper(request, oper_type, o_id):
         'o_id':o_id,
         'goodsName':request.POST.get('goodsName'),                    # 商品名称
         'parentName':request.POST.get('parentName'),                  # 父级分类
-        'goodsPrice':request.POST.get('goodsPrice'),                  # 商品标价
+        'goodsPrice':request.POST.get('goodsPrice'),                                           # 商品标价
         'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
         'goodsStatus':request.POST.get('goodsStatus'),                # 商品状态
         'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),        # 是否线上交易
@@ -111,6 +111,7 @@ def mallManagementOper(request, oper_type, o_id):
         'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
         'detailePicture':request.POST.get('detailePicture'),          # 详情图片
     }
+    print('resultData---------------->',resultData)
     user_id = request.GET.get('user_id')
     if request.method == "POST":
         if oper_type == 'add':
@@ -118,18 +119,18 @@ def mallManagementOper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 print('验证通过')
                 formObjs = forms_obj.cleaned_data
-                models.zgld_goods_management.objects.create(
-                    goodsName=formObjs.get('goodsName'),
-                    parentName_id=formObjs.get('parentName'),
-                    goodsPrice=formObjs.get('goodsPrice'),
-                    inventoryNum=formObjs.get('inventoryNum'),
-                    xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
-                    shichangjiage=formObjs.get('shichangjiage'),
-                    kucunbianhao=formObjs.get('kucunbianhao'),
-                    goodsStatus=formObjs.get('goodsStatus'),
-                    topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
-                    detailePicture=resultData.get('detailePicture'),  # 详情图片
-                )
+                # models.zgld_goods_management.objects.create(
+                #     goodsName=formObjs.get('goodsName'),
+                #     parentName_id=formObjs.get('parentName'),
+                #     goodsPrice=formObjs.get('goodsPrice'),
+                #     inventoryNum=formObjs.get('inventoryNum'),
+                #     xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
+                #     shichangjiage=formObjs.get('shichangjiage'),
+                #     kucunbianhao=formObjs.get('kucunbianhao'),
+                #     goodsStatus=formObjs.get('goodsStatus'),
+                #     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
+                #     detailePicture=resultData.get('detailePicture'),  # 详情图片
+                # )
                 response.code = 200
                 response.msg = '添加成功'
                 response.data = {}
