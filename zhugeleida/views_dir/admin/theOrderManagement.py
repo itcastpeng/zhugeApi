@@ -63,8 +63,11 @@ def theOrderShow(request):
                 topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
 
             countPrice = ''
-            if obj.unitRiceNum and shangpinguanli.goodsPrice:
-                countPrice = int(shangpinguanli.goodsPrice) * int(obj.unitRiceNum)
+            num = 1
+            if obj.unitRiceNum:
+                num = obj.unitRiceNum
+            if num and shangpinguanli.goodsPrice:
+                countPrice = int(shangpinguanli.goodsPrice) * int(num)
 
             otherData.append({
                 'id':obj.id,
