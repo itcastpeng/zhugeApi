@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 from zhugeleida.public.crypto_ import  WXBizMsgCrypt_qiyeweixin
 import sys
-
+from zhugeleida.public import common
 import json
 import redis
 import xml.etree.cElementTree as ET
@@ -64,90 +64,28 @@ def  open_qiyeweixin(request, oper_type):
 
             return HttpResponse("success")
 
+        elif oper_type == "create_grant_url":
 
-        return JsonResponse(response.__dict__)
+            suite_id = 'wx5d26a7a856b22bec'
+            create_pre_auth_code_ret =  common.create_pre_auth_code()
+            pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
+            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company'
 
+            get_bind_auth_data = 'suite_id=%s&pre_auth_code=%s&redirect_uri=%s&state=STATE' % (suite_id,pre_auth_code,redirect_uri)
+
+            pre_auth_code_url = 'https://open.work.weixin.qq.com/3rdapp/install?' + get_bind_auth_data
+
+            response.code = 200
+            response.msg = '生成【授权链接】成功'
+            response.data = {
+                'pre_auth_code_url' : pre_auth_code_url
+            }
+            # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
 
     return JsonResponse(response.__dict__)
 
 
 
-
-## 生成请 第三方平台自己的 suite_access_token
-def  create_suite_access_token():
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    response = Response.ResponseObj()
-
-    SuiteId = 'wx5d26a7a856b22bec'
-    key_name = 'SuiteTicket_%s' % (SuiteId)
-
-    SuiteTicket = rc.get(key_name)
-
-    post_component_data = {
-        "suite_id": SuiteId,
-        "suite_secret": "secret_value",
-        "suite_ticket": SuiteTicket
-    }
-
-    token_ret = rc.get('suite_access_token')
-    print('--- Redis里存储的 suite_access_token---->>', token_ret)
-
-    if not token_ret:
-        post_component_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_suite_token'
-        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
-        print('--------- [企业微信]获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
-        component_token_ret = component_token_ret.json()
-        access_token = component_token_ret.get('suite_access_token')
-
-        if access_token:
-            token_ret = access_token
-            rc.set('suite_access_token', access_token, 7000)
-        else:
-            response.code = 400
-            response.msg = "-------- [企业微信] 获取第三方平台 component_token_ret 返回错误 ------->"
-            return JsonResponse(response.__dict__)
-
-    response.data = {
-        'suite_access_token': token_ret
-    }
-    response.code = 200
-
-    return response
-
-def create_pre_auth_code():
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    response = Response.ResponseObj()
-
-    pre_auth_code_key_name = 'pre_auth_code_qiyeweixin'
-    exist_pre_auth_code = rc.get(pre_auth_code_key_name)
-    suite_access_token_ret = create_suite_access_token()
-    suite_access_token = suite_access_token_ret.data.get('suite_access_token')
-
-
-    if not exist_pre_auth_code:
-        get_pre_auth_data = {
-            'suite_access_token': suite_access_token
-        }
-        pre_auth_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_pre_auth_code'
-        pre_auth_code_ret = requests.get(pre_auth_code_url, params=get_pre_auth_data)
-        pre_auth_code_ret = pre_auth_code_ret.json()
-        pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
-        print('------ [企业微信] 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
-        if pre_auth_code:
-            rc.set(pre_auth_code_key_name, pre_auth_code, 1600)
-        else:
-            response.code = 400
-            response.msg = "--------- [企业微信] 获取第三方平台 pre_auth_code预授权码 返回错误 ------->"
-            return JsonResponse(response.__dict__)
-    else:
-        pre_auth_code = exist_pre_auth_code
-
-    response.data = {
-        'pre_auth_code': pre_auth_code
-    }
-    response.code = 200
-
-    return response
 
 
 class UpdateIDForm(forms.Form):
