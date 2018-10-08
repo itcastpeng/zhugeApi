@@ -54,6 +54,7 @@ def shengchengsign(result_data, KEY=None):
     return stringSignTemp
 
 
+SHANGHUKEY = ''
 @csrf_exempt
 def payback(request):
     resultBody = request.body
@@ -77,6 +78,11 @@ def payback(request):
             }
             url = 'https://api.mch.weixin.qq.com/pay/orderquery'
             KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
+
+            global SHANGHUKEY
+            print('SHANGHUKEY===============> ',SHANGHUKEY)
+
+
             stringSignTemp = shengchengsign(result_data, KEY)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
@@ -104,7 +110,6 @@ def payback(request):
     return JsonResponse(response.__dict__)
 
 
-
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
@@ -126,6 +131,8 @@ def yuZhiFu(request):
 
             # ==========商户KEY============
             KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
+            global SHANGHUKEY
+            SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
             # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)       # 真实单价
             total_fee = int(goodsObjs[0].goodsPrice * 100)
