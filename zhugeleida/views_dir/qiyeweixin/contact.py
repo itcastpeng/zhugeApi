@@ -113,19 +113,23 @@ def contact_oper(request,oper_type):
 
     # 查询聊天信息数量
     response = Response.ResponseObj()
-    if  oper_type == 'query_num':
 
-        response = Response.ResponseObj()
-        user_id = request.GET.get('user_id')
-        company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-        chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile__company_id=company_id,send_type=2, is_user_new_msg=True).count()
+    if request.method == 'GET':
+        if  oper_type == 'query_num':
 
-        response.code = 200
-        response.msg = '查询成功'
-        response.data = {
-            'chatinfo_count': chatinfo_count,
-        }
+            response = Response.ResponseObj()
+            user_id = request.GET.get('user_id')
+            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile__company_id=company_id,send_type=2, is_user_new_msg=True).count()
 
-    else:
-        response.code = 302
-        response.msg = "请求异常"
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'chatinfo_count': chatinfo_count,
+            }
+
+        else:
+            response.code = 302
+            response.msg = "请求异常"
+
+    return JsonResponse(response.__dict__)
