@@ -301,7 +301,7 @@ def chat_oper(request, oper_type, o_id):
 
                 elif  user_type == 1 and customer_id and user_id:
                         #
-                     pass
+                    tasks.user_sen
 
 
                 response.code = 200
