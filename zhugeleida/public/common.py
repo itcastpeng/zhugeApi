@@ -185,10 +185,11 @@ def  create_suite_access_token():
     key_name = 'SuiteTicket_%s' % (SuiteId)
 
     SuiteTicket = rc.get(key_name)
+    suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
 
     post_component_data = {
         "suite_id": SuiteId,
-        "suite_secret": "secret_value",
+        "suite_secret": suite_secret ,
         "suite_ticket": SuiteTicket
     }
 

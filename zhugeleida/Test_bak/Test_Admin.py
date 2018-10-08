@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -66,6 +66,18 @@ ip = 'http://127.0.0.1:8001'
 
 # url = ip + '/zhugeleida/admin/open_weixin/create_grant_url'  # 获取 关联第三方的二维码
 # ret = requests.post(url, params=get_data,data=post_data)
+
+
+######################### 企业微信三方授权 #########################
+
+url = ip + '/zhugeleida/admin/open_qiyeweixin/create_grant_url'  # 获取 关联第三方的二维码
+ret = requests.post(url, params=get_data,data=post_data)
+
+
+
+
+
+
 
 
 # url = ip + '/zhugeleida/admin/xcx_auth_process'
@@ -469,9 +481,9 @@ ip = 'http://127.0.0.1:8001'
 # get_data['company_id'] = 1
 # ret = requests.get(url, data=post_data,params=get_data)
 
-url = ip +  '/zhugeleida/admin/company'   # 验证通过
-get_data['id']=1
-ret = requests.get(url, data=post_data,params=get_data)
+# url = ip +  '/zhugeleida/admin/company'   # 验证通过
+# get_data['id']=1
+# ret = requests.get(url, data=post_data,params=get_data)
 
 
 # url = ip +  '/zhugeleida/admin/company/add_company/0'   # 后台增加公司
