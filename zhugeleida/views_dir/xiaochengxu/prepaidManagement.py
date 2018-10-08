@@ -210,10 +210,12 @@ def yuZhiFu(request):
                 response.msg = '预支付失败'
                 response.data = ''
                 return JsonResponse(response.__dict__)
-        except Exception:
+        except Exception as e:
             response.code = 200
             response.msg = '预支付失败'
             response.data = ''
+            print('错误-----------------> ',e )
+            return JsonResponse(response.__dict__)
 
     else:
         response.code = 402

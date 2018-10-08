@@ -99,7 +99,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 if int(status) == 1:
                     objs.update(tuiKuanStatus=2)
                 elif int(status) == 2:
-                    objs.update(tuiKuanStatus=3)
+                    objs.update(tuiKuanStatus=5)
                 else:
                     objs.update(tuiKuanStatus=4)
                 response.code = 200
