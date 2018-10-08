@@ -886,7 +886,7 @@ def deal_line_info(data):
 
     elif index_type == 2:  # 咨询客户数
         comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                                 is_customer_product_num__gte=1).count()
+                                                                                 is_customer_msg_num__gte=1).count()
         return comm_num_of_customer
 
 
