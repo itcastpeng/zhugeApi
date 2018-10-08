@@ -80,6 +80,7 @@ def payback(request):
             stringSignTemp = shengchengsign(result_data)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
+            print('=======xml_data=========xml_data==========> ',xml_data)
             ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
             ret.encoding = 'utf8'
             DOMTree = xmldom.parseString(ret.text)
