@@ -15,10 +15,11 @@ def tuiKuanDingDanShow(request):
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
     u_id = request.GET.get('u_id')
+    orderNumber_id = request.GET.get('orderNumber'),
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
-        objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber__shouHuoRen_id=u_id)
+        objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=orderNumber_id)
         objsCount = objs.count()
 
         if length != 0:
