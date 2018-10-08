@@ -133,7 +133,7 @@ def work_weixin_auth(request, company_id):
 
             else:
                 print('----------【雷达用户】未开通 ,未登录成功 userid | company_id ------>', userid, company_id)
-                return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+                return redirect('http://zhugeleida.zhugeyingxiao.com/expire_page/index')
 
         else:
             print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>',userid,company_id)
