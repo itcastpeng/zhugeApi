@@ -62,17 +62,19 @@ def theOrderShow(request):
             if obj.shangpinguanli.topLunBoTu:
                 topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
 
-            countPrice = ''
-            num = 1
-            if obj.unitRiceNum:
-                num = obj.unitRiceNum
-            if num and shangpinguanli.goodsPrice:
-                countPrice = int(shangpinguanli.goodsPrice) * int(num)
-
+            # countPrice = ''
+            # num = 1
+            # if obj.unitRiceNum:
+            #     num = obj.unitRiceNum
+            # if num and shangpinguanli.goodsPrice:
+            #     countPrice = int(shangpinguanli.goodsPrice) * int(num)
+            countPrice = 0
+            if obj.goodsPrice:
+                countPrice = obj.goodsPrice * obj.unitRiceNum
             otherData.append({
                 'id':obj.id,
                 'goodsName' : shangpinguanli.goodsName,
-                'goodsPrice':shangpinguanli.goodsPrice,
+                'goodsPrice':obj.goodsPrice,
                 'countPrice':countPrice,
                 'yingFuKuan':obj.yingFuKuan,
                 'youhui':obj.yongJin,

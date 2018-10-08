@@ -188,7 +188,8 @@ def yuZhiFu(request):
                 dingDanObjs.create(
                     shangpinguanli_id = goodsId,            # 商品ID
                     orderNumber = int(getWxPayOrderId),     # 订单号
-                    yingFuKuan = goodsObjs[0].goodsPrice,                 # 应付款
+                    yingFuKuan = total_fee/100,             # 应付款
+                    goodsPrice = goodsObjs[0].goodsPrice,   # 商品单价
                     youHui = 0,                             # 优惠
                     unitRiceNum=goodsNum,                   # 数量
                     yewuUser_id = u_id,                     # 业务
@@ -197,7 +198,8 @@ def yuZhiFu(request):
                     peiSong = '',                           # 配送
                     shouHuoRen_id = u_id,                   # 收货人
                     theOrderStatus = 1,                     # 订单状态
-                    createDate=date_time
+                    createDate=date_time,
+                    goodsName=goodsObjs[0].goodsName
                 )
                 response.code = 200
                 response.msg = '预支付请求成功'
