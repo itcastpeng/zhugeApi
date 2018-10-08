@@ -77,13 +77,9 @@ def payback(request):
                 'nonce_str': generateRandomStamping(),  # 32位随机值
             }
             url = 'https://api.mch.weixin.qq.com/pay/orderquery'
-            KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
-
             global SHANGHUKEY
-            print('SHANGHUKEY===============> ',SHANGHUKEY)
-
-
-            stringSignTemp = shengchengsign(result_data, KEY)
+            SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
+            stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
             ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
@@ -130,10 +126,9 @@ def yuZhiFu(request):
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
 
             # ==========商户KEY============
-            KEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
             global SHANGHUKEY
             SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
-            # KEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
+            # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)       # 真实单价
             total_fee = int(goodsObjs[0].goodsPrice * 100)
 
@@ -160,7 +155,7 @@ def yuZhiFu(request):
                 'trade_type': 'JSAPI'
                 }
             print('result_data-------> ',result_data)
-            stringSignTemp = shengchengsign(result_data, KEY)
+            stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
             print('stringSignTemp----------------stringSignTemp------------->', stringSignTemp)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
