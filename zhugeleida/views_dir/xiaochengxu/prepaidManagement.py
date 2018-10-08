@@ -87,7 +87,6 @@ def payback(request):
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-            print('=======return_code========return_code===return_code======> ',return_code)
             if return_code == 'SUCCESS':
                 dingDanobjs.update(
                     theOrderStatus=8        # 支付成功 改订单状态成功
@@ -112,7 +111,7 @@ def yuZhiFu(request):
     if request.method == 'POST':
         url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
         #  参数
-        goodsNum = request.POST.get('goodsNum')
+        goodsNum = request.POST.get('goodsNum', 1)               # 商品数量
         goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
         u_id = request.POST.get('u_id')
@@ -131,7 +130,7 @@ def yuZhiFu(request):
             SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
             # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)       # 真实单价
-            total_fee = int(goodsObjs[0].goodsPrice * 100)
+            total_fee = int(goodsObjs[0].goodsPrice * 100) * goodsNum
 
             # total_fee = int(0.01 * 100)
             ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
@@ -190,7 +189,7 @@ def yuZhiFu(request):
                     orderNumber = int(getWxPayOrderId),     # 订单号
                     yingFuKuan = total_fee,                 # 应付款
                     youHui = 0,                             # 优惠
-                    unitRiceNum=1,                          # 数量
+                    unitRiceNum=total_fee,                  # 数量
                     yewuUser_id = u_id,                     # 业务
                     gongsimingcheng_id = company_id,        # 公司
                     yongJin = commissionFee,                # 佣金
