@@ -164,8 +164,10 @@ def theOrderOper(request, oper_type, o_id):
                 response.msg = '订单无法取消'
 
         elif oper_type == 'deleteOrder':
+            print('=-==========================================')
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
             status = int(orderObjs[0].theOrderStatus)
+            print('status=============>',status)
             if status in [8, 9, 10]:
                 orderObjs.delete()
                 response.code = 200
