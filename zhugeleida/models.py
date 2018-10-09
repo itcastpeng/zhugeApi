@@ -1037,6 +1037,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     yongJin = models.IntegerField(verbose_name='佣金', default=0)
     peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
     shouHuoRen = models.ForeignKey(to='zgld_customer', verbose_name='收货人', max_length=128, null=True, blank=True)
+    logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
     order_status = (
         (1, '待付款'),
         # (2, '已收款'),
@@ -1069,6 +1070,7 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     )
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
+    logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
 # 员工订单统计
 class zgld_yuangong_dingdan_tongji(models.Model):
     dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)

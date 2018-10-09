@@ -25,7 +25,7 @@ def theOrderShow(request):
         q = Q()
         if detailId:
             q.add(Q(id=detailId), Q.AND)
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=u_id) # 小程序用户只能查看自己的订单
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=u_id, logicDelete=0) # 小程序用户只能查看自己的订单
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
@@ -33,7 +33,7 @@ def theOrderShow(request):
             objs = objs[start_line: stop_line]
         otherData = []
         for obj in objs:
-            tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id)
+            tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id, logicDelete=0)
             username = ''
             yewu = ''
             if obj.yewuUser:
@@ -154,7 +154,7 @@ def theOrderOper(request, oper_type, o_id):
         # 取消订单
         elif oper_type == 'CancelTheOrder':
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
-            status = orderObjs[0].theOrderStatus
+            status = int(orderObjs[0].theOrderStatus)
             if status and (status == 1 or status == 11):
                 orderObjs.update(theOrderStatus=10)
                 response.code = 200
@@ -163,6 +163,36 @@ def theOrderOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '订单无法取消'
 
+        elif oper_type == 'deleteOrder':
+            print('=-==========================================')
+            orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            if orderObjs:
+                status = int(orderObjs[0].theOrderStatus)
+                print('status=============>',status)
+                if status in [1, 10]:
+                    orderObjs.update(logicDelete=1)
+                    response.code = 200
+                    response.msg = '删除成功'
+                elif status in [8, 9]:
+                    tuiKuanObjs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=o_id)
+                    if tuiKuanObjs:
+                        tuikuanstatus = int(tuiKuanObjs[0].tuiKuanStatus)
+                        if tuikuanstatus in [2, 3]:
+                            orderObjs.update(logicDelete=1)
+                            tuiKuanObjs.update(logicDelete=1)
+                        else:
+                            response.code = 301
+                            response.msg = '该订单有退款业务, 不可删除！'
+                    else:
+                        orderObjs.update(logicDelete=1)
+                        response.code = 200
+                        response.msg = '删除成功'
+                else:
+                    response.code = 301
+                    response.msg = '删除失败, 当前状态不可删除'
+            else:
+                response.code = 301
+                response.msg = '无此订单'
     else:
         response.code = 402
         response.msg = "请求异常"
