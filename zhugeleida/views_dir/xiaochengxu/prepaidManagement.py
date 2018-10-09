@@ -186,6 +186,8 @@ def yuZhiFu(request):
             }
             stringSignTemp = shengchengsign(data_dict, SHANGHUKEY)
             data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
+            response.code = 200
+            response.msg = '支付成功'
             # 预支付成功 创建订单
             if not fukuan:
                 dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
@@ -213,7 +215,7 @@ def yuZhiFu(request):
                 response.code = 200
                 response.msg = '预支付请求成功'
                 response.data = data_dict
-                return JsonResponse(response.__dict__)
+            return JsonResponse(response.__dict__)
         else:
             if not fukuan:
                 response.msg = '预支付失败'

@@ -130,7 +130,7 @@ def theOrderOper(request, oper_type, o_id):
         #     else:
         #         response.code = 301
         #         response.msg = json.loads(forms_obj.errors.as_json())
-
+        # 确认收货
         if oper_type == 'querenshouhuo':
             tuiKuanId = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=o_id)
             objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
@@ -146,6 +146,19 @@ def theOrderOper(request, oper_type, o_id):
                     response.msg = '已完成'
                     response.code = 200
                     objs.update(theOrderStatus=7)
+
+        # 取消订单
+        elif oper_type == 'CancelTheOrder':
+            orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            status = orderObjs[0].theOrderStatus
+            if status and (status == 1 or status == 11):
+                orderObjs.update(theOrderStatus=10)
+                response.code = 200
+                response.msg = '已取消订单'
+            else:
+                response.code = 301
+                response.msg = '订单无法取消'
+
     else:
         response.code = 402
         response.msg = "请求异常"
