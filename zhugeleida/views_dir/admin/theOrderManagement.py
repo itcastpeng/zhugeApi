@@ -38,6 +38,7 @@ def theOrderShow(request):
         print('q)------------> ',q)
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
             shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp=xiaochengxu_id
         ).filter(q)

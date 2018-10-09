@@ -14,7 +14,7 @@ class AddForm(forms.Form):
             'required': "订单ID不能为空"
         }
     )
-    tuiKuanYuanYin = forms.CharField(
+    tuiKuanYuanYin = forms.IntegerField(
         required=True,
         error_messages={
             'required': "退款原因不能为空"
