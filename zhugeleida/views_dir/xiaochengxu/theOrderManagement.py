@@ -59,6 +59,9 @@ def theOrderShow(request):
             countPrice = 0
             if obj.goodsPrice:
                 countPrice =  obj.goodsPrice * obj.unitRiceNum
+            detailePicture = ''
+            if objs[0].detailePicture:
+                detailePicture = json.loads(objs[0].detailePicture)
             otherData.append({
                 'goodsPicture':topLunBoTu,
                 'id':obj.id,
@@ -77,7 +80,8 @@ def theOrderShow(request):
                 'status':obj.get_theOrderStatus_display(),
                 'statusId': obj.theOrderStatus,
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                'tuikuan':tuikuan
+                'tuikuan':tuikuan,
+                'detailePicture':detailePicture,
             })
         response.code = 200
         response.msg = '查询成功'

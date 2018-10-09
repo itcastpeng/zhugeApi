@@ -218,7 +218,8 @@ def yuZhiFu(request):
                     shouHuoRen_id = u_id,                   # 收货人
                     theOrderStatus = 1,                     # 订单状态
                     createDate=date_time,
-                    goodsName=goodsObjs[0].goodsName
+                    goodsName=goodsObjs[0].goodsName,
+                    detailePicture=goodsObjs[0].detailePicture
                 )
                 response.code = 200
                 response.msg = '预支付请求成功'
