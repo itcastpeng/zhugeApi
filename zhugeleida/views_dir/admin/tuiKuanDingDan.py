@@ -107,11 +107,11 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             u_id = request.POST.get('u_id')
             objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(id=o_id)
             if status:
-                if int(status) == 1:
-                    objs.update(tuiKuanStatus=2)
-                    response.msg = '修改成功'
+                # if int(status) == 1:
+                #     objs.update(tuiKuanStatus=2)
+                #     response.msg = '修改成功'
                 # 调用微信接口 申请退款
-                elif int(status) == 2:
+                if int(status) == 2:
                     objs.update(tuiKuanStatus=4) # 更新状态 退款中
                     if u_id:
                         # 获取appid
@@ -144,7 +144,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 'total_fee': jine,                                           # 订单金额
                                 'refund_fee': jine,                                          # 退款金额
                             }
-
+                            print('result_data----------result_data--------------result_data------------->',result_data)
                             stringSignTemp = prepaidManagement.shengchengsign(result_data, SHANGHUKEY)
                             result_data['sign'] = prepaidManagement.md5(stringSignTemp).upper()
                             xml_data = prepaidManagement.toXml(result_data)
