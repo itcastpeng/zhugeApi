@@ -247,7 +247,7 @@ def user_oper(request, oper_type, o_id):
                 print("验证通过")
 
                 # user_id = request.GET.get('user_id')
-                userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
+                userid = str(int(time.time()*1000000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
                 username = forms_obj.cleaned_data.get('username')
                 password = forms_obj.cleaned_data.get('password')
                 # role_id = forms_obj.cleaned_data.get('role_id')

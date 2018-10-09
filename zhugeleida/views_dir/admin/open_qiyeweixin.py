@@ -12,6 +12,8 @@ import json
 import redis
 import xml.etree.cElementTree as ET
 from django import forms
+from django.shortcuts import render, redirect
+import datetime
 
 ## 第三方平台接入
 @csrf_exempt
@@ -69,13 +71,47 @@ def  open_qiyeweixin(request, oper_type):
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                 key_name = 'AuthCode_%s' % (SuiteId)
 
-                rc.set(key_name, AuthCode, 3000)
+                rc.set(key_name, AuthCode, 250)  # 授权的auth_code。用于获取企业的永久授权码。5分钟内有效
                 print('--------企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
+                get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
+                create_pre_auth_code_ret = common.create_pre_auth_code()
+
+                suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
+
+                get_permanent_code_url_data = {
+                    'suite_access_token': suite_access_token
+                }
+                post_permanent_code_url_data = {
+                    'AuthCode' : AuthCode
+                }
+
+                get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data,
+                                                 data=json.dumps(post_permanent_code_url_data))
+
+                get_permanent_code_info = get_permanent_code_info_ret.json()
+                print('-------[企业微信] 获取企业永久授权码 返回------->>',get_permanent_code_info)
+
+                corpid =  get_permanent_code_info['auth_corp_info'].get('corpid')       # 授权方企业微信id
+                corp_name =  get_permanent_code_info['auth_corp_info'].get('corp_name') # 授权方企业微信名称
+                access_token = get_permanent_code_info.get('access_token')              # 授权方（企业）access_token
+                permanent_code = get_permanent_code_info.get('permanent_code')          # 企业微信永久授权码
+
+                key_name = 'access_token_qiyeweixin_%s' % (corpid)
+                rc.set(key_name, access_token, 7000)
+                # obj = models.zgld_company.objects.filter(corp_id=corpid)
+                #
+                # if obj:
+                #     print('----- [企业微信] 授权方-企业微信【存在】数据库 corpid: --->',corpid,'|',permanent_code,corp_name)
+                #     # obj.update(
+                #     #     permanent_code=permanent_code
+                #     # )
+                # else:
+                #     print('----- [企业微信] 授权方-企业微信【未在】数据库 corpid: --->', corpid,'|',permanent_code,corp_name)
+
+
+
             return HttpResponse("success")
-
-
-
 
         elif oper_type == "create_grant_url":
 
@@ -94,7 +130,6 @@ def  open_qiyeweixin(request, oper_type):
                 'pre_auth_code_url' : pre_auth_code_url
             }
             # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
-
 
 
 
@@ -177,6 +212,102 @@ def  open_qiyeweixin(request, oper_type):
 
             # 验证URL成功，将sEchoStr返回给企业号
             return HttpResponse(sEchoStr)
+
+        #  网页授权登录第三方 跳转后的 redirect_uri
+        elif oper_type == 'work_weixin_auth':
+            code = request.GET.get('code')
+
+            # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+            create_pre_auth_code_ret = common.create_suite_access_token()
+            suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
+
+            get_code_data = {
+                'code': code,
+                'access_token': suite_access_token
+            }
+            code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserinfo3rd'
+            code_ret = requests.get(code_url, params=get_code_data)
+
+            code_ret_json = code_ret.json()
+            print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
+
+            user_ticket = code_ret_json.get('user_ticket')
+            if not user_ticket:
+                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用access_token:==========>', code, "|",
+                      suite_access_token)
+                return HttpResponse('404')
+            else:
+                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
+                      "|", suite_access_token, "|", user_ticket)
+
+            post_userlist_data = {
+                'user_ticket': user_ticket
+            }
+            get_userlist_data = {
+                'access_token': suite_access_token
+            }
+
+            userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
+            user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
+            user_list_ret_json = user_list_ret.json()
+
+            userid = user_list_ret_json.get('userid')
+            corpid = user_list_ret_json.get('corpid')
+            name = user_list_ret_json.get('name')
+            avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
+            gender = user_list_ret_json.get('gender')
+            # email = user_list_ret_json['email']
+
+            print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
+
+            user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
+                userid=userid,
+
+            )
+
+            # 如果用户存在
+            if user_profile_objs:
+                user_profile_obj = user_profile_objs[0]
+                account_expired_time = user_profile_obj.account_expired_time
+                company_name = user_profile_obj.company.name
+                company_id = user_profile_obj.company_id
+
+                if datetime.datetime.now() > account_expired_time:
+                    response.code = 403
+                    response.msg = '账户过期'
+                    print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (company_id, company_name, account_expired_time))
+                    return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
+
+
+                redirect_url = ''
+                if user_profile_obj.status == 1:  #
+                    user_profile_obj.gender = gender
+                    # user_profile_obj.email = email
+                    user_profile_obj.avatar = avatar
+
+                    last_login_date = user_profile_obj.last_login_date
+                    if not last_login_date:  # 为空说明第一次登陆
+                        is_first_login = 'Yes'
+                        user_profile_obj.last_login_date = datetime.datetime.now()
+                    else:
+                        is_first_login = 'No'
+
+                    user_profile_obj.save()
+                    redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&id=' + str(
+                        user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
+
+                    print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                          userid, "\n", redirect_url)
+                    return redirect(redirect_url)
+
+                else:
+                    print('----------【雷达用户】未开通 ,未登录成功 userid | company_id ------>', userid, company_id)
+                    return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+
+            else:
+                print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>', userid)
+                return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
 
     return JsonResponse(response.__dict__)

@@ -6,8 +6,10 @@ class zgld_company(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
     area = models.CharField(max_length=128, verbose_name='所在地区', null=True)
     address = models.TextField(verbose_name='公司详细地址')
-    corp_id = models.CharField(verbose_name="企业ID", max_length=128)
+    corp_id = models.CharField(verbose_name="企业ID(授权方企业微信id)", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
+    # permanent_code =  models.CharField(verbose_name="企业微信永久授权码", max_length=128,null=True)
+
     website_content = models.TextField(verbose_name='官网内容',default='[]')
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
     charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)

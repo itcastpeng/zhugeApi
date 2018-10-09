@@ -218,7 +218,7 @@ def  create_suite_access_token():
 
     return response
 
-## 企业微信 生成 预授权码
+## 企业微信 生成 预授权码 + suite_access_token
 def create_pre_auth_code():
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
@@ -254,4 +254,5 @@ def create_pre_auth_code():
     response.code = 200
 
     return response
+
 
