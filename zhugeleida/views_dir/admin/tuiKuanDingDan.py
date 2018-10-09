@@ -145,13 +145,13 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                             'refund_fee': jine,                                          # 退款金额
                         }
                         other.append(result_data)
-                        print('result_data----------result_data--------------result_data------------->',result_data)
+                        # print('result_data----------result_data--------------result_data------------->',result_data)
                         stringSignTemp = prepaidManagement.shengchengsign(result_data, SHANGHUKEY)
                         result_data['sign'] = prepaidManagement.md5(stringSignTemp).upper()
                         xml_data = prepaidManagement.toXml(result_data)
                         # print('xml_data-----------> ',xml_data)
 
-                        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                        BASE_DIR = jiChuSheZhiObjs[0].zhengshu
                         cret = os.path.join(BASE_DIR, 'apiclient_cert.pem')
                         key = os.path.join(BASE_DIR, 'apiclient_key.pem')
 
