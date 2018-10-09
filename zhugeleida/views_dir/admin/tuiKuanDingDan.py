@@ -48,12 +48,14 @@ def tuiKuanDingDanShow(request):
                 'id':obj.id,
                 'orderNumber_id':obj.orderNumber_id,
                 'orderNumber':obj.orderNumber.orderNumber,
-                'tuiKuanYuanYin':obj.tuiKuanYuanYin,
+                'tuiKuanYuanYinId':obj.tuiKuanYuanYin,
+                'tuiKuanYuanYin':obj.get_tuiKuanYuanYin_display(),
                 'shengChengDateTime':obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuiKuanDateTime':tuikuan,
                 'tuiKuanStatus':obj.tuiKuanStatus,
                 'tuikuanzhanghao':'123456',
                 'tuikuanjine': obj.orderNumber.yingFuKuan,
+                'statusNameId':obj.tuiKuanStatus,
                 'statusName':obj.get_tuiKuanStatus_display(),
             })
             response.data = {

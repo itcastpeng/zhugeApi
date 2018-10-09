@@ -21,7 +21,7 @@ def tuiKuanDingDanShow(request):
         length = forms_obj.cleaned_data['length']
         objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=orderNumber_id)
         objsCount = objs.count()
-
+        print('objs---------->', objs)
         if length != 0:
             start_line = (current_page - 1) * length
             stop_line = start_line + length
@@ -35,10 +35,12 @@ def tuiKuanDingDanShow(request):
                 'id': obj.id,
                 'orderNumber_id': obj.orderNumber_id,
                 'orderNumber': obj.orderNumber.orderNumber,
-                'tuiKuanYuanYin': obj.tuiKuanYuanYin,
+                'tuiKuanYuanYin': obj.get_tuiKuanYuanYin_display(),
+                'tuiKuanYuanYinId': obj.tuiKuanYuanYin,
                 'shengChengDateTime': obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuiKuanDateTime': tuikuan,
                 'tuiKuanStatus': obj.get_tuiKuanStatus_display(),
+                'tuiKuanStatusId': obj.tuiKuanStatus,
                 'goodsName':obj.orderNumber.goodsName,
                 'tuiKuanPrice':obj.orderNumber.yingFuKuan
             })
@@ -84,9 +86,20 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
     else:
-        response.code = 402
-        response.msg = "请求异常"
-
+        if oper_type == 'selectYuanYin':
+            objs = models.zgld_shangcheng_tuikuan_dingdan_management
+            otherData = []
+            for yuanyin in objs.tuikuanyuanyin_status:
+                otherData.append({
+                    'id':yuanyin[0],
+                    'name':yuanyin[1]
+                })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = otherData
+        else:
+            response.code = 402
+            response.msg = "请求异常"
     return JsonResponse(response.__dict__)
 
 
