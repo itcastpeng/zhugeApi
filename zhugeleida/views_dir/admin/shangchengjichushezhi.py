@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.shangchengshezhi_verify import jichushezhi, zhifupeizhi, yongjinshezhi
-import json
+import json, zipfile, os, random
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -92,20 +92,29 @@ def jiChuSheZhiOper(request, oper_type):
             if forms_obj.is_valid():
                 print('支付配置 验证成功')
                 formObjs = forms_obj.cleaned_data
+                zhengShuPath = formObjs.get('zhengshu')
                 if userObjs:
                     userObjs.update(
                         shangHuHao=formObjs.get('shangHuHao'),
                         shangHuMiYao=formObjs.get('shangHuMiYao'),
-                        zhengshu=formObjs.get('zhengshu')
+                        zhengshu=zhengShuPath
                     )
                     response.msg = '修改成功'
                 else:
                     models.zgld_shangcheng_jichushezhi.objects.create(
                         shangHuHao=formObjs.get('shangHuHao'),
                         shangHuMiYao=formObjs.get('shangHuMiYao'),
-                        zhengshu=formObjs.get('zhengshu')
+                        zhengshu=zhengShuPath
                     )
                     response.msg = '创建成功'
+                zhengshupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
+                file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile') + '/' + formObjs.get('shangHuHao')
+                file_zip = zipfile.ZipFile(zhengshupath, 'r')
+                for file in file_zip.namelist():
+                    file_zip.extract(file, r'{}'.format(file_dir))
+                file_zip.close()
+                os.remove(zhengShuPath)
+                userObjs.update(zhengshu=file_dir)
                 response.code = 200
                 response.data = ''
             else:
