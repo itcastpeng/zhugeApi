@@ -154,7 +154,7 @@ def theOrderOper(request, oper_type, o_id):
         # 取消订单
         elif oper_type == 'CancelTheOrder':
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
-            status = orderObjs[0].theOrderStatus
+            status = int(orderObjs[0].theOrderStatus)
             if status and (status == 1 or status == 11):
                 orderObjs.update(theOrderStatus=10)
                 response.code = 200
@@ -162,6 +162,17 @@ def theOrderOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = '订单无法取消'
+
+        elif oper_type == 'deleteOrder':
+            orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            status = int(orderObjs[0].theOrderStatus)
+            if status in [8, 9, 10]:
+                orderObjs.delete()
+                response.code = 200
+                response.msg = '删除成功'
+            else:
+                response.code = 301
+                response.msg = '删除失败, 当前状态不可删除'
 
     else:
         response.code = 402
