@@ -172,6 +172,7 @@ def yuZhiFu(request):
 
         ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
         ret.encoding = 'utf8'
+        print('ret.text============> ',ret.text)
         DOMTree = xmldom.parseString(ret.text)
         collection = DOMTree.documentElement
         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
