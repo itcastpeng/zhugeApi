@@ -56,7 +56,6 @@ def theOrderShow(request):
                 shouHuoRen_id = obj.shouHuoRen_id
                 decode_username = base64.b64decode(obj.shouHuoRen.username)
                 shouhuoren = str(decode_username, 'utf-8')
-            shangpinguanli = obj.shangpinguanli
             countPrice = 0
             if obj.goodsPrice:
                 countPrice =  obj.goodsPrice * obj.unitRiceNum
@@ -64,7 +63,7 @@ def theOrderShow(request):
                 'goodsPicture':topLunBoTu,
                 'id':obj.id,
                 'unitRiceNum':obj.unitRiceNum,
-                'goodsName' : shangpinguanli.goodsName,
+                'goodsName' : obj.goodsName,
                 'goodsPrice':obj.goodsPrice,
                 'countPrice':countPrice,
                 'yingFuKuan':obj.yingFuKuan,

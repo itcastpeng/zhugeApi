@@ -57,7 +57,6 @@ def theOrderShow(request):
             if obj.shouHuoRen:
                 decode_username = base64.b64decode(obj.shouHuoRen.username)
                 shouhuoren = str(decode_username, 'utf-8')
-            shangpinguanli = obj.shangpinguanli
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
                 topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
@@ -73,7 +72,7 @@ def theOrderShow(request):
                 countPrice = obj.goodsPrice * obj.unitRiceNum
             otherData.append({
                 'id':obj.id,
-                'goodsName' : shangpinguanli.goodsName,
+                'goodsName' : obj.goodsName,
                 'goodsPrice':obj.goodsPrice,
                 'countPrice':countPrice,
                 'yingFuKuan':obj.yingFuKuan,

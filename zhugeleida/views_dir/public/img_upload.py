@@ -160,6 +160,9 @@ def img_merge(request):
         elif  img_source == 'goods':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'goods')
 
+        elif  img_source == 'secretKeyFile':
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile')
+
         fileData = ''
         for chunk in range(chunk_num):
             file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
