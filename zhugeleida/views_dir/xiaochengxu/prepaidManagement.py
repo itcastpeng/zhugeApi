@@ -168,12 +168,14 @@ def yuZhiFu(request):
         stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
         result_data['sign'] = md5(stringSignTemp).upper()
         xml_data = toXml(result_data)
+        print('xml_data----------------> ',xml_data)
 
         ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
         ret.encoding = 'utf8'
         DOMTree = xmldom.parseString(ret.text)
         collection = DOMTree.documentElement
         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+        print('return_code-------------------> ',return_code)
         if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
             # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
             prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
