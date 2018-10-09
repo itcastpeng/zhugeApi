@@ -24,45 +24,51 @@ def  open_qiyeweixin(request, oper_type):
         if oper_type == 'get_ticket':
             print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
 
+
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
+            echostr = request.GET.get('echostr')
+
+            if not echostr: #没有这个字段说明不是获取用户事件回调的验证URL
+
+                postdata = request.body.decode(encoding='UTF-8')
+
+                sToken = "5lokfwWTqHXnb58VCV"
+                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
+                sCorpID = "wx5d26a7a856b22bec"
+                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
 
-            postdata = request.body.decode(encoding='UTF-8')
+                # xml_tree = ET.fromstring(postdata)
+                # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
+                # timestamp = "1538228121"
+                # nonce = "1537294388"
+                # sReqData = '<xml><ToUserName><![CDATA[wx5d26a7a856b22bec]]></ToUserName><Encrypt><![CDATA[uh2c6Yqs5f8nPcXQmTtxifpYEIX0Y5FV/nrsbAo4FGKdCPCLVA1p7XSDnC6XN5/1YiFE4ywFs2CvT0n1xHbJ4vSksICKqkPr0z9PtxhJDcbuhz7wgsUSLmEMeXWR1f6YVaOGkFKqa6YJ0lalvpGcS03RRwTuqb49VccfuV5KO4y3eabi6qQRh5QG6SHYKGPZmTfD32Q5GGgGhm4QH3ne/hUTLtMdk3CONblGcodRs5/iAArxfGCFxYADT9d/9Q6ZoNoLruYD66RPrX8AghjKE6KoCqNomsgLHbINJEBxkyEaTBd9qqJe+zoXJMXhyFJ6CsmfKRITwC/Lz32wZF0bF44fzhybguIyMOohxZEhyl1pJpwpgX5DjpjKs47jKf76]]></Encrypt><AgentID><![CDATA[]]></AgentID></xml>'
 
-            sToken = "5lokfwWTqHXnb58VCV"
-            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-            sCorpID = "wx5d26a7a856b22bec"
-            decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+                ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+                print(ret, sMsg)
+                if (ret != 0):
+                    print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
+                    sys.exit(1)
 
+                # 解密成功，sMsg即为xml格式的明文
+                xml_tree = ET.fromstring(sMsg)
+                SuiteTicket = xml_tree.find("SuiteTicket").text
+                SuiteId = xml_tree.find("SuiteId").text
 
-            # xml_tree = ET.fromstring(postdata)
-            # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
-            # timestamp = "1538228121"
-            # nonce = "1537294388"
-            # sReqData = '<xml><ToUserName><![CDATA[wx5d26a7a856b22bec]]></ToUserName><Encrypt><![CDATA[uh2c6Yqs5f8nPcXQmTtxifpYEIX0Y5FV/nrsbAo4FGKdCPCLVA1p7XSDnC6XN5/1YiFE4ywFs2CvT0n1xHbJ4vSksICKqkPr0z9PtxhJDcbuhz7wgsUSLmEMeXWR1f6YVaOGkFKqa6YJ0lalvpGcS03RRwTuqb49VccfuV5KO4y3eabi6qQRh5QG6SHYKGPZmTfD32Q5GGgGhm4QH3ne/hUTLtMdk3CONblGcodRs5/iAArxfGCFxYADT9d/9Q6ZoNoLruYD66RPrX8AghjKE6KoCqNomsgLHbINJEBxkyEaTBd9qqJe+zoXJMXhyFJ6CsmfKRITwC/Lz32wZF0bF44fzhybguIyMOohxZEhyl1pJpwpgX5DjpjKs47jKf76]]></Encrypt><AgentID><![CDATA[]]></AgentID></xml>'
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-            ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
-            print(ret, sMsg)
-            if (ret != 0):
-                print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
-                sys.exit(1)
-
-            # 解密成功，sMsg即为xml格式的明文
-            xml_tree = ET.fromstring(sMsg)
-            SuiteTicket = xml_tree.find("SuiteTicket").text
-            SuiteId = xml_tree.find("SuiteId").text
-
-            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-            key_name = 'SuiteTicket_%s' % (SuiteId)
-            rc.set(key_name, SuiteTicket, 3000)
-            print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+                key_name = 'SuiteTicket_%s' % (SuiteId)
+                rc.set(key_name, SuiteTicket, 3000)
+                print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
 
 
 
-            return HttpResponse("success")
+                return HttpResponse("success")
+
+
+
 
         elif oper_type == "create_grant_url":
 
@@ -82,6 +88,12 @@ def  open_qiyeweixin(request, oper_type):
             }
             # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
 
+        elif oper_type == 'callback_data':
+
+            return HttpResponse("success")
+
+
+        # 设置授权配置 /zhugeleida/admin/open_qiyeweixin/set_session_info
         elif oper_type == 'set_session_info':
             suite_id = 'wx5d26a7a856b22bec'
             create_pre_auth_code_ret =  common.create_pre_auth_code()
@@ -106,8 +118,35 @@ def  open_qiyeweixin(request, oper_type):
             set_session_info = set_session_info.json()
             print('---------- [企业微信] - 设置授权配置 返回------------>>', set_session_info)
 
+            response.code = 200
+            response.msg = '生成【设置授权配置】成功'
+            response.data = set_session_info
 
 
+    elif request.method == "GET":
+
+        if oper_type == 'get_ticket':
+
+            msg_signature = request.GET.get('msg_signature')
+            timestamp = request.GET.get('timestamp')
+            nonce = request.GET.get('nonce')
+            echostr = request.GET.get('echostr')
+
+            sToken = "5lokfwWTqHXnb58VCV"
+            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
+            sCorpID = "wx5d26a7a856b22bec"
+            wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+
+
+            # ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+            ret, sEchoStr = wxcpt.VerifyURL(msg_signature, timestamp, nonce, echostr)
+            if (ret != 0):
+                print("---- 验证回调URL: VerifyURL ret: ----> " + str(ret))
+                sys.exit(1)
+            print('----- [get_ticket]解密echostr参数得到消息内容 -------->>',sEchoStr)
+            
+            # 验证URL成功，将sEchoStr返回给企业号
+            return HttpResponse(sEchoStr)
 
 
     return JsonResponse(response.__dict__)

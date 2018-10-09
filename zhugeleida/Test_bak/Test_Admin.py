@@ -68,10 +68,13 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.post(url, params=get_data,data=post_data)
 
 
-######################### 企业微信三方授权 #########################
+######################### 【企业微信】三方授权 #########################
 
 url = ip + '/zhugeleida/admin/open_qiyeweixin/create_grant_url'  # 获取 关联第三方的二维码
 ret = requests.post(url, params=get_data,data=post_data)
+
+# url = ip + '/zhugeleida/admin/open_qiyeweixin/set_session_info'  # 获取 关联第三方的二维码
+# ret = requests.post(url, params=get_data,data=post_data)
 
 
 
