@@ -36,13 +36,6 @@ class zhifupeizhi(forms.Form):
         }
     )
 
-
-    zhengshu = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "内容不能为空"
-        }
-    )
     def clean_shangHuHao(self):
         shangHuHao = self.data.get('shangHuHao')
         if len(shangHuHao) > 30:
