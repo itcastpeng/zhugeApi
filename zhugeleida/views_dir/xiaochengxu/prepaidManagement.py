@@ -109,37 +109,41 @@ def payback(request):
 @account.is_token(models.zgld_customer)
 def yuZhiFu(request):
     if request.method == 'POST':
-        url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
-        #  参数
-        goodsNum = request.POST.get('goodsNum', 1)               # 商品数量
-        goodsId = request.POST.get('goodsId')                 # 商品ID
-        user_id = request.GET.get('user_id')
-        u_id = request.POST.get('u_id')
 
         # 获取IP
         # if request.META.has_key('HTTP_X_FORWARDED_FOR'):
         #     ip = request.META['HTTP_X_FORWARDED_FOR']
         # else:
         #     ip = request.META['REMOTE_ADDR']
+        url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
+        # 无订单情况 必传 4个参数
+        goodsNum = request.POST.get('goodsNum', 1)               # 商品数量
+        goodsId = request.POST.get('goodsId')                 # 商品ID
+        user_id = request.GET.get('user_id')
+        u_id = request.POST.get('u_id')
+        # 传 订单 ID
+        fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
 
-        userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
 
-        u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
-        xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)       #真实数据appid
-        appid = xiaochengxu_app[0].authorization_appid
-        company_id = xiaochengxu_app[0].company_id
-        jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
-        # ==========商户KEY============
-        global SHANGHUKEY
-        SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
-        # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
-        goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)       # 真实单价
-        total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)
-        # total_fee = int(0.01 * 100)
-        ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
-        shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
-        dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
-        getWxPayOrderId =  dingdanhao                               # 订单号
+        if not fukuan :
+            userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
+            u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+            xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
+            goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
+            appid = xiaochengxu_app[0].authorization_appid
+            jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
+            # ==========商户KEY============
+            global SHANGHUKEY
+            SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
+            # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
+            total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)
+            # total_fee = int(0.01 * 100)
+            ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
+            shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
+            dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
+            getWxPayOrderId =  dingdanhao                               # 订单号
+            openid = userObjs[0].openid
+
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
         result_data = {
@@ -148,7 +152,7 @@ def yuZhiFu(request):
             'mch_id': '1513325051',                         # 商户号
             # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,      # 商户号真实数据
             'nonce_str': generateRandomStamping(),          # 32位随机值a
-            'openid': userObjs[0].openid,
+            'openid': openid,
             'body': 'zhuge-vip',                            # 描述
             'out_trade_no': getWxPayOrderId,                # 订单号
             'total_fee': total_fee,                            # 金额
@@ -178,34 +182,39 @@ def yuZhiFu(request):
             stringSignTemp = shengchengsign(data_dict, SHANGHUKEY)
             data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
             # 预支付成功 创建订单
-            dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
-            date_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-            commissionFee = 0
-            if goodsObjs[0].commissionFee:
-                commissionFee = goodsObjs[0].commissionFee
-            dingDanObjs.create(
-                shangpinguanli_id = goodsId,            # 商品ID
-                orderNumber = int(getWxPayOrderId),     # 订单号
-                yingFuKuan = float(total_fee)/100,             # 应付款
-                goodsPrice = goodsObjs[0].goodsPrice,   # 商品单价
-                youHui = 0,                             # 优惠
-                unitRiceNum=int(goodsNum),                   # 数量
-                yewuUser_id = u_id,                     # 业务
-                gongsimingcheng_id = company_id,        # 公司
-                yongJin = commissionFee,                # 佣金
-                peiSong = '',                           # 配送
-                shouHuoRen_id = u_id,                   # 收货人
-                theOrderStatus = 1,                     # 订单状态
-                createDate=date_time,
-                goodsName=goodsObjs[0].goodsName
-            )
-            response.code = 200
-            response.msg = '预支付请求成功'
-            response.data = data_dict
-            return JsonResponse(response.__dict__)
+            if not fukuan:
+                dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
+                date_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+                commissionFee = 0
+                if goodsObjs[0].commissionFee:
+                    commissionFee = goodsObjs[0].commissionFee
+                company_id = xiaochengxu_app[0].company_id
+                dingDanObjs.create(
+                    shangpinguanli_id = goodsId,            # 商品ID
+                    orderNumber = int(getWxPayOrderId),     # 订单号
+                    yingFuKuan = float(total_fee)/100,             # 应付款
+                    goodsPrice = goodsObjs[0].goodsPrice,   # 商品单价
+                    youHui = 0,                             # 优惠
+                    unitRiceNum=int(goodsNum),                   # 数量
+                    yewuUser_id = u_id,                     # 业务
+                    gongsimingcheng_id = company_id,        # 公司
+                    yongJin = commissionFee,                # 佣金
+                    peiSong = '',                           # 配送
+                    shouHuoRen_id = u_id,                   # 收货人
+                    theOrderStatus = 1,                     # 订单状态
+                    createDate=date_time,
+                    goodsName=goodsObjs[0].goodsName
+                )
+                response.code = 200
+                response.msg = '预支付请求成功'
+                response.data = data_dict
+                return JsonResponse(response.__dict__)
         else:
+            if not fukuan:
+                response.msg = '预支付失败'
+            else:
+                response.msg = '支付失败'
             response.code = 500
-            response.msg = '预支付失败'
             response.data = ''
             return JsonResponse(response.__dict__)
     else:
