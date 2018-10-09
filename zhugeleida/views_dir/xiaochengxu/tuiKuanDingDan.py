@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.tuiKuanDingDan_verify import AddForm, SelectForm
-import json, base64
+import json, base64, time, random
 
 
 @csrf_exempt
@@ -67,10 +67,15 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             forms_obj = AddForm(otherData)
             if forms_obj.is_valid():
                 print('验证通过')
+                ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime())  # 年月日时分秒
+                shijianchuoafter5 = str(int(time.time() * 1000))[8:]  # 时间戳 后五位
+                tuikuandanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99))
+                print('tuikuandanhao---------> ', tuikuandanhao)
                 formObjs = forms_obj.cleaned_data
                 models.zgld_shangcheng_tuikuan_dingdan_management.objects.create(
                     orderNumber_id=formObjs.get('orderNumber'),
-                    tuiKuanYuanYin=formObjs.get('tuiKuanYuanYin')
+                    tuiKuanYuanYin=formObjs.get('tuiKuanYuanYin'),
+                    tuikuandanhao = tuikuandanhao
                 )
                 response.code = 200
                 response.msg = '添加退款订单成功！'

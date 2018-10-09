@@ -117,10 +117,10 @@ def yuZhiFu(request):
         u_id = request.POST.get('u_id')
 
         # 获取IP
-        if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-            ip = request.META['HTTP_X_FORWARDED_FOR']
-        else:
-            ip = request.META['REMOTE_ADDR']
+        # if request.META.has_key('HTTP_X_FORWARDED_FOR'):
+        #     ip = request.META['HTTP_X_FORWARDED_FOR']
+        # else:
+        #     ip = request.META['REMOTE_ADDR']
 
         userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
 
@@ -140,7 +140,8 @@ def yuZhiFu(request):
         shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
         dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
         getWxPayOrderId =  dingdanhao                               # 订单号
-        client_ip = ip   # 用户ip
+        # client_ip = ip   # 用户ip
+        client_ip = '0.0.0.0'
         result_data = {
             'appid': 'wx1add8692a23b5976',                  # appid
             # 'appid': appid,                               # 真实数据appid
