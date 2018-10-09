@@ -123,14 +123,14 @@ def yuZhiFu(request):
         u_id = request.POST.get('u_id')
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
+        print('fukuan===============> ',fukuan)
 
-
+        userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
+        openid = userObjs[0].openid                                 # openid  用户标识
         if not fukuan :
-            userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
-            appid = xiaochengxu_app[0].authorization_appid
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
             # ==========商户KEY============
             global SHANGHUKEY
@@ -142,7 +142,17 @@ def yuZhiFu(request):
             shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
             dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
             getWxPayOrderId =  dingdanhao                               # 订单号
-            openid = userObjs[0].openid
+            appid = xiaochengxu_app[0].authorization_appid              # 预支付 appid
+            mch_id = jiChuSheZhiObjs[0].shangHuHao
+        # 存在订单的
+        else:
+            orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=fukuan)
+            getWxPayOrderId = orderObjs[0].orderNumber  #订单号
+            goodNum = 1
+            if orderObjs[0].unitRiceNum:
+                goodNum = orderObjs[0].unitRiceNum
+
+            total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
 
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
@@ -150,7 +160,7 @@ def yuZhiFu(request):
             'appid': 'wx1add8692a23b5976',                  # appid
             # 'appid': appid,                               # 真实数据appid
             'mch_id': '1513325051',                         # 商户号
-            # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,      # 商户号真实数据
+            # 'mch_id': mch_id,                             # 商户号真实数据
             'nonce_str': generateRandomStamping(),          # 32位随机值a
             'openid': openid,
             'body': 'zhuge-vip',                            # 描述
@@ -163,12 +173,15 @@ def yuZhiFu(request):
         stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
         result_data['sign'] = md5(stringSignTemp).upper()
         xml_data = toXml(result_data)
+        print('xml_data----------------> ',xml_data)
 
         ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
         ret.encoding = 'utf8'
+        print('ret.text============> ',ret.text)
         DOMTree = xmldom.parseString(ret.text)
         collection = DOMTree.documentElement
         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+        print('return_code-------------------> ',return_code)
         if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
             # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
             prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
@@ -181,6 +194,8 @@ def yuZhiFu(request):
             }
             stringSignTemp = shengchengsign(data_dict, SHANGHUKEY)
             data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
+            response.code = 200
+            response.msg = '支付成功'
             # 预支付成功 创建订单
             if not fukuan:
                 dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
@@ -203,12 +218,13 @@ def yuZhiFu(request):
                     shouHuoRen_id = u_id,                   # 收货人
                     theOrderStatus = 1,                     # 订单状态
                     createDate=date_time,
-                    goodsName=goodsObjs[0].goodsName
+                    goodsName=goodsObjs[0].goodsName,
+                    detailePicture=goodsObjs[0].detailePicture
                 )
                 response.code = 200
                 response.msg = '预支付请求成功'
                 response.data = data_dict
-                return JsonResponse(response.__dict__)
+            return JsonResponse(response.__dict__)
         else:
             if not fukuan:
                 response.msg = '预支付失败'

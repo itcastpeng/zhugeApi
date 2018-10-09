@@ -41,18 +41,18 @@ urlpatterns = [
     url(r'website$',website.website),
 
     # 小程序支付操作
-    url(r'payback', prepaidManagement.payback),                                    # 回调信息
-    url(r'yuZhiFu', prepaidManagement.yuZhiFu),                             # 预支付
+    url(r'payback', prepaidManagement.payback),                                                                 # 回调信息
+    url(r'yuZhiFu', prepaidManagement.yuZhiFu),                                                                 # 预支付
 
     # 订单管理
-    url(r'theOrderShow', theOrderManagement.theOrderShow),                 # 订单管理查询
-    url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
+    url(r'theOrderShow', theOrderManagement.theOrderShow),                                                      # 订单管理查询
+    url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),                   # 订单管理操作
 
     # 退款单管理
-    url(r'tuiKuanDingDanShow', tuiKuanDingDan.tuiKuanDingDanShow),                 # 退款订单管理查询
+    url(r'tuiKuanDingDanShow', tuiKuanDingDan.tuiKuanDingDanShow),                                              # 退款订单管理查询
     url(r'^tuiKuanDingDanOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),           # 退款订单管理操作
 
     # 查询商品
-    url(r'mallManageShow', mallManagementShow.mallManageShow),                 # 订单管理查询
+    url(r'mallManageShow', mallManagementShow.mallManageShow),                                                  # 订单管理查询
 
 ]

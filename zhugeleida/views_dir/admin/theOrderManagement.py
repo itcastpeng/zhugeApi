@@ -67,6 +67,9 @@ def theOrderShow(request):
             #     num = obj.unitRiceNum
             # if num and shangpinguanli.goodsPrice:
             #     countPrice = int(shangpinguanli.goodsPrice) * int(num)
+            detailePicture = ''
+            if objs[0].detailePicture:
+                detailePicture = json.loads(objs[0].detailePicture)
             countPrice = 0
             if obj.goodsPrice:
                 countPrice = obj.goodsPrice * obj.unitRiceNum
@@ -87,6 +90,7 @@ def theOrderShow(request):
                 'status':obj.get_theOrderStatus_display(),
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'lunbotu':topLunBoTu,
+                'detailePicture':detailePicture
             })
             response.data = {
                 'otherData':otherData,
