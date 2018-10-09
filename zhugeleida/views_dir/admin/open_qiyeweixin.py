@@ -82,6 +82,34 @@ def  open_qiyeweixin(request, oper_type):
             }
             # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
 
+        elif oper_type == 'set_session_info':
+            suite_id = 'wx5d26a7a856b22bec'
+            create_pre_auth_code_ret =  common.create_pre_auth_code()
+            pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
+            suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
+
+            set_session_info_url =  'https://qyapi.weixin.qq.com/cgi-bin/service/set_session_info'
+
+            post_set_session_info_data =  {
+                "pre_auth_code": pre_auth_code,
+                "session_info":
+                    {
+                        "appid": [],
+                        "auth_type": 1 #授权类型：0 正式授权， 1 测试授权。 默认值为0。注意，请确保应用在正式发布后的授权类型为“正式授权”
+                    }
+            }
+            get_set_session_info_data = {
+                'suite_access_token': suite_access_token,
+            }
+            set_session_info = requests.post(set_session_info_url, params=get_set_session_info_data,data=json.dumps(post_set_session_info_data))
+
+            set_session_info = set_session_info.json()
+            print('---------- [企业微信] - 设置授权配置 返回------------>>', set_session_info)
+
+
+
+
+
     return JsonResponse(response.__dict__)
 
 

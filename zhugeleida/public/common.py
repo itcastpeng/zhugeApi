@@ -248,7 +248,8 @@ def create_pre_auth_code():
         pre_auth_code = exist_pre_auth_code
 
     response.data = {
-        'pre_auth_code': pre_auth_code
+        'pre_auth_code': pre_auth_code,
+        'suite_access_token': suite_access_token
     }
     response.code = 200
 
