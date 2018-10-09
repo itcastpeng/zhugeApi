@@ -131,17 +131,20 @@ def theOrderOper(request, oper_type, o_id):
         #         response.msg = json.loads(forms_obj.errors.as_json())
 
         if oper_type == 'querenshouhuo':
-            status = request.POST.get('status')
-            if status:
-                objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            tuiKuanId = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=o_id)
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            if tuiKuanId:
+                response.code = 301
+                response.msg = '退款中, 无法确认收货！'
+            else:
                 otherStatus = objs[0].theOrderStatus
-                if int(otherStatus) != 7:
-                    objs.update(theOrderStatus=8)
-                    response.msg = '交易成功'
+                if int(otherStatus) != 8:
+                    response.code = 301
+                    response.msg = '交易未成功,无法收货！'
                 else:
-                    response.msg = '还未送达, 请勿操作订单！'
-            response.code = 200
-            response.data = ''
+                    response.msg = '已完成'
+                    response.code = 200
+                    objs.update(theOrderStatus=7)
     else:
         response.code = 402
         response.msg = "请求异常"

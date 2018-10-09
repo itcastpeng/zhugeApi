@@ -1041,13 +1041,13 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
     shouHuoRen = models.ForeignKey(to='zgld_customer', verbose_name='收货人', max_length=128, null=True, blank=True)
     order_status = (
-        (1, '等待到款'),
+        (1, '待付款'),
         # (2, '已收款'),
         # (3, '等待移仓'),
         # (4, '正在移仓'),
         # (5, '已配货'),
         # (6, '已发货'),
-        # (7, '已送达'),
+        # (7, '已完成'),
         (8, '交易成功'),
         (9, '交易失败'),
         (10, '取消'),
