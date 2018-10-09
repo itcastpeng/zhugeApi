@@ -111,75 +111,74 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 #     objs.update(tuiKuanStatus=2)
                 #     response.msg = '修改成功'
                 # 调用微信接口 申请退款
+                other = []
                 if int(status) == 2:
                     objs.update(tuiKuanStatus=4) # 更新状态 退款中
-                    if user_id:
-                        # 获取appid
-                        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-                        xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
-                            company_id=u_idObjs[0].company_id)
-                        appid = xiaochengxu_app[0].authorization_appid   # 真实数据appid
-                        jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
-                            xiaochengxuApp_id=xiaochengxu_app[0].id)
+                    # 获取appid
+                    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+                    xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
+                        company_id=u_idObjs[0].company_id)
+                    appid = xiaochengxu_app[0].authorization_appid   # 真实数据appid
+                    jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                        xiaochengxuApp_id=xiaochengxu_app[0].id)
 
-                        SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
-                        url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
-                        jine = 0
-                        if objs[0].orderNumber.yingFuKuan:
-                            jine = int((objs[0].orderNumber.yingFuKuan) *100)
-                        dingdan = ''
-                        if objs[0].orderNumber.orderNumber:
-                            dingdan = objs[0].orderNumber.orderNumber
-                        if objs[0].tuikuandanhao:
-                            TUIKUANDANHAO = objs[0].tuikuandanhao
-                            result_data = {
-                                # 'appid': 'wx1add8692a23b5976',                             # appid
-                                'appid': appid,                                              # 真实数据appid
-                                'mch_id': '1513325051',                                      # 商户号
-                                # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,                   # 商户号真实数据
-                                'nonce_str': prepaidManagement.generateRandomStamping(),     # 32位随机值a
-                                # 'out_trade_no': '2018100814582101197912',                  # 订单号
-                                'out_trade_no': dingdan,                                     # 线上订单号
-                                'out_refund_no': TUIKUANDANHAO,                              # 退款单号
-                                'total_fee': jine,                                           # 订单金额
-                                'refund_fee': jine,                                          # 退款金额
-                            }
-                            print('result_data----------result_data--------------result_data------------->',result_data)
-                            stringSignTemp = prepaidManagement.shengchengsign(result_data, SHANGHUKEY)
-                            result_data['sign'] = prepaidManagement.md5(stringSignTemp).upper()
-                            xml_data = prepaidManagement.toXml(result_data)
-                            # print('xml_data-----------> ',xml_data)
+                    SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
+                    url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
+                    jine = 0
+                    if objs[0].orderNumber.yingFuKuan:
+                        jine = int((objs[0].orderNumber.yingFuKuan) *100)
+                    dingdan = ''
+                    if objs[0].orderNumber.orderNumber:
+                        dingdan = objs[0].orderNumber.orderNumber
+                    if objs[0].tuikuandanhao:
+                        TUIKUANDANHAO = objs[0].tuikuandanhao
+                        result_data = {
+                            # 'appid': 'wx1add8692a23b5976',                             # appid
+                            'appid': appid,                                              # 真实数据appid
+                            'mch_id': '1513325051',                                      # 商户号
+                            # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,                   # 商户号真实数据
+                            'nonce_str': prepaidManagement.generateRandomStamping(),     # 32位随机值a
+                            # 'out_trade_no': '2018100814582101197912',                  # 订单号
+                            'out_trade_no': dingdan,                                     # 线上订单号
+                            'out_refund_no': TUIKUANDANHAO,                              # 退款单号
+                            'total_fee': jine,                                           # 订单金额
+                            'refund_fee': jine,                                          # 退款金额
+                        }
+                        other.append(result_data)
+                        print('result_data----------result_data--------------result_data------------->',result_data)
+                        stringSignTemp = prepaidManagement.shengchengsign(result_data, SHANGHUKEY)
+                        result_data['sign'] = prepaidManagement.md5(stringSignTemp).upper()
+                        xml_data = prepaidManagement.toXml(result_data)
+                        # print('xml_data-----------> ',xml_data)
 
-                            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                            cret = os.path.join(BASE_DIR, 'apiclient_cert.pem')
-                            key = os.path.join(BASE_DIR, 'apiclient_key.pem')
+                        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                        cret = os.path.join(BASE_DIR, 'apiclient_cert.pem')
+                        key = os.path.join(BASE_DIR, 'apiclient_key.pem')
 
-                            ret = requests.post(url, data=xml_data, cert=(cret, key))
-                            ret.encoding = 'utf8'
-                            print(ret.text)
-                            DOMTree = xmldom.parseString(ret.text)
-                            collection = DOMTree.documentElement
-                            return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+                        ret = requests.post(url, data=xml_data, cert=(cret, key))
+                        ret.encoding = 'utf8'
+                        print(ret.text)
+                        DOMTree = xmldom.parseString(ret.text)
+                        collection = DOMTree.documentElement
+                        return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
 
-                            if return_code == 'SUCCESS':
-                                if collection.getElementsByTagName("err_code_des"):
-                                    err_code_des = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
-                                    response.msg = err_code_des
-                                else:
-                                    objs.update(tuiKuanStatus=2)
-                                    response.msg = '成功'
+                        if return_code == 'SUCCESS':
+                            if collection.getElementsByTagName("err_code_des"):
+                                err_code_des = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
+                                response.msg = err_code_des
                             else:
-                                response.msg = '退款失败'
-                                objs.update(tuiKuanStatus=3)
+                                objs.update(tuiKuanStatus=2)
+                                response.msg = '成功'
                         else:
-                            response.msg = '无退款单号'
+                            response.msg = '退款失败'
+                            objs.update(tuiKuanStatus=3)
                     else:
-                        response.msg = '无u_id'
+                        response.msg = '无退款单号'
                 else:
                     objs.update(tuiKuanStatus=3)
                     response.msg = '退款失败！'
                 response.code = 200
-                response.data = ''
+                response.data = {'other':other}
     else:
         response.code = 402
         response.msg = "请求异常"
