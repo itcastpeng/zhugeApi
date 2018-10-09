@@ -90,7 +90,27 @@ def  open_qiyeweixin(request, oper_type):
 
         elif oper_type == 'callback_data':
 
-            return HttpResponse("success")
+            msg_signature = request.GET.get('msg_signature')
+            timestamp = request.GET.get('timestamp')
+            nonce = request.GET.get('nonce')
+            echostr = request.GET.get('echostr')
+
+            sToken = "5lokfwWTqHXnb58VCV"
+            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
+            # sCorpID = "wx5d26a7a856b22bec"
+            sCorpID = "wx81159f52aff62388"
+            wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+
+
+            # ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+            ret, sEchoStr = wxcpt.VerifyURL(msg_signature, timestamp, nonce, echostr)
+            if (ret != 0):
+                print("---- 验证回调URL: VerifyURL ret: ----> " + str(ret))
+                sys.exit(1)
+            print('----- [callback_data]解密echostr参数得到消息内容 -------->>',sEchoStr)
+
+            # 验证URL成功，将sEchoStr返回给企业号
+            return HttpResponse(sEchoStr)
 
 
         # 设置授权配置 /zhugeleida/admin/open_qiyeweixin/set_session_info
