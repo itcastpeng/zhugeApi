@@ -75,6 +75,7 @@ def theOrderShow(request):
                 'shouHuoRen_id':shouHuoRen_id,
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
+                'statusId': obj.theOrderStatus,
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuikuan':tuikuan
             })
