@@ -123,14 +123,10 @@ def yuZhiFu(request):
         u_id = request.POST.get('u_id')
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
-        orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=fukuan)
-        getWxPayOrderId = orderObjs[0].orderNumber      # 存在订单的   订单号
+        print('fukuan===============> ',fukuan)
+
         userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
         openid = userObjs[0].openid                                 # openid  用户标识
-        goodNum = 1
-        if orderObjs[0].unitRiceNum:
-            goodNum = orderObjs[0].unitRiceNum
-        total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
         if not fukuan :
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
@@ -148,6 +144,15 @@ def yuZhiFu(request):
             getWxPayOrderId =  dingdanhao                               # 订单号
             appid = xiaochengxu_app[0].authorization_appid              # 预支付 appid
             mch_id = jiChuSheZhiObjs[0].shangHuHao
+        # 存在订单的
+        else:
+            orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=fukuan)
+            getWxPayOrderId = orderObjs[0].orderNumber  #订单号
+            goodNum = 1
+            if orderObjs[0].unitRiceNum:
+                goodNum = orderObjs[0].unitRiceNum
+
+            total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
 
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
