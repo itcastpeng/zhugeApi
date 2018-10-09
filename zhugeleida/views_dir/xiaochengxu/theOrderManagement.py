@@ -168,7 +168,7 @@ def theOrderOper(request, oper_type, o_id):
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
             status = int(orderObjs[0].theOrderStatus)
             print('status=============>',status)
-            if status in [8, 9, 10]:
+            if status in [8, 9, 1]:
                 orderObjs.delete()
                 response.code = 200
                 response.msg = '删除成功'
