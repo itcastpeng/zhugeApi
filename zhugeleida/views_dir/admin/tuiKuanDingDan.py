@@ -104,7 +104,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
         elif oper_type == 'updateStatus':
             status = request.POST.get('status')
-            u_id = request.POST.get('u_id')
+            user_id = request.GET.get('user_id')
             objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(id=o_id)
             if status:
                 # if int(status) == 1:
@@ -113,9 +113,9 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 # 调用微信接口 申请退款
                 if int(status) == 2:
                     objs.update(tuiKuanStatus=4) # 更新状态 退款中
-                    if u_id:
+                    if user_id:
                         # 获取appid
-                        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=u_id)
+                        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
                         xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
                             company_id=u_idObjs[0].company_id)
                         appid = xiaochengxu_app[0].authorization_appid   # 真实数据appid
