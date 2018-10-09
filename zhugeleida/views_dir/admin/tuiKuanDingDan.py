@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 import xml.dom.minidom as xmldom
-import os, random
+import os, random, datetime
 
 
 @csrf_exempt
@@ -167,8 +167,9 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 err_code_des = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
                                 response.msg = err_code_des
                             else:
-                                objs.update(tuiKuanStatus=2)
-                                response.msg = '成功'
+                                nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                objs.update(tuiKuanStatus=2, tuiKuanDateTime=nowTime)
+                                response.msg = '退款成功'
                         else:
                             response.msg = '退款失败'
                             objs.update(tuiKuanStatus=3)
