@@ -63,8 +63,10 @@ def work_weixin_auth(request, company_id):
             access_token = token_ret
 
 
-        get_code_data['code'] = code
-        get_code_data['access_token'] = access_token
+        get_code_data = {
+            'code' : code,
+            'access_token': access_token
+        }
         code_url =  'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo'
         code_ret = requests.get(code_url, params=get_code_data)
 

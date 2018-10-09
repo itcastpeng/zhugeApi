@@ -24,13 +24,10 @@ def  open_qiyeweixin(request, oper_type):
         if oper_type == 'get_ticket':
             print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
 
-
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
-
-
 
             postdata = request.body.decode(encoding='UTF-8')
 
@@ -51,19 +48,29 @@ def  open_qiyeweixin(request, oper_type):
             if (ret != 0):
                 print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
                 sys.exit(1)
+            xml_tree = ET.fromstring(sMsg)
 
             # 解密成功，sMsg即为xml格式的明文
-            xml_tree = ET.fromstring(sMsg)
-            SuiteTicket = xml_tree.find("SuiteTicket").text
-            SuiteId = xml_tree.find("SuiteId").text
+            try:
 
-            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                SuiteTicket = xml_tree.find("SuiteTicket").text
+                SuiteId = xml_tree.find("SuiteId").text
 
-            key_name = 'SuiteTicket_%s' % (SuiteId)
-            rc.set(key_name, SuiteTicket, 3000)
-            print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
+                key_name = 'SuiteTicket_%s' % (SuiteId)
+                rc.set(key_name, SuiteTicket, 3000)
+                print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+            except  Exception as e:
 
+                SuiteId = xml_tree.find("SuiteId").text
+                AuthCode = xml_tree.find("AuthCode").text
+
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                key_name = 'AuthCode_%s' % (SuiteId)
+
+                rc.set(key_name, AuthCode, 3000)
+                print('--------企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
             return HttpResponse("success")
 
@@ -171,7 +178,7 @@ def  open_qiyeweixin(request, oper_type):
             # 验证URL成功，将sEchoStr返回给企业号
             return HttpResponse(sEchoStr)
 
-        
+
     return JsonResponse(response.__dict__)
 
 
