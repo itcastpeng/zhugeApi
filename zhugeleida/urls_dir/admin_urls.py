@@ -4,7 +4,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders
+    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage
 
 
 urlpatterns = [
@@ -133,6 +133,11 @@ urlpatterns = [
     # 员工订单管理
     url(r'employeesOrders', employeesOrders.employeesOrders),  # 订单管理查询
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
+
+    # 活动管理  set_focus_get_redPacket
+    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),  # 关注领红包
+
+
 
 
 ]

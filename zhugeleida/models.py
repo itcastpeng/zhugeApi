@@ -74,6 +74,9 @@ class zgld_gongzhonghao_app(models.Model):
     name = models.CharField(verbose_name="公众号名称", max_length=128, null=True)
     principal_name = models.CharField(verbose_name="公众号主体名称", max_length=128, null=True)
 
+    is_focus_get_redpacket = models.BooleanField(verbose_name="关注领取红包是否开启", default=False)
+    focus_get_money = models.SmallIntegerField(verbose_name='关注领取红包金额',null=True)
+
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128, null=True)
     authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128, null=True)
     template_id = models.CharField(verbose_name="消息模板ID", max_length=128, null=True)
