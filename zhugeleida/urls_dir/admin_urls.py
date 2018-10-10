@@ -3,8 +3,8 @@ from django.conf.urls import url
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
-    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,enterprise_wechat_server_auth,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders
+    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
+    theOrderManagement, tuiKuanDingDan
 
 
 urlpatterns = [
@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^open_weixin/(?P<oper_type>\w+)', open_weixin.open_weixin),
 
     # 企业微信服务商认证接入
-    url(r'^enterprise_wechat_server_auth/(?P<oper_type>\w+)', enterprise_wechat_server_auth.open_weixin),
+    url(r'^open_qiyeweixin/(?P<oper_type>\w+)$', open_qiyeweixin.open_qiyeweixin),
 
 
     # 微信公众号通知
@@ -131,7 +131,7 @@ urlpatterns = [
     url(r'^tuiKuanDingDanOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),  # 退款订单管理操作
 
     # 员工订单管理
-    url(r'employeesOrders', employeesOrders.employeesOrders),                 # 订单管理查询
+    # url(r'theOrderShow', theOrderManagement.theOrderShow),                 # 订单管理查询
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
 
 
