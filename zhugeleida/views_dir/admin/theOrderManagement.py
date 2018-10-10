@@ -25,8 +25,12 @@ def theOrderShow(request):
         start_createDate = request.GET.get('start_createDate')
         stop_createDate = request.GET.get('stop_createDate')
         theOrderStatus = request.GET.get('theOrderStatus')
+        startCompletionTime = request.GET.get('startCompletionTime')    # 开始完成时间
+        stopCompletionTime = request.GET.get('stopCompletionTime')      # 结束完成时间
         if start_createDate and stop_createDate:
             q.add(Q(createDate__gte=start_createDate) & Q(createDate__lte=stop_createDate), Q.AND)
+        if startCompletionTime and stopCompletionTime:
+            q.add(Q(stopDateTime__gte=startCompletionTime) & Q(stopDateTime__lte=stopCompletionTime), Q.AND)
         if theOrderStatus:
             q.add(Q(theOrderStatus=theOrderStatus), Q.AND)
         if yewuyuan:

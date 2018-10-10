@@ -25,6 +25,7 @@ def employeesOrders(request):
         if yewuyuan:
             q.add(Q(yewuUser__username__contains=yewuyuan), Q.AND)
         if startCreateTime and stopCreateTime:
+            stopCreateTime = stopCreateTime.replace('00:00:00', '23:59:59')
             q.add(Q(createDate__gte=startCreateTime) & Q(createDate__lte=stopCreateTime), Q.AND)
         print('q--------------> ',q)
         objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(q).values('yewuUser_id', 'yewuUser__username').annotate(Count('id'), Sum('yingFuKuan'))
@@ -43,7 +44,7 @@ def employeesOrders(request):
             })
         response.msg = '查询成功'
         response.code = 200
-        response.data = otherData
+        response.data = {'otherData':otherData}
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
