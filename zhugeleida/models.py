@@ -6,8 +6,10 @@ class zgld_company(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
     area = models.CharField(max_length=128, verbose_name='所在地区', null=True)
     address = models.TextField(verbose_name='公司详细地址')
-    corp_id = models.CharField(verbose_name="企业ID", max_length=128)
+    corp_id = models.CharField(verbose_name="企业ID(授权方企业微信id)", max_length=128)
     tongxunlu_secret = models.CharField(verbose_name="通讯录同步应用的secret", max_length=256)
+    # permanent_code =  models.CharField(verbose_name="企业微信永久授权码", max_length=128,null=True)
+
     website_content = models.TextField(verbose_name='官网内容',default='[]')
     mingpian_available_num = models.SmallIntegerField(verbose_name='可开通名片数量',default=0) # 0说名一个也没有开通。
     charging_start_time = models.DateTimeField(verbose_name="开始付费时间", null=True)
@@ -732,18 +734,15 @@ class zgld_chatinfo(models.Model):
     msg = models.TextField(u'消息', null=True, blank=True)
     content = models.TextField(verbose_name='消息', null=True, blank=True)
 
-    info_type_choices = (
-                        (1,'chat_people_info'),     #客户和用户之间的聊天信息
-                        (2,'chat_product_info')   #客户和用户之间的产品咨询
-    )
-    info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',choices=info_type_choices)
-    product_cover_url = models.CharField(verbose_name='产品封面URl', max_length=256, null=True)
-    product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
-    product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
+    # info_type_choices = (
+    #                     (1,'chat_people_info'),     #客户和用户之间的聊天信息
+    #                     (2,'chat_product_info')     #客户和用户之间的产品咨询
+    # )
+    # info_type = models.SmallIntegerField(default=1, verbose_name='聊天信息的类型',choices=info_type_choices)
+    # product_cover_url = models.CharField(verbose_name='产品封面URl', max_length=256, null=True)
+    # product_name = models.CharField(verbose_name='产品名称', null=True, max_length=128)
+    # product_price = models.CharField(verbose_name='价格', max_length=64, null=True)
 
-    # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='chatinfo',
-    #                                   verbose_name='最后活动时间(客户发起对话)', null=True)
-    # follow_time = models.ForeignKey('zgld_user_customer_flowup', verbose_name='最后跟进时间(用户发起对话)', null=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -1080,16 +1079,16 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
-# # 员工订单统计
-# class zgld_yuangong_dingdan_tongji(models.Model):
-#     dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
-#     touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
-#     employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
-#     gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
-#     employeesPhone = models.CharField(verbose_name='(员工/业务员)电话', max_length=64, null=True, blank=True)
-#     bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
-#     numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
-#     ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
+# 员工订单统计
+class zgld_yuangong_dingdan_tongji(models.Model):
+    dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
+    touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
+    employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
+    gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
+    employeesPhone = models.IntegerField(verbose_name='(员工/业务员)电话', null=True, blank=True)
+    bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
+    numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
+    ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
 
 
 
