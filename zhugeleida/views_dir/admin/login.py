@@ -24,8 +24,10 @@ def login(request):
     )
 
     if userprofile_objs:
+        print('用户存在')
         if userprofile_objs.filter(status=1):
             # 如果有数据 查询第一条对象
+            print('用户已经启用')
 
             userprofile_obj = userprofile_objs[0]
             # 如果没有token 则生成 token
@@ -36,13 +38,12 @@ def login(request):
             account_expired_time = company_obj.account_expired_time
 
             if datetime.datetime.now() <= account_expired_time:
+                print('用户没有过期,可以使用')
                 if not userprofile_obj.token:
                     token = account.get_token(account.str_encrypt(password))
                     userprofile_obj.token = token
                 else:
                     token = userprofile_obj.token
-
-
 
                 response.code = 200
                 response.msg = '登录成功'
@@ -63,9 +64,11 @@ def login(request):
                     'is_reset_password': is_reset_password,
                     'weChatQrCode':userprofile_obj.company.weChatQrCode
                 }
+                print('response.data  -->', response.data )
 
                 userprofile_obj.last_login_date = datetime.datetime.now()
                 userprofile_obj.save()
+                print('保存')
 
             else:
                 company_name = company_obj.name
@@ -82,6 +85,7 @@ def login(request):
         response.code = 401
         response.msg = "账号或密码错误"
 
+    print('调试登录 ->', response.__dict__)
     return JsonResponse(response.__dict__)
 
 
