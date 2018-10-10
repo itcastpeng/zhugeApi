@@ -19,12 +19,12 @@ def theOrderShow(request):
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
         q = Q()
-        yewuyuan = request.GET.get('yewuyuan')
-        dingdanbianhao = request.GET.get('dingdanbianhao')
-        goodsName = request.GET.get('goodsName')
-        start_createDate = request.GET.get('start_createDate')
-        stop_createDate = request.GET.get('stop_createDate')
-        theOrderStatus = request.GET.get('theOrderStatus')
+        yewuyuan = request.GET.get('yewuyuan')                          # 业务员模糊匹配
+        dingdanbianhao = request.GET.get('dingdanbianhao')              # 订单编号
+        goodsName = request.GET.get('goodsName')                        # 商品名称模糊匹配
+        start_createDate = request.GET.get('start_createDate')          # 开始创建时间
+        stop_createDate = request.GET.get('stop_createDate')            # 结束创建时间
+        theOrderStatus = request.GET.get('theOrderStatus')              # 订单状态
         startCompletionTime = request.GET.get('startCompletionTime')    # 开始完成时间
         stopCompletionTime = request.GET.get('stopCompletionTime')      # 结束完成时间
         if start_createDate and stop_createDate:

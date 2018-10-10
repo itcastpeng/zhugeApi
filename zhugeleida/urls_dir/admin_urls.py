@@ -4,7 +4,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     home_page, product, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage
+    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, redEnvelopeDistributionManagement
 
 
 urlpatterns = [
@@ -137,7 +137,7 @@ urlpatterns = [
     # 活动管理  set_focus_get_redPacket
     url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),  # 关注领红包
 
-
-
+    # 红包发放管理 关注发送
+    url(r'focusOnIssuedRedEnvelope', redEnvelopeDistributionManagement.focusOnIssuedRedEnvelope),
 
 ]
