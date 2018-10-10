@@ -67,6 +67,7 @@ def payback(request):
     cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data        # 钱数
     out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
     dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=out_trade_no)
+    nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if return_code == 'SUCCESS':
         if dingDanobjs:
             # 二次 查询是否付款成功
@@ -89,15 +90,18 @@ def payback(request):
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
             if return_code == 'SUCCESS':
                 dingDanobjs.update(
-                    theOrderStatus=8        # 支付成功 改订单状态成功
+                    theOrderStatus=8,        # 支付成功 改订单状态成功
+                    stopDateTime=nowDate
                 )
             else:
                 dingDanobjs.update(
-                    theOrderStatus=9  # 支付失败 改订单状态失败
+                    theOrderStatus=9,  # 支付失败 改订单状态失败
+                    stopDateTime = nowDate
                 )
     else:
         dingDanobjs.update(
-            theOrderStatus=9  # 支付失败 改订单状态失败
+            theOrderStatus=9,  # 支付失败 改订单状态失败
+            stopDateTime=nowDate
         )
     response.code = 200
     response.data = ''
@@ -215,7 +219,7 @@ def yuZhiFu(request):
                     gongsimingcheng_id = company_id,        # 公司
                     yongJin = commissionFee,                # 佣金
                     peiSong = '',                           # 配送
-                    shouHuoRen_id = u_id,                   # 收货人
+                    shouHuoRen_id = user_id,                   # 收货人
                     theOrderStatus = 1,                     # 订单状态
                     createDate=date_time,
                     goodsName=goodsObjs[0].goodsName,
