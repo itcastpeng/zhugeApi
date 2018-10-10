@@ -1,18 +1,12 @@
-import random
-import hashlib
-import requests
-import xml.dom.minidom as xmldom
-import qrcode
-import uuid, time, json
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
-import requests, base64, datetime
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.views_dir.xiaochengxu import prepaidManagement
-
+from django import forms
+import hashlib, random, xml.dom.minidom as xmldom, qrcode, uuid, time, json, requests, base64, datetime, os, zipfile
 
 response = Response.ResponseObj()
 yuzhifu = prepaidManagement
@@ -71,156 +65,202 @@ yuzhifu = prepaidManagement
 #     return JsonResponse(response.__dict__)
 
 
+class guanZhuForm(forms.Form):
+    SHANGHUKEY = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "商户KEY不能为空"
+        }
+    )
+    total_fee = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "钱数不能为空"
+        }
+    )
+    appid = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "小程序id不能为空"
+        }
+    )
+    mch_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "商户号不能为空"
+        }
+    )
+    openid = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "微信标识openid不能为空"
+        }
+    )
+    # total_num = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "红包发放总人数不能为空"
+    #     }
+    # )
+    send_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "商户名称不能为空"
+        }
+    )
+    act_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "活动名称不能为空"
+        }
+    )
+    remark = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "备注不能为空"
+        }
+    )
+    wishing = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "红包祝福语不能为空"
+        }
+    )
+    def clean_total_fee(self):
+        total_fee = self.data.get('total_fee')
+        if float(total_fee) >= 1:
+            total_fee = int(float(total_fee) * 100)
+            return total_fee
+        else:
+            self.add_error('total_fee', '钱数不能小于1元！')
+    def clean_mch_id(self):
+        mch_id = self.data.get('mch_id')
+        if len(mch_id) > 32:
+            self.add_error('mch_id', '商户号不能超过32位！')
+        else:
+            return mch_id
+    def clean_appid(self):
+        appid = self.data.get('appid')
+        if len(appid) > 32:
+            self.add_error('appid', '公众号appid不能超过32位！')
+        else:
+            return appid
+    def clean_send_name(self):
+        send_name = self.data.get('send_name')
+        if len(send_name) > 32:
+            self.add_error('send_name', '发送者名称不能超过32位！')
+        else:
+            return send_name
+    def clean_openid(self):
+        openid = self.data.get('openid')
+        if len(openid) > 32:
+            self.add_error('openid', '用户唯一标识openid不能超过32位！')
+        else:
+            return openid
+    def clean_wishing(self):
+        wishing = self.data.get('wishing')
+        if len(wishing) > 128:
+            self.add_error('wishing', '红包祝福语不能超过128位！')
+        else:
+            return wishing
+    def clean_act_name(self):
+        act_name = self.data.get('act_name')
+        if len(act_name) > 32:
+            self.add_error('act_name', '活动名称不能超过32位！')
+        else:
+            return act_name
+    def clean_remark(self):
+        remark = self.data.get('remark')
+        if len(remark) > 256:
+            self.add_error('remark', '备注不能超过256位！')
+        else:
+            return remark
 
+
+
+# 订单号生成          规则： 当前年月日时分秒 + 当前时间戳后五位 + 10-99随机值
+def dingdanhaoshengcheng():
+    ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime())  # 年月日时分秒
+    shijianchuoafter5 = str(int(time.time() * 1000))[8:]  # 时间戳 后五位
+    dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99))
+    return dingdanhao
 
 # 关注发放红包(实时发送)
 @csrf_exempt
 # @account.is_token(models.zgld_customer)
 def focusOnIssuedRedEnvelope(request):
     if request.method == 'POST':
+        url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
         # 获取IP
-        print(request.META)
-        # if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-        #     ip = request.META['HTTP_X_FORWARDED_FOR']
-        # else:
-        #     ip = request.META['REMOTE_ADDR']
-        # url =  'https://api.mch.weixin.qq.com/pay/unifiedorder'  # 微信支付接口
+        if request.META.get('HTTP_X_FORWARDED_FOR'):
+            ip = request.META.get('HTTP_X_FORWARDED_FOR')
+        elif request.META.get('REMOTE_ADDR'):
+            ip = request.META.get('REMOTE_ADDR')
+        else:
+            ip = '0.0.0.0'
+        client_ip = ip
+        dataDict = {
+            'SHANGHUKEY' : request.POST.get('SHANGHUKEY'),       # 商户秘钥KEY
+            'total_fee' : request.POST.get('total_fee'),         # 钱数
+            'appid' : request.POST.get('appid'),                 # 小程序ID
+            'mch_id' : request.POST.get('mch_id'),               # 商户号
+            'openid' : request.POST.get('openid'),               # 微信用户唯一标识
+            'send_name' : request.POST.get('send_name'),         # 商户名称 中文
+            'act_name' : request.POST.get('act_name'),           # 动名称 32长度
+            'remark' : request.POST.get('remark'),               # 备注信息 256长度
+            'wishing' : request.POST.get('wishing'),             # 红包祝福语 128长度
+        }
+        forms_obj = guanZhuForm(dataDict)
+        if forms_obj.is_valid():
+            print('===================生成发放订单')
 
-        return JsonResponse(response.__dict__)
 
-        # 无订单情况 必传 4个参数
-        # goodsNum = request.POST.get('goodsNum', 1)               # 商品数量
-        # goodsId = request.POST.get('goodsId')                 # 商品ID
-        # user_id = request.GET.get('user_id')
-        # u_id = request.POST.get('u_id')
-        # # 传 订单 ID
-        # fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
-        # print('fukuan===============> ',fukuan)
-        #
-        # userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
-        # openid = userObjs[0].openid                                 # openid  用户标识
-        # if not fukuan :
-        #     u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
-        #     xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
-        #     goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
-        #     jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
-        #     # ==========商户KEY============
-        #     global SHANGHUKEY
-        #     SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
-        #     # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
-        #     total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)
-        #     # total_fee = int(0.01 * 100)
-        #     ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
-        #     shijianchuoafter5 = str(int(time.time() * 1000))[8:] # 时间戳 后五位
-        #     dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
-        #     getWxPayOrderId =  dingdanhao                               # 订单号
-        #     appid = xiaochengxu_app[0].authorization_appid              # 预支付 appid
-        #     mch_id = jiChuSheZhiObjs[0].shangHuHao
-        # # 存在订单的
-        # else:
-        #     orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=fukuan)
-        #     getWxPayOrderId = orderObjs[0].orderNumber  #订单号
-        #     goodNum = 1
-        #     if orderObjs[0].unitRiceNum:
-        #         goodNum = orderObjs[0].unitRiceNum
-        #
-        #     total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
-        #
-        # # client_ip = ip   # 用户ip
-        # client_ip = '0.0.0.0'
-        # result_data = {
-        #     'appid': 'wx1add8692a23b5976',                  # appid
-        #     # 'appid': appid,                               # 真实数据appid
-        #     'mch_id': '1513325051',                         # 商户号
-        #     # 'mch_id': mch_id,                             # 商户号真实数据
-        #     'nonce_str': yuzhifu.generateRandomStamping(),          # 32位随机值a
-        #     'openid': openid,
-        #     'body': 'zhuge-vip',                            # 描述
-        #     'out_trade_no': getWxPayOrderId,                # 订单号
-        #     'total_fee': total_fee,                            # 金额
-        #     'spbill_create_ip': client_ip,                   # 终端IP
-        #     'notify_url': 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/payback',
-        #     'trade_type': 'JSAPI'
-        #     }
-        # stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
-        # result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
-        # xml_data = yuzhifu.toXml(result_data)
-        # print('xml_data----------------> ',xml_data)
-        #
-        # ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
-        # ret.encoding = 'utf8'
-        # print('ret.text============> ',ret.text)
-        # DOMTree = xmldom.parseString(ret.text)
-        # collection = DOMTree.documentElement
-        # return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-        # print('return_code-------------------> ',return_code)
-        # if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
-        #     # code_url = collection.getElementsByTagName("code_url")[0].childNodes[0].data  # 二维码
-        #     prepay_id = collection.getElementsByTagName("prepay_id")[0].childNodes[0].data  # 直接支付
-        #     data_dict = {
-        #         'appId' : 'wx1add8692a23b5976',
-        #         'timeStamp': int(time.time()),
-        #         'nonceStr':yuzhifu.generateRandomStamping(),
-        #         'package': 'prepay_id=' + prepay_id,
-        #         'signType': 'MD5'
-        #     }
-        #     stringSignTemp = yuzhifu.shengchengsign(data_dict, SHANGHUKEY)
-        #     data_dict['paySign'] = yuzhifu.md5(stringSignTemp).upper() # upper转换为大写
-        #     response.code = 200
-        #     response.msg = '支付成功'
-        #     # 预支付成功 创建订单
-        #     if not fukuan:
-        #         dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
-        #         date_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        #         commissionFee = 0
-        #         if goodsObjs[0].commissionFee:
-        #             commissionFee = goodsObjs[0].commissionFee
-        #         company_id = xiaochengxu_app[0].company_id
-        #         dingDanObjs.create(
-        #             shangpinguanli_id = goodsId,            # 商品ID
-        #             orderNumber = int(getWxPayOrderId),     # 订单号
-        #             yingFuKuan = float(total_fee)/100,             # 应付款
-        #             goodsPrice = goodsObjs[0].goodsPrice,   # 商品单价
-        #             youHui = 0,                             # 优惠
-        #             unitRiceNum=int(goodsNum),                   # 数量
-        #             yewuUser_id = u_id,                     # 业务
-        #             gongsimingcheng_id = company_id,        # 公司
-        #             yongJin = commissionFee,                # 佣金
-        #             peiSong = '',                           # 配送
-        #             shouHuoRen_id = user_id,                   # 收货人
-        #             theOrderStatus = 1,                     # 订单状态
-        #             createDate=date_time,
-        #             goodsName=goodsObjs[0].goodsName,
-        #             detailePicture=goodsObjs[0].detailePicture
-        #         )
+            objsForm = forms_obj.cleaned_data
+            SHANGHUKEY = objsForm.get('SHANGHUKEY')
+            result_data = {
+                'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
+                'wxappid': objsForm.get('appid'),                           # appid
+                'mch_id': objsForm.get('mch_id'),                           # 商户号
+                're_openid': objsForm.get('openid'),                        # 用户唯一标识
+                'total_amount': objsForm.get('total_fee'),                  # 付款金额 1:100
+                'mch_billno': dingdanhaoshengcheng(),                       # 订单号
+                'client_ip': client_ip,                                     # 终端IP
+                'total_num':1,                                              # 红包发放总人数
+                'send_name':objsForm.get('send_name'),                      # 商户名称 中文
+                'act_name':objsForm.get('act_name'),                        # 活动名称 32长度
+                'remark':objsForm.get('remark'),                            # 备注信息 256长度
+                'wishing':objsForm.get('wishing'),                          # 红包祝福语 128长度
+                }
+            stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
+            result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
+            xml_data = yuzhifu.toXml(result_data)
+            xml_data = xml_data.encode('utf8')
+            p = 'statics/zhugeleida/imgs/admin/secretKeyFile/1539054451057.zip'
+            zhengshupath = os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            # file_zip = zipfile.ZipFile(zhengshupath, 'r')
+            # for file in file_zip.namelist():
+            #     file_zip.extract(file, r'{}'.format(file_dir))
+            # file_zip.close()
+            # os.remove(zhengShuPath)
 
-                # dingdanId = dingdan.id
-                # bumen = u_idObjs[0].department.get()
-                # phone = int(u_idObjs[0].wechat_phone)
-                # models.zgld_yuangong_dingdan_tongji.objects.create(
-                #     dingDanguanli_id=dingdanId,
-                #     bumen=bumen.name,
-                #     touxiang=u_idObjs[0].avatar,
-                #     gongsimingcheng_id=u_idObjs[0].company_id,
-                #     employeesName_id=u_id,
-                #     employeesPhone=phone
-                #     # numberOfSalesOrders
-                #     # ClinchADealAmount
-                # )
-            #     response.code = 200
-            #     response.msg = '预支付请求成功'
-            #     response.data = data_dict
-            # return JsonResponse(response.__dict__)
-    #     else:
-    #         if not fukuan:
-    #             response.msg = '预支付失败'
-    #         else:
-    #             response.msg = '支付失败'
-    #         response.code = 500
-    #         response.data = ''
-    #         return JsonResponse(response.__dict__)
-    # else:
-    #     response.code = 402
-    #     response.msg = '请求异常'
-    #     response.data = ''
-    #     return JsonResponse(response.__dict__)
+            file_dir = zhengshupath + '/' + os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile')
+            cret = os.path.join(file_dir, 'apiclient_cert.pem')
+            key = os.path.join(file_dir, 'apiclient_key.pem')
+
+            ret = requests.post(url, data=xml_data, cert=(cret, key))
+            print(ret.text)
+            DOMTree = xmldom.parseString(ret.text)
+            collection = DOMTree.documentElement
+            return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+            print('return_code-------------------> ',return_code)
+            if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
+
+                response.code = 200
+
+
+
+        else:
+            response.code = 301
+            response.msg = json.loads(forms_obj.errors.as_json())
+    return JsonResponse(response.__dict__)
