@@ -38,7 +38,7 @@ def theOrderShow(request):
         if dingdanbianhao:
             q.add(Q(orderNumber__contains=dingdanbianhao), Q.AND)
         if goodsName:
-            q.add(Q(shangpinguanli__goodsName__contains=goodsName), Q.AND)
+            q.add(Q(goodsName__contains=goodsName), Q.AND)
         print('q)------------> ',q)
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
@@ -53,6 +53,7 @@ def theOrderShow(request):
             objs = objs[start_line: stop_line]
         otherData = []
         for obj in objs:
+            print('obj.shangpinguanli.goodsName----------> ',obj.shangpinguanli.goodsName)
             yewuUser = ''
             yewu = ''
             if obj.yewuUser:
