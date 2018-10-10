@@ -1124,9 +1124,24 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
 #     numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
 #     ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
 
-
-
-
-
+# 关注发放红包
+class zgld_issued_a_red_envelope(models.Model):
+    wxappid = models.CharField(verbose_name='公众号appid', max_length=32, null=True, blank=True)
+    mch_id = models.CharField(verbose_name='商户号', max_length=32, null=True, blank=True)
+    re_openid = models.CharField(verbose_name='用户标识openid', max_length=32, null=True, blank=True)
+    total_amount = models.CharField(verbose_name='付款金额', max_length=32, null=True, blank=True)     # 1:100
+    mch_billno = models.CharField(verbose_name='商户订单号', max_length=28, null=True, blank=True)
+    client_ip = models.CharField(verbose_name='用户IP', max_length=16, null=True, blank=True)
+    send_name = models.CharField(verbose_name='(商户/红包发送者)名称', max_length=32, null=True, blank=True)
+    act_name = models.CharField(verbose_name='活动名称', max_length=32, null=True, blank=True)
+    remark = models.TextField(verbose_name='备注', null=True, blank=True)
+    wishing = models.TextField(verbose_name='红包祝福语', max_length=128, null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    issuing_status = (
+        (1, '发放完成'),
+        (2, '发放失败'),
+        (3, '发放中')
+    )
+    issuingState = models.SmallIntegerField(verbose_name='发放状态', choices=issuing_status, default=3)
 
 
