@@ -6,16 +6,20 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
+
 import json
 import redis
 import xml.etree.cElementTree as ET
 from django import forms
+import sys
 
 ## 第三方平台接入
 @csrf_exempt
 def open_weixin(request, oper_type):
+    response = Response.ResponseObj()
+
     if request.method == "POST":
-        response = Response.ResponseObj()
+
         if oper_type == 'tongzhi':
 
             print('------ 第三方 request.body tongzhi 通知内容 ------>>', request.body.decode(encoding='UTF-8'))
@@ -61,9 +65,9 @@ def open_weixin(request, oper_type):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                appid = 'wx67e2fde0f694111c'
+                token = '5lokfwWTqHXnb58VCV'
+                encodingAESKey = 'HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt'
+                appid = 'wx81159f52aff62388'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
@@ -75,6 +79,7 @@ def open_weixin(request, oper_type):
                 print('-----decryp_xml -->', decryp_xml)
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                # rc.get('ComponentVerifyTicket')
 
                 if ret == 0:
                     rc.set('ComponentVerifyTicket', ComponentVerifyTicket, 10000)
@@ -324,7 +329,7 @@ def open_weixin(request, oper_type):
             else:
                 pre_auth_code = exist_pre_auth_code
 
-            # 生成授权链接
+            #生成授权链接
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (app_id, pre_auth_code, redirect_uri)   #auth_type=3 表示公众号和小程序都展示
@@ -333,47 +338,8 @@ def open_weixin(request, oper_type):
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
 
-        #企业微信服务器会定时（每十分钟）推送ticket。https://work.weixin.qq.com/api/doc#10982/推送suite_ticket
-        elif oper_type == 'get_ticket':
-            print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
 
-            timestamp = request.GET.get('timestamp')
-            nonce = request.GET.get('nonce')
-            msg_signature = request.GET.get('msg_signature')
-
-            postdata = request.body.decode(encoding='UTF-8')
-
-            decryp_xml_tree = ''
-            xml_tree = ET.fromstring(postdata)
-            try:
-                '''
-                <xml>
-                    <SuiteId><![CDATA[ww4asffe99e54c0f4c]]></SuiteId>
-                    <InfoType> <![CDATA[suite_ticket]]></InfoType>
-                    <TimeStamp>1403610513</TimeStamp>
-                    <SuiteTicket><![CDATA[asdfasfdasdfasdf]]></SuiteTicket>
-                </xml>
-
-                '''
-                SuiteId = xml_tree.find("SuiteId").text   # 第三方应用的SuiteId
-                InfoType = xml_tree.find("InfoType").text   # suite_ticket
-                TimeStamp = xml_tree.find("TimeStamp").text  # 时间戳
-                SuiteTicket = xml_tree.find("SuiteTicket").text  # 时间戳
-
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-                key_name = 'SuiteTicket_%s' % (SuiteId)
-                rc.set(key_name, SuiteTicket, 10000)
-                print('--------企业微信服务器 SuiteId | suite_ticket--------->>',SuiteId,'|', SuiteTicket)
-
-
-
-            except Exception as e:
-                print('---报错-->>',e)
-
-            return HttpResponse("success")
-
-        return JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
 
 
 ## 生成接入流程控制页面

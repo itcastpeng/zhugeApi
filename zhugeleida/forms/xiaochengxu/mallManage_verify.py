@@ -21,7 +21,7 @@ class AddForm(forms.Form):
         }
     )
 
-    goodsPrice = forms.IntegerField(
+    goodsPrice = forms.FloatField(
         required=True,
         error_messages={
             'required': '商品标价不能为空'
@@ -86,7 +86,7 @@ class UpdateForm(forms.Form):
         }
     )
 
-    goodsPrice = forms.IntegerField(
+    goodsPrice = forms.FloatField(
         required=True,
         error_messages={
             'required': '商品标价不能为空'

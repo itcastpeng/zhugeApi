@@ -5,8 +5,8 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm 
-import json, base64
-
+import json, base64, datetime, time
+from django.db.models import Q
 
 
 @csrf_exempt
@@ -18,14 +18,34 @@ def theOrderShow(request):
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
-
+        q = Q()
+        yewuyuan = request.GET.get('yewuyuan')                          # 业务员模糊匹配
+        dingdanbianhao = request.GET.get('dingdanbianhao')              # 订单编号
+        goodsName = request.GET.get('goodsName')                        # 商品名称模糊匹配
+        start_createDate = request.GET.get('start_createDate')          # 开始创建时间
+        stop_createDate = request.GET.get('stop_createDate')            # 结束创建时间
+        theOrderStatus = request.GET.get('theOrderStatus')              # 订单状态
+        startCompletionTime = request.GET.get('startCompletionTime')    # 开始完成时间
+        stopCompletionTime = request.GET.get('stopCompletionTime')      # 结束完成时间
+        if start_createDate and stop_createDate:
+            q.add(Q(createDate__gte=start_createDate) & Q(createDate__lte=stop_createDate), Q.AND)
+        if startCompletionTime and stopCompletionTime:
+            q.add(Q(stopDateTime__gte=startCompletionTime) & Q(stopDateTime__lte=stopCompletionTime), Q.AND)
+        if theOrderStatus:
+            q.add(Q(theOrderStatus=theOrderStatus), Q.AND)
+        if yewuyuan:
+            q.add(Q(yewuUser_id=yewuyuan), Q.AND)
+        if dingdanbianhao:
+            q.add(Q(orderNumber__contains=dingdanbianhao), Q.AND)
+        if goodsName:
+            q.add(Q(goodsName__contains=goodsName), Q.AND)
+        print('q)------------> ',q)
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        print('u_idObjs--------> ',u_idObjs)
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
 
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
             shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp=xiaochengxu_id
-        )
+        ).filter(q)
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
@@ -33,43 +53,63 @@ def theOrderShow(request):
             objs = objs[start_line: stop_line]
         otherData = []
         for obj in objs:
-            username = ''
+            print('obj.shangpinguanli.goodsName----------> ',obj.shangpinguanli.goodsName)
+            yewuUser = ''
             yewu = ''
             if obj.yewuUser:
-                decode_username = base64.b64decode( obj.yewuUser.username)
-                username = str(decode_username, 'utf-8')
+                yewuUser = obj.yewuUser.username
                 yewu = obj.yewuUser_id
             shouhuoren = ''
             if obj.shouHuoRen:
                 decode_username = base64.b64decode(obj.shouHuoRen.username)
                 shouhuoren = str(decode_username, 'utf-8')
-            shangpinguanli = obj.shangpinguanli
+            topLunBoTu = ''
+            if obj.shangpinguanli.topLunBoTu:
+                topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+
+            # countPrice = ''
+            # num = 1
+            # if obj.unitRiceNum:
+            #     num = obj.unitRiceNum
+            # if num and shangpinguanli.goodsPrice:
+            #     countPrice = int(shangpinguanli.goodsPrice) * int(num)
+            detailePicture = ''
+            if objs[0].detailePicture:
+                detailePicture = json.loads(objs[0].detailePicture)
+            countPrice = 0
+            if obj.goodsPrice:
+                countPrice = obj.goodsPrice * obj.unitRiceNum
             otherData.append({
-                'goodsName' : shangpinguanli.goodsName,
-                'goodsPrice':shangpinguanli.goodsPrice,
-                'countPrice':obj.countPrice,
+                'id':obj.id,
+                'goodsName' : obj.goodsName,
+                'goodsPrice':obj.goodsPrice,
+                'countPrice':countPrice,
                 'yingFuKuan':obj.yingFuKuan,
                 'youhui':obj.yongJin,
                 'yewuyuan_id':yewu,
-                'yewuyuan':username,
+                'yewuyuan':yewuUser,
+                'unitRiceNum':obj.unitRiceNum,
                 'yongjin':obj.yongJin,
                 'peiSong':obj.peiSong,
                 'shouHuoRen_id':obj.shouHuoRen_id,
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                'lunbotu':topLunBoTu,
+                'detailePicture':detailePicture
             })
-            response.code = 200
-            response.msg = '查询成功'
             response.data = {
                 'otherData':otherData,
                 'objsCount':objsCount,
             }
+        response.msg = '查询成功'
+        response.code = 200
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
+
 
 
 
@@ -114,8 +154,34 @@ def theOrderOper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
-        response.code = 402
-        response.msg = "请求异常"
+        if oper_type == 'selectStatus':
+            objs = models.zgld_shangcheng_dingdan_guanli
+            statusData = []
+            for i in objs.order_status:
+                statusData.append({
+                    'value':i[0],
+                    'lable':i[1]
+                })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = statusData
+        elif oper_type == 'selectYeWu':
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
+            company_id = objs[0].shangpinguanli.parentName.xiaochengxu_app.xiaochengxucompany_id
+            companyObjs = models.zgld_company.objects.filter(id=company_id)
+            yewuObjs = models.zgld_admin_userprofile.objects.filter(company_id=companyObjs[0].id)
+            otherData = []
+            for yewuObj in yewuObjs:
+                otherData.append({
+                    'value': yewuObj.id,
+                    'lable':yewuObj.login_user
+                })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = otherData
+        else:
+            response.code = 402
+            response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
 

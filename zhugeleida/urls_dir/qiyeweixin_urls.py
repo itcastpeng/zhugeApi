@@ -53,6 +53,7 @@ urlpatterns = [
     url(r'^chat$', chat.chat),
 
     # 获取聊天联系人列表
+    url(r'^contact/(?P<oper_type>\w+)$', contact.contact_oper),
     url(r'^contact$', contact.contact),
 
     # 获取访问日志动作。

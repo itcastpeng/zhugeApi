@@ -36,11 +36,10 @@ class zhifupeizhi(forms.Form):
         }
     )
 
-
     zhengshu = forms.CharField(
-        required=False,
+        required=True,
         error_messages={
-            'required': "内容不能为空"
+            'required': "证书不能为空"
         }
     )
     def clean_shangHuHao(self):

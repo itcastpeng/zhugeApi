@@ -580,10 +580,25 @@ def mingpian_poster_html_oper(request):
     qr_code = ''
     if  user_id and customer_id :
          qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-         qr_code =  "/" + qr_obj[0].qr_code
+         if qr_obj:
+             qr_code =   qr_obj[0].qr_code
+             if not qr_code:
+                 # 异步生成小程序和企业用户对应的小程序二维码
+                 data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                 tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+
+             qr_code =  "/" + qr_obj[0].qr_code
+
+
          print('--- 从 customer_belonger 里 --->>qr_code',qr_code)
 
     elif user_id and  not customer_id:
+         qr_code = obj.qr_code
+         if not qr_code:
+             # 异步生成小程序和企业用户对应的小程序二维码
+             data_dict = {'user_id': user_id, 'customer_id': ''}
+             tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+
          qr_code = "/" +  obj.qr_code
          print('--- 从 zgld_userprofile 里 --->>qr_code',qr_code)
 

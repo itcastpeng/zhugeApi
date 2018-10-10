@@ -268,12 +268,16 @@ def article_oper(request, oper_type, o_id):
 
                     customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
+
                         remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
+                        print('---- 公众号查看文章[消息提醒]--->>', remark)
+
                         data = request.GET.copy()
                         data['action'] = 14
                         response = action_record(data, remark)
-                    ## 先记录一个用户查看文章的日志
 
+
+                    ## 先记录一个用户查看文章的日志
                     now_date_time = datetime.datetime.now()
 
                     article_access_log_obj = models.zgld_article_access_log.objects.create(

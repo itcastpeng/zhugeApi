@@ -11,8 +11,8 @@ urlpatterns = [
     url(r'^create_user_or_customer_poster', mycelery.create_user_or_customer_poster),     # 生成小程序的海报
 
 
-    url(r'^user_send_template_msg', mycelery.user_send_template_msg),     # 发送模板消息
-    url(r'^user_send_gongzhonghao_template_msg', mycelery.user_send_gongzhonghao_template_msg),     # 发送公众号的模板消息
+    url(r'^user_send_template_msg$', mycelery.user_send_template_msg),     # 发送模板消息
+    url(r'^user_send_gongzhonghao_template_msg$', mycelery.user_send_gongzhonghao_template_msg),     # 发送公众号的模板消息
     url(r'^get_latest_audit_status_and_release_code$', mycelery.get_latest_audit_status_and_release_code),     # 定时检测代小程序发布审核状态
 
 

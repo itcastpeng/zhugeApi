@@ -805,6 +805,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '该文章无查看'
                 response.data = {}
+
         else:
             response.code = 402
             response.msg = '请求异常'

@@ -102,7 +102,7 @@ def mallManagementOper(request, oper_type, o_id):
         'o_id':o_id,
         'goodsName':request.POST.get('goodsName'),                    # 商品名称
         'parentName':request.POST.get('parentName'),                  # 父级分类
-        'goodsPrice':request.POST.get('goodsPrice'),                  # 商品标价
+        'goodsPrice':request.POST.get('goodsPrice'),                                           # 商品标价
         'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
         'goodsStatus':request.POST.get('goodsStatus'),                # 商品状态
         'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),        # 是否线上交易
@@ -111,6 +111,7 @@ def mallManagementOper(request, oper_type, o_id):
         'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
         'detailePicture':request.POST.get('detailePicture'),          # 详情图片
     }
+    print('resultData---------------->',resultData)
     user_id = request.GET.get('user_id')
     if request.method == "POST":
         if oper_type == 'add':
@@ -158,6 +159,7 @@ def mallManagementOper(request, oper_type, o_id):
                 formObjs = forms_obj.cleaned_data
                 print('formObjs------> ',formObjs)
                 print("formObjs.get('xianshangjiaoyi')==========> ",formObjs.get('xianshangjiaoyi'))
+                print("formObjs.get('goodsPrice')==============> ",formObjs.get('goodsPrice'))
                 models.zgld_goods_management.objects.filter(id=o_id).update(
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),

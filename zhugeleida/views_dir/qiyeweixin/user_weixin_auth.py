@@ -41,8 +41,8 @@ def work_weixin_auth(request, company_id):
 
         print('---------【企业微信】 从Redis 取出的 ------->>', key_name, "是:", token_ret)
 
-        # if not token_ret:
-        if True:
+        if not token_ret:
+        # if True:
             corpid = company_obj.corp_id
             corpsecret = company_obj.zgld_app_set.get(company_id=company_id,app_type=1).app_secret
 
@@ -63,6 +63,7 @@ def work_weixin_auth(request, company_id):
         get_code_data['code'] = code
         get_code_data['access_token'] = access_token
         code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo'
+
         code_ret = requests.get(code_url, params=get_code_data)
 
         code_ret_json = code_ret.json()
@@ -126,6 +127,10 @@ def work_weixin_auth(request, company_id):
                 print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|", userid, "\n", redirect_url)
                 print('redirect_url -->', redirect_url)
                 return redirect(redirect_url)
+
+            else:
+                print('----------【雷达用户】未开通 ,未登录成功 userid | company_id ------>', userid, company_id)
+                return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
         else:
             print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>',userid,company_id)

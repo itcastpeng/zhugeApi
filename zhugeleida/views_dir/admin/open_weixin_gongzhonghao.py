@@ -547,8 +547,9 @@ def create_component_access_token(data):
     component_access_token_key_name = 'component_access_token_%s' % (app_id)
     token_ret = rc.get(component_access_token_key_name)
     print('----- Redis 里存储的 component_access_token ---->>', token_ret)
-
+    print('---- post_component_data ---->>',json.dumps(post_component_data))
     if not token_ret:
+
         post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
         component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
         print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())

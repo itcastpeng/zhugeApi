@@ -247,7 +247,7 @@ def user_oper(request, oper_type, o_id):
                 print("验证通过")
 
                 # user_id = request.GET.get('user_id')
-                userid = str(int(time.time()*1000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
+                userid = str(int(time.time()*1000000))   # 成员UserID。对应管理端的帐号，企业内必须唯一
                 username = forms_obj.cleaned_data.get('username')
                 password = forms_obj.cleaned_data.get('password')
                 # role_id = forms_obj.cleaned_data.get('role_id')
@@ -568,8 +568,9 @@ def user_oper(request, oper_type, o_id):
                             response.msg = "修改成功"
 
                             # 生成海报
-                            data_dict = {'user_id': user_id, 'customer_id': ''}
-                            tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                            # data_dict = {'user_id': user_id, 'customer_id': ''}
+                            # tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
                         else:
                             response.code = errcode
                             response.msg = errmsg
@@ -903,6 +904,7 @@ def user_oper(request, oper_type, o_id):
 
                                 obj.department = department_id_list
                                 obj.save()
+                                models.zgld_temp_userprofile.objects.filter(id=temp_obj.id).delete() # 删除已经通过审核的员工。
 
                                 # 生成企业用户二维码
                                 data_dict = {'user_id': obj.id, 'customer_id': ''}

@@ -194,50 +194,7 @@ def mingpian_oper(request, oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-        # 签名
-        # elif oper_type == 'save_sign':
-        #
-        #     user_id = request.GET.get('user_id')
-        #     mingpian_sign = request.POST.get('sign')
-        #
-        #     objs = models.zgld_userprofile.objects.filter(id=user_id)
-        #
-        #     if objs:
-        #         objs.update(sign=mingpian_sign)
-        #         response.code = 200
-        #         response.msg = '保存成功'
 
-        # elif oper_type == "upload_photo":
-        #
-        #     upload_file = request.FILES['file']
-        #     task = request.POST.get('task_id')  # 获取文件唯一标识符
-        #     chunk = request.POST.get('chunk', 0)  # 获取该分片在所有分片中的序号
-        #     filename = '/%s%s' % (task, chunk)  # 构成该分片唯一标识符
-        #
-        #     IMG_PATH_FILES = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo','tmp') + filename
-        #     with open(IMG_PATH_FILES, 'wb+') as destination:
-        #         for chunk in upload_file.chunks():
-        #             destination.write(chunk)
-        #
-        # elif oper_type == 'delete_photo':
-        #     print('--------->>',request.POST)
-        #     user_id = request.GET.get('user_id')
-        #     photo_id = request.POST.get('photo_id')
-        #
-        #     objs = models.zgld_user_photo.objects.filter(id=photo_id,user_id=user_id)
-        #
-        #     if objs:
-        #         IMG_PATH = BASE_DIR  + '/' + objs[0].photo_url
-        #         print('-----IMG_PATH--->>',IMG_PATH)
-        #         if os.path.exists(IMG_PATH):os.remove(IMG_PATH)
-        #         objs.delete()
-        #         response.code = 200
-        #         response.msg = '删除成功'
-        #     else:
-        #         response.code = 302
-        #         response.msg = '删除数据不存在'
-
-        # 意见反馈
         elif oper_type == 'feedback':
             user_id = request.GET.get('user_id')
             content = request.POST.get('content')
