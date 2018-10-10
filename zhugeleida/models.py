@@ -1080,15 +1080,15 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
 # 员工订单统计
-class zgld_yuangong_dingdan_tongji(models.Model):
-    dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
-    touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
-    employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
-    gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
-    employeesPhone = models.IntegerField(verbose_name='(员工/业务员)电话', null=True, blank=True)
-    bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
-    numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
-    ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
+# class zgld_yuangong_dingdan_tongji(models.Model):
+#     dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
+#     touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
+#     employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
+#     gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
+#     employeesPhone = models.IntegerField(verbose_name='(员工/业务员)电话', null=True, blank=True)
+#     bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
+#     numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
+#     ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
 
 
 
