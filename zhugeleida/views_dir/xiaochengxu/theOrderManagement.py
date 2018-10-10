@@ -17,15 +17,21 @@ def theOrderShow(request):
     user_id = request.GET.get('user_id')
     u_id = request.GET.get('u_id')
     if forms_obj.is_valid():
+        q = Q()
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
-        # u_idObjs = models.zgld_customer.objects.filter(id=u_id)
-        # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
         detailId = request.GET.get('detailId')
-        q = Q()
+        orderStatus = request.GET.get('orderStatus')
+        if orderStatus:
+            if int(orderStatus) == 1:
+                q.add(Q(theOrderStatus=8), Q.AND)
+            elif int(orderStatus) == 2:
+                q.add(Q(theOrderStatus=9), Q.AND)
+            else:
+                q.add(Q(theOrderStatus=1) | Q(theOrderStatus=10) | Q(theOrderStatus=11), Q.AND)
         if detailId:
             q.add(Q(id=detailId), Q.AND)
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=u_id, logicDelete=0) # 小程序用户只能查看自己的订单
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=user_id, logicDelete=0) # 小程序用户只能查看自己的订单
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
@@ -42,10 +48,6 @@ def theOrderShow(request):
             tuikuan = 0
             if tuikuanObj:
                 tuikuan = 1
-            # 总价
-            # countPrice = 0
-            # if obj.unitRiceNum and obj.shangpinguanli.goodsPrice:
-            #     countPrice = obj.shangpinguanli.goodsPrice * int(obj.unitRiceNum)
             # 轮播图
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
