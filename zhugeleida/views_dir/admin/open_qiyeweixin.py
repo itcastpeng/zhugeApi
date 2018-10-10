@@ -170,10 +170,17 @@ def  open_qiyeweixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
+            type = request.GET.get('type')
 
-            sToken = "5lokfwWTqHXnb58VCV"
-            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-            # sCorpID = "wx5d26a7a856b22bec"
+            sToken = ''
+            sEncodingAESKey =''
+            if  type == 'leida':
+                sToken = "5lokfwWTqHXnb58VCV" #回调配置
+                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt" #回调配置
+            elif type == 'boss':
+                sToken = "22LlaSyBP" #回调配置
+                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be" #回调配置
+
             sCorpID = "wx81159f52aff62388"
             wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
@@ -195,10 +202,19 @@ def  open_qiyeweixin(request, oper_type):
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
 
-            sToken = "5lokfwWTqHXnb58VCV"
-            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-            # sCorpID = "wx5d26a7a856b22bec"
-            sCorpID = "wx81159f52aff62388"
+            type = request.GET.get('type')
+
+            sToken = ''
+            sEncodingAESKey = ''
+            if type == 'leida':
+                sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
+                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
+            elif type == 'boss':
+                sToken = "22LlaSyBP"  # 回调配置
+                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+
+            
+            sCorpID = "wx81159f52aff62388"  #通用开发参数 CorpID
             wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
 
@@ -233,12 +249,11 @@ def  open_qiyeweixin(request, oper_type):
 
             user_ticket = code_ret_json.get('user_ticket')
             if not user_ticket:
-                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用access_token:==========>', code, "|",
-                      suite_access_token)
+                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用 access_token:==========>', code, "|", suite_access_token)
                 return HttpResponse('404')
+
             else:
-                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
-                      "|", suite_access_token, "|", user_ticket)
+                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,"|", suite_access_token, "|", user_ticket)
 
             post_userlist_data = {
                 'user_ticket': user_ticket
