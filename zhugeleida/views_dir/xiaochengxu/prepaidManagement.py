@@ -221,6 +221,20 @@ def yuZhiFu(request):
                     goodsName=goodsObjs[0].goodsName,
                     detailePicture=goodsObjs[0].detailePicture
                 )
+
+                # dingdanId = dingdan.id
+                # bumen = u_idObjs[0].department.get()
+                # phone = int(u_idObjs[0].wechat_phone)
+                # models.zgld_yuangong_dingdan_tongji.objects.create(
+                #     dingDanguanli_id=dingdanId,
+                #     bumen=bumen.name,
+                #     touxiang=u_idObjs[0].avatar,
+                #     gongsimingcheng_id=u_idObjs[0].company_id,
+                #     employeesName_id=u_id,
+                #     employeesPhone=phone
+                #     # numberOfSalesOrders
+                #     # ClinchADealAmount
+                # )
                 response.code = 200
                 response.msg = '预支付请求成功'
                 response.data = data_dict
