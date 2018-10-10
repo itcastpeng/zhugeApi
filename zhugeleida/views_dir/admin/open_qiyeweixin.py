@@ -116,6 +116,7 @@ def  open_qiyeweixin(request, oper_type):
         elif oper_type == "create_grant_url":
 
             suite_id = 'wx5d26a7a856b22bec'
+
             create_pre_auth_code_ret =  common.create_pre_auth_code()
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company'
@@ -130,8 +131,6 @@ def  open_qiyeweixin(request, oper_type):
                 'pre_auth_code_url' : pre_auth_code_url
             }
             # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
-
-
 
         # 设置授权配置 /zhugeleida/admin/open_qiyeweixin/set_session_info
         elif oper_type == 'set_session_info':
@@ -269,9 +268,10 @@ def  open_qiyeweixin(request, oper_type):
             # 如果用户存在
             if user_profile_objs:
                 user_profile_obj = user_profile_objs[0]
-                account_expired_time = user_profile_obj.account_expired_time
+
                 company_name = user_profile_obj.company.name
                 company_id = user_profile_obj.company_id
+                account_expired_time = models.zgld_company.objects.get(id=company_id).account_expired_time
 
                 if datetime.datetime.now() > account_expired_time:
                     response.code = 403

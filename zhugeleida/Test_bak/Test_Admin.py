@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -73,8 +73,8 @@ ip = 'http://127.0.0.1:8001'
 # url = ip + '/zhugeleida/admin/open_qiyeweixin/create_grant_url'  # 获取 关联第三方的二维码
 # ret = requests.post(url, params=get_data,data=post_data)
 
-# url = ip + '/zhugeleida/admin/open_qiyeweixin/set_session_info'  # 获取 关联第三方的二维码
-# ret = requests.post(url, params=get_data,data=post_data)
+url = ip + '/zhugeleida/admin/open_qiyeweixin/set_session_info'  # 获取 关联第三方的二维码
+ret = requests.post(url, params=get_data,data=post_data)
 
 
 
@@ -272,11 +272,11 @@ ip = 'http://127.0.0.1:8001'
 ################################## 活管理设置 ###############################
 
 
-url =  ip + '/zhugeleida/admin/activity_manage/set_focus_get_redPacket'  # 获取产品的列表
-post_data['is_focus_get_redpacket'] = True
-post_data['focus_get_money'] = 1
-
-ret = requests.post(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/activity_manage/set_focus_get_redPacket'  # 获取产品的列表
+# post_data['is_focus_get_redpacket'] = True
+# post_data['focus_get_money'] = 1
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
 
 
 ##################################### 文章 + 文章标签 + 文章增删改查 ###############################
