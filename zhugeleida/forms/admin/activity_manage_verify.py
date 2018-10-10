@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 # 添加企业的产品
 class SetFocusGetRedPacketForm(forms.Form):
 
-    is_focus_get_redpacket = forms.CharField(
+    is_focus_get_redpacket = forms.BooleanField(
         required=True,
         error_messages={
             'required': "关注领取红包是否开启不能为空"
@@ -38,7 +38,6 @@ class ProductGetForm(forms.Form):
             'required': "产品ID不能为空"
         }
     )
-
 
     def clean_uid(self):
 
@@ -78,8 +77,6 @@ class ProductSelectForm(forms.Form):
             'required': "产品类型不为空"
         }
     )
-
-
 
     current_page = forms.IntegerField(
         required=False,
