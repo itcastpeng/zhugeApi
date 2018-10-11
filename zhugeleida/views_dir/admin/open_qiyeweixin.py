@@ -29,7 +29,6 @@ def  open_qiyeweixin(request, oper_type):
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
-            echostr = request.GET.get('echostr')
             type = request.GET.get('type')
 
             postdata = request.body.decode(encoding='UTF-8')
@@ -86,12 +85,13 @@ def  open_qiyeweixin(request, oper_type):
                 print('--------企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
                 get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
-
+                _app_type=''
                 if SuiteId == 'wx5d26a7a856b22bec':
                     app_type = 'leida'
-
+                    _app_type = 1
                 elif SuiteId == 'wx36c67dd53366b6f0':
                     app_type = 'boss'
+                    _app_type = 2
 
                 _data = {
 
@@ -118,19 +118,38 @@ def  open_qiyeweixin(request, oper_type):
                 corp_name =  get_permanent_code_info['auth_corp_info'].get('corp_name') # 授权方企业微信名称
                 access_token = get_permanent_code_info.get('access_token')              # 授权方（企业）access_token
                 permanent_code = get_permanent_code_info.get('permanent_code')          # 企业微信永久授权码
+                errmsg = get_permanent_code_info.get('errmsg')          # 企业微信永久授权码
+                errcode = get_permanent_code_info.get('errcode')          # 企业微信永久授权码
 
-                key_name = 'access_token_qiyeweixin_%s' % (corpid)
-                rc.set(key_name, access_token, 7000)
-                # obj = models.zgld_company.objects.filter(corp_id=corpid)
-                #
-                # if obj:
-                #     print('----- [企业微信] 授权方-企业微信【存在】数据库 corpid: --->',corpid,'|',permanent_code,corp_name)
-                #     # obj.update(
-                #     #     permanent_code=permanent_code
-                #     # )
-                # else:
-                #     print('----- [企业微信] 授权方-企业微信【未在】数据库 corpid: --->', corpid,'|',permanent_code,corp_name)
+                if errmsg == 'ok':
+                    key_name = 'access_token_qiyeweixin_%s' % (corpid)
+                    rc.set(key_name, access_token, 7000)
+                    obj = models.zgld_company.objects.filter(corp_id=corpid)
+                    company_id = obj.id
 
+
+                    app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
+                    if app_objs:
+                        print('----- [企业微信] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+
+                        app_objs.update(
+                            name=corp_name,
+                            app_type=_app_type,
+                            is_validate=True,
+                            agent_id=corpid,
+
+                        )
+                    else:
+                        print('----- [企业微信] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+                        models.zgld_app.objects.create(
+                            is_validate=True,
+                            name=corp_name,
+                            app_type=_app_type,
+                            agent_id=corpid,
+                            company_id=company_id
+                        )
+                else:
+                    print('-------[企业微信] 获取企业永久授权码 报错：------->>',errmsg,'|',errcode)
 
 
             return HttpResponse("success")
