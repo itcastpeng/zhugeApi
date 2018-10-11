@@ -65,13 +65,11 @@ def login(request):
                 # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
                 company_id = 1
                 is_release_version_num = False
-                print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
-                      user_id, company_id)
+                print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
 
             if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
-                    user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
-                    print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,
-                          user_id)
+                user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
+                print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,user_id)
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             authorizer_appid = obj.authorization_appid
@@ -392,8 +390,8 @@ def login_oper_control(request):
                 "chanpin2": "转发到朋友"
             },
             "poster"  : {
-            "poster1" : "保存名片海报",
-            "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
+                "poster1" : "保存名片海报",
+                "poster2" : "保存小程序码到相册便于二次进入该名片，便于分享到朋友圈。"
             },
             "button_msg": {
                 "msg": "发送手机号"
@@ -404,6 +402,6 @@ def login_oper_control(request):
         # mingan_info = json.dumps(mingan_info)
         response.code = 200
         response.data = mingan_info
-        response.msg = "返回成功成功"
+        response.msg = "返回成功"
 
     return JsonResponse(response.__dict__)

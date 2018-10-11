@@ -65,9 +65,9 @@ def open_weixin(request, oper_type):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                token = '5lokfwWTqHXnb58VCV'
-                encodingAESKey = 'HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt'
-                appid = 'wx81159f52aff62388'
+                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+                appid = 'wx67e2fde0f694111c'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)

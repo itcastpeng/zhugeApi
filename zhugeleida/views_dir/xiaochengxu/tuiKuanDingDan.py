@@ -31,6 +31,9 @@ def tuiKuanDingDanShow(request):
             tuikuan = ''
             if obj.tuiKuanDateTime:
                 tuikuan = obj.tuiKuanDateTime.strftime('%Y-%m-%d %H:%M:%S')
+            detailePicture = ''
+            if obj.orderNumber.detailePicture:
+                detailePicture = json.loads(obj.orderNumber.detailePicture)
             otherData.append({
                 'id': obj.id,
                 'orderNumber_id': obj.orderNumber_id,
@@ -42,7 +45,11 @@ def tuiKuanDingDanShow(request):
                 'tuiKuanStatus': obj.get_tuiKuanStatus_display(),
                 'tuiKuanStatusId': obj.tuiKuanStatus,
                 'goodsName':obj.orderNumber.goodsName,
-                'tuiKuanPrice':obj.orderNumber.yingFuKuan
+                'tuiKuanPrice':obj.orderNumber.yingFuKuan,
+                'detailePicture':detailePicture,
+                'goodsNum':obj.orderNumber.unitRiceNum,
+                'goodsPrice':obj.orderNumber.goodsPrice
+
             })
             response.code = 200
             response.msg = '查询成功'

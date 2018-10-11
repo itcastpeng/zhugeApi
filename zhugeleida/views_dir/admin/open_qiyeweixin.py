@@ -116,6 +116,7 @@ def  open_qiyeweixin(request, oper_type):
         elif oper_type == "create_grant_url":
 
             suite_id = 'wx5d26a7a856b22bec'
+
             create_pre_auth_code_ret =  common.create_pre_auth_code()
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company'
@@ -130,8 +131,6 @@ def  open_qiyeweixin(request, oper_type):
                 'pre_auth_code_url' : pre_auth_code_url
             }
             # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
-
-
 
         # 设置授权配置 /zhugeleida/admin/open_qiyeweixin/set_session_info
         elif oper_type == 'set_session_info':
@@ -171,10 +170,17 @@ def  open_qiyeweixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
+            type = request.GET.get('type')
 
-            sToken = "5lokfwWTqHXnb58VCV"
-            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-            # sCorpID = "wx5d26a7a856b22bec"
+            sToken = ''
+            sEncodingAESKey =''
+            if  type == 'leida':
+                sToken = "5lokfwWTqHXnb58VCV" #回调配置
+                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt" #回调配置
+            elif type == 'boss':
+                sToken = "22LlaSyBP" #回调配置
+                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be" #回调配置
+
             sCorpID = "wx81159f52aff62388"
             wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
@@ -196,10 +202,19 @@ def  open_qiyeweixin(request, oper_type):
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
 
-            sToken = "5lokfwWTqHXnb58VCV"
-            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-            # sCorpID = "wx5d26a7a856b22bec"
-            sCorpID = "wx81159f52aff62388"
+            type = request.GET.get('type')
+
+            sToken = ''
+            sEncodingAESKey = ''
+            if type == 'leida':
+                sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
+                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
+            elif type == 'boss':
+                sToken = "22LlaSyBP"  # 回调配置
+                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+
+
+            sCorpID = "wx81159f52aff62388"  #通用开发参数 CorpID
             wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
 
@@ -234,12 +249,11 @@ def  open_qiyeweixin(request, oper_type):
 
             user_ticket = code_ret_json.get('user_ticket')
             if not user_ticket:
-                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用access_token:==========>', code, "|",
-                      suite_access_token)
+                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用 access_token:==========>', code, "|", suite_access_token)
                 return HttpResponse('404')
+
             else:
-                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
-                      "|", suite_access_token, "|", user_ticket)
+                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,"|", suite_access_token, "|", user_ticket)
 
             post_userlist_data = {
                 'user_ticket': user_ticket
@@ -269,9 +283,10 @@ def  open_qiyeweixin(request, oper_type):
             # 如果用户存在
             if user_profile_objs:
                 user_profile_obj = user_profile_objs[0]
-                account_expired_time = user_profile_obj.account_expired_time
+
                 company_name = user_profile_obj.company.name
                 company_id = user_profile_obj.company_id
+                account_expired_time = models.zgld_company.objects.get(id=company_id).account_expired_time
 
                 if datetime.datetime.now() > account_expired_time:
                     response.code = 403
