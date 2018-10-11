@@ -271,11 +271,21 @@ def  open_qiyeweixin(request, oper_type):
         #  网页授权登录第三方 跳转后的 redirect_uri
         elif oper_type == 'work_weixin_auth':
             code = request.GET.get('code')
+            app_type = request.GET.get('state')
 
-            # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+            SuiteId = ''
+            if app_type == 'leida':
+                SuiteId = 'wx5d26a7a856b22bec'
 
-            create_pre_auth_code_ret = common.create_suite_access_token()
-            suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
+            elif app_type =='boss':
+                SuiteId = 'wx36c67dd53366b6f0'
+
+            _data = {
+                'SuiteId': SuiteId
+            }
+
+            suite_access_token_ret = common.create_suite_access_token(_data)
+            suite_access_token = suite_access_token_ret.data.get('suite_access_token')
 
             get_code_data = {
                 'code': code,

@@ -193,12 +193,10 @@ def conversion_seconds_hms(seconds):
 def  create_suite_access_token(data):
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
-
     SuiteId = data.get('SuiteId')
 
     post_component_data = ''
     if SuiteId == 'wx5d26a7a856b22bec':
-
         key_name = 'SuiteTicket_%s' % (SuiteId)
 
         SuiteTicket = rc.get(key_name)
