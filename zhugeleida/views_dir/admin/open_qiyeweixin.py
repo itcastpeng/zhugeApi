@@ -213,7 +213,7 @@ def  open_qiyeweixin(request, oper_type):
                 sToken = "22LlaSyBP"  # 回调配置
                 sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
 
-            
+
             sCorpID = "wx81159f52aff62388"  #通用开发参数 CorpID
             wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
