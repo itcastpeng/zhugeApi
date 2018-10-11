@@ -63,6 +63,7 @@ def  open_qiyeweixin(request, oper_type):
                 key_name = 'SuiteTicket_%s' % (SuiteId)
                 rc.set(key_name, SuiteTicket, 3000)
                 print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+
             except  Exception as e:
 
                 SuiteId = xml_tree.find("SuiteId").text
@@ -75,7 +76,19 @@ def  open_qiyeweixin(request, oper_type):
                 print('--------企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
                 get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
-                create_pre_auth_code_ret = common.create_pre_auth_code()
+
+                app_type = ''
+                if SuiteId == 'wx5d26a7a856b22bec':
+                    app_type = 'leida'
+
+                elif SuiteId == 'wx36c67dd53366b6f0':
+                    app_type = 'boss'
+
+                _data = {
+
+                    'SuiteId' : SuiteId
+                }
+                create_pre_auth_code_ret = common.create_pre_auth_code(_data)
 
                 suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
 
@@ -120,12 +133,22 @@ def  open_qiyeweixin(request, oper_type):
             suite_id = ''
             if app_type == 1: # 雷达AI
                 suite_id = 'wx5d26a7a856b22bec'
-
+                app_type = 'leida'
             elif app_type == 2: #雷达Boss
                 suite_id = 'wx36c67dd53366b6f0'
+                app_type = 'boss'
+
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company'
 
-            create_pre_auth_code_ret =  common.create_pre_auth_code()
+
+            _data = {
+                'app_type': app_type,
+                'SuiteId': suite_id
+            }
+            create_pre_auth_code_ret = common.create_pre_auth_code(_data)
+
+
+
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
 
 
@@ -142,8 +165,16 @@ def  open_qiyeweixin(request, oper_type):
 
         # 设置授权配置 /zhugeleida/admin/open_qiyeweixin/set_session_info
         elif oper_type == 'set_session_info':
-            suite_id = 'wx5d26a7a856b22bec'
-            create_pre_auth_code_ret =  common.create_pre_auth_code()
+
+            suite_id = request.GET.get('suite_id')
+
+
+            _data = {
+                'SuiteId': suite_id
+            }
+            create_pre_auth_code_ret = common.create_pre_auth_code(_data)
+
+
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
             suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
 
@@ -185,6 +216,7 @@ def  open_qiyeweixin(request, oper_type):
             if  type == 'leida':
                 sToken = "5lokfwWTqHXnb58VCV" #回调配置
                 sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt" #回调配置
+
             elif type == 'boss':
                 sToken = "22LlaSyBP" #回调配置
                 sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be" #回调配置

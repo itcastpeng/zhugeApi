@@ -190,35 +190,54 @@ def conversion_seconds_hms(seconds):
 
 
 ## 生成请 第三方平台自己的 suite_access_token
-def  create_suite_access_token():
+def  create_suite_access_token(data):
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
 
-    SuiteId = 'wx5d26a7a856b22bec'
-    key_name = 'SuiteTicket_%s' % (SuiteId)
+    SuiteId = data.get('SuiteId')
 
-    SuiteTicket = rc.get(key_name)
-    suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
+    post_component_data = ''
+    if SuiteId == 'wx5d26a7a856b22bec':
 
-    post_component_data = {
-        "suite_id": SuiteId,
-        "suite_secret": suite_secret ,
-        "suite_ticket": SuiteTicket
-    }
+        key_name = 'SuiteTicket_%s' % (SuiteId)
 
-    token_ret = rc.get('suite_access_token')
+        SuiteTicket = rc.get(key_name)
+        suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
+
+        post_component_data = {
+            "suite_id": SuiteId,
+            "suite_secret": suite_secret ,
+            "suite_ticket": SuiteTicket
+        }
+
+    elif SuiteId == 'wx36c67dd53366b6f0':
+
+        key_name = 'SuiteTicket_%s' % (SuiteId)
+
+        SuiteTicket = rc.get(key_name)
+        suite_secret = 'dr7UT0zmMW1Dh7XABacmGieqLefoAhyrabAy74yI8rM'
+
+        post_component_data = {
+            "suite_id": SuiteId,
+            "suite_secret": suite_secret,
+            "suite_ticket": SuiteTicket
+        }
+
+    suite_access_token_key_name = 'suite_access_token_%s' % (SuiteId)
+    token_ret = rc.get(suite_access_token_key_name)
     print('--- Redis里存储的 suite_access_token---->>', token_ret)
 
     if not token_ret:
         post_component_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_suite_token'
         component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
         print('--------- [企业微信]获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
         component_token_ret = component_token_ret.json()
         access_token = component_token_ret.get('suite_access_token')
 
         if access_token:
             token_ret = access_token
-            rc.set('suite_access_token', access_token, 7000)
+            rc.set(suite_access_token_key_name, access_token, 7000)
         else:
             response.code = 400
             response.msg = "-------- [企业微信] 获取第三方平台 component_token_ret 返回错误 ------->"
@@ -232,13 +251,23 @@ def  create_suite_access_token():
     return response
 
 ## 企业微信 生成 预授权码 + suite_access_token
-def create_pre_auth_code():
+def create_pre_auth_code(data):
+    # app_type =  data.get('app_type')
+    SuiteId = data.get('SuiteId')
+
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
 
-    pre_auth_code_key_name = 'pre_auth_code_qiyeweixin'
+    pre_auth_code_key_name = 'pre_auth_code_qiyeweixin_%s' % (SuiteId)
     exist_pre_auth_code = rc.get(pre_auth_code_key_name)
-    suite_access_token_ret = create_suite_access_token()
+
+
+    _data = {
+        'SuiteId' : SuiteId
+
+    }
+
+    suite_access_token_ret = create_suite_access_token(_data)
     suite_access_token = suite_access_token_ret.data.get('suite_access_token')
 
 
