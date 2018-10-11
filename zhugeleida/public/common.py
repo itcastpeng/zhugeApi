@@ -158,11 +158,12 @@ def create_scan_code_userinfo_qrcode(data):
 
 
 ## 把秒数换换成 时|分|秒
-def  conversion_seconds_hms(seconds):
-
+def conversion_seconds_hms(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     time = 0
+    print('---h m s-->>', h, m, s)
+
     if not h and not m and s:
         print("%s秒" % (s))
         time = "%s秒" % (s)
@@ -170,9 +171,21 @@ def  conversion_seconds_hms(seconds):
         print("%s分%s秒" % (m, s))
         time = "%s分%s秒" % (m, s)
 
+    elif not h and m and not s:
+        print("%s分钟" % (m))
+        time = "%s分钟" % (m)
+
     elif h and m and s:
-        print("%s时%s分%s秒" % (h, m, s))
-        time = "%s时%s分%s秒" % (h, m, s)
+        print("%s小时%s分%s秒" % (h, m, s))
+        time = "%s小时%s分%s秒" % (h, m, s)
+    elif h and m and not s:
+        print("%s小时%s分钟" % (h, m))
+        time = "%s小时%s分钟" % (h, m)
+
+    elif h and not m and not s:
+        print("%s小时" % (h))
+        time = "%s小时" % (h)
+
     return time
 
 
