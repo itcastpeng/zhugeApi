@@ -30,14 +30,24 @@ def  open_qiyeweixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
+            type = request.GET.get('type')
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            sToken = "5lokfwWTqHXnb58VCV"
-            sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-            sCorpID = "wx5d26a7a856b22bec"
-            decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+            decrypt_obj = ''
+            if type == 'leida':
 
+                sToken = "5lokfwWTqHXnb58VCV"
+                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
+                sCorpID = "wx5d26a7a856b22bec"
+                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+
+            elif type == 'boss':
+                sToken = "22LlaSyBP"  # 回调配置
+                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+                sCorpID = "wx36c67dd53366b6f0"
+
+                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
             # xml_tree = ET.fromstring(postdata)
             # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
@@ -77,7 +87,6 @@ def  open_qiyeweixin(request, oper_type):
 
                 get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
 
-                app_type = ''
                 if SuiteId == 'wx5d26a7a856b22bec':
                     app_type = 'leida'
 
