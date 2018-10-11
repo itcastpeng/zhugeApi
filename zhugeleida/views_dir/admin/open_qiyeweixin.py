@@ -115,11 +115,19 @@ def  open_qiyeweixin(request, oper_type):
 
         elif oper_type == "create_grant_url":
 
-            suite_id = 'wx5d26a7a856b22bec'
+            app_type = int(request.POST.get('app_type')) if request.POST.get('app_type') else ''
+
+            suite_id = ''
+            if app_type == 1: # 雷达AI
+                suite_id = 'wx5d26a7a856b22bec'
+
+            elif app_type == 2: #雷达Boss
+                suite_id = 'wx36c67dd53366b6f0'
+            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company'
 
             create_pre_auth_code_ret =  common.create_pre_auth_code()
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
-            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company'
+
 
             get_bind_auth_data = 'suite_id=%s&pre_auth_code=%s&redirect_uri=%s&state=STATE' % (suite_id,pre_auth_code,redirect_uri)
 
