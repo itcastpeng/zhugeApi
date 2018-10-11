@@ -265,6 +265,9 @@ def login_oper(request, oper_type):
 
         elif oper_type == 'bottom_button_info':
             company_id = request.GET.get('company_id')
+            if not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
+                # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
+                company_id = 1
 
             buttom_navigation_data_list = [
                 {
