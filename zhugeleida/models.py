@@ -48,8 +48,8 @@ class zgld_website_template(models.Model):
 class zgld_app(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     name = models.CharField(verbose_name="企业应用_名称", max_length=128)
-    agent_id = models.CharField(verbose_name="应用ID", max_length=128)
-    app_secret = models.CharField(verbose_name="应用secret", max_length=256)
+    agent_id = models.CharField(verbose_name="应用ID", max_length=128,null=True)
+    app_secret = models.CharField(verbose_name="应用secret", max_length=256,null=True)
     app_type_choice = (
         (1,'AI雷达'),
         (2,'Boss雷达')
