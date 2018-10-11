@@ -10,60 +10,6 @@ import hashlib, random, xml.dom.minidom as xmldom, qrcode, uuid, time, json, req
 
 response = Response.ResponseObj()
 yuzhifu = prepaidManagement
-# SHANGHUKEY = ''
-# @csrf_exempt
-# def payback(request):
-#     resultBody = request.body
-#     DOMTree = xmldom.parseString(resultBody)
-#     collection = DOMTree.documentElement
-#     mch_id = collection.getElementsByTagName("mch_id")[0].childNodes[0].data            # 商户号
-#     return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data  # 状态
-#     appid = collection.getElementsByTagName("appid")[0].childNodes[0].data              # 小程序appid
-#     openid = collection.getElementsByTagName("openid")[0].childNodes[0].data            # 用户openid
-#     cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data        # 钱数
-#     out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
-#     dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=out_trade_no)
-#     nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#     if return_code == 'SUCCESS':
-#         if dingDanobjs:
-#             # 二次 查询是否付款成功
-#             result_data = {
-#                 'appid': appid,                 # appid
-#                 'mch_id': mch_id,               # 商户号
-#                 'out_trade_no': out_trade_no,   # 订单号
-#                 'nonce_str': generateRandomStamping(),  # 32位随机值
-#             }
-#             url = 'https://api.mch.weixin.qq.com/pay/orderquery'
-#             global SHANGHUKEY
-#             SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
-#             stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
-#             result_data['sign'] = md5(stringSignTemp).upper()
-#             xml_data = toXml(result_data)
-#             ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
-#             ret.encoding = 'utf8'
-#             DOMTree = xmldom.parseString(ret.text)
-#             collection = DOMTree.documentElement
-#             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-#             if return_code == 'SUCCESS':
-#                 dingDanobjs.update(
-#                     theOrderStatus=8,        # 支付成功 改订单状态成功
-#                     stopDateTime=nowDate
-#                 )
-#             else:
-#                 dingDanobjs.update(
-#                     theOrderStatus=9,  # 支付失败 改订单状态失败
-#                     stopDateTime = nowDate
-#                 )
-#     else:
-#         dingDanobjs.update(
-#             theOrderStatus=9,  # 支付失败 改订单状态失败
-#             stopDateTime=nowDate
-#         )
-#     response.code = 200
-#     response.data = ''
-#     response.msg = ''
-#     return JsonResponse(response.__dict__)
-
 
 class guanZhuForm(forms.Form):
     SHANGHUKEY = forms.CharField(
@@ -96,12 +42,6 @@ class guanZhuForm(forms.Form):
             'required': "微信标识openid不能为空"
         }
     )
-    # total_num = forms.CharField(
-    #     required=True,
-    #     error_messages={
-    #         'required': "红包发放总人数不能为空"
-    #     }
-    # )
     send_name = forms.CharField(
         required=True,
         error_messages={
@@ -276,10 +216,9 @@ def focusOnIssuedRedEnvelope(request):
                         response.code = 500
                         response.msg = '发放红包失败'
                 else:
-                    response.code = 301
+                    response.code = 500
                     response.msg = '没有商户证书, 请前往商城设置册证书！'
         else:
             response.code = 301
             response.msg = json.loads(forms_obj.errors.as_json())
     return JsonResponse(response.__dict__)
-
