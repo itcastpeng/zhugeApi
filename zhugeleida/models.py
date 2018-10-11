@@ -1124,8 +1124,8 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
 #     numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
 #     ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
 
-# 关注发放红包
-class zgld_issued_a_red_envelope(models.Model):
+# 发放红包
+class zgld_red_envelope_to_issue(models.Model):
     wxappid = models.CharField(verbose_name='公众号appid', max_length=32, null=True, blank=True)
     mch_id = models.CharField(verbose_name='商户号', max_length=32, null=True, blank=True)
     re_openid = models.CharField(verbose_name='用户标识openid', max_length=32, null=True, blank=True)
@@ -1144,4 +1144,5 @@ class zgld_issued_a_red_envelope(models.Model):
     )
     issuingState = models.SmallIntegerField(verbose_name='发放状态', choices=issuing_status, default=3)
 
-
+    # endTheActivity = models.DateTimeField(verbose_name='活动结束时间', null=True, blank=True)
+    articleId = models.IntegerField(verbose_name='文章ID', null=True, blank=True)

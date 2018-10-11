@@ -46,7 +46,10 @@ def tuiKuanDingDanShow(request):
                 'tuiKuanStatusId': obj.tuiKuanStatus,
                 'goodsName':obj.orderNumber.goodsName,
                 'tuiKuanPrice':obj.orderNumber.yingFuKuan,
-                'detailePicture':detailePicture
+                'detailePicture':detailePicture,
+                'goodsNum':obj.orderNumber.unitRiceNum,
+                'goodsPrice':obj.orderNumber.goodsPrice
+
             })
             response.code = 200
             response.msg = '查询成功'
