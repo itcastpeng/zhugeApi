@@ -52,28 +52,27 @@ def plugin_report(request):
             for obj in objs:
                 name_list_data = []
                 read_count =  obj.read_count
-                join_num = models.zgld_report_to_customer.objects.filter(activity_id=obj.id).count()
+                report_customer_obj = models.zgld_report_to_customer.objects.filter(activity_id=obj.id)
+                join_num = report_customer_obj.count()
                 if read_count == 0:
                     convert_pr = 0
                 else:
                     convert_pr = format(float(join_num) / float(read_count), '.2f')
 
-                report_customer_obj = models.zgld_report_to_customer.objects.filter(activity_id=obj.id)
+
                 if report_customer_obj:
                     for r_obj in report_customer_obj:
 
-                        j_objs = models.zgld_information.objects.filter(customer_id=r_obj.customer_id).values('id',
-                                                                                                              'customer__zgld_report_to_customer__leave_message',
-                                                                                                              'customer__username',
-                                                                                                              'customer__phone',
-                                                                                                              'customer__zgld_information__create_date')
+                        j_objs = models.zgld_customer.objects.filter(customer_id=r_obj.customer_id).values('id','username','phone',
+                                                                                                          )
 
                         for j_obj in j_objs:
                             name_list_data.append({
-                                'customer_name': j_obj.get('customer__username'),
-                                'customer_phone': j_obj.get('customer__zgld_information__phone'),
-                                'sign_up_time': j_obj.get('customer__zgld_information__create_date'),
-                                'leave_message': j_obj.get('customer__zgld_report_to_customer__leave_message'),
+                                'customer_id': j_obj.get('customer_id'),
+                                'customer_name': j_obj.get('username'),
+                                'customer_phone': j_obj.get('phone'),
+                                'sign_up_time': r_obj.create_date,
+                                'leave_message': r_obj.leave_message,
                             })
                 else:
                     name_list_data = []
