@@ -60,7 +60,6 @@ def plugin_report_oper(request, oper_type, o_id):
                     )
 
                 customer_obj = models.zgld_customer.objects.get(id=customer_id)
-                customer_obj.username = customer_name
                 customer_obj.phone = phone  # 报名手机号
                 customer_obj.save()
 

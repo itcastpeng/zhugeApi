@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -278,9 +278,32 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.post(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/activity_manage/query_focus_get_redPacket'  # 获取产品的列表
+# url =  ip + '/zhugeleida/admin/activity_manage/query_focus_get_redPacket'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/admin/activity_manage/add/1'  # 获取产品的列表
 get_data['company_id'] = 1
-ret = requests.get(url, data = post_data ,params=get_data)
+post_data['activity_name'] = '[抢话费互动]'
+post_data['activity_total_money'] = 10000
+post_data['activity_single_money'] = 2
+post_data['reach_forward_num'] = 5
+post_data['start_time'] ='2018-10-12 16:03'
+post_data['end_time'] = '2018-10-13 16:03'
+
+
+ret = requests.post(url, data = post_data ,params=get_data)
+
+
+
+
+
+
+
+
+
+
 
 ##################################### 文章 + 文章标签 + 文章增删改查 ###############################
 

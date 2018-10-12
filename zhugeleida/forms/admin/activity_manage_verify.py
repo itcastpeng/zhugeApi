@@ -34,7 +34,7 @@ class SetFocusGetRedPacketForm(forms.Form):
 #增加活动
 class ActivityAddForm(forms.Form):
     article_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "文章ID不能为空"
         }
@@ -47,7 +47,7 @@ class ActivityAddForm(forms.Form):
         }
     )
 
-    activity_name = forms.IntegerField(
+    activity_name = forms.CharField(
         required=True,
         error_messages={
             'required': "活动名称不能为空"
@@ -92,27 +92,17 @@ class ActivityAddForm(forms.Form):
 
 
 
-    def clean_uid(self):
 
-        user_id = self.data['uid']
-        objs = models.zgld_admin_userprofile.objects.filter(
-            id=user_id,
-        )
-        if not objs:
-            self.add_error('uid', '用户名不存在')
-        else:
-            return user_id
-
-    # 判断企业产品名称是否存在
+    # 判断文章是否存在
     def clean_product_id(self):
-        product_id = self.data['product_id']
-        objs = models.zgld_product.objects.filter(id = product_id)
+        article_id = self.data['article_id']
+        objs = models.zgld_article.objects.filter(id = article_id)
 
         if  not objs:
-            self.add_error('product_id', '产品不存在')
+            self.add_error('article_id', '文章ID不存在')
 
         else:
-            return product_id
+            return article_id
 
 
 
