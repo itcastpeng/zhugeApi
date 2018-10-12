@@ -11,7 +11,7 @@ import datetime
 import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
-
+import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -67,9 +67,19 @@ def plugin_report(request):
                                                                                                           )
 
                         for j_obj in j_objs:
+
+                            try:
+                                username = base64.b64decode(j_obj.get('username'))
+                                username = str(username, 'utf-8')
+                                print('----- 解密b64decode User_id username----->', username)
+                            except Exception as e:
+                                print('----- b64decode解密失败的 customer_id 是----->', j_obj.get('customer_id'))
+                                username = '客户ID%s' % (obj.customer_id)
+
+
                             name_list_data.append({
                                 'customer_id': j_obj.get('customer_id'),
-                                'customer_name': j_obj.get('username'),
+                                'customer_name': username ,
                                 'customer_phone': j_obj.get('phone'),
                                 'sign_up_time': r_obj.create_date,
                                 'leave_message': r_obj.leave_message,
