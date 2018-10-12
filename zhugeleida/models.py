@@ -855,9 +855,9 @@ class zgld_article_to_customer_belonger(models.Model):
 class zgld_article_activity(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')
 
-    shanghu_name = models.CharField(verbose_name='商户名称', max_length=128)
-    activity_name = models.CharField(verbose_name='活动名称', max_length=256)
-    wish_language = models.CharField(verbose_name='祝福语', max_length=256)
+    shanghu_name = models.CharField(verbose_name='商户名称', max_length=128,null=True)
+    activity_name = models.CharField(verbose_name='活动名称', max_length=256,null=True)
+    wish_language = models.CharField(verbose_name='祝福语', max_length=256,null=True)
 
     user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
     status_choices = ((1, '未启用'),
