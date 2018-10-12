@@ -882,7 +882,7 @@ class zgld_article_activity(models.Model):
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
 
-    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
 
     # customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
     # customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',related_name="article_customer_parent", null=True)

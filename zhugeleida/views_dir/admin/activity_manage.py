@@ -28,6 +28,7 @@ def activity_manage(request, oper_type):
 
     if request.method == "POST":
 
+        # 设置关注领红包
         if oper_type == 'set_focus_get_redPacket':
 
             is_focus_get_redpacket = request.POST.get('is_focus_get_redpacket')
@@ -64,6 +65,32 @@ def activity_manage(request, oper_type):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 查询关注红包
+        elif oper_type == 'query_focus_get_redPacket':
+
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+
+            objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+            if objs:
+                obj = objs[0]
+                is_focus_get_redpacket = obj.is_focus_get_redpacket
+                focus_get_money = obj.focus_get_money
+                focus_total_money = obj.focus_total_money
+                #  查询成功 返回200 状态码
+                response.data = {
+                    'is_focus_get_redpacket': is_focus_get_redpacket, # 关注领取红包是否(开启)
+                    'focus_get_money': focus_get_money,              # 关注领取红包金额
+                    'focus_total_money': focus_total_money           # 红包总金额
+                }
+                response.code = 200
+                response.msg = '设置成功'
+
+            else:
+                response.code = 301
+                response.msg = '公众号不存在'
 
 
         elif oper_type == 'product_list':
