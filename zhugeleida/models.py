@@ -872,28 +872,22 @@ class zgld_article_activity(models.Model):
     redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True)
     activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',null=True)
 
-    meet_forward_num= models.SmallIntegerField(verbose_name='设置发放阈值(如满足转发次数)',null=True)
+    reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发次数))',null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量',null=True)
 
-    type_choices = (
-                    (1, '分享(转发)领红包'),
-                   )
-    type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
+    # type_choices = (
+    #                 (1, '分享(转发)领红包'),
+    #                )
+    # type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
 
-    # customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
-    # customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',related_name="article_customer_parent", null=True)
+    class Meta:
 
-    # level = models.IntegerField(verbose_name='客户所在层级',null=True)
-    # stay_time = models.IntegerField(verbose_name='停留时长',default=0)
-    # read_count = models.IntegerField(verbose_name="阅读数量",default=0)
-    # forward_count = models.IntegerField(verbose_name="转发数",default=0)
-    # forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
-    # forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
-
+        verbose_name_plural = "文章活动表"
+        app_label = "zhugeleida"
 
 
 

@@ -31,7 +31,92 @@ class SetFocusGetRedPacketForm(forms.Form):
     )
 
 
-# 修改企业的产品
+#增加活动
+class ActivityAddForm(forms.Form):
+    article_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "文章ID不能为空"
+        }
+    )
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    activity_name = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "活动名称不能为空"
+        }
+    )
+
+
+    activity_total_money = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "活动总金额不能为空"
+        }
+    )
+
+    activity_single_money = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "单个金额(元)不能为空"
+        }
+    )
+
+    reach_forward_num = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "设置转发次数不能为空"
+        }
+    )
+
+    start_time = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "设置转发次数不能为空"
+        }
+    )
+
+    end_time = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "设置转发次数不能为空"
+        }
+    )
+
+
+
+    def clean_uid(self):
+
+        user_id = self.data['uid']
+        objs = models.zgld_admin_userprofile.objects.filter(
+            id=user_id,
+        )
+        if not objs:
+            self.add_error('uid', '用户名不存在')
+        else:
+            return user_id
+
+    # 判断企业产品名称是否存在
+    def clean_product_id(self):
+        product_id = self.data['product_id']
+        objs = models.zgld_product.objects.filter(id = product_id)
+
+        if  not objs:
+            self.add_error('product_id', '产品不存在')
+
+        else:
+            return product_id
+
+
+
+
 class ProductGetForm(forms.Form):
     uid = forms.IntegerField(
         required=True,
