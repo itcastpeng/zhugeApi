@@ -29,8 +29,8 @@ def speechDetailsManageShow(request):
         q = conditionCom(request, field_dict)
         print('q -->', q)
         # q.add(Q(talkGroupName_id=user_id), Q.AND)
-        companyName_id = request.GET.get('companyName_id')
-        objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName__companyName_id=companyName_id)
+        # companyName_id = request.GET.get('companyName_id')
+        objs = models.zgld_speech_details_management.objects.filter(q).order_by(order)
         if groupSearch:
             if groupSearch == 'groupSearch':
                 objs = objs.filter(talkGroupName_id__isnull=True)
