@@ -23,8 +23,90 @@ class SetFocusGetRedPacketForm(forms.Form):
         }
     )
 
+    focus_total_money = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "领取红包总金额不能为空"
+        }
+    )
 
-# 修改企业的产品
+
+#增加活动
+class ActivityAddForm(forms.Form):
+    article_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "文章ID不能为空"
+        }
+    )
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    activity_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "活动名称不能为空"
+        }
+    )
+
+
+    activity_total_money = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "活动总金额不能为空"
+        }
+    )
+
+    activity_single_money = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "单个金额(元)不能为空"
+        }
+    )
+
+    reach_forward_num = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "设置转发次数不能为空"
+        }
+    )
+
+    start_time = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "设置转发次数不能为空"
+        }
+    )
+
+    end_time = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "设置转发次数不能为空"
+        }
+    )
+
+
+
+
+    # 判断文章是否存在
+    def clean_product_id(self):
+        article_id = self.data['article_id']
+        objs = models.zgld_article.objects.filter(id = article_id)
+
+        if  not objs:
+            self.add_error('article_id', '文章ID不存在')
+
+        else:
+            return article_id
+
+
+
+
 class ProductGetForm(forms.Form):
     uid = forms.IntegerField(
         required=True,

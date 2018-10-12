@@ -8,17 +8,13 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
-from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ProductSelectForm, imgMergeForm, \
-    imgUploadForm, FeedbackSelectForm
+from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, FeedbackSelectForm
 
 import json
 from django.db.models import Q
 
 import os
 import base64
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 @csrf_exempt
@@ -28,15 +24,18 @@ def activity_manage(request, oper_type):
 
     if request.method == "POST":
 
+        # 设置关注领红包
         if oper_type == 'set_focus_get_redPacket':
 
             is_focus_get_redpacket = request.POST.get('is_focus_get_redpacket')
             focus_get_money = request.POST.get('focus_get_money')
+            focus_total_money = request.POST.get('focus_total_money')
             user_id = request.GET.get('user_id')
 
             form_data = {
                 'is_focus_get_redpacket': is_focus_get_redpacket,
-                'focus_get_money': focus_get_money
+                'focus_get_money': focus_get_money,
+                'focus_total_money': focus_total_money,
             }
 
             forms_obj = SetFocusGetRedPacketForm(form_data)
@@ -47,7 +46,8 @@ def activity_manage(request, oper_type):
                 if gongzhonghao_app_objs:
                     gongzhonghao_app_objs.update(
                         is_focus_get_redpacket=is_focus_get_redpacket,
-                        focus_get_money=focus_get_money
+                        focus_get_money=focus_get_money,
+                        focus_total_money=focus_total_money
                     )
                     #  查询成功 返回200 状态码
                     response.code = 200
@@ -228,12 +228,39 @@ def activity_manage(request, oper_type):
 
             return JsonResponse(response.__dict__)
 
+
+    else:
+        # 查询关注红包
+        if  oper_type == 'query_focus_get_redPacket':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+
+            objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+            if objs:
+                obj = objs[0]
+                is_focus_get_redpacket = obj.is_focus_get_redpacket
+                focus_get_money = obj.focus_get_money
+                focus_total_money = obj.focus_total_money
+                #  查询成功 返回200 状态码
+                response.data = {
+                    'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否(开启)
+                    'focus_get_money': focus_get_money,  # 关注领取红包金额
+                    'focus_total_money': focus_total_money  # 红包总金额
+                }
+                response.code = 200
+                response.msg = '设置成功'
+
+            else:
+                response.code = 301
+                response.msg = '公众号不存在'
+
     return JsonResponse(response.__dict__)
 
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def product_oper(request, oper_type, o_id):
+def activity_manage_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
@@ -265,100 +292,48 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '产品不存在'
 
-        elif oper_type == "change_status":
-            print('-------change_status------->>', request.POST)
-            status = int(request.POST.get('status'))
-            user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id)
-            print('product_objs--------->', product_objs)
 
-            if product_objs:
-
-                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
-                product_objs.update(
-                    status=status
-                )
-                response.code = 200
-                response.msg = "修改状态成功"
-                response.data = {
-                    'product_id': product_objs[0].id,
-                    'status': product_objs[0].get_status_display(),
-                    'status_code': product_objs[0].status
-                }
-
-            else:
-
-                response.code = 302
-                response.msg = '产品不存在'
-
-
-        elif oper_type == "update":
-
-            form_data = {
-                'user_id': request.GET.get('user_id'),
-                'product_id': o_id,  # 标题    非必须
-                'name': request.POST.get('name'),  # 产品名称 必须
-                'price': request.POST.get('price'),  # 价格    非必须
-                'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                'content': request.POST.get('content'),  # 内容 非必须
-            }
-
-            forms_obj = ProductUpdateForm(form_data)
-            if forms_obj.is_valid():
-                user_id = request.GET.get('user_id')
-                product_id = forms_obj.cleaned_data.get('product_id')
-
-                product_obj = models.zgld_product.objects.filter(id=product_id)
-                product_obj.update(
-                    name=forms_obj.cleaned_data.get('name'),
-                    price=forms_obj.cleaned_data.get('price'),
-                    reason=forms_obj.cleaned_data.get('reason'),
-                    content=forms_obj.cleaned_data.get('content')
-                )
-
-                response.code = 200
-                response.msg = "添加成功"
-
-
-            else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
+        # 增加红包活动
         elif oper_type == "add":
 
+            user_id =  request.GET.get('user_id')
+            company_id =  request.GET.get('company_id')
+            activity_name =  request.POST.get('activity_name')
+            article_id =  o_id  # 文章ID
+            activity_total_money =  request.POST.get('activity_total_money')
+            activity_single_money = request.POST.get('activity_single_money')
+            reach_forward_num =  request.POST.get('reach_forward_num')
+            start_time = request.POST.get('start_time')
+            end_time =  request.POST.get('end_time')
+
             form_data = {
-                'user_id': request.GET.get('user_id'),
-                'name': request.POST.get('name'),  # 产品名称 必须
-                'price': request.POST.get('price'),  # 价格     必须
-                'reason': request.POST.get('reason'),  # 推荐理由 非必须
-                'product_type': request.POST.get('product_type'),  # 标题    非必须
-                'content': request.POST.get('content'),  # 内容    非必须
+
+                'company_id': company_id,
+                'activity_name': activity_name,     # 活动名称
+                'article_id': article_id,           # 文章ID
+                'activity_total_money': activity_total_money,    # 活动总金额(元)
+                'activity_single_money':activity_single_money,  # 单个金额(元)
+                'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
+                'start_time':start_time,  # 达到多少次发红包(转发次数)
+                'end_time':end_time,      # 达到多少次发红包(转发次数)
             }
-            product_type = int(request.POST.get('product_type')) if request.POST.get('product_type') else ''
 
-            forms_obj = ProductAddForm(form_data)
+            forms_obj = ActivityAddForm(form_data)
             if forms_obj.is_valid():
-                user_id = request.GET.get('user_id')
-                content = forms_obj.cleaned_data.get('content')
 
-                global product_owner
-                if product_type == 1:  # 代表公司产品
-                    product_owner = ''
-                elif product_type == 2:  # 代表个人产品
-                    product_owner = user_id
+                models.zgld_gongzhonghao_app.objects.filter(id=company_id)
 
-                company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-                product_obj = models.zgld_product.objects.create(
-                    user_id=product_owner,
+                activity_obj = models.zgld_article_activity.objects.create(
+                    article_id=article_id,
                     company_id=company_id,
-                    name=forms_obj.cleaned_data.get('name'),
-                    price=forms_obj.cleaned_data.get('price'),
-                    reason=forms_obj.cleaned_data.get('reason'),
+                    activity_name=activity_name.strip(),
+                    activity_total_money=activity_total_money,
+                    activity_single_money=activity_single_money,
+                    reach_forward_num = reach_forward_num,
+                    start_time=start_time,
+                    end_time=end_time
                 )
 
-                # 封面图片数据绑定到产品。
-                product_obj.content = content
-                product_obj.save()
 
                 response.code = 200
                 response.msg = "添加成功"
@@ -367,106 +342,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        ## 修改推荐指数-影响产品展示排序。
-        elif oper_type == 'recommend_index':
-            form_data = {
-                'user_id': request.GET.get('user_id'),
-                'product_id': o_id,  # 产品ID
-                'recommend_index': request.POST.get('recommend_index')  # 排序优先级。
-            }
-
-            forms_obj = RecommendIndexForm(form_data)
-            if forms_obj.is_valid():
-                user_id = request.GET.get('user_id')
-                product_id = forms_obj.cleaned_data.get('product_id')
-                recommend_index = forms_obj.cleaned_data.get('recommend_index')
-
-                product_obj = models.zgld_product.objects.filter(id=product_id)
-                product_obj.update(
-                    recommend_index=recommend_index
-                )
-
-                response.code = 200
-                response.msg = "修改成功"
-            else:
-                response.code = 303
-                response.msg = "验证未通过"
-                response.data = json.loads(forms_obj.errors.as_json())
-
-        # 上传产品图片的接口
-        elif oper_type == "add_picture":
-            response = Response.ResponseObj()
-
-            forms_obj = imgUploadForm(request.POST)
-            if forms_obj.is_valid():
-                img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
-                timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
-                img_data = forms_obj.cleaned_data.get('img_data')  # 文件内容
-                chunk = forms_obj.cleaned_data.get('chunk')  # 第几片文件
-                expanded_name = img_name.split('.')[-1]  # 扩展名
-
-                img_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-
-                img_save_path = "/".join(
-                    [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', img_name])
-                print('img_save_path -->', img_save_path)
-                # print('img_data -->', img_data)
-                img_data = base64.b64decode(img_data.encode('utf-8'))
-                with open(img_save_path, 'wb') as f:
-                    f.write(img_data)
-
-                response.code = 200
-                response.msg = "上传成功"
-            else:
-                response.code = 303
-                response.msg = "上传异常"
-                response.data = json.loads(forms_obj.errors.as_json())
-            return JsonResponse(response.__dict__)
-
-        # 产品图片合并请求
-        elif oper_type == "upload_complete":
-
-            response = Response.ResponseObj()
-            forms_obj = imgMergeForm(request.POST)
-            if forms_obj.is_valid():
-                img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
-                timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
-                chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
-                expanded_name = img_name.split('.')[-1]  # 扩展名
-                picture_type = forms_obj.cleaned_data.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
-
-                img_name = timestamp + '.' + expanded_name
-                img_path = "/".join(['statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', img_name])
-                img_save_path = "/".join([BasePath, img_path])
-                file_obj = open(img_save_path, 'ab')
-                for chunk in range(chunk_num):
-                    file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-
-                    file_save_path = "/".join(
-                        [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', file_name])
-
-                    with open(file_save_path, 'rb') as f:
-                        file_obj.write(f.read())
-                        # file_content += f.read()
-                    os.remove(file_save_path)
-
-                product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
-                                                                                 picture_url=img_path)
-
-                response.data = {
-                    'picture_type': product_picture_obj.picture_type,
-                    'picture_id': product_picture_obj.id,
-                    'picture_url': product_picture_obj.picture_url,
-
-                }
-                response.code = 200
-                response.msg = "添加图片成功"
-
-            else:
-                response.code = 303
-                response.msg = "上传异常"
-                response.data = json.loads(forms_obj.errors.as_json())
-
+        #
         elif oper_type == "change_feedback_status":
             print('-------change_status------->>', request.POST)
             status = int(request.POST.get('status'))
@@ -475,17 +351,12 @@ def product_oper(request, oper_type, o_id):
 
             if feedback_objs:
 
-                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
                 feedback_objs.update(
                     status=status
                 )
                 response.code = 200
                 response.msg = "修改状态成功"
-                response.data = {
-                    # 'feedback_id': feedback_objs[0].id,
-                    # 'status': feedback_objs[0].get_status_display(),
-                    # 'status_code': feedback_objs[0].status
-                }
+
 
             else:
 
@@ -494,19 +365,3 @@ def product_oper(request, oper_type, o_id):
 
         return JsonResponse(response.__dict__)
 
-
-def sort_article_data(data):
-    ret_list = []
-    for obj in data:
-        if not ret_list:
-            # tmp_dict[obj['order']] = obj
-            ret_list.append(obj)
-
-        else:
-            for index, data in enumerate(ret_list):
-                if obj['order'] < data['order']:
-                    ret_list.insert(index, obj)
-                    break
-            else:
-                ret_list.append(obj)
-    return ret_list
