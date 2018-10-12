@@ -238,7 +238,7 @@ def articleForwardingRedEnvelope(request):
         else:
             ip = '0.0.0.0'
         client_ip = ip
-        articleId = request.POST.get('articleId'),         # 文章ID
+        articleId = request.POST.get('articleId')         # 文章ID
         dataDict = {
             'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
             'total_fee' : request.POST.get('total_fee'),         # 钱数
