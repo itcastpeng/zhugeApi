@@ -269,7 +269,7 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
             user_id = request.GET.get('user_id')
-            article_objs = models.zgld_article.objects.filter(id=o_id,user_id=user_id)
+            article_objs = models.zgld_article.objects.filter(id=o_id)
 
             if article_objs:
                article_objs.delete()

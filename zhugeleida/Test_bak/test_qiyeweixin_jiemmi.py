@@ -8,13 +8,14 @@ import xml.etree.cElementTree as ET
 
 sToken = "5lokfwWTqHXnb58VCV"
 sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-sCorpID = "wx5d26a7a856b22bec"
+sCorpID = "ww24123520340ba230"
 decrypt_obj = WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
-msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
-timestamp = "1538228121"
-nonce = "1537294388"
-sReqData = '<xml><ToUserName><![CDATA[wx5d26a7a856b22bec]]></ToUserName><Encrypt><![CDATA[uh2c6Yqs5f8nPcXQmTtxifpYEIX0Y5FV/nrsbAo4FGKdCPCLVA1p7XSDnC6XN5/1YiFE4ywFs2CvT0n1xHbJ4vSksICKqkPr0z9PtxhJDcbuhz7wgsUSLmEMeXWR1f6YVaOGkFKqa6YJ0lalvpGcS03RRwTuqb49VccfuV5KO4y3eabi6qQRh5QG6SHYKGPZmTfD32Q5GGgGhm4QH3ne/hUTLtMdk3CONblGcodRs5/iAArxfGCFxYADT9d/9Q6ZoNoLruYD66RPrX8AghjKE6KoCqNomsgLHbINJEBxkyEaTBd9qqJe+zoXJMXhyFJ6CsmfKRITwC/Lz32wZF0bF44fzhybguIyMOohxZEhyl1pJpwpgX5DjpjKs47jKf76]]></Encrypt><AgentID><![CDATA[]]></AgentID></xml>'
+msg_signature = "f2919de2c73e792c3b778a173f7c5f55df92ced1"
+timestamp = "1539253005"
+nonce = "1539040416"
+
+sReqData = '<xml><ToUserName><![CDATA[ww24123520340ba230]]></ToUserName><Encrypt><![CDATA[WBLfE7Kkn0faeJ0asgyiUvdAquGyXA35YDigDgO9BgvH9kBbjDdJ8/E267kBgFVgw3Vuxn+iioHYUM/kOTZAO1ROO1EEGa7qw8bRJ+xAYGVnOa4xSW1XMiC25zOi0dY+KPW7OFJk/KbIYNSZ0zt8MPvkNqCW5ZBQ5mTKS5rcJZFsZpAN5cZIhpCdUs7mDuQgTqDiQqIt+654XWxB9qsfO/pGfdwHXvQnT5heNvVzSyw8klDXmZaqV9jJ5XD7YLpM+f4toBffnB232bWdrh8+LYYn+oxbMm9KcY1fwe98u6wYDvz+0yqCNwpBoctRAGBx+5nDMI2HFJufwSEDZbt6wOJBuS0RxjNFzKsDAxzHxpCQBSimcuZykPfE2YBvYOEL]]></Encrypt><AgentID><![CDATA[1000007]]></AgentID></xml>'
 
 
 ret,sMsg = decrypt_obj.DecryptMsg(sReqData, msg_signature, timestamp, nonce)
@@ -25,6 +26,6 @@ if (ret != 0):
 
 # 解密成功，sMsg即为xml格式的明文
 xml_tree = ET.fromstring(sMsg)
-SuiteTicket = xml_tree.find("SuiteTicket").text
+# SuiteTicket = xml_tree.find("SuiteTicket").text
 SuiteId = xml_tree.find("SuiteId").text
 print ('---',SuiteId)
