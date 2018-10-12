@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article,chat
+from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article,chat,plugin_report
 
 
 urlpatterns = [
@@ -22,5 +22,7 @@ urlpatterns = [
 
     # 公众号文章管理
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
+
+    url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_report.plugin_report_oper)
 
 ]
