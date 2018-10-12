@@ -280,7 +280,7 @@ ip = 'http://api.zhugeyingxiao.com'
 
 url =  ip + '/zhugeleida/admin/activity_manage/query_focus_get_redPacket'  # 获取产品的列表
 get_data['company_id'] = 1
-ret = requests.post(url, data = post_data ,params=get_data)
+ret = requests.get(url, data = post_data ,params=get_data)
 
 ##################################### 文章 + 文章标签 + 文章增删改查 ###############################
 

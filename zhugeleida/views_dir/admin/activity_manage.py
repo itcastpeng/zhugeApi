@@ -234,7 +234,6 @@ def activity_manage(request, oper_type):
 
 
     else:
-
         # 查询关注红包
         if  oper_type == 'query_focus_get_redPacket':
             user_id = request.GET.get('user_id')
