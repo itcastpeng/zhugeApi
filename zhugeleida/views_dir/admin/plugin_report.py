@@ -63,7 +63,7 @@ def plugin_report(request):
                 if report_customer_obj:
                     for r_obj in report_customer_obj:
 
-                        j_objs = models.zgld_customer.objects.filter(customer_id=r_obj.customer_id).values('id','username','phone',
+                        j_objs = models.zgld_customer.objects.filter(id=r_obj.customer_id).values('id','username','phone',
                                                                                                           )
 
                         for j_obj in j_objs:
