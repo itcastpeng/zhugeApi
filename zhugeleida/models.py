@@ -76,6 +76,7 @@ class zgld_gongzhonghao_app(models.Model):
 
     is_focus_get_redpacket = models.BooleanField(verbose_name="关注领取红包是否开启", default=False)
     focus_get_money = models.SmallIntegerField(verbose_name='关注领取红包金额',null=True)
+    focus_total_money = models.SmallIntegerField(verbose_name='红包总金额',null=True)
 
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128, null=True)
     authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128, null=True)
@@ -279,7 +280,6 @@ class zgld_access_rules(models.Model):
         return "%s" % self.name
 
 
-
 # 企业用户管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
@@ -362,7 +362,6 @@ class zgld_temp_userprofile(models.Model):
         # unique_together = (("userid", "company"),)
         verbose_name_plural = "用户临时表"
         app_label = "zhugeleida"
-
 
 
 # 用户标签
@@ -855,6 +854,11 @@ class zgld_article_to_customer_belonger(models.Model):
 #公众号-文章-活动(任务)管理表
 class zgld_article_activity(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')
+
+    shanghu_name = models.CharField(verbose_name='商户名称', max_length=128)
+    activity_name = models.CharField(verbose_name='活动名称', max_length=256)
+    wish_language = models.CharField(verbose_name='祝福语', max_length=256)
+
     user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
     status_choices = ((1, '未启用'),
                       (2, '进行中'),
@@ -863,16 +867,22 @@ class zgld_article_activity(models.Model):
                       )
     status = models.SmallIntegerField(default=1, verbose_name='活动状态', choices=status_choices)
     activity_rules = models.CharField(verbose_name='活动规则', max_length=2048,null=True)
-    activity_total_money= models.CharField(verbose_name='活动总金额', max_length=2048,null=True)
-    activity_single_money= models.CharField(verbose_name='单个金额', max_length=2048,null=True)
-    activity_each_money= models.CharField(verbose_name='(达到条件)领取金额', max_length=2048,null=True)
 
+    activity_total_money= models.CharField(verbose_name='活动总金额', max_length=2048,null=True)
+    redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True)
+    activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',null=True)
+
+    meet_forward_num= models.SmallIntegerField(verbose_name='设置发放阈值(如满足转发次数)',null=True)
+    already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量',null=True)
 
     type_choices = (
-                    (1, '分享领红包'),
+                    (1, '分享(转发)领红包'),
                    )
-    type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices)
+    type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
+    start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
+    end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
 
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     # customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
     # customer_parent = models.ForeignKey('zgld_customer', verbose_name='查看文章的客户所属的父级',related_name="article_customer_parent", null=True)
@@ -881,8 +891,8 @@ class zgld_article_activity(models.Model):
     # stay_time = models.IntegerField(verbose_name='停留时长',default=0)
     # read_count = models.IntegerField(verbose_name="阅读数量",default=0)
     # forward_count = models.IntegerField(verbose_name="转发数",default=0)
-    forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
-    forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
+    # forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
+    # forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
 
 
 

@@ -32,6 +32,7 @@ def activity_manage(request, oper_type):
 
             is_focus_get_redpacket = request.POST.get('is_focus_get_redpacket')
             focus_get_money = request.POST.get('focus_get_money')
+            focus_total_money = request.POST.get('focus_total_money')
             user_id = request.GET.get('user_id')
 
             form_data = {
@@ -47,7 +48,8 @@ def activity_manage(request, oper_type):
                 if gongzhonghao_app_objs:
                     gongzhonghao_app_objs.update(
                         is_focus_get_redpacket=is_focus_get_redpacket,
-                        focus_get_money=focus_get_money
+                        focus_get_money=focus_get_money,
+                        focus_total_money=focus_total_money
                     )
                     #  查询成功 返回200 状态码
                     response.code = 200
@@ -233,7 +235,7 @@ def activity_manage(request, oper_type):
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def product_oper(request, oper_type, o_id):
+def activity_manage_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
@@ -328,9 +330,9 @@ def product_oper(request, oper_type, o_id):
 
             form_data = {
                 'user_id': request.GET.get('user_id'),
-                'name': request.POST.get('name'),  # 产品名称 必须
-                'price': request.POST.get('price'),  # 价格     必须
-                'reason': request.POST.get('reason'),  # 推荐理由 非必须
+                'name': request.POST.get('activity_name'),  # 产品名称 必须
+                'article_id': request.POST.get('article_id'),  # 价格     必须
+                'activity_single_money': request.POST.get('activity_single_money'),  # 推荐理由 非必须
                 'product_type': request.POST.get('product_type'),  # 标题    非必须
                 'content': request.POST.get('content'),  # 内容    非必须
             }
