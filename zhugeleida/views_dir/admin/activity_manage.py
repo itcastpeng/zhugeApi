@@ -37,7 +37,8 @@ def activity_manage(request, oper_type):
 
             form_data = {
                 'is_focus_get_redpacket': is_focus_get_redpacket,
-                'focus_get_money': focus_get_money
+                'focus_get_money': focus_get_money,
+                'focus_total_money': focus_total_money,
             }
 
             forms_obj = SetFocusGetRedPacketForm(form_data)

@@ -23,6 +23,13 @@ class SetFocusGetRedPacketForm(forms.Form):
         }
     )
 
+    focus_total_money = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "领取红包总金额不能为空"
+        }
+    )
+
 
 # 修改企业的产品
 class ProductGetForm(forms.Form):
