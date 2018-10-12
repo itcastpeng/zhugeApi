@@ -422,6 +422,12 @@ def user_oper(request, oper_type, o_id):
                                 user_objs.delete()
                                 response.code = 200
                                 response.msg = "删除成功"
+
+                            elif weixin_ret['errcode'] == 60111: # userId not found
+                                user_objs.delete()
+                                response.code = 200
+                                response.msg = "删除成功"
+
                             else:
                                 rc.delete(key_name)
                                 response.code = weixin_ret['errcode']
