@@ -854,12 +854,10 @@ class zgld_article_to_customer_belonger(models.Model):
 #公众号-文章-活动(任务)管理表
 class zgld_article_activity(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')
-    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业',null=True)
     # shanghu_name = models.CharField(verbose_name='商户名称', max_length=128,null=True)
     activity_name = models.CharField(verbose_name='活动名称', max_length=256,null=True)
     # wish_language = models.CharField(verbose_name='祝福语', max_length=256,null=True)
-
-    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
     status_choices = ((1, '未启用'),
                       (2, '进行中'),
                       (3, '已暂停'),

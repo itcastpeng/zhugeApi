@@ -343,15 +343,15 @@ def activity_manage_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         #
-        elif oper_type == "change_feedback_status":
+        elif oper_type == "change_artivity_status":
             print('-------change_status------->>', request.POST)
-            status = int(request.POST.get('status'))
+            status = request.POST.get('status')
 
-            feedback_objs = models.zgld_user_feedback.objects.filter(id=o_id)
+            article_objs = models.zgld_article_activity.objects.filter(id=o_id)
 
-            if feedback_objs:
+            if article_objs:
 
-                feedback_objs.update(
+                article_objs.update(
                     status=status
                 )
                 response.code = 200
@@ -361,7 +361,7 @@ def activity_manage_oper(request, oper_type, o_id):
             else:
 
                 response.code = 302
-                response.msg = '产品不存在'
+                response.msg = '活动不存在'
 
         return JsonResponse(response.__dict__)
 
