@@ -513,6 +513,7 @@ def open_qiyeweixin(request, oper_type):
                             agent_id=agentid,
                             company_id=company_id
                         )
+                    return redirect('http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company')
 
                 else:
                     print('-------[企业微信] 企业不存在：------->>', corpid)
