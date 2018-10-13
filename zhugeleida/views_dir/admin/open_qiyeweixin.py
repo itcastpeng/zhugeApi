@@ -460,7 +460,7 @@ def open_qiyeweixin(request, oper_type):
                 'suite_access_token': suite_access_token
             }
             post_permanent_code_url_data = {
-                'AuthCode': AuthCode
+                'auth_code': AuthCode
             }
 
             get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data,
