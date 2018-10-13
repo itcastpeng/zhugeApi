@@ -317,6 +317,7 @@ def create_qiyeweixin_access_token(data):
         'suite_access_token': suite_access_token
     }
     post_code_data = {
+        'auth_corpid': auth_corpid,
         'permanent_code' : permanent_code
     }
 

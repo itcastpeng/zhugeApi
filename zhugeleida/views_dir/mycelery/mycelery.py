@@ -47,14 +47,15 @@ def user_send_action_log(request):
     app_obj =  models.zgld_app.objects.get(company_id=company_id, app_type=1)
     agentid = app_obj.agent_id
 
-    import redis
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    key_name = "company_%s_leida_app_token" % (user_obj.company_id)
-    token_ret = rc.get(key_name)
-
-    print('-------  Redis缓存的 keyname |value -------->>',key_name,"|",token_ret)
 
     if not permanent_code:
+
+        import redis
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+        key_name = "company_%s_leida_app_token" % (user_obj.company_id)
+        token_ret = rc.get(key_name)
+
+        print('-------  Redis缓存的 keyname |value -------->>', key_name, "|", token_ret)
 
         app_secret = app_obj.app_secret
         get_token_data = {
