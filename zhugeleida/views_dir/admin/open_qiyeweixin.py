@@ -435,7 +435,8 @@ def open_qiyeweixin(request, oper_type):
                             name=name,
                             app_type=_app_type,
                             agent_id=agentid,
-                            company_id=company_id
+                            company_id=company_id,
+                            permanent_code = permanent_code
                         )
                     return redirect('http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company')
 

@@ -38,7 +38,7 @@ def user_send_action_log(request):
     send_token_data = {}
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
 
-    permanent_code = user_obj.company.permanent_code  # 企业微信永久授权码 【企业服务商】
+   
     corp_id = user_obj.company.corp_id
     company_id = user_obj.company_id
 
@@ -46,6 +46,7 @@ def user_send_action_log(request):
 
     app_obj =  models.zgld_app.objects.get(company_id=company_id, app_type=1)
     agentid = app_obj.agent_id
+    permanent_code = app_obj.permanent_code
 
 
     if not permanent_code:
