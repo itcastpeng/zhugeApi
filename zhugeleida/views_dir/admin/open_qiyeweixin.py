@@ -471,13 +471,18 @@ def open_qiyeweixin(request, oper_type):
 
             corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
             corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
+            agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
+            agentid = ''
+            for _agent_dict in agent_list:
+                _name = _agent_dict.get('name')
+                if _name == name:
+                    agentid = _agent_dict.get('agentid')
 
             access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
             permanent_code = get_permanent_code_info.get('permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
-            errmsg = get_permanent_code_info.get('errmsg')  # 企业微信永久授权码
-            errcode = get_permanent_code_info.get('errcode')  # 企业微信永久授权码
 
-            if errmsg == 'ok':
+
+            if permanent_code:
                 key_name = 'access_token_qiyeweixin_%s' % (corpid)
                 rc.set(key_name, access_token, 7000)
                 objs = models.zgld_company.objects.filter(corp_id=corpid)
@@ -495,7 +500,7 @@ def open_qiyeweixin(request, oper_type):
                             name=name,
                             app_type=_app_type,
                             is_validate=True,
-                            # agent_id=corpid,
+                            agent_id=agentid,
 
                         )
 
@@ -505,14 +510,14 @@ def open_qiyeweixin(request, oper_type):
                             is_validate=True,
                             name=name,
                             app_type=_app_type,
-                            # agent_id=corpid,
+                            agent_id=agentid,
                             company_id=company_id
                         )
 
                 else:
                     print('-------[企业微信] 企业不存在：------->>', corpid)
             else:
-                print('-------[企业微信] 获取企业永久授权码 报错：------->>', errmsg, '|', errcode)
+                print('-------[企业微信] 获取企业永久授权码 报错：------->>')
 
     return JsonResponse(response.__dict__)
 
