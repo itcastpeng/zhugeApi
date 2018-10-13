@@ -321,7 +321,7 @@ def create_qiyeweixin_access_token(data):
         'permanent_code' : permanent_code
     }
 
-    key_name = 'access_token_qiyeweixin_%s' % (auth_corpid)
+    key_name = 'access_token_qiyeweixin_%s_%s' % (auth_corpid,SuiteId)
     access_token = rc.get(key_name)
 
     if not access_token:
@@ -333,9 +333,7 @@ def create_qiyeweixin_access_token(data):
         print('===========【企业微信】获取企业access_token 返回:==========>', json.dumps(get_corp_token_ret))
 
         access_token = get_corp_token_ret.get('access_token')
-        errmsg = get_corp_token_ret.get('errmsg')
-
-        if errmsg == 'ok' :
+        if access_token:
             rc.set(key_name, access_token, 7000)
             print('===========【企业微信】获取企业access_token【成功】 得到 access_token | 使用 suite_access_token ==========>',access_token ,suite_access_token, "|",)
 
