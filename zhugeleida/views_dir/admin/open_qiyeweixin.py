@@ -480,29 +480,37 @@ def open_qiyeweixin(request, oper_type):
             if errmsg == 'ok':
                 key_name = 'access_token_qiyeweixin_%s' % (corpid)
                 rc.set(key_name, access_token, 7000)
-                obj = models.zgld_company.objects.filter(corp_id=corpid)
-                company_id = obj.id
-
-                app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
-                if app_objs:
-                    print('----- [企业微信] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
-
-                    app_objs.update(
-                        name=name,
-                        app_type=_app_type,
-                        is_validate=True,
-                        # agent_id=corpid,
-
+                objs = models.zgld_company.objects.filter(corp_id=corpid)
+                if objs:
+                    objs.update(
+                        permanent_code=permanent_code
                     )
+                    company_id = objs[0].id
+
+                    app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
+                    if app_objs:
+                        print('----- [企业微信] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+
+                        app_objs.update(
+                            name=name,
+                            app_type=_app_type,
+                            is_validate=True,
+                            # agent_id=corpid,
+
+                        )
+
+                    else:
+                        print('----- [企业微信] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+                        models.zgld_app.objects.create(
+                            is_validate=True,
+                            name=name,
+                            app_type=_app_type,
+                            # agent_id=corpid,
+                            company_id=company_id
+                        )
+
                 else:
-                    print('----- [企业微信] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
-                    models.zgld_app.objects.create(
-                        is_validate=True,
-                        name=name,
-                        app_type=_app_type,
-                        # agent_id=corpid,
-                        company_id=company_id
-                    )
+                    print('-------[企业微信] 企业不存在：------->>', corpid)
             else:
                 print('-------[企业微信] 获取企业永久授权码 报错：------->>', errmsg, '|', errcode)
 
