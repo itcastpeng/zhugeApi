@@ -198,7 +198,6 @@ def  create_suite_access_token(data):
     post_component_data = ''
     if SuiteId == 'wx5d26a7a856b22bec':
         key_name = 'SuiteTicket_%s' % (SuiteId)
-
         SuiteTicket = rc.get(key_name)
         suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
 
@@ -211,7 +210,6 @@ def  create_suite_access_token(data):
     elif SuiteId == 'wx36c67dd53366b6f0':
 
         key_name = 'SuiteTicket_%s' % (SuiteId)
-
         SuiteTicket = rc.get(key_name)
         suite_secret = 'dr7UT0zmMW1Dh7XABacmGieqLefoAhyrabAy74yI8rM'
 
@@ -335,7 +333,7 @@ def create_qiyeweixin_access_token(data):
         access_token = get_corp_token_ret.get('access_token')
         if access_token:
             rc.set(key_name, access_token, 7000)
-            print('===========【企业微信】获取企业access_token【成功】 得到 access_token | 使用 suite_access_token ==========>',access_token ,suite_access_token, "|",)
+            print('===========【企业微信】获取企业access_token【成功】 得到 access_token | 使用 suite_access_token ==========>',access_token,"|" ,suite_access_token,)
 
         else:
             print('===========【企业微信】获取企业access_token【失败】')

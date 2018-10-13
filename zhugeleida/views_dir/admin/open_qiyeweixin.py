@@ -412,9 +412,7 @@ def open_qiyeweixin(request, oper_type):
                 rc.set(key_name, access_token, 7000)
                 objs = models.zgld_company.objects.filter(corp_id=corpid)
                 if objs:
-                    objs.update(
-                        permanent_code=permanent_code
-                    )
+
                     company_id = objs[0].id
 
                     app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
@@ -426,6 +424,7 @@ def open_qiyeweixin(request, oper_type):
                             app_type=_app_type,
                             is_validate=True,
                             agent_id=agentid,
+                            permanent_code=permanent_code
 
                         )
 
