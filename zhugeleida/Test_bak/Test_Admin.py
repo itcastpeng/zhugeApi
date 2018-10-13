@@ -293,10 +293,17 @@ ip = 'http://127.0.0.1:8001'
 # post_data['end_time'] = '2018-10-13 16:03'
 # ret = requests.post(url, data = post_data ,params=get_data)
 
+# url =  ip + '/zhugeleida/admin/activity_manage/activity_list'  # 获取产品的列表
+# get_data['company_id'] =1
+# get_data['status'] = 2
+# # get_data['activity_name'] = '想'
+# # get_data['article_title'] = 'G'
+#
+# ret = requests.get(url, data = post_data ,params=get_data)
+
 
 url =  ip + '/zhugeleida/admin/activity_manage/change_artivity_status/1'  # 获取产品的列表
-get_data['company_id'] = 1
-post_data['status'] = 2
+post_data['status'] = 1
 ret = requests.post(url, data = post_data ,params=get_data)
 
 

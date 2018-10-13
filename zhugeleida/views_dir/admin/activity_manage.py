@@ -8,7 +8,7 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
-from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, FeedbackSelectForm
+from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm
 
 import json
 from django.db.models import Q
@@ -63,175 +63,10 @@ def activity_manage(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
 
-        elif oper_type == 'product_list':
-            print('request.GET----->', request.GET)
-            forms_obj = ProductSelectForm(request.GET)
-            if forms_obj.is_valid():
-                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-                product_type = forms_obj.cleaned_data.get('product_type')
-
-                # 如果为1 代表是公司的官网
-                user_id = request.GET.get('user_id')
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-recommend_index')
-
-                q1 = Q()
-                q1.connector = 'and'
-                user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)[0]
-                company_id = user_obj.company_id
-                # role_id = user_obj.role_id
-
-                if product_type == 1:  # 展示公司 产品
-                    q1.children.append(('user_id__isnull', True))
-                elif product_type == 2:  # 展示个人 产品
-                    q1.children.append(('user_id__isnull', False))
-
-                # if role_id == 1:  # 为超级管理员 展示出所有公司的产品
-                #     search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                #     if search_company_id:
-                #         q1.children.append(('company_id', search_company_id))
-                #
-                # elif role_id == 2:  # 为管理员 展示出自己所属公司的产品
-                q1.children.append(('company_id', company_id))
-
-                search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
-                if search_product_name:
-                    q1.children.append(('name__contains', search_product_name))
-
-                search_product_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
-                if not search_product_status:
-                    q1.children.append(('status__in', [1, 3]))  # 默认是显示出所有的上架的产品
-                else:
-                    if int(search_product_status) == 1:
-                        q1.children.append(('status__in', [1, 3]))  # (1,'已上架')
-
-                    elif int(search_product_status) == 2:
-                        q1.children.append(('status__in', [2]))  # (2,'已下架')
-
-                print('-----q1---->>', q1)
-                objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
-                count = objs.count()
-                print('-----objs----->>', objs)
-
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
-
-                ret_data = []
-
-                if objs:
-                    for obj in objs:
-                        product_id = obj.id
-
-                        if obj.user_id:
-                            publisher = obj.user.username
-                        else:
-                            publisher = obj.company.name
-
-                        content = {
-                            'cover_data': json.loads(obj.content).get('cover_data')
-
-                        }
-
-                        ret_data.append({
-                            'product_id': product_id,
-                            'content': content,  # 封面地址的URL
-                            'name': obj.name,  # 产品名称
-                            'price': obj.price,  # 价格
-                            'publisher_date': obj.create_date.strftime("%Y-%m-%d %H:%M:%S"),  # 发布日期。
-                            'publisher': publisher,  # 发布者
-                            'status': obj.get_status_display(),
-                            'recommend_index': obj.recommend_index,  # 产品推荐指数
-                            'status_code': obj.status  # 产品的动态。
-                        })
-
-                        #  查询成功 返回200 状态码
-                        response.code = 200
-                        response.msg = '查询成功'
-                        response.data = {
-                            'ret_data': ret_data,
-                            'data_count': count,
-                        }
-                else:
-                    response.code = 302
-                    response.msg = '产品列表无数据'
-
-            else:
-                response.code = 402
-                response.msg = "验证未通过"
-                response.data = json.loads(forms_obj.errors.as_json())
-
-
-        elif oper_type == 'feedback_list':
-            user_id = request.GET.get('user_id')
-
-            user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
-            role_id = user_obj.role_id
-            print('-----role id ---->>', role_id)
-            forms_obj = FeedbackSelectForm(request.GET)
-            if forms_obj.is_valid():
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')
-
-                if int(role_id) == 1:  # 为超级管理员 展示出所有公司的产品
-                    search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                    field_dict = {
-                        'id': '',
-                        'company__name': '__contains',
-                        'status': '',
-
-                    }
-
-                    q = conditionCom(request, field_dict)
-                    if search_company_id:
-                        q.add(Q(**{'user__company_id': search_company_id}), Q.AND)
-
-                    objs = models.zgld_user_feedback.objects.select_related('user').filter(q).order_by(order)
-                    count = objs.count()
-                    print('-----objs----->>', objs)
-
-                    ret_data = []
-                    if length != 0:
-                        start_line = (current_page - 1) * length
-                        stop_line = start_line + length
-                        objs = objs[start_line: stop_line]
-
-                    if objs:
-                        for obj in objs:
-                            ret_data.append({
-                                'id': obj.id,
-                                'user_id': obj.user_id,
-                                'user_name': obj.user.username,
-                                'problem_type': obj.problem_type,
-                                'problem_type_text': obj.get_problem_type_display(),
-                                'content': json.loads(obj.content),
-                                'company_name': obj.user.company.name,
-                                'company_id': obj.user.company_id,
-                                'status': obj.status,
-                                'status_text': obj.get_status_display()
-                            })
-
-                        #  查询成功 返回200 状态码
-                        response.code = 200
-                        response.msg = '查询成功'
-                        response.data = {
-                            'ret_data': ret_data,
-                            'data_count': count,
-                        }
-
-                else:
-                    response.code = 302
-                    response.msg = '列表无数据'
-
-            return JsonResponse(response.__dict__)
-
 
     else:
         # 查询关注红包
-        if  oper_type == 'query_focus_get_redPacket':
+        if oper_type == 'query_focus_get_redPacket':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
 
@@ -254,6 +89,85 @@ def activity_manage(request, oper_type):
             else:
                 response.code = 301
                 response.msg = '公众号不存在'
+
+        elif oper_type == 'activity_list':
+
+            print('request.GET----->', request.GET)
+
+            forms_obj = ActivitySelectForm(request.GET)
+            if forms_obj.is_valid():
+                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                product_type = forms_obj.cleaned_data.get('product_type')
+
+                # 如果为1 代表是公司的官网
+                user_id = request.GET.get('user_id')
+                company_id = forms_obj.cleaned_data.get('company_id')
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+
+                q1 = Q()
+                q1.connector = 'and'
+                q1.children.append(('company_id', company_id))
+
+                search_activity_name = request.GET.get('activity_name')  # 当有搜索条件 如 搜索产品名称
+                if search_activity_name:
+                    q1.children.append(('activity_name__contains', search_activity_name))
+
+                article_title = request.GET.get('article_title')  # 当有搜索条件 如 搜索产品名称
+                if article_title:
+                    q1.children.append(('article__title__contains', article_title))
+
+
+                search_activity_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
+
+                if search_activity_status:
+                    q1.children.append(('status', search_activity_status))  # (1,'已上架')
+
+                print('-----q1---->>', q1)
+                objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
+                count = objs.count()
+                print('-----objs----->>', objs)
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                ret_data = []
+                if objs:
+                    for obj in objs:
+
+                        ret_data.append({
+                            'article_id' : obj.article_id,
+                            'article_title' : obj.article.title,
+                            'company_id' : obj.company_id,
+
+                            'activity_name' : obj.activity_name,    #分享文章名称
+                            'activity_total_money' :  obj.activity_total_money,   #活动总金额
+                            'activity_single_money' : obj.activity_single_money,  #单个金额
+                            'reach_forward_num' :  obj.reach_forward_num,  #达到多少次发红包
+                            'already_send_redPacket_num' :  obj.already_send_redPacket_num or 0,  #已发放发红包个数[领取条件]
+                            'status': obj.status,
+                            'status_text': obj.get_status_display(),
+                            'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
+                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M')
+                        })
+
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
+
+
+            else:
+
+                response.code = 301
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 
@@ -292,30 +206,29 @@ def activity_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '产品不存在'
 
-
         # 增加红包活动
         elif oper_type == "add":
 
-            user_id =  request.GET.get('user_id')
-            company_id =  request.GET.get('company_id')
-            activity_name =  request.POST.get('activity_name')
-            article_id =  o_id  # 文章ID
-            activity_total_money =  request.POST.get('activity_total_money')
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+            activity_name = request.POST.get('activity_name')
+            article_id = o_id  # 文章ID
+            activity_total_money = request.POST.get('activity_total_money')
             activity_single_money = request.POST.get('activity_single_money')
-            reach_forward_num =  request.POST.get('reach_forward_num')
+            reach_forward_num = request.POST.get('reach_forward_num')
             start_time = request.POST.get('start_time')
-            end_time =  request.POST.get('end_time')
+            end_time = request.POST.get('end_time')
 
             form_data = {
 
                 'company_id': company_id,
-                'activity_name': activity_name,     # 活动名称
-                'article_id': article_id,           # 文章ID
-                'activity_total_money': activity_total_money,    # 活动总金额(元)
-                'activity_single_money':activity_single_money,  # 单个金额(元)
+                'activity_name': activity_name,  # 活动名称
+                'article_id': article_id,  # 文章ID
+                'activity_total_money': activity_total_money,  # 活动总金额(元)
+                'activity_single_money': activity_single_money,  # 单个金额(元)
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
-                'start_time':start_time,  # 达到多少次发红包(转发次数)
-                'end_time':end_time,      # 达到多少次发红包(转发次数)
+                'start_time': start_time,  # 达到多少次发红包(转发次数)
+                'end_time': end_time,  # 达到多少次发红包(转发次数)
             }
 
             forms_obj = ActivityAddForm(form_data)
@@ -329,11 +242,10 @@ def activity_manage_oper(request, oper_type, o_id):
                     activity_name=activity_name.strip(),
                     activity_total_money=activity_total_money,
                     activity_single_money=activity_single_money,
-                    reach_forward_num = reach_forward_num,
+                    reach_forward_num=reach_forward_num,
                     start_time=start_time,
                     end_time=end_time
                 )
-
 
                 response.code = 200
                 response.msg = "添加成功"
@@ -342,7 +254,7 @@ def activity_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        #
+        # 修改活动状态
         elif oper_type == "change_artivity_status":
             print('-------change_status------->>', request.POST)
             status = request.POST.get('status')
@@ -363,5 +275,4 @@ def activity_manage_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '活动不存在'
 
-        return JsonResponse(response.__dict__)
-
+    return JsonResponse(response.__dict__)
