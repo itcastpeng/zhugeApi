@@ -296,7 +296,250 @@ def open_weixin_gongzhonghao(request, oper_type):
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
 
+
         return JsonResponse(response.__dict__)
+
+## 第三方平台接入
+@csrf_exempt
+def open_weixin_gongzhonghao_oper(request, oper_type,app_id):
+    if request.method == "POST":
+        response = Response.ResponseObj()
+        if oper_type == 'tongzhi':
+
+            print('------ 第三方 request.body tongzhi 通知内容 ------>>', request.body.decode(encoding='UTF-8'))
+
+            signature = request.GET.get('signature')
+            timestamp = request.GET.get('timestamp')
+            nonce = request.GET.get('nonce')
+            msg_signature = request.GET.get('msg_signature')
+            # postdata =  request.POST.get('postdata')
+
+            postdata = request.body.decode(encoding='UTF-8')
+
+            global decryp_xml_tree
+            xml_tree = ET.fromstring(postdata)
+            try:
+
+                '''
+                调用示例代码中的DecryptMsg函数（需传入msg_signature、timetamp、nonce和postdata，前3个参数可从接收已授权公众号消息和事件的URL中获得，
+                postdata即为POST过来的数据包内容），若调用成功，sMsg则为输出结果，其内容为如下的明文的xml消息体:
+                <xml>
+                    <ToUserName></ToUserName>
+                    <FromUserName></FromUserName>
+                    <CreateTime>1411035097</CreateTime>
+                    <MsgType></MsgType>
+                    <Content></Content>
+                    <MsgId>6060349595123187712</MsgId>
+                </xml>
+
+
+                #测试加密接口
+                encryp_test = WXBizMsgCrypt(token, encodingAESKey, app_id)
+                ret, encrypt_xml = encryp_test.EncryptMsg(to_xml, nonce)
+                print(ret, encrypt_xml)
+
+                '''
+                encrypt = xml_tree.find("Encrypt").text
+                app_id = xml_tree.find("AppId").text
+
+                # print('----- 授权公众号授权 postdata---->>',postdata)
+
+                print('appid -->', app_id)
+                print('encrypt -->', encrypt)
+
+                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+                appid = 'wx6ba07e6ddcdc69b3'
+
+                decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+                ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+
+                decryp_xml_tree = ET.fromstring(decryp_xml)
+                ComponentVerifyTicket = decryp_xml_tree.find("ComponentVerifyTicket").text
+
+                print('----ret -->', ret)
+                print('-----decryp_xml -->', decryp_xml)
+
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+                ComponentVerifyTicket_key_name =  'ComponentVerifyTicket_%s' % (appid)
+                if ret == 0:
+                    rc.set(ComponentVerifyTicket_key_name, ComponentVerifyTicket, 10000)
+                    print('--------授权-诸葛雷达_公众号消息解密 ComponentVerifyTicket--------->>', ComponentVerifyTicket)
+
+                else:
+                    response.code = ret
+                    response.msg = "-------- 授权-诸葛雷达_公众号消息解密  ------->"
+                    return JsonResponse(response.__dict__)
+
+            except Exception as e:
+                auth_code = decryp_xml_tree.find('AuthorizationCode').text
+                authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
+
+                app_id = 'wx6ba07e6ddcdc69b3'
+                if auth_code:
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    # exist_auth_code = rc.get('auth_code')
+                    auth_code_key_name = 'auth_code_%s' % (app_id)
+                    rc.set(auth_code_key_name, auth_code, 3400)
+
+                    print("---------- 成功获取授权码auth_code --------->>", auth_code)
+
+                else:
+                    print('------ 授权码（authorization_code）为空------>>')
+                    response.code = 400
+                    response.msg = "授权码authorization_code为空"
+                    return JsonResponse(response.__dict__)
+
+                component_access_token_key_name = 'component_access_token_%s' % (app_id)
+                get_access_token_data = {}
+                post_access_token_data = {}
+                component_access_token = rc.get(component_access_token_key_name)
+
+                access_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_query_auth'
+                get_access_token_data['component_access_token'] = component_access_token
+                post_access_token_data['component_appid'] = app_id
+                post_access_token_data['authorization_code'] = auth_code
+
+                access_token_ret = requests.post(access_token_url, params=get_access_token_data,data=json.dumps(post_access_token_data))
+                access_token_ret = access_token_ret.json()
+                print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>', access_token_ret)
+                authorizer_access_token = access_token_ret['authorization_info'].get('authorizer_access_token')
+                authorizer_refresh_token = access_token_ret['authorization_info'].get('authorizer_refresh_token')
+                authorizer_appid = access_token_ret['authorization_info'].get('authorizer_appid')
+
+                authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+                if authorizer_access_token and authorizer_refresh_token:
+
+                    rc.set(authorizer_access_token_key_name, authorizer_access_token, 7000)
+
+                    ##################### 获取公众号授权方的authorizer_info信息 ##################
+                    get_wx_info_data = {}
+                    post_wx_info_data = {}
+                    post_wx_info_data['component_appid'] = app_id
+                    post_wx_info_data['authorizer_appid'] = authorizer_appid
+                    get_wx_info_data['component_access_token'] = component_access_token
+                    url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
+
+                    print('----------- 获取_公众号授权方的authorizer_info信息 返回 ------------->',json.dumps(authorizer_info_ret.json()))
+                    authorizer_info_ret = authorizer_info_ret.json()
+                    original_id = authorizer_info_ret['authorizer_info'].get('user_name')
+
+                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
+                    #
+                    principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
+                    qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')   # 二维码
+                    head_img = authorizer_info_ret['authorizer_info'].get('head_img')       # 头像
+                    nick_name = authorizer_info_ret['authorizer_info'].get('nick_name')     # 头像
+
+                    miniprograminfo = authorizer_info_ret['authorizer_info'].get('MiniProgramInfo')
+                    categories = ''
+                    if miniprograminfo:
+                        categories = authorizer_info_ret['authorizer_info']['MiniProgramInfo'].get('categories')  # 类目
+
+                        if len(categories) != 0:
+                            categories = json.dumps(categories)
+                        else:
+                            categories = ''
+
+                    if original_id:
+                        obj = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorization_appid)
+                        if obj:
+                            obj.update(
+                                authorization_appid=authorization_appid,  # 授权方appid
+                                authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
+                                original_id=original_id,  # 公众号的原始ID
+                                verify_type_info=verify_type_info,  # 是否 微信认证
+
+                                principal_name=principal_name,  # 主体名称
+                                qrcode_url=qrcode_url,   # 二维码
+                                head_img=head_img,       # 头像
+                                name=nick_name,          # 昵称
+                                service_category=categories,  # 服务类目
+                            )
+                        print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
+                        response.code = 200
+                        response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
+
+                        ########################### 公众号设置所属行业 ######################################
+                        get_industry_data = {'access_token': authorizer_access_token}
+
+                        api_set_industry_url  = 'https://api.weixin.qq.com/cgi-bin/template/api_set_industry'
+                        post_industry_data = {
+                            "industry_id1": "1", # IT科技 互联网|电子商务，
+                            "industry_id2": "2"
+                        }
+                        template_list_ret = requests.post(api_set_industry_url, params=get_industry_data,data=json.dumps(post_industry_data))
+                        template_list_ret = template_list_ret.json()
+                        errcode = template_list_ret.get('errcode')
+                        errmsg = template_list_ret.get('errmsg')
+
+                        print('---- 公众号设置所属行业【返回】 ---->',json.dumps(template_list_ret))
+
+                        # {"errcode": 0, "errmsg": "ok"}
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "公众号设置所属行业成功"
+
+                            print('---------授权appid: %s , 公众号设置所属行业 【成功】------------>>' % (authorization_appid))
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 公众号设置所属行业 【失败】------------>>' % (authorization_appid),errmsg, '|', errcode)
+
+                        ########### 添加模板ID到该公众号下 ##################
+                        # doc https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277
+                        # OPENTM202109783	咨询回复消息提醒	IT科技	互联网|电子商务
+                        api_add_template_url = 'https://api.weixin.qq.com/cgi-bin/template/api_add_template'
+
+                        post_add_template_data = {
+                            "template_id_short": "OPENTM202109783"
+                        }
+
+                        industry_ret = requests.post(api_add_template_url, params=get_industry_data, data=json.dumps(post_add_template_data))
+                        industry_ret = industry_ret.json()
+                        template_id = industry_ret.get('template_id')
+
+                        print('-------- 【公众号】添加模板ID到该账户下 返回 ---->', json.dumps(industry_ret))
+
+                        if errcode == 0:
+                            response.code = 200
+                            response.msg = "公众号添加模板ID成功"
+                            obj.update(template_id=template_id)
+                            # {"errcode": 0, "errmsg": "ok", "template_id": "yIqr5W_MVshHlyjZIvEd8Lg0KI-nyrOlsTIWMyX_NME"}
+                            print('---------授权appid: %s , 公众号添加模板ID 【成功】------------>>' % (authorization_appid),)
+
+                        else:
+                            response.code = errcode
+                            response.msg = errmsg
+                            print('---------授权appid: %s , 公众号添加模板ID 【失败】------------>>' % (authorization_appid), errmsg,'|', errcode)
+
+
+
+
+                    else:
+                        response.code = 400
+                        response.msg = "获取帐号基本信息 authorizer_info信息为空"
+                        return JsonResponse(response.__dict__)
+
+                        ######################### end ############################################
+
+                else:
+                    print('------ 令牌（authorizer_access_token）为空------>>')
+                    response.code = 400
+                    response.msg = "令牌 authorizer_access_token 为空"
+                    return JsonResponse(response.__dict__)
+
+            return HttpResponse("success")
+
+        # 消息与事件接收URL [授权后实现业务]
+        elif oper_type == 'callback':
+
+            print('------- 【消息与事件接收URL】------->>',request.POST,"|",app_id)
+
+            return HttpResponse("success")
 
 
 ## 生成接入流程控制页面
