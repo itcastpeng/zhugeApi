@@ -144,8 +144,8 @@ def user_gongzhonghao_auth(request):
         # 非静默
         else:
             print('ret_data -->', ret_data)
-            # get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
-            get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
+            get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
+            # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
             get_user_info_data = {
                 'access_token': access_token,
                 'openid': openid,
