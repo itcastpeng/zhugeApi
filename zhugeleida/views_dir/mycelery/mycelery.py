@@ -38,7 +38,7 @@ def user_send_action_log(request):
     send_token_data = {}
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
 
-   
+
     corp_id = user_obj.company.corp_id
     company_id = user_obj.company_id
 
