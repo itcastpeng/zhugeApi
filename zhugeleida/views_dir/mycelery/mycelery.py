@@ -21,7 +21,6 @@ from PIL import Image
 from zhugeapi_celery_project import tasks
 from zhugeleida.public import common
 
-
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
 def user_send_action_log(request):
@@ -100,9 +99,6 @@ def user_send_action_log(request):
         access_token_ret = common.create_qiyeweixin_access_token(_data)
         access_token = access_token_ret.data.get('access_token')
         send_token_data['access_token'] = access_token
-
-
-
 
     userid = user_obj.userid
     post_send_data = {

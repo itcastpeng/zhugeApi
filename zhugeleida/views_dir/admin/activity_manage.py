@@ -151,7 +151,8 @@ def activity_manage(request, oper_type):
                             'status': obj.status,
                             'status_text': obj.get_status_display(),
                             'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
-                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M')
+                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
+                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M')
                         })
 
                 #  查询成功 返回200 状态码
@@ -212,7 +213,7 @@ def activity_manage_oper(request, oper_type, o_id):
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
             activity_name = request.POST.get('activity_name')
-            article_id = o_id  # 文章ID
+            article_id =  request.POST.get('article_id')  # 文章ID
             activity_total_money = request.POST.get('activity_total_money')
             activity_single_money = request.POST.get('activity_single_money')
             reach_forward_num = request.POST.get('reach_forward_num')
