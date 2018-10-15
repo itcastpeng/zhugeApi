@@ -151,7 +151,8 @@ def activity_manage(request, oper_type):
                             'status': obj.status,
                             'status_text': obj.get_status_display(),
                             'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
-                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M')
+                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
+                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M')
                         })
 
                 #  查询成功 返回200 状态码
