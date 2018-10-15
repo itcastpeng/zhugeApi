@@ -207,6 +207,7 @@ def company_oper(request, oper_type, o_id):
                 models.zgld_company.objects.create(**company_data)
                 response.code = 200
                 response.msg = "添加成功"
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)

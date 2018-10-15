@@ -35,7 +35,6 @@ def action_record(data,remark):
 
         if action in [0]: # 只发消息，不用记录日志。
 
-
             data['content'] = '%s%s' % (customer_name, remark)
             data['agentid'] = agent_id
 
@@ -43,7 +42,7 @@ def action_record(data,remark):
             response.code = 200
             response.msg = '发送消息提示成功'
 
-        elif action in [14,15,16]:
+        elif action in [14,15,16]:  #  (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
             # 创建访问日志
             models.zgld_accesslog.objects.create(
                 user_id=user_id,

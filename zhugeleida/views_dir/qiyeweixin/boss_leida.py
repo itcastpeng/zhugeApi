@@ -930,7 +930,7 @@ def deal_sale_ranking_data(data, q):
 
         user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
                                                                               'user__avatar','user__gender').annotate(
-            have_customer_num=Count('customer'))
+            have_customer_num=Count('customer')).distinct()
 
 
         objs = list(user_have_customer_num_list_objs)

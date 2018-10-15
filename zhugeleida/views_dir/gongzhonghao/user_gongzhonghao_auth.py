@@ -299,16 +299,25 @@ def binding_article_customer_relate(data):
             level=level,
         )
 
-        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
-                                                                                       user_id=user_id)
+    user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+    if user_customer_belonger_obj:
+        response.code = 302
+        response.msg = "关系存在"
 
-        if user_customer_belonger_obj:
-            response.code = 302
-            response.msg = "关系存在"
+    else:
 
-        else:
+        obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
 
-            obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+        # user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+        #                                                                                user_id=user_id)
+        #
+        # if user_customer_belonger_obj:
+        #     response.code = 302
+        #     response.msg = "关系存在"
+        #
+        # else:
+        #
+        #     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
             # obj.customer_parent_id = parent_id  # 上级人。
 
         response.code = 200

@@ -12,6 +12,8 @@ import redis
 import xml.etree.cElementTree as ET
 from django import forms
 import sys
+from zhugeapi_celery_project.tasks import celery_addSmallProgram
+
 
 ## 第三方平台接入
 @csrf_exempt
@@ -167,8 +169,8 @@ def open_weixin(request, oper_type):
                             obj.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
-                                original_id=original_id,  # 小程序的原始ID
-                                verify_type_info=verify_type_info,  # 是否 微信认证
+                                original_id=original_id,             # 小程序的原始ID
+                                verify_type_info=verify_type_info,   # 是否 微信认证
 
                                 principal_name=principal_name,  # 主体名称
                                 qrcode_url=qrcode_url,   # 二维码
@@ -176,6 +178,15 @@ def open_weixin(request, oper_type):
                                 name=nick_name,          # 昵称
                                 service_category=categories,  # 服务类目
                             )
+
+                            ## 商城基础设置
+                            celery_addSmallProgram(authorization_appid)
+                            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                                xiaochengxuApp_id=authorization_appid)
+                            if not userObjs:
+                                models.zgld_shangcheng_jichushezhi.objects.create(
+                                    xiaochengxuApp_id=authorization_appid
+                                )
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
