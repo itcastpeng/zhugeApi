@@ -299,56 +299,57 @@ def open_qiyeweixin(request, oper_type):
             # email = user_list_ret_json['email']
 
             print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
+            company_objs = models.zgld_company.objects.filter(corp_id=corpid)
 
-            user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
-                userid=userid,
+            if company_objs:
+                company_id = company_objs[0].id
+                user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
+                    userid=userid,
+                    company_id=company_id
+                )
 
-            )
+                # 如果用户存在
+                if user_profile_objs:
+                    user_profile_obj = user_profile_objs[0]
 
-            # 如果用户存在
-            if user_profile_objs:
-                user_profile_obj = user_profile_objs[0]
+                    account_expired_time = company_objs[0].account_expired_time
+                    if datetime.datetime.now() > account_expired_time:
+                        response.code = 403
+                        response.msg = '账户过期'
+                        print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
+                        return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
-                company_name = user_profile_obj.company.name
-                company_id = user_profile_obj.company_id
-                account_expired_time = models.zgld_company.objects.get(id=company_id).account_expired_time
+                    redirect_url = ''
+                    if user_profile_obj.status == 1:  #
+                        user_profile_obj.gender = gender
+                        # user_profile_obj.email = email
+                        user_profile_obj.avatar = avatar
 
-                if datetime.datetime.now() > account_expired_time:
-                    response.code = 403
-                    response.msg = '账户过期'
-                    print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (
-                    company_id, company_name, account_expired_time))
-                    return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
+                        last_login_date = user_profile_obj.last_login_date
+                        if not last_login_date:  # 为空说明第一次登陆
+                            is_first_login = 'Yes'
+                            user_profile_obj.last_login_date = datetime.datetime.now()
+                        else:
+                            is_first_login = 'No'
 
-                redirect_url = ''
-                if user_profile_obj.status == 1:  #
-                    user_profile_obj.gender = gender
-                    # user_profile_obj.email = email
-                    user_profile_obj.avatar = avatar
+                        user_profile_obj.save()
+                        redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&id=' + str(
+                            user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
-                    last_login_date = user_profile_obj.last_login_date
-                    if not last_login_date:  # 为空说明第一次登陆
-                        is_first_login = 'Yes'
-                        user_profile_obj.last_login_date = datetime.datetime.now()
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                              userid, "\n", redirect_url)
+                        return redirect(redirect_url)
+
                     else:
-                        is_first_login = 'No'
-
-                    user_profile_obj.save()
-                    redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&id=' + str(
-                        user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
-
-                    print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
-                          userid, "\n", redirect_url)
-                    return redirect(redirect_url)
+                        print('----------【雷达用户】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
+                        return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
                 else:
-                    print('----------【雷达用户】未开通 ,未登录成功 userid | company_id ------>', userid, company_id)
+                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
                     return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
-
             else:
-                print('----------【雷达用户】不存在 ,未登录成功 userid | company_id ------>', userid)
+                print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid,"|",corpid)
                 return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
-
 
         #  用户确认授权后，会进入回调URI(即redirect_uri)，并在URI参数中带上临时授权码
         elif oper_type == 'get_auth_code':
