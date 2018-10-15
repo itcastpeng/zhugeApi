@@ -27,7 +27,7 @@ def init_data(xiaochengxu_id, pid=None, level=1):
             'label': obj.classificationName,
             'value': obj.id,
         }
-        print('obj.id---------> ',obj.id)
+        # print('obj.id---------> ',obj.id)
         children_data = init_data(xiaochengxu_id, pid=obj.id, level=2)
         if children_data:
             current_data['children'] = children_data
@@ -43,35 +43,41 @@ def goodsClassShow(request):
         singleUser = request.GET.get('singleUser')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
-        xiaochengxu_id = userObjs[0].id
-
-        groupObjs = models.zgld_goods_classification_management.objects
-        parentData = init_data(xiaochengxu_id)
-        q = Q()
-        if singleUser:
-            q.add(Q(parentClassification_id=singleUser), Q.AND)
-        objs = groupObjs.filter( xiaochengxu_app_id=xiaochengxu_id).filter(q)
-        otherData = []
-        for obj in objs:
-            countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
-            classificationName = ''
-            parentClassification_id = ''
-            if obj.parentClassification_id:
-                parentClassification_id = obj.parentClassification_id
-                classificationName = obj.parentClassification.classificationName
-            otherData.append({
-                'groupId':obj.id,
-                'groupName':obj.classificationName,
-                'groupParentId':parentClassification_id,
-                'groupParent':classificationName,
-                'countNum':countNum
-            })
-        response.code = 200
-        response.msg = '查询成功'
-        response.data = {
-            'parentData':parentData,
-             'otherData':otherData
-        }
+        if userObjs[0].id:
+            xiaochengxu_id = userObjs[0].id
+            groupObjs = models.zgld_goods_classification_management.objects
+            parentData = init_data(xiaochengxu_id)
+            q = Q()
+            if singleUser:
+                q.add(Q(parentClassification_id=singleUser), Q.AND)
+            objs = groupObjs.filter( xiaochengxu_app_id=xiaochengxu_id).filter(q)
+            otherData = []
+            for obj in objs:
+                countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+                classificationName = ''
+                parentClassification_id = ''
+                if obj.parentClassification_id:
+                    parentClassification_id = obj.parentClassification_id
+                    classificationName = obj.parentClassification.classificationName
+                otherData.append({
+                    'groupId':obj.id,
+                    'groupName':obj.classificationName,
+                    'groupParentId':parentClassification_id,
+                    'groupParent':classificationName,
+                    'countNum':countNum
+                })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'parentData':parentData,
+                 'otherData':otherData
+            }
+        else:
+            response.code = 301
+            response.msg = '商城未配置'
+    else:
+        response.code = 402
+        response.msg = '请求异常'
     return JsonResponse(response.__dict__)
 
 def updateInitData(result_data,xiaochengxu_id, pid=None):
