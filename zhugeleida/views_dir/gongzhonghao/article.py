@@ -270,6 +270,7 @@ def article_oper(request, oper_type, o_id):
                         read_count=F('read_count') + 1
                     )
 
+
                     forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
                         customer_parent_id=customer_id).values_list('customer_id').distinct()
 
