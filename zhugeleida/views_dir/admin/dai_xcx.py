@@ -15,6 +15,7 @@ from django.conf import settings
 import os
 from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,RelaseCodeInfoForm,AuditCodeInfoForm,GetAuditForm,RevertCodeReleaseForm
 
+from zhugeleida.public.WorkWeixinOper import WorkWeixinOper
 
 
 @csrf_exempt
@@ -734,11 +735,11 @@ def dai_xcx_oper(request, oper_type):
                     response.code = 301
                     response.msg = json.loads(forms_obj.errors.as_json())
 
-
     return JsonResponse(response.__dict__)
 
 
-def  batch_get_latest_audit_status(data):
+# 获取处于待审核的小程序是否审核通过
+def batch_get_latest_audit_status(data):
     response = Response.ResponseObj()
     objs = data.get('upload_audit_objs')
     now_time = datetime.datetime.now()
@@ -804,7 +805,6 @@ def  batch_get_latest_audit_status(data):
                 # # {'errcode': 0, 'errmsg': 'ok', 'auditid': 451831474, 'status': 1, 'reason': '1:
                 # relase_code(relase_data)
 
-
             elif status == 1:  #
                 obj.audit_reply_date = now_time
                 code_release_result = '代码审核状态报错: %s : %s' % (errmsg,reason)
@@ -814,7 +814,6 @@ def  batch_get_latest_audit_status(data):
                 response.code = 1
                 response.msg = '审核状态失败'
                 print('-------- 代码审核状态为【失败】---- auditid | audit_code_id -------->>', auditid, '|', obj.app_id)
-
 
             elif status == 2:
                 xcx_app_obj.code_release_status = 4
@@ -832,7 +831,25 @@ def  batch_get_latest_audit_status(data):
             obj.reason = reason
             obj.save()
 
+            if status in [0, 1]:
+                # 发送企业微信消息通知
+                corpid = 'wx81159f52aff62388'  # 企业ID
+                corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
+                redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
+                obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
 
+                xcx_app_name = xcx_app_obj.name
+                msg = """小程序名称：{xcx_app_name}\n审核状态：{status}\n备注：{remark}""".format(
+                    xcx_app_name=xcx_app_name,
+                    status="审核通过" if status == 0 else "审核失败",
+                    remark="" if status == 0 else xcx_app_obj.code_release_result,
+                )
+                obj.send_message(
+                    agentid=1000005,
+                    msg=msg,
+                    touser="zhangcong"
+                    # touser="zhangcong|1530778413048|1531464629357|1531476018476"
+                )
 
     else:
         response.code = 302

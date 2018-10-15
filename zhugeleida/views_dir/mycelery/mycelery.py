@@ -20,6 +20,9 @@ import requests
 from PIL import Image
 from zhugeapi_celery_project import tasks
 
+from zhugeleida.views_dir.admin.dai_xcx import batch_get_latest_audit_status
+
+
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
 def user_send_action_log(request):
@@ -55,7 +58,6 @@ def user_send_action_log(request):
     token_ret = rc.get(key_name)
 
     print('-------  Redis缓存的 keyname |value -------->>',key_name,"|",token_ret)
-
 
     if not token_ret:
         ret = requests.get(Conf['token_url'], params=get_token_data)
@@ -440,7 +442,6 @@ def user_send_template_msg(request):
     return JsonResponse(response.__dict__)
 
 
-
 @csrf_exempt
 def user_send_gongzhonghao_template_msg(request):
     response = ResponseObj()
@@ -575,17 +576,18 @@ def user_send_gongzhonghao_template_msg(request):
     return JsonResponse(response.__dict__)
 
 
-
-
-#获取查询最新一次提交的审核状态 并提交审核通过的代码上线.
+# 获取查询最新一次提交的审核状态 并提交审核通过的代码上线.
 @csrf_exempt
 def get_latest_audit_status_and_release_code(request):
-    from zhugeleida.views_dir.admin.dai_xcx import  batch_get_latest_audit_status
+
     response = ResponseObj()
 
     if request.method == "GET":
 
-        objs = models.zgld_xiapchengxu_upload_audit.objects.filter(audit_result=2, auditid__isnull=False).order_by('-audit_commit_date')
+        objs = models.zgld_xiapchengxu_upload_audit.objects.filter(
+            audit_result=2,
+            auditid__isnull=False
+        ).order_by('-audit_commit_date')
 
         audit_status_data = {
             'upload_audit_objs': objs
