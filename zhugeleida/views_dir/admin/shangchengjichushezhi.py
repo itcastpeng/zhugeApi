@@ -48,12 +48,12 @@ def jiChuSheZhiShow(request):
         response.data = ''
     return JsonResponse(response.__dict__)
 
-def addSmallProgram(user_id, xiaochengxuid):
+def addSmallProgram(xiaochengxuid):
     response = Response.ResponseObj()
-    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-    xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id[0].id)
-    if userObjs:
+    # u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+    # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
+    if not userObjs:
         models.zgld_shangcheng_jichushezhi.objects.create(
             xiaochengxuApp_id=xiaochengxuid
         )
