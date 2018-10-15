@@ -16,7 +16,7 @@ def jiChuSheZhiShow(request):
     xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
     if xiaochengxu:
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
-        user_id_mallStatus = models.zgld_company.objects.filter(id=user_id)
+        user_id_mallStatus = models.zgld_company.objects.filter(id=u_idObjs[0].company_id)
         mallStatus = user_id_mallStatus[0].get_shopping_type_display()
         mallStatusID = user_id_mallStatus[0].shopping_type
         otherData = []
