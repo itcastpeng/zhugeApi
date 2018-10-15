@@ -288,13 +288,30 @@ def article_oper(request, oper_type, o_id):
                         last_access_date=now_date_time
                     )
                     article_access_log_id = article_access_log_obj.id
+                    is_subscribe = customer_obj[0].is_subscribe
+                    is_subscribe_text  = customer_obj[0].get_is_subscribe_display()
 
-                response.code = 200
-                response.data = {
-                    'ret_data': ret_data,
-                    'article_access_log_id': article_access_log_id,
+                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id,status=2)
+                    if activity_objs:
+                        is_have_activity = 1 # 活动已经开启
+                    else:
+                        is_have_activity = 0  #没有搞活动
 
-                }
+                    response.code = 200
+                    response.data = {
+                        'ret_data': ret_data,
+                        'article_access_log_id': article_access_log_id,
+                        'is_subscribe' :is_subscribe , # 是否关注了公众号。0 为没有关注 1为关注了。
+                        'is_subscribe_text' : is_subscribe_text,
+                        'is_have_activity' :  is_have_activity  # 是否搞活动。0 是没有活动，1 是活动已经开启。
+                    }
+
+                else:
+                    response.code = 200
+                    response.data = {
+                        'ret_data': ret_data,
+                        'article_access_log_id': article_access_log_id
+                    }
 
             else:
                 print('------- 公众号查看我的文章未能通过------->>', forms_obj.errors)

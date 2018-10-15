@@ -152,6 +152,8 @@ def user_gongzhonghao_auth(request):
                 'lang': 'zh_CN',
             }
 
+
+
             ret = requests.get(get_user_info_url, params=get_user_info_data)
             ret.encoding = 'utf-8'
             ret_json = ret.json()

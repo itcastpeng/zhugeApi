@@ -538,8 +538,7 @@ class zgld_customer(models.Model):
 
     user_type_choices = (
         (1, '微信公众号'),
-        (2, '微信小程序'),
-
+        (2, '微信小程序')
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     nickname = models.CharField(max_length=64, verbose_name='昵称', blank=True, null=True)
@@ -549,6 +548,11 @@ class zgld_customer(models.Model):
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
     # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
+    subscribe_choices = (
+        (0, '没有订阅该公众号'),
+        (1, '已经订阅该公众号')
+    )
+    is_subscribe =  models.SmallIntegerField(verbose_name='用户是否订阅该公众号', choices=subscribe_choices,null=True)                                                                   #值为0时，代表此用户没有关注该公众号
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
