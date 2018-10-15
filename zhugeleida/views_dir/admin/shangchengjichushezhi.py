@@ -48,16 +48,31 @@ def jiChuSheZhiShow(request):
         response.data = ''
     return JsonResponse(response.__dict__)
 
+def addSmallProgram(xiaochengxuid):
+    # response = Response.ResponseObj()
+    # u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+    # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
+    if not userObjs:
+        models.zgld_shangcheng_jichushezhi.objects.create(
+            xiaochengxuApp_id=xiaochengxuid
+        )
+        # response.code = 200
+        # response.msg = '添加成功'
+    # else:
+    #     response.code = 301
+    #     response.msg = '该小程序已创建设置'
 
 # 商城设置
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
+    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+    xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id[0].id)
     if request.method == "POST":
-        user_id = request.GET.get('user_id')
-        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
         if oper_type == 'jichushezhi':
             resultData = {
                 'mallStatus' : request.POST.get('mallStatus'),          # 是否打开 商城 1为产品 2为商城
@@ -70,18 +85,18 @@ def jiChuSheZhiOper(request, oper_type):
                 print('验证通过')
                 if int(resultData.get('mallStatus')) == 2:
                     models.zgld_company.objects.filter(id=user_id).update(shopping_type=2)
-                if userObjs:
-                    userObjs.update(
-                        shangChengName=formObjs.get('shangChengName'),
-                        lunbotu=formObjs.get('lunbotu'),
-                    )
-                    response.msg = '修改成功'
-                else:
-                    models.zgld_shangcheng_jichushezhi.objects.create(
-                        shangChengName=formObjs.get('shangChengName'),
-                        lunbotu=formObjs.get('lunbotu'),
-                    )
-                    response.msg = '创建成功'
+                # if userObjs:
+                userObjs.update(
+                    shangChengName=formObjs.get('shangChengName'),
+                    lunbotu=formObjs.get('lunbotu'),
+                )
+                response.msg = '修改成功'
+                # else:
+                #     models.zgld_shangcheng_jichushezhi.objects.create(
+                #         shangChengName=formObjs.get('shangChengName'),
+                #         lunbotu=formObjs.get('lunbotu'),
+                #     )
+                #     response.msg = '创建成功'
                 response.code = 200
                 response.data = ''
             else:
@@ -99,20 +114,20 @@ def jiChuSheZhiOper(request, oper_type):
                 print('支付配置 验证成功')
                 formObjs = forms_obj.cleaned_data
                 zhengShuPath = formObjs.get('zhengshu')
-                if userObjs:
-                    userObjs.update(
-                        shangHuHao=formObjs.get('shangHuHao'),
-                        shangHuMiYao=formObjs.get('shangHuMiYao'),
-                        zhengshu=zhengShuPath
-                    )
-                    response.msg = '修改成功'
-                else:
-                    models.zgld_shangcheng_jichushezhi.objects.create(
-                        shangHuHao=formObjs.get('shangHuHao'),
-                        shangHuMiYao=formObjs.get('shangHuMiYao'),
-                        zhengshu=zhengShuPath
-                    )
-                    response.msg = '创建成功'
+                # if userObjs:
+                userObjs.update(
+                    shangHuHao=formObjs.get('shangHuHao'),
+                    shangHuMiYao=formObjs.get('shangHuMiYao'),
+                    zhengshu=zhengShuPath
+                )
+                response.msg = '修改成功'
+                # else:
+                #     models.zgld_shangcheng_jichushezhi.objects.create(
+                #         shangHuHao=formObjs.get('shangHuHao'),
+                #         shangHuMiYao=formObjs.get('shangHuMiYao'),
+                #         zhengshu=zhengShuPath
+                #     )
+                #     response.msg = '创建成功'
                 zhengshupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
                 file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile') + '/' + formObjs.get('shangHuHao')
                 file_zip = zipfile.ZipFile(zhengshupath, 'r')
@@ -134,15 +149,15 @@ def jiChuSheZhiOper(request, oper_type):
             forms_obj = yongjinshezhi(resultData)
             if forms_obj.is_valid():
                 formObjs = forms_obj.cleaned_data
-                if userObjs:
-                    userObjs.update(
-                        yongjin=formObjs.get('yongjin')
-                    )
-                    response.msg = '修改成功'
-                else:
-                    models.zgld_shangcheng_jichushezhi.objects.create(
-                        yongjin=formObjs.get('yongjin'),
-                    )
+                # if userObjs:
+                userObjs.update(
+                    yongjin=formObjs.get('yongjin')
+                )
+                response.msg = '修改成功'
+                # else:
+                #     models.zgld_shangcheng_jichushezhi.objects.create(
+                #         yongjin=formObjs.get('yongjin'),
+                #     )
                 response.code = 200
                 response.data = ''
             else:
@@ -151,5 +166,4 @@ def jiChuSheZhiOper(request, oper_type):
     else:
         response.code = 402
         response.msg = "请求异常"
-
     return JsonResponse(response.__dict__)
