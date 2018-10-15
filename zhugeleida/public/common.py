@@ -198,7 +198,6 @@ def  create_suite_access_token(data):
     post_component_data = ''
     if SuiteId == 'wx5d26a7a856b22bec':
         key_name = 'SuiteTicket_%s' % (SuiteId)
-
         SuiteTicket = rc.get(key_name)
         suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
 
@@ -211,7 +210,6 @@ def  create_suite_access_token(data):
     elif SuiteId == 'wx36c67dd53366b6f0':
 
         key_name = 'SuiteTicket_%s' % (SuiteId)
-
         SuiteTicket = rc.get(key_name)
         suite_secret = 'dr7UT0zmMW1Dh7XABacmGieqLefoAhyrabAy74yI8rM'
 
@@ -268,8 +266,9 @@ def create_pre_auth_code(data):
     suite_access_token_ret = create_suite_access_token(_data)
     suite_access_token = suite_access_token_ret.data.get('suite_access_token')
 
-
     if not exist_pre_auth_code:
+
+
         get_pre_auth_data = {
             'suite_access_token': suite_access_token
         }
@@ -296,3 +295,53 @@ def create_pre_auth_code(data):
     return response
 
 
+def create_qiyeweixin_access_token(data):
+    response = Response.ResponseObj()
+
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    SuiteId = data.get('SuiteId')  # 三方应用IP 。
+    auth_corpid = data.get('corp_id')            #授权方企业corpid
+    permanent_code = data.get('permanent_code')  #企业微信永久授权码
+
+    _data = {
+        'SuiteId': SuiteId
+    }
+
+    suite_access_token_ret = create_suite_access_token(_data)
+
+    suite_access_token = suite_access_token_ret.data.get('suite_access_token')
+
+    get_code_data = {
+        'suite_access_token': suite_access_token
+    }
+    post_code_data = {
+        'auth_corpid': auth_corpid,
+        'permanent_code' : permanent_code
+    }
+
+    key_name = 'access_token_qiyeweixin_%s_%s' % (auth_corpid,SuiteId)
+    access_token = rc.get(key_name)
+
+    if not access_token:
+
+        get_corp_token_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_corp_token'
+        get_corp_token_ret = requests.post(get_corp_token_url, params=get_code_data,data=json.dumps(post_code_data))
+
+        get_corp_token_ret = get_corp_token_ret.json()
+        print('===========【企业微信】获取企业access_token 返回:==========>', json.dumps(get_corp_token_ret))
+
+        access_token = get_corp_token_ret.get('access_token')
+        if access_token:
+            rc.set(key_name, access_token, 7000)
+            print('===========【企业微信】获取企业access_token【成功】 得到 access_token | 使用 suite_access_token ==========>',access_token,"|" ,suite_access_token,)
+
+        else:
+            print('===========【企业微信】获取企业access_token【失败】')
+
+    response.data = {
+        'access_token': access_token,
+        'suite_access_token': suite_access_token
+    }
+    response.code = 200
+
+    return response

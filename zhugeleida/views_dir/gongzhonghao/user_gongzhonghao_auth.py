@@ -145,11 +145,14 @@ def user_gongzhonghao_auth(request):
         else:
             print('ret_data -->', ret_data)
             get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
+            # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
             get_user_info_data = {
                 'access_token': access_token,
                 'openid': openid,
                 'lang': 'zh_CN',
             }
+
+
 
             ret = requests.get(get_user_info_url, params=get_user_info_data)
             ret.encoding = 'utf-8'

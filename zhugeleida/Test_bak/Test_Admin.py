@@ -282,17 +282,28 @@ ip = 'http://127.0.0.1:8001'
 # get_data['company_id'] = 1
 # ret = requests.get(url, data = post_data ,params=get_data)
 
+#
+# url =  ip + '/zhugeleida/admin/activity_manage/add/1'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['activity_name'] = '[抢话费互动]'
+# post_data['activity_total_money'] = 10000
+# post_data['activity_single_money'] = 2
+# post_data['reach_forward_num'] = 5
+# post_data['start_time'] ='2018-10-12 16:03'
+# post_data['end_time'] = '2018-10-13 16:03'
+# ret = requests.post(url, data = post_data ,params=get_data)
 
-url =  ip + '/zhugeleida/admin/activity_manage/add/1'  # 获取产品的列表
-get_data['company_id'] = 1
-post_data['activity_name'] = '[抢话费互动]'
-post_data['activity_total_money'] = 10000
-post_data['activity_single_money'] = 2
-post_data['reach_forward_num'] = 5
-post_data['start_time'] ='2018-10-12 16:03'
-post_data['end_time'] = '2018-10-13 16:03'
+# url =  ip + '/zhugeleida/admin/activity_manage/activity_list'  # 获取产品的列表
+# get_data['company_id'] =1
+# get_data['status'] = 2
+# # get_data['activity_name'] = '想'
+# # get_data['article_title'] = 'G'
+#
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 
+url =  ip + '/zhugeleida/admin/activity_manage/change_artivity_status/1'  # 获取产品的列表
+post_data['status'] = 1
 ret = requests.post(url, data = post_data ,params=get_data)
 
 

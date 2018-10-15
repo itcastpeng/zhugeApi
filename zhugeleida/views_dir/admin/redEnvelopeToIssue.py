@@ -145,7 +145,7 @@ def focusOnIssuedRedEnvelope(request):
             'appid' : request.POST.get('appid'),                 # 小程序ID
             'mch_id' : request.POST.get('mch_id'),               # 商户号
             'openid' : request.POST.get('openid'),               # 微信用户唯一标识
-            'send_name' : request.POST.get('send_name'),         # 商户名称 中文
+            'send_name' : request.POST.get('send_name'),         # 商户名称 中文32
             'act_name' : request.POST.get('act_name'),           # 动名称 32长度
             'remark' : request.POST.get('remark'),               # 备注信息 256长度
             'wishing' : request.POST.get('wishing'),             # 红包祝福语 128长度

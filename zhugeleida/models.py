@@ -50,6 +50,7 @@ class zgld_app(models.Model):
     name = models.CharField(verbose_name="企业应用_名称", max_length=128)
     agent_id = models.CharField(verbose_name="应用ID", max_length=128,null=True)
     app_secret = models.CharField(verbose_name="应用secret", max_length=256,null=True)
+    permanent_code = models.CharField(verbose_name="企业微信永久授权码", max_length=128, null=True)
     app_type_choice = (
         (1,'AI雷达'),
         (2,'Boss雷达')
@@ -537,8 +538,7 @@ class zgld_customer(models.Model):
 
     user_type_choices = (
         (1, '微信公众号'),
-        (2, '微信小程序'),
-
+        (2, '微信小程序')
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     nickname = models.CharField(max_length=64, verbose_name='昵称', blank=True, null=True)
@@ -548,6 +548,11 @@ class zgld_customer(models.Model):
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
     # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
+    subscribe_choices = (
+        (0, '没有订阅该公众号'),
+        (1, '已经订阅该公众号')
+    )
+    is_subscribe =  models.SmallIntegerField(verbose_name='用户是否订阅该公众号', choices=subscribe_choices,null=True)                                                                   #值为0时，代表此用户没有关注该公众号
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -854,12 +859,10 @@ class zgld_article_to_customer_belonger(models.Model):
 #公众号-文章-活动(任务)管理表
 class zgld_article_activity(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')
-    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业',null=True)
     # shanghu_name = models.CharField(verbose_name='商户名称', max_length=128,null=True)
     activity_name = models.CharField(verbose_name='活动名称', max_length=256,null=True)
     # wish_language = models.CharField(verbose_name='祝福语', max_length=256,null=True)
-
-    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属用户ID", null=True)
     status_choices = ((1, '未启用'),
                       (2, '进行中'),
                       (3, '已暂停'),
