@@ -49,7 +49,7 @@ def jiChuSheZhiShow(request):
     return JsonResponse(response.__dict__)
 
 def addSmallProgram(xiaochengxuid):
-    response = Response.ResponseObj()
+    # response = Response.ResponseObj()
     # u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
     # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
     userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
@@ -57,11 +57,11 @@ def addSmallProgram(xiaochengxuid):
         models.zgld_shangcheng_jichushezhi.objects.create(
             xiaochengxuApp_id=xiaochengxuid
         )
-        response.code = 200
-        response.msg = '添加成功'
-    else:
-        response.code = 301
-        response.msg = '该小程序已创建设置'
+        # response.code = 200
+        # response.msg = '添加成功'
+    # else:
+    #     response.code = 301
+    #     response.msg = '该小程序已创建设置'
 
 # 商城设置
 @csrf_exempt
