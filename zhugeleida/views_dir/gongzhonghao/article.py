@@ -203,6 +203,7 @@ def article_oper(request, oper_type, o_id):
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
             parent_id = request.GET.get('pid')
+            company_id = request.GET.get('company_id')
 
             request_data_dict = {
                 'article_id': o_id,
@@ -296,14 +297,18 @@ def article_oper(request, oper_type, o_id):
                         is_have_activity = 1 # 活动已经开启
                     else:
                         is_have_activity = 0  #没有搞活动
-
+                    gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                    qrcode_url = ''
+                    if gongzhonghao_app_objs:
+                        qrcode_url = gongzhonghao_app_objs[0].qrcode_url
                     response.code = 200
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
                         'is_subscribe' :is_subscribe , # 是否关注了公众号。0 为没有关注 1为关注了。
                         'is_subscribe_text' : is_subscribe_text,
-                        'is_have_activity' :  is_have_activity  # 是否搞活动。0 是没有活动，1 是活动已经开启。
+                        'is_have_activity' :  is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
+                        'qrcode_url': qrcode_url
                     }
 
                 else:
