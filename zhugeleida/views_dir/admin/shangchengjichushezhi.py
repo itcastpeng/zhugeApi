@@ -11,11 +11,14 @@ import json, zipfile, os, random
 @account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhiShow(request):
     response = Response.ResponseObj()
-    u_id = request.GET.get('user_id')
-    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=u_id)
+    user_id = request.GET.get('user_id')
+    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
     xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
     if xiaochengxu:
         userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
+        user_id_mallStatus = models.zgld_company.objects.filter(id=user_id)
+        mallStatus = user_id_mallStatus[0].get_shopping_type_display()
+        mallStatusID = user_id_mallStatus[0].shopping_type
         otherData = []
         for obj in userObjs:
             lunbotu = ''
@@ -32,6 +35,9 @@ def jiChuSheZhiShow(request):
                 'xiaochengxucompany_id': obj.xiaochengxucompany_id,
                 'xiaochengxucompany': obj.xiaochengxucompany.name,
                 'zhengshu': obj.zhengshu,
+                'mallStatus':mallStatus,
+                'mallStatusID':mallStatusID
+
             })
             response.code = 200
             response.msg = '查询成功'
