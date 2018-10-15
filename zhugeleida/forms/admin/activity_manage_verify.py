@@ -144,21 +144,8 @@ class ProductGetForm(forms.Form):
             return product_id
 
 
-class ProductSelectForm(forms.Form):
+class ActivitySelectForm(forms.Form):
 
-    user_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "用户ID不能为空"
-        }
-    )
-
-    product_type = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "产品类型不为空"
-        }
-    )
 
     current_page = forms.IntegerField(
         required=False,
@@ -170,6 +157,12 @@ class ProductSelectForm(forms.Form):
         required=False,
         error_messages={
             'required': "页显示数量类型错误"
+        }
+    )
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
         }
     )
 
