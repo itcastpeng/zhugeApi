@@ -19,6 +19,7 @@ from selenium import webdriver
 import requests
 from PIL import Image
 from zhugeapi_celery_project import tasks
+from zhugeleida.public import common
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
@@ -30,57 +31,74 @@ def user_send_action_log(request):
     customer_id = data.get('customer_id', '')
     user_id = data.get('uid')
     content = data.get('content')
-    agentid = data.get('agentid')
+    # agentid = data.get('agentid')
 
-    get_token_data = {}
+
     send_token_data = {}
-
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
-    print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', user_obj.company.corp_id, user_obj.company.tongxunlu_secret)
+
+
     corp_id = user_obj.company.corp_id
+    company_id = user_obj.company_id
 
-    get_token_data['corpid'] = corp_id
-    # app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, name='AI雷达').app_secret
-    app_secret = models.zgld_app.objects.get(company_id=user_obj.company_id, app_type=1).app_secret
+    print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', corp_id)
 
-
-
-    get_token_data['corpsecret'] = app_secret
-    print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
+    app_obj =  models.zgld_app.objects.get(company_id=company_id, app_type=1)
+    agentid = app_obj.agent_id
+    permanent_code = app_obj.permanent_code
 
 
-    import redis
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    key_name = "company_%s_leida_app_token" % (user_obj.company_id)
-    token_ret = rc.get(key_name)
+    if not permanent_code:
 
-    print('-------  Redis缓存的 keyname |value -------->>',key_name,"|",token_ret)
+        import redis
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+        key_name = "company_%s_leida_app_token" % (user_obj.company_id)
+        token_ret = rc.get(key_name)
+
+        print('-------  Redis缓存的 keyname |value -------->>', key_name, "|", token_ret)
+
+        app_secret = app_obj.app_secret
+        get_token_data = {
+            'corpid' : corp_id,
+            'corpsecret' : app_secret
+        }
+
+        print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
+
+        if not token_ret:
+            ret = requests.get(Conf['token_url'], params=get_token_data)
+
+            weixin_ret_data = ret.json()
+            errcode = weixin_ret_data.get('errcode')
+            errmsg = weixin_ret_data.get('errmsg')
+            access_token = weixin_ret_data.get('access_token')
+            print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
 
 
-    if not token_ret:
-        ret = requests.get(Conf['token_url'], params=get_token_data)
+            if errcode == 0:
+                rc.set(key_name, access_token, 7000)
+                send_token_data['access_token'] = access_token
 
-        weixin_ret_data = ret.json()
-        errcode = weixin_ret_data.get('errcode')
-        errmsg = weixin_ret_data.get('errmsg')
-        access_token = weixin_ret_data.get('access_token')
-        print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
-
-
-        if errcode == 0:
-            rc.set(key_name, access_token, 7000)
-            send_token_data['access_token'] = access_token
+            else:
+                response.code = errcode
+                response.msg = "企业微信验证未能通过"
+                print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
+                return JsonResponse(response.__dict__)
 
         else:
-            response.code = errcode
-            response.msg = "企业微信验证未能通过"
-            print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
-
-
-            return JsonResponse(response.__dict__)
+            send_token_data['access_token'] = token_ret
 
     else:
-        send_token_data['access_token'] = token_ret
+
+        SuiteId = 'wx5d26a7a856b22bec' # '雷达AI | 三方应用id'
+        _data = {
+            'SuiteId' : SuiteId , # 三方应用IP 。
+            'corp_id' :  corp_id,  # 授权方企业corpid
+            'permanent_code' :  permanent_code
+        }
+        access_token_ret = common.create_qiyeweixin_access_token(_data)
+        access_token = access_token_ret.data.get('access_token')
+        send_token_data['access_token'] = access_token
 
     userid = user_obj.userid
     post_send_data = {
