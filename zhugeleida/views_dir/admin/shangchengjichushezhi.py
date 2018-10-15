@@ -36,7 +36,7 @@ def jiChuSheZhiShow(request):
                 'xiaochengxucompany': obj.xiaochengxucompany.name,
                 'zhengshu': obj.zhengshu,
                 'mallStatus':mallStatus,
-                'mallStatusID':mallStatusID,
+                'mallStatusID':mallStatusID
 
             })
             response.code = 200
