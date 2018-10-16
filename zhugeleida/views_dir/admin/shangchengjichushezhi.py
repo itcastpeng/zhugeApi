@@ -53,20 +53,21 @@ def jiChuSheZhiShow(request):
 def addSmallProgram(request):
     xiaochengxuid = request.GET.get('xiaochengxuid')
     response = Response.ResponseObj()
-    # u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-    # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
-    nowdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    if not userObjs:
-        models.zgld_shangcheng_jichushezhi.objects.create(
-            xiaochengxuApp_id=xiaochengxuid,
-            createDate=nowdate
-        )
-        response.code = 200
-        response.msg = '添加成功'
-    else:
-        response.code = 301
-        response.msg = '该小程序已创建设置'
+    xiaochengxuObjs = models.zgld_xiaochengxu_app.objects.filter(id=xiaochengxuid)
+    if xiaochengxuObjs:
+        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
+        nowdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if not userObjs:
+            models.zgld_shangcheng_jichushezhi.objects.create(
+                xiaochengxuApp_id=xiaochengxuid,
+                xiaochengxucompany_id=xiaochengxuObjs[0].company_id,
+                createDate=nowdate
+            )
+            response.code = 200
+            response.msg = '添加成功'
+        else:
+            response.code = 301
+            response.msg = '该小程序已创建设置'
     return JsonResponse(response.__dict__)
 
 # 商城设置
