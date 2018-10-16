@@ -20,6 +20,23 @@ import datetime
 @csrf_exempt
 def open_qiyeweixin(request, oper_type):
     response = Response.ResponseObj()
+    application_data = {
+        'leida': {
+            'sToken': '5lokfwWTqHXnb58VCV',
+            'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
+            'sCorpID': 'wx5d26a7a856b22bec',
+        },
+        'boss': {
+            'sToken': '22LlaSyBP',
+            'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
+            'sCorpID': 'wx36c67dd53366b6f0',
+        },
+        'address_book': {
+            'sToken': '8sCAJ3YuU6EfYWxI',
+            'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
+            'sCorpID': 'wx1cbe3089128fda03',
+        },
+    }
 
     if request.method == "POST":
 
@@ -34,23 +51,6 @@ def open_qiyeweixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            application_data = {
-                'leida': {
-                    'sToken': '5lokfwWTqHXnb58VCV',
-                    'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
-                    'sCorpID': 'wx5d26a7a856b22bec',
-                },
-                'boss': {
-                    'sToken': '22LlaSyBP',
-                    'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
-                    'sCorpID': 'wx36c67dd53366b6f0',
-                },
-                'address_book': {
-                    'sToken': '8sCAJ3YuU6EfYWxI',
-                    'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
-                    'sCorpID': 'wx1cbe3089128fda03',
-                },
-            }
             sToken = application_data[ticket_type]['sToken']
             sEncodingAESKey = application_data[ticket_type]['sEncodingAESKey']
             sCorpID = application_data[ticket_type]['sCorpID']
@@ -194,17 +194,20 @@ def open_qiyeweixin(request, oper_type):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             echostr = request.GET.get('echostr')
-            type = request.GET.get('type')
+            ticket_type = request.GET.get('type')
 
-            sToken = ''
-            sEncodingAESKey = ''
-            if type == 'leida':
-                sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
-                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
-
-            elif type == 'boss':
-                sToken = "22LlaSyBP"  # 回调配置
-                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+            sToken = application_data[ticket_type]['sToken']
+            sEncodingAESKey = application_data[ticket_type]['sEncodingAESKey']
+            # sCorpID = application_data[ticket_type]['sCorpID']
+            # sToken = ''
+            # sEncodingAESKey = ''
+            # if type == 'leida':
+            #     sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
+            #     sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
+            #
+            # elif type == 'boss':
+            #     sToken = "22LlaSyBP"  # 回调配置
+            #     sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
 
             sCorpID = "wx81159f52aff62388"
             wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
