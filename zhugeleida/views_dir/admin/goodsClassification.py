@@ -42,17 +42,18 @@ def goodsClassShow(request):
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
         user_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
+        print('user_idObjs------->',user_idObjs.company_id)
         userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
             'xiaochengxuApp__company'
         ).filter(xiaochengxuApp__company_id=user_idObjs.company_id)
         if userObjs:
-            xiaochengxu_id = userObjs[0].id
+            jichushezhi_id = userObjs[0].id
             groupObjs = models.zgld_goods_classification_management.objects
-            parentData = init_data(xiaochengxu_id)
+            parentData = init_data(jichushezhi_id)
             q = Q()
             if singleUser:
                 q.add(Q(parentClassification_id=singleUser), Q.AND)
-            objs = groupObjs.filter( xiaochengxu_app_id=xiaochengxu_id).filter(q)
+            objs = groupObjs.filter(xiaochengxu_app_id=jichushezhi_id).filter(q)
             otherData = []
             for obj in objs:
                 countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
@@ -75,8 +76,8 @@ def goodsClassShow(request):
                  'otherData':otherData
             }
         else:
+            response.msg = '请完善商城配置信息'
             response.code = 301
-            response.msg = '商城未配置'
     else:
         response.code = 402
         response.msg = '请求异常'
@@ -123,7 +124,13 @@ def goodsClassOper(request, oper_type, o_id):
                         response.msg = '无此父级'
                         return JsonResponse(response.__dict__)
                 objs = models.zgld_goods_classification_management.objects
-                objsId = objs.create(**forms_obj.cleaned_data)
+                # objsId = objs.create(**forms_obj.cleaned_data)
+                objForm = forms_obj.cleaned_data
+                objsId = objs.create(
+                    classificationName=objForm.get('classificationName'),
+                    parentClassification_id=objForm.get('parentClassification_id'),
+                    xiaochengxu_app_id=userObjs[0].id,
+                )
                 objs.filter(id=objsId.id).update(level=level)
                 response.code = 200
                 response.msg = '添加成功'
