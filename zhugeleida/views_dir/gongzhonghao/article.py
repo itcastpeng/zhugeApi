@@ -499,21 +499,15 @@ def article_oper(request, oper_type, o_id):
 
         elif oper_type == 'test_send_redPacket':
 
-            ip = ''
-            if request.META.get('HTTP_X_FORWARDED_FOR'):
-                ip = request.META.get('HTTP_X_FORWARDED_FOR')
-            elif request.META.get('REMOTE_ADDR'):
-                ip = request.META.get('REMOTE_ADDR')
-            else:
-                ip = '0.0.0.0'
 
             _data = {
-                'ip': ip,
+
                 'parent_id': 9,
                 'article_id': 23,
                 'activity_id': 1,
                 'company_id': 1,
             }
+
             tasks.user_send_activity_redPacket.delay(_data)
 
 
