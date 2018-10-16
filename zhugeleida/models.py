@@ -870,16 +870,16 @@ class zgld_activity_redPacket(models.Model):
                      )
     status = models.SmallIntegerField(verbose_name='[红包]发放状态', choices=status_choices,null=True)
 
-    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属企业用户ID", null=True)
+    # user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属企业用户ID", null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
-    customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属的父级',related_name="article_customer_parent", null=True)
+    # customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属的父级',related_name="article_customer_parent", null=True)
 
-    read_count = models.IntegerField(verbose_name="阅读次数", default=0)
-    stay_time = models.IntegerField(verbose_name='阅读时长', default=0)
+    forward_read_count = models.IntegerField(verbose_name="转发后阅读人数", default=0)
+    forward_stay_time = models.IntegerField(verbose_name='转发后阅读的时长', default=0)
 
-    forward_count = models.IntegerField(verbose_name="被转发个数", default=0)
-    forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
-    forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
+    # forward_count = models.IntegerField(verbose_name="被转发个数", default=0)
+    # forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
+    # forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
 
     send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额',default=0, null=True)
     send_redPacket_num = models.SmallIntegerField(verbose_name='已发放次数',default=0 ,null=True)
