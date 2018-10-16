@@ -24,10 +24,10 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
             if flag == 'admin':
-                u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
+                u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
             else:
-                u_idObjs = models.zgld_customer.objects.filter(id=user_id)
-            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app_id=u_idObjs[0].company_id)
+                u_idObjs = models.zgld_customer.objects.get(id=user_id)
+            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app__xiaochengxucompany_id=u_idObjs.company_id)
             otherData = []
             if length != 0:
                 start_line = (current_page - 1) * length
