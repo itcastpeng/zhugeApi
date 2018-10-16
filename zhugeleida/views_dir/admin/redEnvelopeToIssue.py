@@ -164,6 +164,8 @@ def focusOnIssuedRedEnvelope(resultDict):
     }
     forms_obj = guanZhuForm(dataDict)
     if forms_obj.is_valid():
+        print('------ forms_obj 验证后的数据----->>',json.dumps(forms_obj.cleaned_data))
+
         objsForm = forms_obj.cleaned_data
         redEnvelope = models.zgld_red_envelope_to_issue.objects.filter(articleId__isnull=True)
 
@@ -173,6 +175,7 @@ def focusOnIssuedRedEnvelope(resultDict):
             response.msg = '重复关注公众号'
             return JsonResponse(response.__dict__)
         else:
+            print('---- cunzaiObjs ! --->>',cunzaiObjs)
             nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             redEnvelopeObjs = redEnvelope.create(
                 wxappid = objsForm.get('appid'),                        # appid
@@ -202,6 +205,8 @@ def focusOnIssuedRedEnvelope(resultDict):
                 'remark':objsForm.get('remark'),                            # 备注信息 256长度
                 'wishing':objsForm.get('wishing'),                          # 红包祝福语 128长度
                 }
+            print('---- 支付的 result_data ------>>',json.dumps(yuzhifu))
+
             stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
             result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
             xml_data = yuzhifu.toXml(result_data).encode('utf8')
@@ -219,21 +224,25 @@ def focusOnIssuedRedEnvelope(resultDict):
                 DOMTree = xmldom.parseString(ret.text)
                 collection = DOMTree.documentElement
                 return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-                print('return_code-------------------> ',return_code)
+                print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
                 if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
                     redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
                     response.code = 200
                     response.msg = '发放红包成功'
                 else:
+                    print('----- 发放红包失败 ----->>')
                     redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
                     response.code = 500
                     response.msg = '发放红包失败'
             else:
+                print('---- 没有商户证书, 请前往商城设置册证书！--->')
                 response.code = 500
                 response.msg = '没有商户证书, 请前往商城设置册证书！'
     else:
+        print('---- [关注领红包form报错]---->>',json.loads(forms_obj.errors.as_json()))
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
+
     return JsonResponse(response.__dict__)
 
 # 文章转发发放红包
