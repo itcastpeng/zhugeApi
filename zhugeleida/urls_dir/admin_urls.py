@@ -112,8 +112,9 @@ urlpatterns = [
     url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 
     # 小程序 - 商城基础设置
-    url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商品基础查询
-    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商品基础设置
+    url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商城基础查询
+    url(r'addSmallProgram', shangchengjichushezhi.addSmallProgram),                       # 添加小程序ID
+    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),
 
     # 小程序 - 商品分类管理
     url(r'goodsClassShow', goodsClassification.goodsClassShow),  # 商品分类管理查询
