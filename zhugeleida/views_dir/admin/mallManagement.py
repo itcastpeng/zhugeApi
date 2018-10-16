@@ -82,7 +82,7 @@ def mallManagementShow(request):
     response = mallManagement(request, user_id, goodsGroup, status, flag)
     return JsonResponse(response.__dict__)
 
-def updateInitData(result_data,xiaochengxu_id, pid=None):
+def updateInitData(result_data,xiaochengxu_id, pid=None):   # 更新查询 分类接口
     objs = models.zgld_goods_classification_management.objects.filter(
         xiaochengxu_app_id=xiaochengxu_id,
         id=pid,
@@ -102,7 +102,7 @@ def mallManagementOper(request, oper_type, o_id):
         'o_id':o_id,
         'goodsName':request.POST.get('goodsName'),                    # 商品名称
         'parentName':request.POST.get('parentName'),                  # 父级分类
-        'goodsPrice':request.POST.get('goodsPrice'),                                           # 商品标价
+        'goodsPrice':request.POST.get('goodsPrice'),                  # 商品标价
         'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
         'goodsStatus':request.POST.get('goodsStatus'),                # 商品状态
         'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),        # 是否线上交易
