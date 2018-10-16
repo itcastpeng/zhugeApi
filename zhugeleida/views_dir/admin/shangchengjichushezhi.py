@@ -76,9 +76,12 @@ def addSmallProgram(request):
 def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
-    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-    xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id[0].id)
+    u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
+    # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+    # userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id[0].id)
+    userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
+        'xiaochengxuApp__company'
+    ).filter(xiaochengxuApp__company_id=u_idObjs.company_id)
     if request.method == "POST":
         if oper_type == 'jichushezhi':
             resultData = {
