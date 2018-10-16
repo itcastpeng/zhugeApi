@@ -1064,7 +1064,7 @@ class zgld_speech_details_management(models.Model):
 
 # 小程序 - 商城基础设置
 class zgld_shangcheng_jichushezhi(models.Model):
-    shangChengName = models.CharField(verbose_name='商城名称', max_length=32, null=True, blank=True)
+    shangChengName = models.CharField(verbose_name='商城名称', max_length=32, default='商城')
     # userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
     shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
     shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
