@@ -56,11 +56,11 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                     'parentName_id':parentGroup_id,
                     'parentName':parentGroup_name,
                     'goodsPrice':obj.goodsPrice,
-                    'inventoryNum':obj.inventoryNum,
+                    # 'inventoryNum':obj.inventoryNum,
                     'goodsStatus':obj.get_goodsStatus_display(),
                     'xianshangjiaoyi':xianshangjiaoyi,
                     'shichangjiage':obj.shichangjiage,
-                    'kucunbianhao':obj.kucunbianhao,
+                    # 'kucunbianhao':obj.kucunbianhao,
                     'topLunBoTu': topLunBoTu,  # 顶部轮播图
                     'detailePicture' : detailePicture,  # 详情图片
                     'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
@@ -103,11 +103,11 @@ def mallManagementOper(request, oper_type, o_id):
         'goodsName':request.POST.get('goodsName'),                    # 商品名称
         'parentName':request.POST.get('parentName'),                  # 父级分类
         'goodsPrice':request.POST.get('goodsPrice'),                  # 商品标价
-        'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
+        # 'inventoryNum':request.POST.get('inventoryNum'),              # 商品库存
         'goodsStatus':request.POST.get('goodsStatus'),                # 商品状态
         'xianshangjiaoyi':request.POST.get('xianshangjiaoyi'),        # 是否线上交易
         'shichangjiage':request.POST.get('shichangjiage'),            # 市场价格
-        'kucunbianhao':request.POST.get('kucunbianhao'),              # 库存编号
+        # 'kucunbianhao':request.POST.get('kucunbianhao'),              # 库存编号
         'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
         'detailePicture':request.POST.get('detailePicture'),          # 详情图片
     }
@@ -123,10 +123,10 @@ def mallManagementOper(request, oper_type, o_id):
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
-                    inventoryNum=formObjs.get('inventoryNum'),
+                    # inventoryNum=formObjs.get('inventoryNum'),
                     xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
                     shichangjiage=formObjs.get('shichangjiage'),
-                    kucunbianhao=formObjs.get('kucunbianhao'),
+                    # kucunbianhao=formObjs.get('kucunbianhao'),
                     goodsStatus=formObjs.get('goodsStatus'),
                     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
                     detailePicture=resultData.get('detailePicture'),  # 详情图片
@@ -164,7 +164,7 @@ def mallManagementOper(request, oper_type, o_id):
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
-                    kucunbianhao=formObjs.get('kucunbianhao'),
+                    # kucunbianhao=formObjs.get('kucunbianhao'),
                     goodsStatus=formObjs.get('goodsStatus'),
                     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
                     detailePicture=resultData.get('detailePicture'),  # 详情图片

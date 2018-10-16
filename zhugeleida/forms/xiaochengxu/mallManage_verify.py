@@ -28,12 +28,12 @@ class AddForm(forms.Form):
         }
     )
 
-    inventoryNum = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "商品库存不能为空"
-        }
-    )
+    # inventoryNum = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "商品库存不能为空"
+    #     }
+    # )
 
     xianshangjiaoyi = forms.BooleanField(
         required=False,
@@ -43,18 +43,18 @@ class AddForm(forms.Form):
     )
 
     shichangjiage = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
-            'required': "市场价格不能为空"
+            'required': "市场价格类型错误"
         }
     )
 
-    kucunbianhao = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "库存编号不能为空"
-        }
-    )
+    # kucunbianhao = forms.CharField(
+    #     required=False,
+    #     error_messages={
+    #         'required': "库存编号不能为空"
+    #     }
+    # )
 
     goodsStatus = forms.IntegerField(
         required=True,
@@ -105,12 +105,12 @@ class UpdateForm(forms.Form):
             'required': "是否线上交易类型错误"
         }
     )
-    kucunbianhao = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "库存编号不能为空"
-        }
-    )
+    # kucunbianhao = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': "库存编号不能为空"
+    #     }
+    # )
     def clean_o_id(self):
         o_id = self.data.get('o_id')
         objs = models.zgld_goods_management.objects.filter(id=o_id)
