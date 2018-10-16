@@ -642,7 +642,7 @@ def user_send_activity_redPacket(request):
 
 
         forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-            customer_parent_id=parent_id).values_list('customer_id').distinct()
+            customer_parent_id=parent_id).values_list('customer_id').distinct().count()
 
         forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
             customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
