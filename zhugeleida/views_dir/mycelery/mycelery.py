@@ -680,13 +680,16 @@ def user_send_activity_redPacket(request):
             shangcheng_objs =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
             send_name = ''
             shangHuHao = ''
+            shangHuMiYao = ''
             if shangcheng_objs:
                 shangcheng_obj = shangcheng_objs[0]
                 shangHuHao = shangcheng_obj.shangHuHao
                 send_name = shangcheng_obj.shangChengName
+                shangHuMiYao = shangcheng_obj.shangHuMiYao
 
             _data = {
                 'client_ip': client_ip,
+                'shanghukey': shangHuMiYao , # 支付钱数
                 'total_fee': activity_single_money , # 支付钱数
                 'appid': authorization_appid,        # 小程序ID
                 'mch_id': shangHuHao ,               # 商户号
