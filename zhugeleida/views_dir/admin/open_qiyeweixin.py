@@ -49,6 +49,13 @@ def open_qiyeweixin(request, oper_type):
 
                 decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
+            elif type == 'address_book':
+                sToken = "8sCAJ3YuU6EfYWxI"  # 回调配置
+                sEncodingAESKey = "3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj"  # 回调配置
+                sCorpID = "wx1cbe3089128fda03"
+
+                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+
             # xml_tree = ET.fromstring(postdata)
             # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
             # timestamp = "1538228121"
