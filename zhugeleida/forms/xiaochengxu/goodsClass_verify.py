@@ -32,7 +32,7 @@ class AddForm(forms.Form):
         })
     def clean_xiaochengxu_app_id(self):
         xiaochengxu_app_id = self.data.get('xiaochengxu_app_id')
-        objs = models.zgld_shangcheng_jichushezhi.objects.filter(id=xiaochengxu_app_id)
+        objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app_id)
         if not objs:
             self.add_error('xiaochengxu_app_id', '无此小程序！')
         else:
