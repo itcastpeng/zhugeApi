@@ -634,7 +634,7 @@ def user_send_activity_redPacket(request):
             ip = request.META.get('REMOTE_ADDR')
         else:
             ip = '0.0.0.0'
-            
+
         ip = '0.0.0.0'
 
         client_ip = ip
