@@ -89,7 +89,7 @@ def jiChuSheZhiOper(request, oper_type):
                 formObjs = forms_obj.cleaned_data
                 print('验证通过')
                 if int(resultData.get('mallStatus')) == 2:
-                    models.zgld_company.objects.filter(id=user_id).update(shopping_type=2)
+                    models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
                 if userObjs:
                     userObjs.update(
                         shangChengName=formObjs.get('shangChengName'),
