@@ -40,9 +40,11 @@ def goodsClassShow(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         user_id = request.GET.get('user_id')
-        singleUser = request.GET.get('singleUser')
-        u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
+        singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
+        user_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
+        userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
+            'xiaochengxuApp__company'
+        ).filter(xiaochengxuApp__company_id=user_idObjs.company_id)
         if userObjs:
             xiaochengxu_id = userObjs[0].id
             groupObjs = models.zgld_goods_classification_management.objects
@@ -95,8 +97,11 @@ def updateInitData(result_data,xiaochengxu_id, pid=None):
 @account.is_token(models.zgld_admin_userprofile)
 def goodsClassOper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
+    u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)                            # 查询 admin用户
+    xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs.company_id) # 查询小程序ID
+    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)  #商城基础设置
     if request.method == "POST":
-        user_id = request.GET.get('user_id')
         dataDict = {
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
@@ -104,7 +109,6 @@ def goodsClassOper(request, oper_type, o_id):
             'userProfile_id':request.GET.get('user_id'),
             'parentClassification_id':request.POST.get('parentClassification')
         }
-        print('dataDict---------------> ',dataDict)
         if oper_type == 'add':
             forms_obj = AddForm(dataDict)
             if forms_obj.is_valid():
@@ -129,15 +133,17 @@ def goodsClassOper(request, oper_type, o_id):
                 response.data = json.loads(forms_obj.errors.as_json())
 
         elif oper_type == 'Beforeupdate':
-            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
+            result_data = []
             xiaochengxu_id = userObjs[0].id
             objs = models.zgld_goods_classification_management.objects.filter(id=o_id)
-            result_data = []
-            parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = parentData
+            if objs:
+                parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = parentData
+            else:
+                response.code = 301
+                response.msg = '分组ID错误'
 
 
         elif oper_type == 'update':
