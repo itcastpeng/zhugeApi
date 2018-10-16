@@ -13,7 +13,7 @@ import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 import datetime
-
+from django.db.models import Count
 
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
@@ -256,8 +256,42 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'customer_id': customer_id}), Q.AND)
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
+                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
+                    if activity_objs:
+                        activity_id = activity_objs[0].id
+                        is_have_activity = 1  # 活动已经开启
+                    else:
+                        is_have_activity = 0  # 没有搞活动
+
+
                     if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+
+
+                        ## 判断转发后阅读的人数 +转发后阅读时间
+                        ## 此处要 封装到异步中。
+                        from django.db.models import  Sum
+
+                        if activity_objs: # 说明有参与活动
+                            forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
+                                customer_parent_id=parent_id).values_list('customer_id').distinct()
+
+                            forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
+                                customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
+
+                            forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
+                            if not forward_stay_time:
+                                forward_stay_time = 0
+
+                            activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
+                                                                                                    article_id=article_id,
+                                                                                                    activity_id=activity_id
+                                                                                                    )
+                            if activity_redPacket_objs:
+                                activity_redPacket_objs.update(
+                                    read_count=forward_read_num,
+                                    forward_stay_time=forward_stay_time
+                                )
 
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
@@ -271,24 +305,13 @@ def article_oper(request, oper_type, o_id):
                     )
 
 
-                    forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                        customer_parent_id=customer_id).values_list('customer_id').distinct()
-
-                    activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,
-                                                                                            article_id=article_id
-                                                                                            )
-                    if activity_redPacket_objs:
-                        activity_redPacket_objs.update(
-                            read_count=forward_read_num
-                        )
-
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
 
                         remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
                         print('---- 公众号查看文章[消息提醒]--->>', remark)
                         data = request.GET.copy()
                         data['action'] = 14
-                        response = action_record(data, remark)
+                        response = action_record(data, remark) # 此步骤要要封装到 异步中。
 
                     ## 先记录一个用户查看文章的日志
                     now_date_time = datetime.datetime.now()
@@ -304,11 +327,7 @@ def article_oper(request, oper_type, o_id):
                     is_subscribe = customer_obj[0].is_subscribe
                     is_subscribe_text = customer_obj[0].get_is_subscribe_display()
 
-                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
-                    if activity_objs:
-                        is_have_activity = 1  # 活动已经开启
-                    else:
-                        is_have_activity = 0  # 没有搞活动
+
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     qrcode_url = ''
                     if gongzhonghao_app_objs:
