@@ -131,14 +131,6 @@ class guanZhuForm(forms.Form):
 def focusOnIssuedRedEnvelope(resultDict):
     # if request.method == 'POST':
     url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
-        # 获取IP
-        # if request.META.get('HTTP_X_FORWARDED_FOR'):
-        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        # elif request.META.get('REMOTE_ADDR'):
-        #     ip = request.META.get('REMOTE_ADDR')
-        # else:
-        #     ip = '0.0.0.0'
-        # client_ip = ip
         # dataDict = {
         #     'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
         #     'total_fee' : request.POST.get('total_fee'),         # 钱数
@@ -165,18 +157,8 @@ def focusOnIssuedRedEnvelope(resultDict):
     forms_obj = guanZhuForm(dataDict)
     if forms_obj.is_valid():
         print('------ forms_obj 验证后的数据----->>',json.dumps(forms_obj.cleaned_data))
-
         objsForm = forms_obj.cleaned_data
         redEnvelope = models.zgld_red_envelope_to_issue.objects.filter(articleId__isnull=True)
-
-        # cunzaiObjs = redEnvelope.filter(mch_id=objsForm.get('mch_id'), re_openid=objsForm.get('openid'))
-        # if cunzaiObjs:
-        #     print('-------重复关注公众号---->>')
-        #     response.code = 500
-        #     response.msg = '重复关注公众号'
-        #     return JsonResponse(response.__dict__)
-        # else:
-        #     print('---- cunzaiObjs ! --->>',cunzaiObjs)
         nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         redEnvelopeObjs = redEnvelope.create(
             wxappid = objsForm.get('appid'),                        # appid
@@ -253,14 +235,6 @@ def focusOnIssuedRedEnvelope(resultDict):
 def articleForwardingRedEnvelope(resultDict):
     # if request.method == 'POST':
     url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
-        # 获取IP
-        # if request.META.get('HTTP_X_FORWARDED_FOR'):
-        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        # elif request.META.get('REMOTE_ADDR'):
-        #     ip = request.META.get('REMOTE_ADDR')
-        # else:
-        #     ip = '0.0.0.0'
-        # client_ip = ip
         # articleId = request.POST.get('articleId')         # 文章ID
         # dataDict = {
         #     'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
