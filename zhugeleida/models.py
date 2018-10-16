@@ -1090,7 +1090,7 @@ class zgld_goods_management(models.Model):
     parentName = models.ForeignKey(to='zgld_goods_classification_management', verbose_name='归属分类', null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价',max_length=64, default=0)
     salesNum = models.IntegerField(verbose_name='销量', default=0)
-    inventoryNum = models.IntegerField(verbose_name='库存', default=0)
+    # inventoryNum = models.IntegerField(verbose_name='库存', default=0)
     commissionFee = models.IntegerField(verbose_name='佣金提成', default=0)
     status_choices = (
         (1, '已上架'),
@@ -1102,7 +1102,7 @@ class zgld_goods_management(models.Model):
     shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", auto_now_add=True)
     xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
-    kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
+    # kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
     zhengshu = models.CharField(verbose_name='证书', max_length=256, null=True, blank=True)
     topLunBoTu = models.TextField(verbose_name='顶部轮播图', null=True, blank=True)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
