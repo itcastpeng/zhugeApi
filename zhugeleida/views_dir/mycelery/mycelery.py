@@ -665,7 +665,7 @@ def user_forward_send_activity_redPacket(request):
                 forward_stay_time=forward_stay_time
             )
         if 4 == 4:
-            app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+            app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
             activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
             activity_single_money = activity_obj.activity_single_money
