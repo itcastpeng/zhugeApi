@@ -627,15 +627,15 @@ def user_forward_send_activity_redPacket(request):
     if request.method == "GET":
         print('------- 【大红包测试】user_send_activity_redPacket ------>>')
 
-        ip = ''
-        if request.META.get('HTTP_X_FORWARDED_FOR'):
-            ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        elif request.META.get('REMOTE_ADDR'):
-            ip = request.META.get('REMOTE_ADDR')
-        else:
-            ip = '0.0.0.0'
+        # ip = ''
+        # if request.META.get('HTTP_X_FORWARDED_FOR'):
+        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
+        # elif request.META.get('REMOTE_ADDR'):
+        #     ip = request.META.get('REMOTE_ADDR')
+        # else:
+        #     ip = '0.0.0.0'
 
-        ip = '120.133.21.53'
+        ip = '192.168.1.10'
 
         client_ip = ip
         company_id =  request.GET.get('company_id')
