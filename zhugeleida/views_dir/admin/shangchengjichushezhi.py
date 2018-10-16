@@ -13,42 +13,37 @@ from zhugeleida.views_dir.xiaochengxu import prepaidManagement as yuzhifu
 def jiChuSheZhiShow(request):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
-    u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-    xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-    if xiaochengxu:
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu[0].id)
-        user_id_mallStatus = models.zgld_company.objects.filter(id=u_idObjs[0].company_id)
-        mallStatus = user_id_mallStatus[0].get_shopping_type_display()
-        mallStatusID = user_id_mallStatus[0].shopping_type
-        otherData = []
-        for obj in userObjs:
-            lunbotu = ''
-            if obj.lunbotu:
-                lunbotu = json.loads(obj.lunbotu)
-            xiaoChengXuCompanyName = ''
-            if obj.xiaochengxucompany:
-                xiaoChengXuCompanyName = obj.xiaochengxucompany.name
-            otherData.append({
-                'shangChengName': obj.shangChengName,
-                'shangHuHao': obj.shangHuHao,
-                'shangHuMiYao': obj.shangHuMiYao,
-                'lunbotu': lunbotu,
-                'yongjin': obj.yongjin,
-                'xiaochengxuApp': obj.xiaochengxuApp.name,
-                'xiaochengxuApp_id': obj.xiaochengxuApp_id,
-                'xiaochengxucompany_id': obj.xiaochengxucompany_id,
-                'xiaochengxucompany': xiaoChengXuCompanyName,
-                'zhengshu': obj.zhengshu,
-                'mallStatus':mallStatus,
-                'mallStatusID':mallStatusID
-            })
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {'otherData':otherData}
-    else:
-        response.code = 301
-        response.msg = '您未注册公司, 请联系管理员！'
-        response.data = ''
+    user_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
+    # xiaochengxu = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+    shezhi_obj = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxuApp__company').filter(xiaochengxuApp__company_id=user_idObjs.company_id)
+    user_id_mallStatus = models.zgld_company.objects.filter(id=user_idObjs.company_id)
+    mallStatus = user_id_mallStatus[0].get_shopping_type_display()
+    mallStatusID = user_id_mallStatus[0].shopping_type
+    otherData = []
+    for obj in shezhi_obj:
+        lunbotu = ''
+        if obj.lunbotu:
+            lunbotu = json.loads(obj.lunbotu)
+        xiaoChengXuCompanyName = ''
+        if obj.xiaochengxucompany:
+            xiaoChengXuCompanyName = obj.xiaochengxucompany.name
+        otherData.append({
+            'shangChengName': obj.shangChengName,
+            'shangHuHao': obj.shangHuHao,
+            'shangHuMiYao': obj.shangHuMiYao,
+            'lunbotu': lunbotu,
+            'yongjin': obj.yongjin,
+            'xiaochengxuApp': obj.xiaochengxuApp.name,
+            'xiaochengxuApp_id': obj.xiaochengxuApp_id,
+            'xiaochengxucompany_id': obj.xiaochengxucompany_id,
+            'xiaochengxucompany': xiaoChengXuCompanyName,
+            'zhengshu': obj.zhengshu,
+            'mallStatus':mallStatus,
+            'mallStatusID':mallStatusID
+        })
+    response.msg = '查询成功'
+    response.data = {'otherData':otherData}
+    response.code = 200
     return JsonResponse(response.__dict__)
 
 def addSmallProgram(request):
@@ -95,7 +90,7 @@ def jiChuSheZhiOper(request, oper_type):
                 formObjs = forms_obj.cleaned_data
                 print('验证通过')
                 if int(resultData.get('mallStatus')) == 2:
-                    models.zgld_company.objects.filter(id=user_id).update(shopping_type=2)
+                    models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
                 if userObjs:
 
                     userObjs.update(

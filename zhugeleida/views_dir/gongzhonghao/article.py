@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, \
     MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm
-
+from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
 from django.db.models import F
 import json
@@ -14,6 +14,7 @@ from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 import datetime
 from django.db.models import Count
+
 
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
@@ -260,6 +261,7 @@ def article_oper(request, oper_type, o_id):
                     if activity_objs:
                         activity_id = activity_objs[0].id
                         is_have_activity = 1  # 活动已经开启
+
                     else:
                         is_have_activity = 0  # 没有搞活动
 
@@ -270,28 +272,46 @@ def article_oper(request, oper_type, o_id):
 
                         ## 判断转发后阅读的人数 +转发后阅读时间
                         ## 此处要 封装到异步中。
-                        from django.db.models import  Sum
+
 
                         if activity_objs: # 说明有参与活动
-                            forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                                customer_parent_id=parent_id).values_list('customer_id').distinct()
+                            # forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
+                            #     customer_parent_id=parent_id).values_list('customer_id').distinct()
+                            #
+                            # forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
+                            #     customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
+                            #
+                            # forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
+                            # if not forward_stay_time:
+                            #     forward_stay_time = 0
+                            #
+                            # activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
+                            #                                                                         article_id=article_id,
+                            #                                                                         activity_id=activity_id
+                            #                                                                         )
+                            # if activity_redPacket_objs:
+                            #     activity_redPacket_objs.update(
+                            #         forward_read_num=forward_read_num,
+                            #         forward_stay_time=forward_stay_time
+                            #     )
+                            # if forward_read_num == 4:
+                            ip = ''
+                            if request.META.get('HTTP_X_FORWARDED_FOR'):
+                                ip = request.META.get('HTTP_X_FORWARDED_FOR')
+                            elif request.META.get('REMOTE_ADDR'):
+                                ip = request.META.get('REMOTE_ADDR')
+                            else:
+                                ip = '0.0.0.0'
 
-                            forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                                customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
+                            _data = {
+                                'ip' : ip,
+                                'parent_id':  parent_id,
+                                'article_id': article_id,
+                                'activity_id' : activity_id,
+                                'company_id' : company_id,
+                            }
+                            tasks.user_send_activity_redPacket.delay(json.dumps(_data))
 
-                            forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
-                            if not forward_stay_time:
-                                forward_stay_time = 0
-
-                            activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
-                                                                                                    article_id=article_id,
-                                                                                                    activity_id=activity_id
-                                                                                                    )
-                            if activity_redPacket_objs:
-                                activity_redPacket_objs.update(
-                                    read_count=forward_read_num,
-                                    forward_stay_time=forward_stay_time
-                                )
 
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
@@ -300,10 +320,7 @@ def article_oper(request, oper_type, o_id):
                     zgld_article_objs.update(status=1)  # 改为已发状态
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
 
-                    models.zgld_article_to_customer_belonger.objects.filter(q).update(
-                        read_count=F('read_count') + 1
-                    )
-
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count')+1)
 
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
 
@@ -479,5 +496,21 @@ def article_oper(request, oper_type, o_id):
                 # print('------- 公众号-记录查看文章时间未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'test_send_redPacket':
+
+
+            _data = {
+
+                'parent_id': 9,
+                'article_id': 23,
+                'activity_id': 1,
+                'company_id': 1,
+            }
+
+            tasks.user_send_activity_redPacket.delay(_data)
+
+
+
 
     return JsonResponse(response.__dict__)

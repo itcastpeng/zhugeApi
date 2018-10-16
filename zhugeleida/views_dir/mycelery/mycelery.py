@@ -20,6 +20,9 @@ import requests
 from PIL import Image
 from zhugeapi_celery_project import tasks
 from zhugeleida.public import common
+from django.db.models import  Sum
+from zhugeleida.views_dir.admin.redEnvelopeToIssue import  focusOnIssuedRedEnvelope
+
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
@@ -614,4 +617,94 @@ def get_latest_audit_status_and_release_code(request):
         response.msg = '查询最新一次提交的审核状态-执行完成'
 
     return JsonResponse(response.__dict__)
+
+
+
+# 关注发红包和转发文章满足就发红包
+@csrf_exempt
+def user_send_activity_redPacket(request):
+
+    if request.method == "GET":
+        print('------- 【大红包测试】user_send_activity_redPacket ------>>')
+
+        ip = ''
+        if request.META.get('HTTP_X_FORWARDED_FOR'):
+            ip = request.META.get('HTTP_X_FORWARDED_FOR')
+        elif request.META.get('REMOTE_ADDR'):
+            ip = request.META.get('REMOTE_ADDR')
+        else:
+            ip = '0.0.0.0'
+
+        ip = '120.133.21.53'
+
+        client_ip = ip
+        company_id =  request.GET.get('company_id')
+        parent_id =  request.GET.get('parent_id')
+        article_id =  request.GET.get('article_id')
+        activity_id = request.GET.get('activity_id')
+
+
+        forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
+            customer_parent_id=parent_id).values_list('customer_id').distinct().count()
+
+        forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
+            customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
+
+        forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
+        if not forward_stay_time:
+            forward_stay_time = 0
+
+        activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
+                                                                                article_id=article_id,
+                                                                                activity_id=activity_id
+                                                                                )
+        if activity_redPacket_objs:
+
+            activity_redPacket_objs.update(
+                forward_read_num=forward_read_num,
+                forward_stay_time=forward_stay_time
+            )
+        if 4 == 4:
+            app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+
+            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+            activity_single_money = activity_obj.activity_single_money
+            activity_name = activity_obj.activity_name
+
+            customer_obj = models.zgld_customer.objects.get(id=parent_id)
+            openid =  customer_obj.openid
+
+            authorization_appid = ''
+            if app_objs:
+                authorization_appid =  app_objs[0].authorization_appid
+
+
+            shangcheng_objs =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+            send_name = ''
+            shangHuHao = ''
+            shangHuMiYao = ''
+            if shangcheng_objs:
+                shangcheng_obj = shangcheng_objs[0]
+                shangHuHao = shangcheng_obj.shangHuHao
+                send_name = shangcheng_obj.shangChengName
+                shangHuMiYao = shangcheng_obj.shangHuMiYao
+
+            _data = {
+                'client_ip': client_ip,
+                'shanghukey': shangHuMiYao , # 支付钱数
+                'total_fee': activity_single_money , # 支付钱数
+                'appid': authorization_appid,        # 小程序ID
+                'mch_id': shangHuHao ,               # 商户号
+                'openid': openid,
+                'send_name': send_name,              #商户名称
+                'act_name': activity_name,           #活动名称
+                'remark':  '猜越多得越多,快来抢！',                    #备注信息
+                'wishing': '感谢您参加猜灯谜活动，祝您元宵节快乐！',                  #祝福语
+            }
+            print('------[调发红包的接口 data 数据]------>>',json.dumps(_data))
+            focusOnIssuedRedEnvelope(_data)
+
+
+    # print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
+    # requests.post(url, data=post_data)
 

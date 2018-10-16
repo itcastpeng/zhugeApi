@@ -11,6 +11,9 @@ import datetime,time
 import psutil
 import os
 import signal
+from django.db.models import  Sum
+from zhugeleida import models
+import json
 
 #  小程序访问动作日志的发送到企业微信
 @app.task
@@ -22,6 +25,19 @@ def user_send_action_log(data):
     }
     print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
     requests.post(url, data=post_data)
+
+#  小程序访问动作日志的发送到企业微信
+@app.task
+def user_send_activity_redPacket(data):
+    # url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
+    # url = 'http://127.0.0.1:8000/zhugeleida/mycelery/user_send_action_log'
+    post_data = {
+        'data': data
+    }
+
+
+    # print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
+    # requests.post(url, data=post_data)
 
 
 # 企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
