@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.shangchengshezhi_verify import jichushezhi, zhifupeizhi, yongjinshezhi
-import json, zipfile, os, random
+import json, zipfile, os, random, datetime
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -54,9 +54,11 @@ def addSmallProgram(request):
     # u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
     # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
     userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
+    nowdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if not userObjs:
         models.zgld_shangcheng_jichushezhi.objects.create(
-            xiaochengxuApp_id=xiaochengxuid
+            xiaochengxuApp_id=xiaochengxuid,
+            createDate=nowdate
         )
         response.code = 200
         response.msg = '添加成功'
