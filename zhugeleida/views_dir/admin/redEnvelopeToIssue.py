@@ -205,7 +205,7 @@ def focusOnIssuedRedEnvelope(resultDict):
                 'remark':objsForm.get('remark'),                            # 备注信息 256长度
                 'wishing':objsForm.get('wishing'),                          # 红包祝福语 128长度
                 }
-            print('---- 支付的 result_data ------>>',json.dumps(yuzhifu))
+            print('---- 支付的 result_data ------>>',json.dumps(result_data))
 
             stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
             result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
