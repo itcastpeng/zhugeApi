@@ -21,6 +21,7 @@ from PIL import Image
 from zhugeapi_celery_project import tasks
 from zhugeleida.public import common
 from django.db.models import  Sum
+from zhugeleida.views_dir.admin.redEnvelopeToIssue import  focusOnIssuedRedEnvelope
 
 
 # 小程序访问动作日志的发送到企业微信
@@ -675,8 +676,8 @@ def user_send_activity_redPacket(request):
             if app_objs:
                 authorization_appid =  app_objs[0].authorization_appid
 
-            from zhugeleida.views_dir.admin.redEnvelopeToIssue import  focusOnIssuedRedEnvelope
-            shangcheng_objs =  models.zgld_shangcheng_jichushezhi.objects.filter(company_id=company_id)
+
+            shangcheng_objs =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
             send_name = ''
             shangHuHao = ''
             if shangcheng_objs:
