@@ -35,6 +35,7 @@ def user_send_activity_redPacket(data):
         'data': data
     }
 
+    print('------- 【大红包测试】user_send_activity_redPacket ------>>')
     client_ip =  data.get('ip')
     company_id =  data.get('company_id')
     parent_id =  data.get('parent_id')
