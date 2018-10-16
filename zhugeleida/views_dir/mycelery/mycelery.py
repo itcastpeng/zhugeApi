@@ -635,7 +635,7 @@ def user_send_activity_redPacket(request):
         else:
             ip = '0.0.0.0'
 
-        ip = '119.90.40.144'
+        ip = '120.133.21.53'
 
         client_ip = ip
         company_id =  request.GET.get('company_id')
