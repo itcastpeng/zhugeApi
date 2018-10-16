@@ -1073,6 +1073,7 @@ class zgld_shangcheng_jichushezhi(models.Model):
     xiaochengxuApp = models.ForeignKey(to='zgld_xiaochengxu_app', verbose_name='小程序APP', null=True, blank=True)
     xiaochengxucompany = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     zhengshu = models.TextField(verbose_name='证书', null=True, blank=True)
+    createDate = models.DateTimeField(verbose_name="创建时间", null=True, blank=True)
 
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
