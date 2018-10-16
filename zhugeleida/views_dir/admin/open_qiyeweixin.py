@@ -30,31 +30,32 @@ def open_qiyeweixin(request, oper_type):
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
-            type = request.GET.get('type')
+            ticket_type = request.GET.get('type')
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            decrypt_obj = ''
-            if type == 'leida':
+            application_data = {
+                'leida': {
+                    'sToken': '5lokfwWTqHXnb58VCV',
+                    'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
+                    'sCorpID': 'wx5d26a7a856b22bec',
+                },
+                'boss': {
+                    'sToken': '22LlaSyBP',
+                    'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
+                    'sCorpID': 'wx36c67dd53366b6f0',
+                },
+                'address_book': {
+                    'sToken': '8sCAJ3YuU6EfYWxI',
+                    'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
+                    'sCorpID': 'wx1cbe3089128fda03',
+                },
+            }
+            sToken = application_data[ticket_type]['sToken']
+            sEncodingAESKey = application_data[ticket_type]['sEncodingAESKey']
+            sCorpID = application_data[ticket_type]['sCorpID']
 
-                sToken = "5lokfwWTqHXnb58VCV"
-                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
-                sCorpID = "wx5d26a7a856b22bec"
-                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
-
-            elif type == 'boss':
-                sToken = "22LlaSyBP"  # 回调配置
-                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
-                sCorpID = "wx36c67dd53366b6f0"
-
-                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
-
-            elif type == 'address_book':
-                sToken = "8sCAJ3YuU6EfYWxI"  # 回调配置
-                sEncodingAESKey = "3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj"  # 回调配置
-                sCorpID = "wx1cbe3089128fda03"
-
-                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+            decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
             # xml_tree = ET.fromstring(postdata)
             # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
