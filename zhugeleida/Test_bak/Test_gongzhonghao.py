@@ -13,7 +13,7 @@ get_data = {
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
     # 'user_id': 1,
-    'user_id': 1,
+    'user_id': 9,
 
 
 
@@ -23,9 +23,10 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -353,6 +354,11 @@ ip = 'http://127.0.0.1:8001'
 # url =  ip + '/zhugeleida/gongzhonghao/article/forward_article/2'  # 获取产品的列表
 # get_data['uid'] = 1
 # ret = requests.get(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/gongzhonghao/article/test_send_redPacket/0'  # 获取产品的列表
+
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 # url =  ip + '/zhugeleida/gongzhonghao/article/staytime/2'  # 获取产品的列表
