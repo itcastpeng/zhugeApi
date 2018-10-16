@@ -147,6 +147,7 @@ def activity_manage(request, oper_type):
                             'article_title' : obj.article.title,
                             'company_id' : obj.company_id,
 
+                            'activity_id' : obj.id,    #活动Id
                             'activity_name' : obj.activity_name,    #分享文章名称
                             'activity_total_money' :  obj.activity_total_money,   #活动总金额
                             'activity_single_money' : obj.activity_single_money,  #单个金额
