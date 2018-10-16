@@ -97,8 +97,8 @@ def user_send_activity_redPacket(data):
             'remark':  '猜越多得越多,快来抢！',                    #备注信息
             'wishing': '感谢您参加猜灯谜活动，祝您元宵节快乐！',                  #祝福语
         }
-
-        focusOnIssuedRedEnvelope(_data)
+        print('------[调发红包的接口 data 数据]------>>',json.dumps(_data))
+        # focusOnIssuedRedEnvelope(_data)
 
 
     # print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
