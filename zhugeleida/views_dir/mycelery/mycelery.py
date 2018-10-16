@@ -657,7 +657,6 @@ def user_send_activity_redPacket(request):
                                                                                 )
         if activity_redPacket_objs:
 
-
             activity_redPacket_objs.update(
                 forward_read_num=forward_read_num,
                 forward_stay_time=forward_stay_time
