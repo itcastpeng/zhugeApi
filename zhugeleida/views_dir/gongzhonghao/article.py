@@ -15,6 +15,9 @@ from zhugeleida.public.condition_com import conditionCom
 import datetime
 from django.db.models import Count
 
+import requests
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
+
 
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
@@ -106,7 +109,7 @@ def article(request, oper_type):
 @account.is_token(models.zgld_customer)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-
+    import json
     if request.method == "POST":
         if oper_type == "add":
             article_data = {
@@ -265,16 +268,13 @@ def article_oper(request, oper_type, o_id):
                     else:
                         is_have_activity = 0  # 没有搞活动
 
-
                     if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-
 
                         ## 判断转发后阅读的人数 +转发后阅读时间
                         ## 此处要 封装到异步中。
 
-
-                        if activity_objs: # 说明有参与活动
+                        if activity_objs:  # 说明有参与活动
                             # forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
                             #     customer_parent_id=parent_id).values_list('customer_id').distinct()
                             #
@@ -305,10 +305,10 @@ def article_oper(request, oper_type, o_id):
 
                             _data = {
                                 # 'ip' : ip,
-                                'parent_id':  parent_id,
+                                'parent_id': parent_id,
                                 'article_id': article_id,
-                                'activity_id' : activity_id,
-                                'company_id' : company_id,
+                                'activity_id': activity_id,
+                                'company_id': company_id,
                             }
                             tasks.user_forward_send_activity_redPacket.delay(_data)
 
@@ -320,7 +320,7 @@ def article_oper(request, oper_type, o_id):
                     zgld_article_objs.update(status=1)  # 改为已发状态
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
 
-                    models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count')+1)
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
 
                     if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
 
@@ -328,7 +328,7 @@ def article_oper(request, oper_type, o_id):
                         print('---- 公众号查看文章[消息提醒]--->>', remark)
                         data = request.GET.copy()
                         data['action'] = 14
-                        response = action_record(data, remark) # 此步骤要要封装到 异步中。
+                        response = action_record(data, remark)  # 此步骤要要封装到 异步中。
 
                     ## 先记录一个用户查看文章的日志
                     now_date_time = datetime.datetime.now()
@@ -343,7 +343,6 @@ def article_oper(request, oper_type, o_id):
                     article_access_log_id = article_access_log_obj.id
                     is_subscribe = customer_obj[0].is_subscribe
                     is_subscribe_text = customer_obj[0].get_is_subscribe_display()
-
 
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     qrcode_url = ''
@@ -499,7 +498,6 @@ def article_oper(request, oper_type, o_id):
 
         elif oper_type == 'test_send_redPacket':
 
-
             # _data = {
             #
             #     'parent_id': 9,
@@ -509,9 +507,6 @@ def article_oper(request, oper_type, o_id):
             # }
             #
             # tasks.user_forward_send_activity_redPacket.delay(_data)
-            import requests
-
-            from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 
             _data = {
                 'authorizer_appid': 'wxa77213c591897a13',
@@ -540,6 +535,5 @@ def article_oper(request, oper_type, o_id):
             ret_json = ret.json()
 
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
-
 
     return JsonResponse(response.__dict__)
