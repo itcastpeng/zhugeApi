@@ -55,6 +55,9 @@ def open_qiyeweixin(request, oper_type):
             sEncodingAESKey = application_data[ticket_type]['sEncodingAESKey']
             sCorpID = application_data[ticket_type]['sCorpID']
 
+            print('sToken -->', sToken)
+            print('sEncodingAESKey -->', sEncodingAESKey)
+            print('sCorpID -->', sCorpID)
             decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
             # xml_tree = ET.fromstring(postdata)
