@@ -11,7 +11,6 @@ import datetime,time
 import psutil
 import os
 import signal
-from zhugeleida.views_dir.admin import shangchengjichushezhi
 
 #  小程序访问动作日志的发送到企业微信
 @app.task
@@ -123,4 +122,6 @@ def get_latest_audit_status_and_release_code():
     requests.get(url, params=get_data)
 @app.task
 def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序ID
-    shangchengjichushezhi.addSmallProgram(xiaochengxuid)
+    if xiaochengxuid:
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/addSmallProgram?xiaochengxuid={}'.format(xiaochengxuid)
+        requests.get(url)

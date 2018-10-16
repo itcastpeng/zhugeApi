@@ -802,8 +802,8 @@ class zgld_article(models.Model):
     # up_count = models.IntegerField(default=0,verbose_name="赞次数")
     # down_count = models.IntegerField(default=0,verbose_name="踩次数")
     cover_picture  = models.CharField(verbose_name="封面图片URL",max_length=128)
-    read_count = models.IntegerField(verbose_name="被阅读数量",default=0)
-    forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
+    read_count = models.IntegerField(verbose_name="文章阅读数量",default=0)
+    forward_count = models.IntegerField(verbose_name="文章转发个数",default=0)
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
 
     insert_ads = models.TextField(verbose_name='插入广告语',null=True)
@@ -816,6 +816,85 @@ class zgld_article(models.Model):
     class Meta:
         verbose_name_plural = "文章表"
         app_label = "zhugeleida"
+
+
+# 公众号-文章-活动(任务)管理表
+class zgld_article_activity(models.Model):
+    article = models.ForeignKey('zgld_article',verbose_name='文章')
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业',null=True)
+    # shanghu_name = models.CharField(verbose_name='商户名称', max_length=128,null=True)
+    activity_name = models.CharField(verbose_name='活动名称', max_length=256,null=True)
+    # wish_language = models.CharField(verbose_name='祝福语', max_length=256,null=True)
+    status_choices = ((1, '未启用'),
+                      (2, '进行中'),
+                      (3, '已暂停'),
+                      (4, '已结束')
+                      )
+    status = models.SmallIntegerField(default=1, verbose_name='活动状态', choices=status_choices)
+    activity_rules = models.CharField(verbose_name='活动规则', max_length=2048,null=True)
+
+    activity_total_money= models.SmallIntegerField(verbose_name='活动总金额', default=0,null=True)
+    redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True,default=0)
+    activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',default=0,null=True)
+
+    reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发次数))',null=True)
+    already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量',null=True)
+
+    # type_choices = (
+    #                 (1, '分享(转发)领红包'),
+    #                )
+    # type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
+    start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
+    end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
+
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
+
+    class Meta:
+
+        verbose_name_plural = "文章活动表"
+        app_label = "zhugeleida"
+
+
+
+
+
+# 公众号-活动发红包记录表
+class zgld_activity_redPacket(models.Model):
+    article = models.ForeignKey('zgld_article', verbose_name='文章',null=True)
+    activity =  models.ForeignKey('zgld_article_activity', verbose_name='文章活动',null=True)
+    company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
+
+
+    status_choices = ( (1,'已发'),
+                       (2,'未发'),
+                     )
+    status = models.SmallIntegerField(verbose_name='[红包]发放状态', choices=status_choices,null=True)
+
+    user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属企业用户ID", null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属的父级',related_name="article_customer_parent", null=True)
+
+    read_count = models.IntegerField(verbose_name="阅读次数", default=0)
+    stay_time = models.IntegerField(verbose_name='阅读时长', default=0)
+
+    forward_count = models.IntegerField(verbose_name="被转发个数", default=0)
+    forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
+    forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
+
+    send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额',default=0, null=True)
+    send_redPacket_num = models.SmallIntegerField(verbose_name='已发放次数',default=0 ,null=True)
+
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        unique_together = [
+            ('article', 'customer'),
+        ]
+        verbose_name_plural = "活动发红包记录表"
+        app_label = "zhugeleida"
+
+
+
 
 #公众号-文章标签表
 class zgld_article_tag(models.Model):
@@ -854,45 +933,6 @@ class zgld_article_to_customer_belonger(models.Model):
         ]
         verbose_name_plural = "文章和查看客户之间绑定关系表"
         app_label = "zhugeleida"
-
-
-#公众号-文章-活动(任务)管理表
-class zgld_article_activity(models.Model):
-    article = models.ForeignKey('zgld_article',verbose_name='文章')
-    company = models.ForeignKey('zgld_company', verbose_name='所属企业',null=True)
-    # shanghu_name = models.CharField(verbose_name='商户名称', max_length=128,null=True)
-    activity_name = models.CharField(verbose_name='活动名称', max_length=256,null=True)
-    # wish_language = models.CharField(verbose_name='祝福语', max_length=256,null=True)
-    status_choices = ((1, '未启用'),
-                      (2, '进行中'),
-                      (3, '已暂停'),
-                      (4, '已结束')
-                      )
-    status = models.SmallIntegerField(default=1, verbose_name='活动状态', choices=status_choices)
-    activity_rules = models.CharField(verbose_name='活动规则', max_length=2048,null=True)
-
-    activity_total_money= models.CharField(verbose_name='活动总金额', max_length=2048,null=True)
-    redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True)
-    activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',null=True)
-
-    reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发次数))',null=True)
-    already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量',null=True)
-
-    # type_choices = (
-    #                 (1, '分享(转发)领红包'),
-    #                )
-    # type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
-    start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
-    end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
-
-    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
-
-    class Meta:
-
-        verbose_name_plural = "文章活动表"
-        app_label = "zhugeleida"
-
-
 
 
 #公众号-文章查看用户停留时间表
@@ -969,6 +1009,7 @@ class zgld_report_to_customer(models.Model):
         verbose_name_plural = "报名的客户和活动绑定的关系"
         app_label = "zhugeleida"
 
+
 # 公众号 - 名片商品
 class zgld_plugin_goods(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="归属的员工", null=True)
@@ -982,6 +1023,7 @@ class zgld_plugin_goods(models.Model):
     class Meta:
         verbose_name_plural = "插件-商品插件"
         app_label = "zhugeleida"
+
 
 # 公众号 - 名片商品
 class zgld_plugin_goods_order(models.Model):

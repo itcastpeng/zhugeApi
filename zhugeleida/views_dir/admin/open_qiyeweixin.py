@@ -73,8 +73,6 @@ def open_qiyeweixin(request, oper_type):
             rc.set(key_name, SuiteTicket, 3000)
             print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
 
-
-
             return HttpResponse("success")
 
         elif oper_type == "create_grant_url":

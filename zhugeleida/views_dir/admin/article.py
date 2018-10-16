@@ -65,7 +65,8 @@ def article(request,oper_type):
                 ret_data = []
                 # 获取第几页的数据
                 for obj in objs:
-                    print('-----obj.tags.values---->', obj.tags.values('id','name'))
+                    tag_list =  list(obj.tags.values('id', 'name'))
+                    # print('-----obj.tags.values---->', obj.tags.values('id','name'))
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,       # 文章标题
@@ -79,7 +80,7 @@ def article(request,oper_type):
                         'forward_count': obj.forward_count,  #被转发个数
                         'create_date': obj.create_date,      #文章创建时间
                         'cover_url' : obj.cover_picture,     #文章图片链接
-                        'tag_list' :  list(obj.tags.values('id','name')),
+                        'tag_list' : tag_list ,
                         'insert_ads' : json.loads(obj.insert_ads)  if obj.insert_ads else '' # 插入的广告语
                     })
 
@@ -364,10 +365,7 @@ def article_oper(request, oper_type, o_id):
             forms_obj = MyarticleForm(request_data_dict)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-
                 article_id = forms_obj.cleaned_data.get('article_id')
-
-
 
                 objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)
                 count = objs.count()
@@ -376,7 +374,8 @@ def article_oper(request, oper_type, o_id):
                 ret_data = []
                 # 获取第几页的数据
                 for obj in objs:
-                    print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
+                    tag_list = list(obj.tags.values('id', 'name'))
+                    # print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,  # 文章标题
@@ -387,7 +386,7 @@ def article_oper(request, oper_type, o_id):
                         'create_date': obj.create_date,  # 文章创建时间
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'content': obj.content,  # 文章内容
-                        'tag_list': list(obj.tags.values('id', 'name')),
+                        'tag_list': tag_list,
                         'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
 
                     })
@@ -451,6 +450,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '该文章无查看'
                 response.data = {}
+
         else:
             response.code = 402
             response.msg = '请求异常'
