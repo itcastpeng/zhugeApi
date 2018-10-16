@@ -175,17 +175,20 @@ def jiChuSheZhiOper(request, oper_type):
                     response.code = 301
                     response.msg = '未注册小程序'
                     return JsonResponse(response.__dict__)
-
-                zhengshupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
-                file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile') + '/' + formObjs.get('shangHuHao')
-                file_zip = zipfile.ZipFile(zhengshupath, 'r')
-                for file in file_zip.namelist():
-                    file_zip.extract(file, r'{}'.format(file_dir))
-                file_zip.close()
-                os.remove(zhengShuPath)
-                userObjs.update(zhengshu=file_dir)
-                response.code = 200
-                response.data = ''
+                try:
+                    zhengshupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
+                    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile') + '/' + formObjs.get('shangHuHao')
+                    file_zip = zipfile.ZipFile(zhengshupath, 'r')
+                    for file in file_zip.namelist():
+                        file_zip.extract(file, r'{}'.format(file_dir))
+                    file_zip.close()
+                    os.remove(zhengShuPath)
+                    userObjs.update(zhengshu=file_dir)
+                    response.code = 200
+                    response.data = ''
+                except Exception:
+                    response.code = 301
+                    response.msg = '请添加正确 微信证书压缩包'
             else:
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
