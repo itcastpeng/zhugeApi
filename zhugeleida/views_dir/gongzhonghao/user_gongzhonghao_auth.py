@@ -305,23 +305,28 @@ def binding_article_customer_relate(data):
         response.msg = "关系存在"
 
     else:
+        models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
 
-        obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
+    if activity_objs:
+        activity_id = activity_objs[0].id
+        redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id,activity_id=activity_id,customer_id=customer_id)
 
-        # user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
-        #                                                                                user_id=user_id)
-        #
-        # if user_customer_belonger_obj:
-        #     response.code = 302
-        #     response.msg = "关系存在"
-        #
-        # else:
-        #
-        #     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
-            # obj.customer_parent_id = parent_id  # 上级人。
+        if redPacket_objs:
+            response.code = 302
+            response.msg = "关系存在"
 
-        response.code = 200
-        response.msg = "绑定成功"
+        else:
+
+            models.zgld_activity_redPacket.objects.create(article_id=article_id,
+                                                          activity_id=activity_id,
+                                                          customer_id=customer_id,
+                                                          company_id=company_id,
+                                                                           )
+
+
+            response.code = 200
+            response.msg = "绑定成功"
 
     return response
 

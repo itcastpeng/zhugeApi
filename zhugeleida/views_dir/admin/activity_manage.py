@@ -8,7 +8,7 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
-from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm
+from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm,ActivityUpdateForm
 
 import json
 from django.db.models import Q
@@ -118,6 +118,10 @@ def activity_manage(request, oper_type):
                 if article_title:
                     q1.children.append(('article__title__contains', article_title))
 
+                activity_id = request.GET.get('activity_id')  # 当有搜索条件 如 搜索产品名称
+                if activity_id:
+                    q1.children.append(('id', activity_id))
+
 
                 search_activity_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
 
@@ -143,6 +147,7 @@ def activity_manage(request, oper_type):
                             'article_title' : obj.article.title,
                             'company_id' : obj.company_id,
 
+                            'activity_id' : obj.id,    #活动Id
                             'activity_name' : obj.activity_name,    #分享文章名称
                             'activity_total_money' :  obj.activity_total_money,   #活动总金额
                             'activity_single_money' : obj.activity_single_money,  #单个金额
@@ -181,31 +186,70 @@ def activity_manage_oper(request, oper_type, o_id):
     if request.method == "POST":
         # 删除-个人产品
         if oper_type == "delete":
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)
-            role_id = user_obj[0].role_id
-            company_id = user_obj[0].company_id
 
-            # if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
-            product_objs = models.zgld_product.objects.filter(id=o_id, company_id=company_id)
-            if product_objs:
-                product_objs.delete()
 
+            objs = models.zgld_article_activity.objects.filter(id=o_id,status__in=[1,3,4])
+
+            if objs:
+                objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
 
-            # elif role_id == 2 or role_id == 3:  # 普通用户只能删除自己的公司的个人产品。
-            #     product_objs = models.zgld_product.objects.filter(id=o_id, company_id=company_id)
-            #
-            #     if product_objs:
-            #         product_objs.delete()
-            #
-            #         response.code = 200
-            #         response.msg = "删除成功"
+            else:
+                response.code = 301
+                response.msg = '活动不存在或者正在进行中'
+
+
+        elif oper_type == 'update':
+
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+            activity_id = o_id
+            activity_name = request.POST.get('activity_name')
+            article_id = request.POST.get('article_id')  # 文章ID
+            activity_total_money = request.POST.get('activity_total_money')
+            activity_single_money = request.POST.get('activity_single_money')
+            reach_forward_num = request.POST.get('reach_forward_num')
+            start_time = request.POST.get('start_time')
+            end_time = request.POST.get('end_time')
+
+            form_data = {
+
+                'company_id': company_id,
+                'activity_id': activity_id,  # 活动名称
+                'activity_name': activity_name,  # 活动名称
+
+                'article_id': article_id,  # 文章ID
+                'activity_total_money': activity_total_money,  # 活动总金额(元)
+                'activity_single_money': activity_single_money,  # 单个金额(元)
+                'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
+                'start_time': start_time,  # 达到多少次发红包(转发次数)
+                'end_time': end_time,  # 达到多少次发红包(转发次数)
+            }
+
+            forms_obj = ActivityUpdateForm(form_data)
+            if forms_obj.is_valid():
+
+
+                objs = models.zgld_article_activity.objects.filter(id=activity_id,company_id=company_id)
+
+                if objs:
+                    objs.update(
+                    article_id=article_id,
+                    activity_name=activity_name.strip(),
+                    activity_total_money=activity_total_money,
+                    activity_single_money=activity_single_money,
+                    reach_forward_num=reach_forward_num,
+                    start_time=start_time,
+                    end_time=end_time
+                )
+
+                response.code = 200
+                response.msg = "添加成功"
 
             else:
                 response.code = 301
-                response.msg = '产品不存在'
+                response.msg = json.loads(forms_obj.errors.as_json())
 
         # 增加红包活动
         elif oper_type == "add":
@@ -235,9 +279,7 @@ def activity_manage_oper(request, oper_type, o_id):
             forms_obj = ActivityAddForm(form_data)
             if forms_obj.is_valid():
 
-                models.zgld_gongzhonghao_app.objects.filter(id=company_id)
-
-                activity_obj = models.zgld_article_activity.objects.create(
+                models.zgld_article_activity.objects.create(
                     article_id=article_id,
                     company_id=company_id,
                     activity_name=activity_name.strip(),

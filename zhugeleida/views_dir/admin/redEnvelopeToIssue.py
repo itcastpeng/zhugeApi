@@ -126,29 +126,41 @@ class guanZhuForm(forms.Form):
             return remark
 
 # 关注发放红包(实时发送)
-@csrf_exempt
+# @csrf_exempt
 # @account.is_token(models.zgld_customer)
-def focusOnIssuedRedEnvelope(request):
+def focusOnIssuedRedEnvelope(request, resultDict):
     if request.method == 'POST':
         url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
         # 获取IP
-        if request.META.get('HTTP_X_FORWARDED_FOR'):
-            ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        elif request.META.get('REMOTE_ADDR'):
-            ip = request.META.get('REMOTE_ADDR')
-        else:
-            ip = '0.0.0.0'
-        client_ip = ip
+        # if request.META.get('HTTP_X_FORWARDED_FOR'):
+        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
+        # elif request.META.get('REMOTE_ADDR'):
+        #     ip = request.META.get('REMOTE_ADDR')
+        # else:
+        #     ip = '0.0.0.0'
+        # client_ip = ip
+        # dataDict = {
+        #     'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
+        #     'total_fee' : request.POST.get('total_fee'),         # 钱数
+        #     'appid' : request.POST.get('appid'),                 # 小程序ID
+        #     'mch_id' : request.POST.get('mch_id'),               # 商户号
+        #     'openid' : request.POST.get('openid'),               # 微信用户唯一标识
+        #     'send_name' : request.POST.get('send_name'),         # 商户名称 中文32
+        #     'act_name' : request.POST.get('act_name'),           # 动名称 32长度
+        #     'remark' : request.POST.get('remark'),               # 备注信息 256长度
+        #     'wishing' : request.POST.get('wishing'),             # 红包祝福语 128长度
+        # }
+        client_ip = resultDict.get('client_ip'),  # 用户IP
         dataDict = {
-            'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
-            'total_fee' : request.POST.get('total_fee'),         # 钱数
-            'appid' : request.POST.get('appid'),                 # 小程序ID
-            'mch_id' : request.POST.get('mch_id'),               # 商户号
-            'openid' : request.POST.get('openid'),               # 微信用户唯一标识
-            'send_name' : request.POST.get('send_name'),         # 商户名称 中文32
-            'act_name' : request.POST.get('act_name'),           # 动名称 32长度
-            'remark' : request.POST.get('remark'),               # 备注信息 256长度
-            'wishing' : request.POST.get('wishing'),             # 红包祝福语 128长度
+            'SHANGHUKEY': resultDict.get('shanghukey'), # 商户秘钥KEY
+            'total_fee': resultDict.get('total_fee'),   # 钱数
+            'appid': resultDict.get('appid'),           # 小程序ID
+            'mch_id': resultDict.get('mch_id'),         # 商户号
+            'openid': resultDict.get('openid'),         # 微信用户唯一标识
+            'send_name': resultDict.get('send_name'),   # 商户名称 中文32
+            'act_name': resultDict.get('act_name'),     # 动名称 32长度
+            'remark': resultDict.get('remark'),         # 备注信息 256长度
+            'wishing': resultDict.get('wishing'),       # 红包祝福语 128长度
         }
         forms_obj = guanZhuForm(dataDict)
         if forms_obj.is_valid():
@@ -183,7 +195,7 @@ def focusOnIssuedRedEnvelope(request):
                     're_openid': objsForm.get('openid'),                        # 用户唯一标识
                     'total_amount': objsForm.get('total_fee'),                  # 付款金额 1:100
                     'mch_billno': dingdanhaoshengcheng(),                       # 订单号
-                    'client_ip': client_ip,                                     # 终端IP
+                    'client_ip' : client_ip,                                    # 终端IP
                     'total_num':1,                                              # 红包发放总人数
                     'send_name':objsForm.get('send_name'),                      # 商户名称 中文
                     'act_name':objsForm.get('act_name'),                        # 活动名称 32长度
@@ -225,30 +237,43 @@ def focusOnIssuedRedEnvelope(request):
     return JsonResponse(response.__dict__)
 
 # 文章转发发放红包
-@csrf_exempt
+# @csrf_exempt
 # @account.is_token(models.zgld_customer)
-def articleForwardingRedEnvelope(request):
+def articleForwardingRedEnvelope(request, resultDict):
     if request.method == 'POST':
         url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
         # 获取IP
-        if request.META.get('HTTP_X_FORWARDED_FOR'):
-            ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        elif request.META.get('REMOTE_ADDR'):
-            ip = request.META.get('REMOTE_ADDR')
-        else:
-            ip = '0.0.0.0'
-        client_ip = ip
-        articleId = request.POST.get('articleId')         # 文章ID
+        # if request.META.get('HTTP_X_FORWARDED_FOR'):
+        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
+        # elif request.META.get('REMOTE_ADDR'):
+        #     ip = request.META.get('REMOTE_ADDR')
+        # else:
+        #     ip = '0.0.0.0'
+        # client_ip = ip
+        # articleId = request.POST.get('articleId')         # 文章ID
+        # dataDict = {
+        #     'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
+        #     'total_fee' : request.POST.get('total_fee'),         # 钱数
+        #     'appid' : request.POST.get('appid'),                 # 小程序ID
+        #     'mch_id' : request.POST.get('mch_id'),               # 商户号
+        #     'openid' : request.POST.get('openid'),               # 微信用户唯一标识
+        #     'send_name' : request.POST.get('send_name'),         # 商户名称 中文
+        #     'act_name' : request.POST.get('act_name'),           # 动名称 32长度
+        #     'remark' : request.POST.get('remark'),               # 备注信息 256长度
+        #     'wishing' : request.POST.get('wishing'),             # 红包祝福语 128长度
+        # }
+        client_ip = resultDict.get('client_ip')
+        articleId = resultDict.get('articleId')  # 文章ID
         dataDict = {
-            'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
-            'total_fee' : request.POST.get('total_fee'),         # 钱数
-            'appid' : request.POST.get('appid'),                 # 小程序ID
-            'mch_id' : request.POST.get('mch_id'),               # 商户号
-            'openid' : request.POST.get('openid'),               # 微信用户唯一标识
-            'send_name' : request.POST.get('send_name'),         # 商户名称 中文
-            'act_name' : request.POST.get('act_name'),           # 动名称 32长度
-            'remark' : request.POST.get('remark'),               # 备注信息 256长度
-            'wishing' : request.POST.get('wishing'),             # 红包祝福语 128长度
+            'SHANGHUKEY' : resultDict.get('shanghukey'),       # 商户秘钥KEY
+            'total_fee' : resultDict.get('total_fee'),         # 钱数
+            'appid' : resultDict.get('appid'),                 # 小程序ID
+            'mch_id' : resultDict.get('mch_id'),               # 商户号
+            'openid' : resultDict.get('openid'),               # 微信用户唯一标识
+            'send_name' : resultDict.get('send_name'),         # 商户名称 中文
+            'act_name' : resultDict.get('act_name'),           # 动名称 32长度
+            'remark' : resultDict.get('remark'),               # 备注信息 256长度
+            'wishing' : resultDict.get('wishing'),             # 红包祝福语 128长度
         }
         forms_obj = guanZhuForm(dataDict)
         if forms_obj.is_valid():
