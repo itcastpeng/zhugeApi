@@ -664,7 +664,7 @@ def user_send_activity_redPacket(request):
         if 4 == 4:
             app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
 
-            activity_obj = models.zgld_article_activity.objects.get(id=article_id)
+            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
             activity_single_money = activity_obj.activity_single_money
             activity_name = activity_obj.activity_name
 
