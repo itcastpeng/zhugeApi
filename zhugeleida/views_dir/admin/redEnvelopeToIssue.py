@@ -131,14 +131,6 @@ class guanZhuForm(forms.Form):
 def focusOnIssuedRedEnvelope(resultDict):
     # if request.method == 'POST':
     url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
-        # 获取IP
-        # if request.META.get('HTTP_X_FORWARDED_FOR'):
-        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        # elif request.META.get('REMOTE_ADDR'):
-        #     ip = request.META.get('REMOTE_ADDR')
-        # else:
-        #     ip = '0.0.0.0'
-        # client_ip = ip
         # dataDict = {
         #     'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
         #     'total_fee' : request.POST.get('total_fee'),         # 钱数
@@ -195,7 +187,7 @@ def focusOnIssuedRedEnvelope(resultDict):
                 're_openid': objsForm.get('openid'),                        # 用户唯一标识
                 'total_amount': objsForm.get('total_fee'),                  # 付款金额 1:100
                 'mch_billno': dingdanhaoshengcheng(),                       # 订单号
-                'client_ip' : client_ip,                                    # 终端IP
+                'client_ip' : client_ip,                                    # 终端信任IP
                 'total_num':1,                                              # 红包发放总人数
                 'send_name':objsForm.get('send_name'),                      # 商户名称 中文
                 'act_name':objsForm.get('act_name'),                        # 活动名称 32长度
@@ -242,14 +234,6 @@ def focusOnIssuedRedEnvelope(resultDict):
 def articleForwardingRedEnvelope(resultDict):
     # if request.method == 'POST':
     url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
-        # 获取IP
-        # if request.META.get('HTTP_X_FORWARDED_FOR'):
-        #     ip = request.META.get('HTTP_X_FORWARDED_FOR')
-        # elif request.META.get('REMOTE_ADDR'):
-        #     ip = request.META.get('REMOTE_ADDR')
-        # else:
-        #     ip = '0.0.0.0'
-        # client_ip = ip
         # articleId = request.POST.get('articleId')         # 文章ID
         # dataDict = {
         #     'SHANGHUKEY' : request.POST.get('shanghukey'),       # 商户秘钥KEY
@@ -308,7 +292,7 @@ def articleForwardingRedEnvelope(resultDict):
                 're_openid': objsForm.get('openid'),                        # 用户唯一标识
                 'total_amount': objsForm.get('total_fee'),                  # 付款金额 1:100
                 'mch_billno': dingdanhaoshengcheng(),                       # 订单号
-                'client_ip': client_ip,                                     # 终端IP
+                'client_ip': client_ip,                                     # 终端信任IP
                 'total_num':1,                                              # 红包发放总人数
                 'send_name':objsForm.get('send_name'),                      # 商户名称 中文
                 'act_name':objsForm.get('act_name'),                        # 活动名称 32长度
