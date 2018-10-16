@@ -185,22 +185,18 @@ def activity_manage_oper(request, oper_type, o_id):
     if request.method == "POST":
         # 删除-个人产品
         if oper_type == "delete":
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)
-            role_id = user_obj[0].role_id
-            company_id = user_obj[0].company_id
 
-            # if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
-            product_objs = models.zgld_product.objects.filter(id=o_id, company_id=company_id)
-            if product_objs:
-                product_objs.delete()
 
+            objs = models.zgld_article_activity.objects.filter(id=o_id,status__in=[1,3,4])
+
+            if objs:
+                objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
 
             else:
                 response.code = 301
-                response.msg = '产品不存在'
+                response.msg = '活动不存在或者正在进行中'
 
 
         elif oper_type == 'update':
