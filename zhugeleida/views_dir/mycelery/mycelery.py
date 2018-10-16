@@ -622,7 +622,7 @@ def get_latest_audit_status_and_release_code(request):
 
 # 关注发红包和转发文章满足就发红包
 @csrf_exempt
-def user_send_activity_redPacket(request):
+def user_forward_send_activity_redPacket(request):
 
     if request.method == "GET":
         print('------- 【大红包测试】user_send_activity_redPacket ------>>')
