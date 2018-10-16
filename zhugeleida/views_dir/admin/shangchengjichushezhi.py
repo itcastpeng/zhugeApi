@@ -24,6 +24,9 @@ def jiChuSheZhiShow(request):
             lunbotu = ''
             if obj.lunbotu:
                 lunbotu = json.loads(obj.lunbotu)
+            xiaoChengXuCompanyName = ''
+            if obj.xiaochengxucompany:
+                xiaoChengXuCompanyName = obj.xiaochengxucompany.name
             otherData.append({
                 'shangChengName': obj.shangChengName,
                 'shangHuHao': obj.shangHuHao,
@@ -33,11 +36,10 @@ def jiChuSheZhiShow(request):
                 'xiaochengxuApp': obj.xiaochengxuApp.name,
                 'xiaochengxuApp_id': obj.xiaochengxuApp_id,
                 'xiaochengxucompany_id': obj.xiaochengxucompany_id,
-                'xiaochengxucompany': obj.xiaochengxucompany.name,
+                'xiaochengxucompany': xiaoChengXuCompanyName,
                 'zhengshu': obj.zhengshu,
                 'mallStatus':mallStatus,
                 'mallStatusID':mallStatusID
-
             })
             response.code = 200
             response.msg = '查询成功'
