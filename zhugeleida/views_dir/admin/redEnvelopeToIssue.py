@@ -171,6 +171,7 @@ def focusOnIssuedRedEnvelope(resultDict):
 
         cunzaiObjs = redEnvelope.filter(mch_id=objsForm.get('mch_id'), re_openid=objsForm.get('openid'))
         if cunzaiObjs:
+            print('-------重复关注公众号---->>')
             response.code = 500
             response.msg = '重复关注公众号'
             return JsonResponse(response.__dict__)
@@ -234,6 +235,7 @@ def focusOnIssuedRedEnvelope(resultDict):
                     redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
                     response.code = 500
                     response.msg = '发放红包失败'
+
             else:
                 print('---- 没有商户证书, 请前往商城设置册证书！--->')
                 response.code = 500
