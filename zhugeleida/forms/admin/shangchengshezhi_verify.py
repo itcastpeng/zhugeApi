@@ -10,10 +10,10 @@ from django.core.exceptions import ValidationError
 class jichushezhi(forms.Form):
 
     shangChengName = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "商城名称不能为空"
-        }
+        required=False,
+        # error_messages={
+        #     'required': "商城名称不能为空"
+        # }
     )
 
     lunbotu = forms.CharField(

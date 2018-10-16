@@ -106,7 +106,7 @@ def goodsClassOper(request, oper_type, o_id):
         dataDict = {
             'o_id':o_id,
             'classificationName': request.POST.get('classificationName'),
-            'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id'),
+            # 'xiaochengxu_app_id': request.POST.get('xiaochengxu_app_id'),
             'userProfile_id':request.GET.get('user_id'),
             'parentClassification_id':request.POST.get('parentClassification')
         }
@@ -173,7 +173,7 @@ def goodsClassOper(request, oper_type, o_id):
                 models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
                     classificationName=formObj.get('classificationName'),
                     parentClassification_id=parentClassification_id,
-                    xiaochengxu_app_id=dataDict.get('xiaochengxu_app_id'),
+                    xiaochengxu_app_id=userObjs[0].id,
                     level=level,
                 )
                 response.code = 200
