@@ -169,77 +169,77 @@ def focusOnIssuedRedEnvelope(resultDict):
         objsForm = forms_obj.cleaned_data
         redEnvelope = models.zgld_red_envelope_to_issue.objects.filter(articleId__isnull=True)
 
-        cunzaiObjs = redEnvelope.filter(mch_id=objsForm.get('mch_id'), re_openid=objsForm.get('openid'))
-        if cunzaiObjs:
-            print('-------重复关注公众号---->>')
-            response.code = 500
-            response.msg = '重复关注公众号'
-            return JsonResponse(response.__dict__)
-        else:
-            print('---- cunzaiObjs ! --->>',cunzaiObjs)
-            nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            redEnvelopeObjs = redEnvelope.create(
-                wxappid = objsForm.get('appid'),                        # appid
-                mch_id = objsForm.get('mch_id'),                        # 商户号
-                re_openid = objsForm.get('openid'),                 # 用户唯一标识
-                total_amount = int(objsForm.get('total_fee')) / 100,  # 付款金额 1:100
-                mch_billno = dingdanhaoshengcheng(),                  # 订单号
-                send_name = objsForm.get('send_name'),                  # 商户名称 中文
-                act_name = objsForm.get('act_name'),                    # 活动名称 32长度
-                remark = objsForm.get('remark'),                        # 备注信息 256长度
-                client_ip = client_ip,                                  # 终端IP
-                wishing = objsForm.get('wishing'),                      # 红包祝福语 128长度
-                createDate=nowDateTime
-            )
-            SHANGHUKEY = objsForm.get('SHANGHUKEY')
-            result_data = {
-                'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
-                'wxappid': objsForm.get('appid'),                           # appid
-                'mch_id':objsForm.get('mch_id'),                            # 商户号
-                're_openid': objsForm.get('openid'),                        # 用户唯一标识
-                'total_amount': objsForm.get('total_fee'),                  # 付款金额 1:100
-                'mch_billno': dingdanhaoshengcheng(),                       # 订单号
-                'client_ip' : client_ip,                                    # 终端IP
-                'total_num':1,                                              # 红包发放总人数
-                'send_name':objsForm.get('send_name'),                      # 商户名称 中文
-                'act_name':objsForm.get('act_name'),                        # 活动名称 32长度
-                'remark':objsForm.get('remark'),                            # 备注信息 256长度
-                'wishing':objsForm.get('wishing'),                          # 红包祝福语 128长度
-                }
-            print('---- 支付的 result_data ------>>',json.dumps(result_data))
+        # cunzaiObjs = redEnvelope.filter(mch_id=objsForm.get('mch_id'), re_openid=objsForm.get('openid'))
+        # if cunzaiObjs:
+        #     print('-------重复关注公众号---->>')
+        #     response.code = 500
+        #     response.msg = '重复关注公众号'
+        #     return JsonResponse(response.__dict__)
+        # else:
+        #     print('---- cunzaiObjs ! --->>',cunzaiObjs)
+        nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        redEnvelopeObjs = redEnvelope.create(
+            wxappid = objsForm.get('appid'),                        # appid
+            mch_id = objsForm.get('mch_id'),                        # 商户号
+            re_openid = objsForm.get('openid'),                 # 用户唯一标识
+            total_amount = int(objsForm.get('total_fee')) / 100,  # 付款金额 1:100
+            mch_billno = dingdanhaoshengcheng(),                  # 订单号
+            send_name = objsForm.get('send_name'),                  # 商户名称 中文
+            act_name = objsForm.get('act_name'),                    # 活动名称 32长度
+            remark = objsForm.get('remark'),                        # 备注信息 256长度
+            client_ip = client_ip,                                  # 终端IP
+            wishing = objsForm.get('wishing'),                      # 红包祝福语 128长度
+            createDate=nowDateTime
+        )
+        SHANGHUKEY = objsForm.get('SHANGHUKEY')
+        result_data = {
+            'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
+            'wxappid': objsForm.get('appid'),                           # appid
+            'mch_id':objsForm.get('mch_id'),                            # 商户号
+            're_openid': objsForm.get('openid'),                        # 用户唯一标识
+            'total_amount': objsForm.get('total_fee'),                  # 付款金额 1:100
+            'mch_billno': dingdanhaoshengcheng(),                       # 订单号
+            'client_ip' : client_ip,                                    # 终端IP
+            'total_num':1,                                              # 红包发放总人数
+            'send_name':objsForm.get('send_name'),                      # 商户名称 中文
+            'act_name':objsForm.get('act_name'),                        # 活动名称 32长度
+            'remark':objsForm.get('remark'),                            # 备注信息 256长度
+            'wishing':objsForm.get('wishing'),                          # 红包祝福语 128长度
+            }
+        print('---- 支付的 result_data ------>>',json.dumps(result_data))
 
-            stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
-            result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
-            xml_data = yuzhifu.toXml(result_data).encode('utf8')
-            # 获取商户证书
-            shangHuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(shangHuHao=objsForm.get('mch_id'))
-            if shangHuObjs:
-                path = shangHuObjs[0].zhengshu
-                zhengshupath = os.path.dirname(
-                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-                file_dir = zhengshupath + '/' + path
-                cret = os.path.join(file_dir, 'apiclient_cert.pem')
-                key = os.path.join(file_dir, 'apiclient_key.pem')
-                ret = requests.post(url, data=xml_data, cert=(cret, key))
-                print(ret.text)
-                DOMTree = xmldom.parseString(ret.text)
-                collection = DOMTree.documentElement
-                return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-                print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
-                if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
-                    redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
-                    response.code = 200
-                    response.msg = '发放红包成功'
-                else:
-                    print('----- 发放红包失败 ----->>')
-                    redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
-                    response.code = 500
-                    response.msg = '发放红包失败'
-
+        stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
+        result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
+        xml_data = yuzhifu.toXml(result_data).encode('utf8')
+        # 获取商户证书
+        shangHuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(shangHuHao=objsForm.get('mch_id'))
+        if shangHuObjs:
+            path = shangHuObjs[0].zhengshu
+            zhengshupath = os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            file_dir = zhengshupath + '/' + path
+            cret = os.path.join(file_dir, 'apiclient_cert.pem')
+            key = os.path.join(file_dir, 'apiclient_key.pem')
+            ret = requests.post(url, data=xml_data, cert=(cret, key))
+            print(ret.text)
+            DOMTree = xmldom.parseString(ret.text)
+            collection = DOMTree.documentElement
+            return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+            print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
+            if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
+                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
+                response.code = 200
+                response.msg = '发放红包成功'
             else:
-                print('---- 没有商户证书, 请前往商城设置册证书！--->')
+                print('----- 发放红包失败 ----->>')
+                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
                 response.code = 500
-                response.msg = '没有商户证书, 请前往商城设置册证书！'
+                response.msg = '发放红包失败'
+
+        else:
+            print('---- 没有商户证书, 请前往商城设置册证书！--->')
+            response.code = 500
+            response.msg = '没有商户证书, 请前往商城设置册证书！'
     else:
         print('---- [关注领红包form报错]---->>',json.loads(forms_obj.errors.as_json()))
         response.code = 301
