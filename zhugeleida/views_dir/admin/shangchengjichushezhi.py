@@ -166,11 +166,13 @@ def jiChuSheZhiOper(request, oper_type):
                             shangHuMiYao=formObjs.get('shangHuMiYao'),
                             zhengshu=zhengShuPath
                         )
+                        response.code = 200
                         response.msg = '修改成功'
                     else:
                         return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
                         response.code = 301
                         response.msg = '请输入正确商户号和商户秘钥, 微信接口返回错误：{return_code}'.format(return_code=return_code)
+                        return JsonResponse(response.__dict__)
                 else:
                     response.code = 301
                     response.msg = '未注册小程序'

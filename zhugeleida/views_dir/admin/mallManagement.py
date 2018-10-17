@@ -56,7 +56,7 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                     'parentName_id':parentGroup_id,
                     'parentName':parentGroup_name,
                     'goodsPrice':obj.goodsPrice,
-                    'inventoryNum':obj.inventoryNum,
+                    # 'inventoryNum':obj.inventoryNum,
                     'goodsStatus':obj.get_goodsStatus_display(),
                     'xianshangjiaoyi':xianshangjiaoyi,
                     'shichangjiage':obj.shichangjiage,

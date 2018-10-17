@@ -155,6 +155,7 @@ def goodsClassOper(request, oper_type, o_id):
 
         elif oper_type == 'update':
             forms_obj = UpdateForm(dataDict)
+            print('dataDict=========> ',dataDict)
             if forms_obj.is_valid():
                 print('==验证成功==')
                 parentClassName_id = forms_obj.cleaned_data.get('parentClassification_id')
