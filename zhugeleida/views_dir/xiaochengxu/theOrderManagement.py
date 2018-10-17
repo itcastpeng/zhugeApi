@@ -67,7 +67,7 @@ def theOrderShow(request):
             otherData.append({
                 'goodsPicture':topLunBoTu,
                 'id':obj.id,
-                'unitRiceNum':obj.unitRiceNum,
+                # 'unitRiceNum':obj.unitRiceNum,
                 'goodsName' : obj.goodsName,
                 'goodsPrice':obj.goodsPrice,
                 'countPrice':countPrice,

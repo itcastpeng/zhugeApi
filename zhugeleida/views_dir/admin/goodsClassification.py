@@ -83,14 +83,17 @@ def goodsClassShow(request):
         response.msg = '请求异常'
     return JsonResponse(response.__dict__)
 
-def updateInitData(result_data,xiaochengxu_id, pid=None):
+def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id 判断是否会关联自己 如果o_id 在 result_data里会return
     objs = models.zgld_goods_classification_management.objects.filter(
         xiaochengxu_app_id=xiaochengxu_id,
         id=pid,
     )
     for obj in objs:
-        parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id)
         result_data.append(obj.id)
+        if o_id:
+            if int(o_id) == int(obj.id):
+                return result_data
+        parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id, o_id=o_id)
     return result_data
 
 
@@ -141,10 +144,9 @@ def goodsClassOper(request, oper_type, o_id):
 
         elif oper_type == 'Beforeupdate':
             result_data = []
-            xiaochengxu_id = userObjs[0].id
             objs = models.zgld_goods_classification_management.objects.filter(id=o_id)
             if objs:
-                parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
+                parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id)
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = parentData
@@ -154,8 +156,19 @@ def goodsClassOper(request, oper_type, o_id):
 
 
         elif oper_type == 'update':
+            # 判断是否会关联自己
+            result_data = []
+            if int(dataDict.get('o_id')) == int(dataDict.get('parentClassification_id')):
+                response.code = 301
+                response.msg = '不可关联自己'
+                return JsonResponse(response.__dict__)
+            objs = models.zgld_goods_classification_management.objects.filter(id=dataDict.get('parentClassification_id'))
+            parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id, o_id)
+            if int(o_id) in parentData:
+                response.code = 301
+                response.msg = '不可关联自己'
+                return JsonResponse(response.__dict__)
             forms_obj = UpdateForm(dataDict)
-            print('dataDict=========> ',dataDict)
             if forms_obj.is_valid():
                 print('==验证成功==')
                 parentClassName_id = forms_obj.cleaned_data.get('parentClassification_id')
