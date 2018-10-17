@@ -207,16 +207,24 @@ def focusOnIssuedRedEnvelope(resultDict):
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-            print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
-            if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
+            return_msg = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
 
+            print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
+
+            if return_code == 'SUCCESS' and '余额不足' not in return_msg:        # 判断预支付返回参数 是否正确
                 response.code = 200
                 response.msg = '发放红包成功'
+
+            elif '余额不足' in return_msg:
+                print('------ %s |  appid: ----->>' % return_msg,objsForm.get('appid'))
+                response.code = 199
+                response.msg = return_msg
+
             else:
-                print('----- 发放红包失败 ----->>')
+                print('----- 发放红包失败  return_msg | appid:----->>',return_msg,"|" ,objsForm.get('appid'))
 
                 response.code = 500
-                response.msg = '发放红包失败'
+                response.msg = return_msg
 
         else:
             print('---- 没有商户证书, 请前往商城设置册证书！--->')
