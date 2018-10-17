@@ -745,8 +745,8 @@ def user_forward_send_activity_redPacket(request):
             print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id,'|',article_id,"|",activity_id)
 
 
-    # print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
-    # requests.post(url, data=post_data)
+
+
 
 @csrf_exempt
 def user_focus_send_activity_redPacket(request):
@@ -847,13 +847,13 @@ def user_focus_send_activity_redPacket(request):
 
     return JsonResponse(response.__dict__)
 
-    # print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
-    # requests.post(url, data=post_data)
+
 
 
 ## 异步获取公众号用户信息[用三方平台token]
 @csrf_exempt
 def get_customer_gongzhonghao_userinfo(request):
+    response = Response.ResponseObj()
     authorizer_appid = request.GET.get('authorizer_appid')
     openid = request.GET.get('openid')
 
@@ -899,13 +899,12 @@ def get_customer_gongzhonghao_userinfo(request):
         )
         print('---------- 公众号-用户创建成功 crete successful openid | subscribe ---->',openid,"|",subscribe)
 
-
+    return JsonResponse(response.__dict__)
 
 ## 绑定客户和文章的关系
 @csrf_exempt
 def binding_article_customer_relate(request):
-
-
+    response = Response.ResponseObj()
     article_id = request.GET.get('article_id')    # 公众号文章ID
     customer_id = request.GET.get('customer_id')  # 公众号客户ID
     user_id = request.GET.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
@@ -975,8 +974,8 @@ def binding_article_customer_relate(request):
                                                           customer_id=customer_id,
                                                           company_id=company_id,
                                                          )
-    #         response.code = 200
-    #         response.msg = "绑定成功"
+            response.code = 200
+            response.msg = "绑定成功"
     #
-    # return response
+    return JsonResponse(response.__dict__)
 
