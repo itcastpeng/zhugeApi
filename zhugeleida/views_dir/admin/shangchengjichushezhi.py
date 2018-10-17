@@ -175,12 +175,12 @@ def jiChuSheZhiOper(request, oper_type):
                     stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
                     result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
                     xml_data = yuzhifu.toXml(result_data).encode('utf8')
-                    shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '\\' + file_dir
+                    # shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '\\' + file_dir
                     # shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
                     # shanghupath = shanghupath + '\\' + 'statics\zhugeleida\imgs\\admin\secretKeyFile/1513325051'
-                    cret = os.path.join(shanghupath, 'apiclient_cert.pem')
-                    key = os.path.join(shanghupath, 'apiclient_key.pem')
+                    cret = os.path.join(file_dir, 'apiclient_cert.pem')
+                    key = os.path.join(file_dir, 'apiclient_key.pem')
                     ret = requests.post(url, data=xml_data, cert=(cret, key))
                     print(ret.text)
                     DOMTree = yuzhifu.xmldom.parseString(ret.text)
