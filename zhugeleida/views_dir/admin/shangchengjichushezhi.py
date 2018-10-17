@@ -160,57 +160,50 @@ def jiChuSheZhiOper(request, oper_type):
                         'wxappid': appid,  # 真实数据appid
                         're_openid': 'o2ZPb4qZTfb7BOe92eh8ipVWilCc',  # 用户唯一标识
                         'total_amount': 100,  # 付款金额 1:100
+                        'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
                         'client_ip': '192.168.1.1',  # 终端IP
+                        'mch_id': formObjs.get('mch_id'),  # 商户号
                         'total_num': 1,  # 红包发放总人数
                         'send_name': '诸葛雷达',  # 商户名称 中文
                         'act_name': '测试商户',  # 活动名称 32长度
                         'remark': '测试备注信息',  # 备注信息 256长度
                         'wishing': '测试红包祝福语',  # 红包祝福语 128长度
                     }
+                    print('result_data----------> ',result_data)
                     SHANGHUKEY = formObjs.get('shangHuMiYao')    # 商户KEY
                     stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
                     result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
                     xml_data = yuzhifu.toXml(result_data).encode('utf8')
-                    print('file_zip=======> ',file_dir)
-                    file_dir = ''
-                    shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + file_dir
+                    shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '\\' + file_dir
+                    # shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+                    # shanghupath = shanghupath + '\\' + 'statics\zhugeleida\imgs\\admin\secretKeyFile/1513325051'
                     cret = os.path.join(shanghupath, 'apiclient_cert.pem')
                     key = os.path.join(shanghupath, 'apiclient_key.pem')
                     ret = requests.post(url, data=xml_data, cert=(cret, key))
                     print(ret.text)
-                    # DOMTree = xmldom.parseString(ret.text)
-                    # collection = DOMTree.documentElement
-                    # return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-
-
-                #     stringSignTemp = yuzhifu.shengchengsign(result_data, formObjs.get('shangHuMiYao'))
-                #     # stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
-                #     result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
-                #     xml_data = yuzhifu.toXml(result_data)
-                #     # print('xml_data-------------> ',xml_data)
-
-
-
-
-                #     if return_code == 'SUCCESS':  # 判断预支付返回参数 是否正确
-                #         userObjs.update(
-                #             shangHuHao=formObjs.get('shangHuHao'),
-                #             shangHuMiYao=formObjs.get('shangHuMiYao'),
-                #             zhengshu=shanghuzhengshupath
-                #         )
-                #         response.code = 200
-                #         response.msg = '修改成功'
-                #     else:
-                #         return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
-                #         response.code = 301
-                #         response.msg = '请输入正确商户号和商户秘钥, 微信接口返回错误：{return_code}'.format(return_code=return_code)
-                #         return JsonResponse(response.__dict__)
-                # else:
-                #     response.code = 301
-                #     response.msg = '未注册小程序'
-                #     return JsonResponse(response.__dict__)
+                    DOMTree = yuzhifu.xmldom.parseString(ret.text)
+                    collection = DOMTree.documentElement
+                    return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+                    print('return_code--> ',return_code)
+                    if return_code == 'SUCCESS':  # 判断预支付返回参数 是否正确
+                        userObjs.update(
+                            shangHuHao=formObjs.get('shangHuHao'),
+                            shangHuMiYao=formObjs.get('shangHuMiYao'),
+                            zhengshu=shanghuzhengshupath
+                        )
+                        response.code = 200
+                        response.msg = '修改成功'
+                    else:
+                        return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
+                        response.code = 301
+                        response.msg = '请输入正确商户号和商户秘钥, 微信接口返回错误：{return_code}'.format(return_code=return_code)
+                        return JsonResponse(response.__dict__)
+                else:
+                    response.code = 301
+                    response.msg = '未注册小程序'
+                    return JsonResponse(response.__dict__)
             else:
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
