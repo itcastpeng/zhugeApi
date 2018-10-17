@@ -905,7 +905,7 @@ def get_customer_gongzhonghao_userinfo(request):
 @csrf_exempt
 def binding_article_customer_relate(request):
 
-    response = Response.ResponseObj()
+
     article_id = request.GET.get('article_id')    # 公众号文章ID
     customer_id = request.GET.get('customer_id')  # 公众号客户ID
     user_id = request.GET.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
@@ -931,8 +931,8 @@ def binding_article_customer_relate(request):
 
     if article_to_customer_belonger_obj:
         print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>')
-        response.code = 302
-        response.msg = "文章和客户\雷达用户-关系存在"
+        # response.code = 302
+        # response.msg = "文章和客户\雷达用户-关系存在"
 
     else:
         print('------ [创建]文章和客户\雷达用户关系 ------>')
@@ -947,8 +947,8 @@ def binding_article_customer_relate(request):
     user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
     if user_customer_belonger_obj:
         print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>',customer_id,"|",user_id)
-        response.code = 302
-        response.msg = "关系存在"
+        # response.code = 302
+        # response.msg = "关系存在"
 
     else:
         print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
@@ -963,8 +963,8 @@ def binding_article_customer_relate(request):
 
         if redPacket_objs:
             print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (article_id,activity_id,customer_id) )
-            response.code = 302
-            response.msg = "关系存在"
+            # response.code = 302
+            # response.msg = "关系存在"
 
         else:
             print('----- 活动发红包表数据【不存在并创建】 article_id:%s | activity_id:%s | customer_id: %s | company_id: %s ----->>' % (
@@ -975,8 +975,8 @@ def binding_article_customer_relate(request):
                                                           customer_id=customer_id,
                                                           company_id=company_id,
                                                          )
-            response.code = 200
-            response.msg = "绑定成功"
-
-    return response
+    #         response.code = 200
+    #         response.msg = "绑定成功"
+    #
+    # return response
 
