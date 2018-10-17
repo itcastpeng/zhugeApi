@@ -12,6 +12,8 @@ import datetime
 import redis
 from collections import OrderedDict
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
+
 import sys
 import logging.handlers
 from django.conf import settings
@@ -859,6 +861,7 @@ def get_customer_gongzhonghao_userinfo(request):
     authorizer_refresh_token = ''
     if objs:
         authorizer_refresh_token = objs[0].authorizer_refresh_token
+
     key_name = 'authorizer_access_token_%s' % (authorizer_appid)
     _data = {
         'authorizer_appid': authorizer_appid,
@@ -868,7 +871,7 @@ def get_customer_gongzhonghao_userinfo(request):
         'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
     }
 
-    authorizer_access_token_ret = create_authorizer_access_token(_data)
+    authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
     authorizer_access_token = authorizer_access_token_ret.data
 
     # access_token = "14_8p_bIh8kVgaZpnn_8IQ3y77mhJcSLoLuxnqtrE-mKYuOfXFPnNYhZAOWk8AZ-NeK6-AthHxolrSOJr1HvlV-gSlspaO0YFYbkPrsjJzKxalWQtlBxX4n-v11mqJElbT0gn3WVo9UO5zQpQMmTDGjAEDZJM"
@@ -921,6 +924,7 @@ def binding_article_customer_relate(request):
     else:
         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
+    data =request.GET.copy()
     print('------ 绑定文章客户关系 json.dumps(data) ------>>',json.dumps(data))
 
     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
