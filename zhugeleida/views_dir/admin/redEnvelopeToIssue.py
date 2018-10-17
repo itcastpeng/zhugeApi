@@ -320,11 +320,11 @@ def articleForwardingRedEnvelope(resultDict):
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
             print('return_code-------------------> ',return_code)
             if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
+                models.zgld_red_envelope_to_issue.objects.filter(id=redEnvelopeObjs.id).update(issuingState=1)
                 response.code = 200
                 response.msg = '发放红包成功'
             else:
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
+                models.zgld_red_envelope_to_issue.objects.filter(id=redEnvelopeObjs.id).update(issuingState=2)
                 response.code = 500
                 response.msg = '发放红包失败'
         else:
