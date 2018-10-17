@@ -11,12 +11,7 @@ import datetime,time
 import psutil
 import os
 import signal
-from django.db.models import  Sum
-from zhugeleida import models
-import json
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
-from django.db.models import Q
-from publicFunc import Response
+
 
 #  小程序访问动作日志的发送到企业微信
 @app.task
