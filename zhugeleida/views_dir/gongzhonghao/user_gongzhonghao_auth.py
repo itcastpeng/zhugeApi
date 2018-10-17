@@ -5,13 +5,11 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm,LoginBindingForm,CreateShareUrl
-
 import time
 from django.db.models import Q
-
 import requests
-from publicFunc.condition_com import conditionCom
-from ..conf import *
+from zhugeapi_celery_project import tasks
+
 import random
 from  publicFunc.account import str_sha_encrypt
 import base64
@@ -82,15 +80,20 @@ def user_gongzhonghao_auth(request):
         openid = ret_data['openid']
         access_token = ret_data['access_token']
         redirect_url = ''
+
+
         # 判断静默和非静默方式
         # 静默方式
+        client_id = ''
         if state == 'snsapi_base':
+
             customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
                 user_type=1,  # 公众号
             )
 
             # openid 存在数据库中
+
             if customer_objs:
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
@@ -129,7 +132,7 @@ def user_gongzhonghao_auth(request):
                         customer_username = str(customer_username, 'utf-8')
 
                     print('--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (uid,client_id,customer_username), '|', json.dumps(data))
-                    binding_article_customer_relate(data)
+                    tasks.binding_article_customer_relate(data)
 
             else:
                 redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id, pid,level,uid,company_id)
@@ -190,12 +193,12 @@ def user_gongzhonghao_auth(request):
                     article_url = '/gongzhonghao/yulanneirong/'
                 else:  # 代表是雷达用户分享出去的。
                     article_url = '/gongzhonghao/leidawenzhang/'
-
+                client_id = obj.id
                 redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
                     article_url=article_url,
                     article_id=article_id,
                     token=token,
-                    client_id=obj.id,
+                    client_id=client_id,
 
                     uid = uid,  # 文章作者-ID
                     level = level,  # 所在层级
@@ -213,7 +216,7 @@ def user_gongzhonghao_auth(request):
                 customer_id = int(obj.id)
                 if uid and pid != customer_id: # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
                     print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (uid,obj.id,customer_name), '|', json.dumps(data))
-                    binding_article_customer_relate(data)
+                    tasks.binding_article_customer_relate(data)
 
             else:
                 errcode = ret_json.get('errcode')
@@ -221,7 +224,16 @@ def user_gongzhonghao_auth(request):
                 print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
 
         print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>',redirect_url)
+
+        _data = {
+            'openid' : openid,
+            'authorizer_appid': appid,
+        }
+        # 获取 公众号的用户信息
+        tasks.get_customer_gongzhonghao_userinfo(_data)
+
         return redirect(redirect_url)
+
 
     else:
         response.code = 402
@@ -322,9 +334,7 @@ def binding_article_customer_relate(data):
                                                           activity_id=activity_id,
                                                           customer_id=customer_id,
                                                           company_id=company_id,
-                                                                           )
-
-
+                                                         )
             response.code = 200
             response.msg = "绑定成功"
 

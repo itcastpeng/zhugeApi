@@ -209,12 +209,12 @@ def focusOnIssuedRedEnvelope(resultDict):
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
             print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
             if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
+
                 response.code = 200
                 response.msg = '发放红包成功'
             else:
                 print('----- 发放红包失败 ----->>')
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
+
                 response.code = 500
                 response.msg = '发放红包失败'
 
@@ -227,7 +227,7 @@ def focusOnIssuedRedEnvelope(resultDict):
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
 
-    return JsonResponse(response.__dict__)
+    return response
 
 # 文章转发发放红包
 # @csrf_exempt
