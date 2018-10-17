@@ -553,6 +553,14 @@ class zgld_customer(models.Model):
         (1, '已经订阅该公众号')
     )
     is_subscribe =  models.SmallIntegerField(verbose_name='用户是否订阅该公众号', choices=subscribe_choices,null=True)                                                                   #值为0时，代表此用户没有关注该公众号
+
+    receive_redPacket_choices = (
+        (0, '没有发送过关注红包'),
+        (1, '发送了关注红包')
+    )
+
+    is_receive_redPacket =  models.SmallIntegerField(verbose_name='是否发送过关注红包', choices=receive_redPacket_choices,default=0)
+
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -837,7 +845,7 @@ class zgld_article_activity(models.Model):
     redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True,default=0)
     activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',default=0,null=True)
 
-    reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发次数))',null=True)
+    reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量',null=True)
 
     # type_choices = (

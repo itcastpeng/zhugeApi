@@ -207,16 +207,24 @@ def focusOnIssuedRedEnvelope(resultDict):
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+            return_msg = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
+
             print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
-            if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
+
+            if return_code == 'SUCCESS' and '余额不足' not in return_msg:        # 判断预支付返回参数 是否正确
                 response.code = 200
                 response.msg = '发放红包成功'
+
+            elif '余额不足' in return_msg:
+                print('------ %s |  appid: ----->>' % return_msg,objsForm.get('appid'))
+                response.code = 199
+                response.msg = return_msg
+
             else:
-                print('----- 发放红包失败 ----->>')
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
+                print('----- 发放红包失败  return_msg | appid:----->>',return_msg,"|" ,objsForm.get('appid'))
+
                 response.code = 500
-                response.msg = '发放红包失败'
+                response.msg = return_msg
 
         else:
             print('---- 没有商户证书, 请前往商城设置册证书！--->')
@@ -227,7 +235,7 @@ def focusOnIssuedRedEnvelope(resultDict):
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
 
-    return JsonResponse(response.__dict__)
+    return response
 
 # 文章转发发放红包
 # @csrf_exempt
@@ -320,11 +328,11 @@ def articleForwardingRedEnvelope(resultDict):
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
             print('return_code-------------------> ',return_code)
             if return_code == 'SUCCESS':        # 判断预支付返回参数 是否正确
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=1)
+                models.zgld_red_envelope_to_issue.objects.filter(id=redEnvelopeObjs.id).update(issuingState=1)
                 response.code = 200
                 response.msg = '发放红包成功'
             else:
-                redEnvelope.filter(id=redEnvelopeObjs.id).update(issuingState=2)
+                models.zgld_red_envelope_to_issue.objects.filter(id=redEnvelopeObjs.id).update(issuingState=2)
                 response.code = 500
                 response.msg = '发放红包失败'
         else:

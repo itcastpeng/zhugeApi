@@ -8,9 +8,9 @@ from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm, Article
     MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
-from django.db.models import F
+
 import json
-from django.db.models import Q
+from django.db.models import Q,F
 from zhugeleida.public.condition_com import conditionCom
 import datetime
 from django.db.models import Count
@@ -295,16 +295,8 @@ def article_oper(request, oper_type, o_id):
                             #         forward_stay_time=forward_stay_time
                             #     )
                             # if forward_read_num == 4:
-                            ip = ''
-                            if request.META.get('HTTP_X_FORWARDED_FOR'):
-                                ip = request.META.get('HTTP_X_FORWARDED_FOR')
-                            elif request.META.get('REMOTE_ADDR'):
-                                ip = request.META.get('REMOTE_ADDR')
-                            else:
-                                ip = '0.0.0.0'
 
                             _data = {
-                                # 'ip' : ip,
                                 'parent_id': parent_id,
                                 'article_id': article_id,
                                 'activity_id': activity_id,
@@ -512,8 +504,8 @@ def article_oper(request, oper_type, o_id):
                 'authorizer_appid': 'wxa77213c591897a13',
                 'authorizer_refresh_token': 'refreshtoken@@@RAVUheyR510HyjAYrDxgSrX8MHDkbbb5ysHgGRWHeUc',
                 'key_name': 'authorizer_access_token_wxa77213c591897a13',
-                'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+                'app_id': 'wx6ba07e6ddcdc69b3',                     # 查看诸葛雷达_公众号的 appid
+                'app_secret': '0bbed534062ceca2ec25133abe1eecba'    # 查看诸葛雷达_公众号的AppSecret
             }
 
             authorizer_access_token_ret = create_authorizer_access_token(_data)
@@ -529,7 +521,7 @@ def article_oper(request, oper_type, o_id):
                 'openid': openid,
                 'lang': 'zh_CN',
             }
-            import json
+
             ret = requests.get(get_user_info_url, params=get_user_info_data)
             ret.encoding = 'utf-8'
             ret_json = ret.json()
