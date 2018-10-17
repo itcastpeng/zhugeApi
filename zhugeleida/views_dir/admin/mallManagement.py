@@ -141,12 +141,14 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'Beforeupdate':
             goodsObjs = models.zgld_goods_management.objects.filter(id=o_id)
             u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=u_idObjs[0].company_id)
+            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs[0].company_id)
             xiaochengxu_id = userObjs[0].id
             objs = models.zgld_goods_classification_management.objects.filter(id=goodsObjs[0].parentName_id)
             result_data = []
+
             parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
             parentData.append(goodsObjs[0].parentName_id)
+
             response.code = 200
             response.msg = '查询成功'
             response.data = parentData
