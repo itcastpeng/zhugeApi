@@ -662,13 +662,13 @@ def user_forward_send_activity_redPacket(request):
                 forward_stay_time = 0
 
             activity_redPacket_objs.update(
-                forward_read_num=forward_read_num,
+                forward_read_count=forward_read_num,
                 forward_stay_time=forward_stay_time
             )
             activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
-            reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
-            send_redPacket_num = activity_redPacket_obj.send_redPacket_num           # 已发放次数
+            reach_forward_num = activity_obj.reach_forward_num                        # 达到多少次发红包(转发阅读后次数))
+            send_redPacket_num = activity_redPacket_obj.send_redPacket_num            # 已发放次数
             send_redPacket_money = activity_redPacket_obj.send_redPacket_money        #已发红包金额
 
             if reach_forward_num != 0: #不能为0
