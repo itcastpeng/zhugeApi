@@ -681,6 +681,8 @@ def user_forward_send_activity_redPacket(request):
                     yushu = divmod_ret[1]
 
                     if shoudle_send_num > send_redPacket_num:
+                        print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',forward_read_num,"|",reach_forward_num)
+                        print('---- 【满足发红包条件】shoudle_send_num[实发数] | send_redPacket_num[已发数] ----->>',shoudle_send_num,"|",reach_forward_num)
                         app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                         activity_single_money = activity_obj.activity_single_money
                         activity_name = activity_obj.activity_name
