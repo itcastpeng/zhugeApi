@@ -158,16 +158,17 @@ def goodsClassOper(request, oper_type, o_id):
         elif oper_type == 'update':
             # 判断是否会关联自己
             result_data = []
-            if int(dataDict.get('o_id')) == int(dataDict.get('parentClassification_id')):
-                response.code = 301
-                response.msg = '不可关联自己'
-                return JsonResponse(response.__dict__)
-            objs = models.zgld_goods_classification_management.objects.filter(id=dataDict.get('parentClassification_id'))
-            parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id, o_id)
-            if int(o_id) in parentData:
-                response.code = 301
-                response.msg = '不可关联自己'
-                return JsonResponse(response.__dict__)
+            if dataDict.get('parentClassification_id'):
+                if int(dataDict.get('o_id')) == int(dataDict.get('parentClassification_id')):
+                    response.code = 301
+                    response.msg = '不可关联自己'
+                    return JsonResponse(response.__dict__)
+                objs = models.zgld_goods_classification_management.objects.filter(id=dataDict.get('parentClassification_id'))
+                parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id, o_id)
+                if int(o_id) in parentData:
+                    response.code = 301
+                    response.msg = '不可关联自己'
+                    return JsonResponse(response.__dict__)
             forms_obj = UpdateForm(dataDict)
             if forms_obj.is_valid():
                 print('==验证成功==')
