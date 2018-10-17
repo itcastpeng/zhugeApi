@@ -105,6 +105,12 @@ class UpdateForm(forms.Form):
             'required': "是否线上交易类型错误"
         }
     )
+    shichangjiage = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "市场价格类型错误"
+        }
+    )
     # kucunbianhao = forms.CharField(
     #     required=True,
     #     error_messages={
