@@ -138,20 +138,17 @@ def mallManagementOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'Beforeupdate':
-            goodsObjs = models.zgld_goods_management.objects.filter(id=o_id)
-            u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs[0].company_id)
-            xiaochengxu_id = userObjs[0].id
-            objs = models.zgld_goods_classification_management.objects.filter(id=goodsObjs[0].parentName_id)
+        elif oper_type == 'Beforeupdate': # 查询该商品 分组信息
+            goodsObjs = models.zgld_goods_management.objects.get(id=o_id) # 商品ID
+            u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
+            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs.company_id)
+            objs = models.zgld_goods_classification_management.objects.filter(id=goodsObjs.parentName_id)
             result_data = []
-
-            parentData = updateInitData(result_data, xiaochengxu_id, objs[0].parentClassification_id)
-            parentData.append(goodsObjs[0].parentName_id)
-
+            parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id)
+            parentData.append(goodsObjs.parentName_id)  # 添加自己本身分组ID
             response.code = 200
             response.msg = '查询成功'
-            response.data = parentData
+            response.data = parentData # 根据 分组上下级关系 由大到小列表排列ID
 
 
         elif oper_type == 'update':
