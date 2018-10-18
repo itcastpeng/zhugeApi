@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.mallManage_verify import AddForm, UpdateForm, SelectForm
 import json,os,sys
 from django.db.models import Q
-
+import datetime
 
 def mallManagement(request, user_id, goodsGroup, status, flag):
     response = Response.ResponseObj()
@@ -50,6 +50,9 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                 detailePicture = ''
                 if obj.detailePicture:
                     detailePicture = json.loads(obj.detailePicture)
+                shelvesCreateDate = ''
+                if obj.shelvesCreateDate:
+                    shelvesCreateDate = obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S')
                 otherData.append({
                     'id':obj.id,
                     'goodsName':obj.goodsName,
@@ -64,7 +67,8 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                     'topLunBoTu': topLunBoTu,  # 顶部轮播图
                     'detailePicture' : detailePicture,  # 详情图片
                     'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                    'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
+                    'shelvesCreateDate':shelvesCreateDate,
+                    'DetailsDescription': obj.DetailsDescription # 描述详情
                 })
             response.code = 200
             response.msg = '查询成功'
@@ -110,16 +114,19 @@ def mallManagementOper(request, oper_type, o_id):
         # 'kucunbianhao':request.POST.get('kucunbianhao'),            # 库存编号
         'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
         'detailePicture':request.POST.get('detailePicture'),          # 详情图片
+        'DetailsDescription': request.POST.get('DetailsDescription')  # 描述详情
     }
     print('resultData---------------->',resultData)
     user_id = request.GET.get('user_id')
     if request.method == "POST":
+        nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if oper_type == 'add':
             forms_obj = AddForm(resultData)
             if forms_obj.is_valid():
-                print('验证通过')
                 formObjs = forms_obj.cleaned_data
-                models.zgld_goods_management.objects.create(
+                print('验证通过')
+                print('nowDate-------------> ',nowDate)
+                objs = models.zgld_goods_management.objects.create(
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
@@ -130,7 +137,12 @@ def mallManagementOper(request, oper_type, o_id):
                     goodsStatus=formObjs.get('goodsStatus'),
                     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
                     detailePicture=resultData.get('detailePicture'),  # 详情图片
+                    DetailsDescription=formObjs.get('DetailsDescription') # 描述详情
                 )
+                if formObjs.get('goodsStatus') == 1:
+                    models.zgld_goods_management.objects.filter(id=objs.id).update(
+                        shelvesCreateDate=nowDate
+                    )
                 response.code = 200
                 response.msg = '添加成功'
                 response.data = {}
@@ -154,12 +166,12 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'update':
             forms_obj = UpdateForm(resultData)
             if forms_obj.is_valid():
-                print('======================')
                 formObjs = forms_obj.cleaned_data
-                print('formObjs------> ',formObjs)
-                print("formObjs.get('xianshangjiaoyi')==========> ",formObjs.get('xianshangjiaoyi'))
-                print("formObjs.get('goodsPrice')==============> ",formObjs.get('goodsPrice'))
-                models.zgld_goods_management.objects.filter(id=o_id).update(
+                objs = models.zgld_goods_management.objects.filter(id=o_id)
+                if not objs[0].shelvesCreateDate and formObjs.get('goodsStatus') == 1:# 判断如果原本上架时间为空 且当前传上架时间 则更改
+                    objs.update(shelvesCreateDate = nowDate)
+                print("formObjs.get('DetailsDescription')============> ",formObjs.get('DetailsDescription'))
+                objs.update(
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
@@ -169,6 +181,7 @@ def mallManagementOper(request, oper_type, o_id):
                     topLunBoTu=resultData.get('topLunBoTu'),            # 顶部轮播图
                     detailePicture=resultData.get('detailePicture'),    # 详情图片
                     xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
+                    DetailsDescription=formObjs.get('DetailsDescription')  # 描述详情
                 )
                 response.code = 200
                 response.msg = '修改成功'

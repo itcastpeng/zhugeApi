@@ -6,13 +6,25 @@ import re
 import json
 from django.core.exceptions import ValidationError
 
-# 添加企业的产品
+
 class UpdateForm(forms.Form):
 
     o_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': "订单ID不能为空"
+        }
+    )
+    yingFuKuan = forms.FloatField(
+        required=True,
+        error_messages={
+            'required': "应付款不能为空"
+        }
+    )
+    phoneNumber = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "电话不能为空"
         }
     )
 
@@ -27,7 +39,14 @@ class UpdateForm(forms.Form):
                 self.add_error('o_id', '该订单已付款, 不可修改！')
             else:
                 return o_id
-
+    def clean_phoneNumber(self):
+        phoneNumber = self.data.get('phoneNumber')
+        phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
+        res = re.search(phone_pat, phoneNumber)
+        if res:
+            return phoneNumber
+        else:
+            self.add_error('phoneNumber', '请输入正确手机号')
 
 class SelectForm(forms.Form):
 

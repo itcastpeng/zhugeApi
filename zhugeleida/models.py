@@ -549,7 +549,7 @@ class zgld_customer(models.Model):
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
     # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
     subscribe_choices = (
-        (0, '没有订阅该公众号'),
+        (0, '取消订阅该公众号'),
         (1, '已经订阅该公众号')
     )
     is_subscribe =  models.SmallIntegerField(verbose_name='用户是否订阅该公众号', choices=subscribe_choices,null=True)                                                                   #值为0时，代表此用户没有关注该公众号
@@ -1107,18 +1107,19 @@ class zgld_goods_management(models.Model):
     )
     goodsStatus = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", auto_now_add=True)
+    shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", null=True, blank=True)
     xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
     # kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
     zhengshu = models.CharField(verbose_name='证书', max_length=256, null=True, blank=True)
     topLunBoTu = models.TextField(verbose_name='顶部轮播图', null=True, blank=True)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
-
+    DetailsDescription = models.TextField(verbose_name='详情描述', null=True, blank=True)
 
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):
     shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
+    phone = models.CharField(verbose_name='手机号码', max_length=32, null=True, blank=True)
     orderNumber = models.CharField(verbose_name='订单号', max_length=128, null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价', max_length=64, default=0)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
@@ -1129,7 +1130,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     yewuUser = models.ForeignKey(to='zgld_userprofile', verbose_name='业务员', null=True, blank=True)
     gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     yongJin = models.IntegerField(verbose_name='佣金', default=0)
-    peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
+    # peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
     shouHuoRen = models.ForeignKey(to='zgld_customer', verbose_name='收货人', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
     order_status = (

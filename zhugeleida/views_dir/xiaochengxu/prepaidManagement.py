@@ -1,14 +1,8 @@
-import random
-import hashlib
-import requests
-import xml.dom.minidom as xmldom
-import qrcode
-import uuid, time, json
+import qrcode, re, requests, hashlib, random, uuid, time, json, xml.dom.minidom as xmldom, base64, datetime
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
-import requests, base64, datetime
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -125,6 +119,13 @@ def yuZhiFu(request):
         goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
         u_id = request.POST.get('u_id')
+        phoneNumber = request.POST.get('phoneNumber')           # 电话号码
+        phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
+        res = re.search(phone_pat, phoneNumber)
+        if not res:
+            response.code = 301
+            response.msg = '请输入正确的手机号'
+            return JsonResponse(response.__dict__)
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
         print('fukuan===============> ',fukuan)
@@ -201,7 +202,7 @@ def yuZhiFu(request):
             response.code = 200
             response.msg = '支付成功'
             # 预支付成功 创建订单
-            if not fukuan:
+            if not fukuan: # 判断是否已经存在订单
                 dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
                 date_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
                 commissionFee = 0
@@ -218,12 +219,13 @@ def yuZhiFu(request):
                     yewuUser_id = u_id,                     # 业务
                     gongsimingcheng_id = company_id,        # 公司
                     yongJin = commissionFee,                # 佣金
-                    peiSong = '',                           # 配送
+                    # peiSong = '',                           # 配送
                     shouHuoRen_id = user_id,                   # 收货人
                     theOrderStatus = 1,                     # 订单状态
                     createDate=date_time,
                     goodsName=goodsObjs[0].goodsName,
-                    detailePicture=goodsObjs[0].detailePicture
+                    detailePicture=goodsObjs[0].detailePicture,
+                    phone=phoneNumber
                 )
 
                 # dingdanId = dingdan.id

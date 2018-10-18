@@ -11,18 +11,16 @@ import datetime,time
 import psutil
 import os
 import signal
-
+import json
 
 #  小程序访问动作日志的发送到企业微信
 @app.task
 def user_send_action_log(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
     # url = 'http://127.0.0.1:8000/zhugeleida/mycelery/user_send_action_log'
-    post_data = {
-        'data': data
-    }
-    print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 post_data数据 ------------>',post_data)
-    requests.post(url, data=post_data)
+    get_data = data
+    print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 get_data数据 ------------>',json.dumps(get_data))
+    requests.get(url, params=get_data)
 
 
 # 转发发送红包
@@ -106,10 +104,9 @@ def user_send_template_msg_to_customer(data):
 # 发送公众号-模板消息。
 @app.task
 def user_send_gongzhonghao_template_msg(data):
+    print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->', data)
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_gongzhonghao_template_msg'
-    get_data = {
-        'data': data
-    }
+    get_data = data
     print('-----发送公众号-模板消息---->>',get_data)
     requests.get(url, params=get_data)
 
@@ -165,3 +162,7 @@ def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序I
     if xiaochengxuid:
         url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/addSmallProgram?xiaochengxuid={}'.format(xiaochengxuid)
         requests.get(url)
+@app.task
+def mallOrderTimeToRefresh():# 商城订单 定时刷新 十分钟未付款自动改状态
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/timeToRefresh'
+    requests.get(url)

@@ -239,9 +239,10 @@ def article_oper(request, oper_type, o_id):
 
                 tag_list = list(obj.tags.values('id', 'name'))
                 # print('-----obj.tags.values---->', tag_list)
+                title =  obj.title
                 ret_data.append({
                     'id': obj.id,
-                    'title': obj.title,  # 文章标题
+                    'title': title,  # 文章标题
                     'author': obj.user.username,  # 如果为原创显示,文章作者
                     'avatar': obj.user.avatar,  # 用户的头像
                     'summary': obj.summary,  # 摘要
@@ -271,31 +272,8 @@ def article_oper(request, oper_type, o_id):
                     if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
 
-                        ## 判断转发后阅读的人数 +转发后阅读时间
-                        ## 此处要 封装到异步中。
-
-                        if activity_objs:  # 说明有参与活动
-                            # forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                            #     customer_parent_id=parent_id).values_list('customer_id').distinct()
-                            #
-                            # forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                            #     customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
-                            #
-                            # forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
-                            # if not forward_stay_time:
-                            #     forward_stay_time = 0
-                            #
-                            # activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
-                            #                                                                         article_id=article_id,
-                            #                                                                         activity_id=activity_id
-                            #                                                                         )
-                            # if activity_redPacket_objs:
-                            #     activity_redPacket_objs.update(
-                            #         forward_read_num=forward_read_num,
-                            #         forward_stay_time=forward_stay_time
-                            #     )
-                            # if forward_read_num == 4:
-
+                        ## 判断转发后阅读的人数 +转发后阅读时间 此处要 封装到异步中。
+                        if activity_objs:  # 说明有参与活动，活动在进行中
                             _data = {
                                 'parent_id': parent_id,
                                 'article_id': article_id,
@@ -305,22 +283,41 @@ def article_oper(request, oper_type, o_id):
                             tasks.user_forward_send_activity_redPacket.delay(_data)
 
 
+
+
+
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
-                    customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
+                    customer_objs = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     zgld_article_objs.update(status=1)  # 改为已发状态
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
+                    customer_obj = ''
+                    if customer_objs:  # 说明客户访问时候经过认证的
+                        customer_obj = customer_objs[0]
+                        username = customer_obj.username
+                        user_type = customer_obj.user_type
+                        if username:
+                            remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + title))
+                            print('---- 公众号查看文章[消息提醒]--->>', remark)
+                            data = request.GET.copy()
+                            data['action'] = 14
+                            action_record(data, remark)  # 此步骤封装到 异步中。
 
-                    if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
+                        if parent_id and uid : # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
 
-                        remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
-                        print('---- 公众号查看文章[消息提醒]--->>', remark)
-                        data = request.GET.copy()
-                        data['action'] = 14
-                        response = action_record(data, remark)  # 此步骤要要封装到 异步中。
+                            data_ = {
+                                'customer_id': parent_id,
+                                'user_id' :  uid,
+                                'type' : 'forward_look_article_tishi'
+                            }
+                            print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->', data_)
+
+                            tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息】
+
+
 
                     ## 先记录一个用户查看文章的日志
                     now_date_time = datetime.datetime.now()
@@ -333,8 +330,8 @@ def article_oper(request, oper_type, o_id):
                         last_access_date=now_date_time
                     )
                     article_access_log_id = article_access_log_obj.id
-                    is_subscribe = customer_obj[0].is_subscribe
-                    is_subscribe_text = customer_obj[0].get_is_subscribe_display()
+                    is_subscribe = customer_obj.is_subscribe
+                    is_subscribe_text = customer_obj.get_is_subscribe_display()
 
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     qrcode_url = ''
