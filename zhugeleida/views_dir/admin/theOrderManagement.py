@@ -138,13 +138,19 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
                 print('验证通过')
                 print(forms_obj.cleaned_data)
                 dingDanId = forms_obj.cleaned_data.get('o_id')
+                yongjin = 0
+                if otherData.get('yongjin'):
+                    yongjin = otherData.get('yongjin')
+                youhui = 0
+                if otherData.get('youhui'):
+                    youhui = otherData.get('youhui')
                 models.zgld_shangcheng_dingdan_guanli.objects.filter(
                     id=dingDanId
                 ).update(
                     yingFuKuan=otherData.get('yingFuKuan'),
-                    youHui=otherData.get('youhui'),
+                    youHui=youhui,
                     yewuUser_id=otherData.get('yewuyuan_id'),
-                    yongJin=otherData.get('yongjin'),
+                    yongJin=yongjin,
                     # peiSong=otherData.get('peiSong'),
                     shouHuoRen_id=otherData.get('shouHuoRen_id'),
                     phone=otherData.get('phoneNumber')

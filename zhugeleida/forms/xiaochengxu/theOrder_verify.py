@@ -15,6 +15,12 @@ class UpdateForm(forms.Form):
             'required': "订单ID不能为空"
         }
     )
+    yingFuKuan = forms.FloatField(
+        required=True,
+        error_messages={
+            'required': "应付款不能为空"
+        }
+    )
     phoneNumber = forms.CharField(
         required=True,
         error_messages={
