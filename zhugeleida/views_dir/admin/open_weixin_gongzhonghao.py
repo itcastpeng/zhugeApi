@@ -672,7 +672,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         content = '嗨,您好~ \n 丫挺的,欢迎您参加活动,刚才那谁查看了您转发的文章,还有2个人查看的话，我就给你发个大红包了，骗你是个小狗。'
 
                         res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
-                            openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
+                            openid=openid, original_id=original_id, createtime=createtime, content='YYYY'.encode('utf-8'))
 
 
 
@@ -682,7 +682,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         # print('-------【加密后】的 消息---->>', encrypt_xml)
 
                         # return HttpResponse(encrypt_xml)
-                        return HttpResponse(res_msg.encode('utf-8'), content_type="application/xml")
+                        return HttpResponse(res_msg, content_type="application/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
