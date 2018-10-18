@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm 
-import json, base64
+import json, base64, datetime
 from django.db.models import Q
 
 
@@ -97,6 +97,20 @@ def theOrderShow(request):
 
     return JsonResponse(response.__dict__)
 
+@csrf_exempt
+def timeToRefresh(request):# 定时刷新 订单超过十分钟 不付款 更改为取消订单
+    response = Response.ResponseObj()
+    nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # nowDate = (datetime.datetime.now() - datetime.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S')
+    objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(theOrderStatus=1)
+    for obj in objs:
+        objCreate = (obj.createDate + datetime.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S')
+        if nowDate > objCreate:
+            print('=========')
+            models.zgld_shangcheng_dingdan_guanli.objects.filter(id=obj.id).update(theOrderStatus=10)
+    response.code = 200
+    response.msg = '更新成功'
+    return JsonResponse(response.__dict__)
 
 
 @csrf_exempt
@@ -104,38 +118,7 @@ def theOrderShow(request):
 def theOrderOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':
-        # if oper_type == 'update':
-        #     otherData = {
-        #         'o_id': o_id,
-        #         # 'countPrice': obj.countPrice,
-        #         'yingFuKuan': request.POST.get('yingFuKuan'),
-        #         'youhui': request.POST.get('youhui'),
-        #         'yewuyuan_id': request.POST.get('yewuyuan_id'),
-        #         'yongjin': request.POST.get('yongjin'),
-        #         'peiSong': request.POST.get('peiSong'),
-        #         'shouHuoRen_id': request.POST.get('shouHuoRen_id'),
-        #     }
-        #     forms_obj = UpdateForm(otherData)
-        #     if forms_obj.is_valid():
-        #         print('验证通过')
-        #         print(forms_obj.cleaned_data)
-        #         dingDanId = forms_obj.cleaned_data.get('o_id')
-        #         models.zgld_shangcheng_dingdan_guanli.objects.filter(
-        #             id=dingDanId
-        #         ).update(
-        #             yingFuKuan=otherData.get('yingFuKuan'),
-        #             youHui=otherData.get('youhui'),
-        #             yewuUser_id=otherData.get('yewuyuan_id'),
-        #             yongJin=otherData.get('yongjin'),
-        #             peiSong=otherData.get('peiSong'),
-        #             shouHuoRen_id=otherData.get('shouHuoRen_id')
-        #         )
-        #         response.code = 200
-        #         response.msg = '修改成功'
-        #         response.data = ''
-        #     else:
-        #         response.code = 301
-        #         response.msg = json.loads(forms_obj.errors.as_json())
+
         # 确认收货
         if oper_type == 'querenshouhuo':
             tuiKuanId = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=o_id)
@@ -198,7 +181,6 @@ def theOrderOper(request, oper_type, o_id):
     else:
         response.code = 402
         response.msg = "请求异常"
-
     return JsonResponse(response.__dict__)
 
 

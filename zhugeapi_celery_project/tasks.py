@@ -165,3 +165,7 @@ def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序I
     if xiaochengxuid:
         url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/addSmallProgram?xiaochengxuid={}'.format(xiaochengxuid)
         requests.get(url)
+@app.task
+def mallOrderTimeToRefresh():# 商城订单 定时刷新 十分钟未付款自动改状态
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/timeToRefresh'
+    requests.get(url)

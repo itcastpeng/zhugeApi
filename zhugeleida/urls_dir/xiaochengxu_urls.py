@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'yuZhiFu', prepaidManagement.yuZhiFu),                                                                 # 预支付
 
     # 订单管理
+    url(r'timeToRefresh', theOrderManagement.timeToRefresh),                                                    # 定时刷新订单 超时未支付 更改状态
     url(r'theOrderShow', theOrderManagement.theOrderShow),                                                      # 订单管理查询
     url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),                   # 订单管理操作
 
