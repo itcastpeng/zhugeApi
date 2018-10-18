@@ -673,7 +673,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         #     openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
 
                         res_msg = '<xml><ToUserName><{openid}></ToUserName><FromUserName><{original_id}></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><text></MsgType><Content><{content}></Content></xml>'.format(
-                            openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
+                            openid=openid, original_id=app_id, createtime=createtime, content='YYYY')
 
                         print('----- 【加密前】的 消息---->>', res_msg)
                         # ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
