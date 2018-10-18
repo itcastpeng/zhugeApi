@@ -17,11 +17,6 @@ def mallManageShow(request):
     uid = request.GET.get('uid')
     detaileId = request.GET.get('detaileId')    # 查询详情
     u_idObjs = models.zgld_userprofile.objects.get(id=uid)
-    print('u_idObjs.company.name===============> ',u_idObjs.company.name)
-    print('u_idObjs.company.name===============> ',u_idObjs.company.id)
-
-
-
     xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs.company_id)
     indexLunBoTu = ''
     if xiaoChengXuObjs:
@@ -29,7 +24,8 @@ def mallManageShow(request):
 
     otherData = []
     if detaileId:
-        objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id).filter(id=detaileId)
+        print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuObjs[0].id)
+        objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id).filter(id=detaileId).exclude(goodsStatus=2)
         print('objs=========>',objs)
         for obj in objs:
             groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)
@@ -67,7 +63,7 @@ def mallManageShow(request):
             'otherData':otherData,
         }
     else:
-        objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id)
+        objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id).exclude(goodsStatus=2)
         for obj in objs:
             topLunBoTu = ''
             if obj.topLunBoTu:
@@ -81,12 +77,12 @@ def mallManageShow(request):
             })
         if indexLunBoTu:
             indexLunBoTu = json.loads(indexLunBoTu)
-        response.code = 200
-        response.msg = '查询成功'
         response.data = {
             'indexLunBoTu':indexLunBoTu,
             'otherData':otherData,
         }
+    response.code = 200
+    response.msg = '查询成功'
     return JsonResponse(response.__dict__)
 
 
