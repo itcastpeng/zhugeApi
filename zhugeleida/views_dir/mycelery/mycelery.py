@@ -785,7 +785,7 @@ def user_focus_send_activity_redPacket(request):
                     is_subscribe = obj.is_subscribe              #用户是否订阅该公众号   (0, '没有订阅该公众号'),
                     is_receive_redPacket = obj.is_receive_redPacket   #是否发送过关注红包  (0, '没有发送过关注红包'),
 
-                    if is_subscribe == 0:
+                    if is_subscribe == 1 and is_receive_redPacket == 0:
 
                         focus_get_money = gongzhonghao_app_obj.focus_get_money #关注领取的红包金额
                         focus_total_money = gongzhonghao_app_obj.focus_total_money
@@ -830,8 +830,8 @@ def user_focus_send_activity_redPacket(request):
 
                     else:
                         response.code = 302
-                        response.msg = '已发过红包'
-                        print('------已发过红包 customer_id | openid ----->>',customer_id ,"|", openid)
+                        response.msg = '没有订阅公众号或者应发过红包'
+                        print('------没有订阅公众号或者应发过红包 customer_id | openid ----->>',customer_id ,"|", openid)
                 else:
                     response.code = 301
                     response.msg = '客户不存在'
