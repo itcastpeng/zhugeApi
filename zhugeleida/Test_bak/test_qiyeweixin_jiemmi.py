@@ -30,7 +30,12 @@ import xml.etree.cElementTree as ET
 # SuiteId = xml_tree.find("SuiteId").text
 # print ('---',SuiteId)
 
-sMsg = '<xml><ToUserName><![CDATA[toUser]]></ToUserName><FromUserName><![CDATA[FromUser]]></FromUserName><CreateTime>123456789</CreateTime><MsgType><![CDATA[event]]></MsgType><Event><![CDATA[subscribe]]></Event></xml>'
+
+
+
+######### 公众号事件解密 #################
+
+sMsg ='<xml><ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName><Encrypt><![CDATA[UYT10UW9rJEWMtGCbMWdHXaTCdMggtLWAVh6dmM+keV74xjJ3MpDeaf5fE9pRHqN3djG1oTYEiQU2O0HUf996o8hu0WTMiytOunj2Tyg7uw2OWKNaFgk9bqIKGHbTUOilp00SfDRCTSQUsFJwzLRStwaj+7CM/i/j9sdwoeZsB0iz4sh3dVNjXwkmIB5Hmi9F7tnzSHziOr/Nfg9ISXNgif1Zly/aoRlwaEakcS12vU9nyIh3l/8lQZWFgo+jvH+Jx5P6qAv52noX3YCnCyb1gMj8A80umDGWCTko1kf0OoG5o5Y6zF6k/R6Uwxqr1YOJSdcs6twxgdOvxqO2CuP/h6ZePJ67/sFRpcXP+1u3JvDhqZkjGaN28e7W/KLlDOhkR85ukv3cF4ecsBuU3uhBF7Pia3NMPZTbpaqDs4uGmM=]]></Encrypt>\x0A</xml>'
 
 # sMsg = '''
 # <catalog>
@@ -47,6 +52,45 @@ sMsg = '<xml><ToUserName><![CDATA[toUser]]></ToUserName><FromUserName><![CDATA[F
 # </catalog>
 # '''
 
+import hashlib, random, xml.dom.minidom as xmldom
+from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
+token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+appid = 'wx6ba07e6ddcdc69b3'
+
 xml_tree = ET.fromstring(sMsg)
-print(xml_tree)
-print(xml_tree.find("FromUserName").text)
+# print(xml_tree)
+
+msg_signature = "c1a43c5bdb77386d5ed72e341150891f5e913f03"
+timestamp = "1539827462"
+nonce = "1250886219"
+encrypt = xml_tree.find("Encrypt").text
+
+decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+
+# print('--->>',decryp_xml)
+
+# decryp_xml_tree = ET.fromstring(decryp_xml)
+#
+# print(xml_tree.find("FromUserName"))
+# print(xml_tree.find("Event"))
+
+# print(decryp_xml)
+DOMTree = xmldom.parseString(decryp_xml)
+collection = DOMTree.documentElement
+original_id = collection.getElementsByTagName("ToUserName")[0].childNodes[0].data
+openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
+Event = collection.getElementsByTagName("Event")[0].childNodes[0].data
+print('--original_id-->>',original_id)
+print('--Event-->>',Event)
+print('--openid-->>',openid)
+
+
+# ComponentVerifyTicket = decryp_xml_tree.find("ComponentVerifyTicket").text
+
+# print('----ret -->', ret)
+# print('-----decryp_xml -->', decryp_xml)
+
+
+# print(xml_tree.find("Encrypt").text)

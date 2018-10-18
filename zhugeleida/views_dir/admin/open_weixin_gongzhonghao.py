@@ -6,6 +6,9 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
+import  xml.dom.minidom as xmldom
+from zhugeapi_celery_project import tasks
+
 import json
 import redis
 import xml.etree.cElementTree as ET
@@ -249,9 +252,6 @@ def open_weixin_gongzhonghao(request, oper_type):
         # 生成接入的二维码
         elif oper_type == "create_grant_url":
             user_id = request.GET.get('user_id')
-            request.session['user_id'] = user_id
-            print('----request.session userId--->', request.session.get('user_id'))
-
             app_id = 'wx6ba07e6ddcdc69b3'  #诸葛雷达_公众号 appid
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
@@ -537,9 +537,73 @@ def open_weixin_gongzhonghao_oper(request, oper_type,app_id):
         # 消息与事件接收URL [授权后实现业务]
         elif oper_type == 'callback':
 
-            print('------- 【消息与事件接收URL】------->>',request.POST,"|",app_id)
+            print('------- 【消息与事件接收URL】------->>', request.POST, "|", app_id)
 
-            return HttpResponse("success")
+            timestamp = request.GET.get('timestamp')
+            nonce = request.GET.get('nonce')
+            msg_signature = request.GET.get('msg_signature')
+            # postdata =  request.POST.get('postdata')
+
+            postdata = request.body.decode(encoding='UTF-8')
+            global decryp_xml_tree
+            xml_tree = ET.fromstring(postdata)
+            encrypt = xml_tree.find("Encrypt").text
+            token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+            encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+            appid = 'wx6ba07e6ddcdc69b3'
+
+            decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+            ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+
+            DOMTree = xmldom.parseString(decryp_xml)
+            collection = DOMTree.documentElement
+            original_id = collection.getElementsByTagName("ToUserName")[0].childNodes[0].data
+            openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
+            Event = collection.getElementsByTagName("Event")[0].childNodes[0].data
+            MsgType = collection.getElementsByTagName("MsgType")[0].childNodes[0].data
+            print('--original_id-->>', original_id)
+            print('--Event-->>', Event)
+            print('--MsgType-->>', MsgType)
+            print('--openid-->>', openid)
+
+
+            if MsgType == 'event': # 事件处理
+
+                gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
+                if gongzhonghao_app_objs:
+                    gongzhonghao_app_obj = gongzhonghao_app_objs[0]
+                    company_id = gongzhonghao_app_obj.company_id
+                    name = gongzhonghao_app_obj.name
+                    is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket # 是否开启了 关注领红包的活动
+
+                    objs = models.zgld_customer.objects.filter(openid=openid, company_id=company_id, user_type=1)
+                    if objs:
+                        customer_id = objs[0].id
+
+                        if Event == 'unsubscribe': # 取消关注
+                            print('----- 公众号【取消关注】,看看是谁: 客户：%s | 公众号: %s | 公司ID: %s---->>',objs[0].id,name,company_id)
+                            objs.update(
+                                is_subscribe=0 # 改为取消
+                            )
+
+                        elif Event == 'subscribe': # 关注公众号
+
+                            print('----- 公众号【点击关注】啦, 客户是: %s 【点击关注】公众号: %s | 公司ID: %s---->>', customer_id,name, company_id)
+                            objs.update(
+                                is_subscribe=1  # 改为关注状态
+                            )
+
+                            if is_focus_get_redpacket: # 开启了
+                                _data = {
+                                    'company_id': company_id,
+                                    'customer_id': customer_id,
+                                }
+                                tasks.user_focus_send_activity_redPacket.delay(_data) # 异步判断是否下发红包。
+
+
+
+
+        return HttpResponse("success")
 
 
 ## 生成接入流程控制页面

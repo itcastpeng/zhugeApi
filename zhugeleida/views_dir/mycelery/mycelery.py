@@ -744,7 +744,7 @@ def user_forward_send_activity_redPacket(request):
             response.msg = '[无记录]活动发红包记录表'
             print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id,'|',article_id,"|",activity_id)
 
-
+    return JsonResponse(response.__dict__)
 
 
 

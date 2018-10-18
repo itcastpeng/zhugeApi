@@ -549,7 +549,7 @@ class zgld_customer(models.Model):
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
     # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
     subscribe_choices = (
-        (0, '没有订阅该公众号'),
+        (0, '取消订阅该公众号'),
         (1, '已经订阅该公众号')
     )
     is_subscribe =  models.SmallIntegerField(verbose_name='用户是否订阅该公众号', choices=subscribe_choices,null=True)                                                                   #值为0时，代表此用户没有关注该公众号

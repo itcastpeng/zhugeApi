@@ -271,31 +271,8 @@ def article_oper(request, oper_type, o_id):
                     if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
 
-                        ## 判断转发后阅读的人数 +转发后阅读时间
-                        ## 此处要 封装到异步中。
-
-                        if activity_objs:  # 说明有参与活动
-                            # forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                            #     customer_parent_id=parent_id).values_list('customer_id').distinct()
-                            #
-                            # forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                            #     customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
-                            #
-                            # forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
-                            # if not forward_stay_time:
-                            #     forward_stay_time = 0
-                            #
-                            # activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
-                            #                                                                         article_id=article_id,
-                            #                                                                         activity_id=activity_id
-                            #                                                                         )
-                            # if activity_redPacket_objs:
-                            #     activity_redPacket_objs.update(
-                            #         forward_read_num=forward_read_num,
-                            #         forward_stay_time=forward_stay_time
-                            #     )
-                            # if forward_read_num == 4:
-
+                        ## 判断转发后阅读的人数 +转发后阅读时间 此处要 封装到异步中。
+                        if activity_objs:  # 说明有参与活动，活动在进行中
                             _data = {
                                 'parent_id': parent_id,
                                 'article_id': article_id,
