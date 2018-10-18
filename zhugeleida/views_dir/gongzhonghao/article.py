@@ -306,7 +306,7 @@ def article_oper(request, oper_type, o_id):
                             data['action'] = 14
                             response = action_record(data, remark)  # 此步骤要要封装到 异步中。
 
-                        if parent_id and user_type == 1 and uid : # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
+                        if parent_id and uid : # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
 
                             data_ = {
                                 'customer_id': parent_id,
