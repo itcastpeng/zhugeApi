@@ -152,6 +152,7 @@ class Prpcrypt(object):
         """
         # 16位随机字符串添加到明文开头
 
+        print('---- 加密前-->>',text,"|",)
         socket_htonl_text = socket.htonl(len(text))
         text = self.get_random_str() + str(struct.pack("I", socket_htonl_text)) + text + appid
         # 使用自定义的填充方式对明文进行补位填充
@@ -160,13 +161,16 @@ class Prpcrypt(object):
         text = pkcs7.encode(text)
         # 加密
         cryptor = AES.new(self.key,self.mode,self.key[:16])
-        try:
-            ciphertext = cryptor.encrypt(text)
-            # 使用BASE64对加密后的字符串进行编码
-            return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
-        except Exception as e:
-            print('----- +160 ------>>', e)
-            return  ierror.WXBizMsgCrypt_EncryptAES_Error,None
+        # try:
+        print('--- 加密后text --->>',text)
+        ciphertext = cryptor.encrypt(text)
+        print('----ciphertext-->>',ciphertext)
+
+        # 使用BASE64对加密后的字符串进行编码
+        return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
+        # except Exception as e:
+        #     print('----- +160 ------>>', e)
+        #     return  ierror.WXBizMsgCrypt_EncryptAES_Error,None
 
     def decrypt(self,text,appid):
         """对解密后的明文进行补位删除
