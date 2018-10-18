@@ -294,7 +294,7 @@ def article_oper(request, oper_type, o_id):
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
-
+                    customer_obj = ''
                     if customer_objs:  # 说明客户访问时候经过认证的
                         customer_obj = customer_objs[0]
                         username = customer_obj.username
@@ -307,11 +307,14 @@ def article_oper(request, oper_type, o_id):
                             response = action_record(data, remark)  # 此步骤要要封装到 异步中。
 
                         if parent_id and user_type == 1 and uid : # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
+
                             data_ = {
                                 'customer_id': parent_id,
                                 'user_id' :  uid,
                                 'type' : 'forward_look_article_tishi'
                             }
+                            print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->', data_)
+
                             tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息】
 
 
@@ -327,8 +330,8 @@ def article_oper(request, oper_type, o_id):
                         last_access_date=now_date_time
                     )
                     article_access_log_id = article_access_log_obj.id
-                    is_subscribe = customer_obj[0].is_subscribe
-                    is_subscribe_text = customer_obj[0].get_is_subscribe_display()
+                    is_subscribe = customer_obj.is_subscribe
+                    is_subscribe_text = customer_obj.get_is_subscribe_display()
 
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     qrcode_url = ''
