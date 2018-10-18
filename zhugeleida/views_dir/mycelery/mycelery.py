@@ -1006,10 +1006,12 @@ def get_customer_gongzhonghao_userinfo(request):
         subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
 
         objs = models.zgld_customer.objects.filter(openid=openid)
-        objs.update(
-            is_subscribe=subscribe
-        )
-        print('---------- 公众号-用户创建成功 crete successful openid | subscribe ---->',openid,"|",subscribe)
+        if objs:
+            customer_id = objs[0].id
+            objs.update(
+                is_subscribe=subscribe
+            )
+            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id),openid,"|",subscribe)
 
     return JsonResponse(response.__dict__)
 

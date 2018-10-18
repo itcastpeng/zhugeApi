@@ -312,7 +312,7 @@ def article_oper(request, oper_type, o_id):
                                 'user_id' :  uid,
                                 'type' : 'forward_look_article_tishi'
                             }
-                            tasks.user_send_gongzhonghao_template_msg.delay(json.dumps(data_))  # 发送【公众号发送模板消息】
+                            tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息】
 
 
 
