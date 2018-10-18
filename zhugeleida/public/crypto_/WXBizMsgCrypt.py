@@ -264,7 +264,7 @@ class WXBizMsgCrypt(object):
         if ret != 0:
             return ret,None
         xmlParse = XMLParse()
-        return ret,xmlParse.generate(encrypt, signature, timestamp, sNonce)
+        return ret,xmlParse.generate(encrypt.decode('utf-8'), signature, timestamp, sNonce)
 
     def DecryptMsg(self, encrypt, sMsgSignature, sTimeStamp, sNonce):
         # 检验消息的真实性，并且获取解密后的明文
