@@ -61,6 +61,11 @@ def mallManageShow(request):
                 'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
             })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+            'otherData':otherData,
+        }
     else:
         objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id)
         for obj in objs:
@@ -74,14 +79,14 @@ def mallManageShow(request):
                 'topLunBoTu': topLunBoTu,
                 'shichangjiage': obj.shichangjiage,
             })
-    if indexLunBoTu:
-        indexLunBoTu = json.loads(indexLunBoTu)
-    response.code = 200
-    response.msg = '查询成功'
-    response.data = {
-        'indexLunBoTu':indexLunBoTu,
-        'otherData':otherData,
-    }
+        if indexLunBoTu:
+            indexLunBoTu = json.loads(indexLunBoTu)
+        response.code = 200
+        response.msg = '查询成功'
+        response.data = {
+            'indexLunBoTu':indexLunBoTu,
+            'otherData':otherData,
+        }
     return JsonResponse(response.__dict__)
 
 
