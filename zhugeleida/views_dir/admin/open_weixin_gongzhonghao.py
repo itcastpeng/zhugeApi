@@ -545,7 +545,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type,app_id):
             # postdata =  request.POST.get('postdata')
 
             postdata = request.body.decode(encoding='UTF-8')
-            global decryp_xml_tree
+
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
             token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
