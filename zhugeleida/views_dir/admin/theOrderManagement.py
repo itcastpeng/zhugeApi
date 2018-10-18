@@ -45,7 +45,7 @@ def theOrderShow(request):
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
             shangpinguanli__parentName__mallSetting__xiaochengxuApp=xiaochengxu_id
-        ).filter(q).order_by('-start_createDate')
+        ).filter(q).order_by('-createDate')
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length

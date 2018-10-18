@@ -24,11 +24,11 @@ def theOrderShow(request):
         orderStatus = request.GET.get('orderStatus')
         if orderStatus:
             if int(orderStatus) == 1:
-                q.add(Q(theOrderStatus=8), Q.AND)
+                q.add(Q(theOrderStatus=1) | Q(theOrderStatus=11), Q.AND)
             elif int(orderStatus) == 2:
                 q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
             else:
-                q.add(Q(theOrderStatus=1) | Q(theOrderStatus=11), Q.AND)
+                q.add(Q(theOrderStatus=8), Q.AND)
         if detailId:
             q.add(Q(id=detailId), Q.AND)
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=user_id, logicDelete=0) # 小程序用户只能查看自己的订单
