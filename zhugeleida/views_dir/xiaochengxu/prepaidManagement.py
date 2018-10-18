@@ -1,14 +1,8 @@
-import random
-import hashlib
-import requests
-import xml.dom.minidom as xmldom
-import qrcode
-import uuid, time, json
+import qrcode, re, requests, hashlib, random, uuid, time, json, xml.dom.minidom as xmldom, base64, datetime
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
-import requests, base64, datetime
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -126,6 +120,12 @@ def yuZhiFu(request):
         user_id = request.GET.get('user_id')
         u_id = request.POST.get('u_id')
         phoneNumber = request.POST.get('phoneNumber')           # 电话号码
+        phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
+        res = re.search(phone_pat, phoneNumber)
+        if not res:
+            response.code = 301
+            response.msg = '请输入正确的手机号'
+            return JsonResponse(response.__dict__)
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
         print('fukuan===============> ',fukuan)

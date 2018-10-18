@@ -44,7 +44,7 @@ def theOrderShow(request):
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
-            shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp=xiaochengxu_id
+            shangpinguanli__parentName__mallSetting__xiaochengxuApp=xiaochengxu_id
         ).filter(q)
         objsCount = objs.count()
         if length != 0:
@@ -96,7 +96,8 @@ def theOrderShow(request):
                 'status':obj.get_theOrderStatus_display(),
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'lunbotu':topLunBoTu,
-                'detailePicture':detailePicture
+                'detailePicture':detailePicture,
+                'phoneNumber':obj.phone
             })
             response.data = {
                 'otherData':otherData,
@@ -117,7 +118,7 @@ def theOrderShow(request):
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def theOrderOper(request, oper_type, o_id):
+def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
     response = Response.ResponseObj()
     if request.method == 'POST':
         if oper_type == 'update':
@@ -130,6 +131,7 @@ def theOrderOper(request, oper_type, o_id):
                 'yongjin': request.POST.get('yongjin'),
                 'peiSong': request.POST.get('peiSong'),
                 'shouHuoRen_id': request.POST.get('shouHuoRen_id'),
+                'phoneNumber': request.POST.get('phoneNumber')    # 电话
             }
             forms_obj = UpdateForm(otherData)
             if forms_obj.is_valid():
@@ -144,7 +146,8 @@ def theOrderOper(request, oper_type, o_id):
                     yewuUser_id=otherData.get('yewuyuan_id'),
                     yongJin=otherData.get('yongjin'),
                     peiSong=otherData.get('peiSong'),
-                    shouHuoRen_id=otherData.get('shouHuoRen_id')
+                    shouHuoRen_id=otherData.get('shouHuoRen_id'),
+                    phone=otherData.get('phoneNumber')
                 )
                 response.code = 200
                 response.msg = '修改成功'
@@ -154,7 +157,7 @@ def theOrderOper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
-        if oper_type == 'selectStatus':
+        if oper_type == 'selectStatus':  # 查询所有状态
             objs = models.zgld_shangcheng_dingdan_guanli
             statusData = []
             for i in objs.order_status:
@@ -165,9 +168,9 @@ def theOrderOper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = statusData
-        elif oper_type == 'selectYeWu':
-            objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
-            company_id = objs[0].shangpinguanli.parentName.xiaochengxu_app.xiaochengxucompany_id
+        elif oper_type == 'selectYeWu':     # 查询所有业务
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)  # 订单ID
+            company_id = objs[0].shangpinguanli.parentName.mallSetting.xiaochengxucompany_id
             companyObjs = models.zgld_company.objects.filter(id=company_id)
             yewuObjs = models.zgld_admin_userprofile.objects.filter(company_id=companyObjs[0].id)
             otherData = []
