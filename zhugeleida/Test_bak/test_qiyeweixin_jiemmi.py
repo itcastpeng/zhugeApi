@@ -91,7 +91,7 @@ openid = 'ob5mL1Q4faFlL2Hv2S43XYKbNO-k'
 original_id = 'gh_21c48bcaa193'
 
 content = '手动阀大'
-_nonce = '1045672352'
+_nonce = '1152221748'
 res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
     openid=openid, original_id=original_id, createtime=createtime, content=content.encode('utf-8'))
 

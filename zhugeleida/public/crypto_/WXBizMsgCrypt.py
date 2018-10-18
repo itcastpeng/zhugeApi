@@ -49,15 +49,17 @@ class SHA1:
         @param nonce: 随机字符串
         @return: 安全签名
         """
-        try:
-            sortlist = [token, timestamp, nonce, encrypt]
-            sortlist.sort()
-            sha = hashlib.sha1()
-            sha.update("".join(sortlist).encode("ascii"))
-            return  ierror.WXBizMsgCrypt_OK, sha.hexdigest()
-        except Exception as e:
-            print ('-----+57---->>',e)
-            return  ierror.WXBizMsgCrypt_ComputeSignature_Error, None
+        # try:
+        sortlist = [token, timestamp, nonce, encrypt.decode()]
+
+        sortlist.sort()
+        sha = hashlib.sha1()
+        sha.update("".join(sortlist).encode("ascii"))
+        return  ierror.WXBizMsgCrypt_OK, sha.hexdigest()
+
+        # except Exception as e:
+        #     print ('-----+57---->>',e)
+        #     return  ierror.WXBizMsgCrypt_ComputeSignature_Error, None
 
 
 class XMLParse:
