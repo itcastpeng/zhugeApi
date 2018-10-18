@@ -567,7 +567,7 @@ def user_send_gongzhonghao_template_msg(request):
 
     user_id = request.GET.get('user_id')
     customer_id = request.GET.get('customer_id')
-    type = request.GET.get('type')
+    _type = request.GET.get('type')
 
     userprofile_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = userprofile_obj.company_id
@@ -608,7 +608,7 @@ def user_send_gongzhonghao_template_msg(request):
                 'app_secret': '0bbed534062ceca2ec25133abe1eecba'
             }
 
-            authorizer_access_token_result = create_authorizer_access_token(data)
+            authorizer_access_token_result = create_gongzhonghao_authorizer_access_token(data)
             if authorizer_access_token_result.code == 200:
                 authorizer_access_token = authorizer_access_token_result.data
 
@@ -630,7 +630,7 @@ def user_send_gongzhonghao_template_msg(request):
         点击进入咨询页面
         '''
         data = ''
-        if  type == 'user_chat_tishi':
+        if  _type == 'user_chat_tishi':
 
             consult_info = ('%s - %s【%s】') %  (company_name,user_name,position)
             data = {
@@ -652,7 +652,7 @@ def user_send_gongzhonghao_template_msg(request):
 
 
 
-        elif type == 'forward_look_article_tishi':
+        elif _type == 'forward_look_article_tishi':
             data = {
                 'first': {
                     'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
