@@ -67,7 +67,7 @@ nonce = "1250886219"
 encrypt = xml_tree.find("Encrypt").text
 
 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
-ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+# ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
 
 # print('--->>',decryp_xml)
 
@@ -77,16 +77,29 @@ ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonc
 # print(xml_tree.find("Event"))
 
 # print(decryp_xml)
-DOMTree = xmldom.parseString(decryp_xml)
-collection = DOMTree.documentElement
-original_id = collection.getElementsByTagName("ToUserName")[0].childNodes[0].data
-openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
-Event = collection.getElementsByTagName("Event")[0].childNodes[0].data
-print('--original_id-->>',original_id)
-print('--Event-->>',Event)
-print('--openid-->>',openid)
+# DOMTree = xmldom.parseString(decryp_xml)
+# collection = DOMTree.documentElement
+# original_id = collection.getElementsByTagName("ToUserName")[0].childNodes[0].data
+# openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
+# Event = collection.getElementsByTagName("Event")[0].childNodes[0].data
+# print('--original_id-->>',original_id)
+# print('--Event-->>',Event)
+# print('--openid-->>',openid)
+import time
+createtime = int(time.time())
+openid = 'ob5mL1Q4faFlL2Hv2S43XYKbNO-k'
+original_id = 'gh_21c48bcaa193'
 
+content = '手动阀大'
+_nonce = '1045672352'
+res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
+    openid=openid, original_id=original_id, createtime=createtime, content=content)
 
+# print('----- 【加密前】的 消息---->>', res_msg)
+
+ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, _nonce)
+print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
+print('-------【加密后】的 消息---->>', encrypt_xml)
 # ComponentVerifyTicket = decryp_xml_tree.find("ComponentVerifyTicket").text
 
 # print('----ret -->', ret)
