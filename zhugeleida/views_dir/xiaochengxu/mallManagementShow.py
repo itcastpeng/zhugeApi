@@ -56,6 +56,7 @@ def mallManageShow(request):
                 'detailePicture' : detailePicture,              # 详情图片
                 'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
+                'DetailsDescription': obj.DetailsDescription    # 描述详情
             })
             response.code = 200
             response.msg = '查询成功'

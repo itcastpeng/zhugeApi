@@ -27,7 +27,12 @@ class AddForm(forms.Form):
             'required': '商品标价不能为空'
         }
     )
-
+    DetailsDescription = forms.CharField(
+        required=False,
+        error_messages={
+            'required': ''
+        }
+    )
     # inventoryNum = forms.IntegerField(
     #     required=True,
     #     error_messages={
@@ -62,14 +67,25 @@ class AddForm(forms.Form):
             'required': "商品状态不能为空"
         }
     )
-
-
+    def clean_DetailsDescription(self):
+        DetailsDescription = self.data.get('DetailsDescription')
+        if DetailsDescription:
+            if len(DetailsDescription) > 1024:
+                self.add_error('DetailsDescription', '描述详情长度不可超过1024')
+            else:
+                return DetailsDescription
 # 更新
 class UpdateForm(forms.Form):
     o_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': "修改ID不能为空"
+        }
+    )
+    DetailsDescription = forms.CharField(
+        required=False,
+        error_messages={
+            'required': ''
         }
     )
     goodsName = forms.CharField(
@@ -124,7 +140,13 @@ class UpdateForm(forms.Form):
             self.add_error('o_id', '修改ID不存在！')
         else:
             return o_id
-
+    def clean_DetailsDescription(self):
+        DetailsDescription = self.data.get('DetailsDescription')
+        if DetailsDescription:
+            if len(DetailsDescription) > 1024:
+                self.add_error('DetailsDescription', '描述详情长度不可超过1024')
+            else:
+                return DetailsDescription
 
 
 class SelectForm(forms.Form):
