@@ -16,14 +16,16 @@ def mallManageShow(request):
     response = Response.ResponseObj()
     uid = request.GET.get('uid')
     detaileId = request.GET.get('detaileId')    # 查询详情
-    u_idObjs = models.zgld_admin_userprofile.objects.get(id=uid)
+    u_idObjs = models.zgld_userprofile.objects.get(id=uid)
     print('u_idObjs.company.name===============> ',u_idObjs.company.name)
     print('u_idObjs.company.name===============> ',u_idObjs.company.id)
 
 
 
     xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs.company_id)
-    indexLunBoTu = xiaoChengXuObjs[0].lunbotu  # 查询首页 轮播图
+    indexLunBoTu = ''
+    if xiaoChengXuObjs:
+        indexLunBoTu = xiaoChengXuObjs[0].lunbotu  # 查询首页 轮播图
 
     otherData = []
     if detaileId:
