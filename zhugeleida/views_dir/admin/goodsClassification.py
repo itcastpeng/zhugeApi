@@ -17,7 +17,7 @@ def init_data(xiaochengxu_id, pid=None, level=1):
     result_data = []
     print('level------> ',level)
     objs = models.zgld_goods_classification_management.objects.filter(
-        xiaochengxu_app_id=xiaochengxu_id,
+        mallSetting_id=xiaochengxu_id,
         # userProfile_id=user_id,
         parentClassification_id=pid,
         level=level
@@ -53,7 +53,7 @@ def goodsClassShow(request):
             q = Q()
             if singleUser:
                 q.add(Q(parentClassification_id=singleUser), Q.AND)
-            objs = groupObjs.filter(xiaochengxu_app_id=jichushezhi_id).filter(q)
+            objs = groupObjs.filter(mallSetting_id=jichushezhi_id).filter(q)
             otherData = []
             for obj in objs:
                 countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
@@ -85,7 +85,7 @@ def goodsClassShow(request):
 
 def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id 判断是否会关联自己 如果o_id 在 result_data里会return
     objs = models.zgld_goods_classification_management.objects.filter(
-        xiaochengxu_app_id=xiaochengxu_id,
+        mallSetting_id=xiaochengxu_id,
         id=pid,
     )
     for obj in objs:
@@ -132,7 +132,7 @@ def goodsClassOper(request, oper_type, o_id):
                 objsId = objs.create(
                     classificationName=objForm.get('classificationName'),
                     parentClassification_id=objForm.get('parentClassification_id'),
-                    xiaochengxu_app_id=userObjs[0].id,
+                    mallSetting_id=userObjs[0].id,
                 )
                 objs.filter(id=objsId.id).update(level=level)
                 response.code = 200
@@ -188,7 +188,7 @@ def goodsClassOper(request, oper_type, o_id):
                 models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
                     classificationName=formObj.get('classificationName'),
                     parentClassification_id=parentClassification_id,
-                    xiaochengxu_app_id=userObjs[0].id,
+                    mallSetting_id=userObjs[0].id,
                     level=level,
                 )
                 response.code = 200

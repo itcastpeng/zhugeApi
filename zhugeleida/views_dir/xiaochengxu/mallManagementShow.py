@@ -15,14 +15,20 @@ def mallManageShow(request):
     # response = mallManagement.mallManagement(request, uid, goodsGroup, status, flag)
     response = Response.ResponseObj()
     uid = request.GET.get('uid')
-    detaileId = request.GET.get('detaileId')
-    u_idObjs = models.zgld_customer.objects.filter(id=uid)
-    xiaochengxu_id = u_idObjs[0].company_id
-    xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)
-    indexLunBoTu = xiaoChengXuObjs[0].lunbotu
+    detaileId = request.GET.get('detaileId')    # 查询详情
+    u_idObjs = models.zgld_admin_userprofile.objects.get(id=uid)
+    print('u_idObjs.company.name===============> ',u_idObjs.company.name)
+    print('u_idObjs.company.name===============> ',u_idObjs.company.id)
+
+
+
+    xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs.company_id)
+    indexLunBoTu = xiaoChengXuObjs[0].lunbotu  # 查询首页 轮播图
+
     otherData = []
     if detaileId:
-        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=xiaochengxu_id).filter(id=detaileId)
+        objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id).filter(id=detaileId)
+        print('objs=========>',objs)
         for obj in objs:
             groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)
             xianshangjiaoyi = '否'
@@ -45,19 +51,16 @@ def mallManageShow(request):
                 'parentName_id':parentGroup_id,
                 'parentName':parentGroup_name,
                 'goodsPrice':obj.goodsPrice,
-                'inventoryNum':obj.inventoryNum,
                 'goodsStatus':obj.get_goodsStatus_display(),
                 'xianshangjiaoyi':xianshangjiaoyi,
                 'shichangjiage':obj.shichangjiage,
-                'kucunbianhao':obj.kucunbianhao,
                 'topLunBoTu': topLunBoTu,                       # 顶部轮播图
                 'detailePicture' : detailePicture,              # 详情图片
                 'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                 'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
             })
     else:
-        objs = models.zgld_goods_management.objects.filter(parentName__xiaochengxu_app_id=xiaochengxu_id)
-        print(objs)
+        objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id)
         for obj in objs:
             topLunBoTu = ''
             if obj.topLunBoTu:

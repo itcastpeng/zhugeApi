@@ -27,7 +27,7 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                 u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
             else:
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
-            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__xiaochengxu_app__xiaochengxucompany_id=u_idObjs.company_id)
+            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id)
             otherData = []
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -84,7 +84,7 @@ def mallManagementShow(request):
 
 def updateInitData(result_data,xiaochengxu_id, pid=None):   # 更新查询 分类接口
     objs = models.zgld_goods_classification_management.objects.filter(
-        xiaochengxu_app_id=xiaochengxu_id,
+        mallSetting_id=xiaochengxu_id,
         id=pid,
     )
     for obj in objs:
