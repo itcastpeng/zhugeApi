@@ -666,7 +666,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                     if objs:
                         obj = objs[0]
                         customer_id = obj.id
-                        openid = obj.openid
+
                         import time
                         createtime = int(time.time())
                         content = '嗨,您好~ \n 丫挺的,欢迎您参加活动,刚才那谁查看了您转发的文章,还有2个人查看的话，我就给你发个大红包了，骗你是个小狗。'
@@ -682,7 +682,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         # print('-------【加密后】的 消息---->>', encrypt_xml)
 
                         # return HttpResponse(encrypt_xml)
-                        return HttpResponse(res_msg)
+                        return HttpResponse(res_msg, content_type="application/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
