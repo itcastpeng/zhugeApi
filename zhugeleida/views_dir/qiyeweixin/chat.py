@@ -303,7 +303,8 @@ def chat_oper(request, oper_type, o_id):
                     print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->',json.dumps(data))
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
-                    tasks.user_send_gongzhonghao_template_msg.delay(json.dumps(data))
+                    data['type'] = 'user_chat_tishi'
+                    tasks.user_send_gongzhonghao_template_msg.delay(json.dumps(data)) # 发送【公众号发送模板消息】
 
 
                 response.code = 200

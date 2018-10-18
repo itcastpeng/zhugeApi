@@ -25,19 +25,113 @@ from zhugeleida.public import common
 from django.db.models import  Sum
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import  focusOnIssuedRedEnvelope
 from django.db.models import Q,F
+import base64
+
+
+def action_record(data):
+
+    response = Response.ResponseObj()
+    user_id = data.get('uid')  # 用户 id
+    customer_id = data.get('user_id')  # 客户 id
+    article_id = data.get('article_id')  # 客户 id
+    action = data.get('action')
+    remark = data.get('remark')
+
+    company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
+    company_obj = models.zgld_company.objects.get(id=company_id)
+    agent_id = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
+    account_expired_time = company_obj.account_expired_time
+
+    customer_name = models.zgld_customer.objects.get(id=customer_id).username
+    customer_name = base64.b64decode(customer_name)
+    customer_name = str(customer_name, 'utf-8')
+
+    if datetime.datetime.now() <= account_expired_time:
+
+        if action in [0]: # 只发消息，不用记录日志。
+
+            # data['content'] = '%s%s' % (customer_name, remark)
+            # data['agentid'] = agent_id
+            # tasks.user_send_action_log.delay(json.dumps(data))
+            content =  '%s%s' % (customer_name, remark)
+            response.data = {
+                'content' : content,
+                'agentid' :  agent_id
+            }
+            response.code = 200
+            response.msg = '发送消息提示成功'
+
+        elif action in [14,15,16]:  #  (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
+            # 创建访问日志
+            models.zgld_accesslog.objects.create(
+                user_id=user_id,
+                article_id=article_id,
+                customer_id=customer_id,
+                remark=remark,
+                action=action
+            )
+            content = '%s%s' % (customer_name, remark)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name, content)
+            response.data = {
+                'content': content,
+                'agentid': agent_id
+            }
+            response.code = 200
+            response.msg = '发送消息提示成功'
+
+        else:
+            # 创建访问日志
+            models.zgld_accesslog.objects.create(
+                user_id=user_id,
+                customer_id=customer_id,
+                remark=remark,
+                action=action
+            )
+
+            # 查询客户与用户是否已经建立关系
+            follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+                user_id=user_id,
+                customer_id=customer_id
+            )
+            now_time = datetime.datetime.now()
+            if follow_objs:  # 已经有关系了
+                follow_objs.update(
+                    last_activity_time=now_time
+                   )
+                content = '%s%s' % (customer_name, remark)
+                print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,content)
+
+                response.data = {
+                    'content': content,
+                    'agentid': agent_id
+                }
+                response.code = 200
+                response.msg = '记录日志成功'
+
+    else:
+        company_name = company_obj.name
+        response.code = 403
+        response.msg = '账户过期'
+        print('-------- 雷达账户过期: %s-%s | 过期时间:%s ------->>' % (company_id,company_name,account_expired_time))
+
+
+    return response
+
+
+
 
 
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
 def user_send_action_log(request):
-    response = ResponseObj()
-    data = json.loads(request.POST.get('data'))
-    print('data ===>', data)
 
+    response = ResponseObj()
+    data = request.GET.copy()
+
+    response_ret = action_record(data)
+    content =  response_ret.data.get('content')
     customer_id = data.get('customer_id', '')
-    user_id = data.get('uid')
-    content = data.get('content')
-    # agentid = data.get('agentid')
+    user_id = request.GET.get('uid')
 
 
     send_token_data = {}
@@ -469,11 +563,11 @@ def user_send_template_msg(request):
 def user_send_gongzhonghao_template_msg(request):
     response = ResponseObj()
 
-    print('request -->', request.GET)
-    data = json.loads(request.GET.get('data'))
+    print('---request -->', request.GET)
 
-    user_id = data.get('user_id')
-    customer_id = data.get('customer_id')
+    user_id = request.GET.get('user_id')
+    customer_id = request.GET.get('customer_id')
+    type = request.GET.get('type')
 
     userprofile_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = userprofile_obj.company_id
@@ -497,48 +591,47 @@ def user_send_gongzhonghao_template_msg(request):
 
     user_name = objs[0].user.username
     position = objs[0].user.position
-    flag = True
-    while flag:
 
-        post_template_data =  {}
+    key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+    authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-        key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-        authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+    if not authorizer_access_token:
+        authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+        authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
-            authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-            authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+            data = {
+                'key_name': authorizer_access_token_key_name,
+                'authorizer_refresh_token': authorizer_refresh_token,
+                'authorizer_appid': authorizer_appid,
+                'app_id': 'wx6ba07e6ddcdc69b3',
+                'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+            }
 
-            if not authorizer_access_token:
-                data = {
-                    'key_name': authorizer_access_token_key_name,
-                    'authorizer_refresh_token': authorizer_refresh_token,
-                    'authorizer_appid': authorizer_appid,
-                    'app_id': 'wx6ba07e6ddcdc69b3',
-                    'app_secret': '0bbed534062ceca2ec25133abe1eecba'
-                }
+            authorizer_access_token_result = create_authorizer_access_token(data)
+            if authorizer_access_token_result.code == 200:
+                authorizer_access_token = authorizer_access_token_result.data
 
-                authorizer_access_token_result = create_authorizer_access_token(data)
-                if authorizer_access_token_result.code == 200:
-                    authorizer_access_token = authorizer_access_token_result.data
+    get_template_data = {
+        'access_token' : authorizer_access_token      #授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
+    }
 
-        get_template_data = {
-            'access_token' : authorizer_access_token      #授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
-        }
+    if customer_obj and objs:
+        openid = customer_obj[0].openid
 
-        if customer_obj and objs:
-            openid = customer_obj[0].openid
+        path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+        xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+        appid = xiaochengxu_app_obj.authorization_appid
+        # 留言回复通知
+        '''
+        您好，您咨询商家的问题已回复
+        咨询名称：孕儿美摄影工作室-张炬
+        消息回复：您有未读消息哦
+        点击进入咨询页面
+        '''
+        data = ''
+        if  type == 'user_chat_tishi':
 
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-            xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            appid = xiaochengxu_app_obj.authorization_appid
-            # 留言回复通知
-            '''
-            您好，您咨询商家的问题已回复
-            咨询名称：孕儿美摄影工作室-张炬
-            消息回复：您有未读消息哦
-            点击进入咨询页面
-            '''
             consult_info = ('%s - %s【%s】') %  (company_name,user_name,position)
             data = {
                 'first': {
@@ -556,45 +649,64 @@ def user_send_gongzhonghao_template_msg(request):
                     'value': '了解更多请点击进入【我的名片小程序】哦'  #回复内容
                 }
             }
-            post_template_data = {
-                'touser' : openid,
-                'template_id': template_id,
-                "miniprogram": {
-                    "appid": appid,
-                    "pagepath": path,
+
+
+
+        elif type == 'forward_look_article_tishi':
+            data = {
+                'first': {
+                    'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
                 },
-                'data' : data
+                'keyword1': {
+                    'value': '欢迎您参加转发文章,得现金活动 😁！',
+                    "color": "#0000EE"
+                },
+                'keyword2': {
+                    'value': '转发多多,红包多多,立返红包!',
+                    "color": "#FF0000"
+                },
+                'remark': {
+                    'value': '【回复1】查看转发详情'  # 回复内容
+                }
             }
 
-            print('=========== 发送出去的【模板消息】请求数据 =======>>',json.dumps(post_template_data))
+        post_template_data = {
+            'touser' : openid,
+            'template_id': template_id,
+            "miniprogram": {
+                "appid": appid,
+                "pagepath": path,
+            },
+            'data' : data
+        }
 
-            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
-            template_msg_url =  'https://api.weixin.qq.com/cgi-bin/message/template/send'
-            template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
-            template_ret = template_ret.json()
+        print('=========== 发送出去的【模板消息】请求数据 =======>>',json.dumps(post_template_data))
 
-            print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
+        # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
+        template_msg_url =  'https://api.weixin.qq.com/cgi-bin/message/template/send'
+        template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
+        template_ret = template_ret.json()
 
-            if template_ret.get('errmsg') == "ok":
-                print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
-                response.code = 200
-                response.msg = "企业用户发送模板消息成功"
-                flag = False
+        print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
 
-            elif template_ret.get('errcode') == 40001:
-                rc.delete(key_name)
+        if template_ret.get('errmsg') == "ok":
+            print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
+            response.code = 200
+            response.msg = "企业用户发送模板消息成功"
 
-            else:
-                print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
-                response.code = 301
-                response.msg = "企业用户发送模板消息失败"
 
-            flag = False
+        elif template_ret.get('errcode') == 40001:
+            rc.delete(key_name)
 
         else:
-            response.msg = "客户不存在"
+            print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
             response.code = 301
-            print('---- Template Msg 客户不存在---->>')
+            response.msg = "企业用户发送模板消息失败"
+
+    else:
+        response.msg = "客户不存在"
+        response.code = 301
+        print('---- Template Msg 客户不存在---->>')
 
     return JsonResponse(response.__dict__)
 

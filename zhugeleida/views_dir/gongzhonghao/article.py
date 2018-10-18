@@ -239,9 +239,10 @@ def article_oper(request, oper_type, o_id):
 
                 tag_list = list(obj.tags.values('id', 'name'))
                 # print('-----obj.tags.values---->', tag_list)
+                title =  obj.title
                 ret_data.append({
                     'id': obj.id,
-                    'title': obj.title,  # 文章标题
+                    'title': title,  # 文章标题
                     'author': obj.user.username,  # 如果为原创显示,文章作者
                     'avatar': obj.user.avatar,  # 用户的头像
                     'summary': obj.summary,  # 摘要
@@ -282,22 +283,38 @@ def article_oper(request, oper_type, o_id):
                             tasks.user_forward_send_activity_redPacket.delay(_data)
 
 
+
+
+
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
-                    customer_obj = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
+                    customer_objs = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     zgld_article_objs.update(status=1)  # 改为已发状态
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
 
-                    if customer_obj and customer_obj[0].username:  # 说明客户访问时候经过认证的
+                    if customer_objs:  # 说明客户访问时候经过认证的
+                        customer_obj = customer_objs[0]
+                        username = customer_obj.username
+                        user_type = customer_obj.user_type
+                        if username:
+                            remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + title))
+                            print('---- 公众号查看文章[消息提醒]--->>', remark)
+                            data = request.GET.copy()
+                            data['action'] = 14
+                            response = action_record(data, remark)  # 此步骤要要封装到 异步中。
 
-                        remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + obj.title))
-                        print('---- 公众号查看文章[消息提醒]--->>', remark)
-                        data = request.GET.copy()
-                        data['action'] = 14
-                        response = action_record(data, remark)  # 此步骤要要封装到 异步中。
+                        if parent_id and user_type == 1 and uid : # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
+                            data_ = {
+                                'customer_id': parent_id,
+                                'user_id' :  uid,
+                                'type' : 'forward_look_article_tishi'
+                            }
+                            tasks.user_send_gongzhonghao_template_msg.delay(json.dumps(data_))  # 发送【公众号发送模板消息】
+
+
 
                     ## 先记录一个用户查看文章的日志
                     now_date_time = datetime.datetime.now()
