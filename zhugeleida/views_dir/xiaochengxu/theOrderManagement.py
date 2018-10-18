@@ -31,7 +31,7 @@ def theOrderShow(request):
                 q.add(Q(theOrderStatus=8), Q.AND)
         if detailId:
             q.add(Q(id=detailId), Q.AND)
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=user_id, logicDelete=0) # 小程序用户只能查看自己的订单
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=user_id, logicDelete=0).order_by('-createDate') # 小程序用户只能查看自己的订单
         objsCount = objs.count()
         if length != 0:
             start_line = (current_page - 1) * length
