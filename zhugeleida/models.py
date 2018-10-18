@@ -1107,18 +1107,19 @@ class zgld_goods_management(models.Model):
     )
     goodsStatus = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", auto_now_add=True)
+    shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", null=True, blank=True)
     xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
     # kucunbianhao = models.CharField(verbose_name='库存编号', max_length=128, default='')
     zhengshu = models.CharField(verbose_name='证书', max_length=256, null=True, blank=True)
     topLunBoTu = models.TextField(verbose_name='顶部轮播图', null=True, blank=True)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
-
+    DetailsDescription = models.TextField(verbose_name='详情描述', null=True, blank=True)
 
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):
     shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
+    phone = models.CharField(verbose_name='手机号码', max_length=32, null=True, blank=True)
     orderNumber = models.CharField(verbose_name='订单号', max_length=128, null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价', max_length=64, default=0)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)

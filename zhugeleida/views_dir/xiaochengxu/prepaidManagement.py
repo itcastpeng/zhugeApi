@@ -125,6 +125,7 @@ def yuZhiFu(request):
         goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
         u_id = request.POST.get('u_id')
+        phoneNumber = request.POST.get('phoneNumber')           # 电话号码
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
         print('fukuan===============> ',fukuan)
@@ -201,7 +202,7 @@ def yuZhiFu(request):
             response.code = 200
             response.msg = '支付成功'
             # 预支付成功 创建订单
-            if not fukuan:
+            if not fukuan: # 判断是否已经存在订单
                 dingDanObjs = models.zgld_shangcheng_dingdan_guanli.objects
                 date_time = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
                 commissionFee = 0
@@ -223,7 +224,8 @@ def yuZhiFu(request):
                     theOrderStatus = 1,                     # 订单状态
                     createDate=date_time,
                     goodsName=goodsObjs[0].goodsName,
-                    detailePicture=goodsObjs[0].detailePicture
+                    detailePicture=goodsObjs[0].detailePicture,
+                    phone=phoneNumber
                 )
 
                 # dingdanId = dingdan.id
