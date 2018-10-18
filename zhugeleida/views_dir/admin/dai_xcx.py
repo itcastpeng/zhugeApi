@@ -15,6 +15,7 @@ from django.conf import settings
 import os
 from zhugeleida.forms.admin.dai_xcx_verify import CommitCodeInfoForm,SubmitAuditForm,RelaseCodeInfoForm,AuditCodeInfoForm,GetAuditForm,RevertCodeReleaseForm
 
+from zhugeleida.public.WorkWeixinOper import WorkWeixinOper
 
 
 @csrf_exempt
@@ -832,7 +833,25 @@ def  batch_get_latest_audit_status(data):
             obj.reason = reason
             obj.save()
 
+            if status in [0, 1]:
+                # 发送企业微信消息通知
+                corpid = 'wx81159f52aff62388'  # 企业ID
+                corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
+                redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
+                obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
 
+                xcx_app_name = xcx_app_obj.name
+                msg = """小程序名称：{xcx_app_name}\n审核状态：{status}\n备注：{remark}""".format(
+                    xcx_app_name=xcx_app_name,
+                    status="审核通过" if status == 0 else "审核失败",
+                    remark="" if status == 0 else xcx_app_obj.code_release_result,
+                )
+                obj.send_message(
+                    agentid=1000005,
+                    msg=msg,
+                    touser="zhangcong"
+                    # touser="zhangcong|1530778413048|1531464629357|1531476018476"
+                )
 
     else:
         response.code = 302
