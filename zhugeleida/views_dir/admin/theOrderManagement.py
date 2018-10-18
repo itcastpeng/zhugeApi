@@ -90,7 +90,7 @@ def theOrderShow(request):
                 'yewuyuan':yewuUser,
                 'unitRiceNum':obj.unitRiceNum,
                 'yongjin':obj.yongJin,
-                'peiSong':obj.peiSong,
+                # 'peiSong':obj.peiSong,
                 'shouHuoRen_id':obj.shouHuoRen_id,
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
@@ -129,7 +129,7 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
                 'youhui': request.POST.get('youhui'),
                 'yewuyuan_id': request.POST.get('yewuyuan_id'),
                 'yongjin': request.POST.get('yongjin'),
-                'peiSong': request.POST.get('peiSong'),
+                # 'peiSong': request.POST.get('peiSong'),
                 'shouHuoRen_id': request.POST.get('shouHuoRen_id'),
                 'phoneNumber': request.POST.get('phoneNumber')    # 电话
             }
@@ -145,7 +145,7 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
                     youHui=otherData.get('youhui'),
                     yewuUser_id=otherData.get('yewuyuan_id'),
                     yongJin=otherData.get('yongjin'),
-                    peiSong=otherData.get('peiSong'),
+                    # peiSong=otherData.get('peiSong'),
                     shouHuoRen_id=otherData.get('shouHuoRen_id'),
                     phone=otherData.get('phoneNumber')
                 )

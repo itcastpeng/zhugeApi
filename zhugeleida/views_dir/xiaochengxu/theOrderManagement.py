@@ -76,7 +76,7 @@ def theOrderShow(request):
                 'yewuyuan_id':yewu,
                 'yewuyuan':username,
                 'yongjin':obj.yongJin,
-                'peiSong':obj.peiSong,
+                # 'peiSong':obj.peiSong,
                 'shouHuoRen_id':shouHuoRen_id,
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
