@@ -122,7 +122,8 @@ class PKCS7Encoder():
             amount_to_pad = self.block_size
         # 获得补位所用的字符
         pad = chr(amount_to_pad)
-        return text + pad * amount_to_pad
+        print('---amount_to_pad->>',amount_to_pad,pad)
+        return str(text + (pad * amount_to_pad)).encode('utf-8')
 
     def decode(self, decrypted):
         """删除解密后明文的补位字符
@@ -152,25 +153,41 @@ class Prpcrypt(object):
         """
         # 16位随机字符串添加到明文开头
 
-        print('---- 加密前-->>',text,"|",)
-        socket_htonl_text = socket.htonl(len(text))
-        text = self.get_random_str() + str(struct.pack("I", socket_htonl_text)) + text + appid
-        # 使用自定义的填充方式对明文进行补位填充
-
-        pkcs7 = PKCS7Encoder()
-        text = pkcs7.encode(text)
-        # 加密
-        cryptor = AES.new(self.key,self.mode,self.key[:16])
-        # try:
-        print('--- 加密后text --->>',text)
-        ciphertext = cryptor.encrypt(text)
-        print('----ciphertext-->>',ciphertext)
-
+        # print('---- 加密前-->>',text,"|",)
+        # socket_htonl_text = socket.htonl(len(text))
+        # print('-----str(struct.pack("I", socket_htonl_text))---->>', str(struct.pack("I", socket_htonl_text)))
+        #
+        # text = self.get_random_str() + str(struct.pack("I", socket_htonl_text)) + text + appid
+        # # 使用自定义的填充方式对明文进行补位填充
+        #
+        # pkcs7 = PKCS7Encoder()
+        # text = pkcs7.encode(text)
+        # # 加密
+        # cryptor = AES.new(self.key,self.mode,self.key[:16])
+        # # try:
+        # print('--- 加密后text --->>',text)
+        # ciphertext = cryptor.encrypt(text)
+        # print('----ciphertext-->>',ciphertext)
         # 使用BASE64对加密后的字符串进行编码
-        return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
+        # return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
         # except Exception as e:
         #     print('----- +160 ------>>', e)
         #     return  ierror.WXBizMsgCrypt_EncryptAES_Error,None
+        # 16位随机字符串添加到明文开头
+        text = self.get_random_str() + str(struct.pack("I",socket.htonl(len(text)))) + text + appid
+        # 使用自定义的填充方式对明文进行补位填充
+        pkcs7 = PKCS7Encoder()
+
+        text = pkcs7.encode(text)
+
+        # 加密
+        cryptor = AES.new(self.key,self.mode, self.key[:16])
+
+        ciphertext = cryptor.encrypt(text)
+        print('---ciphertext---->',ciphertext)
+        # 使用BASE64对加密后的字符串进行编码
+        return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
+
 
     def decrypt(self,text,appid):
         """对解密后的明文进行补位删除
