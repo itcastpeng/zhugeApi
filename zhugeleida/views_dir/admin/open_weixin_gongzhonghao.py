@@ -672,7 +672,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         content = '嗨,您好~ \n 丫挺的,欢迎您参加活动,刚才那谁查看了您转发的文章,还有2个人查看的话，我就给你发个大红包了，骗你是个小狗。'
 
                         res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content><MsgId>{MsgId}</MsgId></xml>'.format(
-                            openid=openid, original_id=original_id, createtime=CreateTime, content='YYYY',MsgId=MsgId)
+                            openid=openid, original_id=original_id, createtime=createtime, content='YYYY',MsgId=MsgId)
 
 
 
