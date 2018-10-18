@@ -93,7 +93,7 @@ original_id = 'gh_21c48bcaa193'
 content = '手动阀大'
 _nonce = '1045672352'
 res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
-    openid=openid, original_id=original_id, createtime=createtime, content=content)
+    openid=openid, original_id=original_id, createtime=createtime, content=content.encode('utf-8'))
 
 # print('----- 【加密前】的 消息---->>', res_msg)
 
