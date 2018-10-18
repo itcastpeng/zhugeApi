@@ -50,6 +50,9 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                 detailePicture = ''
                 if obj.detailePicture:
                     detailePicture = json.loads(obj.detailePicture)
+                shelvesCreateDate = ''
+                if obj.shelvesCreateDate:
+                    shelvesCreateDate = obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S')
                 otherData.append({
                     'id':obj.id,
                     'goodsName':obj.goodsName,
@@ -64,7 +67,7 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                     'topLunBoTu': topLunBoTu,  # 顶部轮播图
                     'detailePicture' : detailePicture,  # 详情图片
                     'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                    'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
+                    'shelvesCreateDate':shelvesCreateDate,
                     'DetailsDescription': obj.DetailsDescription # 描述详情
                 })
             response.code = 200
