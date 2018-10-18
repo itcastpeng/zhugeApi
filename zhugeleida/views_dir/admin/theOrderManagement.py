@@ -168,11 +168,11 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
             response.code = 200
             response.msg = '查询成功'
             response.data = statusData
-        elif oper_type == 'selectYeWu':     # 查询所有业务
+        elif oper_type == 'selectYeWu':     # 修改时查询所有 订单业务员
             objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)  # 订单ID
             company_id = objs[0].shangpinguanli.parentName.mallSetting.xiaochengxucompany_id
-            companyObjs = models.zgld_company.objects.filter(id=company_id)
-            yewuObjs = models.zgld_admin_userprofile.objects.filter(company_id=companyObjs[0].id)
+            # companyObjs = models.zgld_company.objects.filter(id=company_id)
+            yewuObjs = models.zgld_admin_userprofile.objects.filter(company_id=company_id)
             otherData = []
             for yewuObj in yewuObjs:
                 otherData.append({
