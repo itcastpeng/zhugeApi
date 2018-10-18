@@ -1130,7 +1130,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     yewuUser = models.ForeignKey(to='zgld_userprofile', verbose_name='业务员', null=True, blank=True)
     gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     yongJin = models.IntegerField(verbose_name='佣金', default=0)
-    peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
+    # peiSong = models.CharField(verbose_name='配送', max_length=64, null=True, blank=True)
     shouHuoRen = models.ForeignKey(to='zgld_customer', verbose_name='收货人', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
     order_status = (
