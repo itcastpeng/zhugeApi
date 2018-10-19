@@ -50,7 +50,7 @@ def website(request):
                 remark = '查看了您公司的官网,看来TA对您公司感兴趣'
                 data = request.GET.copy()
                 data['action'] = 4
-                response = action_record(data, remark)
+                action_record(data, remark)
 
         response.code = 200
         response.data = {

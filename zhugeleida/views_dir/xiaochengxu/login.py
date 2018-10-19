@@ -289,7 +289,7 @@ def login_oper(request, oper_type):
                 data = request.GET.copy()
                 print('data --> request.GET.copy() -->', data)
                 data['action'] = 13  # 代表用客户授权访问
-                response = action_record(data, remark)
+                action_record(data, remark)
 
                 response.data = {'ret_data': username + ' 已向您授权登录页面'}
                 response.code = 200

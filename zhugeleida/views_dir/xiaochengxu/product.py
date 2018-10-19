@@ -99,7 +99,7 @@ def product(request, oper_type):
                                 remark = '%s,尽快把握商机' % (('正在查看' + obj.name))
                                 data = request.GET.copy()
                                 data['action'] = 2
-                                response = action_record(data, remark)
+                                action_record(data, remark)
 
                         #  查询成功 返回200 状态码
                         response.code = 200
@@ -193,7 +193,7 @@ def product(request, oper_type):
                             remark = '正在查看您发布的产品,尽快把握商机'
                             data = request.GET.copy()
                             data['action'] = 2
-                            response = action_record(data, remark)
+                            action_record(data, remark)
 
                     #  查询成功 返回200 状态码
                     response.code = 200
@@ -278,7 +278,7 @@ def product(request, oper_type):
                 remark = '向您咨询产品'
                 data = request.GET.copy()
                 data['action'] = 7 # 咨询产品
-                response = action_record(data, remark)
+                action_record(data, remark)
                 response.code = 200
                 response.msg = "咨询产品返回成功"
 
@@ -295,7 +295,7 @@ def product(request, oper_type):
             remark = '%s' % (('转发了' + objs[0].name))
             data = request.GET.copy()
             data['action'] = 2
-            response = action_record(data, remark)
+            action_record(data, remark)
             response.code = 200
             response.msg = "记录转发产品成功"
 
