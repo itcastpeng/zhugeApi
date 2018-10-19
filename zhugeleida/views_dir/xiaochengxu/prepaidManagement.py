@@ -120,13 +120,8 @@ def yuZhiFu(request):
         goodsId = request.POST.get('goodsId')                 # 商品ID
         user_id = request.GET.get('user_id')
         u_id = request.POST.get('u_id')
-        phoneNumber = request.POST.get('phoneNumber')           # 电话号码
-        phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
-        res = re.search(phone_pat, phoneNumber)
-        if not res:
-            response.code = 301
-            response.msg = '请输入正确的手机号'
-            return JsonResponse(response.__dict__)
+
+
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
         print('fukuan===============> ',fukuan)
@@ -134,6 +129,7 @@ def yuZhiFu(request):
         userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
         openid = userObjs[0].openid                                 # openid  用户标识
         if not fukuan :
+            phoneNumber = request.POST.get('phoneNumber')  # 电话号码
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
@@ -157,9 +153,15 @@ def yuZhiFu(request):
             goodNum = 1
             if orderObjs[0].unitRiceNum:
                 goodNum = orderObjs[0].unitRiceNum
-
+                phoneNumber = orderObjs[0].phone
             total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
-
+        if phoneNumber:
+            phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
+            res = re.search(phone_pat, phoneNumber)
+            if not res:
+                response.code = 301
+                response.msg = '请输入正确的手机号'
+            return JsonResponse(response.__dict__)
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
         result_data = {
