@@ -704,6 +704,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                         reply = TextReply(content='YYY', message=decryp_xml)
                         xml = reply.render()
+                        print('xml -->', xml)
 
                         # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
                         # encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
