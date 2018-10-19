@@ -575,6 +575,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
 
             ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+            print('decryp_xml -->', decryp_xml)
 
             DOMTree = xmldom.parseString(decryp_xml)
             collection = DOMTree.documentElement
@@ -701,7 +702,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         from wechatpy.replies import TextReply
                         from wechatpy.crypto import WeChatCrypto
 
-                        reply = TextReply(content='YYY')
+                        reply = TextReply(content='YYY', message=decryp_xml)
                         xml = reply.render()
 
                         # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
