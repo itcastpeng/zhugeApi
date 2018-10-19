@@ -282,8 +282,7 @@ def activity_manage(request, oper_type):
                 else:
                     response.code = 301
                     response.msg = '[无记录]活动发红包记录表'
-                    print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id, '|',
-                          article_id, "|", activity_id)
+                    print('------[无记录]活动发红包记录表 activity_id ----->>', activity_id)
 
     return JsonResponse(response.__dict__)
 
