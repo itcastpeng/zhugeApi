@@ -559,7 +559,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
         # 消息与事件接收URL [授权后实现业务]
         elif oper_type == 'callback':
 
-            print('------- 【消息与事件接收URL】------->>', request.POST, "|", app_id)
+            print('------- 【消息与事件接收URL】------->>', request.body, "|", app_id)
 
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
