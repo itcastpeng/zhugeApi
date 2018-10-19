@@ -685,7 +685,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                         # return HttpResponse(encrypt_xml)
                         print('res_msg -->', res_msg)
-                        return HttpResponse(res_msg)
+                        return HttpResponse(res_msg, content_type="text/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
