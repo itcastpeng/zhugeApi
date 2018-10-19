@@ -227,6 +227,7 @@ def activity_manage(request, oper_type):
                         if not forward_stay_time:
                             forward_stay_time = 0
 
+                        print('-----forward_read_num forward_stay_time --->>',forward_read_num,forward_stay_time)
                         obj.forward_read_count=forward_read_num,
                         obj.forward_stay_time=forward_stay_time
                         obj.save()
