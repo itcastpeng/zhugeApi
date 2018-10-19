@@ -230,7 +230,7 @@ def activity_manage(request, oper_type):
                         print('-----forward_read_num forward_stay_time --->>',forward_read_num,forward_stay_time)
                         obj.forward_read_count=forward_read_num
                         obj.forward_stay_time=forward_stay_time
-                        obj.save()
+                        
 
                         activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
@@ -241,12 +241,9 @@ def activity_manage(request, oper_type):
                         shoudle_send_num = ''
                         if reach_forward_num != 0:  # 不能为0
                             forward_read_num = int(forward_read_num)
-                            if forward_read_num >= reach_forward_num:  # 转发大于 阈值,达到可以条件
-
-                                divmod_ret = divmod(forward_read_num, reach_forward_num)
-
-                                shoudle_send_num = divmod_ret[0]
-                                yushu = divmod_ret[1]
+                            divmod_ret = divmod(forward_read_num, reach_forward_num)
+                            shoudle_send_num = divmod_ret[0]
+                            yushu = divmod_ret[1]
 
                         customer_area = obj.customer.province + obj.customer.city
 
