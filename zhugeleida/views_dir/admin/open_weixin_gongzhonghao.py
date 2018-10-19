@@ -17,8 +17,11 @@ import redis
 import xml.etree.cElementTree as ET
 from django import forms
 
+from wechatpy.replies import TextReply
+from wechatpy.crypto import WeChatCrypto
 
-## 第三方平台接入
+
+# 第三方平台接入
 @csrf_exempt
 def open_weixin_gongzhonghao(request, oper_type):
     if request.method == "POST":
@@ -323,7 +326,7 @@ def open_weixin_gongzhonghao(request, oper_type):
         return JsonResponse(response.__dict__)
 
 
-## 第三方平台接入
+# 第三方平台接入
 @csrf_exempt
 def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
     if request.method == "POST":
@@ -570,7 +573,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
         # 消息与事件接收URL [授权后实现业务]
         elif oper_type == 'callback':
 
-            print('------- 【消息与事件接收URL】------->>', request.POST, "|", app_id)
+            print('------- 【消息与事件接收URL】------->>', request.body, "|", app_id)
 
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
@@ -586,6 +589,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
 
             ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+            print('decryp_xml -->', decryp_xml)
 
             DOMTree = xmldom.parseString(decryp_xml)
             collection = DOMTree.documentElement
@@ -678,24 +682,20 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         obj = objs[0]
                         customer_id = obj.id
 
-                        import time
-                        createtime = int(time.time())
-                        content = '嗨,您好~ \n 丫挺的,欢迎您参加活动,刚才那谁查看了您转发的文章,还有2个人查看的话，我就给你发个大红包了，骗你是个小狗。'
+                        reply = TextReply(content='YYY')
+                        reply._data['ToUserName'] = openid
+                        reply._data['FromUserName'] = original_id
 
-                        # res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
-                        #     openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
+                        xml = reply.render()
 
-                        res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content>></xml>'.format(
-                            openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
+                        print('xml -->', xml)
 
+                        timestamp = str(int(time.time()))
+                        crypto = WeChatCrypto(token, encodingAESKey, appid)
+                        encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                        print(encrypted_xml)
 
-                        print('----- 【加密前】的 消息---->>', res_msg)
-                        ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
-                        print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
-                        print('-------【加密后】的 消息---->>', encrypt_xml)
-
-                        # return HttpResponse(encrypt_xml)
-                        return HttpResponse(res_msg, content_type="application/xml")
+                        return HttpResponse(encrypted_xml, content_type="application/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)

@@ -31,7 +31,7 @@ def tuiKuanDingDanShow(request):
         objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related(
             'orderNumber'
         ).filter(
-            orderNumber__shangpinguanli__parentName__xiaochengxu_app__xiaochengxuApp_id=xiaochengxu_id
+            orderNumber__shangpinguanli__parentName__mallSetting__xiaochengxuApp_id=xiaochengxu_id
         ).filter(q)
 
         objsCount = objs.count()
