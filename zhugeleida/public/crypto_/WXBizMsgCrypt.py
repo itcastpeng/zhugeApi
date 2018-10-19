@@ -148,48 +148,78 @@ class Prpcrypt(object):
         self.mode = AES.MODE_CBC
 
 
-    def encrypt(self,text,appid):
+    # def encrypt(self,text,appid):
+    #     """对明文进行加密
+    #     @param text: 需要加密的明文
+    #     @return: 加密得到的字符串
+    #     """
+    #     # 16位随机字符串添加到明文开头
+    #
+    #     # print('---- 加密前-->>',text,"|",)
+    #     # socket_htonl_text = socket.htonl(len(text))
+    #     # print('-----str(struct.pack("I", socket_htonl_text))---->>', str(struct.pack("I", socket_htonl_text)))
+    #     #
+    #     # text = self.get_random_str() + str(struct.pack("I", socket_htonl_text)) + text + appid
+    #     # # 使用自定义的填充方式对明文进行补位填充
+    #     #
+    #     # pkcs7 = PKCS7Encoder()
+    #     # text = pkcs7.encode(text)
+    #     # # 加密
+    #     # cryptor = AES.new(self.key,self.mode,self.key[:16])
+    #     # # try:
+    #     # print('--- 加密后text --->>',text)
+    #     # ciphertext = cryptor.encrypt(text)
+    #     # print('----ciphertext-->>',ciphertext)
+    #     # 使用BASE64对加密后的字符串进行编码
+    #     # return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
+    #     # except Exception as e:
+    #     #     print('----- +160 ------>>', e)
+    #     #     return  ierror.WXBizMsgCrypt_EncryptAES_Error,None
+    #     # 16位随机字符串添加到明文开头
+    #     text = self.get_random_str() + str(struct.pack("I",socket.htonl(len(text)))) + text + appid
+    #     # 使用自定义的填充方式对明文进行补位填充
+    #     pkcs7 = PKCS7Encoder()
+    #
+    #     text = pkcs7.encode(text)
+    #
+    #     # 加密
+    #     cryptor = AES.new(self.key,self.mode, self.key[:16])
+    #
+    #     ciphertext = cryptor.encrypt(text)
+    #     print('---ciphertext---->',ciphertext)
+    #     # 使用BASE64对加密后的字符串进行编码
+    #     return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
+
+    def encrypt(self, text, appid):
         """对明文进行加密
         @param text: 需要加密的明文
         @return: 加密得到的字符串
         """
         # 16位随机字符串添加到明文开头
+        # len_str = struct.pack("I", socket.htonl(len(text)))
+        # xml_len = socket.ntohl(struct.unpack("I", content[: 4])[0])
 
-        # print('---- 加密前-->>',text,"|",)
-        # socket_htonl_text = socket.htonl(len(text))
-        # print('-----str(struct.pack("I", socket_htonl_text))---->>', str(struct.pack("I", socket_htonl_text)))
-        #
+        # text = self.get_random_str() + binascii.b2a_hex(len_str).decode() + text + appid
         # text = self.get_random_str() + str(struct.pack("I", socket_htonl_text)) + text + appid
-        # # 使用自定义的填充方式对明文进行补位填充
-        #
-        # pkcs7 = PKCS7Encoder()
-        # text = pkcs7.encode(text)
-        # # 加密
-        # cryptor = AES.new(self.key,self.mode,self.key[:16])
-        # # try:
-        # print('--- 加密后text --->>',text)
-        # ciphertext = cryptor.encrypt(text)
-        # print('----ciphertext-->>',ciphertext)
-        # 使用BASE64对加密后的字符串进行编码
-        # return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
-        # except Exception as e:
-        #     print('----- +160 ------>>', e)
-        #     return  ierror.WXBizMsgCrypt_EncryptAES_Error,None
-        # 16位随机字符串添加到明文开头
-        text = self.get_random_str() + str(struct.pack("I",socket.htonl(len(text)))) + text + appid
+        # text = self.get_random_str() + str(len_str) + text + appid
+
+        # xml_len = socket.ntohl(struct.pack("I", text[: 4])[0])
+        len_str = struct.pack("I", socket.htonl(len(text.encode())))
+        print('len_str -->', len_str)
+        text = self.get_random_str() + text + str(len_str) + appid
+        # text = self.get_random_str() + text + str(len_str) + appid
+        print('text -->', text)
         # 使用自定义的填充方式对明文进行补位填充
         pkcs7 = PKCS7Encoder()
-
         text = pkcs7.encode(text)
-
         # 加密
-        cryptor = AES.new(self.key,self.mode, self.key[:16])
-
-        ciphertext = cryptor.encrypt(text)
-        print('---ciphertext---->',ciphertext)
-        # 使用BASE64对加密后的字符串进行编码
-        return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext)
-
+        cryptor = AES.new(self.key, self.mode, self.key[:16])
+        try:
+            ciphertext = cryptor.encrypt(text)
+            # 使用BASE64对加密后的字符串进行编码
+            return ierror.WXBizMsgCrypt_OK, base64.b64encode(ciphertext).decode('utf8')
+        except Exception as e:
+            return ierror.WXBizMsgCrypt_EncryptAES_Error, None
 
     def decrypt(self,text,appid):
         """对解密后的明文进行补位删除
@@ -212,12 +242,20 @@ class Prpcrypt(object):
         #plain_text = pkcs7.encode(plain_text)
         # 去除16位随机字符串
         content = plain_text[16:-pad]
-        xml_len = socket.ntohl(struct.unpack("I",content[ : 4])[0])
+
+        xml_len = socket.ntohl(struct.unpack("I",content[ : 4])[0])     # 1014525292
         xml_content = content[ 4: xml_len+4:].decode("utf8")
         from_appid = content[xml_len+4:]
-        print ('------- 解密后xml_content ----->>',xml_content,'\n',from_appid,'\n',appid)
 
-        if  from_appid.decode("utf8") != appid:
+        print('----------pad ------>', pad)
+        print('----------plain_text ------>', plain_text)
+        print('----------content ------>', content)
+        print('----------xml_len ------>', xml_len)
+        print ('------- 解密后xml_content ----->>', xml_content)
+        print ('------- 解密后from_appid ----->>', from_appid)
+        print ('------- 解密后appid ----->>', appid)
+
+        if from_appid.decode("utf8") != appid:
             return ierror.WXBizMsgCrypt_ValidateAppid_Error,None
 
         return 0,xml_content
@@ -254,6 +292,7 @@ class WXBizMsgCrypt(object):
         #return：成功0，sEncryptMsg,失败返回对应的错误码None
         pc = Prpcrypt(self.key)
         ret,encrypt = pc.encrypt(sReplyMsg, self.appid)
+        print('encrypt -->', encrypt)
         if ret != 0:
             return ret,None
         if timestamp is None:
@@ -264,7 +303,7 @@ class WXBizMsgCrypt(object):
         if ret != 0:
             return ret,None
         xmlParse = XMLParse()
-        return ret,xmlParse.generate(encrypt.decode('utf-8'), signature, timestamp, sNonce)
+        return ret,xmlParse.generate(encrypt, signature, timestamp, sNonce)
 
     def DecryptMsg(self, encrypt, sMsgSignature, sTimeStamp, sNonce):
         # 检验消息的真实性，并且获取解密后的明文
@@ -281,7 +320,7 @@ class WXBizMsgCrypt(object):
         #     return ret, None
         sha1 = SHA1()
         ret, signature = sha1.getSHA1(self.token, sTimeStamp, sNonce, encrypt)
-        #print('----- 解密 sha1.getSHA1 signature ----->>',ret, signature)
+        print('----- 解密 sha1.getSHA1 signature ----->>',ret, signature)
         if ret != 0:
             return ret, None
         if not signature == sMsgSignature:
@@ -290,3 +329,27 @@ class WXBizMsgCrypt(object):
         ret, xml_content = pc.decrypt(encrypt, self.appid)
         return ret, xml_content
 
+
+if __name__ == '__main__':
+    token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+    encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+    appid = 'wx6ba07e6ddcdc69b3'
+
+    decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+
+
+
+    # res_msg = '<xml><ToUserName><![CDATA[ob5mL1ZLRFlsArXPwOZVYOqacdCI]]></ToUserName><FromUserName><![CDATA[wxa77213c591897a13]]></FromUserName><CreateTime>1539934580</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[YYYY]]></Content></xml>'
+    # nonce = '1481412419'
+    # timestamp = '1539934580'
+    # ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce, timestamp)
+    # print(ret, encrypt_xml)
+
+
+
+    encrypt = 'rcDjSfj0S4ShQdwHiRi+Sku+/UABOARd9jfPdriUcwjuQ7A/1rEWlnpjtma5FFGvfthqtTGD7K9t2REhJWVoKqLE3oIT3+mdjUodheHufxa56qKTO4WP8FTAeSQNLoZXGd914UysmQRnrJ4dqYmProRlU/q4XVrKk/HASAWCtkw3gr3OkWdBVyLXEuaDV20edCsS883utDg4gMdT6B3wV696B7M2GLJMgT0FHj8JczAetK0ce8O2g+28TNDuj0MlSoLKtQpMCrWJqNJpbwNK8j7rVIJsK164mdMbMHDg0mve7A0iEHV3jPHdkVnX4hy+E5lHKbTTKbcbp6LFUL6tWg=='
+    msg_signature = '614e192ddfc0b5b60cc2e3edf91f9e48a0b0bc34'
+    timestamp = '1539934580'
+    nonce = '1481412419'
+    ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+    print(ret, decryp_xml)
