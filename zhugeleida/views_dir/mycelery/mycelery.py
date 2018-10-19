@@ -764,10 +764,10 @@ def user_forward_send_activity_redPacket(request):
         if activity_redPacket_objs:
             activity_redPacket_obj = activity_redPacket_objs[0]
             forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id).values_list('customer_id').distinct().count()
+                customer_parent_id=parent_id,article_id=article_id).values_list('customer_id').distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
+                customer_parent_id=parent_id,article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
 
             forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
             if not forward_stay_time:

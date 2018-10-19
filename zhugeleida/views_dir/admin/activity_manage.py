@@ -176,7 +176,7 @@ def activity_manage(request, oper_type):
         elif oper_type == 'send_activity_redPacket':
 
             company_id = request.GET.get('company_id')
-            # article_id = request.GET.get('article_id')
+            article_id = request.GET.get('article_id')
             activity_id = request.GET.get('activity_id')
 
             status = request.GET.get('status')
@@ -201,7 +201,7 @@ def activity_manage(request, oper_type):
 
 
                 activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('customer','article','activity','company').filter(
-                                                                                        # article_id=article_id,
+                                                                                        article_id=article_id,
                                                                                         activity_id=activity_id
                                                                                         ).filter(q1).order_by(order)
 
@@ -218,10 +218,10 @@ def activity_manage(request, oper_type):
                     for obj in activity_redPacket_objs:
 
                         forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id).values_list('customer_id').distinct().count()
+                            customer_parent_id=obj.customer_id,article_id=article_id).values_list('customer_id').distinct().count()
 
                         forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id).aggregate(forward_stay_time=Sum('stay_time'))
+                            customer_parent_id=obj.customer_id,article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
 
                         forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
                         if not forward_stay_time:
