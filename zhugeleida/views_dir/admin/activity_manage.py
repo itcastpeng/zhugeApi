@@ -198,7 +198,7 @@ def activity_manage(request, oper_type):
                 }
 
 
-                activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(
+                activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('customer','article','activity','company').filter(
                                                                                         article_id=article_id,
                                                                                         activity_id=activity_id
                                                                                         )
@@ -241,15 +241,12 @@ def activity_manage(request, oper_type):
                                           forward_read_num, "|", reach_forward_num)
                                     print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
                                           shoudle_send_num, "|", reach_forward_num)
-                                    app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
-                                    activity_single_money = activity_obj.activity_single_money
-                                    activity_name = activity_obj.activity_name
 
-                                    customer_obj = models.zgld_customer.objects.get(id=parent_id)
 
                         ##
 
-                        print('----- obj.tags.values---->', obj.tags.values('id', 'name'))
+                        customer_area = obj.customer.province + obj.customer.city
+
                         ret_data.append({
                             'id': obj.id,
                             'title': obj.title,  # 文章标题
@@ -259,9 +256,13 @@ def activity_manage(request, oper_type):
 
                             'customer_username': obj.customer.username,  # 如果为原创显示,文章作者
                             'customer_headimgurl': obj.customer.headimgurl,  # 用户的头像
-                            'customer_de': obj.customer.get_sex_display(),  # 用户的头像
-                            'read_count': obj.read_count,  # 被阅读数量
-                            'forward_count': obj.forward_count,  # 被转发个数
+                            'customer_sex_text': obj.customer.get_sex_display(),  # 用户的头像
+                            'customer_sex': obj.customer.sex,  # 用户的头像
+                            'customer_area': customer_area,  # 用户的头像
+
+                            'forward_read_num': forward_read_num,    # 转发文章被阅读数量
+                            'forward_stay_time': forward_stay_time,  # 转发文章被查看时长
+
                             'create_date': obj.create_date,  # 文章创建时间
                             'cover_url': obj.cover_picture,  # 文章图片链接
                             'tag_list': list(obj.tags.values('id', 'name')),

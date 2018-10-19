@@ -381,6 +381,8 @@ def bottom_button_info(request):
 
         buttom_navigation_data_list.insert(2, shopping_info_dict)
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list
+        ret_data['shop_type'] = shopping_type
+        ret_data['shop_type_text'] = obj.get_shopping_type_display()
 
         print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200

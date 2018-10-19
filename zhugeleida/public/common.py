@@ -23,10 +23,8 @@ def action_record(data,remark):
     tasks.user_send_action_log.delay(data)
 
 
-    #
     # print('----- customer_id |  user_id | action ----->>',customer_id,user_id,action)
     # company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-    #
     # company_obj = models.zgld_company.objects.get(id=company_id)
     # agent_id = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
     # account_expired_time = company_obj.account_expired_time
