@@ -252,16 +252,14 @@ def activity_manage(request, oper_type):
 
                         ret_data.append({
                             'id': obj.id,
-                            'title': obj.title,  # 文章标题
                             'status': obj.status,  # 状态
                             'status_text': obj.get_status_display(),  # 状态
 
-
-                            'customer_username': obj.customer.username,  # 如果为原创显示,文章作者
-                            'customer_headimgurl': obj.customer.headimgurl,  # 用户的头像
-                            'customer_sex_text': obj.customer.get_sex_display(),  # 用户的头像
-                            'customer_sex': obj.customer.sex,  # 用户的头像
-                            'customer_area': customer_area,  # 用户的头像
+                            'customer_username': obj.customer.username,      # 客户名字
+                            'customer_headimgurl': obj.customer.headimgurl,  # 客户的头像
+                            'customer_sex_text': obj.customer.get_sex_display(),  # 性别
+                            'customer_sex': obj.customer.sex,  # 客户的头像
+                            'customer_area': customer_area,    # 客户的所在地区
 
                             'forward_read_num': forward_read_num,    # 转发文章被阅读数量
                             'forward_stay_time': forward_stay_time,  # 转发文章被查看时长
