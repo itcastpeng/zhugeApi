@@ -71,7 +71,7 @@ def action_record(request):
                 action=action
             )
             content = '%s%s' % (customer_name, remark)
-            print('------ 客户姓名 + 访问日志信息------->>', customer_name, content)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name,'action:',action, content)
             response.data = {
                 'content': content,
                 'agentid': agent_id
@@ -99,7 +99,7 @@ def action_record(request):
                     last_activity_time=now_time
                    )
                 content = '%s%s' % (customer_name, remark)
-                print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,content)
+                print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,'action:',action,content)
 
                 response.data = {
                     'content': content,
@@ -835,7 +835,8 @@ def user_forward_send_activity_redPacket(request):
                             print('---- 调用发红包成功[转发得现金] 状态值:200 --->>')
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
-                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money # 已发红包金额 [累加发送金额]
+                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money, # 已发红包金额 [累加发送金额]
+                                should_send_redPacket_num=shoudle_send_num        # 应该发放的次数 [应发]
                             )
 
 

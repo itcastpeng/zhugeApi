@@ -889,7 +889,7 @@ class zgld_activity_redPacket(models.Model):
     # forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     # forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
 
-    send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额',default=0, null=True)
+    already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额',default=0, null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已经发放次数(实发)[个人]',default=0 ,null=True)
     should_send_redPacket_num = models.SmallIntegerField(verbose_name='应该发放的次数(应发)',default=0 ,null=True)
 

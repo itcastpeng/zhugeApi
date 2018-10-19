@@ -8,7 +8,7 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
-from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm,ActivityUpdateForm
+from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm,ActivityUpdateForm,ArticleRedPacketSelectForm
 
 import json
 from django.db.models import Q,Sum
@@ -176,34 +176,44 @@ def activity_manage(request, oper_type):
         elif oper_type == 'send_activity_redPacket':
 
             company_id = request.GET.get('company_id')
-            parent_id = request.GET.get('parent_id')
-            article_id = request.GET.get('article_id')
+            # article_id = request.GET.get('article_id')
             activity_id = request.GET.get('activity_id')
 
-            forms_obj = ArticleSelectForm(request.GET)
+            status = request.GET.get('status')
+            customer_name = request.GET.get('customer_name')  # 当有搜索条件 如 搜索产品名称
+
+            forms_obj = ArticleRedPacketSelectForm(request.GET)
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
-                user_id = request.GET.get('user_id')              # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+                order =  request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+                                                                  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+                q1 = Q()
+                q1.connector = 'and'
+                if status:
+                    q1.children.append(('status', status))
 
-                field_dict = {
-                    'id': '',
-                    # 'user_id' : '',
-                    'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
-                    # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
-                    'title': '__contains',  # 按文章标题搜索
-                }
+                if customer_name:
+                    q1.children.append(('customer__username__contains', customer_name))
+
 
 
                 activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('customer','article','activity','company').filter(
-                                                                                        article_id=article_id,
+                                                                                        # article_id=article_id,
                                                                                         activity_id=activity_id
-                                                                                        )
+                                                                                        ).filter(q1).order_by(order)
 
+                count = activity_redPacket_objs.count()
                 if activity_redPacket_objs: # 说明有人参加活动
+
+                    if length != 0:
+                        print('current_page -->', current_page)
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        activity_redPacket_objs = activity_redPacket_objs[start_line: stop_line]
+
                     ret_data = []
                     for obj in activity_redPacket_objs:
 
@@ -224,9 +234,10 @@ def activity_manage(request, oper_type):
                         activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
                         reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
-                        already_send_redPacket_num = obj.already_send_redPacket_num  # 已发放次数
-                        send_redPacket_money = obj.send_redPacket_money  # 已发红包金额
+                        already_send_redPacket_num = obj.already_send_redPacket_num         # 已发放次数
+                        already_send_redPacket_money = obj.already_send_redPacket_money     # 已发红包金额
 
+                        shoudle_send_num = ''
                         if reach_forward_num != 0:  # 不能为0
                             forward_read_num = int(forward_read_num)
                             if forward_read_num >= reach_forward_num:  # 转发大于 阈值,达到可以条件
@@ -236,22 +247,13 @@ def activity_manage(request, oper_type):
                                 shoudle_send_num = divmod_ret[0]
                                 yushu = divmod_ret[1]
 
-                                if shoudle_send_num > already_send_redPacket_num:
-                                    print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
-                                          forward_read_num, "|", reach_forward_num)
-                                    print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
-                                          shoudle_send_num, "|", reach_forward_num)
-
-
-                        ##
-
                         customer_area = obj.customer.province + obj.customer.city
 
                         ret_data.append({
                             'id': obj.id,
                             'title': obj.title,  # 文章标题
-                            'status_code': obj.status,  # 状态
-                            'status': obj.get_status_display(),  # 状态
+                            'status': obj.status,  # 状态
+                            'status_text': obj.get_status_display(),  # 状态
 
 
                             'customer_username': obj.customer.username,  # 如果为原创显示,文章作者
@@ -263,17 +265,16 @@ def activity_manage(request, oper_type):
                             'forward_read_num': forward_read_num,    # 转发文章被阅读数量
                             'forward_stay_time': forward_stay_time,  # 转发文章被查看时长
 
-                            'create_date': obj.create_date,  # 文章创建时间
-                            'cover_url': obj.cover_picture,  # 文章图片链接
-                            'tag_list': list(obj.tags.values('id', 'name')),
-                            'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                            'already_send_redPacket_money': already_send_redPacket_money,  # 已发红包金额
+                            'already_send_redPacket_num':   already_send_redPacket_num,    # 已经发放次数
+                            'should_send_redPacket_num': shoudle_send_num,    # 应该发放的次数
 
                         })
 
                         response.code = 200
                         response.data = {
                             'ret_data': ret_data,
-                            'data_count': count,
+                            'count': count,
                         }
 
 

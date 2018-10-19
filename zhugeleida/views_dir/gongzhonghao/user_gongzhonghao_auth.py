@@ -17,6 +17,7 @@ import json
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token,create_component_access_token
 import string
 import redis
+from urllib.parse import unquote
 
 # 从微信公众号接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -492,7 +493,7 @@ def user_gongzhonghao_redirect_share_url(request):
         # 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
 
         share_url = request.GET.get('share_url')
-        from urllib.parse import unquote
+
         redirect_url = unquote(share_url, 'utf-8')
         print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
         return redirect(redirect_url)
