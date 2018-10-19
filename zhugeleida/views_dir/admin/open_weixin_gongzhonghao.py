@@ -702,7 +702,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         from wechatpy.replies import TextReply
                         from wechatpy.crypto import WeChatCrypto
 
-                        reply = TextReply(content='YYY', message=decryp_xml)
+                        reply = TextReply(content='YYY', message={'source': openid, 'target': original_id})
                         xml = reply.render()
                         print('xml -->', xml)
 
