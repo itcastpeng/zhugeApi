@@ -252,7 +252,7 @@ def activity_manage(request, oper_type):
                         customer_id =  obj.customer_id
                         customer_username =  obj.customer.username
                         customer_username = conversion_base64_customer_username_base64(customer_username,customer_id)
-                        
+
                         ret_data.append({
                             'id': obj.id,
                             'status': obj.status,  # 状态
@@ -261,7 +261,7 @@ def activity_manage(request, oper_type):
                             'customer_username': customer_username,      # 客户名字
                             'customer_id': obj.customer_id,      # 客户ID
                             'customer_headimgurl': obj.customer.headimgurl,  # 客户的头像
-                            'customer_sex_text': obj.customer.get_sex_display(),  # 性别
+                            'customer_sex_text': obj.customer.get_sex_display() or '',  # 性别
                             'customer_sex': obj.customer.sex or '',  # 客户的头像
                             'customer_area': customer_area,    # 客户的所在地区
 
