@@ -674,7 +674,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         # res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
                         #     openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
 
-                        res_msg = "<xml><ToUserName>< ![CDATA[{openid}]]></ToUserName><FromUserName>< ![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType>< ![CDATA[text]]></MsgType><Content>< ![CDATA[{content}]]></Content></xml>".format(
+                        res_msg = "<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>".format(
                             openid=openid,
                             original_id=original_id,
                             createtime=createtime,
