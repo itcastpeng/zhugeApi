@@ -230,7 +230,7 @@ def activity_manage(request, oper_type):
                         print('-----forward_read_num forward_stay_time --->>',forward_read_num,forward_stay_time)
                         obj.forward_read_count=forward_read_num
                         obj.forward_stay_time=forward_stay_time
-                        
+
 
                         activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
