@@ -678,13 +678,14 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
 
 
-                        print('----- 【加密前】的 消息---->>', res_msg)
-                        ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
-                        print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
-                        print('-------【加密后】的 消息---->>', encrypt_xml)
+                        # print('----- 【加密前】的 消息---->>', res_msg)
+                        # ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
+                        # print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
+                        # print('-------【加密后】的 消息---->>', encrypt_xml)
 
                         # return HttpResponse(encrypt_xml)
-                        return HttpResponse(res_msg, content_type="text/xml")
+                        print('res_msg -->', res_msg)
+                        return HttpResponse(res_msg)
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
