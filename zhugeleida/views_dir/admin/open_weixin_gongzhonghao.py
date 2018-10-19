@@ -710,7 +710,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         # timestamp = '1539934580'
                         # nonce = '1481412419'
                         timestamp = str(int(time.time()))
-                        crypto = WeChatCrypto(token, encodingAESKey, original_id)
+                        crypto = WeChatCrypto(token, encodingAESKey, app_id)
                         encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
                         print(encrypted_xml)
 
