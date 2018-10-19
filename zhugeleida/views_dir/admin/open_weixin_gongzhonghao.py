@@ -682,20 +682,21 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                       "<Content><![CDATA[{content}]]></Content>" \
                                   "</xml>".format(
                             openid=openid,
-                            original_id=original_id,
+                            # original_id=original_id,
+                            original_id=gongzhonghao_app_obj.authorization_appid,
                             createtime=createtime,
                             content='YYYY'
                         )
 
 
                         # print('----- 【加密前】的 消息---->>', res_msg)
-                        # ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
+                        ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
                         # print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
                         # print('-------【加密后】的 消息---->>', encrypt_xml)
 
                         # return HttpResponse(encrypt_xml)
                         print('res_msg -->', res_msg)
-                        return HttpResponse(res_msg, content_type="application/xml")
+                        return HttpResponse(encrypt_xml, content_type="application/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
