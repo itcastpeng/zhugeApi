@@ -26,7 +26,7 @@ def tag_list(request):
         user_id = request.GET.get('user_id')
         customer_id = request.GET.get('customer_id')
 
-        tag_values = models.zgld_tag.objects.values_list('id', 'name', 'tag_parent_id')
+        tag_values = models.zgld_tag.objects.filter(id=user_id).values_list('id', 'name', 'tag_parent_id')
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
