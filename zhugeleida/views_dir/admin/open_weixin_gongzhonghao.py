@@ -15,8 +15,11 @@ import redis
 import xml.etree.cElementTree as ET
 from django import forms
 
+from wechatpy.replies import TextReply
+from wechatpy.crypto import WeChatCrypto
 
-## 第三方平台接入
+
+# 第三方平台接入
 @csrf_exempt
 def open_weixin_gongzhonghao(request, oper_type):
     if request.method == "POST":
@@ -312,7 +315,7 @@ def open_weixin_gongzhonghao(request, oper_type):
         return JsonResponse(response.__dict__)
 
 
-## 第三方平台接入
+# 第三方平台接入
 @csrf_exempt
 def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
     if request.method == "POST":
@@ -668,40 +671,6 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         obj = objs[0]
                         customer_id = obj.id
 
-                        # import time
-                        # createtime = int(time.time())
-                        # content = '嗨,您好~ \n 丫挺的,欢迎您参加活动,刚才那谁查看了您转发的文章,还有2个人查看的话，我就给你发个大红包了，骗你是个小狗。'
-
-                        # # res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
-                        # #     openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
-                        #
-                        # res_msg = "<xml>" \
-                        #               "<ToUserName><![CDATA[{openid}]]></ToUserName>" \
-                        #               "<FromUserName><![CDATA[{original_id}]]></FromUserName>" \
-                        #               "<CreateTime>{createtime}</CreateTime>" \
-                        #               "<MsgType><![CDATA[text]]></MsgType>" \
-                        #               "<Content><![CDATA[{content}]]></Content>" \
-                        #           "</xml>".format(
-                        #     openid=openid,
-                        #     # original_id=original_id,
-                        #     original_id=original_id,
-                        #     createtime=createtime,
-                        #     content='YYYY'
-                        # )
-                        #
-                        #
-                        # # print('----- 【加密前】的 消息---->>', res_msg)
-                        # ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce, timestamp)
-                        # print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
-                        # # print('-------【加密后】的 消息---->>', encrypt_xml)
-                        #
-                        # # return HttpResponse(encrypt_xml)
-                        # print('res_msg -->', res_msg)
-                        # ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt_xml, msg_signature, timestamp, nonce)
-
-                        from wechatpy.replies import TextReply
-                        from wechatpy.crypto import WeChatCrypto
-
                         reply = TextReply(content='YYY')
                         reply._data['ToUserName'] = openid
                         reply._data['FromUserName'] = original_id
@@ -710,11 +679,6 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                         print('xml -->', xml)
 
-                        # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-                        # encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                        # appid = original_id
-                        # timestamp = '1539934580'
-                        # nonce = '1481412419'
                         timestamp = str(int(time.time()))
                         crypto = WeChatCrypto(token, encodingAESKey, appid)
                         encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
