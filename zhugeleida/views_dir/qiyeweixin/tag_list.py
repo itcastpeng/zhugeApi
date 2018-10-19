@@ -9,7 +9,7 @@ import time
 import datetime
 import json
 from publicFunc.condition_com import conditionCom
-
+from django.db.models import Q
 
 # 查询标签和所属的用户
 @csrf_exempt
@@ -26,7 +26,9 @@ def tag_list(request):
         user_id = request.GET.get('user_id')
         customer_id = request.GET.get('customer_id')
 
-        tag_values = models.zgld_tag.objects.values_list('id', 'name', 'tag_parent_id')
+
+
+        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id').order_by('-create_date')
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)

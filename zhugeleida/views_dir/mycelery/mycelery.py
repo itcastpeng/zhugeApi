@@ -28,14 +28,14 @@ from django.db.models import Q,F
 import base64
 
 
-def action_record(data):
+def action_record(request):
 
     response = Response.ResponseObj()
-    user_id = data.get('uid')  # 用户 id
-    customer_id = data.get('user_id')  # 客户 id
-    article_id = data.get('article_id')  # 客户 id
-    action = data.get('action')
-    remark = data.get('remark')
+    user_id = request.GET.get('uid')  # 用户 id
+    customer_id = request.GET.get('user_id')  # 客户 id
+    article_id = request.GET.get('article_id')  # 客户 id
+    action = request.GET.get('action')
+    remark = request.GET.get('remark')
 
     company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
     company_obj = models.zgld_company.objects.get(id=company_id)
@@ -71,7 +71,7 @@ def action_record(data):
                 action=action
             )
             content = '%s%s' % (customer_name, remark)
-            print('------ 客户姓名 + 访问日志信息------->>', customer_name, content)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name,'action:',action, content)
             response.data = {
                 'content': content,
                 'agentid': agent_id
@@ -99,7 +99,7 @@ def action_record(data):
                     last_activity_time=now_time
                    )
                 content = '%s%s' % (customer_name, remark)
-                print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,content)
+                print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,'action:',action,content)
 
                 response.data = {
                     'content': content,
@@ -126,11 +126,9 @@ def action_record(data):
 def user_send_action_log(request):
 
     response = ResponseObj()
-    data = request.GET.copy()
 
-    response_ret = action_record(data)
+    response_ret = action_record(request)
     content =  response_ret.data.get('content')
-    customer_id = data.get('customer_id', '')
     user_id = request.GET.get('uid')
 
 
@@ -766,10 +764,10 @@ def user_forward_send_activity_redPacket(request):
         if activity_redPacket_objs:
             activity_redPacket_obj = activity_redPacket_objs[0]
             forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id).values_list('customer_id').distinct().count()
+                customer_parent_id=parent_id,article_id=article_id).values_list('customer_id').distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id).aggregate(forward_stay_time=Sum('stay_time'))
+                customer_parent_id=parent_id,article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
 
             forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
             if not forward_stay_time:
@@ -782,8 +780,8 @@ def user_forward_send_activity_redPacket(request):
             activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
             reach_forward_num = activity_obj.reach_forward_num                        # 达到多少次发红包(转发阅读后次数))
-            send_redPacket_num = activity_redPacket_obj.send_redPacket_num            # 已发放次数
-            send_redPacket_money = activity_redPacket_obj.send_redPacket_money        #已发红包金额
+            already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num            # 已发放次数
+            # already_send_redPacket_money = activity_redPacket_obj.already_send_redPacket_money        #已发红包金额
 
             if reach_forward_num != 0: #不能为0
                 forward_read_num = int(forward_read_num)
@@ -794,9 +792,9 @@ def user_forward_send_activity_redPacket(request):
                     shoudle_send_num = divmod_ret[0]
                     yushu = divmod_ret[1]
 
-                    if shoudle_send_num > send_redPacket_num:
+                    if shoudle_send_num > already_send_redPacket_num:
                         print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',forward_read_num,"|",reach_forward_num)
-                        print('---- 【满足发红包条件】shoudle_send_num[实发数] | send_redPacket_num[已发数] ----->>',shoudle_send_num,"|",reach_forward_num)
+                        print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',shoudle_send_num,"|",already_send_redPacket_num)
                         app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                         activity_single_money = activity_obj.activity_single_money
                         activity_name = activity_obj.activity_name
@@ -836,8 +834,10 @@ def user_forward_send_activity_redPacket(request):
                         if response.code == 200:
                             print('---- 调用发红包成功[转发得现金] 状态值:200 --->>')
                             activity_redPacket_objs.update(
-                                send_redPacket_num=F('send_redPacket_num') + 1,
-                                send_redPacket_money=F('send_redPacket_money') + activity_single_money # 已发红包金额 [累加发送金额]
+                                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money, # 已发红包金额 [累加发送金额]
+                                should_send_redPacket_num=shoudle_send_num,        # 应该发放的次数 [应发]
+                                status=1        # (1,'已发'),
                             )
 
 
@@ -850,7 +850,7 @@ def user_forward_send_activity_redPacket(request):
 
                     response.code = 301
                     response.msg = '转发查看数未达到阈值'
-                    print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num, '|',send_redPacket_num )
+                    print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num, '|',already_send_redPacket_num )
         else:
             response.code = 301
             response.msg = '[无记录]活动发红包记录表'

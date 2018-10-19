@@ -137,8 +137,8 @@ urlpatterns = [
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
 
     # 活动管理
-    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),  # 关注领红包
-    url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),  # 关注领红包
+    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),                      # 关注领红包
+    url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),   # 关注领红包
 
     # 关注公众号 发放红包管理
     # url(r'focusOnIssuedRedEnvelope', redEnvelopeToIssue.focusOnIssuedRedEnvelope),          # 关注发放红包
