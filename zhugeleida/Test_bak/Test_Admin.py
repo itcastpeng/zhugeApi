@@ -326,7 +326,7 @@ url =  ip + '/zhugeleida/admin/activity_manage/send_activity_redPacket'  # è·å
 get_data['company_id'] = 1
 get_data['article_id'] = 2
 get_data['activity_id'] = 2
-get_data['status'] = 2
+get_data['status'] = 1
 ret = requests.get(url, data = post_data ,params=get_data)
 
 

@@ -275,6 +275,7 @@ def activity_manage(request, oper_type):
                         })
 
                         response.code = 200
+                        response.msg = '获取成功'
                         response.data = {
                             'ret_data': ret_data,
                             'count': count,
