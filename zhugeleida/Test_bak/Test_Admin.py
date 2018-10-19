@@ -638,9 +638,9 @@ ret = requests.get(url, data = post_data ,params=get_data)
 
 
 
-url = ip +  '/zhugeleida/admin/user/create_small_program_qr_code/0'   # 后台增加用户
-post_data['user_id'] = 128
-ret = requests.post(url, data=post_data,params=get_data)
+# url = ip +  '/zhugeleida/admin/user/create_small_program_qr_code/0'   # 后台增加用户
+# post_data['user_id'] = 128
+# ret = requests.post(url, data=post_data,params=get_data)
 
 
 # url = ip +  '/zhugeleida/admin/user/sync_user_tongxunlu/5'   # 后台增加用户

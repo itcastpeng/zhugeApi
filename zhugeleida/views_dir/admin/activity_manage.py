@@ -246,21 +246,27 @@ def activity_manage(request, oper_type):
                             yushu = divmod_ret[1]
 
                         customer_area = obj.customer.province + obj.customer.city
+                        from zhugeleida.public.common import  conversion_seconds_hms,conversion_base64_customer_username_base64
 
+                        _forward_stay_time = conversion_seconds_hms(forward_stay_time)
+                        customer_id =  obj.customer_id
+                        customer_username =  obj.customer.username
+                        customer_username = conversion_base64_customer_username_base64(customer_username,customer_id)
+                        
                         ret_data.append({
                             'id': obj.id,
                             'status': obj.status,  # 状态
                             'status_text': obj.get_status_display(),  # 状态
 
-                            'customer_username': obj.customer.username,      # 客户名字
+                            'customer_username': customer_username,      # 客户名字
                             'customer_id': obj.customer_id,      # 客户ID
                             'customer_headimgurl': obj.customer.headimgurl,  # 客户的头像
                             'customer_sex_text': obj.customer.get_sex_display(),  # 性别
-                            'customer_sex': obj.customer.sex,  # 客户的头像
+                            'customer_sex': obj.customer.sex or '',  # 客户的头像
                             'customer_area': customer_area,    # 客户的所在地区
 
                             'forward_read_num': forward_read_num,    # 转发文章被阅读数量
-                            'forward_stay_time': forward_stay_time,  # 转发文章被查看时长
+                            'forward_stay_time': _forward_stay_time,  # 转发文章被查看时长
 
                             'already_send_redPacket_money': already_send_redPacket_money,  # 已发红包金额
                             'already_send_redPacket_num':   already_send_redPacket_num,    # 已经发放次数

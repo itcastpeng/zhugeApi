@@ -157,6 +157,16 @@ def create_scan_code_userinfo_qrcode(data):
 
     return response
 
+def conversion_base64_customer_username_base64(customer_name,customer_id):
+    try:
+        username = base64.b64decode(customer_name)
+        customer_name = str(username, 'utf-8')
+        print('----- 解密b64decode username----->', username)
+    except Exception as e:
+        print('----- b64decode解密失败的 customer_id 是 | e ----->',customer_id, "|", e)
+        customer_name = '客户ID%s' % (customer_id)
+    return  customer_name
+
 
 ## 把秒数换换成 时|分|秒
 def conversion_seconds_hms(seconds):
