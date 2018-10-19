@@ -28,7 +28,7 @@ def tag_list(request):
 
 
 
-        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id').order_by('-create_date')
+        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id')
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
@@ -36,6 +36,7 @@ def tag_list(request):
         for obj in date_list:
             if obj[2] == None:
                 tag_dict['tags'] = []
+                tag_dict['name'] = obj[1]
 
                 for tag in date_list:
                     customr_obj = models.zgld_tag.objects.filter(id=tag[0])[0].tag_customer.filter(id=customer_id)
@@ -43,6 +44,7 @@ def tag_list(request):
                         tag_flag = True
                     else:
                         tag_flag = False
+
                     if tag[2] == obj[0]:
                         tag_dict['name']  = obj[1]
                         tag_dict['tags'].append({ 'id': tag[0],'name': tag[1],'is_select': tag_flag})
