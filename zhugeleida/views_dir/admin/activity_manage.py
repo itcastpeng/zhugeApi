@@ -11,10 +11,8 @@ from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm,ActivityUpdateForm
 
 import json
-from django.db.models import Q
+from django.db.models import Q,Sum
 
-import os
-import base64
 
 
 @csrf_exempt
@@ -174,6 +172,116 @@ def activity_manage(request, oper_type):
                 response.code = 301
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'send_activity_redPacket':
+
+            company_id = request.GET.get('company_id')
+            parent_id = request.GET.get('parent_id')
+            article_id = request.GET.get('article_id')
+            activity_id = request.GET.get('activity_id')
+
+            forms_obj = ArticleSelectForm(request.GET)
+            if forms_obj.is_valid():
+                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+                user_id = request.GET.get('user_id')              # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+
+                field_dict = {
+                    'id': '',
+                    # 'user_id' : '',
+                    'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
+                    # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
+                    'title': '__contains',  # 按文章标题搜索
+                }
+
+
+                activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(
+                                                                                        article_id=article_id,
+                                                                                        activity_id=activity_id
+                                                                                        )
+
+                if activity_redPacket_objs: # 说明有人参加活动
+                    ret_data = []
+                    for obj in activity_redPacket_objs:
+
+                        forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
+                            customer_parent_id=obj.customer_id).values_list('customer_id').distinct().count()
+
+                        forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
+                            customer_parent_id=obj.customer_id).aggregate(forward_stay_time=Sum('stay_time'))
+
+                        forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
+                        if not forward_stay_time:
+                            forward_stay_time = 0
+
+                        activity_redPacket_objs.update(
+                            forward_read_count=forward_read_num,
+                            forward_stay_time=forward_stay_time
+                        )
+                        activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+
+                        reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
+                        already_send_redPacket_num = obj.already_send_redPacket_num  # 已发放次数
+                        send_redPacket_money = obj.send_redPacket_money  # 已发红包金额
+
+                        if reach_forward_num != 0:  # 不能为0
+                            forward_read_num = int(forward_read_num)
+                            if forward_read_num >= reach_forward_num:  # 转发大于 阈值,达到可以条件
+
+                                divmod_ret = divmod(forward_read_num, reach_forward_num)
+
+                                shoudle_send_num = divmod_ret[0]
+                                yushu = divmod_ret[1]
+
+                                if shoudle_send_num > already_send_redPacket_num:
+                                    print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
+                                          forward_read_num, "|", reach_forward_num)
+                                    print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
+                                          shoudle_send_num, "|", reach_forward_num)
+                                    app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                                    activity_single_money = activity_obj.activity_single_money
+                                    activity_name = activity_obj.activity_name
+
+                                    customer_obj = models.zgld_customer.objects.get(id=parent_id)
+
+                        ##
+
+                        print('----- obj.tags.values---->', obj.tags.values('id', 'name'))
+                        ret_data.append({
+                            'id': obj.id,
+                            'title': obj.title,  # 文章标题
+                            'status_code': obj.status,  # 状态
+                            'status': obj.get_status_display(),  # 状态
+
+
+                            'customer_username': obj.customer.username,  # 如果为原创显示,文章作者
+                            'customer_headimgurl': obj.customer.headimgurl,  # 用户的头像
+                            'customer_de': obj.customer.get_sex_display(),  # 用户的头像
+                            'read_count': obj.read_count,  # 被阅读数量
+                            'forward_count': obj.forward_count,  # 被转发个数
+                            'create_date': obj.create_date,  # 文章创建时间
+                            'cover_url': obj.cover_picture,  # 文章图片链接
+                            'tag_list': list(obj.tags.values('id', 'name')),
+                            'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+
+                        })
+
+                        response.code = 200
+                        response.data = {
+                            'ret_data': ret_data,
+                            'data_count': count,
+                        }
+
+
+
+                else:
+                    response.code = 301
+                    response.msg = '[无记录]活动发红包记录表'
+                    print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id, '|',
+                          article_id, "|", activity_id)
 
     return JsonResponse(response.__dict__)
 

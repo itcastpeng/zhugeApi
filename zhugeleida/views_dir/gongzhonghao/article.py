@@ -418,7 +418,7 @@ def article_oper(request, oper_type, o_id):
                     remark = '转发了您的文章《%s》%s,帮您进一步扩大了传播效果' % (objs[0].title, place)
                     data = request.GET.copy()
                     data['action'] = action
-                    response = action_record(data, remark)
+                    action_record(data, remark)
                     response.code = 200
                     response.msg = "记录转发文章成功"
             else:

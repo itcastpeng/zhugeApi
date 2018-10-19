@@ -652,6 +652,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
             elif MsgType == 'text':
                 Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
+                MsgId = collection.getElementsByTagName("MsgId")[0].childNodes[0].data
+                CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
                 print('--内容Content-->>', Content)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
@@ -664,20 +666,25 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                     if objs:
                         obj = objs[0]
                         customer_id = obj.id
-                        openid = obj.openid
+
                         import time
                         createtime = int(time.time())
                         content = '嗨,您好~ \n 丫挺的,欢迎您参加活动,刚才那谁查看了您转发的文章,还有2个人查看的话，我就给你发个大红包了，骗你是个小狗。'
 
-                        res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
-                            openid=openid, original_id=original_id, createtime=createtime, content=content)
+                        # res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content></xml>'.format(
+                        #     openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
+
+                        res_msg = '<xml><ToUserName><![CDATA[{openid}]]></ToUserName><FromUserName><![CDATA[{original_id}]]></FromUserName><CreateTime>{createtime}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[{content}]]></Content>></xml>'.format(
+                            openid=openid, original_id=original_id, createtime=createtime, content='YYYY')
+
 
                         print('----- 【加密前】的 消息---->>', res_msg)
                         ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
                         print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
                         print('-------【加密后】的 消息---->>', encrypt_xml)
 
-                        return HttpResponse(encrypt_xml)
+                        # return HttpResponse(encrypt_xml)
+                        return HttpResponse(res_msg, content_type="application/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)

@@ -162,21 +162,21 @@ def mingpian_oper(request, oper_type):
                 remark = '拨打您的手机'
                 data = request.GET.copy()
                 data['action'] = 10
-                response = action_record(data, remark)
+                action_record(data, remark)
 
 
             if oper_type == 'save_phone':
                 remark = '保存了您的电话,可以考虑拜访'
                 data = request.GET.copy()
                 data['action'] = 8
-                response = action_record(data, remark)
+                action_record(data, remark)
 
             elif oper_type == 'save_wechat':
                 if oper_type == 'save_wechat':
                     remark = '复制了您的微信,留意微信新朋友消息'
                     data = request.GET.copy()
                     data['action'] = 5
-                    response = action_record(data, remark)
+                    action_record(data, remark)
 
 
             elif oper_type == 'praise':  # 点赞功能，觉得你靠谱
@@ -197,7 +197,7 @@ def mingpian_oper(request, oper_type):
                     remark = '觉得您非常靠谱'
                     data = request.GET.copy()
                     data['action'] = 9
-                    response = action_record(data, remark)
+                    action_record(data, remark)
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
                     objs.update(praise=F('praise') + 1)
                     praise_num = objs[0].praise
@@ -221,7 +221,7 @@ def mingpian_oper(request, oper_type):
                         updown_obj.update(up=False)
                         data = request.GET.copy()
                         data['action'] = 9
-                        response = action_record(data, remark)
+                        action_record(data, remark)
                         objs = models.zgld_userprofile.objects.filter(id=user_id)
                         objs.update(praise=F('praise') - 1)
                         praise_num = objs[0].praise
@@ -243,7 +243,7 @@ def mingpian_oper(request, oper_type):
                         updown_obj.update(up=True)
                         data = request.GET.copy()
                         data['action'] = 9
-                        response = action_record(data, remark)
+                        action_record(data, remark)
                         objs = models.zgld_userprofile.objects.filter(id=user_id)
                         objs.update(praise=F('praise') + 1)
                         praise_num = objs[0].praise
@@ -266,7 +266,7 @@ def mingpian_oper(request, oper_type):
                 remark = '转发了你的名片,你的人脉圈正在裂变'
                 data = request.GET.copy()
                 data['action'] = 6
-                response = action_record(data, remark)
+                action_record(data, remark)
                 models.zgld_userprofile.objects.filter(id=user_id).update(forward=F('forward') + 1)
 
             elif oper_type == 'up_sign':
@@ -287,7 +287,7 @@ def mingpian_oper(request, oper_type):
                     remark = '赞了你的个性签名'
                     data = request.GET.copy()
                     data['action'] = 9
-                    response = action_record(data, remark)
+                    action_record(data, remark)
                     objs = models.zgld_userprofile.objects.filter(id=user_id)
                     objs.update(sign_num=F('sign_num') + 1)
 
@@ -379,7 +379,7 @@ def mingpian_oper(request, oper_type):
                 remark = '保存了您的名片海报'
                 data = request.GET.copy()
                 data['action'] = 1
-                response = action_record(data, remark)
+                action_record(data, remark)
 
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')

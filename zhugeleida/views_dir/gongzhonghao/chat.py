@@ -302,7 +302,7 @@ def chat_oper(request, oper_type, o_id):
                     data = request.GET.copy()
                     data['action'] = 0  # 代表发送客户聊天信息
                     data['uid'] = user_id
-                    response = action_record(data, remark)
+                    action_record(data, remark)
 
                 response.code = 200
                 response.msg = 'send msg successful'
