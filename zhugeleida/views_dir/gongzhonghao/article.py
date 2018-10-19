@@ -262,8 +262,10 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
                     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
+                    reach_forward_num = ''
                     if activity_objs:
                         activity_id = activity_objs[0].id
+                        reach_forward_num = activity_objs[0].reach_forward_num
                         is_have_activity = 1  # 活动已经开启
 
                     else:
@@ -281,10 +283,6 @@ def article_oper(request, oper_type, o_id):
                                 'company_id': company_id,
                             }
                             tasks.user_forward_send_activity_redPacket.delay(_data)
-
-
-
-
 
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
@@ -345,7 +343,8 @@ def article_oper(request, oper_type, o_id):
                         'is_subscribe': is_subscribe,  # 是否关注了公众号。0 为没有关注 1为关注了。
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
-                        'qrcode_url': qrcode_url
+                        'qrcode_url': qrcode_url,
+                        'reach_forward_num': reach_forward_num
                     }
 
                 else:

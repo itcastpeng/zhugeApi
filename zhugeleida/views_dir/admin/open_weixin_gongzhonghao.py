@@ -9,6 +9,8 @@ from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
 import xml.dom.minidom as xmldom
 from zhugeapi_celery_project import tasks
 import time
+import os, datetime
+
 
 import json
 import redis
@@ -147,9 +149,8 @@ def open_weixin_gongzhonghao(request, oper_type):
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
-                                                   'id'] == 0 else False
-                    #
+                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
+
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                     qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
                     head_img = authorizer_info_ret['authorizer_info'].get('head_img')  # 头像
@@ -166,9 +167,9 @@ def open_weixin_gongzhonghao(request, oper_type):
                             categories = ''
 
                     if original_id:
-                        obj = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorization_appid)
-                        if obj:
-                            obj.update(
+                        objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorization_appid)
+                        if objs:
+                            objs.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
                                 original_id=original_id,  # 公众号的原始ID
@@ -180,6 +181,15 @@ def open_weixin_gongzhonghao(request, oper_type):
                                 name=nick_name,  # 昵称
                                 service_category=categories,  # 服务类目
                             )
+
+                            html = requests.get(qrcode_url)
+                            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                            filename = "/%s_%s.jpg" % (authorizer_appid,now_time)
+                            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
+                            with open(file_dir, 'wb') as file:
+                                file.write(html.content)
+
+
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
                         response.msg = "成功获取auth_code和帐号基本信息authorizer_info成功"
@@ -202,15 +212,15 @@ def open_weixin_gongzhonghao(request, oper_type):
 
                         # {"errcode": 0, "errmsg": "ok"}
 
-                        if errcode == 0:
+                        if errmsg == "ok":
                             response.code = 200
                             response.msg = "公众号设置所属行业成功"
 
-                            print('---------授权appid: %s , 公众号设置所属行业 【成功】------------>>' % (authorization_appid))
+                            print('---------  授权appid: %s  公众号设置所属行业【成功】 ------------>>' % (authorization_appid))
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('---------授权appid: %s , 公众号设置所属行业 【失败】------------>>' % (authorization_appid), errmsg,
+                            print('---------  授权appid: %s  公众号设置所属行业【失败】------------>>' % (authorization_appid), errmsg,
                                   '|', errcode)
 
                         ########### 添加模板ID到该公众号下 ##################
@@ -226,21 +236,22 @@ def open_weixin_gongzhonghao(request, oper_type):
                                                      data=json.dumps(post_add_template_data))
                         industry_ret = industry_ret.json()
                         template_id = industry_ret.get('template_id')
+                        errmsg = industry_ret.get('errmsg')
+                        errcode = industry_ret.get('errcode')
 
                         print('-------- 【公众号】添加模板ID到该账户下 返回 ---->', json.dumps(industry_ret))
 
-                        if errcode == 0:
+                        if errmsg == "ok":
                             response.code = 200
                             response.msg = "公众号添加模板ID成功"
-                            obj.update(template_id=template_id)
+                            objs.update(template_id=template_id)
                             # {"errcode": 0, "errmsg": "ok", "template_id": "yIqr5W_MVshHlyjZIvEd8Lg0KI-nyrOlsTIWMyX_NME"}
-                            print('---------授权appid: %s , 公众号添加模板ID 【成功】------------>>' % (authorization_appid), )
+                            print('--------- 公众号添加模板ID【成功】  appid: %s ------------>>' % (authorization_appid) )
 
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('---------授权appid: %s , 公众号添加模板ID 【失败】------------>>' % (authorization_appid), errmsg,
-                                  '|', errcode)
+                            print('--------- 公众号添加模板ID 【失败】 appid: %s ------------>>' % (authorization_appid), errmsg, '|', errcode)
 
 
 

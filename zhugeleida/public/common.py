@@ -23,10 +23,8 @@ def action_record(data,remark):
     tasks.user_send_action_log.delay(data)
 
 
-    #
     # print('----- customer_id |  user_id | action ----->>',customer_id,user_id,action)
     # company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-    #
     # company_obj = models.zgld_company.objects.get(id=company_id)
     # agent_id = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
     # account_expired_time = company_obj.account_expired_time
@@ -158,6 +156,16 @@ def create_scan_code_userinfo_qrcode(data):
 
 
     return response
+
+def conversion_base64_customer_username_base64(customer_name,customer_id):
+    try:
+        username = base64.b64decode(customer_name)
+        customer_name = str(username, 'utf-8')
+        print('----- 解密b64decode username----->', username)
+    except Exception as e:
+        print('----- b64decode解密失败的 customer_id 是 | e ----->',customer_id, "|", e)
+        customer_name = '客户ID%s' % (customer_id)
+    return  customer_name
 
 
 ## 把秒数换换成 时|分|秒
