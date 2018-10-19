@@ -690,12 +690,13 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                         # print('----- 【加密前】的 消息---->>', res_msg)
-                        ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce)
+                        ret, encrypt_xml = decrypt_obj.EncryptMsg(res_msg, nonce, timestamp)
                         print('-----ret, encrypt_xml----->>', ret, encrypt_xml)
                         # print('-------【加密后】的 消息---->>', encrypt_xml)
 
                         # return HttpResponse(encrypt_xml)
                         print('res_msg -->', res_msg)
+                        ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt_xml, msg_signature, timestamp, nonce)
                         return HttpResponse(encrypt_xml, content_type="application/xml")
 
                     else:
