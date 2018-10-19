@@ -836,7 +836,8 @@ def user_forward_send_activity_redPacket(request):
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money, # 已发红包金额 [累加发送金额]
-                                should_send_redPacket_num=shoudle_send_num        # 应该发放的次数 [应发]
+                                should_send_redPacket_num=shoudle_send_num,        # 应该发放的次数 [应发]
+                                status=1        # (1,'已发'),
                             )
 
 

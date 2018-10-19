@@ -253,6 +253,7 @@ def activity_manage(request, oper_type):
                             'status_text': obj.get_status_display(),  # 状态
 
                             'customer_username': obj.customer.username,      # 客户名字
+                            'customer_id': obj.customer_id,      # 客户ID
                             'customer_headimgurl': obj.customer.headimgurl,  # 客户的头像
                             'customer_sex_text': obj.customer.get_sex_display(),  # 性别
                             'customer_sex': obj.customer.sex,  # 客户的头像

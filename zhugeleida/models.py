@@ -876,7 +876,7 @@ class zgld_activity_redPacket(models.Model):
     status_choices = ( (1,'已发'),
                        (2,'未发'),
                      )
-    status = models.SmallIntegerField(verbose_name='[红包]发放状态', choices=status_choices,null=True)
+    status = models.SmallIntegerField(verbose_name='[红包]发放状态',default=2,choices=status_choices,null=True)
 
     # user = models.ForeignKey('zgld_userprofile', verbose_name="文章所属企业用户ID", null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name="查看文章的客户", null=True)

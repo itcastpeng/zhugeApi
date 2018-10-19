@@ -258,7 +258,7 @@ class ArticleRedPacketSelectForm(forms.Form):
     )
 
     article_id = forms.IntegerField(
-        required=False,
+        required=True,
         error_messages={
             'required': "文章ID不能为空"
         }
