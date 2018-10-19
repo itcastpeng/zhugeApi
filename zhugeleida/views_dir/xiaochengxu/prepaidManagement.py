@@ -52,6 +52,7 @@ SHANGHUKEY = ''
 @csrf_exempt
 def payback(request):
     resultBody = request.body
+    print('resultBody------------------> ',resultBody)
     DOMTree = xmldom.parseString(resultBody)
     collection = DOMTree.documentElement
     mch_id = collection.getElementsByTagName("mch_id")[0].childNodes[0].data            # 商户号
