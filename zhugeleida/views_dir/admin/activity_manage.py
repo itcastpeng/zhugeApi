@@ -227,10 +227,10 @@ def activity_manage(request, oper_type):
                         if not forward_stay_time:
                             forward_stay_time = 0
 
-                        activity_redPacket_objs.update(
-                            forward_read_count=forward_read_num,
-                            forward_stay_time=forward_stay_time
-                        )
+                        obj.forward_read_count=forward_read_num,
+                        obj.forward_stay_time=forward_stay_time
+                        obj.save()
+
                         activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
                         reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
