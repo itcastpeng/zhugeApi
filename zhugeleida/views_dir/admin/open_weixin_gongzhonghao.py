@@ -684,7 +684,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         print('-------【加密后】的 消息---->>', encrypt_xml)
 
                         # return HttpResponse(encrypt_xml)
-                        return HttpResponse(res_msg, content_type="application/xml")
+                        return HttpResponse(res_msg, content_type="text/xml")
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
