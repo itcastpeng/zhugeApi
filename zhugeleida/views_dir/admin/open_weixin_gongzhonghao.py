@@ -702,8 +702,12 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         from wechatpy.replies import TextReply
                         from wechatpy.crypto import WeChatCrypto
 
-                        reply = TextReply(content='YYY', message={'source': openid, 'target': original_id})
+                        reply = TextReply(content='YYY')
+                        reply._data['ToUserName'] = openid
+                        reply._data['FromUserName'] = original_id
+
                         xml = reply.render()
+
                         print('xml -->', xml)
 
                         # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
