@@ -161,7 +161,7 @@ def yuZhiFu(request):
             if not res:
                 response.code = 301
                 response.msg = '请输入正确的手机号'
-            return JsonResponse(response.__dict__)
+                return JsonResponse(response.__dict__)
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
         result_data = {
