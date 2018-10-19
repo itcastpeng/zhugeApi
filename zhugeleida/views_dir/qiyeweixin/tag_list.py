@@ -28,13 +28,13 @@ def tag_list(request):
 
 
 
-        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id')
+        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id','user_id')
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
 
         for obj in date_list:
-            if obj[2] == None:
+            if obj[2] == None and obj[3] == None:
                 tag_dict['tags'] = []
                 tag_dict['name'] = obj[1]
 
@@ -57,7 +57,7 @@ def tag_list(request):
         response.code = 200
         response.data = {
             'ret_data': ret_data,
-            'tag_count': len(ret_data),
+            'tag_count': len(ret_data)
         }
         return JsonResponse(response.__dict__)
 
