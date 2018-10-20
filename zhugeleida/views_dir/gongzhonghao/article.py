@@ -309,6 +309,7 @@ def article_oper(request, oper_type, o_id):
                             data_ = {
                                 'customer_id': parent_id,
                                 'user_id' :  uid,
+                                'activity_id' :  activity_id,
                                 'type' : 'forward_look_article_tishi'
                             }
                             print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->', data_)
