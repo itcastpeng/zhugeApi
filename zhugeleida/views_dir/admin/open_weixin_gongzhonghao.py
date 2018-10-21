@@ -586,12 +586,19 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
             appid = 'wx6ba07e6ddcdc69b3'
 
-            decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+            crypto = WeChatCrypto(token, encodingAESKey, appid)
+            decrypted_xml = crypto.decrypt_message(
+                postdata,
+                msg_signature,
+                timestamp,
+                nonce
+            )
 
-            ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
-            print('----- 【公众号】客户发过来的消息 【解密后】xml ---->', decryp_xml)
+            # decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+            # ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+            print('----- 【公众号】客户发过来的消息 【解密后】xml ---->', decrypted_xml)
 
-            DOMTree = xmldom.parseString(decryp_xml)
+            DOMTree = xmldom.parseString(decrypted_xml)
             collection = DOMTree.documentElement
             original_id = collection.getElementsByTagName("ToUserName")[0].childNodes[0].data
             openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
@@ -700,9 +707,9 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                             if  forward_read_count >= reach_forward_num:
 
-                                _content = '转发后阅读人数已达【%s】人👫 ,已发红包【%s】个🎒 . \n还差【%s】人👦🏻又能再拿现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (forward_read_count,already_send_redPacket_num,short_num)
+                                _content = '转发后阅读人数已达【%s】人 ,已发红包【%s】个 . \n还差【%s】人又能再拿现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (forward_read_count,already_send_redPacket_num,short_num)
                             else:
-                                _content = '转发后阅读人数已达【%s】人👫 ,还差【%s】人可立获现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
+                                _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
                                 forward_read_count, short_num)
 
 
