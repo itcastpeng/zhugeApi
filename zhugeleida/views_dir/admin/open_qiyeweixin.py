@@ -259,11 +259,14 @@ def open_qiyeweixin(request, oper_type):
             app_type = request.GET.get('state')
 
             SuiteId = ''
+            url = ''
             if app_type == 'leida':
                 SuiteId = 'wx5d26a7a856b22bec'
+                url = 'http://zhugeleida.zhugeyingxiao.com'
 
             elif app_type == 'boss':
                 SuiteId = 'wx36c67dd53366b6f0'
+                url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
 
             _data = {
                 'SuiteId': SuiteId
@@ -323,6 +326,9 @@ def open_qiyeweixin(request, oper_type):
                 # 如果用户存在
                 if user_profile_objs:
                     user_profile_obj = user_profile_objs[0]
+                    status = user_profile_obj.status
+                    boss_status = user_profile_obj.boss_status
+
 
                     account_expired_time = company_objs[0].account_expired_time
                     if datetime.datetime.now() > account_expired_time:
@@ -332,7 +338,7 @@ def open_qiyeweixin(request, oper_type):
                         return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
                     redirect_url = ''
-                    if user_profile_obj.status == 1:  #
+                    if status == 1 or boss_status == 1:  #
                         user_profile_obj.gender = gender
                         # user_profile_obj.email = email
                         user_profile_obj.avatar = avatar
@@ -343,21 +349,22 @@ def open_qiyeweixin(request, oper_type):
                             user_profile_obj.last_login_date = datetime.datetime.now()
                         else:
                             is_first_login = 'No'
-
                         user_profile_obj.save()
-                        redirect_url = 'http://zhugeleida.zhugeyingxiao.com?token=' + user_profile_obj.token + '&id=' + str(
+
+                        redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
                             user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
                         print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
                               userid, "\n", redirect_url)
                         return redirect(redirect_url)
 
+
                     else:
-                        print('----------【雷达用户】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
+                        print('----------【雷达权限】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
                         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
                 else:
-                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
+                    print('----------【雷达权限】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
                     return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
             else:
                 print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid,"|",corpid)

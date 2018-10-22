@@ -566,6 +566,7 @@ def user_send_gongzhonghao_template_msg(request):
     user_id = request.GET.get('user_id')
     customer_id = request.GET.get('customer_id')
     _type = request.GET.get('type')
+    activity_id = request.GET.get('activity_id')
 
     userprofile_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = userprofile_obj.company_id
@@ -616,6 +617,9 @@ def user_send_gongzhonghao_template_msg(request):
 
     if customer_obj and objs:
         openid = customer_obj[0].openid
+        username = customer_obj[0].username
+        username =  common.conversion_base64_customer_username_base64(username,customer_id)
+
 
         path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
         xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
@@ -651,20 +655,27 @@ def user_send_gongzhonghao_template_msg(request):
 
 
         elif _type == 'forward_look_article_tishi':
+            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+
+            reach_forward_num = activity_obj.reach_forward_num
+            activity_single_money = activity_obj.activity_single_money
+
+            remark = '  <规则>: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。\n分享不停,红包不停,上不封顶！' % (reach_forward_num,activity_single_money)
             data = {
                 'first': {
-                    'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
+                    'value': ('您好,我是%s的%s %s, 很高兴为您服务 😁！\n  欢迎您参加【分享文章 赚现金活动】' % (company_name,position, user_name))  # 回复者
                 },
                 'keyword1': {
-                    'value': '欢迎您参加转发文章,得现金活动 😁！',
+                    'value': '您的朋友【%s】查看了您转发的活动文章' % (username) ,
                     "color": "#0000EE"
                 },
                 'keyword2': {
-                    'value': '转发多多,红包多多,立返红包!',
+                    'value': '【回复 %s】查看红包活动进度、具体人员详情' % (activity_id),
                     "color": "#FF0000"
+
                 },
                 'remark': {
-                    'value': '【回复1】查看转发详情'  # 回复内容
+                    'value': remark  # 回复内容
                 }
             }
 

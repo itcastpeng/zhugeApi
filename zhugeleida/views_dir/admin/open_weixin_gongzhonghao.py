@@ -586,12 +586,19 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
             appid = 'wx6ba07e6ddcdc69b3'
 
-            decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+            crypto = WeChatCrypto(token, encodingAESKey, appid)
+            decrypted_xml = crypto.decrypt_message(
+                postdata,
+                msg_signature,
+                timestamp,
+                nonce
+            )
 
-            ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
-            print('decryp_xml -->', decryp_xml)
+            # decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+            # ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
+            print('----- 【公众号】客户发过来的消息 【解密后】xml ---->', decrypted_xml)
 
-            DOMTree = xmldom.parseString(decryp_xml)
+            DOMTree = xmldom.parseString(decrypted_xml)
             collection = DOMTree.documentElement
             original_id = collection.getElementsByTagName("ToUserName")[0].childNodes[0].data
             openid = collection.getElementsByTagName("FromUserName")[0].childNodes[0].data
@@ -667,12 +674,13 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
             elif MsgType == 'text':
                 Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
-                MsgId = collection.getElementsByTagName("MsgId")[0].childNodes[0].data
                 CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
                 print('--内容Content-->>', Content)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
                 if gongzhonghao_app_objs:
+                    activity_id = Content
+
                     gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                     company_id = gongzhonghao_app_obj.company_id
                     name = gongzhonghao_app_obj.name
@@ -681,19 +689,45 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                     if objs:
                         obj = objs[0]
                         customer_id = obj.id
+                        redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,activity_id=activity_id)
 
-                        reply = TextReply(content='YYY')
+
+                        if redPacket_objs:
+                            redPacket_obj = redPacket_objs[0]
+                            forward_read_count = redPacket_obj.forward_read_count
+                            already_send_redPacket_num = redPacket_obj.already_send_redPacket_num
+
+                            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+                            reach_forward_num  = activity_obj.reach_forward_num
+                            divmod_ret = divmod(forward_read_count, reach_forward_num)
+
+                            shoudle_send_num = divmod_ret[0]
+                            yushu = divmod_ret[1]
+                            short_num = reach_forward_num - yushu
+
+                            if  forward_read_count >= reach_forward_num:
+
+                                _content = '转发后阅读人数已达【%s】人 ,已发红包【%s】个 . \n还差【%s】人又能再拿现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (forward_read_count,already_send_redPacket_num,short_num)
+                            else:
+                                _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
+                                forward_read_count, short_num)
+
+
+                        else:
+                            _content = '输入查询ID可能有误, 客服已通知技术小哥👨🏻‍💻, 快马加鞭🕙为您解决问题,\n 请您及时关注消息提醒🔔!'
+
+                        reply = TextReply(content=_content)
                         reply._data['ToUserName'] = openid
                         reply._data['FromUserName'] = original_id
 
                         xml = reply.render()
 
-                        print('xml -->', xml)
+                        print('------ 被动回复消息【加密前】xml -->', xml)
 
                         timestamp = str(int(time.time()))
                         crypto = WeChatCrypto(token, encodingAESKey, appid)
                         encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
-                        print(encrypted_xml)
+                        print('------ 被动回复消息【加密后】xml------>',encrypted_xml)    ## 加密后的xml 数据
 
                         return HttpResponse(encrypted_xml, content_type="application/xml")
 
