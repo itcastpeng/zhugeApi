@@ -1,8 +1,6 @@
 from django.shortcuts import HttpResponse
-import os
 from django import forms
 from publicFunc import Response
-import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import base64
@@ -17,8 +15,7 @@ import os
 import uuid
 import json
 import datetime as dt
-import re
-
+import time
 
 
 # 添加企业的产品
@@ -166,12 +163,21 @@ def img_merge(request):
         fileData = ''
 
         for chunk in range(chunk_num):
-            file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
-            file_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', file_name)
-            with open(file_save_path, 'r') as f:
-                fileData += f.read()
 
-            os.remove(file_save_path)
+            count = 0
+            while True:
+                count += 1
+                try:
+                    if count > 5:
+                        break
+                    file_name = timestamp + "_" + str(chunk) + '.' + expanded_name
+                    file_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', file_name)
+                    with open(file_save_path, 'r') as f:
+                        fileData += f.read()
+                    os.remove(file_save_path)
+                    break
+                except FileNotFoundError:
+                    time.sleep(0.1)
 
         # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
