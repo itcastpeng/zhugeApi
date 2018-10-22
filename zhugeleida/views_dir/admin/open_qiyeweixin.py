@@ -109,7 +109,6 @@ def open_qiyeweixin(request, oper_type):
                     'SuiteId': SuiteId
                 }
                 create_pre_auth_code_ret = common.create_pre_auth_code(_data)
-
                 suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
 
                 get_permanent_code_url_data = {

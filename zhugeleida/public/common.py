@@ -207,16 +207,12 @@ def  create_suite_access_token(data):
     SuiteId = data.get('SuiteId')
 
     post_component_data = ''
+    suite_secret = ''
+    SuiteTicket = ''
     if SuiteId == 'wx5d26a7a856b22bec':
         key_name = 'SuiteTicket_%s' % (SuiteId)
         SuiteTicket = rc.get(key_name)
         suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
-
-        post_component_data = {
-            "suite_id": SuiteId,
-            "suite_secret": suite_secret ,
-            "suite_ticket": SuiteTicket
-        }
 
     elif SuiteId == 'wx36c67dd53366b6f0':
 
@@ -224,11 +220,17 @@ def  create_suite_access_token(data):
         SuiteTicket = rc.get(key_name)
         suite_secret = 'dr7UT0zmMW1Dh7XABacmGieqLefoAhyrabAy74yI8rM'
 
-        post_component_data = {
-            "suite_id": SuiteId,
-            "suite_secret": suite_secret,
-            "suite_ticket": SuiteTicket
-        }
+    elif SuiteId == 'wx1cbe3089128fda03':
+        key_name = 'SuiteTicket_%s' % (SuiteId)
+        SuiteTicket = rc.get(key_name)
+        suite_secret = 'xA9Z8lcsTCc7eW8vaKQD0hTmamfjKn1Dnph3TcfdY-8'
+
+
+    post_component_data = {
+        "suite_id": SuiteId,
+        "suite_secret": suite_secret,
+        "suite_ticket": SuiteTicket
+    }
 
     suite_access_token_key_name = 'suite_access_token_%s' % (SuiteId)
     token_ret = rc.get(suite_access_token_key_name)
