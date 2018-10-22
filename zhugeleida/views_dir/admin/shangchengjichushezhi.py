@@ -89,28 +89,24 @@ def jiChuSheZhiOper(request, oper_type):
             if forms_obj.is_valid():
                 formObjs = forms_obj.cleaned_data
                 print('验证通过')
-                if int(resultData.get('mallStatus')) == 2:
-                    models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
-                else:
-                    if userObjs:
-                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=1)
+                if userObjs:
+                    # 判断
+                    if int(resultData.get('mallStatus')) == 2:
+                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
                     else:
-                        response.code = 301
-                        response.msg = '未注册小程序'
-                        return JsonResponse(response.__dict__)
-                userObjs.update(
-                    shangChengName=formObjs.get('shangChengName'),
-                    lunbotu=formObjs.get('lunbotu')
-                )
-                response.msg = '修改成功'
-                response.code = 200
-                response.data = {}
-                # else:
-                #     models.zgld_shangcheng_jichushezhi.objects.create(
-                #         shangChengName=formObjs.get('shangChengName'),
-                #         lunbotu=formObjs.get('lunbotu'),
-                #     )
-                #     response.msg = '创建成功'
+                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=1)
+                    # 更新基础设置 轮播图和商城名称
+                    userObjs.update(
+                        shangChengName=formObjs.get('shangChengName'),
+                        lunbotu=formObjs.get('lunbotu')
+                    )
+                    response.msg = '修改成功'
+                    response.code = 200
+                    response.data = {}
+                else:
+                    response.code = 301
+                    response.msg = '未注册小程序'
+                    return JsonResponse(response.__dict__)
             else:
                 response.code = 301
                 response.msg = '未通过'
