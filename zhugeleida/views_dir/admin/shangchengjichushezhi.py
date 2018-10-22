@@ -92,6 +92,9 @@ def jiChuSheZhiOper(request, oper_type):
                 if int(resultData.get('mallStatus')) == 2:
                     print('进入这里')
                     models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
+                    response.msg = '修改成功'
+                    response.code = 200
+                    response.data = {}
                 else:
                     if userObjs:
                         models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=1)
@@ -101,7 +104,7 @@ def jiChuSheZhiOper(request, oper_type):
                         )
                         response.msg = '修改成功'
                         response.code = 200
-                        response.data = ''
+                        response.data = {}
                     else:
                         response.code = 301
                         response.msg = '未注册小程序'
