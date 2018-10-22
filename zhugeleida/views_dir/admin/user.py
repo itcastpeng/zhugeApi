@@ -265,7 +265,7 @@ def user_oper(request, oper_type, o_id):
                 used_user_num  = models.zgld_userprofile.objects.filter(company_id=company_id).count() #
 
 
-                print('----- 超过明片最大开通数 ------>>',available_user_num,used_user_num)
+                print('----- 明片最大开通数 | 开通数------>>',available_user_num,used_user_num)
                 if  int(used_user_num) >= int(available_user_num): # 开通的用户数量 等于 == 该公司最大可用名片数
                     response.code = 302
                     response.msg = "超过明片最大开通数,请您联系管理员"
@@ -426,7 +426,7 @@ def user_oper(request, oper_type, o_id):
             department_id = request.POST.get('department_id')
             if department_id:
                 department_id = json.loads(department_id)
-
+            company_id = request.POST.get('company_id')
             # 获取ID 用户名 及 角色
             form_data = {
                 'o_id': o_id,
@@ -448,7 +448,6 @@ def user_oper(request, oper_type, o_id):
                 print(forms_obj.cleaned_data)
                 username = forms_obj.cleaned_data.get('username')
                 # role_id = forms_obj.cleaned_data.get('role_id')
-                company_id = forms_obj.cleaned_data.get('company_id')
                 position = forms_obj.cleaned_data.get('position')
 
                 wechat_phone =   forms_obj.cleaned_data.get('wechat_phone')
@@ -763,7 +762,7 @@ def user_oper(request, oper_type, o_id):
                         available_user_num = models.zgld_company.objects.filter(id=company_id)[0].mingpian_available_num
                         used_user_num = models.zgld_userprofile.objects.filter(company_id=company_id).count()  #
 
-                        print('-----超过明片最大开通数------>>', available_user_num, used_user_num)
+                        print('-----明片最大开通数 | 已开通数------>>', available_user_num, used_user_num)
                         if int(used_user_num) >= int(available_user_num):  # 开通的用户数量 等于 == 该公司最大可用名片数
                             response.code = 302
                             response.msg = "超过明片最大开通数,请您联系管理员"
