@@ -23,6 +23,7 @@ def mallManageShow(request):
         indexLunBoTu = xiaoChengXuObjs[0].lunbotu  # 查询首页 轮播图
 
     otherData = []
+    response.data = {}
     if detaileId:
         print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuObjs[0].id)
         objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuObjs[0].id).filter(id=detaileId).exclude(goodsStatus=2)
