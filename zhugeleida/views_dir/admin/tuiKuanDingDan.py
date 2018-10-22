@@ -168,6 +168,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                             if collection.getElementsByTagName("err_code_des"):
                                 err_code_des = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
                                 response.msg = err_code_des
+                                return JsonResponse(response.__dict__)
                             else:
                                 nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                                 objs.update(tuiKuanStatus=2, tuiKuanDateTime=nowTime)
@@ -179,7 +180,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         response.msg = '无退款单号'
                 else:
                     objs.update(tuiKuanStatus=3)
-                    response.msg = '退款失败！'
+                    response.msg = '卖家拒绝退款'
                 response.code = 200
                 response.data = {'other':other}
     else:

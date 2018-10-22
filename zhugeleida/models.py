@@ -1169,6 +1169,7 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
         (2, '退款完成'),
         (3, '退款失败'),
         (4, '退款中'),
+        (5, '拒绝退款'),
     )
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
