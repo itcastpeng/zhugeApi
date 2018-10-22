@@ -10,6 +10,7 @@ from publicFunc.condition_com import conditionCom
 import requests
 from ..conf import *
 from django.db.models import Q
+from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -86,42 +87,46 @@ def department_oper(request, oper_type, o_id):
                 parentid_id = forms_obj.cleaned_data.get('parentid_id')
                 if not  parentid_id:
                     parentid_id = ''
+                company_id = forms_obj.cleaned_data.get('company_id')
 
+                name = forms_obj.cleaned_data.get('name')
                 data_dict = {
-                    'company_id' :forms_obj.cleaned_data.get('company_id'),
-                    'name' : forms_obj.cleaned_data.get('name'),
+                    'company_id' : company_id,
+                    'name' : name,
                     'parentid_id' : parentid_id
                 }
-                print('-----data_dict------->', data_dict,)
                 obj = models.zgld_department.objects.create(**data_dict)
-                print('-----data_dict------->', data_dict,  obj.id)
 
-                print('obj.id -->', obj.id)
-                get_token_data = {}
-                get_user_data = {}
+                # print('obj.id -->', obj.id)
+                # get_token_data = {}
+                # get_user_data = {}
+                #
+                # get_token_data['corpid'] = obj.company.corp_id
+                # get_token_data['corpsecret'] = obj.company.tongxunlu_secret
+                #
+                #
+                # import redis
+                # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                # key_name = "company_%s_tongxunlu_token" % (obj.company_id)
+                # token_ret = rc.get(key_name)
+                #
+                # print('---token_ret---->>', token_ret)
+                #
+                # if not token_ret:
+                #     ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                #     ret_json = ret.json()
+                #     access_token = ret_json['access_token']
+                #     get_user_data['access_token'] = access_token
+                #
+                #     rc.set(key_name, access_token, 7000)
+                #
+                # else:
+                #     get_user_data['access_token'] = token_ret
 
-                get_token_data['corpid'] = obj.company.corp_id
-                get_token_data['corpsecret'] = obj.company.tongxunlu_secret
-
-
-                import redis
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                key_name = "company_%s_tongxunlu_token" % (obj.company_id)
-                token_ret = rc.get(key_name)
-
-                print('---token_ret---->>', token_ret)
-
-                if not token_ret:
-                    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                    ret_json = ret.json()
-                    access_token = ret_json['access_token']
-                    get_user_data['access_token'] = access_token
-
-                    rc.set(key_name, access_token, 7000)
-
-                else:
-                    get_user_data['access_token'] = token_ret
-
+                token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                get_user_data = {
+                    'access_token': token_ret
+                }
 
                 if not obj.parentid_id: #为空的话，说明是顶级
                     parentid_id = 1
@@ -132,22 +137,19 @@ def department_oper(request, oper_type, o_id):
 
                 post_user_data = {
                     'id': obj.id,
-                    'name': forms_obj.cleaned_data.get('name'),
+                    'name': name,
                     'parentid': parentid_id
                 }
                 print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data))
 
                 ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
-                print(ret.text)
+                weixin_ret = ret.json()
 
-                weixin_ret = json.loads(ret.text)
                 if weixin_ret.get('errmsg') == 'created':
                     response.code = 200
                     response.msg = "添加成功"
                 else:
-                    models.zgld_department.objects.filter(id= obj.id).delete()
-
-                    rc.delete(key_name)
+                    models.zgld_department.objects.filter(id=obj.id).delete()
                     response.code = weixin_ret['errcode']
                     response.msg = "企业微信返回错误,%s" %  weixin_ret['errmsg']
 
@@ -168,31 +170,37 @@ def department_oper(request, oper_type, o_id):
                 user_objs = models.zgld_userprofile.objects.filter(department=o_id)
 
                 if user_objs.count() == 0:
-                    get_token_data = {}
-                    get_user_data = {}
 
-                    get_token_data['corpid'] = department_objs[0].company.corp_id
-                    get_token_data['corpsecret'] = department_objs[0].company.tongxunlu_secret
+                    company_id =  department_objs[0].company_id
+                    # get_token_data = {}
+                    # get_user_data = {}
+                    #
+                    # get_token_data['corpid'] = department_objs[0].company.corp_id
+                    # get_token_data['corpsecret'] = department_objs[0].company.tongxunlu_secret
+                    #
+                    # import redis
+                    # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    # key_name = "company_%s_tongxunlu_token" % (department_objs[0].company_id)
+                    # token_ret = rc.get(key_name)
+                    # print('---token_ret---->>', token_ret)
+                    #
+                    # if not token_ret:
+                    #     ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    #     ret_json = ret.json()
+                    #     access_token = ret_json['access_token']
+                    #     get_user_data['access_token'] = access_token
+                    #
+                    #     rc.set(key_name, access_token, 7000)
+                    # else:
+                    #     get_user_data['access_token'] = token_ret
 
-                    import redis
-                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    key_name = "company_%s_tongxunlu_token" % (department_objs[0].company_id)
-                    token_ret = rc.get(key_name)
-                    print('---token_ret---->>', token_ret)
-
-                    if not token_ret:
-                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                        ret_json = ret.json()
-                        access_token = ret_json['access_token']
-                        get_user_data['access_token'] = access_token
-
-                        rc.set(key_name, access_token, 7000)
-                    else:
-                        get_user_data['access_token'] = token_ret
-
-                    get_user_data['id'] = o_id
+                    token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                    get_user_data = {
+                        'access_token': token_ret,
+                        'id' : o_id
+                    }
                     ret = requests.get(Conf['delete_department_url'], params=get_user_data)
-                    print(ret.text)
+                    print(ret.json())
 
                     weixin_ret = json.loads(ret.text)
                     if weixin_ret.get('errmsg') == 'deleted':
@@ -200,9 +208,8 @@ def department_oper(request, oper_type, o_id):
                         response.code = 200
                         response.msg = "删除成功"
                     else:
-                        rc.delete(key_name)
-                        response.code = weixin_ret['errcode']
 
+                        response.code = weixin_ret['errcode']
                         if weixin_ret['errcode'] == 60005:
                            error_msg = '部门下存在成员,请先删除或转移子级数据'
                         else:
@@ -242,28 +249,33 @@ def department_oper(request, oper_type, o_id):
 
 
                 if department_objs:
-                    get_token_data = {}
-                    get_user_data = {}
+                    company_id =  department_objs[0].company_id
+                    # get_token_data = {}
+                    # get_user_data = {}
+                    #
+                    # get_token_data['corpid'] = department_objs[0].company.corp_id
+                    # get_token_data['corpsecret'] = department_objs[0].company.tongxunlu_secret
+                    #
+                    # import redis
+                    # rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    # key_name = "company_%s_tongxunlu_token" % (department_objs[0].company_id)
+                    # token_ret = rc.get(key_name)
+                    # print('---token_ret---->>', token_ret)
+                    #
+                    # if not token_ret:
+                    #     ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                    #     ret_json = ret.json()
+                    #     access_token = ret_json['access_token']
+                    #     get_user_data['access_token'] = access_token
+                    #     rc.set(key_name, access_token, 7000)
+                    #
+                    # else:
+                    #     get_user_data['access_token'] = token_ret
 
-                    get_token_data['corpid'] = department_objs[0].company.corp_id
-                    get_token_data['corpsecret'] = department_objs[0].company.tongxunlu_secret
-
-                    import redis
-                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                    key_name = "company_%s_tongxunlu_token" % (department_objs[0].company_id)
-                    token_ret = rc.get(key_name)
-                    print('---token_ret---->>', token_ret)
-
-                    if not token_ret:
-                        ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                        ret_json = ret.json()
-                        access_token = ret_json['access_token']
-                        get_user_data['access_token'] = access_token
-                        rc.set(key_name, access_token, 7000)
-
-                    else:
-                        get_user_data['access_token'] = token_ret
-
+                    token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                    get_user_data = {
+                        'access_token': token_ret
+                    }
 
                     post_user_data = {
                         'id': o_id,

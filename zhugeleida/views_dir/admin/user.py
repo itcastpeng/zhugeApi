@@ -15,7 +15,7 @@ from  zhugeleida.views_dir.qiyeweixin.qr_code_auth import create_small_program_q
 from zhugeapi_celery_project import tasks
 from django.db.models import Q
 import redis
-from  zhugeleida.public.common import create_qiyeweixin_access_token
+from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -886,44 +886,3 @@ def user_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-
-def  jianrong_create_qiyeweixin_access_token(company_id):
-
-    app_obj = models.zgld_app.objects.get(company_id=company_id, app_type=3)
-    permanent_code = app_obj.permanent_code
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-    company_obj = models.zgld_company.objects.get(id=company_id)
-    corp_id = company_obj.corp_id
-    tongxunlu_secret = company_obj.tongxunlu_secret
-
-
-    if not  permanent_code:
-        get_token_data = {
-            'corpid': corp_id,
-            'corpsecret': tongxunlu_secret
-        }
-
-        key_name = "company_%s_tongxunlu_token" % (company_id)
-        access_token = rc.get(key_name)
-
-        print('---token_ret---->>', access_token)
-
-        if not access_token:
-            ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-            ret_json = ret.json()
-            print('--------【企业微信】使用秘钥生成 access_token 返回-->>', ret_json)
-            access_token = ret_json['access_token']
-            rc.set(key_name, access_token, 7000)
-
-    else:
-        SuiteId = 'wx1cbe3089128fda03'  # 通讯录
-        _data = {
-            'SuiteId': SuiteId,  # 通讯录 。
-            'corp_id': corp_id,  # 授权方企业corpid
-            'permanent_code': permanent_code
-        }
-        access_token_ret = create_qiyeweixin_access_token(_data)
-        access_token = access_token_ret.data.get('access_token')
-
-    return  access_token
