@@ -44,7 +44,10 @@ def employeesOrders(request):
             })
         response.msg = '查询成功'
         response.code = 200
-        response.data = {'otherData':otherData}
+        response.data = {
+            'otherData':otherData,
+            'objsCount':objsCount
+        }
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())

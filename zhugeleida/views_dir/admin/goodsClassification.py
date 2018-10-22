@@ -54,6 +54,7 @@ def goodsClassShow(request):
             if singleUser:
                 q.add(Q(parentClassification_id=singleUser), Q.AND)
             objs = groupObjs.filter(mallSetting_id=jichushezhi_id).filter(q)
+            objsCount = objs.count()
             otherData = []
             for obj in objs:
                 countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
@@ -73,7 +74,8 @@ def goodsClassShow(request):
             response.msg = '查询成功'
             response.data = {
                 'parentData':parentData,
-                 'otherData':otherData
+                'otherData':otherData,
+                'objsCount':objsCount
             }
         else:
             response.msg = '请完善商城配置信息'
