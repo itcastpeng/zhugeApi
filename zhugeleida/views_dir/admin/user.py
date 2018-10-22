@@ -992,7 +992,7 @@ def  jianrong_create_qiyeweixin_access_token(company_id):
     tongxunlu_secret = company_obj.tongxunlu_secret
 
 
-    if permanent_code:
+    if not  permanent_code:
         get_token_data = {
             'corpid': corp_id,
             'corpsecret': tongxunlu_secret
