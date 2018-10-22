@@ -185,7 +185,6 @@ def user(request):
                             'position': obj.position,
                             'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
                             'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
-                            'status': obj.get_status_display(),
                             'avatar': mingpian_avatar,          # 头像
                             'qr_code': obj.qr_code,
                             'company': obj.company.name,
@@ -193,6 +192,11 @@ def user(request):
                             'department' : department,
                             'department_id' : department_id,
                             'gender': obj.gender,
+
+                            'status': obj.status,
+                            'status_text': obj.get_status_display(),
+                            'boss_status': obj.boss_status,
+                            'boss_status_text': obj.get_boss_status_display()
 
                         })
                         #  查询成功 返回200 状态码
@@ -596,6 +600,7 @@ def user_oper(request, oper_type, o_id):
         elif oper_type == "update_status":
 
             status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
+            boss_status = request.POST.get('boss_status')    #(1, "启用"),  (2, "未启用"),
             user_id = request.GET.get('user_id')
 
             objs = models.zgld_userprofile.objects.filter(id=o_id)
@@ -606,8 +611,12 @@ def user_oper(request, oper_type, o_id):
                     response.code = 305
                     response.msg = "不能修改自己"
 
-                else:
+                elif status:
                     objs.update(status=status)
+                    response.code = 200
+                    response.msg = "修改成功"
+                elif boss_status:
+                    objs.update(boss_status=boss_status)
                     response.code = 200
                     response.msg = "修改成功"
 

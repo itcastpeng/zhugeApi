@@ -318,10 +318,19 @@ class zgld_userprofile(models.Model):
     avatar = models.CharField(verbose_name="头像url", max_length=256, default='statics/imgs/setAvator.jpg')
     qr_code = models.CharField(verbose_name='企业用户个人二维码', max_length=128, null=True)
     status_choices = (
-        (1, "启用"),
-        (2, "未启用"),
+        (1, "AI雷达启用"),
+        (2, "AI雷达不启用"),
+
     )
-    status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=2)
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="AI雷达状态", default=2)
+
+    boss_status_choices = (
+        (1, "Boss雷达启用"),
+        (2, "Boss雷达不启用"),
+    )
+    boss_status = models.SmallIntegerField(choices=boss_status_choices, verbose_name="Boss雷达状态", default=2)
+
+
 
     popularity = models.IntegerField(verbose_name='人气数(被查看)', default=0)
     praise = models.IntegerField(verbose_name='被赞数', default=0)

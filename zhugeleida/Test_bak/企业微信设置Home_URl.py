@@ -5,7 +5,7 @@
 # ret = rc.get('xxx')
 # print(ret)
 import requests
-get_code_data = {}
+
 import json
 
 code = 'vq6XRbGxe60eJJzitVXSRHN3IaPfujZkNgQJRi6H3KQ'
@@ -60,9 +60,20 @@ code = 'vq6XRbGxe60eJJzitVXSRHN3IaPfujZkNgQJRi6H3KQ'
 # print(code_ret)
 
 
-post_data = { "access_token"  : "RWjRc3L6ymjnZ6d7IXtbJizEfrRklrdqe07DuorGdxBKWUqs-1s10Isk_ihzGnRzTQBAeQx5UZ2fxJmq4nddMwaNw6PJJxuyaroEw5c7-zeZicGvrt9xTkqFBNcKqrN-d2ohj1nZjzkqcqbrIl7kPDXKedugTXFxC4RDFjKwGAdPWwAOGn24VfvgI9SFwwCN9vzq7NFWcu4FP-51efyQ_A"}
+post_data = {
+    "access_token"  : "RWjRc3L6ymjnZ6d7IXtbJizEfrRklrdqe07DuorGdxBKWUqs-1s10Isk_ihzGnRzTQBAeQx5UZ2fxJmq4nddMwaNw6PJJxuyaroEw5c7-zeZicGvrt9xTkqFBNcKqrN-d2ohj1nZjzkqcqbrIl7kPDXKedugTXFxC4RDFjKwGAdPWwAOGn24VfvgI9SFwwCN9vzq7NFWcu4FP-51efyQ_A"
+}
 
 
 
+access_token = 'VSM-cq9Yki7W1eMGJ7fX1KjYUppbPpg3NzdIYJRb7A3biYj3PdVZCo_ORibgXXxHgqX3YdfQDEXelHkIFwihPy7IxSDM747inr_O6AkzAz3pRS9CAjLmwjmoTXdBB8_-AyWDhdS0d5Xa48rzW4Yu0N7zs8n0ptq9CmF2GDw8YQMObBLs2FFHXkpVH7r04LFIwGAHYUrRTuYn1u5R3_tmdA'
 
+get_code_data = {
+    'access_token' : access_token,
+    'userid': 'ZhangJu'
+}
+code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get'
+code_ret = requests.get(code_url, params=get_code_data)
 
+code_ret_json = code_ret.json()
+print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
