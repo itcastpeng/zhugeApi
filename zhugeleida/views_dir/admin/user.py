@@ -194,6 +194,9 @@ def user(request):
                             'department_id' : department_id,
                             'gender': obj.gender,
 
+                            'boss_status': obj.boss_status,
+                            'boss_status_text': obj.get_boss_status_display()
+
                         })
                         #  查询成功 返回200 状态码
                     response.code = 200
