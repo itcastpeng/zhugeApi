@@ -98,6 +98,13 @@ def open_qiyeweixin(request, oper_type):
                 suite_id = 'wx36c67dd53366b6f0'
                 app_type = 'boss'
 
+            elif app_type == 3:
+                suite_id = 'wx1cbe3089128fda03'
+                app_type = 'address_book'
+
+
+
+
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
 
             _data = {

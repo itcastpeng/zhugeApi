@@ -128,7 +128,7 @@ class ProductSelectForm(forms.Form):
 
     def clean_length(self):
         if 'length' not in self.data:
-            length = 20
+            length = 50
         else:
             length = int(self.data['length'])
         return length
