@@ -32,7 +32,7 @@ def tuiKuanDingDanShow(request):
             'orderNumber'
         ).filter(
             orderNumber__shangpinguanli__parentName__mallSetting__xiaochengxuApp_id=xiaochengxu_id
-        ).filter(q)
+        ).filter(q).order_by('-shengChengDateTime')
 
         objsCount = objs.count()
         if length != 0:
