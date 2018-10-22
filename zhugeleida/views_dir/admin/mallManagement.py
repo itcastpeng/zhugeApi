@@ -28,6 +28,7 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
             else:
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
             objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id)
+            objsCount = objs.count()
             otherData = []
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -72,7 +73,10 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
                 })
             response.code = 200
             response.msg = '查询成功'
-            response.data = otherData
+            response.data = {
+                'otherData':otherData,
+                'objsCount':objsCount
+            }
     return response
 
 # 商城展示
