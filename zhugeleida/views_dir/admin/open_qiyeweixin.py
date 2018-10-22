@@ -115,7 +115,7 @@ def open_qiyeweixin(request, oper_type):
                     'suite_access_token': suite_access_token
                 }
                 post_permanent_code_url_data = {
-                    'AuthCode': AuthCode
+                    'auth_code': AuthCode
                 }
 
                 get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data, data=json.dumps(post_permanent_code_url_data))
@@ -125,16 +125,11 @@ def open_qiyeweixin(request, oper_type):
 
                 corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
                 corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
-                agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
-                agentid = ''
-                for _agent_dict in agent_list:
-                    _name = _agent_dict.get('name')
-                    if _name == name:
-                        agentid = _agent_dict.get('agentid')
+                # agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
+
 
                 access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
-                permanent_code = get_permanent_code_info.get(
-                    'permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
+                permanent_code = get_permanent_code_info.get('permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
 
                 if permanent_code:
                     key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
@@ -150,7 +145,7 @@ def open_qiyeweixin(request, oper_type):
                                 name=name,
                                 app_type=_app_type,
                                 is_validate=True,
-                                agent_id=agentid,
+                                # agent_id=agentid,
                                 permanent_code=permanent_code
                             )
 
@@ -160,7 +155,7 @@ def open_qiyeweixin(request, oper_type):
                                 is_validate=True,
                                 name=name,
                                 app_type=_app_type,
-                                agent_id=agentid,
+                                # agent_id=agentid,
                                 company_id=company_id,
                                 permanent_code=permanent_code
                             )
