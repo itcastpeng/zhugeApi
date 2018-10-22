@@ -672,6 +672,7 @@ def user_send_gongzhonghao_template_msg(request):
                 'keyword2': {
                     'value': '【回复 %s】查看红包活动进度、具体人员详情' % (activity_id),
                     "color": "#FF0000"
+
                 },
                 'remark': {
                     'value': remark  # 回复内容
