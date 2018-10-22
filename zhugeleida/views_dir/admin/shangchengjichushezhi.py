@@ -90,20 +90,21 @@ def jiChuSheZhiOper(request, oper_type):
                 formObjs = forms_obj.cleaned_data
                 print('验证通过')
                 if int(resultData.get('mallStatus')) == 2:
+                    print('进入这里')
                     models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
-                if userObjs:
-
-                    userObjs.update(
-                        shangChengName=formObjs.get('shangChengName'),
-                        lunbotu=formObjs.get('lunbotu'),
-                    )
-                    response.msg = '修改成功'
-                    response.code = 200
-                    response.data = ''
-
                 else:
-                    response.code = 301
-                    response.msg = '未注册小程序'
+                    if userObjs:
+                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=1)
+                        userObjs.update(
+                            shangChengName=formObjs.get('shangChengName'),
+                            lunbotu=formObjs.get('lunbotu')
+                        )
+                        response.msg = '修改成功'
+                        response.code = 200
+                        response.data = ''
+                    else:
+                        response.code = 301
+                        response.msg = '未注册小程序'
                 # else:
                 #     models.zgld_shangcheng_jichushezhi.objects.create(
                 #         shangChengName=formObjs.get('shangChengName'),
