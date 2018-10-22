@@ -53,7 +53,8 @@ class zgld_app(models.Model):
     permanent_code = models.CharField(verbose_name="企业微信永久授权码", max_length=128, null=True)
     app_type_choice = (
         (1,'AI雷达'),
-        (2,'Boss雷达')
+        (2,'Boss雷达'),
+        (3,'三方通讯录')
     )
     app_type = models.SmallIntegerField(verbose_name='app类型区分', choices=app_type_choice,default=1)
 

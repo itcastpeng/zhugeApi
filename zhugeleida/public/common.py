@@ -271,15 +271,11 @@ def create_pre_auth_code(data):
 
     _data = {
         'SuiteId' : SuiteId
-
     }
-
     suite_access_token_ret = create_suite_access_token(_data)
     suite_access_token = suite_access_token_ret.data.get('suite_access_token')
 
     if not exist_pre_auth_code:
-
-
         get_pre_auth_data = {
             'suite_access_token': suite_access_token
         }
