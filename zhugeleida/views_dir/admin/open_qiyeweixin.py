@@ -98,6 +98,13 @@ def open_qiyeweixin(request, oper_type):
                 suite_id = 'wx36c67dd53366b6f0'
                 app_type = 'boss'
 
+            elif app_type == 3:
+                suite_id = 'wx1cbe3089128fda03'
+                app_type = 'address_book'
+
+
+
+
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
 
             _data = {
@@ -338,7 +345,7 @@ def open_qiyeweixin(request, oper_type):
                         return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
                     redirect_url = ''
-                    if status == 1 or boss_status == 1:  #
+                    if status == 1 and  app_type == 'leida':  #
                         user_profile_obj.gender = gender
                         # user_profile_obj.email = email
                         user_profile_obj.avatar = avatar
@@ -358,6 +365,18 @@ def open_qiyeweixin(request, oper_type):
                               userid, "\n", redirect_url)
                         return redirect(redirect_url)
 
+                    if  boss_status == 1 and app_type == 'boss': #
+                        user_profile_obj.gender = gender
+                        # user_profile_obj.email = email
+                        user_profile_obj.avatar = avatar
+                        user_profile_obj.save()
+
+                        redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
+                            user_profile_obj.id) + '&avatar=' + avatar
+
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                              userid, "\n", redirect_url)
+                        return redirect(redirect_url)
 
                     else:
                         print('----------【雷达权限】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
