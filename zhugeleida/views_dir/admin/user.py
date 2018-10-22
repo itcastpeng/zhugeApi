@@ -185,7 +185,6 @@ def user(request):
                             'position': obj.position,
                             'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
                             'phone': obj.wechat_phone,          # 代表注册企业微信注册时的电话
-                            'status': obj.get_status_display(),
                             'avatar': mingpian_avatar,          # 头像
                             'qr_code': obj.qr_code,
                             'company': obj.company.name,
@@ -193,6 +192,11 @@ def user(request):
                             'department' : department,
                             'department_id' : department_id,
                             'gender': obj.gender,
+
+                            'status': obj.status,
+                            'status_text': obj.get_status_display(),
+                            'boss_status': obj.boss_status,
+                            'boss_status_text': obj.get_boss_status_display()
 
                         })
                         #  查询成功 返回200 状态码
