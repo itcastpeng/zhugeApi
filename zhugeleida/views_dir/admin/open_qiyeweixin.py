@@ -353,11 +353,11 @@ def open_qiyeweixin(request, oper_type):
                         return redirect(redirect_url)
 
                     else:
-                        print('----------【雷达用户】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
+                        print('----------【AI雷达权限】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
                         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
                 else:
-                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
+                    print('----------【AI雷达权限】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
                     return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
             else:
                 print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid,"|",corpid)
