@@ -90,7 +90,7 @@ def theOrderShow(request):
                 'yewuyuan':yewuUser,
                 'unitRiceNum':obj.unitRiceNum,
                 'yongjin':obj.yongJin,
-                # 'peiSong':obj.peiSong,
+                'orderNumber':obj.orderNumber,
                 'shouHuoRen_id':obj.shouHuoRen_id,
                 'shouHuoRen':shouhuoren,
                 'status':obj.get_theOrderStatus_display(),
