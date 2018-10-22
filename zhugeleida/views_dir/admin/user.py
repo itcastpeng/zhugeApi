@@ -290,49 +290,11 @@ def user_oper(request, oper_type, o_id):
                                     response.code = 404
                                     response.msg = '非法请求'
                                     return JsonResponse(response.__dict__)
-                    app_obj = models.zgld_app.objects.get(company_id=company_id, app_type=3)
-                    permanent_code = app_obj.permanent_code
 
-                    company_obj = models.zgld_company.objects.get(id=company_id)
-                    corp_id =  company_obj.corp_id
-                    tongxunlu_secret =  company_obj.tongxunlu_secret
-
-                    get_user_data = {}
-                    key_name = ''
-                    if permanent_code:
-                        get_token_data = {
-                            'corpid': corp_id,
-                            'corpsecret': tongxunlu_secret
-                        }
-
-                        key_name = "company_%s_tongxunlu_token" % (company_id)
-                        token_ret = rc.get(key_name)
-
-                        print('---token_ret---->>',token_ret)
-
-                        if not  token_ret:
-                            ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                            ret_json = ret.json()
-                            print('--------ret_json-->>',ret_json)
-
-                            access_token = ret_json['access_token']
-                            get_user_data['access_token'] = access_token
-                            rc.set(key_name,access_token,7000)
-                        else:
-                            get_user_data['access_token'] = token_ret
-
-                    else:
-
-                        SuiteId = 'wx1cbe3089128fda03'  # 通讯录
-                        _data = {
-                            'SuiteId': SuiteId,  # 通讯录 。
-                            'corp_id': corp_id,  # 授权方企业corpid
-                            'permanent_code': permanent_code
-                        }
-                        access_token_ret = create_qiyeweixin_access_token(_data)
-                        access_token = access_token_ret.data.get('access_token')
-                        get_user_data['access_token'] = access_token
-
+                    token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                    get_user_data = {
+                        'access_token': token_ret
+                    }
 
                     if len(depart_id_list) == 0:
                         depart_id_list = [1]
@@ -379,7 +341,7 @@ def user_oper(request, oper_type, o_id):
                         response.msg = "添加用户成功"
 
                     else:
-                        rc.delete(key_name)
+
                         response.code = weixin_ret['errcode']
                         response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
@@ -413,28 +375,12 @@ def user_oper(request, oper_type, o_id):
                 else:
                     user_objs = models.zgld_userprofile.objects.filter(id=o_id)
                     if user_objs:
+                        company_id =  user_objs[0].company_id
 
-                        get_token_data = {}
-                        get_user_data = {}
-                        get_token_data['corpid'] = user_objs[0].company.corp_id
-                        get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
-
-
-                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                        key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
-                        token_ret = rc.get(key_name)
-
-                        print('---token_ret---->>', token_ret)
-
-                        if not token_ret:
-                            ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                            ret_json = ret.json()
-                            access_token = ret_json['access_token']
-                            get_user_data['access_token'] = access_token
-
-                            rc.set(key_name, access_token, 7000)
-                        else:
-                            get_user_data['access_token'] = token_ret
+                        token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                        get_user_data = {
+                            'access_token': token_ret
+                        }
 
                         userid = user_objs[0].userid
                         if userid:
@@ -454,7 +400,7 @@ def user_oper(request, oper_type, o_id):
                                 response.msg = "删除成功"
 
                             else:
-                                rc.delete(key_name)
+
                                 response.code = weixin_ret['errcode']
                                 response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
 
@@ -534,34 +480,14 @@ def user_oper(request, oper_type, o_id):
 
                     if user_objs:
 
-                        # print(user_objs[0].company.corp_id, user_objs[0].company.tongxunlu_secret)
-                        get_token_data = {}
-                        post_user_data = {}
-                        get_user_data = {}
-                        get_token_data['corpid'] = user_objs[0].company.corp_id
-                        get_token_data['corpsecret'] = user_objs[0].company.tongxunlu_secret
-
-
-                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                        key_name = "company_%s_tongxunlu_token" % (user_objs[0].company_id)
-                        token_ret = rc.get(key_name)
-
-                        print('---token_ret---->>', token_ret)
-
-                        if not token_ret:
-                            ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                            ret_json = ret.json()
-                            access_token = ret_json['access_token']
-                            get_user_data['access_token'] = access_token
-
-                            rc.set(key_name, access_token, 7000)
-
-                        else:
-                            get_user_data['access_token'] = token_ret
+                        token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                        get_user_data = {
+                            'access_token': token_ret
+                        }
 
                         if len(department_id) == 0:
                             department_id = [1]
-
+                        post_user_data = {}
                         post_user_data['userid'] = user_objs[0].userid
                         post_user_data['name'] = username
                         post_user_data['position'] = position
@@ -866,40 +792,19 @@ def user_oper(request, oper_type, o_id):
 
                             }
 
-                            company_obj = models.zgld_company.objects.get(id=company_id)
-                            get_token_data = {}
+                            token_ret = jianrong_create_qiyeweixin_access_token(company_id)
+                            get_user_data = {
+                                'access_token': token_ret
+                            }
+
                             post_user_data = {}
-                            get_user_data = {}
-                            get_token_data['corpid'] = company_obj.corp_id
-                            get_token_data['corpsecret'] = company_obj.tongxunlu_secret
-
-
-                            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                            key_name = "company_%s_tongxunlu_token" % (company_id)
-                            token_ret = rc.get(key_name)
-
-                            print('---token_ret---->>', token_ret)
-
-                            if not token_ret:
-                                ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
-                                ret_json = ret.json()
-                                print('--------ret_json-->>', ret_json)
-
-                                access_token = ret_json['access_token']
-                                get_user_data['access_token'] = access_token
-
-                                rc.set(key_name, access_token, 7000)
-
-                            else:
-                                get_user_data['access_token'] = token_ret
-
                             post_user_data['userid'] = userid
                             post_user_data['name'] = username
                             post_user_data['position'] = position
                             post_user_data['mobile'] = wechat_phone
                             post_user_data['department'] = department_id_list
                             add_user_url = Conf['add_user_url']
-
+                            key_name = "company_%s_tongxunlu_token" % (company_id)
                             print('-------->>', json.dumps(post_user_data))
 
                             ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
@@ -924,6 +829,7 @@ def user_oper(request, oper_type, o_id):
                                 response.msg = "添加用户成功"
 
                             else:
+                                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                                 rc.delete(key_name)
                                 response.code = weixin_ret['errcode']
                                 response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
