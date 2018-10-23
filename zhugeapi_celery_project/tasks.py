@@ -111,7 +111,7 @@ def user_send_gongzhonghao_template_msg(data):
 
 
 ## 企业微信获取三方通讯录的人员信息
-@app.tasks
+@app.task
 def qiyeweixin_user_get_userinfo(data):
     print('--- 【企业微信-获取三方通讯录的人员信息】 --->', data)
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/qiyeweixin_user_get_userinfo'
