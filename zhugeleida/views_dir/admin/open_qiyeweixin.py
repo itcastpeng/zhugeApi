@@ -346,15 +346,15 @@ def open_qiyeweixin(request, oper_type):
             SuiteId = ''
             url = ''
             if app_type == 'leida':
-                SuiteId = 'wx5d26a7a856b22bec'
+                # SuiteId = 'wx5d26a7a856b22bec'
                 url = 'http://zhugeleida.zhugeyingxiao.com'
 
             elif app_type == 'boss':
-                SuiteId = 'wx36c67dd53366b6f0'
+                # SuiteId = 'wx36c67dd53366b6f0'
                 url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
 
             _data = {
-                'SuiteId': SuiteId
+                'SuiteId': 'wx1cbe3089128fda03' # 通讯录三方应用
             }
 
             suite_access_token_ret = common.create_suite_access_token(_data)
@@ -380,6 +380,7 @@ def open_qiyeweixin(request, oper_type):
                 print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
                       "|", suite_access_token, "|", user_ticket)
 
+
             post_userlist_data = {
                 'user_ticket': user_ticket
             }
@@ -387,7 +388,8 @@ def open_qiyeweixin(request, oper_type):
                 'access_token': suite_access_token
             }
 
-            userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
+            # userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
+            userlist_url = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail",
             user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
             user_list_ret_json = user_list_ret.json()
 
@@ -397,6 +399,17 @@ def open_qiyeweixin(request, oper_type):
             avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
             gender = user_list_ret_json.get('gender')
             # email = user_list_ret_json['email']
+
+
+            # get_code_data = {
+            #     'access_token': access_token,
+            #     'userid': '1539586048417872'
+            # }
+            # code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get'
+            # code_ret = requests.get(code_url, params=get_code_data)
+            #
+            # code_ret_json = code_ret.json()
+            # print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
 
             print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
             company_objs = models.zgld_company.objects.filter(corp_id=corpid)
