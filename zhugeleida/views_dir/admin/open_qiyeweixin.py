@@ -15,6 +15,7 @@ from django import forms
 from django.shortcuts import render, redirect
 import datetime
 from zhugeapi_celery_project import tasks
+import xml.dom.minidom as xmldom
 
 ## 第三方平台接入
 @csrf_exempt
@@ -71,7 +72,44 @@ def open_qiyeweixin(request, oper_type):
             if (ret != 0):
                 print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
                 sys.exit(1)
+
+            DOMTree = xmldom.parseString(sMsg)
+            collection = DOMTree.documentElement
+            ChangeType = collection.getElementsByTagName("ChangeType") #update_user
+
+            if ChangeType: # 通讯录的触发事件，增删改查用户 和关注微工作台的事件提示。
+                InfoType = collection.getElementsByTagName("InfoType")[0].childNodes[0].data       #<InfoType><![CDATA[change_contact]]></InfoType>
+                ChangeType = collection.getElementsByTagName("ChangeType")[0].childNodes[0].data   #<ChangeType><![CDATA[update_user]]></ChangeType>
+                UserID = collection.getElementsByTagName("UserID")[0].childNodes[0].data
+                AuthCorpId = collection.getElementsByTagName("AuthCorpId")[0].childNodes[0].data
+
+                company_objs = models.zgld_company.objects.filter(corp_id=AuthCorpId)
+                company_id = ''
+                if company_objs:
+                    company_obj = company_objs[0]
+                    company_id = company_obj.id
+
+                _Status = collection.getElementsByTagName("Status")   #<Status>1</Status></xml> #激活状态: 1=已激活，2=已禁用，4=未激活。
+                if _Status: # 代表既未激活企业微信又未关注微工作台（原企业号）。
+                    Status = collection.getElementsByTagName("Status")[0].childNodes[0].data
+                    if int(Status) == 1: # 1=已激活
+                        _data = {
+                            'company_id': company_id,
+                            'userid': UserID,
+                        }
+                        tasks.qiyeweixin_user_get_userinfo(_data) #异步获取用户的头像
+                    return HttpResponse("success")
+
+                elif not _Status: # 没有status ，说明 是用户的增删改查。
+
+                    return HttpResponse("success")
+
+
+
             xml_tree = ET.fromstring(sMsg)
+            xml_tree.find("SuiteTicket")
+
+
 
             # 解密成功，sMsg即为xml格式的明文
             try:
@@ -270,6 +308,8 @@ def open_qiyeweixin(request, oper_type):
             print('-----post callback_data postdata 数据:------>',postdata)
 
             return HttpResponse('success')
+
+
 
     elif request.method == "GET":
 

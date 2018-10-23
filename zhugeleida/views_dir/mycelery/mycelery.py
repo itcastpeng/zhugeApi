@@ -380,6 +380,7 @@ def qiyeweixin_user_get_userinfo(request):
             # userid = user_list_ret_json.get('userid')
             corpid = user_list_ret_json.get('corpid')
             avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
+            mobile = user_list_ret_json.get('mobile')  # 加上100 获取小图
             gender = user_list_ret_json.get('gender')
             errmsg = user_list_ret_json.get('errmsg')
 
@@ -392,7 +393,8 @@ def qiyeweixin_user_get_userinfo(request):
                 )
                 user_profile_objs.update(
                     avatar=avatar,
-                    gender=gender
+                    gender=gender,
+                    wechat_phone=mobile, #微信绑定的手机号
                 )
                 response.msg ='【celery企业微信】获取成员信息成功'
                 response.code = 200
