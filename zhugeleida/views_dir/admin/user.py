@@ -653,7 +653,8 @@ def user_oper(request, oper_type, o_id):
                             objs =  models.zgld_userprofile.objects.filter(userid=userid,company_id=company_id)
 
                             if objs:
-                                print('-------- 用户数据成功已存在 username | userid | user_id -------->>',username,userid,objs[0].id)
+                                user_id = objs[0].id
+                                print('-------- 用户数据成功已存在 username | userid | user_id -------->>',username,userid,user_id)
                             else:
                                 obj = models.zgld_userprofile.objects.create(
                                     userid=userid,

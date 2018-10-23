@@ -387,7 +387,7 @@ def open_qiyeweixin(request, oper_type):
             url = ''
             if app_type == 'leida':
                 SuiteId = 'wx5d26a7a856b22bec'
-                url = 'http://zhugeleida.zhugeyingxiao.com'
+                url = 'http://zhugeleida.zhugeyingxiao.com/'
 
             elif app_type == 'boss':
                 SuiteId = 'wx36c67dd53366b6f0'
@@ -446,7 +446,7 @@ def open_qiyeweixin(request, oper_type):
             # email = user_list_ret_json['email']
 
 
-            print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(code_ret_json), "|", userid)
+            # print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(code_ret_json), "|", userid)
             company_objs = models.zgld_company.objects.filter(corp_id=corpid)
 
             if company_objs:
@@ -498,7 +498,7 @@ def open_qiyeweixin(request, oper_type):
                               userid, "\n", redirect_url)
                         return redirect(redirect_url)
 
-                    if  boss_status == 1 and app_type == 'boss': #
+                    elif  boss_status == 1 and app_type == 'boss': #
                         redirect_url = url + '?token=' + token + '&id=' + str(
                             user_id ) + '&avatar=' + avatar
 
