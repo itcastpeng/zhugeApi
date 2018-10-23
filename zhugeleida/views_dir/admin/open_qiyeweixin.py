@@ -371,37 +371,42 @@ def open_qiyeweixin(request, oper_type):
             print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
 
             user_ticket = code_ret_json.get('user_ticket')
-            if not user_ticket:
-                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用 access_token:==========>', code, "|",
-                      suite_access_token)
-                return HttpResponse('404')
-
-            else:
-                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
-                      "|", suite_access_token, "|", user_ticket)
+            errcode = code_ret_json.get('errcode')
+            userid = code_ret_json.get('UserId')
+            corpid = code_ret_json.get('CorpId')
 
 
-            post_userlist_data = {
-                'user_ticket': user_ticket
-            }
-            get_userlist_data = {
-                'access_token': suite_access_token
-            }
-
-            # userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
-            userlist_url = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail"
-            user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
-            user_list_ret_json = user_list_ret.json()
-
-            userid = user_list_ret_json.get('userid')
-            corpid = user_list_ret_json.get('corpid')
-            name = user_list_ret_json.get('name')
-            avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
-            gender = user_list_ret_json.get('gender')
+            # if not user_ticket:
+            #     print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用 access_token:==========>', code, "|",
+            #           suite_access_token)
+            #     return HttpResponse('404')
+            #
+            # else:
+            #     print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
+            #           "|", suite_access_token, "|", user_ticket)
+            #
+            #
+            # post_userlist_data = {
+            #     'user_ticket': user_ticket
+            # }
+            # get_userlist_data = {
+            #     'access_token': suite_access_token
+            # }
+            #
+            #  userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
+            # #userlist_url = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail"
+            # user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
+            # user_list_ret_json = user_list_ret.json()
+            #
+            # userid = user_list_ret_json.get('userid')
+            # corpid = user_list_ret_json.get('corpid')
+            # name = user_list_ret_json.get('name')
+            # avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
+            # gender = user_list_ret_json.get('gender')
             # email = user_list_ret_json['email']
 
 
-            print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
+            print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(code_ret_json), "|", userid)
             company_objs = models.zgld_company.objects.filter(corp_id=corpid)
 
             if company_objs:
@@ -432,11 +437,11 @@ def open_qiyeweixin(request, oper_type):
                         print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
                         return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
-                    redirect_url = ''
+
+                    avatar = user_profile_obj.avatar
+                    user_id = user_profile_obj.id
+                    token = user_profile_obj.token
                     if status == 1 and  app_type == 'leida':  #
-                        user_profile_obj.gender = gender
-                        # user_profile_obj.email = email
-                        user_profile_obj.avatar = avatar
 
                         last_login_date = user_profile_obj.last_login_date
                         if not last_login_date:  # 为空说明第一次登陆
@@ -446,24 +451,20 @@ def open_qiyeweixin(request, oper_type):
                             is_first_login = 'No'
                         user_profile_obj.save()
 
-                        redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
-                            user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
+                        redirect_url = url + '?token=' + token + '&id=' + str(
+                            user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
                         return redirect(redirect_url)
 
                     if  boss_status == 1 and app_type == 'boss': #
-                        user_profile_obj.gender = gender
-                        # user_profile_obj.email = email
-                        user_profile_obj.avatar = avatar
-                        user_profile_obj.save()
+                        redirect_url = url + '?token=' + token + '&id=' + str(
+                            user_id ) + '&avatar=' + avatar
 
-                        redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
-                            user_profile_obj.id) + '&avatar=' + avatar
-
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
+
                         return redirect(redirect_url)
 
                     else:
