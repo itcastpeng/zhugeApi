@@ -482,7 +482,7 @@ def user_oper(request, oper_type, o_id):
                     user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=o_id)
 
                     if user_objs:
-
+                        userid = user_objs[0].userid
                         token_ret = jianrong_create_qiyeweixin_access_token(company_id)
                         get_user_data = {
                             'access_token': token_ret
@@ -491,7 +491,7 @@ def user_oper(request, oper_type, o_id):
                         if len(department_id) == 0:
                             department_id = [1]
                         post_user_data = {}
-                        post_user_data['userid'] = user_objs[0].userid
+                        post_user_data['userid'] = userid
                         post_user_data['name'] = username
                         post_user_data['position'] = position
                         post_user_data['department'] = department_id
