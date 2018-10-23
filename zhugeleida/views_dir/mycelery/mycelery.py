@@ -373,9 +373,7 @@ def qiyeweixin_user_get_userinfo(request):
                 'userid': userid
             }
             code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get'
-            code_ret = requests.get(code_url, params=get_code_data)
-
-            user_list_ret = code_ret.json()
+            user_list_ret = requests.get(code_url, params=get_code_data)
             print('===========【celery 企业微信】 获取 user_ticket 返回:==========>', json.dumps(user_list_ret))
 
             user_list_ret_json = user_list_ret.json()
