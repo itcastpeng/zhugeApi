@@ -34,7 +34,7 @@ def action_record(data):
 
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
-    customer_id = data.get('user_id')  # 客户 id
+    customer_id = data.get('customer_id')  # 客户 id
     article_id = data.get('article_id')  # 客户 id
     action = data.get('action')
     if action:
@@ -146,7 +146,7 @@ def user_send_action_log(request):
 
     if datetime.datetime.now() <= account_expired_time:
         _data = {
-            'user_id': user_id,  # 用户 id
+            'uid': user_id,  # 用户 id
             'customer_id': customer_id,  # 客户 id
             'article_id': article_id,  # 客户 id
             'action': action,
