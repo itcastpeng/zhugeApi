@@ -343,18 +343,18 @@ def open_qiyeweixin(request, oper_type):
             code = request.GET.get('code')
             app_type = request.GET.get('state')
 
-            SuiteId = ''
+            SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
             url = ''
             if app_type == 'leida':
-                # SuiteId = 'wx5d26a7a856b22bec'
+                SuiteId = 'wx5d26a7a856b22bec'
                 url = 'http://zhugeleida.zhugeyingxiao.com'
 
             elif app_type == 'boss':
-                # SuiteId = 'wx36c67dd53366b6f0'
+                SuiteId = 'wx36c67dd53366b6f0'
                 url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
 
             _data = {
-                'SuiteId': 'wx1cbe3089128fda03' # 通讯录三方应用
+                'SuiteId': SuiteId , # 通讯录三方应用
             }
 
             suite_access_token_ret = common.create_suite_access_token(_data)
