@@ -841,7 +841,7 @@ def  batch_get_latest_audit_status(data):
                 obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
 
                 xcx_app_name = xcx_app_obj.name
-                msg = """小程序名称：{xcx_app_name}\n审核状态：{status}\n备注：{remark}""".format(
+                msg = """【小程序名称】：{xcx_app_name}\n【审核状态】：{status}\n【备注】：{remark}""".format(
                     xcx_app_name=xcx_app_name,
                     status="审核通过" if status == 0 else "审核失败",
                     remark="" if status == 0 else xcx_app_obj.code_release_result,
@@ -849,8 +849,8 @@ def  batch_get_latest_audit_status(data):
                 obj.send_message(
                     agentid=1000005,
                     msg=msg,
-                    touser="zhangcong"
-                    # touser="zhangcong|1530778413048|1531464629357|1531476018476"
+                    # touser="zhangcong"
+                    touser="zhangcong|1530778413048|1531464629357|1531476018476"
                 )
 
     else:

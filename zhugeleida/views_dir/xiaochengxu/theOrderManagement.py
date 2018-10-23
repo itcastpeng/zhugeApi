@@ -68,6 +68,7 @@ def theOrderShow(request):
                 'goodsPicture':topLunBoTu,
                 'id':obj.id,
                 # 'unitRiceNum':obj.unitRiceNum,
+                'goodsId':obj.shangpinguanli.id,
                 'goodsName' : obj.goodsName,
                 'goodsPrice':obj.goodsPrice,
                 'countPrice':countPrice,
