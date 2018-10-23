@@ -14,7 +14,7 @@ import xml.etree.cElementTree as ET
 from django import forms
 from django.shortcuts import render, redirect
 import datetime
-
+from zhugeapi_celery_project import tasks
 
 ## 第三方平台接入
 @csrf_exempt
@@ -401,21 +401,18 @@ def open_qiyeweixin(request, oper_type):
             # email = user_list_ret_json['email']
 
 
-            # get_code_data = {
-            #     'access_token': access_token,
-            #     'userid': '1539586048417872'
-            # }
-            # code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get'
-            # code_ret = requests.get(code_url, params=get_code_data)
-            #
-            # code_ret_json = code_ret.json()
-            # print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
-
             print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
             company_objs = models.zgld_company.objects.filter(corp_id=corpid)
 
             if company_objs:
                 company_id = company_objs[0].id
+
+                _data = {
+                    'company_id': company_id,
+                    'userid': userid,
+                }
+                tasks.qiyeweixin_user_get_userinfo(_data)
+
                 user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
                     userid=userid,
                     company_id=company_id

@@ -336,6 +336,11 @@ def user_oper(request, oper_type, o_id):
                         data_dict ={ 'user_id': obj.id, 'customer_id': ''}
                         tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
+                        _data = {
+                            'company_id': company_id,
+                            'userid': userid,
+                        }
+                        tasks.qiyeweixin_user_get_userinfo(_data)
 
                         response.code = 200
                         response.msg = "添加用户成功"

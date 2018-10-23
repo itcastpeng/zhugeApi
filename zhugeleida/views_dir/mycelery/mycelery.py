@@ -26,94 +26,88 @@ from django.db.models import  Sum
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import  focusOnIssuedRedEnvelope
 from django.db.models import Q,F
 import base64
+from zhugeleida.public.common import create_qiyeweixin_access_token
 
 
-def action_record(request):
+
+def action_record(data):
 
     response = Response.ResponseObj()
-    user_id = request.GET.get('uid')  # 用户 id
-    customer_id = request.GET.get('user_id')  # 客户 id
-    article_id = request.GET.get('article_id')  # 客户 id
-    action = request.GET.get('action')
-    remark = request.GET.get('remark')
+    user_id = data.get('uid')  # 用户 id
+    customer_id = data.get('user_id')  # 客户 id
+    article_id = data.get('article_id')  # 客户 id
+    action = data.get('action')
+    if action:
+        action = int(action)
 
-    company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-    company_obj = models.zgld_company.objects.get(id=company_id)
-    agent_id = models.zgld_app.objects.get(company_id=company_id, app_type=1).agent_id
-    account_expired_time = company_obj.account_expired_time
+    remark = data.get('remark')
+    agent_id = data.get('agent_id')
 
     customer_name = models.zgld_customer.objects.get(id=customer_id).username
     customer_name = base64.b64decode(customer_name)
     customer_name = str(customer_name, 'utf-8')
 
-    if datetime.datetime.now() <= account_expired_time:
 
-        if action in [0]: # 只发消息，不用记录日志。
 
-            # data['content'] = '%s%s' % (customer_name, remark)
-            # data['agentid'] = agent_id
-            # tasks.user_send_action_log.delay(json.dumps(data))
-            content =  '%s%s' % (customer_name, remark)
-            response.data = {
-                'content' : content,
-                'agentid' :  agent_id
-            }
-            response.code = 200
-            response.msg = '发送消息提示成功'
+    if action in [0]: # 只发消息，不用记录日志。
 
-        elif action in [14,15,16]:  #  (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
-            # 创建访问日志
-            models.zgld_accesslog.objects.create(
-                user_id=user_id,
-                article_id=article_id,
-                customer_id=customer_id,
-                remark=remark,
-                action=action
-            )
+        # data['content'] = '%s%s' % (customer_name, remark)
+        # data['agentid'] = agent_id
+        # tasks.user_send_action_log.delay(json.dumps(data))
+        content =  '%s%s' % (customer_name, remark)
+        response.data = {
+            'content' : content,
+            'agentid' :  agent_id
+        }
+        response.code = 200
+        response.msg = '发送消息提示成功'
+
+    elif action in [14,15,16]:  #  (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
+        # 创建访问日志
+        models.zgld_accesslog.objects.create(
+            user_id=user_id,
+            article_id=article_id,
+            customer_id=customer_id,
+            remark=remark,
+            action=action
+        )
+        content = '%s%s' % (customer_name, remark)
+        print('------ 客户姓名 + 访问日志信息------->>', customer_name,'action:',action, content)
+        response.data = {
+            'content': content,
+            'agentid': agent_id
+        }
+        response.code = 200
+        response.msg = '发送消息提示成功'
+
+    else:
+        # 创建访问日志
+        models.zgld_accesslog.objects.create(
+            user_id=user_id,
+            customer_id=customer_id,
+            remark=remark,
+            action=action
+        )
+
+        # 查询客户与用户是否已经建立关系
+        follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+            user_id=user_id,
+            customer_id=customer_id
+        )
+        now_time = datetime.datetime.now()
+        if follow_objs:  # 已经有关系了
+            follow_objs.update(
+                last_activity_time=now_time
+               )
             content = '%s%s' % (customer_name, remark)
-            print('------ 客户姓名 + 访问日志信息------->>', customer_name,'action:',action, content)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,'action:',action,content)
+
             response.data = {
                 'content': content,
                 'agentid': agent_id
             }
             response.code = 200
-            response.msg = '发送消息提示成功'
-
-        else:
-            # 创建访问日志
-            models.zgld_accesslog.objects.create(
-                user_id=user_id,
-                customer_id=customer_id,
-                remark=remark,
-                action=action
-            )
-
-            # 查询客户与用户是否已经建立关系
-            follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
-                user_id=user_id,
-                customer_id=customer_id
-            )
-            now_time = datetime.datetime.now()
-            if follow_objs:  # 已经有关系了
-                follow_objs.update(
-                    last_activity_time=now_time
-                   )
-                content = '%s%s' % (customer_name, remark)
-                print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,'action:',action,content)
-
-                response.data = {
-                    'content': content,
-                    'agentid': agent_id
-                }
-                response.code = 200
-                response.msg = '记录日志成功'
-
-    else:
-        company_name = company_obj.name
-        response.code = 403
-        response.msg = '账户过期'
-        print('-------- 雷达账户过期: %s-%s | 过期时间:%s ------->>' % (company_id,company_name,account_expired_time))
-
+            response.msg = '记录日志成功'
 
     return response
 
@@ -126,9 +120,10 @@ def action_record(request):
 def user_send_action_log(request):
 
     response = ResponseObj()
-
-    response_ret = action_record(request)
-    content =  response_ret.data.get('content')
+    customer_id = request.GET.get('user_id')  # 客户 id
+    article_id = request.GET.get('article_id')  # 客户 id
+    action = request.GET.get('action')
+    remark = request.GET.get('remark')
     user_id = request.GET.get('uid')
 
 
@@ -142,95 +137,115 @@ def user_send_action_log(request):
     print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', corp_id)
 
     app_obj =  models.zgld_app.objects.get(company_id=company_id, app_type=1)
-    agentid = app_obj.agent_id
+    agent_id = app_obj.agent_id
     permanent_code = app_obj.permanent_code
 
+    company_obj = models.zgld_company.objects.get(id=company_id)
+    account_expired_time = company_obj.account_expired_time
+    company_name = company_obj.name
 
-    if not permanent_code:
-
-        import redis
-        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-        key_name = "company_%s_leida_app_token" % (user_obj.company_id)
-        token_ret = rc.get(key_name)
-
-        print('-------  Redis缓存的 keyname |value -------->>', key_name, "|", token_ret)
-
-        app_secret = app_obj.app_secret
-        get_token_data = {
-            'corpid' : corp_id,
-            'corpsecret' : app_secret
+    if datetime.datetime.now() <= account_expired_time:
+        _data = {
+            'user_id': user_id,  # 用户 id
+            'customer_id': customer_id,  # 客户 id
+            'article_id': article_id,  # 客户 id
+            'action': action,
+            'remark': remark,
+            'agent_id': agent_id,
         }
+        response_ret = action_record(_data)
+        content = response_ret.data.get('content')
 
-        print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
+        if not permanent_code:
 
-        if not token_ret:
-            ret = requests.get(Conf['token_url'], params=get_token_data)
+            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+            key_name = "company_%s_leida_app_token" % (user_obj.company_id)
+            token_ret = rc.get(key_name)
 
-            weixin_ret_data = ret.json()
-            errcode = weixin_ret_data.get('errcode')
-            errmsg = weixin_ret_data.get('errmsg')
-            access_token = weixin_ret_data.get('access_token')
-            print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
+            print('-------  Redis缓存的 keyname |value -------->>', key_name, "|", token_ret)
+
+            app_secret = app_obj.app_secret
+            get_token_data = {
+                'corpid' : corp_id,
+                'corpsecret' : app_secret
+            }
+
+            print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
+
+            if not token_ret:
+                ret = requests.get(Conf['token_url'], params=get_token_data)
+
+                weixin_ret_data = ret.json()
+                errcode = weixin_ret_data.get('errcode')
+                errmsg = weixin_ret_data.get('errmsg')
+                access_token = weixin_ret_data.get('access_token')
+                print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
 
 
-            if errcode == 0:
-                rc.set(key_name, access_token, 7000)
-                send_token_data['access_token'] = access_token
+                if errcode == 0:
+                    rc.set(key_name, access_token, 7000)
+                    send_token_data['access_token'] = access_token
+
+                else:
+                    response.code = errcode
+                    response.msg = "企业微信验证未能通过"
+                    print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
+                    return JsonResponse(response.__dict__)
 
             else:
-                response.code = errcode
-                response.msg = "企业微信验证未能通过"
-                print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
-                return JsonResponse(response.__dict__)
+                send_token_data['access_token'] = token_ret
 
         else:
-            send_token_data['access_token'] = token_ret
 
-    else:
+            SuiteId = 'wx5d26a7a856b22bec' # '雷达AI | 三方应用id'
+            _data = {
+                'SuiteId' : SuiteId , # 三方应用IP 。
+                'corp_id' :  corp_id,  # 授权方企业corpid
+                'permanent_code' :  permanent_code
+            }
+            access_token_ret = common.create_qiyeweixin_access_token(_data)
+            access_token = access_token_ret.data.get('access_token')
+            send_token_data['access_token'] = access_token
 
-        SuiteId = 'wx5d26a7a856b22bec' # '雷达AI | 三方应用id'
-        _data = {
-            'SuiteId' : SuiteId , # 三方应用IP 。
-            'corp_id' :  corp_id,  # 授权方企业corpid
-            'permanent_code' :  permanent_code
+        userid = user_obj.userid
+        post_send_data = {
+            "touser": userid,
+            # "toparty" : "PartyID1|PartyID2",
+            # "totag" : "TagID1 | TagID2",
+            "msgtype": "text",
+            "agentid": int(agent_id),
+            "text": {
+                "content": content,
+            },
+            "safe": 0
         }
-        access_token_ret = common.create_qiyeweixin_access_token(_data)
-        access_token = access_token_ret.data.get('access_token')
-        send_token_data['access_token'] = access_token
-
-    userid = user_obj.userid
-    post_send_data = {
-        "touser": userid,
-        # "toparty" : "PartyID1|PartyID2",
-        # "totag" : "TagID1 | TagID2",
-        "msgtype": "text",
-        "agentid": int(agentid),
-        "text": {
-            "content": content,
-        },
-        "safe": 0
-    }
-    print('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
+        print('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
 
 
-    inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
+        inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
 
-    weixin_ret_data = inter_ret.json()
-    errcode = weixin_ret_data.get('errcode')
-    errmsg = weixin_ret_data.get('errmsg')
+        weixin_ret_data = inter_ret.json()
+        errcode = weixin_ret_data.get('errcode')
+        errmsg = weixin_ret_data.get('errmsg')
 
-    print('---- 发送应用消息 【接口返回】 --->>', weixin_ret_data)
+        print('---- 发送应用消息 【接口返回】 --->>', weixin_ret_data)
 
 
-    if errmsg == "ok":
-        response.code = 200
-        response.msg = '发送成功'
-        print('--------- 发送应用消息 【成功】----------->')
+        if errmsg == "ok":
+            response.code = 200
+            response.msg = '发送成功'
+            print('--------- 发送应用消息 【成功】----------->')
+
+        else:
+            response.code = errcode
+            response.msg = "企业微信验证未能通过"
+            print('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->',errcode,'|',errmsg)
 
     else:
-        response.code = errcode
-        response.msg = "企业微信验证未能通过"
-        print('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->',errcode,'|',errmsg)
+
+        response.code = 403
+        response.msg = '账户过期'
+        print('-------- 雷达账户过期: %s-%s | 过期时间:%s ------->>' % (company_id,company_name,account_expired_time))
 
     return JsonResponse(response.__dict__)
 
@@ -330,6 +345,63 @@ def create_user_or_customer_qr_code(request):
 
     return JsonResponse(response.__dict__)
 
+
+def qiyeweixin_user_get_userinfo(request):
+    response = ResponseObj()
+    company_id = request.GET.get('company_id')
+    userid = request.GET.get('userid')
+
+    company_objs = models.zgld_company.objects.filter(id=company_id)
+    corp_id = company_objs[0].corp_id
+
+    app_objs = models.zgld_app.objects.filter(company_id=company_id,app_type=3)
+    if app_objs:
+        app_obj = app_objs[0]
+        permanent_code = app_obj.permanent_code
+        if permanent_code:
+            SuiteId = 'wx1cbe3089128fda03'  # '雷达AI | 三方应用id'
+            _data = {
+                'SuiteId': SuiteId,  # 三方应用IP 。
+                'corp_id': corp_id,  # 授权方企业corpid
+                'permanent_code': permanent_code,
+            }
+            access_token_ret = create_qiyeweixin_access_token(_data)
+            access_token = access_token_ret.data.get('access_token')
+
+            get_code_data = {
+                'access_token': access_token,
+                'userid': userid
+            }
+            code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get'
+            code_ret = requests.get(code_url, params=get_code_data)
+
+            user_list_ret = code_ret.json()
+            print('===========【celery 企业微信】 获取 user_ticket 返回:==========>', json.dumps(user_list_ret))
+
+            user_list_ret_json = user_list_ret.json()
+            # userid = user_list_ret_json.get('userid')
+            corpid = user_list_ret_json.get('corpid')
+            avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
+            gender = user_list_ret_json.get('gender')
+            errmsg = user_list_ret_json.get('errmsg')
+
+            if errmsg == 'ok':
+                print('----------【celery 企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
+
+                user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
+                    userid=userid,
+                    company_id=company_id
+                )
+                user_profile_objs.update(
+                    avatar=avatar,
+                    gender=gender
+                )
+                response.msg ='【celery企业微信】获取成员信息成功'
+                response.code = 200
+            else:
+                print('----------【celery 企业微信】获取 《用户基本信息》报错 ------>')
+
+    return JsonResponse(response.__dict__)
 
 @csrf_exempt
 def create_user_or_customer_poster(request):
