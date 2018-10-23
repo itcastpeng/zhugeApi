@@ -389,7 +389,7 @@ def open_qiyeweixin(request, oper_type):
             }
 
             # userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
-            userlist_url = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail",
+            userlist_url = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail"
             user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
             user_list_ret_json = user_list_ret.json()
 
