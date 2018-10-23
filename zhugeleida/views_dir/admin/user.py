@@ -405,10 +405,9 @@ def user_oper(request, oper_type, o_id):
                                 response.msg = "删除成功"
 
                             else:
-
+                                print('------ "企业微信返回错误,%s" % weixin_ret ---->',"企业微信返回错误,%s" , weixin_ret['errmsg'])
                                 response.code = weixin_ret['errcode']
                                 response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
-
 
                         else:
                             response.code = '302'
@@ -521,6 +520,13 @@ def user_oper(request, oper_type, o_id):
                                 wechat_phone=wechat_phone,
                                 mingpian_phone=mingpian_phone
                             )
+
+                            _data = {
+                                'company_id': company_id,
+                                'userid': userid,
+                            }
+                            tasks.qiyeweixin_user_get_userinfo(_data) # 获取用户头像
+
 
                             user_obj = user_objs[0]
                             user_obj.department = department_id
@@ -660,6 +666,12 @@ def user_oper(request, oper_type, o_id):
                                     # mingpian_phone= '',
                                     token=token
                                 )
+
+                                _data = {
+                                    'company_id': company_id,
+                                    'userid': userid,
+                                }
+                                tasks.qiyeweixin_user_get_userinfo(_data) # 获取头像信息
 
                                 print('-------- 同步用户数据成功 user_id：-------->>',obj.id)
 
@@ -828,6 +840,13 @@ def user_oper(request, oper_type, o_id):
                                 # 生成企业用户二维码
                                 data_dict = {'user_id': obj.id, 'customer_id': ''}
                                 tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+
+                                # 获取用户头像信息
+                                _data = {
+                                    'company_id': company_id,
+                                    'userid': userid,
+                                }
+                                tasks.qiyeweixin_user_get_userinfo(_data)
 
                                 response.code = 200
                                 response.msg = "添加用户成功"
