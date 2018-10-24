@@ -785,7 +785,7 @@ def user_send_gongzhonghao_template_msg(request):
                 'access_token': authorizer_access_token,
             }
 
-            content =  json.dumps(content)
+            content =  json.loads(content)
             msg = content.get('msg')
             msg = base64.b64decode(msg)
             msg = str(msg, 'utf-8')
