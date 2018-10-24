@@ -789,11 +789,11 @@ def user_send_gongzhonghao_template_msg(request):
                 "msgtype": "text",
                 "text":
                 {
-                     "content": content.encode('utf-8')
+                     "content": content
                 }
             }
 
-            kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=json.dumps(kefu_msg_post_data))
+            kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=json.dumps(kefu_msg_post_data,aensure_ascii=False).decode('utf8'))
             kefu_ret = kefu_ret.json()
 
             print('--------企业用户 send to 小程序 kefu_客服接口 - 返回数据--------->', kefu_ret)
