@@ -789,7 +789,7 @@ def user_send_gongzhonghao_template_msg(request):
                 "msgtype": "text",
                 "text":
                 {
-                     "content": content
+                     "content": content.decode('utf-8')
                 }
             }
 
