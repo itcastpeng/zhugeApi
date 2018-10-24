@@ -188,7 +188,7 @@ def chat_oper(request, oper_type, o_id):
                 data = request.POST.copy()
                 user_id = int(data.get('user_id'))
                 customer_id = int(data.get('customer_id'))
-                Content = data.get('content')
+                content = data.get('content')
                 send_type = int(data.get('send_type'))
 
                 flow_up_obj = models.zgld_user_customer_belonger.objects.select_related('user','customer').filter(user_id=user_id, customer_id=customer_id)
@@ -199,9 +199,9 @@ def chat_oper(request, oper_type, o_id):
                         last_follow_time = datetime.datetime.now()
                     )
 
-                _content = json.loads(Content)
+                _content = json.loads(content)
                 info_type = _content.get('info_type')
-                content = ''
+                msg = ''
                 if info_type:
 
                     info_type = int(info_type)
@@ -275,7 +275,7 @@ def chat_oper(request, oper_type, o_id):
                     data['user_id'] = user_id
                     # data['type'] = 'gongzhonghao_template_chat'
                     data['type'] = 'gongzhonghao_send_kefu_msg'
-                    data['content'] = Content
+                    data['content'] = msg
                     tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
 
 
