@@ -865,7 +865,7 @@ class zgld_article_activity(models.Model):
     # type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
-
+    reason = models.CharField(verbose_name='返回的发红包错误信息', max_length=512, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
 
     class Meta:

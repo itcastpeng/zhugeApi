@@ -12,7 +12,8 @@ import datetime
 import redis
 from collections import OrderedDict
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
+    create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
 
 import sys
 import logging.handlers
@@ -22,16 +23,14 @@ import requests
 from PIL import Image
 from zhugeapi_celery_project import tasks
 from zhugeleida.public import common
-from django.db.models import  Sum
-from zhugeleida.views_dir.admin.redEnvelopeToIssue import  focusOnIssuedRedEnvelope
-from django.db.models import Q,F
+from django.db.models import Sum
+from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
+from django.db.models import Q, F
 import base64
 from zhugeleida.public.common import create_qiyeweixin_access_token
 
 
-
 def action_record(data):
-
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('customer_id')  # 客户 id
@@ -47,22 +46,20 @@ def action_record(data):
     customer_name = base64.b64decode(customer_name)
     customer_name = str(customer_name, 'utf-8')
 
-
-
-    if action in [0]: # 只发消息，不用记录日志。
+    if action in [0]:  # 只发消息，不用记录日志。
 
         # data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = agent_id
         # tasks.user_send_action_log.delay(json.dumps(data))
-        content =  '%s%s' % (customer_name, remark)
+        content = '%s%s' % (customer_name, remark)
         response.data = {
-            'content' : content,
-            'agentid' :  agent_id
+            'content': content,
+            'agentid': agent_id
         }
         response.code = 200
         response.msg = '发送消息提示成功'
 
-    elif action in [14,15,16]:  #  (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
+    elif action in [14, 15, 16]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
         # 创建访问日志
         models.zgld_accesslog.objects.create(
             user_id=user_id,
@@ -72,7 +69,7 @@ def action_record(data):
             action=action
         )
         content = '%s%s' % (customer_name, remark)
-        print('------ 客户姓名 + 访问日志信息------->>', customer_name,'action:',action, content)
+        print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
         response.data = {
             'content': content,
             'agentid': agent_id
@@ -98,9 +95,9 @@ def action_record(data):
         if follow_objs:  # 已经有关系了
             follow_objs.update(
                 last_activity_time=now_time
-               )
+            )
             content = '%s%s' % (customer_name, remark)
-            print('------ 客户姓名 + 访问日志信息------->>', customer_name,'+' ,'action:',action,content)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name, '+', 'action:', action, content)
 
             response.data = {
                 'content': content,
@@ -112,13 +109,9 @@ def action_record(data):
     return response
 
 
-
-
-
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
 def user_send_action_log(request):
-
     response = ResponseObj()
     customer_id = request.GET.get('user_id')  # 客户 id
     article_id = request.GET.get('article_id')  # 客户 id
@@ -126,17 +119,15 @@ def user_send_action_log(request):
     remark = request.GET.get('remark')
     user_id = request.GET.get('uid')
 
-
     send_token_data = {}
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
-
 
     corp_id = user_obj.company.corp_id
     company_id = user_obj.company_id
 
     print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', corp_id)
 
-    app_obj =  models.zgld_app.objects.get(company_id=company_id, app_type=1)
+    app_obj = models.zgld_app.objects.get(company_id=company_id, app_type=1)
     agent_id = app_obj.agent_id
     permanent_code = app_obj.permanent_code
 
@@ -166,8 +157,8 @@ def user_send_action_log(request):
 
             app_secret = app_obj.app_secret
             get_token_data = {
-                'corpid' : corp_id,
-                'corpsecret' : app_secret
+                'corpid': corp_id,
+                'corpsecret': app_secret
             }
 
             print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
@@ -181,7 +172,6 @@ def user_send_action_log(request):
                 access_token = weixin_ret_data.get('access_token')
                 print('--------- 从【企业微信】接口, 获取access_token 返回 -------->>', weixin_ret_data)
 
-
                 if errcode == 0:
                     rc.set(key_name, access_token, 7000)
                     send_token_data['access_token'] = access_token
@@ -189,7 +179,7 @@ def user_send_action_log(request):
                 else:
                     response.code = errcode
                     response.msg = "企业微信验证未能通过"
-                    print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>',errcode,"|",errmsg)
+                    print('----------- 获取 access_token 失败 : errcode | errmsg  -------->>', errcode, "|", errmsg)
                     return JsonResponse(response.__dict__)
 
             else:
@@ -197,11 +187,11 @@ def user_send_action_log(request):
 
         else:
 
-            SuiteId = 'wx5d26a7a856b22bec' # '雷达AI | 三方应用id'
+            SuiteId = 'wx5d26a7a856b22bec'  # '雷达AI | 三方应用id'
             _data = {
-                'SuiteId' : SuiteId , # 三方应用IP 。
-                'corp_id' :  corp_id,  # 授权方企业corpid
-                'permanent_code' :  permanent_code
+                'SuiteId': SuiteId,  # 三方应用IP 。
+                'corp_id': corp_id,  # 授权方企业corpid
+                'permanent_code': permanent_code
             }
             access_token_ret = common.create_qiyeweixin_access_token(_data)
             access_token = access_token_ret.data.get('access_token')
@@ -221,7 +211,6 @@ def user_send_action_log(request):
         }
         print('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
 
-
         inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
 
         weixin_ret_data = inter_ret.json()
@@ -229,7 +218,6 @@ def user_send_action_log(request):
         errmsg = weixin_ret_data.get('errmsg')
 
         print('---- 发送应用消息 【接口返回】 --->>', weixin_ret_data)
-
 
         if errmsg == "ok":
             response.code = 200
@@ -239,13 +227,13 @@ def user_send_action_log(request):
         else:
             response.code = errcode
             response.msg = "企业微信验证未能通过"
-            print('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->',errcode,'|',errmsg)
+            print('---------- 发送应用消息 【失败】 : errcode | errmsg ----------->', errcode, '|', errmsg)
 
     else:
 
         response.code = 403
         response.msg = '账户过期'
-        print('-------- 雷达账户过期: %s-%s | 过期时间:%s ------->>' % (company_id,company_name,account_expired_time))
+        print('-------- 雷达账户过期: %s-%s | 过期时间:%s ------->>' % (company_id, company_name, account_expired_time))
 
     return JsonResponse(response.__dict__)
 
@@ -258,28 +246,26 @@ def create_user_or_customer_qr_code(request):
 
     data = request.GET.get('data')
     if data:
-         data = json.loads(request.GET.get('data'))
-         user_id = data.get('user_id')
-         customer_id = data.get('customer_id', '')
+        data = json.loads(request.GET.get('data'))
+        user_id = data.get('user_id')
+        customer_id = data.get('customer_id', '')
 
     else:
-         # data = request.POST.get('user_id')
-         print('---- celery request.POST | data 数据 -->',request.POST, '|')
-         user_id = request.POST.get('user_id')
-         customer_id = request.POST.get('customer_id', '')
-
-
+        # data = request.POST.get('user_id')
+        print('---- celery request.POST | data 数据 -->', request.POST, '|')
+        user_id = request.POST.get('user_id')
+        customer_id = request.POST.get('customer_id', '')
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     if not customer_id:
         path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
-        user_qr_code = '/%s_%s_qrcode.jpg' % (user_id,now_time)
+        user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
 
     else:
         path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
-        user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id ,customer_id,now_time)
+        user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
 
     get_qr_data = {}
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
@@ -297,13 +283,13 @@ def create_user_or_customer_qr_code(request):
 
     if not authorizer_access_token:
         data = {
-            'key_name' : key_name,
+            'key_name': key_name,
             'authorizer_refresh_token': authorizer_refresh_token,
             'authorizer_appid': authorizer_appid,
 
         }
         authorizer_access_token_ret = create_authorizer_access_token(data)
-        authorizer_access_token = authorizer_access_token_ret.data # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
+        authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
 
     get_qr_data['access_token'] = authorizer_access_token
 
@@ -323,21 +309,21 @@ def create_user_or_customer_qr_code(request):
         f.write(qr_ret.content)
 
     if customer_id:
-        user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id,customer_id=customer_id)
+        user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
         user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
-        user_obj.qr_code=user_qr_code_path
+        user_obj.qr_code = user_qr_code_path
         user_obj.save()
-        print('----celery生成用户-客户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
+        print('----celery生成用户-客户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
         # 一并生成海报
         data_dict = {'user_id': user_id, 'customer_id': customer_id}
         tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-    else:   # 没有 customer_id 说明不是在小程序中生成
+    else:  # 没有 customer_id 说明不是在小程序中生成
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
         user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
         user_obj.save()
-        print('----celery生成企业用户对应的小程序二维码成功-->>','statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
+        print('----celery生成企业用户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
     response.data = {'qr_code': user_obj.qr_code}
     response.code = 200
@@ -354,7 +340,7 @@ def qiyeweixin_user_get_userinfo(request):
     company_objs = models.zgld_company.objects.filter(id=company_id)
     corp_id = company_objs[0].corp_id
 
-    app_objs = models.zgld_app.objects.filter(company_id=company_id,app_type=3)
+    app_objs = models.zgld_app.objects.filter(company_id=company_id, app_type=3)
     if app_objs:
         app_obj = app_objs[0]
         permanent_code = app_obj.permanent_code
@@ -385,7 +371,8 @@ def qiyeweixin_user_get_userinfo(request):
             errmsg = user_list_ret_json.get('errmsg')
 
             if errmsg == 'ok':
-                print('----------【celery 企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
+                print('----------【celery 企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|",
+                      userid)
 
                 user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
                     userid=userid,
@@ -394,18 +381,18 @@ def qiyeweixin_user_get_userinfo(request):
                 user_profile_objs.update(
                     avatar=avatar,
                     gender=gender,
-                    wechat_phone=mobile, #微信绑定的手机号
+                    wechat_phone=mobile,  # 微信绑定的手机号
                 )
-                response.msg ='【celery企业微信】获取成员信息成功'
+                response.msg = '【celery企业微信】获取成员信息成功'
                 response.code = 200
             else:
                 print('----------【celery 企业微信】获取 《用户基本信息》报错 ------>')
 
     return JsonResponse(response.__dict__)
 
+
 @csrf_exempt
 def create_user_or_customer_poster(request):
-
     response = ResponseObj()
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
@@ -426,7 +413,6 @@ def create_user_or_customer_poster(request):
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
         print('---->', BASE_DIR)
 
-
         platform = sys.platform  # 获取平台
         phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
@@ -441,7 +427,8 @@ def create_user_or_customer_poster(request):
         driver = webdriver.PhantomJS(phantomjs_path)
         driver.implicitly_wait(10)
 
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
+        customer_id, user_id)
 
         print('----url-->', url)
 
@@ -521,7 +508,6 @@ def user_send_template_msg(request):
     authorizer_appid = obj.authorization_appid
     template_id = obj.template_id
 
-
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     customer_obj = models.zgld_customer.objects.filter(id=customer_id)
     now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -535,7 +521,7 @@ def user_send_template_msg(request):
     flag = True
     while flag:
 
-        post_template_data =  {}
+        post_template_data = {}
         # get_token_data['appid'] = authorization_appid
         # get_token_data['secret'] = authorization_secret
         # get_token_data['grant_type'] = 'client_credential'
@@ -546,7 +532,7 @@ def user_send_template_msg(request):
 
         if not authorizer_access_token:
             data = {
-                'key_name' : key_name,
+                'key_name': key_name,
                 'authorizer_refresh_token': authorizer_refresh_token,
                 'authorizer_appid': authorizer_appid,
 
@@ -554,7 +540,7 @@ def user_send_template_msg(request):
             authorizer_access_token = create_authorizer_access_token(data)
 
         get_template_data = {
-            'access_token' : authorizer_access_token      #授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
+            'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
         }
         # global openid,form_id
         if customer_obj and objs:
@@ -563,7 +549,7 @@ def user_send_template_msg(request):
 
             # post_template_data['template_id'] = 'yoPCOozUQ5Po3w4D63WhKkpGndOKFk986vdqEZMHLgE'
             post_template_data['template_id'] = template_id
-            
+
             # path = 'pages/mingpian/index' % (user_id)
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
             post_template_data['page'] = path
@@ -574,7 +560,7 @@ def user_send_template_msg(request):
                 print('------- 没有消费的formID -------->>')
                 break
 
-            print('---------formId 消费前数据----------->>',exist_formid_json)
+            print('---------formId 消费前数据----------->>', exist_formid_json)
             form_id = exist_formid_json.pop(-1)
             obj = models.zgld_customer.objects.filter(id=customer_id)
 
@@ -582,29 +568,29 @@ def user_send_template_msg(request):
             print('---------formId 消费了哪个 ----------->>', form_id)
             post_template_data['form_id'] = form_id
 
-
             # 留言回复通知
             data = {
                 'keyword1': {
                     'value': user_name  # 回复者
                 },
                 'keyword2': {
-                    'value': now_time   # 回复时间
+                    'value': now_time  # 回复时间
                 },
                 'keyword3': {
-                    'value': '您有未读消息,点击小程序查看哦'  #回复内容
+                    'value': '您有未读消息,点击小程序查看哦'  # 回复内容
                 }
             }
             post_template_data['data'] = data
             # post_template_data['emphasis_keyword'] = 'keyword1.DATA'
-            print('===========post_template_data=======>>',post_template_data)
+            print('===========post_template_data=======>>', post_template_data)
 
             # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
 
-            template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+            template_ret = requests.post(Conf['template_msg_url'], params=get_template_data,
+                                         data=json.dumps(post_template_data))
             template_ret = template_ret.json()
 
-            print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
+            print('--------企业用户 send to 小程序 Template 接口返回数据--------->', template_ret)
 
             if template_ret.get('errmsg') == "ok":
                 print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
@@ -628,7 +614,7 @@ def user_send_template_msg(request):
     return JsonResponse(response.__dict__)
 
 
-
+## 发送公众号模板消息
 @csrf_exempt
 def user_send_gongzhonghao_template_msg(request):
     response = ResponseObj()
@@ -649,8 +635,6 @@ def user_send_gongzhonghao_template_msg(request):
     authorizer_appid = obj.authorization_appid
     template_id = obj.template_id
 
-
-
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     customer_obj = models.zgld_customer.objects.filter(id=customer_id)
     now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -668,7 +652,8 @@ def user_send_gongzhonghao_template_msg(request):
 
     if not authorizer_access_token:
         authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-        authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+        authorizer_access_token = rc.get(
+            authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
             data = {
@@ -684,105 +669,149 @@ def user_send_gongzhonghao_template_msg(request):
                 authorizer_access_token = authorizer_access_token_result.data
 
     get_template_data = {
-        'access_token' : authorizer_access_token      #授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
+        'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
     }
 
     if customer_obj and objs:
         openid = customer_obj[0].openid
         username = customer_obj[0].username
-        username =  common.conversion_base64_customer_username_base64(username,customer_id)
+        username = common.conversion_base64_customer_username_base64(username, customer_id)
 
 
-        path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-        xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-        appid = xiaochengxu_app_obj.authorization_appid
-        # 留言回复通知
-        '''
-        您好，您咨询商家的问题已回复
-        咨询名称：孕儿美摄影工作室-张炬
-        消息回复：您有未读消息哦
-        点击进入咨询页面
-        '''
-        data = ''
-        if  _type == 'user_chat_tishi':
+        # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
+        authorizer_access_token = ''
+        if _type == 'gongzhonghao_template_chat' or _type == 'forward_look_article_tishi':
 
-            consult_info = ('%s - %s【%s】') %  (company_name,user_name,position)
-            data = {
-                'first': {
-                    'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
-                },
-                'keyword1': {
-                    'value': consult_info,
-                    "color": "#0000EE"
-                },
-                'keyword2': {
-                    'value': '您有未读消息',
-                    "color": "#FF0000"
-                },
-                'remark': {
-                    'value': '了解更多请点击进入【我的名片小程序】哦'  #回复内容
+            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            appid = xiaochengxu_app_obj.authorization_appid
+
+            # 留言回复通知
+            '''
+            您好，您咨询商家的问题已回复
+            咨询名称：孕儿美摄影工作室-张炬
+            消息回复：您有未读消息哦
+            点击进入咨询页面
+            '''
+            data = ''
+            if _type == 'gongzhonghao_template_chat':
+
+                consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                data = {
+                    'first': {
+                        'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
+                    },
+                    'keyword1': {
+                        'value': consult_info,
+                        "color": "#0000EE"
+                    },
+                    'keyword2': {
+                        'value': '您有未读消息',
+                        "color": "#FF0000"
+                    },
+                    'remark': {
+                        'value': '了解更多请点击进入【我的名片小程序】哦'  # 回复内容
+                    }
                 }
+
+
+            elif _type == 'forward_look_article_tishi':
+                activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+
+                activity_name = activity_obj.activity_name
+                reach_forward_num = activity_obj.reach_forward_num
+                activity_single_money = activity_obj.activity_single_money
+                start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
+                end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
+
+                remark = '    <规则>: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。\n    分享不停,红包不停,上不封顶！\n截止日期: %s 至 %s' % (
+                reach_forward_num, activity_single_money,start_time,end_time)
+                data = {
+                    'first': {
+                        'value': ('您好,我是%s的%s %s, 很高兴为您服务 😁！\n    欢迎您参加【分享文章 赚现金活动】\n' % (
+                        company_name, position, user_name))  # 回复者
+                    },
+                    'keyword1': {
+                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (username, activity_name),
+                        "color": "#0000EE"
+                    },
+                    'keyword2': {
+                        'value': '【回复 T%s】查看红包活动进度、具体人员详情\n' % (activity_id),
+                        "color": "#FF0000"
+
+                    },
+                    'remark': {
+                        'value': remark  # 回复内容
+                    }
+                }
+
+            post_template_data = {
+                'touser': openid,
+                'template_id': template_id,
+                "miniprogram": {
+                    "appid": appid,
+                    "pagepath": path,
+                },
+                'data': data
             }
 
+            print('=========== 发送出去的【模板消息】请求数据 =======>>', json.dumps(post_template_data))
+
+            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
+            template_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/template/send'
+            template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
+            template_ret = template_ret.json()
+
+            print('--------企业用户 send to 小程序 Template 接口返回数据--------->', template_ret)
+
+            if template_ret.get('errmsg') == "ok":
+                print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
+                response.code = 200
+                response.msg = "企业用户发送模板消息成功"
 
 
-        elif _type == 'forward_look_article_tishi':
-            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+            elif template_ret.get('errcode') == 40001:
+                rc.delete(key_name)
 
-            reach_forward_num = activity_obj.reach_forward_num
-            activity_single_money = activity_obj.activity_single_money
+            else:
+                print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
+                response.code = 301
+                response.msg = "企业用户发送模板消息失败"
 
-            remark = '  <规则>: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。\n分享不停,红包不停,上不封顶！' % (reach_forward_num,activity_single_money)
-            data = {
-                'first': {
-                    'value': ('您好,我是%s的%s %s, 很高兴为您服务 😁！\n  欢迎您参加【分享文章 赚现金活动】' % (company_name,position, user_name))  # 回复者
-                },
-                'keyword1': {
-                    'value': '您的朋友【%s】查看了您转发的活动文章' % (username) ,
-                    "color": "#0000EE"
-                },
-                'keyword2': {
-                    'value': '【回复 %s】查看红包活动进度、具体人员详情' % (activity_id),
-                    "color": "#FF0000"
+        elif _type == 'gongzhonghao_send_kefu_msg':
 
-                },
-                'remark': {
-                    'value': remark  # 回复内容
-                }
+            kefu_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send'
+            kefu_msg_get_data = {
+                'access_token': authorizer_access_token,
             }
+            kefu_msg_post_data ={
+                "touser": openid,
+                "msgtype": "text",
+                "text":
+                {
+                     "content":"Hello World  YYY"
+                }
+}
 
-        post_template_data = {
-            'touser' : openid,
-            'template_id': template_id,
-            "miniprogram": {
-                "appid": appid,
-                "pagepath": path,
-            },
-            'data' : data
-        }
+            kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=json.dumps(kefu_msg_post_data))
+            kefu_ret = kefu_ret.json()
 
-        print('=========== 发送出去的【模板消息】请求数据 =======>>',json.dumps(post_template_data))
+            print('--------企业用户 send to 小程序 kefu_客服接口 - 返回数据--------->', kefu_ret)
 
-        # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
-        template_msg_url =  'https://api.weixin.qq.com/cgi-bin/message/template/send'
-        template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
-        template_ret = template_ret.json()
-
-        print('--------企业用户 send to 小程序 Template 接口返回数据--------->',template_ret)
-
-        if template_ret.get('errmsg') == "ok":
-            print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
-            response.code = 200
-            response.msg = "企业用户发送模板消息成功"
+            if kefu_ret.get('errmsg') == "ok":
+                print('-----企业用户 send to 小程序 kefu_客服消息 Successful---->>', )
+                response.code = 200
+                response.msg = "企业用户发送客服消息成功"
 
 
-        elif template_ret.get('errcode') == 40001:
-            rc.delete(key_name)
+            elif kefu_ret.get('errcode') == 40001:
+                rc.delete(key_name)
 
-        else:
-            print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
-            response.code = 301
-            response.msg = "企业用户发送模板消息失败"
+            else:
+                print('-----企业用户 send to 小程序 kefu_客服 消息 Failed---->>', )
+                response.code = 301
+                response.msg = "企业用户发送客服消息成功失败"
+
 
     else:
         response.msg = "客户不存在"
@@ -794,15 +823,15 @@ def user_send_gongzhonghao_template_msg(request):
 
 
 
-#获取查询最新一次提交的审核状态 并提交审核通过的代码上线.
+# 获取查询最新一次提交的审核状态 并提交审核通过的代码上线.
 @csrf_exempt
 def get_latest_audit_status_and_release_code(request):
-    from zhugeleida.views_dir.admin.dai_xcx import  batch_get_latest_audit_status
+    from zhugeleida.views_dir.admin.dai_xcx import batch_get_latest_audit_status
     response = ResponseObj()
 
     if request.method == "GET":
-
-        objs = models.zgld_xiapchengxu_upload_audit.objects.filter(audit_result=2, auditid__isnull=False).order_by('-audit_commit_date')
+        objs = models.zgld_xiapchengxu_upload_audit.objects.filter(audit_result=2, auditid__isnull=False).order_by(
+            '-audit_commit_date')
 
         audit_status_data = {
             'upload_audit_objs': objs
@@ -813,7 +842,6 @@ def get_latest_audit_status_and_release_code(request):
         response.msg = '查询最新一次提交的审核状态-执行完成'
 
     return JsonResponse(response.__dict__)
-
 
 
 # 关注发红包和转发文章满足就发红包
@@ -834,11 +862,10 @@ def user_forward_send_activity_redPacket(request):
         ip = '192.168.1.10'
 
         client_ip = ip
-        company_id =  request.GET.get('company_id')
-        parent_id =  request.GET.get('parent_id')
-        article_id =  request.GET.get('article_id')
+        company_id = request.GET.get('company_id')
+        parent_id = request.GET.get('parent_id')
+        article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
-
 
         activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
                                                                                 article_id=article_id,
@@ -847,10 +874,10 @@ def user_forward_send_activity_redPacket(request):
         if activity_redPacket_objs:
             activity_redPacket_obj = activity_redPacket_objs[0]
             forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id,article_id=article_id).values_list('customer_id').distinct().count()
+                customer_parent_id=parent_id, article_id=article_id).values_list('customer_id').distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id,article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
+                customer_parent_id=parent_id, article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
 
             forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
             if not forward_stay_time:
@@ -862,34 +889,40 @@ def user_forward_send_activity_redPacket(request):
             )
             activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
-            reach_forward_num = activity_obj.reach_forward_num                        # 达到多少次发红包(转发阅读后次数))
-            already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num            # 已发放次数
+            reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
+            already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num  # 已发放次数
             # already_send_redPacket_money = activity_redPacket_obj.already_send_redPacket_money        #已发红包金额
 
-            if reach_forward_num != 0: #不能为0
+            if reach_forward_num != 0:  # 不能为0
                 forward_read_num = int(forward_read_num)
-                if forward_read_num  >= reach_forward_num: # 转发大于 阈值,达到可以条件
+                if forward_read_num >= reach_forward_num:  # 转发大于 阈值,达到可以条件
 
-                    divmod_ret =  divmod(forward_read_num, reach_forward_num)
+                    divmod_ret = divmod(forward_read_num, reach_forward_num)
 
                     shoudle_send_num = divmod_ret[0]
                     yushu = divmod_ret[1]
 
                     if shoudle_send_num > already_send_redPacket_num:
-                        print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',forward_read_num,"|",reach_forward_num)
-                        print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',shoudle_send_num,"|",already_send_redPacket_num)
-                        app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                        print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
+                              forward_read_num, "|", reach_forward_num)
+                        print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
+                              shoudle_send_num, "|", already_send_redPacket_num)
+                        app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
+                            company_id=company_id)
                         activity_single_money = activity_obj.activity_single_money
                         activity_name = activity_obj.activity_name
 
                         customer_obj = models.zgld_customer.objects.get(id=parent_id)
-                        openid =  customer_obj.openid
+                        openid = customer_obj.openid
 
                         authorization_appid = ''
+                        company_name = ''
                         if app_objs:
-                            authorization_appid =  app_objs[0].authorization_appid
+                            company_name = '【%s】' % (app_objs[0].company.name)
+                            authorization_appid = app_objs[0].authorization_appid
 
-                        shangcheng_objs =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                            xiaochengxucompany_id=company_id)
                         send_name = ''
                         shangHuHao = ''
                         shangHuMiYao = ''
@@ -901,30 +934,35 @@ def user_forward_send_activity_redPacket(request):
 
                         _data = {
                             'client_ip': client_ip,
-                            'shanghukey': shangHuMiYao , # 支付钱数
-                            'total_fee': activity_single_money , # 支付钱数
-                            'appid': authorization_appid,        # 小程序ID
-                            'mch_id': shangHuHao ,               # 商户号
+                            'shanghukey': shangHuMiYao,  # 支付钱数
+                            'total_fee': activity_single_money,  # 支付钱数
+                            'appid': authorization_appid,  # 小程序ID
+                            'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': send_name,              #商户名称
-                            'act_name': activity_name,           #活动名称
-                            'remark':  '猜越多得越多,快来抢！',                    #备注信息
-                            'wishing': '感谢您参加猜灯谜活动，祝您元宵节快乐！',                  #祝福语
+                            'send_name': company_name,  # 商户名称
+                            'act_name': activity_name,  # 活动名称
+                            'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
+                            'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
                         }
-                        print('------[调用转发后满足条件,发红包的接口 data 数据]------>>',json.dumps(_data))
+                        print('------[调用转发后满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
 
                         response_ret = focusOnIssuedRedEnvelope(_data)
                         if response_ret.code == 200:
                             print('---- 调用发红包成功[转发得现金] 状态值:200 --->>')
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
-                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money, # 已发红包金额 [累加发送金额]
-                                should_send_redPacket_num=shoudle_send_num,        # 应该发放的次数 [应发]
-                                status=1        # (1,'已发'),
+                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+                                # 已发红包金额 [累加发送金额]
+                                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+                                status=1  # (1,'已发'),
                             )
-                        else: # 余额不足后者其他原因
+                            activity_obj.update(
+                                reason=''
+                            )
 
-                            app_objs.update(
+                        else:  # 余额不足后者其他原因,记录下日志
+
+                            activity_obj.update(
                                 reason=response_ret.msg
                             )
 
@@ -932,20 +970,22 @@ def user_forward_send_activity_redPacket(request):
                     else:
                         response.code = 301
                         response.msg = '应发数<=已发数'
-                        print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|reach_forward_num ----->>', shoudle_send_num, '|',reach_forward_num )
+                        print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|reach_forward_num ----->>', shoudle_send_num,
+                              '|', reach_forward_num)
 
                 else:
 
                     response.code = 301
                     response.msg = '转发查看数未达到阈值'
-                    print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num, '|',already_send_redPacket_num )
+                    print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num,
+                          '|', already_send_redPacket_num)
         else:
             response.code = 301
             response.msg = '[无记录]活动发红包记录表'
-            print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id,'|',article_id,"|",activity_id)
+            print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id, '|', article_id, "|",
+                  activity_id)
 
     return JsonResponse(response.__dict__)
-
 
 
 @csrf_exempt
@@ -965,13 +1005,12 @@ def user_focus_send_activity_redPacket(request):
         ip = '192.168.1.10'
 
         client_ip = ip
-        company_id =  request.GET.get('company_id')
-        customer_id =  request.GET.get('customer_id')
-
+        company_id = request.GET.get('company_id')
+        customer_id = request.GET.get('customer_id')
 
         gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
         if gongzhonghao_app_objs:
-            gongzhonghao_app_obj =  gongzhonghao_app_objs[0]
+            gongzhonghao_app_obj = gongzhonghao_app_objs[0]
             is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
 
             if is_focus_get_redpacket:  # 开启了-关注领取红包是否开启
@@ -982,22 +1021,22 @@ def user_focus_send_activity_redPacket(request):
                     obj = objs[0]
 
                     openid = obj.openid
-                    is_subscribe = obj.is_subscribe              #用户是否订阅该公众号   (0, '没有订阅该公众号'),
-                    is_receive_redPacket = obj.is_receive_redPacket   #是否发送过关注红包  (0, '没有发送过关注红包'),
+                    is_subscribe = obj.is_subscribe  # 用户是否订阅该公众号   (0, '没有订阅该公众号'),
+                    is_receive_redPacket = obj.is_receive_redPacket  # 是否发送过关注红包  (0, '没有发送过关注红包'),
 
                     if is_subscribe == 1 and is_receive_redPacket == 0:
 
-                        focus_get_money = gongzhonghao_app_obj.focus_get_money #关注领取的红包金额
+                        focus_get_money = gongzhonghao_app_obj.focus_get_money  # 关注领取的红包金额
                         focus_total_money = gongzhonghao_app_obj.focus_total_money
 
                         app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
                         authorization_appid = ''
                         if app_objs:
-                            authorization_appid =  app_objs[0].authorization_appid
+                            authorization_appid = app_objs[0].authorization_appid
 
-
-                        shangcheng_objs =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                            xiaochengxucompany_id=company_id)
                         send_name = ''
                         shangHuHao = ''
                         shangHuMiYao = ''
@@ -1009,29 +1048,35 @@ def user_focus_send_activity_redPacket(request):
 
                         _data = {
                             'client_ip': client_ip,
-                            'shanghukey': shangHuMiYao , # 支付钱数
-                            'total_fee': focus_get_money , # 支付钱数
-                            'appid': authorization_appid,        # 小程序ID
-                            'mch_id': shangHuHao ,               # 商户号
+                            'shanghukey': shangHuMiYao,  # 支付钱数
+                            'total_fee': focus_get_money,  # 支付钱数
+                            'appid': authorization_appid,  # 小程序ID
+                            'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': send_name,              #商户名称
-                            'act_name': '关注领现金红包',                      #活动名称
-                            'remark':  '动动手指,轻松拿现金!',         #备注信息
-                            'wishing': '感谢您的关注我！',                       #祝福语
+                            'send_name': send_name,  # 商户名称
+                            'act_name': '关注领现金红包',  # 活动名称
+                            'remark': '动动手指,轻松拿现金!',  # 备注信息
+                            'wishing': '感谢您的关注我！',  # 祝福语
                         }
 
-                        print('------[调发红包的接口 data 数据]------>>',json.dumps(_data))
-                        response = focusOnIssuedRedEnvelope(_data)
-                        if response.code == 200:
+                        print('------[调发红包的接口 data 数据]------>>', json.dumps(_data))
+                        response_ret = focusOnIssuedRedEnvelope(_data)
+                        if response_ret.code == 200:
                             print('---- 调发红包成功 状态值:200 --->>')
                             objs.update(
                                 is_receive_redPacket=1
                             )
-
+                            app_objs.update(
+                                reason=''
+                            )
+                        else:
+                            app_objs.update(
+                                reason=response_ret.msg
+                            )
                     else:
                         response.code = 302
                         response.msg = '没有订阅公众号或者应发过红包'
-                        print('------没有订阅公众号或者应发过红包 customer_id | openid ----->>',customer_id ,"|", openid)
+                        print('------没有订阅公众号或者应发过红包 customer_id | openid ----->>', customer_id, "|", openid)
                 else:
                     response.code = 301
                     response.msg = '客户不存在'
@@ -1039,15 +1084,13 @@ def user_focus_send_activity_redPacket(request):
             else:
                 response.code = 301
                 response.msg = '此公众号没有开启[关注领红包]'
-                print('------此公众号没有开启[关注领红包] company_id ----->>', company_id )
+                print('------此公众号没有开启[关注领红包] company_id ----->>', company_id)
         else:
             response.code = 301
             response.msg = '无此公众号'
             print('------无此公众号 company_id ----->>', company_id)
 
     return JsonResponse(response.__dict__)
-
-
 
 
 ## 异步获取公众号用户信息[用三方平台token]
@@ -1067,7 +1110,7 @@ def get_customer_gongzhonghao_userinfo(request):
         'authorizer_appid': authorizer_appid,
         'authorizer_refresh_token': authorizer_refresh_token,
         'key_name': key_name,
-        'app_id': 'wx6ba07e6ddcdc69b3',                   # 查看诸葛雷达_公众号的 appid
+        'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
         'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
     }
 
@@ -1099,20 +1142,21 @@ def get_customer_gongzhonghao_userinfo(request):
             objs.update(
                 is_subscribe=subscribe
             )
-            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id),openid,"|",subscribe)
+            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
 
     return JsonResponse(response.__dict__)
+
 
 ## 绑定客户和文章的关系
 @csrf_exempt
 def binding_article_customer_relate(request):
     response = Response.ResponseObj()
-    article_id = request.GET.get('article_id')    # 公众号文章ID
+    article_id = request.GET.get('article_id')  # 公众号文章ID
     customer_id = request.GET.get('customer_id')  # 公众号客户ID
     user_id = request.GET.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
-    level = request.GET.get('level')      # 公众号层级
-    parent_id = request.GET.get('pid')    # 所属的父级的客户ID。为空代表第一级。
-    company_id = request.GET.get('company_id')    # 所属的父级的客户ID。为空代表第一级。
+    level = request.GET.get('level')  # 公众号层级
+    parent_id = request.GET.get('pid')  # 所属的父级的客户ID。为空代表第一级。
+    company_id = request.GET.get('company_id')  # 所属的父级的客户ID。为空代表第一级。
 
     q = Q()
     q.add(Q(**{'article_id': article_id}), Q.AND)
@@ -1125,8 +1169,8 @@ def binding_article_customer_relate(request):
     else:
         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
-    data =request.GET.copy()
-    print('------ 绑定文章客户关系 json.dumps(data) ------>>',json.dumps(data))
+    data = request.GET.copy()
+    print('------ 绑定文章客户关系 json.dumps(data) ------>>', json.dumps(data))
 
     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
 
@@ -1145,39 +1189,42 @@ def binding_article_customer_relate(request):
             level=level,
         )
 
-    user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+    user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+                                                                                   user_id=user_id)
     if user_customer_belonger_obj:
-        print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>',customer_id,"|",user_id)
+        print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
+              user_id)
         # response.code = 302
         # response.msg = "关系存在"
 
     else:
         print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
               user_id)
-        models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+        models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
     if activity_objs:
         activity_id = activity_objs[0].id
-        print('------ 此文章有活动 article_id：----->',article_id)
-        redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id,activity_id=activity_id,customer_id=customer_id)
+        print('------ 此文章有活动 article_id：----->', article_id)
+        redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id, activity_id=activity_id,
+                                                                       customer_id=customer_id)
 
         if redPacket_objs:
-            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (article_id,activity_id,customer_id) )
+            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (
+            article_id, activity_id, customer_id))
             # response.code = 302
             # response.msg = "关系存在"
 
         else:
             print('----- 活动发红包表数据【不存在并创建】 article_id:%s | activity_id:%s | customer_id: %s | company_id: %s ----->>' % (
-            article_id, activity_id, customer_id,company_id))
+                article_id, activity_id, customer_id, company_id))
 
             models.zgld_activity_redPacket.objects.create(article_id=article_id,
                                                           activity_id=activity_id,
                                                           customer_id=customer_id,
                                                           company_id=company_id,
-                                                         )
+                                                          )
             response.code = 200
             response.msg = "绑定成功"
     #
     return JsonResponse(response.__dict__)
-
