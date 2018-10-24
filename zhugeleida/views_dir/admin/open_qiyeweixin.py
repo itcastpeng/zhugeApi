@@ -14,7 +14,8 @@ import xml.etree.cElementTree as ET
 from django import forms
 from django.shortcuts import render, redirect
 import datetime
-
+from zhugeapi_celery_project import tasks
+import xml.dom.minidom as xmldom
 
 ## 第三方平台接入
 @csrf_exempt
@@ -71,7 +72,44 @@ def open_qiyeweixin(request, oper_type):
             if (ret != 0):
                 print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
                 sys.exit(1)
+
+            DOMTree = xmldom.parseString(sMsg)
+            collection = DOMTree.documentElement
+            ChangeType = collection.getElementsByTagName("ChangeType") #update_user
+
+            if ChangeType: # 通讯录的触发事件，增删改查用户 和关注微工作台的事件提示。
+                InfoType = collection.getElementsByTagName("InfoType")[0].childNodes[0].data       #<InfoType><![CDATA[change_contact]]></InfoType>
+                ChangeType = collection.getElementsByTagName("ChangeType")[0].childNodes[0].data   #<ChangeType><![CDATA[update_user]]></ChangeType>
+                UserID = collection.getElementsByTagName("UserID")[0].childNodes[0].data
+                AuthCorpId = collection.getElementsByTagName("AuthCorpId")[0].childNodes[0].data
+
+                company_objs = models.zgld_company.objects.filter(corp_id=AuthCorpId)
+                company_id = ''
+                if company_objs:
+                    company_obj = company_objs[0]
+                    company_id = company_obj.id
+
+                _Status = collection.getElementsByTagName("Status")   #<Status>1</Status></xml> #激活状态: 1=已激活，2=已禁用，4=未激活。
+                if _Status: # 代表既未激活企业微信又未关注微工作台（原企业号）。
+                    Status = collection.getElementsByTagName("Status")[0].childNodes[0].data
+                    if int(Status) == 1: # 1=已激活
+                        _data = {
+                            'company_id': company_id,
+                            'userid': UserID,
+                        }
+                        tasks.qiyeweixin_user_get_userinfo(_data) #异步获取用户的头像
+                    return HttpResponse("success")
+
+                elif not _Status: # 没有status ，说明 是用户的增删改查。
+
+                    return HttpResponse("success")
+
+
+
             xml_tree = ET.fromstring(sMsg)
+            xml_tree.find("SuiteTicket")
+
+
 
             # 解密成功，sMsg即为xml格式的明文
             try:
@@ -271,6 +309,8 @@ def open_qiyeweixin(request, oper_type):
 
             return HttpResponse('success')
 
+
+
     elif request.method == "GET":
 
         if oper_type == 'get_ticket':
@@ -343,18 +383,18 @@ def open_qiyeweixin(request, oper_type):
             code = request.GET.get('code')
             app_type = request.GET.get('state')
 
-            SuiteId = ''
+            SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
             url = ''
             if app_type == 'leida':
                 SuiteId = 'wx5d26a7a856b22bec'
-                url = 'http://zhugeleida.zhugeyingxiao.com'
+                url = 'http://zhugeleida.zhugeyingxiao.com/'
 
             elif app_type == 'boss':
                 SuiteId = 'wx36c67dd53366b6f0'
                 url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
 
             _data = {
-                'SuiteId': SuiteId
+                'SuiteId': SuiteId , # 通讯录三方应用
             }
 
             suite_access_token_ret = common.create_suite_access_token(_data)
@@ -371,38 +411,53 @@ def open_qiyeweixin(request, oper_type):
             print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
 
             user_ticket = code_ret_json.get('user_ticket')
-            if not user_ticket:
-                print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用 access_token:==========>', code, "|",
-                      suite_access_token)
-                return HttpResponse('404')
+            errcode = code_ret_json.get('errcode')
+            userid = code_ret_json.get('UserId')
+            corpid = code_ret_json.get('CorpId')
 
-            else:
-                print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
-                      "|", suite_access_token, "|", user_ticket)
 
-            post_userlist_data = {
-                'user_ticket': user_ticket
-            }
-            get_userlist_data = {
-                'access_token': suite_access_token
-            }
-
-            userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
-            user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
-            user_list_ret_json = user_list_ret.json()
-
-            userid = user_list_ret_json.get('userid')
-            corpid = user_list_ret_json.get('corpid')
-            name = user_list_ret_json.get('name')
-            avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
-            gender = user_list_ret_json.get('gender')
+            # if not user_ticket:
+            #     print('===========【企业微信】获取 user_ticket【失败】,消费 code | 使用 access_token:==========>', code, "|",
+            #           suite_access_token)
+            #     return HttpResponse('404')
+            #
+            # else:
+            #     print('===========【企业微信】获取 user_ticket【成功】,消费 code | 使用access_token | user_ticket==========>', code,
+            #           "|", suite_access_token, "|", user_ticket)
+            #
+            #
+            # post_userlist_data = {
+            #     'user_ticket': user_ticket
+            # }
+            # get_userlist_data = {
+            #     'access_token': suite_access_token
+            # }
+            #
+            #  userlist_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserdetail3rd'
+            # #userlist_url = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail"
+            # user_list_ret = requests.post(userlist_url, params=get_userlist_data, data=json.dumps(post_userlist_data))
+            # user_list_ret_json = user_list_ret.json()
+            #
+            # userid = user_list_ret_json.get('userid')
+            # corpid = user_list_ret_json.get('corpid')
+            # name = user_list_ret_json.get('name')
+            # avatar = user_list_ret_json.get('avatar')  # 加上100 获取小图
+            # gender = user_list_ret_json.get('gender')
             # email = user_list_ret_json['email']
 
-            print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|", userid)
+
+            # print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(code_ret_json), "|", userid)
             company_objs = models.zgld_company.objects.filter(corp_id=corpid)
 
             if company_objs:
                 company_id = company_objs[0].id
+
+                _data = {
+                    'company_id': company_id,
+                    'userid': userid,
+                }
+                tasks.qiyeweixin_user_get_userinfo(_data)
+
                 user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
                     userid=userid,
                     company_id=company_id
@@ -422,11 +477,11 @@ def open_qiyeweixin(request, oper_type):
                         print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
                         return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
-                    redirect_url = ''
+
+                    avatar = user_profile_obj.avatar
+                    user_id = user_profile_obj.id
+                    token = user_profile_obj.token
                     if status == 1 and  app_type == 'leida':  #
-                        user_profile_obj.gender = gender
-                        # user_profile_obj.email = email
-                        user_profile_obj.avatar = avatar
 
                         last_login_date = user_profile_obj.last_login_date
                         if not last_login_date:  # 为空说明第一次登陆
@@ -436,24 +491,20 @@ def open_qiyeweixin(request, oper_type):
                             is_first_login = 'No'
                         user_profile_obj.save()
 
-                        redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
-                            user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
+                        redirect_url = url + '?token=' + token + '&id=' + str(
+                            user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
                         return redirect(redirect_url)
 
-                    if  boss_status == 1 and app_type == 'boss': #
-                        user_profile_obj.gender = gender
-                        # user_profile_obj.email = email
-                        user_profile_obj.avatar = avatar
-                        user_profile_obj.save()
+                    elif  boss_status == 1 and app_type == 'boss': #
+                        redirect_url = url + '?token=' + token + '&id=' + str(
+                            user_id ) + '&avatar=' + avatar
 
-                        redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
-                            user_profile_obj.id) + '&avatar=' + avatar
-
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_profile_obj.id, "|",
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
+
                         return redirect(redirect_url)
 
                     else:

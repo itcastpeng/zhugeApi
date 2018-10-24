@@ -17,7 +17,6 @@ import json
 @app.task
 def user_send_action_log(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
-    # url = 'http://127.0.0.1:8000/zhugeleida/mycelery/user_send_action_log'
     get_data = data
     print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 get_data数据 ------------>',json.dumps(get_data))
     requests.get(url, params=get_data)
@@ -111,7 +110,14 @@ def user_send_gongzhonghao_template_msg(data):
     requests.get(url, params=get_data)
 
 
+## 企业微信获取三方通讯录的人员信息
+@app.task
+def qiyeweixin_user_get_userinfo(data):
+    print('--- 【企业微信-获取三方通讯录的人员信息】 --->', data)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/qiyeweixin_user_get_userinfo'
+    get_data = data
 
+    requests.get(url, params=get_data)
 
 
 @app.task

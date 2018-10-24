@@ -59,14 +59,22 @@ encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
 appid = 'wx6ba07e6ddcdc69b3'
 
 xml_tree = ET.fromstring(sMsg)
-# print(xml_tree)
+print(xml_tree)
 
 msg_signature = "c1a43c5bdb77386d5ed72e341150891f5e913f03"
 timestamp = "1539827462"
 nonce = "1250886219"
-encrypt = xml_tree.find("Encrypt").text
 
-decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
+DOMTree = xmldom.parseString(sMsg)
+collection = DOMTree.documentElement
+if collection.getElementsByTagName("Encrypt"):
+
+    print(collection.getElementsByTagName("Encrypt")[0])
+
+original_id = collection.getElementsByTagName("Encrypt")[0].childNodes[0].data
+
+
+# decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
 # ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
 
 # print('--->>',decryp_xml)

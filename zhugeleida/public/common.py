@@ -308,9 +308,9 @@ def create_qiyeweixin_access_token(data):
     response = Response.ResponseObj()
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    SuiteId = data.get('SuiteId')  # 三方应用IP 。
-    auth_corpid = data.get('corp_id')            #授权方企业corpid
-    permanent_code = data.get('permanent_code')  #企业微信永久授权码
+    SuiteId = data.get('SuiteId')                # 三方应用IP 。
+    auth_corpid = data.get('corp_id')            # 授权方企业corpid
+    permanent_code = data.get('permanent_code')  # 企业微信永久授权码
 
     _data = {
         'SuiteId': SuiteId

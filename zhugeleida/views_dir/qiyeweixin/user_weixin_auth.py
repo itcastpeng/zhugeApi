@@ -19,7 +19,7 @@ import string
 import time
 from  publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
-
+from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 
 @csrf_exempt
 def work_weixin_auth(request, company_id):
@@ -301,7 +301,6 @@ def enterprise_weixin_sign(request):
         正常情况下，jsapi_ticket的有效期为7200秒，通过access_token来获取
         '''
 
-        get_token_data = {}
         user_id = request.GET.get('user_id')
 
         user_obj = models.zgld_userprofile.objects.get(id=user_id)
@@ -313,25 +312,7 @@ def enterprise_weixin_sign(request):
         company_obj = models.zgld_company.objects.get(id=company_id)
         corpid = company_obj.corp_id
 
-        if not token_ret:
-
-            # corpsecret = company_obj.zgld_app_set.get(company_id=company_id,name='AI雷达').app_secret
-            corpsecret = company_obj.zgld_app_set.get(company_id=company_id,app_type=1).app_secret
-
-            get_token_data['corpid'] = corpid
-            get_token_data['corpsecret'] = corpsecret
-
-            ret = requests.get(Conf['token_url'], params=get_token_data)
-            ret_json = ret.json()
-            print('===========access_token==========>', ret_json)
-            access_token = ret_json.get('access_token')
-
-            key_name = "company_%s_leida_app_token" % (company_id)
-            rc.set(key_name, access_token, 7000)
-
-        else:
-            access_token = token_ret
-
+        token_ret = jianrong_create_qiyeweixin_access_token(company_id)
 
         key_name = "company_%s_jsapi_ticket" % (company_id)
         ticket_ret = rc.get(key_name)
@@ -341,7 +322,7 @@ def enterprise_weixin_sign(request):
         if not ticket_ret:
             get_jsapi_ticket_url =  'https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket'
             get_ticket_data  = {
-                'access_token' : access_token
+                'access_token' : token_ret
             }
             jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
             print('=========== 权限签名 jsapi_ticket_ret 接口返回 ==========>', jsapi_ticket_ret.json())

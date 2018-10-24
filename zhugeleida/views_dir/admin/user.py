@@ -336,6 +336,11 @@ def user_oper(request, oper_type, o_id):
                         data_dict ={ 'user_id': obj.id, 'customer_id': ''}
                         tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
+                        _data = {
+                            'company_id': company_id,
+                            'userid': userid,
+                        }
+                        tasks.qiyeweixin_user_get_userinfo(_data)
 
                         response.code = 200
                         response.msg = "添加用户成功"
@@ -400,10 +405,9 @@ def user_oper(request, oper_type, o_id):
                                 response.msg = "删除成功"
 
                             else:
-
+                                print('------ "企业微信返回错误,%s" % weixin_ret ---->',"企业微信返回错误,%s" , weixin_ret['errmsg'])
                                 response.code = weixin_ret['errcode']
                                 response.msg = "企业微信返回错误,%s" % weixin_ret['errmsg']
-
 
                         else:
                             response.code = '302'
@@ -478,7 +482,7 @@ def user_oper(request, oper_type, o_id):
                     user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=o_id)
 
                     if user_objs:
-
+                        userid = user_objs[0].userid
                         token_ret = jianrong_create_qiyeweixin_access_token(company_id)
                         get_user_data = {
                             'access_token': token_ret
@@ -487,7 +491,7 @@ def user_oper(request, oper_type, o_id):
                         if len(department_id) == 0:
                             department_id = [1]
                         post_user_data = {}
-                        post_user_data['userid'] = user_objs[0].userid
+                        post_user_data['userid'] = userid
                         post_user_data['name'] = username
                         post_user_data['position'] = position
                         post_user_data['department'] = department_id
@@ -516,6 +520,13 @@ def user_oper(request, oper_type, o_id):
                                 wechat_phone=wechat_phone,
                                 mingpian_phone=mingpian_phone
                             )
+
+                            _data = {
+                                'company_id': company_id,
+                                'userid': userid,
+                            }
+                            tasks.qiyeweixin_user_get_userinfo(_data) # 获取用户头像
+
 
                             user_obj = user_objs[0]
                             user_obj.department = department_id
@@ -642,7 +653,8 @@ def user_oper(request, oper_type, o_id):
                             objs =  models.zgld_userprofile.objects.filter(userid=userid,company_id=company_id)
 
                             if objs:
-                                print('-------- 用户数据成功已存在 username | userid | user_id -------->>',username,userid,objs[0].id)
+                                user_id = objs[0].id
+                                print('-------- 用户数据成功已存在 username | userid | user_id -------->>',username,userid,user_id)
                             else:
                                 obj = models.zgld_userprofile.objects.create(
                                     userid=userid,
@@ -655,6 +667,12 @@ def user_oper(request, oper_type, o_id):
                                     # mingpian_phone= '',
                                     token=token
                                 )
+
+                                _data = {
+                                    'company_id': company_id,
+                                    'userid': userid,
+                                }
+                                tasks.qiyeweixin_user_get_userinfo(_data) # 获取头像信息
 
                                 print('-------- 同步用户数据成功 user_id：-------->>',obj.id)
 
@@ -823,6 +841,13 @@ def user_oper(request, oper_type, o_id):
                                 # 生成企业用户二维码
                                 data_dict = {'user_id': obj.id, 'customer_id': ''}
                                 tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+
+                                # 获取用户头像信息
+                                _data = {
+                                    'company_id': company_id,
+                                    'userid': userid,
+                                }
+                                tasks.qiyeweixin_user_get_userinfo(_data)
 
                                 response.code = 200
                                 response.msg = "添加用户成功"
