@@ -270,7 +270,7 @@ def chat_oper(request, oper_type, o_id):
                     tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
 
                 elif  user_type == 1 and customer_id and user_id:
-                    print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->',json.dumps(data))
+                    print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->')
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
                     # data['type'] = 'gongzhonghao_template_chat'
