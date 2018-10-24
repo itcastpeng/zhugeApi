@@ -652,8 +652,7 @@ def user_send_gongzhonghao_template_msg(request):
 
     if not authorizer_access_token:
         authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-        authorizer_access_token = rc.get(
-            authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+        authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
             data = {
@@ -679,7 +678,7 @@ def user_send_gongzhonghao_template_msg(request):
 
 
         # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
-        authorizer_access_token = ''
+        
         if _type == 'gongzhonghao_template_chat' or _type == 'forward_look_article_tishi':
 
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
@@ -791,7 +790,7 @@ def user_send_gongzhonghao_template_msg(request):
                 {
                      "content":"Hello World  YYY"
                 }
-}
+            }
 
             kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=json.dumps(kefu_msg_post_data))
             kefu_ret = kefu_ret.json()
