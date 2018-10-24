@@ -913,14 +913,19 @@ def user_forward_send_activity_redPacket(request):
                         }
                         print('------[调用转发后满足条件,发红包的接口 data 数据]------>>',json.dumps(_data))
 
-                        response = focusOnIssuedRedEnvelope(_data)
-                        if response.code == 200:
+                        response_ret = focusOnIssuedRedEnvelope(_data)
+                        if response_ret.code == 200:
                             print('---- 调用发红包成功[转发得现金] 状态值:200 --->>')
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money, # 已发红包金额 [累加发送金额]
                                 should_send_redPacket_num=shoudle_send_num,        # 应该发放的次数 [应发]
                                 status=1        # (1,'已发'),
+                            )
+                        else: # 余额不足后者其他原因
+
+                            app_objs.update(
+                                reason=response_ret.msg
                             )
 
 
@@ -1011,8 +1016,8 @@ def user_focus_send_activity_redPacket(request):
                             'openid': openid,
                             'send_name': send_name,              #商户名称
                             'act_name': '关注领现金红包',                      #活动名称
-                            'remark':  '动动手指,轻松拿现金！骗你是个狗',                    #备注信息
-                            'wishing': '感谢您关注我！',                  #祝福语
+                            'remark':  '动动手指,轻松拿现金!',         #备注信息
+                            'wishing': '感谢您的关注我！',                       #祝福语
                         }
 
                         print('------[调发红包的接口 data 数据]------>>',json.dumps(_data))
