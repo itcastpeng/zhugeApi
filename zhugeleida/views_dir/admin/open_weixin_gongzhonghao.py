@@ -10,7 +10,7 @@ import xml.dom.minidom as xmldom
 from zhugeapi_celery_project import tasks
 import time
 import os, datetime
-
+import base64
 
 import json
 import redis
@@ -19,7 +19,7 @@ from django import forms
 
 from wechatpy.replies import TextReply
 from wechatpy.crypto import WeChatCrypto
-
+from zhugeleida.public.common import action_record
 
 # 第三方平台接入
 @csrf_exempt
@@ -152,7 +152,8 @@ def open_weixin_gongzhonghao(request, oper_type):
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
+                    verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
+                                                   'id'] == 0 else False
 
                     principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                     qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
@@ -187,11 +188,10 @@ def open_weixin_gongzhonghao(request, oper_type):
 
                             html = requests.get(qrcode_url)
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                            filename = "/%s_%s.jpg" % (authorizer_appid,now_time)
+                            filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
                             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
                             with open(file_dir, 'wb') as file:
                                 file.write(html.content)
-
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
@@ -249,12 +249,13 @@ def open_weixin_gongzhonghao(request, oper_type):
                             response.msg = "公众号添加模板ID成功"
                             objs.update(template_id=template_id)
                             # {"errcode": 0, "errmsg": "ok", "template_id": "yIqr5W_MVshHlyjZIvEd8Lg0KI-nyrOlsTIWMyX_NME"}
-                            print('--------- 公众号添加模板ID【成功】  appid: %s ------------>>' % (authorization_appid) )
+                            print('--------- 公众号添加模板ID【成功】  appid: %s ------------>>' % (authorization_appid))
 
                         else:
                             response.code = errcode
                             response.msg = errmsg
-                            print('--------- 公众号添加模板ID 【失败】 appid: %s ------------>>' % (authorization_appid), errmsg, '|', errcode)
+                            print('--------- 公众号添加模板ID 【失败】 appid: %s ------------>>' % (authorization_appid), errmsg,
+                                  '|', errcode)
 
 
 
@@ -317,7 +318,7 @@ def open_weixin_gongzhonghao(request, oper_type):
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (
-            app_id, pre_auth_code, redirect_uri)  # auth_type=3 表示公众号和小程序都展示
+                app_id, pre_auth_code, redirect_uri)  # auth_type=3 表示公众号和小程序都展示
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
             response.code = 200
             response.msg = '生成【授权链接】成功'
@@ -675,61 +676,109 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             elif MsgType == 'text':
                 Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
                 CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
-                print('--内容Content-->>', Content)
+                print('-----【公众号】客户发送的内容 Content ---->>', Content)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
                 if gongzhonghao_app_objs:
-                    activity_id = Content
 
                     gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                     company_id = gongzhonghao_app_obj.company_id
-                    name = gongzhonghao_app_obj.name
 
                     objs = models.zgld_customer.objects.filter(openid=openid, company_id=company_id, user_type=1)
                     if objs:
                         obj = objs[0]
                         customer_id = obj.id
-                        redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,activity_id=activity_id)
+
+                        if Content.startswith('T'):
+                            activity_id = int(Content.split('T')[1])
+
+                            redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,
+                                                                                           activity_id=activity_id)
+                            if redPacket_objs:
+                                redPacket_obj = redPacket_objs[0]
+                                forward_read_count = redPacket_obj.forward_read_count
+                                already_send_redPacket_num = redPacket_obj.already_send_redPacket_num
+
+                                activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+                                reach_forward_num = activity_obj.reach_forward_num
+                                divmod_ret = divmod(forward_read_count, reach_forward_num)
+
+                                shoudle_send_num = divmod_ret[0]
+                                yushu = divmod_ret[1]
+                                short_num = reach_forward_num - yushu
+
+                                if forward_read_count >= reach_forward_num:
+
+                                    _content = '转发后阅读人数已达【%s】人,已发红包【%s】个,还差【%s】人又能再拿现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
+                                    forward_read_count, already_send_redPacket_num, short_num)
+                                else:
+                                    _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
+                                        forward_read_count, short_num)
 
 
-                        if redPacket_objs:
-                            redPacket_obj = redPacket_objs[0]
-                            forward_read_count = redPacket_obj.forward_read_count
-                            already_send_redPacket_num = redPacket_obj.already_send_redPacket_num
-
-                            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
-                            reach_forward_num  = activity_obj.reach_forward_num
-                            divmod_ret = divmod(forward_read_count, reach_forward_num)
-
-                            shoudle_send_num = divmod_ret[0]
-                            yushu = divmod_ret[1]
-                            short_num = reach_forward_num - yushu
-
-                            if  forward_read_count >= reach_forward_num:
-
-                                _content = '转发后阅读人数已达【%s】人 ,已发红包【%s】个 . \n还差【%s】人又能再拿现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (forward_read_count,already_send_redPacket_num,short_num)
                             else:
-                                _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n 转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
-                                forward_read_count, short_num)
+                                _content = '输入查询ID可能有误, 客服已通知技术小哥👨🏻‍💻, 快马加鞭🕙为您解决问题,\n 请您及时关注消息提醒🔔!'
+
+                            reply = TextReply(content=_content)
+                            reply._data['ToUserName'] = openid
+                            reply._data['FromUserName'] = original_id
+                            xml = reply.render()
+
+                            print('------ 被动回复消息【加密前】xml -->', xml)
+
+                            timestamp = str(int(time.time()))
+                            crypto = WeChatCrypto(token, encodingAESKey, appid)
+                            encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                            print('------ 被动回复消息【加密后】xml------>', encrypted_xml)  ## 加密后的xml 数据
+
+                            return HttpResponse(encrypted_xml, content_type="application/xml")
 
 
                         else:
-                            _content = '输入查询ID可能有误, 客服已通知技术小哥👨🏻‍💻, 快马加鞭🕙为您解决问题,\n 请您及时关注消息提醒🔔!'
+                            # 发送的聊天咨询信息；
+                            # print('----send_msg--->>', request.POST)
+                            # customer_id = int(request.GET.get('user_id'))
+                            # user_id = request.POST.get('u_id')
+                            # content = request.POST.get('content')
 
-                        reply = TextReply(content=_content)
-                        reply._data['ToUserName'] = openid
-                        reply._data['FromUserName'] = original_id
+                            flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
+                                customer_id=customer_id).order_by('-last_follow_time')
+                            if flow_up_objs:
+                                user_id = flow_up_objs[0].user_id
 
-                        xml = reply.render()
+                                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                    is_last_msg=True).update(
+                                    is_last_msg=False)  # 把所有的重置为不是最后一条
 
-                        print('------ 被动回复消息【加密前】xml -->', xml)
 
-                        timestamp = str(int(time.time()))
-                        crypto = WeChatCrypto(token, encodingAESKey, appid)
-                        encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
-                        print('------ 被动回复消息【加密后】xml------>',encrypted_xml)    ## 加密后的xml 数据
+                                encodestr = base64.b64encode(Content.encode('utf-8'))
+                                msg = str(encodestr, 'utf-8')
+                                _content= {
+                                    'msg' : msg,
+                                    'info_type' : 1
+                                }
+                                content = json.dumps(_content)
 
-                        return HttpResponse(encrypted_xml, content_type="application/xml")
+                                models.zgld_chatinfo.objects.create(
+                                    content=content,
+                                    userprofile_id=user_id,
+                                    customer_id=customer_id,
+                                    send_type=2
+                                )
+
+                                if user_id and  customer_id:  # 发送的文字消息
+                                    remark = ': %s' % (Content)
+
+                                    data = {
+                                        'action': 0 ,   # 代表发送客户聊天信息
+                                        'uid' : user_id,
+                                        'user_id' : customer_id
+                                    }
+                                    action_record(data, remark)
+
+                            response.code = 200
+                            response.msg = 'send msg successful'
+
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)

@@ -276,13 +276,18 @@ def article_oper(request, oper_type, o_id):
 
                         ## 判断转发后阅读的人数 +转发后阅读时间 此处要 封装到异步中。
                         if activity_objs:  # 说明有参与活动，活动在进行中
-                            _data = {
-                                'parent_id': parent_id,
-                                'article_id': article_id,
-                                'activity_id': activity_id,
-                                'company_id': company_id,
-                            }
-                            tasks.user_forward_send_activity_redPacket.delay(_data)
+                            start_time = activity_objs[0].start_time
+                            end_time = activity_objs[0].end_time
+                            now_date_time = datetime.datetime.now()
+
+                            if now_date_time >= start_time   and now_date_time <= end_time:
+                                _data = {
+                                    'parent_id': parent_id,
+                                    'article_id': article_id,
+                                    'activity_id': activity_id,
+                                    'company_id': company_id,
+                                }
+                                tasks.user_forward_send_activity_redPacket.delay(_data)
 
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)

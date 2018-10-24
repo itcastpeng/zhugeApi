@@ -75,11 +75,13 @@ def activity_manage(request, oper_type):
                 is_focus_get_redpacket = obj.is_focus_get_redpacket
                 focus_get_money = obj.focus_get_money
                 focus_total_money = obj.focus_total_money
+                reason = obj.reason
                 #  查询成功 返回200 状态码
                 response.data = {
                     'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否(开启)
                     'focus_get_money': focus_get_money,  # 关注领取红包金额
-                    'focus_total_money': focus_total_money  # 红包总金额
+                    'focus_total_money': focus_total_money,  # 红包总金额
+                    'reason': reason  # 提示
                 }
                 response.code = 200
                 response.msg = '设置成功'

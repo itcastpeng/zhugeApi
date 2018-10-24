@@ -265,6 +265,7 @@ def article_oper(request, oper_type, o_id):
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
+
                 }
 
 

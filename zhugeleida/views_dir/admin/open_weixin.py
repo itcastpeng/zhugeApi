@@ -180,13 +180,13 @@ def open_weixin(request, oper_type):
                             )
 
                             ## 商城基础设置
-                            celery_addSmallProgram(authorization_appid)
-                            userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
-                                xiaochengxuApp_id=authorization_appid)
-                            if not userObjs:
-                                models.zgld_shangcheng_jichushezhi.objects.create(
-                                    xiaochengxuApp_id=authorization_appid
-                                )
+                            celery_addSmallProgram.delay(authorization_appid)
+                            # userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                            #     xiaochengxuApp_id=authorization_appid)
+                            # if not userObjs:
+                            #     models.zgld_shangcheng_jichushezhi.objects.create(
+                            #         xiaochengxuApp_id=authorization_appid
+                            #     )
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200

@@ -79,6 +79,7 @@ class zgld_gongzhonghao_app(models.Model):
     is_focus_get_redpacket = models.BooleanField(verbose_name="关注领取红包是否开启", default=False)
     focus_get_money = models.SmallIntegerField(verbose_name='关注领取红包金额',null=True)
     focus_total_money = models.SmallIntegerField(verbose_name='红包总金额',null=True)
+    reason = models.CharField(verbose_name='发送红包失败原因',max_length=512,null=True)
 
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128, null=True)
     authorization_secret = models.CharField(verbose_name="授权方appsecret", max_length=128, null=True)
@@ -864,7 +865,7 @@ class zgld_article_activity(models.Model):
     # type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
-
+    reason = models.CharField(verbose_name='返回的发红包错误信息', max_length=512, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
 
     class Meta:

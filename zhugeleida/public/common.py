@@ -360,8 +360,10 @@ def create_qiyeweixin_access_token(data):
 ## 兼容创建企业微信的token
 def  jianrong_create_qiyeweixin_access_token(company_id):
 
-    app_obj = models.zgld_app.objects.get(company_id=company_id, app_type=3)
-    permanent_code = app_obj.permanent_code
+    app_objs = models.zgld_app.objects.filter(company_id=company_id, app_type=3)
+    permanent_code = ''
+    if app_objs:
+        permanent_code = app_objs[0].permanent_code
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
     company_obj = models.zgld_company.objects.get(id=company_id)
