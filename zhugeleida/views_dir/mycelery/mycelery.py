@@ -784,12 +784,13 @@ def user_send_gongzhonghao_template_msg(request):
             kefu_msg_get_data = {
                 'access_token': authorizer_access_token,
             }
+            _content  = '【%s】: %s' % (username,content)
             kefu_msg_post_data ={
                 "touser": openid,
                 "msgtype": "text",
                 "text":
                 {
-                     "content": content
+                     "content": _content
                 }
             }
             kefu_msg_post_data =  json.dumps(kefu_msg_post_data, ensure_ascii=False)
