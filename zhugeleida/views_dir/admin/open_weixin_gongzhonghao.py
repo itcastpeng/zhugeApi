@@ -687,7 +687,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                     if objs:
                         obj = objs[0]
                         customer_id = obj.id
-                        _content = ''
+
 
                         if Content.startswith('T'):
                             activity_id = int(Content.split('T')[1])
