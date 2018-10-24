@@ -792,8 +792,8 @@ def user_send_gongzhonghao_template_msg(request):
                      "content": content
                 }
             }
-
-            kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=json.dumps(kefu_msg_post_data,ensure_ascii=False))
+            kefu_msg_post_data =  json.dumps(kefu_msg_post_data, ensure_ascii=False)
+            kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=kefu_msg_post_data.encode('utf-8'))
             kefu_ret = kefu_ret.json()
 
             print('--------企业用户 send to 小程序 kefu_客服接口 - 返回数据--------->', kefu_ret)
