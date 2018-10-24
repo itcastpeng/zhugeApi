@@ -722,6 +722,7 @@ get_data['customer_id'] = 852
 # get_data['type'] = 'gongzhonghao_template_chat'
 
 get_data['type'] = 'gongzhonghao_send_kefu_msg'
+get_data['content'] = '测试数据手动阀大是ddddd'
 ret = requests.get(url, params=get_data)
 
 

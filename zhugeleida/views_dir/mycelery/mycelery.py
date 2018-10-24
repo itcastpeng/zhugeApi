@@ -625,6 +625,7 @@ def user_send_gongzhonghao_template_msg(request):
     customer_id = request.GET.get('customer_id')
     _type = request.GET.get('type')
     activity_id = request.GET.get('activity_id')
+    content = request.GET.get('content')
 
     userprofile_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = userprofile_obj.company_id
@@ -678,7 +679,7 @@ def user_send_gongzhonghao_template_msg(request):
 
 
         # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
-        
+
         if _type == 'gongzhonghao_template_chat' or _type == 'forward_look_article_tishi':
 
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
@@ -788,7 +789,7 @@ def user_send_gongzhonghao_template_msg(request):
                 "msgtype": "text",
                 "text":
                 {
-                     "content":"Hello World  YYY"
+                     "content": content
                 }
             }
 
