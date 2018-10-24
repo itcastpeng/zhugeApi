@@ -772,7 +772,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                     data = {
                                         'action': 0 ,   # 代表发送客户聊天信息
                                         'uid' : user_id,
-                                        'customer_id' : customer_id
+                                        'user_id' : customer_id
                                     }
                                     action_record(data, remark)
 

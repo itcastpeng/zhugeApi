@@ -114,10 +114,11 @@ def action_record(data):
 def user_send_action_log(request):
     response = ResponseObj()
     customer_id = request.GET.get('user_id')  # 客户 id
+    user_id = request.GET.get('uid')
     article_id = request.GET.get('article_id')  # 客户 id
     action = request.GET.get('action')
     remark = request.GET.get('remark')
-    user_id = request.GET.get('uid')
+
 
     send_token_data = {}
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
