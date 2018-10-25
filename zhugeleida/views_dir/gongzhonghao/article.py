@@ -263,9 +263,11 @@ def article_oper(request, oper_type, o_id):
 
                     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
                     reach_forward_num = ''
+                    activity_single_money = ''
                     if activity_objs:
                         activity_id = activity_objs[0].id
                         reach_forward_num = activity_objs[0].reach_forward_num
+                        activity_single_money = activity_objs[0].activity_single_money
                         is_have_activity = 1  # 活动已经开启
 
                     else:
@@ -357,7 +359,8 @@ def article_oper(request, oper_type, o_id):
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         'qrcode_url': qrcode_url,
-                        'reach_forward_num': reach_forward_num
+                        'reach_forward_num': reach_forward_num,  #达到多少次发红包
+                        'activity_single_money': activity_single_money #单个金额
                     }
 
                 else:
