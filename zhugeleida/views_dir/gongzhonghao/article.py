@@ -339,13 +339,20 @@ def article_oper(request, oper_type, o_id):
 
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     qrcode_url = ''
+                    is_focus_get_redpacket = ''
                     if gongzhonghao_app_objs:
                         qrcode_url = gongzhonghao_app_objs[0].qrcode_url
+                        is_focus_get_redpacket = gongzhonghao_app_objs[0].is_focus_get_redpacket
+                        if is_focus_get_redpacket:
+                            is_focus_get_redpacket = 'true'
+                        else:
+                            is_focus_get_redpacket = 'false'
 
                     response.code = 200
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
+                        'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否开启。 'true' 或   'false'
                         'is_subscribe': is_subscribe,  # 是否关注了公众号。0 为没有关注 1为关注了。
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
