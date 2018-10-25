@@ -129,15 +129,18 @@ def activity_manage(request, oper_type):
                     if int(search_activity_status) == 3:
                         q1.children.append(('status', search_activity_status))  # (1,'已上架')
                     elif  int(search_activity_status) == 2:
+
                         q1.children.append(('start_time__lte', now_date_time))
                         q1.children.append(('end_time__gte', now_date_time))
+                        q1.children.append(('status__in', [1,2,4]))
 
                     elif int(search_activity_status) == 1:
                         q1.children.append(('start_time__gt', now_date_time))
-
+                        q1.children.append(('status__in', [1, 2, 4]))
                     elif int(search_activity_status) == 4:
                         q1.children.append(('end_time__lt', now_date_time))
-
+                        q1.children.append(('status__in', [1, 2, 4]))
+                        
                 print('-----q1---->>', q1)
                 objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
                 count = objs.count()
