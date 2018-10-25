@@ -128,6 +128,7 @@ def activity_manage(request, oper_type):
                 if search_activity_status:
                     if int(search_activity_status) == 3:
                         q1.children.append(('status', search_activity_status))  # (1,'已上架')
+
                     elif  int(search_activity_status) == 2:
 
                         q1.children.append(('start_time__lte', now_date_time))
@@ -159,7 +160,7 @@ def activity_manage(request, oper_type):
 
                         start_time = obj.start_time
                         end_time =   obj.end_time
-                        status = ''
+                        status = obj.status
                         status_text = ''
                         if status != 3:
 
@@ -173,7 +174,7 @@ def activity_manage(request, oper_type):
                                 status = 4
                                 status_text = '已结束'
                         else:
-                            status = obj.status
+                            
                             status_text = '已终止'
 
                         ret_data.append({
