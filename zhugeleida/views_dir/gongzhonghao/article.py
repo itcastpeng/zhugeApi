@@ -344,9 +344,9 @@ def article_oper(request, oper_type, o_id):
                         qrcode_url = gongzhonghao_app_objs[0].qrcode_url
                         is_focus_get_redpacket = gongzhonghao_app_objs[0].is_focus_get_redpacket
                         if is_focus_get_redpacket:
-                            is_focus_get_redpacket = 'true'
+                            is_focus_get_redpacket = 1
                         else:
-                            is_focus_get_redpacket = 'false'
+                            is_focus_get_redpacket = 2
 
                     response.code = 200
                     response.data = {
