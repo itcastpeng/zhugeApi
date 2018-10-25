@@ -266,7 +266,7 @@ def article_oper(request, oper_type, o_id):
 
                     _start_time = ''
                     _end_time = ''
-                    is_have_activity = 0 # 默认没有搞活动
+                    is_have_activity = 2 # 默认没有搞活动
 
                     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id)
                     now_date_time = datetime.datetime.now()
