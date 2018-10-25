@@ -47,7 +47,7 @@ def dai_xcx_oper(request, oper_type):
             forms_obj = CommitCodeInfoForm(request.POST)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')  # 账户
-                app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
+                app_ids_list = request.POST.get('app_ids_list')  # 账户
                 user_version = forms_obj.cleaned_data.get('user_version') # 版本
                 template_id = forms_obj.cleaned_data.get('template_id')   #模板ID
                 user_desc = forms_obj.cleaned_data.get('user_desc')       #描述
@@ -199,17 +199,14 @@ def dai_xcx_oper(request, oper_type):
                             with open(path_qr_code_name, 'wb') as f:
                                 f.write(get_qrcode_ret.content)
 
-                            # response.code = 200
-                            # response.msg = '生成并获取小程序体验码成功'
+                            response.code = 200
+                            response.msg = '生成并获取小程序体验码成功'
                             print('---------生成并获取小程序体验码成功--------->>',qr_url)
-                            # response.data = {
-                            #     'qrcode_url': qr_url
-                            #
-                            # }
+
 
                             upload_code_obj.experience_qrcode=qr_url
                             upload_code_obj.save()
-                            return JsonResponse(response.__dict__)
+
 
 
                         except Exception as e:
@@ -403,17 +400,12 @@ def dai_xcx_oper(request, oper_type):
             forms_obj = RelaseCodeInfoForm(request.POST)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')  # 账户
-                app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
-                # auditid_list = forms_obj.cleaned_data.get('auditid_list')  # 账户
-                # auditid_list = json.loads(auditid_list)
+                app_ids_list = request.POST.get('app_ids_list')  # 账户  # 账户
                 app_ids_list = json.loads(app_ids_list)
 
                 forms_obj = AuditCodeInfoForm(request.POST)
                 if forms_obj.is_valid():
                     user_id = request.GET.get('user_id')  # 账户
-                    app_ids_list = forms_obj.cleaned_data.get('app_ids_list')  # 账户
-
-                    app_ids_list = json.loads(app_ids_list)
                     objs = models.zgld_xiaochengxu_app.objects.filter(id__in=app_ids_list)
                     if objs:
                         for obj in objs:

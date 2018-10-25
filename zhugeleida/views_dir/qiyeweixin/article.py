@@ -86,10 +86,19 @@ def article(request, oper_type):
                     if not read_count:
                         read_count = 0
 
-
+                    article_id = obj.id
+                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3)
+                    now_date_time = datetime.datetime.now()
+                    is_have_activity = 2 #
+                    if activity_objs:
+                        activity_obj = activity_objs[0]
+                        start_time = activity_obj.start_time
+                        end_time = activity_obj.end_time
+                        if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                            is_have_activity = 1  # 活动已经开启
 
                     ret_data.append({
-                        'id': obj.id,
+                        'id': article_id,
                         'title': obj.title,  # 文章标题
                         'status_code': obj.status,  # 状态
                         'status': obj.get_status_display(),  # 状态
@@ -102,8 +111,8 @@ def article(request, oper_type):
                         'create_date': obj.create_date,  # 文章创建时间
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'tag_list': list(obj.tags.values('id', 'name')),
-                        'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
-
+                        'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
+                        'is_have_activity': is_have_activity
                     })
                 response.code = 200
                 response.data = {

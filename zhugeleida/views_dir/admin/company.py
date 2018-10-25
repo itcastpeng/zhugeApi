@@ -106,16 +106,19 @@ def author_status(request,oper_type):
             ret_data = []
             # 获取第几页的数据
             if company_objs:
-                is_validate = company_objs[0].is_validate
+                app_objs = company_objs[0].zgld_app_set.filter(company_id=company_id, app_type=3)
+
+                is_validate = False
+                if app_objs: # 通讯录
+                    is_validate =  app_objs[0].is_validate
 
                 ret_data.append({
                     'name' : '通讯录',
                     'is_validate': is_validate,
-                    'app_type': ''
+                    'app_type': 3
                 })
 
                 name = ''
-                is_validate = False
                 # app_objs = list(company_objs[0].zgld_app_set.filter(company_id=company_id).values('id','name','is_validate','app_type'))
                 app_objs = company_objs[0].zgld_app_set.filter(company_id=company_id,app_type=1)
 

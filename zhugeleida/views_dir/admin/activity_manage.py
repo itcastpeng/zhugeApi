@@ -124,9 +124,23 @@ def activity_manage(request, oper_type):
 
 
                 search_activity_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
-
+                now_date_time = datetime.datetime.now()
                 if search_activity_status:
-                    q1.children.append(('status', search_activity_status))  # (1,'已上架')
+                    if int(search_activity_status) == 3:
+                        q1.children.append(('status', search_activity_status))  # (1,'已上架')
+
+                    elif  int(search_activity_status) == 2:
+
+                        q1.children.append(('start_time__lte', now_date_time))
+                        q1.children.append(('end_time__gte', now_date_time))
+                        q1.children.append(('status__in', [1,2,4]))
+
+                    elif int(search_activity_status) == 1:
+                        q1.children.append(('start_time__gt', now_date_time))
+                        q1.children.append(('status__in', [1, 2, 4]))
+                    elif int(search_activity_status) == 4:
+                        q1.children.append(('end_time__lt', now_date_time))
+                        q1.children.append(('status__in', [1, 2, 4]))
 
                 print('-----q1---->>', q1)
                 objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
@@ -138,9 +152,30 @@ def activity_manage(request, oper_type):
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
 
+
                 ret_data = []
                 if objs:
+
                     for obj in objs:
+
+                        start_time = obj.start_time
+                        end_time =   obj.end_time
+                        status = obj.status
+                        status_text = ''
+                        if status != 3:
+
+                            if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                                status = 2
+                                status_text = '进行中'
+                            elif now_date_time < start_time:
+                                status = 1
+                                status_text = '未启用'
+                            elif now_date_time > end_time:
+                                status = 4
+                                status_text = '已结束'
+                        else:
+
+                            status_text = '已终止'
 
                         ret_data.append({
                             'article_id' : obj.article_id,
@@ -153,8 +188,8 @@ def activity_manage(request, oper_type):
                             'activity_single_money' : obj.activity_single_money,  #单个金额
                             'reach_forward_num' :  obj.reach_forward_num,  #达到多少次发红包
                             'already_send_redPacket_num' :  obj.already_send_redPacket_num or 0,  #已发放发红包个数[领取条件]
-                            'status': obj.status,
-                            'status_text': obj.get_status_display(),
+                            'status': status,
+                            'status_text': status_text ,
                             'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
                             'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
                             'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M')
@@ -387,8 +422,8 @@ def activity_manage_oper(request, oper_type, o_id):
                 'activity_total_money': activity_total_money,  # 活动总金额(元)
                 'activity_single_money': activity_single_money,  # 单个金额(元)
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
-                'start_time': start_time,  # 达到多少次发红包(转发次数)
-                'end_time': end_time,  # 达到多少次发红包(转发次数)
+                'start_time': start_time,  #
+                'end_time': end_time,  #
             }
 
             forms_obj = ActivityAddForm(form_data)
