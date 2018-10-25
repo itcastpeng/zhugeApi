@@ -165,7 +165,7 @@ def activity_manage(request, oper_type):
                         if status != 3:
 
                             if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
-                                status = 2  # 未启用
+                                status = 2
                                 status_text = '进行中'
                             elif now_date_time < start_time:
                                 status = 1
@@ -174,7 +174,7 @@ def activity_manage(request, oper_type):
                                 status = 4
                                 status_text = '已结束'
                         else:
-                            
+
                             status_text = '已终止'
 
                         ret_data.append({
