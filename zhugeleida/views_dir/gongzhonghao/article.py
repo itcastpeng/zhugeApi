@@ -261,13 +261,19 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'customer_id': customer_id}), Q.AND)
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
-                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
+                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id)
                     reach_forward_num = ''
                     activity_single_money = ''
+                    start_time = ''
+                    end_time = ''
                     if activity_objs:
-                        activity_id = activity_objs[0].id
-                        reach_forward_num = activity_objs[0].reach_forward_num
-                        activity_single_money = activity_objs[0].activity_single_money
+                        activity_obj = activity_objs[0]
+                        activity_id = activity_obj.id
+                        reach_forward_num = activity_obj.reach_forward_num
+                        activity_single_money = activity_obj.activity_single_money
+                        start_time = activity_objs.start_time
+                        end_time = activity_objs.end_time
+
                         is_have_activity = 1  # 活动已经开启
 
                     else:
@@ -278,8 +284,7 @@ def article_oper(request, oper_type, o_id):
 
                         ## 判断转发后阅读的人数 +转发后阅读时间 此处要 封装到异步中。
                         if activity_objs:  # 说明有参与活动，活动在进行中
-                            start_time = activity_objs[0].start_time
-                            end_time = activity_objs[0].end_time
+
                             now_date_time = datetime.datetime.now()
 
                             if now_date_time >= start_time   and now_date_time <= end_time:
@@ -300,7 +305,7 @@ def article_oper(request, oper_type, o_id):
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
                     customer_obj = ''
-                    if customer_objs:  # 说明客户访问时候经过认证的
+                    if customer_objs:
                         customer_obj = customer_objs[0]
                         username = customer_obj.username
                         user_type = customer_obj.user_type
@@ -360,7 +365,9 @@ def article_oper(request, oper_type, o_id):
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         'qrcode_url': qrcode_url,
                         'reach_forward_num': reach_forward_num,  #达到多少次发红包
-                        'activity_single_money': activity_single_money #单个金额
+                        'activity_single_money': activity_single_money, #单个金额
+                        'start_time' : start_time.strftime('%Y-%m-%d %H:%M') if start_time else '',
+                        'end_time' :   end_time.strftime('%Y-%m-%d %H:%M') if end_time else  ''
                     }
 
                 else:
