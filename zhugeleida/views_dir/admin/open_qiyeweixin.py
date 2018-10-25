@@ -222,7 +222,7 @@ def open_qiyeweixin(request, oper_type):
 
 
 
-            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
+            redirect_uri = 'http://zhugeyingxiao.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
 
             _data = {
                 'SuiteId': suite_id
@@ -541,6 +541,10 @@ def open_qiyeweixin(request, oper_type):
             elif SuiteId == 'wx36c67dd53366b6f0':
                 name = '雷达Boss'
                 _app_type = 2
+
+            elif SuiteId == 'wx1cbe3089128fda03':
+                name = '诸葛通讯录'
+                _app_type = 3
 
             _data = {
                 'SuiteId': SuiteId
