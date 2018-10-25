@@ -91,7 +91,11 @@ def article(request, oper_type):
                     now_date_time = datetime.datetime.now()
                     is_have_activity = 2 #
                     if activity_objs:
-                        is_have_activity = 1  # 活动已经开启
+                        activity_obj = activity_objs[0]
+                        start_time = activity_obj.start_time
+                        end_time = activity_obj.end_time
+                        if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                            is_have_activity = 1  # 活动已经开启
 
                     ret_data.append({
                         'id': article_id,
