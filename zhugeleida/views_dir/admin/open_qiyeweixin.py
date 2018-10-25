@@ -222,7 +222,7 @@ def open_qiyeweixin(request, oper_type):
 
 
 
-            redirect_uri = 'http://zhugeyingxiao.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
+            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
 
             _data = {
                 'SuiteId': suite_id
