@@ -261,40 +261,52 @@ def article_oper(request, oper_type, o_id):
                     q.add(Q(**{'customer_id': customer_id}), Q.AND)
                     q.add(Q(**{'user_id': uid}), Q.AND)
 
-                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id)
                     reach_forward_num = ''
                     activity_single_money = ''
-                    start_time = ''
-                    end_time = ''
+
+                    _start_time = ''
+                    _end_time = ''
+                    is_have_activity = 0 # 默认没有搞活动
+
+                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id)
+                    now_date_time = datetime.datetime.now()
                     if activity_objs:
                         activity_obj = activity_objs[0]
-                        activity_id = activity_obj.id
-                        reach_forward_num = activity_obj.reach_forward_num
-                        activity_single_money = activity_obj.activity_single_money
                         start_time = activity_obj.start_time
                         end_time = activity_obj.end_time
 
-                        is_have_activity = 1  # 活动已经开启
+                        if now_date_time >= start_time and now_date_time <= end_time: # 活动开启并活动在进行中
+                            _start_time = start_time.strftime('%Y-%m-%d %H:%M')
+                            _end_time = end_time.strftime('%Y-%m-%d %H:%M')
+                            activity_id = activity_obj.id
+                            reach_forward_num = activity_obj.reach_forward_num
+                            activity_single_money = activity_obj.activity_single_money
+                            is_have_activity = 1  # 活动已经开启
 
-                    else:
-                        is_have_activity = 0  # 没有搞活动
-
-                    if parent_id:
-                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-
-                        ## 判断转发后阅读的人数 +转发后阅读时间 此处要 封装到异步中。
-                        if activity_objs:  # 说明有参与活动，活动在进行中
-
-                            now_date_time = datetime.datetime.now()
-
-                            if now_date_time >= start_time   and now_date_time <= end_time:
+                            if parent_id:
                                 _data = {
                                     'parent_id': parent_id,
                                     'article_id': article_id,
                                     'activity_id': activity_id,
                                     'company_id': company_id,
-                                }
+                                } ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
                                 tasks.user_forward_send_activity_redPacket.delay(_data)
+
+                                # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
+                                data_ = {
+                                    'customer_id': parent_id,
+                                    'user_id': uid,
+                                    'activity_id': activity_id,
+                                    'type': 'forward_look_article_tishi'
+                                }
+                                print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->', data_)
+
+                                tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息】
+
+
+
+                    if parent_id:
+                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
 
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
@@ -304,11 +316,15 @@ def article_oper(request, oper_type, o_id):
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
 
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
-                    customer_obj = ''
+
+                    is_subscribe = ''
+                    is_subscribe_text = ''
                     if customer_objs:
                         customer_obj = customer_objs[0]
                         username = customer_obj.username
-                        user_type = customer_obj.user_type
+                        is_subscribe = customer_obj.is_subscribe
+                        is_subscribe_text = customer_obj.get_is_subscribe_display()
+
                         if username:
                             remark = '%s》,看来对您的文章感兴趣' % (('正在查看文章《' + title))
                             print('---- 公众号查看文章[消息提醒]--->>', remark)
@@ -316,23 +332,8 @@ def article_oper(request, oper_type, o_id):
                             data['action'] = 14
                             action_record(data, remark)  # 此步骤封装到 异步中。
 
-                        if parent_id and uid : # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
 
-                            data_ = {
-                                'customer_id': parent_id,
-                                'user_id' :  uid,
-                                'activity_id' :  activity_id,
-                                'type' : 'forward_look_article_tishi'
-                            }
-                            print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->', data_)
-
-                            tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息】
-
-
-
-                    ## 先记录一个用户查看文章的日志
-                    now_date_time = datetime.datetime.now()
-
+                    ## 记录一个用户查看文章的日志
                     article_access_log_obj = models.zgld_article_access_log.objects.create(
                         article_id=article_id,
                         customer_id=customer_id,
@@ -341,33 +342,35 @@ def article_oper(request, oper_type, o_id):
                         last_access_date=now_date_time
                     )
                     article_access_log_id = article_access_log_obj.id
-                    is_subscribe = customer_obj.is_subscribe
-                    is_subscribe_text = customer_obj.get_is_subscribe_display()
 
-                    gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
                     qrcode_url = ''
-                    is_focus_get_redpacket = ''
+                    is_focus_get_redpacket = 2 # 默认是不开启关注领红包
+                    focus_get_money = ''
+                    gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
-                        qrcode_url = gongzhonghao_app_objs[0].qrcode_url
-                        is_focus_get_redpacket = gongzhonghao_app_objs[0].is_focus_get_redpacket
+                        gongzhonghao_app_obj = gongzhonghao_app_objs[0]
+                        qrcode_url = gongzhonghao_app_obj.qrcode_url
+                        is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
                         if is_focus_get_redpacket:
+                            focus_get_money = gongzhonghao_app_obj.focus_get_money
                             is_focus_get_redpacket = 1
-                        else:
-                            is_focus_get_redpacket = 2
+
 
                     response.code = 200
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
                         'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否开启。 'true' 或   'false'
+                        'focus_get_money': focus_get_money, #关注领取红包金额
                         'is_subscribe': is_subscribe,  # 是否关注了公众号。0 为没有关注 1为关注了。
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         'qrcode_url': qrcode_url,
                         'reach_forward_num': reach_forward_num,  #达到多少次发红包
                         'activity_single_money': activity_single_money, #单个金额
-                        'start_time' : start_time.strftime('%Y-%m-%d %H:%M') if start_time else '',
-                        'end_time' :   end_time.strftime('%Y-%m-%d %H:%M') if end_time else  ''
+                        'start_time' : _start_time,
+                        'end_time' :   _end_time
                     }
 
                 else:
