@@ -140,7 +140,7 @@ def activity_manage(request, oper_type):
                     elif int(search_activity_status) == 4:
                         q1.children.append(('end_time__lt', now_date_time))
                         q1.children.append(('status__in', [1, 2, 4]))
-                        
+
                 print('-----q1---->>', q1)
                 objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
                 count = objs.count()
@@ -159,14 +159,22 @@ def activity_manage(request, oper_type):
 
                         start_time = obj.start_time
                         end_time =   obj.end_time
-                        status = obj.status
+                        status = ''
+                        status_text = ''
                         if status != 3:
+
                             if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
                                 status = 2  # 未启用
+                                status_text = '进行中'
                             elif now_date_time < start_time:
                                 status = 1
+                                status_text = '未启用'
                             elif now_date_time > end_time:
                                 status = 4
+                                status_text = '已结束'
+                        else:
+                            status = obj.status
+                            status_text = '已终止'
 
                         ret_data.append({
                             'article_id' : obj.article_id,
@@ -180,7 +188,7 @@ def activity_manage(request, oper_type):
                             'reach_forward_num' :  obj.reach_forward_num,  #达到多少次发红包
                             'already_send_redPacket_num' :  obj.already_send_redPacket_num or 0,  #已发放发红包个数[领取条件]
                             'status': status,
-                            'status_text': obj.get_status_display(),
+                            'status_text': status_text ,
                             'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
                             'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
                             'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M')
