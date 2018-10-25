@@ -271,8 +271,8 @@ def article_oper(request, oper_type, o_id):
                         activity_id = activity_obj.id
                         reach_forward_num = activity_obj.reach_forward_num
                         activity_single_money = activity_obj.activity_single_money
-                        start_time = activity_objs.start_time
-                        end_time = activity_objs.end_time
+                        start_time = activity_obj.start_time
+                        end_time = activity_obj.end_time
 
                         is_have_activity = 1  # 活动已经开启
 
