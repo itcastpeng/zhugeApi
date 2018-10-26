@@ -725,11 +725,11 @@ def user_send_gongzhonghao_template_msg(request):
                 start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
                 end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
 
-                remark = '    <规则>: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。\n    分享不停,红包不停,上不封顶！\n截止日期: %s 至 %s' % (
+                remark = '    <规则>: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。\n分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
                 reach_forward_num, activity_single_money,start_time,end_time)
                 data = {
                     'first': {
-                        'value': ('您好,我是%s的%s %s, 很高兴为您服务 😁！\n    欢迎您参加【分享文章 赚现金活动】\n' % (
+                        'value': ('        您好,我是%s的%s %s,很高兴为您服务😁\n        欢迎您参加【分享文章 赚现金活动】\n' % (
                         company_name, position, user_name))  # 回复者
                     },
                     'keyword1': {
@@ -749,10 +749,10 @@ def user_send_gongzhonghao_template_msg(request):
             post_template_data = {
                 'touser': openid,
                 'template_id': template_id,
-                "miniprogram": {
-                    "appid": appid,
-                    "pagepath": path,
-                },
+                # "miniprogram": {
+                #     "appid": appid,
+                #     "pagepath": path,
+                # },
                 'data': data
             }
 

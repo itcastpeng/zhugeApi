@@ -342,6 +342,7 @@ def activity_manage(request, oper_type):
 
                 dai_xiaofei_money = activity_total_money -  already_send_redPacket_money
 
+
                 #  查询成功 返回200 状态码
                 response.data = {
                     'activity_total_money': activity_total_money,   # 活动总金额
