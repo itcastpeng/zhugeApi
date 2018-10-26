@@ -897,7 +897,9 @@ def user_forward_send_activity_redPacket(request):
                 forward_read_count=forward_read_num,
                 forward_stay_time=forward_stay_time
             )
-            activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+            activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
+
+            activity_obj = activity_objs[0]
 
             reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
             already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num  # 已发放次数
@@ -966,13 +968,17 @@ def user_forward_send_activity_redPacket(request):
                                 should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
                                 status=1  # (1,'已发'),
                             )
-                            activity_obj.update(
-                                reason=''
+                            activity_objs.update(
+                                reason='发放成功',
+                                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+
                             )
+
 
                         else:  # 余额不足后者其他原因,记录下日志
 
-                            activity_obj.update(
+                            activity_objs.update(
                                 reason=response_ret.msg
                             )
 

@@ -11,7 +11,7 @@ from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm,ActivityUpdateForm,ArticleRedPacketSelectForm
 
 import json
-from django.db.models import Q,Sum
+from django.db.models import Q,Sum,Count
 
 
 
@@ -110,24 +110,24 @@ def activity_manage(request, oper_type):
                 q1.connector = 'and'
                 q1.children.append(('company_id', company_id))
 
-                search_activity_name = request.GET.get('activity_name')  # 当有搜索条件 如 搜索产品名称
+                search_activity_name = request.GET.get('activity_name')  #
                 if search_activity_name:
                     q1.children.append(('activity_name__contains', search_activity_name))
 
-                article_title = request.GET.get('article_title')  # 当有搜索条件 如 搜索产品名称
+                article_title = request.GET.get('article_title')  #
                 if article_title:
                     q1.children.append(('article__title__contains', article_title))
 
-                activity_id = request.GET.get('activity_id')  # 当有搜索条件 如 搜索产品名称
+                activity_id = request.GET.get('activity_id')  #
                 if activity_id:
                     q1.children.append(('id', activity_id))
 
 
-                search_activity_status = request.GET.get('status')  # 当有搜索条件 如 搜索上架或者不上架的
+                search_activity_status = request.GET.get('status')  #
                 now_date_time = datetime.datetime.now()
                 if search_activity_status:
                     if int(search_activity_status) == 3:
-                        q1.children.append(('status', search_activity_status))  # (1,'已上架')
+                        q1.children.append(('status', search_activity_status))  #
 
                     elif  int(search_activity_status) == 2:
 
@@ -201,6 +201,7 @@ def activity_manage(request, oper_type):
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
+
                 }
 
 
@@ -324,6 +325,37 @@ def activity_manage(request, oper_type):
                     response.code = 301
                     response.msg = '[无记录]活动发红包记录表'
                     print('------[无记录]活动发红包记录表 activity_id ----->>', activity_id)
+
+        elif oper_type == 'query_total_xiaofei':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+
+            objs = models.zgld_article_activity.objects.filter(company_id=company_id)
+
+            if objs:
+                obj = objs[0]
+                already_send_redPacket_money = obj.already_send_redPacket_money
+                activity_total_money_dict = objs.aggregate(activity_total_money=Count('activity_total_money'))
+                activity_total_money =  activity_total_money_dict.get('activity_total_money')
+                if not  activity_total_money:
+                    activity_total_money = 0
+
+                dai_xiaofei_money = activity_total_money -  already_send_redPacket_money
+
+                #  查询成功 返回200 状态码
+                response.data = {
+                    'activity_total_money': activity_total_money,   # 活动总金额
+                    'already_send_redPacket_money': already_send_redPacket_money,  # 已发红包
+                    'dai_xiaofei_money': dai_xiaofei_money         # 剩余待消费金额
+                }
+
+                response.code = 200
+                response.msg = '获取成功'
+
+            else:
+                response.code = 301
+                response.msg = '活动不存在'
+
 
     return JsonResponse(response.__dict__)
 
