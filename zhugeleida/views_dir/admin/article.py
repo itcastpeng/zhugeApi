@@ -28,6 +28,7 @@ def article(request,oper_type):
             if forms_obj.is_valid():
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 user_id = request.GET.get('user_id')
+                _type = request.GET.get('type')
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -36,7 +37,6 @@ def article(request,oper_type):
                 field_dict = {
                     'id': '',
                     'status': '',           # 按状态搜索, (1,'已发'),  (2,'未发'),
-                                            # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
                     'title': '__contains',  # 按文章标题搜索
                 }
 
@@ -50,9 +50,22 @@ def article(request,oper_type):
                 if tag_list:
                     q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
-                objs = models.zgld_article.objects.filter(q).order_by(order)
+                already_choice_article_list = []
+                if _type == 'exclude_already_choice_article':
+                    now_date_time = datetime.datetime.now()
+
+                    q1 = Q()
+                    q1.connector = 'and'
+                    q1.children.append(('end_time__gte', now_date_time))
+                    q1.children.append(('company_id', company_id))
+                    q1.children.append(('status__in', [1,2,4]))
+
+                    # 找出可以不能选择的.  未开始的,进行中的
+                    already_choice_article_list =  list(models.zgld_article_activity.objects.filter(q1).filter(q1).values_list('article_id',flat=True))
 
 
+
+                objs = models.zgld_article.objects.filter(q).order_by(order).exclude(id__in=already_choice_article_list)
                 count = objs.count()
 
                 if length != 0:

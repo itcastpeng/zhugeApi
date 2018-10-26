@@ -481,7 +481,7 @@ def open_qiyeweixin(request, oper_type):
                         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
                 else:
-                    print('----------【雷达权限】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
+                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
                     return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
             else:
                 print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid,"|",corpid)
@@ -577,10 +577,12 @@ def open_qiyeweixin(request, oper_type):
                             company_id=company_id,
                             permanent_code = permanent_code
                         )
-                    return redirect('http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company')
+
 
                 else:
                     print('-------[企业微信] 企业不存在：------->>', corpid)
+
+                return redirect('http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company')
             else:
                 print('-------[企业微信] 获取企业永久授权码 报错：------->>')
 

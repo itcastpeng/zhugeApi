@@ -849,7 +849,7 @@ class zgld_article_activity(models.Model):
                       (3, '已暂停'),
                       (4, '已结束')
                       )
-    status = models.SmallIntegerField(default=1, verbose_name='活动状态', choices=status_choices)
+    status = models.SmallIntegerField(default=2, verbose_name='活动状态', choices=status_choices)
     activity_rules = models.CharField(verbose_name='活动规则', max_length=2048,null=True)
 
     activity_total_money= models.SmallIntegerField(verbose_name='活动总金额', default=0,null=True)
@@ -858,7 +858,7 @@ class zgld_article_activity(models.Model):
 
     reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]',null=True)
-
+    already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额', default=0, null=True)
     # type_choices = (
     #                 (1, '分享(转发)领红包'),
     #                )
