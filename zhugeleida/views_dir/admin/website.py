@@ -7,8 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.website_verify import WebsiteAddForm,WebsiteTemplateUpdateForm,WebsiteTemplateAddForm, DepartmentUpdateForm, DepartmentSelectForm
 import json
 from publicFunc.condition_com import conditionCom
-import requests
-from ..conf import *
+from django import forms
 from django.db.models import Q
 
 @csrf_exempt
@@ -103,30 +102,41 @@ def website_template(request):
             'name': '',
             'create_date': '',
         }
-        # company_id = request.GET.get('company_id')
-        q = conditionCom(request, field_dict)
-        # q.add(Q(**{'id': company_id}), Q.AND)
 
-        objs = models.zgld_website_template.objects.filter(q).order_by('-create_date')
-        count = objs.count()
+        forms_obj = SelectForm(request.GET)
+        if forms_obj.is_valid():
+
+            q = conditionCom(request, field_dict)
+            objs = models.zgld_website_template.objects.filter(q).order_by('-create_date')
+            count = objs.count()
 
 
-        # 获取所有数据
-        ret_data = []
-        # 获取第几页的数据
-        for obj in objs:
-            ret_data.append({
-                'id': obj.id,
-                'name': obj.name,
-                'template_content': json.loads(obj.template_content),
-                'create_date': obj.create_date,
-            })
+            # 获取所有数据
+            ret_data = []
+            # 获取第几页的数据
+            if objs:
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
 
-        response.code = 200
-        response.data = {
-            'ret_data': ret_data,
-            'data_count': count,
-        }
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+
+                for obj in objs:
+                    ret_data.append({
+                        'id': obj.id,
+                        'name': obj.name,
+                        'template_content': json.loads(obj.template_content),
+                        'create_date': obj.create_date,
+                    })
+
+                response.code = 200
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
         return JsonResponse(response.__dict__)
 
     else:
@@ -215,3 +225,35 @@ def website_template_oper(request, oper_type,o_id):
         response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
+
+
+
+
+class SelectForm(forms.Form):
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        }
+    )
+
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 10
+        else:
+            length = int(self.data['length'])
+        return length

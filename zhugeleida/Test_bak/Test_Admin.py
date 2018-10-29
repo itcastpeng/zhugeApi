@@ -322,13 +322,18 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 
-url =  ip + '/zhugeleida/admin/activity_manage/send_activity_redPacket'  # 获取产品的列表
-get_data['company_id'] = 1
-get_data['article_id'] = 2
-get_data['activity_id'] = 2
-get_data['status'] = 1
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/activity_manage/send_activity_redPacket'  # 获取产品的列表
+# get_data['company_id'] = 1
+# get_data['article_id'] = 2
+# get_data['activity_id'] = 2
+# get_data['status'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
+
+url =  ip + '/zhugeleida/admin/activity_manage/query_total_xiaofei'  # 获取产品的列表
+get_data['company_id'] = 1
+
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 
