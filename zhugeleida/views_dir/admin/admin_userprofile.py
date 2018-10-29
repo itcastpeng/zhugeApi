@@ -149,12 +149,9 @@ def admin_userprofile_oper(request, oper_type, o_id):
                     id=id
                 )
 
-                password = forms_obj.cleaned_data['password']
-
-                if not password:
-                    print('------ del forms_obj ---->>',forms_obj.cleaned_data)
-
+                if not  request.POST.get('password'):
                     del forms_obj.cleaned_data['password']
+                    print('------ del forms_obj ---->>',forms_obj.cleaned_data)
 
                 print('---- forms_obj.cleaned_data ------->>', json.dumps(forms_obj.cleaned_data))
 
