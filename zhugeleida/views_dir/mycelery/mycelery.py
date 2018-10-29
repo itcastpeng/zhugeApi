@@ -724,12 +724,13 @@ def user_send_gongzhonghao_template_msg(request):
                 activity_single_money = activity_obj.activity_single_money
                 start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
                 end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
-
-                remark = '    <规则>: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。\n分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
+                if not position:
+                    position = ''
+                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。 分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
                 reach_forward_num, activity_single_money,start_time,end_time)
                 data = {
                     'first': {
-                        'value': ('        您好,我是%s的%s %s,很高兴为您服务😁\n        欢迎您参加【分享文章 赚现金活动】\n' % (
+                        'value': ('        您好,我是%s的%s%s,很高兴为您服务, 欢迎您参加【分享文章 赚现金活动】\n' % (
                         company_name, position, user_name))  # 回复者
                     },
                     'keyword1': {
@@ -941,7 +942,7 @@ def user_forward_send_activity_redPacket(request):
                         if shangcheng_objs:
                             shangcheng_obj = shangcheng_objs[0]
                             shangHuHao = shangcheng_obj.shangHuHao
-                            send_name = shangcheng_obj.shangChengName
+                            # send_name = shangcheng_obj.shangChengName
                             shangHuMiYao = shangcheng_obj.shangHuMiYao
 
                         _data = {
@@ -1045,11 +1046,13 @@ def user_focus_send_activity_redPacket(request):
                         focus_get_money = gongzhonghao_app_obj.focus_get_money  # 关注领取的红包金额
                         focus_total_money = gongzhonghao_app_obj.focus_total_money
 
-                        app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                        app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(company_id=company_id)
 
                         authorization_appid = ''
+                        company_name = ''
                         if app_objs:
                             authorization_appid = app_objs[0].authorization_appid
+                            company_name = '【%s】' % (app_objs[0].company.name)
 
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
                             xiaochengxucompany_id=company_id)
@@ -1059,7 +1062,7 @@ def user_focus_send_activity_redPacket(request):
                         if shangcheng_objs:
                             shangcheng_obj = shangcheng_objs[0]
                             shangHuHao = shangcheng_obj.shangHuHao
-                            send_name = shangcheng_obj.shangChengName
+                            # send_name = shangcheng_obj.shangChengName
                             shangHuMiYao = shangcheng_obj.shangHuMiYao
 
                         _data = {
@@ -1069,7 +1072,7 @@ def user_focus_send_activity_redPacket(request):
                             'appid': authorization_appid,  # 小程序ID
                             'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': send_name,  # 商户名称
+                            'send_name': company_name,  # 商户名称
                             'act_name': '关注领现金红包',  # 活动名称
                             'remark': '动动手指,轻松拿现金!',  # 备注信息
                             'wishing': '感谢您的关注我！',  # 祝福语
@@ -1218,7 +1221,7 @@ def binding_article_customer_relate(request):
               user_id)
         models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
-    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
+    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1,2,4])
     if activity_objs:
         activity_id = activity_objs[0].id
         print('------ 此文章有活动 article_id：----->', article_id)
