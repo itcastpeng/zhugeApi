@@ -152,7 +152,11 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 password = forms_obj.cleaned_data['password']
 
                 if not password:
+                    print('------ del forms_obj ---->>',forms_obj.cleaned_data)
+
                     del forms_obj.cleaned_data['password']
+
+                print('---- forms_obj.cleaned_data ------->>', json.dumps(forms_obj.cleaned_data))
 
                 if objs:
                     # objs.update(

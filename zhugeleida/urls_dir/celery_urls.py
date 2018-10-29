@@ -14,8 +14,8 @@ urlpatterns = [
 
 
     url(r'^create_user_or_customer_qr_code', mycelery.create_user_or_customer_qr_code),     # 生成小程序二维码
-    url(r'^qiyeweixin_user_get_userinfo', mycelery.qiyeweixin_user_get_userinfo),     # 生成小程序二维码
-    url(r'^create_user_or_customer_poster', mycelery.create_user_or_customer_poster),     # 生成小程序的海报
+    url(r'^qiyeweixin_user_get_userinfo', mycelery.qiyeweixin_user_get_userinfo),           # 生成小程序二维码
+    url(r'^create_user_or_customer_poster', mycelery.create_user_or_customer_poster),       # 生成小程序的海报
 
 
     url(r'^user_send_template_msg$', mycelery.user_send_template_msg),     # 发送模板消息
