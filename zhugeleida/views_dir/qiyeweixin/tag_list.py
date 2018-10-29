@@ -100,6 +100,20 @@ def tag_list_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == 'delete_tag':
+
+            user_id = request.GET.get('user_id')
+
+            objs = models.zgld_tag.objects.filter(id=o_id,user_id=user_id)
+
+            if objs:
+                objs.delete()
+
+            response.code = 200
+            response.msg = "添加成功"
+
+
+
         elif oper_type == "customer_tag":  # 操作tag，为客户添加多个标签
 
             tag_list = json.loads(request.POST.get('tag_list'))
