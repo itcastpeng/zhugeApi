@@ -1069,9 +1069,6 @@ def bufa_send_activity_redPacket(request):
                 activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
 
 
-
-                # if reach_forward_num != 0:  # 不能为0
-
                 if should_send_redPacket_num > already_send_redPacket_num:  # 转发大于 阈值,达到可以条件
 
                     bufa_redPacket_num = should_send_redPacket_num -  already_send_redPacket_num
@@ -1153,6 +1150,14 @@ def bufa_send_activity_redPacket(request):
                             activity_objs.update(
                                 reason=response_ret.msg
                             )
+
+                        _should_send_redPacket_num = activity_redPacket_obj.should_send_redPacket_num
+                        _already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num
+
+                        _bufa_redPacket_num = _should_send_redPacket_num - _already_send_redPacket_num
+                        if _bufa_redPacket_num + 1 != bufa_redPacket_num:
+                            break
+
 
 
                 else:
