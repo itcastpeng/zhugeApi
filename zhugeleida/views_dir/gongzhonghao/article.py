@@ -294,6 +294,7 @@ def article_oper(request, oper_type, o_id):
 
                                 # 说明被人转发后有人查看后,发送公众号模板消息给他的父亲级，提示他有人查看了他的文章
                                 data_ = {
+                                    'parent_id' : parent_id,
                                     'customer_id': customer_id,
                                     'user_id': uid,
                                     'activity_id': activity_id,
