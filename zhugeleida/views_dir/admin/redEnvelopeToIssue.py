@@ -209,11 +209,16 @@ def focusOnIssuedRedEnvelope(resultDict):
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
             return_msg = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
 
-            print('---------  发放红包 解析后的xml内容 ------------> ',return_code,collection)
+            print('---------  发放红包 解析后的xml内容 return_code | collection | return_msg------------> ',return_code,"|",collection,"|",return_msg)
 
-            if return_code == 'SUCCESS' and '余额不足' not in return_msg:        # 判断预支付返回参数 是否正确
+            if return_code == 'SUCCESS' and '余额不足' not in return_msg and  '参数错误' not in return_msg:        # 判断预支付返回参数 是否正确
                 response.code = 200
                 response.msg = '发放红包成功'
+
+            elif '参数错误' in return_msg:
+                print('------ %s |  appid: ----->>' % return_msg, objsForm.get('appid'))
+                response.code = 199
+                response.msg = return_msg
 
             elif '余额不足' in return_msg:
                 print('------ %s |  appid: ----->>' % return_msg,objsForm.get('appid'))

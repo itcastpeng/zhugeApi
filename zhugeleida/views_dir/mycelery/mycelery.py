@@ -935,14 +935,15 @@ def user_forward_send_activity_redPacket(request):
                         openid = customer_obj.openid
 
                         authorization_appid = ''
-                        company_name = ''
+                        gongzhonghao_name = ''
                         if app_objs:
-                            company_name = '【%s】' % (app_objs[0].company.name)
+                            # company_name = '%s' % (app_objs[0].company.name)
+                            gongzhonghao_name = '%s' % (app_objs[0].name)
                             authorization_appid = app_objs[0].authorization_appid
 
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
                             xiaochengxucompany_id=company_id)
-                        send_name = ''
+
                         shangHuHao = ''
                         shangHuMiYao = ''
                         if shangcheng_objs:
@@ -958,7 +959,7 @@ def user_forward_send_activity_redPacket(request):
                             'appid': authorization_appid,  # 小程序ID
                             'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': company_name,  # 商户名称
+                            'send_name': gongzhonghao_name,  # 商户名称
                             'act_name': activity_name,  # 活动名称
                             'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
                             'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
@@ -967,24 +968,40 @@ def user_forward_send_activity_redPacket(request):
 
                         response_ret = focusOnIssuedRedEnvelope(_data)
                         if response_ret.code == 200:
-                            print('---- 调用发红包成功[转发得现金] 状态值:200 --->>')
+                            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            print('---- 调用发红包成功[转发得现金] 状态值:200  parent_id | openid --->>',parent_id,'|',openid)
+
+                            _send_log_dict = {
+                                'type': '自动发送',
+                                'activity_single_money': activity_single_money,
+                                'send_time': now_time,
+                            }
+                            activity_redPacket_obj = activity_redPacket_objs[0]
+                            send_log_list =activity_redPacket_obj.send_log
+                            _send_log_list = json.loads(send_log_list)
+                            _send_log_list.append(_send_log_dict)
+                            send_log_list = json.dumps(_send_log_list)
+
+
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
                                 # 已发红包金额 [累加发送金额]
                                 should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=1  # (1,'已发'),
+                                status=1,  # (1,'已发'),
+                                send_log=send_log_list  # (1,'已发'),
                             )
                             activity_objs.update(
                                 reason='发放成功',
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
-
                             )
 
-
                         else:  # 余额不足后者其他原因,记录下日志
-
+                            activity_redPacket_objs.update(
+                                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+                                status=2  # (2,'未发'),  改为未发状态
+                            )
                             activity_objs.update(
                                 reason=response_ret.msg
                             )

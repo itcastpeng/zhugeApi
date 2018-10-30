@@ -56,8 +56,7 @@ def action(request, oper_type):
                         q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
 
                     if create_date__lt:
-                        stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime(
-                            "%Y-%m-%d")
+                        stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
                         q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
                 objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
@@ -88,16 +87,12 @@ def action(request, oper_type):
                         'create_date': obj.create_date,
                     })
 
-                if current_page == 1:
-                    count_action_data = models.zgld_accesslog.objects.filter(user_id=user_id).values('action').annotate(
-                        Count('action'))
-                    print('count_action_data -->', count_action_data)
+                # if current_page == 1:
+                #     count_action_data = models.zgld_accesslog.objects.filter(user_id=user_id).values('action').annotate(Count('action'))
+                #     print('count_action_data -->', count_action_data)
 
-                    customer_action_data = models.zgld_accesslog.objects.filter(user_id=user_id).values('action',
-                                                                                                        'customer_id',
-                                                                                                        'customer__username').annotate(
-                        Count('action'))
-                    print('customer_action_data -->', customer_action_data)
+                #     models.zgld_accesslog.objects.filter(user_id=user_id).values('action','customer_id','customer__username').annotate(Count('action'))
+                #     print('customer_action_data -->', customer_action_data)
 
                 response.code = 200
                 response.msg = '查询日志记录成功'
@@ -122,7 +117,7 @@ def action(request, oper_type):
 
                 q = conditionCom(request, field_dict)
                 q.add(Q(**{'is_new_msg': True}), Q.AND)
-                print('---action---->>',q)
+
 
                 objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
                 count = objs.count()
@@ -147,7 +142,7 @@ def action(request, oper_type):
                         'create_date': obj.create_date,
                     })
 
-                print('----ret_data----->>', ret_data)
+                # print('----ret_data----->>', ret_data)
                 objs.update(is_new_msg=False)
                 response.code = 200
                 response.msg = '查询日志记录成功'
@@ -186,15 +181,14 @@ def action(request, oper_type):
                         "%Y-%m-%d")
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
-                print('q  ---->', q)
+                # print('q  ---->', q)
 
-                objs = models.zgld_accesslog.objects.filter(q).values('action').annotate(
-                    Count('action'))
-                print('count_action_data -->', objs)
+                objs = models.zgld_accesslog.objects.filter(q).values('action').annotate(Count('action'))
+                # print('count_action_data -->', objs)
 
                 detail_dict = {}
                 for obj in objs:
-                    print('---------->>', obj['action'], obj['action__count'])
+                    # print('---------->>', obj['action'], obj['action__count'])
                     detail_dict[obj.get('action')] = obj['action__count']
 
                 action_dict = {
@@ -252,8 +246,8 @@ def action(request, oper_type):
                         "%Y-%m-%d")
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
-                print('----q-->>',q)
-                objs = models.zgld_accesslog.objects.filter(q).values('customer__headimgurl', 'customer_id',
+                # print('----q-->>',q)
+                objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer__headimgurl', 'customer_id',
                                                                       'customer__username').annotate(Count('action'))
 
 
@@ -297,7 +291,7 @@ def action(request, oper_type):
                         else:
                             ret_list.append(insert_data)
 
-                print('ret_list -->', ret_list)
+                # print('ret_list -->', ret_list)
 
                 response.code = 200
                 response.msg = '查询日志记录成功'
@@ -312,19 +306,16 @@ def action(request, oper_type):
                 'user_id': '',
             }
 
-            import json
             customer_id = request.GET.get('customer_id')
             q = conditionCom(request, field_dict)
-            objs = models.zgld_accesslog.objects.filter(q).values('customer_id', 'action').annotate(Count('action'))
-            print('-------objs---->>', json.dumps(list(objs)))
+            objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer_id', 'action').annotate(Count('action'))
+            # print('-------objs---->>', json.dumps(list(objs)))
 
             ret_data = []
             action_dict = {}
             for i in models.zgld_accesslog.action_choices:
                 action_dict[i[0]] = i[1]
 
-            temp_dict = {}
-            ret_list = []
 
             temp_dict = {}
             for obj in objs:
