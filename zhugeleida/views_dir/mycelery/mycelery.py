@@ -624,6 +624,7 @@ def user_send_gongzhonghao_template_msg(request):
 
     user_id = request.GET.get('user_id')
     customer_id = request.GET.get('customer_id')
+    parent_id = request.GET.get('parent_id')
     _type = request.GET.get('type')
     activity_id = request.GET.get('activity_id')
     content = request.GET.get('content')
@@ -638,7 +639,12 @@ def user_send_gongzhonghao_template_msg(request):
     template_id = obj.template_id
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+    customer_obj = ''
+    if parent_id:
+        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
+    else:
+        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+
     now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
