@@ -937,7 +937,7 @@ def user_forward_send_activity_redPacket(request):
                         authorization_appid = ''
                         company_name = ''
                         if app_objs:
-                            company_name = '【%s】' % (app_objs[0].company.name)
+                            company_name = '%s' % (app_objs[0].company.name)
                             authorization_appid = app_objs[0].authorization_appid
 
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
@@ -967,7 +967,7 @@ def user_forward_send_activity_redPacket(request):
 
                         response_ret = focusOnIssuedRedEnvelope(_data)
                         if response_ret.code == 200:
-                            print('---- 调用发红包成功[转发得现金] 状态值:200 --->>')
+                            print('---- 调用发红包成功[转发得现金] 状态值:200  parent_id | openid --->>',parent_id,'|',openid)
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
