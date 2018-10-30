@@ -211,7 +211,7 @@ def focusOnIssuedRedEnvelope(resultDict):
 
             print('---------  发放红包 解析后的xml内容 return_code | collection | return_msg------------> ',return_code,"|",collection,"|",return_msg)
 
-            if return_code == 'SUCCESS' and '余额不足' not in return_msg:        # 判断预支付返回参数 是否正确
+            if return_code == 'SUCCESS' and '余额不足' not in return_msg and  '参数错误' not in return_msg:        # 判断预支付返回参数 是否正确
                 response.code = 200
                 response.msg = '发放红包成功'
 
