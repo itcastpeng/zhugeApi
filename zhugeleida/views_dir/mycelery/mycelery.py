@@ -926,6 +926,8 @@ def user_forward_send_activity_redPacket(request):
                     yushu = divmod_ret[1]
 
                     if shoudle_send_num > already_send_redPacket_num:
+
+
                         print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
                               forward_read_num, "|", reach_forward_num)
                         print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
@@ -987,13 +989,20 @@ def user_forward_send_activity_redPacket(request):
                             send_log_list = json.dumps(_send_log_list)
 
 
+                            bufa_send_activity_redPacket = shoudle_send_num - already_send_redPacket_num
+
+                            status = 1
+                            if bufa_send_activity_redPacket > 1:
+                                status = 4 # 补发状态
+
+
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
                                 # 已发红包金额 [累加发送金额]
                                 should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=1,  # (1,'已发'),
-                                send_log=send_log_list  # (1,'已发'),
+                                status=status,  # (1,'已发成功'),
+                                send_log=send_log_list  #
                             )
                             activity_objs.update(
                                 reason='发放成功',
@@ -1004,7 +1013,7 @@ def user_forward_send_activity_redPacket(request):
                         else:  # 余额不足后者其他原因,记录下日志
                             activity_redPacket_objs.update(
                                 should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=2  # (2,'未发'),  改为未发状态
+                                status=3  # (2,'未发'),  改为未发状态
                             )
                             activity_objs.update(
                                 reason=response_ret.msg
@@ -1048,29 +1057,28 @@ def bufa_send_activity_redPacket(request):
         # article_id = request.GET.get('article_id')
         # activity_id = request.GET.get('activity_id')
 
-        activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('company','activity','article','customer').filter(status=2)
+        activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('company','activity','article','customer').filter(status__in=[3,4])
 
         if activity_redPacket_objs:
 
 
             for activity_redPacket_obj in  activity_redPacket_objs:
 
-                company_id = activity_redPacket_objs[0].company_id
-                customer_id = activity_redPacket_obj.customer_id
-                article_id = activity_redPacket_obj.article_id
-                activity_id = activity_redPacket_obj.activity_id
-
-                activity_single_money = activity_redPacket_obj.activity.activity_single_money
-                activity_name = activity_redPacket_obj.activity.activity_name
-
                 should_send_redPacket_num =activity_redPacket_obj.should_send_redPacket_num
                 already_send_redPacket_num =activity_redPacket_obj.already_send_redPacket_num
 
-                activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
 
+                if should_send_redPacket_num > already_send_redPacket_num:
 
-                if should_send_redPacket_num > already_send_redPacket_num:  # 转发大于 阈值,达到可以条件
+                    company_id = activity_redPacket_objs[0].company_id
+                    customer_id = activity_redPacket_obj.customer_id
+                    article_id = activity_redPacket_obj.article_id
+                    activity_id = activity_redPacket_obj.activity_id
 
+                    activity_single_money = activity_redPacket_obj.activity.activity_single_money
+                    activity_name = activity_redPacket_obj.activity.activity_name
+
+                    activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
                     bufa_redPacket_num = should_send_redPacket_num -  already_send_redPacket_num
                     app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
                         company_id=company_id)
@@ -1128,6 +1136,7 @@ def bufa_send_activity_redPacket(request):
                             _send_log_list.append(_send_log_dict)
                             send_log_list = json.dumps(_send_log_list)
 
+                            _should_send_redPacket_num = activity_redPacket_objs[0].should_send_redPacket_num
 
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
@@ -1143,20 +1152,30 @@ def bufa_send_activity_redPacket(request):
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
                             )
 
+                            _should_send_redPacket_num = activity_redPacket_objs[0].should_send_redPacket_num
+                            _already_send_redPacket_num = activity_redPacket_objs[0].already_send_redPacket_num
+
+                            _bufa_redPacket_num = _should_send_redPacket_num - _already_send_redPacket_num
+                            if _bufa_redPacket_num + 1 != bufa_redPacket_num:  # 如果补发不相等说明有人在说手动触发了。我们在这有停止发放。
+                                if _bufa_redPacket_num > 1:
+                                    activity_redPacket_objs.update(
+                                        status=4
+                                    )
+                                break
+
+
+
+
                         else:  # 余额不足后者其他原因,记录下日志
                             activity_redPacket_objs.update(
-                                status=2,
+                                status=3,
                             )
                             activity_objs.update(
                                 reason=response_ret.msg
                             )
-
-                        _should_send_redPacket_num = activity_redPacket_obj.should_send_redPacket_num
-                        _already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num
-
-                        _bufa_redPacket_num = _should_send_redPacket_num - _already_send_redPacket_num
-                        if _bufa_redPacket_num + 1 != bufa_redPacket_num:
                             break
+
+
 
 
 
