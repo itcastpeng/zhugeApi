@@ -1111,9 +1111,9 @@ def bufa_send_activity_redPacket(request):
                         'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
                         'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
                     }
-                    print('------[调用转发后满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
+                    print('------[补发后-满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
 
-                    for i in bufa_redPacket_num:
+                    for i in range(bufa_redPacket_num):
                         response_ret = focusOnIssuedRedEnvelope(_data)
 
                         if response_ret.code == 200:
@@ -1121,7 +1121,7 @@ def bufa_send_activity_redPacket(request):
                             print('---- 调用发红包成功[转发得现金] 状态值:200  customer_id | openid --->>',customer_id,'|',openid)
 
                             _send_log_dict = {
-                                'type': '自动发送',
+                                'type': '自动补发',
                                 'activity_single_money': activity_single_money,
                                 'send_time': now_time,
                             }
@@ -1147,7 +1147,9 @@ def bufa_send_activity_redPacket(request):
                             )
 
                         else:  # 余额不足后者其他原因,记录下日志
-
+                            activity_redPacket_objs.update(
+                                status=2,
+                            )
                             activity_objs.update(
                                 reason=response_ret.msg
                             )
@@ -1161,8 +1163,8 @@ def bufa_send_activity_redPacket(request):
 
         else:
             response.code = 301
-            response.msg = '[无补发]'
-            print('------【无补发】红包记录表里没有要补发的客户 ----->>')
+            response.msg = '[无补发用户]'
+            print('------【无补发用户】红包记录表里没有要补发的客户 ----->>')
 
     return JsonResponse(response.__dict__)
 
