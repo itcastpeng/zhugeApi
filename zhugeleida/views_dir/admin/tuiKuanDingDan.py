@@ -172,17 +172,20 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                             else:
                                 nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                                 objs.update(tuiKuanStatus=2, tuiKuanDateTime=nowTime)
+                                response.code = 200
                                 response.msg = '退款成功'
                         else:
+                            response.code = 301
                             response.msg = '退款失败'
-                            objs.update(tuiKuanStatus=3)
+                            # objs.update(tuiKuanStatus=1)
                     else:
+                        response.code = 301
                         response.msg = '无退款单号'
                 else:
                     objs.update(tuiKuanStatus=3)
                     response.msg = '卖家拒绝退款'
-                response.code = 200
-                response.data = {'other':other}
+                    response.code = 301
+                # response.data = {'other':other}
     else:
         response.code = 402
         response.msg = "请求异常"
