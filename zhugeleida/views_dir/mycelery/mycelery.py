@@ -935,9 +935,10 @@ def user_forward_send_activity_redPacket(request):
                         openid = customer_obj.openid
 
                         authorization_appid = ''
-                        company_name = ''
+                        gongzhonghao_name = ''
                         if app_objs:
-                            company_name = '%s' % (app_objs[0].company.name)
+                            # company_name = '%s' % (app_objs[0].company.name)
+                            gongzhonghao_name = '%s' % (app_objs[0].name)
                             authorization_appid = app_objs[0].authorization_appid
 
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
@@ -958,7 +959,7 @@ def user_forward_send_activity_redPacket(request):
                             'appid': authorization_appid,  # 小程序ID
                             'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': company_name,  # 商户名称
+                            'send_name': gongzhonghao_name,  # 商户名称
                             'act_name': activity_name,  # 活动名称
                             'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
                             'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语

@@ -358,7 +358,7 @@ ip = 'http://api.zhugeyingxiao.com'
 #
 url =  ip + '/zhugeleida/mycelery/user_forward_send_activity_redPacket'  # 获取产品的列表
 get_data['parent_id'] = 850
-get_data['article_id'] = 23
+get_data['article_id'] = 2
 get_data['activity_id'] = 2
 get_data['company_id'] = 1
 ret = requests.get(url, data = post_data ,params=get_data)
