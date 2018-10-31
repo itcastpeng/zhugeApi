@@ -1277,7 +1277,7 @@ def user_focus_send_activity_redPacket(request):
                                 is_receive_redPacket=1
                             )
                             app_objs.update(
-                                reason=''
+                                reason='发放成功'
                             )
                         else:
                             app_objs.update(

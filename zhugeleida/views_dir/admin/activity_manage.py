@@ -275,6 +275,10 @@ def activity_manage(request, oper_type):
                         reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
                         already_send_redPacket_num = obj.already_send_redPacket_num         # 已发放次数
                         already_send_redPacket_money = obj.already_send_redPacket_money     # 已发红包金额
+                        reason = obj.reason     # 已发红包金额
+                        if '成功' in reason:
+                            reason = ''
+
 
                         shoudle_send_num = ''
                         if reach_forward_num != 0:  # 不能为0
@@ -290,11 +294,18 @@ def activity_manage(request, oper_type):
                         customer_id =  obj.customer_id
                         customer_username =  obj.customer.username
                         customer_username = conversion_base64_customer_username_base64(customer_username,customer_id)
+                        status = obj.status
+                        if status in [2,3,4]:
+                            status_text = '未发'
+                            status = 2
+                        else:
+                            status_text = '已发'
+                            status = 1
 
                         ret_data.append({
                             'id': obj.id,
-                            'status': obj.status,  # 状态
-                            'status_text': obj.get_status_display(),  # 状态
+                            'status': status,  # 状态
+                            'status_text': status_text ,  # 状态
 
                             'customer_username': customer_username,      # 客户名字
                             'customer_id': obj.customer_id,      # 客户ID
@@ -309,6 +320,8 @@ def activity_manage(request, oper_type):
                             'already_send_redPacket_money': already_send_redPacket_money,  # 已发红包金额
                             'already_send_redPacket_num':   already_send_redPacket_num,    # 已经发放次数
                             'should_send_redPacket_num': shoudle_send_num,    # 应该发放的次数
+                            'reason': reason,    # 应该发放的次数
+
 
                         })
 
@@ -336,9 +349,10 @@ def activity_manage(request, oper_type):
             if objs:
                 obj = objs[0]
                 already_send_redPacket_money_dict = objs.aggregate(already_send_redPacket_money=Sum('already_send_redPacket_money'))
-                already_send_redPacket_money = 0
-                if not already_send_redPacket_money_dict:
-                    already_send_redPacket_money = already_send_redPacket_money_dict.get('already_send_redPacket_money')
+                already_send_redPacket_money = already_send_redPacket_money_dict.get('already_send_redPacket_money')
+
+                if not already_send_redPacket_money:
+                    already_send_redPacket_money = 0
 
                 activity_total_money_dict = objs.aggregate(activity_total_money=Sum('activity_total_money'))
                 activity_total_money =  activity_total_money_dict.get('activity_total_money')
