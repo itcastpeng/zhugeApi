@@ -145,7 +145,7 @@ def activity_manage(request, oper_type):
                 print('-----q1---->>', q1)
                 objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
                 count = objs.count()
-                print('-----objs----->>', objs)
+                # print('-----objs----->>', objs)
 
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -157,6 +157,10 @@ def activity_manage(request, oper_type):
                 if objs:
 
                     for obj in objs:
+
+                        reason = obj.reason  # 已发红包金额
+                        if '成功' in reason:
+                            reason = ''
 
                         start_time = obj.start_time
                         end_time =   obj.end_time
@@ -192,7 +196,9 @@ def activity_manage(request, oper_type):
                             'status_text': status_text ,
                             'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
                             'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
-                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M')
+                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M'),
+                            'reason' : reason
+
                         })
 
                 #  查询成功 返回200 状态码
@@ -236,11 +242,10 @@ def activity_manage(request, oper_type):
                 if customer_name:
                     q1.children.append(('customer__username__contains', customer_name))
 
-
-
                 activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('customer','article','activity','company').filter(
                                                                                         article_id=article_id,
-                                                                                        activity_id=activity_id
+                                                                                        activity_id=activity_id,
+                                                                                        should_send_redPacket_num__gt=0,
                                                                                         ).filter(q1).order_by(order)
 
                 count = activity_redPacket_objs.count()
@@ -275,9 +280,7 @@ def activity_manage(request, oper_type):
                         reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
                         already_send_redPacket_num = obj.already_send_redPacket_num         # 已发放次数
                         already_send_redPacket_money = obj.already_send_redPacket_money     # 已发红包金额
-                        reason = activity_obj.reason     # 已发红包金额
-                        if '成功' in reason:
-                            reason = ''
+
 
 
                         shoudle_send_num = ''
@@ -320,7 +323,7 @@ def activity_manage(request, oper_type):
                             'already_send_redPacket_money': already_send_redPacket_money,  # 已发红包金额
                             'already_send_redPacket_num':   already_send_redPacket_num,    # 已经发放次数
                             'should_send_redPacket_num': shoudle_send_num,    # 应该发放的次数
-                            'reason': reason,    # 应该发放的次数
+                            'send_log': json.loads(obj.send_log),    # 应该发放的次数
 
 
                         })
