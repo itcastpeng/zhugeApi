@@ -1239,10 +1239,11 @@ def user_focus_send_activity_redPacket(request):
                         app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(company_id=company_id)
 
                         authorization_appid = ''
-                        company_name = ''
+                        gongzhonghao_name = ''
                         if app_objs:
                             authorization_appid = app_objs[0].authorization_appid
-                            company_name = '【%s】' % (app_objs[0].company.name)
+                            # company_name = '【%s】' % (app_objs[0].company.name)
+                            gongzhonghao_name = app_objs[0].name
 
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
                             xiaochengxucompany_id=company_id)
@@ -1262,7 +1263,7 @@ def user_focus_send_activity_redPacket(request):
                             'appid': authorization_appid,  # 小程序ID
                             'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': company_name,  # 商户名称
+                            'send_name': gongzhonghao_name,  # 商户名称
                             'act_name': '关注领现金红包',  # 活动名称
                             'remark': '动动手指,轻松拿现金!',  # 备注信息
                             'wishing': '感谢您的关注我！',  # 祝福语

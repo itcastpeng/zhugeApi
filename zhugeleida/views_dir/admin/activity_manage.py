@@ -331,7 +331,7 @@ def activity_manage(request, oper_type):
             company_id = request.GET.get('company_id')
 
             now_date_time = datetime.datetime.now()
-            objs = models.zgld_article_activity.objects.filter(company_id=company_id,start_time__lte=now_date_time,end_time__gte=now_date_time).exclude(status=3)
+            objs = models.zgld_article_activity.objects.filter(company_id=company_id,end_time__gte=now_date_time).exclude(status=3)
 
             if objs:
                 obj = objs[0]
