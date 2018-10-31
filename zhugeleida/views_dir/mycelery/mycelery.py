@@ -890,11 +890,17 @@ def user_forward_send_activity_redPacket(request):
                                                                                 )
         if activity_redPacket_objs:
             activity_redPacket_obj = activity_redPacket_objs[0]
+
+            activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
+            activity_obj = activity_objs[0]
+            start_time = activity_obj.start_time
+            end_time = activity_obj.end_time
+
             forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id, article_id=article_id).values_list('customer_id').distinct().count()
+                customer_parent_id=parent_id, article_id=article_id,create_date__lte=end_time,create_date__gte=start_time).values_list('customer_id').distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id, article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
+                customer_parent_id=parent_id, article_id=article_id,create_date__lte=end_time,create_date__gte=start_time).aggregate(forward_stay_time=Sum('stay_time'))
 
             forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
             if not forward_stay_time:
@@ -904,9 +910,7 @@ def user_forward_send_activity_redPacket(request):
                 forward_read_count=forward_read_num,
                 forward_stay_time=forward_stay_time
             )
-            activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
 
-            activity_obj = activity_objs[0]
 
             reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
             already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num  # 已发放次数
@@ -922,6 +926,8 @@ def user_forward_send_activity_redPacket(request):
                     yushu = divmod_ret[1]
 
                     if shoudle_send_num > already_send_redPacket_num:
+
+
                         print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
                               forward_read_num, "|", reach_forward_num)
                         print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
@@ -983,13 +989,20 @@ def user_forward_send_activity_redPacket(request):
                             send_log_list = json.dumps(_send_log_list)
 
 
+                            bufa_send_activity_redPacket = shoudle_send_num - already_send_redPacket_num
+
+                            status = 1
+                            if bufa_send_activity_redPacket > 1:
+                                status = 4 # 补发状态
+
+
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
                                 already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
                                 # 已发红包金额 [累加发送金额]
                                 should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=1,  # (1,'已发'),
-                                send_log=send_log_list  # (1,'已发'),
+                                status=status,  # (1,'已发成功'),
+                                send_log=send_log_list  #
                             )
                             activity_objs.update(
                                 reason='发放成功',
@@ -1000,7 +1013,7 @@ def user_forward_send_activity_redPacket(request):
                         else:  # 余额不足后者其他原因,记录下日志
                             activity_redPacket_objs.update(
                                 should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=2  # (2,'未发'),  改为未发状态
+                                status=3  # (2,'未发'),  改为未发状态
                             )
                             activity_objs.update(
                                 reason=response_ret.msg
@@ -1026,6 +1039,160 @@ def user_forward_send_activity_redPacket(request):
                   activity_id)
 
     return JsonResponse(response.__dict__)
+
+
+
+# [定时器] - 补发红包红包
+@csrf_exempt
+def bufa_send_activity_redPacket(request):
+    response = Response.ResponseObj()
+    if request.method == "GET":
+        print('------- 【补发红包】 ------>>')
+
+        ip = '192.168.1.10'
+
+        client_ip = ip
+        # company_id = request.GET.get('company_id')
+        # parent_id = request.GET.get('parent_id')
+        # article_id = request.GET.get('article_id')
+        # activity_id = request.GET.get('activity_id')
+
+        activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('company','activity','article','customer').filter(status__in=[3,4])
+
+        if activity_redPacket_objs:
+
+
+            for activity_redPacket_obj in  activity_redPacket_objs:
+
+                should_send_redPacket_num =activity_redPacket_obj.should_send_redPacket_num
+                already_send_redPacket_num =activity_redPacket_obj.already_send_redPacket_num
+
+
+                if should_send_redPacket_num > already_send_redPacket_num:
+
+                    company_id = activity_redPacket_objs[0].company_id
+                    customer_id = activity_redPacket_obj.customer_id
+                    article_id = activity_redPacket_obj.article_id
+                    activity_id = activity_redPacket_obj.activity_id
+
+                    activity_single_money = activity_redPacket_obj.activity.activity_single_money
+                    activity_name = activity_redPacket_obj.activity.activity_name
+
+                    activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
+                    bufa_redPacket_num = should_send_redPacket_num -  already_send_redPacket_num
+                    app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
+                        company_id=company_id)
+
+                    customer_obj = models.zgld_customer.objects.get(id=customer_id)
+                    openid = customer_obj.openid
+
+                    authorization_appid = ''
+                    gongzhonghao_name = ''
+                    if app_objs:
+                        # company_name = '%s' % (app_objs[0].company.name)
+                        gongzhonghao_name = '%s' % (app_objs[0].name)
+                        authorization_appid = app_objs[0].authorization_appid
+
+                    shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                        xiaochengxucompany_id=company_id)
+
+                    shangHuHao = ''
+                    shangHuMiYao = ''
+                    if shangcheng_objs:
+                        shangcheng_obj = shangcheng_objs[0]
+                        shangHuHao = shangcheng_obj.shangHuHao
+                        # send_name = shangcheng_obj.shangChengName
+                        shangHuMiYao = shangcheng_obj.shangHuMiYao
+
+                    _data = {
+                        'client_ip': client_ip,
+                        'shanghukey': shangHuMiYao,  # 支付钱数
+                        'total_fee': activity_single_money,  # 支付钱数
+                        'appid': authorization_appid,  # 小程序ID
+                        'mch_id': shangHuHao,  # 商户号
+                        'openid': openid,
+                        'send_name': gongzhonghao_name,  # 商户名称
+                        'act_name': activity_name,  # 活动名称
+                        'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
+                        'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
+                    }
+                    print('------[补发后-满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
+
+                    for i in range(bufa_redPacket_num):
+                        response_ret = focusOnIssuedRedEnvelope(_data)
+
+                        if response_ret.code == 200:
+                            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            print('---- 调用发红包成功[转发得现金] 状态值:200  customer_id | openid --->>',customer_id,'|',openid)
+
+                            _send_log_dict = {
+                                'type': '自动补发',
+                                'activity_single_money': activity_single_money,
+                                'send_time': now_time,
+                            }
+                            activity_redPacket_obj = activity_redPacket_objs[0]
+                            send_log_list =activity_redPacket_obj.send_log
+                            _send_log_list = json.loads(send_log_list)
+                            _send_log_list.append(_send_log_dict)
+                            send_log_list = json.dumps(_send_log_list)
+
+
+                            activity_redPacket_objs.update(
+                                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+                                # 已发红包金额 [累加发送金额]
+                                # should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+                                status=1,  # (1,'已发'),
+                                send_log=send_log_list  # (1,'已发'),
+                            )
+                            activity_objs.update(
+                                reason='发放成功',
+                                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+                            )
+
+                            _should_send_redPacket_num = activity_redPacket_objs[0].should_send_redPacket_num
+                            _already_send_redPacket_num = activity_redPacket_objs[0].already_send_redPacket_num
+
+                            _bufa_redPacket_num = _should_send_redPacket_num - _already_send_redPacket_num
+                            if _bufa_redPacket_num + 1 != bufa_redPacket_num:  # 如果补发不相等说明有人在说手动触发了。我们在这停止发放。
+                                if _bufa_redPacket_num > 1:
+                                    activity_redPacket_objs.update(
+                                        status=4
+                                    )
+                                break
+
+
+
+
+                        else:  # 余额不足后者其他原因,记录下日志
+                            activity_redPacket_objs.update(
+                                status=3,
+                            )
+                            activity_objs.update(
+                                reason=response_ret.msg
+                            )
+                            break
+
+
+
+
+
+                else:
+                    response.code = 301
+                    response.msg = '实发数<=已发数'
+                    print('------ 【实发数<=已发数】 should_send_redPacket_num | already_send_redPacket_num ----->>', should_send_redPacket_num,
+                          '|', already_send_redPacket_num)
+
+        else:
+            response.code = 301
+            response.msg = '[无补发用户]'
+            print('------【无补发用户】红包记录表里没有要补发的客户 ----->>')
+
+    return JsonResponse(response.__dict__)
+
+
+
 
 
 @csrf_exempt

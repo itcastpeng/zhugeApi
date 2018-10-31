@@ -884,8 +884,10 @@ class zgld_activity_redPacket(models.Model):
     company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
 
 
-    status_choices = ( (1,'已发'),
+    status_choices = ( (1,'已发(成功)'),
                        (2,'未发'),
+                       (3,'已发(失败)'),
+                       (4,'补发)'),
                      )
     status = models.SmallIntegerField(verbose_name='[红包]发放状态',default=2,choices=status_choices,null=True)
 
