@@ -359,7 +359,12 @@ def activity_manage(request, oper_type):
                 response.msg = '获取成功'
 
             else:
-                response.code = 301
+                response.data = {
+                    'activity_total_money': 0,  # 活动总金额
+                    'already_send_redPacket_money': 0,  # 已发红包
+                    'dai_xiaofei_money': 0  # 剩余待消费金额
+                }
+                response.code = 200
                 response.msg = '活动不存在'
 
 
