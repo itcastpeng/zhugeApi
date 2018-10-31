@@ -809,6 +809,13 @@ def user_send_gongzhonghao_template_msg(request):
                      "content": _content
                 }
             }
+
+
+            objs.update(
+                last_follow_time=datetime.datetime.now()
+            )
+
+
             kefu_msg_post_data =  json.dumps(kefu_msg_post_data, ensure_ascii=False)
             kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=kefu_msg_post_data.encode('utf-8'))
             kefu_ret = kefu_ret.json()
@@ -891,7 +898,7 @@ def user_forward_send_activity_redPacket(request):
         if activity_redPacket_objs:
             activity_redPacket_obj = activity_redPacket_objs[0]
 
-            activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
+            activity_objs = models.zgld_article_activity.objects.filter(id=activity_id).order_by('-create_date')
             activity_obj = activity_objs[0]
             start_time = activity_obj.start_time
             end_time = activity_obj.end_time
@@ -1066,19 +1073,19 @@ def bufa_send_activity_redPacket(request):
 
                 should_send_redPacket_num =activity_redPacket_obj.should_send_redPacket_num
                 already_send_redPacket_num =activity_redPacket_obj.already_send_redPacket_num
+                activity_id = activity_redPacket_obj.activity_id
+                activity_objs = models.zgld_article_activity.objects.filter(id=activity_id).order_by('-create_date')
 
-
-                if should_send_redPacket_num > already_send_redPacket_num:
+                if should_send_redPacket_num > already_send_redPacket_num and activity_objs:
 
                     company_id = activity_redPacket_objs[0].company_id
                     customer_id = activity_redPacket_obj.customer_id
                     article_id = activity_redPacket_obj.article_id
-                    activity_id = activity_redPacket_obj.activity_id
 
                     activity_single_money = activity_redPacket_obj.activity.activity_single_money
                     activity_name = activity_redPacket_obj.activity.activity_name
 
-                    activity_objs = models.zgld_article_activity.objects.filter(id=activity_id)
+
                     bufa_redPacket_num = should_send_redPacket_num -  already_send_redPacket_num
                     app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
                         company_id=company_id)
@@ -1239,10 +1246,11 @@ def user_focus_send_activity_redPacket(request):
                         app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(company_id=company_id)
 
                         authorization_appid = ''
-                        company_name = ''
+                        gongzhonghao_name = ''
                         if app_objs:
                             authorization_appid = app_objs[0].authorization_appid
-                            company_name = '【%s】' % (app_objs[0].company.name)
+                            # company_name = '【%s】' % (app_objs[0].company.name)
+                            gongzhonghao_name = app_objs[0].name
 
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
                             xiaochengxucompany_id=company_id)
@@ -1262,7 +1270,7 @@ def user_focus_send_activity_redPacket(request):
                             'appid': authorization_appid,  # 小程序ID
                             'mch_id': shangHuHao,  # 商户号
                             'openid': openid,
-                            'send_name': company_name,  # 商户名称
+                            'send_name': gongzhonghao_name,  # 商户名称
                             'act_name': '关注领现金红包',  # 活动名称
                             'remark': '动动手指,轻松拿现金!',  # 备注信息
                             'wishing': '感谢您的关注我！',  # 祝福语
@@ -1276,7 +1284,7 @@ def user_focus_send_activity_redPacket(request):
                                 is_receive_redPacket=1
                             )
                             app_objs.update(
-                                reason=''
+                                reason='发放成功'
                             )
                         else:
                             app_objs.update(
