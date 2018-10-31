@@ -1136,7 +1136,6 @@ def bufa_send_activity_redPacket(request):
                             _send_log_list.append(_send_log_dict)
                             send_log_list = json.dumps(_send_log_list)
 
-                            _should_send_redPacket_num = activity_redPacket_objs[0].should_send_redPacket_num
 
                             activity_redPacket_objs.update(
                                 already_send_redPacket_num=F('already_send_redPacket_num') + 1,
@@ -1156,7 +1155,7 @@ def bufa_send_activity_redPacket(request):
                             _already_send_redPacket_num = activity_redPacket_objs[0].already_send_redPacket_num
 
                             _bufa_redPacket_num = _should_send_redPacket_num - _already_send_redPacket_num
-                            if _bufa_redPacket_num + 1 != bufa_redPacket_num:  # 如果补发不相等说明有人在说手动触发了。我们在这有停止发放。
+                            if _bufa_redPacket_num + 1 != bufa_redPacket_num:  # 如果补发不相等说明有人在说手动触发了。我们在这停止发放。
                                 if _bufa_redPacket_num > 1:
                                     activity_redPacket_objs.update(
                                         status=4
