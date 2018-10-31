@@ -330,12 +330,17 @@ def activity_manage(request, oper_type):
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
 
-            objs = models.zgld_article_activity.objects.filter(company_id=company_id)
+            now_date_time = datetime.datetime.now()
+            objs = models.zgld_article_activity.objects.filter(company_id=company_id,start_time__lte=now_date_time,end_time__gte=now_date_time).exclude(status=3)
 
             if objs:
                 obj = objs[0]
-                already_send_redPacket_money = obj.already_send_redPacket_money
-                activity_total_money_dict = objs.aggregate(activity_total_money=Count('activity_total_money'))
+                already_send_redPacket_money_dict = objs.aggregate(already_send_redPacket_money=Sum('already_send_redPacket_money'))
+                already_send_redPacket_money = 0
+                if not already_send_redPacket_money_dict:
+                    already_send_redPacket_money = already_send_redPacket_money_dict.get('already_send_redPacket_money')
+
+                activity_total_money_dict = objs.aggregate(activity_total_money=Sum('activity_total_money'))
                 activity_total_money =  activity_total_money_dict.get('activity_total_money')
                 if not  activity_total_money:
                     activity_total_money = 0
