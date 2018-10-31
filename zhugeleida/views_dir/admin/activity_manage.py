@@ -275,7 +275,7 @@ def activity_manage(request, oper_type):
                         reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
                         already_send_redPacket_num = obj.already_send_redPacket_num         # 已发放次数
                         already_send_redPacket_money = obj.already_send_redPacket_money     # 已发红包金额
-                        reason = obj.reason     # 已发红包金额
+                        reason = activity_obj.reason     # 已发红包金额
                         if '成功' in reason:
                             reason = ''
 
