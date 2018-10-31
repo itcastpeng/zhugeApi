@@ -159,9 +159,10 @@ def activity_manage(request, oper_type):
                     for obj in objs:
 
                         reason = obj.reason  # 已发红包金额
-                        if '成功' in reason:
-                            reason = ''
-
+                        if reason:
+                            if '成功' in reason:
+                                reason = ''
+                        
                         start_time = obj.start_time
                         end_time =   obj.end_time
                         status = obj.status
