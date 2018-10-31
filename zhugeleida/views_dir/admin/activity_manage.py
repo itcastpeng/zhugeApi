@@ -162,7 +162,7 @@ def activity_manage(request, oper_type):
                         if reason:
                             if '成功' in reason:
                                 reason = ''
-                        
+
                         start_time = obj.start_time
                         end_time =   obj.end_time
                         status = obj.status
@@ -261,11 +261,18 @@ def activity_manage(request, oper_type):
                     ret_data = []
                     for obj in activity_redPacket_objs:
 
+                        activity_objs = models.zgld_article_activity.objects.filter(id=activity_id).order_by('-create_date')
+                        activity_obj = activity_objs[0]
+                        start_time = activity_obj.start_time
+                        end_time = activity_obj.end_time
+
                         forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id,article_id=article_id).values_list('customer_id').distinct().count()
+                            customer_parent_id=obj.customer_id, article_id=article_id, create_date__lte=end_time,
+                            create_date__gte=start_time).values_list('customer_id').distinct().count()
 
                         forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id,article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
+                            customer_parent_id=obj.customer_id, article_id=article_id, create_date__lte=end_time,
+                            create_date__gte=start_time).aggregate(forward_stay_time=Sum('stay_time'))
 
                         forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
                         if not forward_stay_time:
