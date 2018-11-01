@@ -629,6 +629,14 @@ def user_send_gongzhonghao_template_msg(request):
     activity_id = request.GET.get('activity_id')
     content = request.GET.get('content')
 
+    if _type == 'forward_look_article_tishi':
+
+        activity_redPacket_objs =  models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,customer_parent_id=parent_id,activity_id=activity_id)
+        if not activity_redPacket_objs:
+            print('------ 【转发后查看 * 不发消息公众号模板消息提示】customer_id | parent_id | activity_id-------->>',customer_id,"|",parent_id,"|",activity_id)
+            return
+
+
     userprofile_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = userprofile_obj.company_id
     company_name = userprofile_obj.company.name
@@ -639,13 +647,12 @@ def user_send_gongzhonghao_template_msg(request):
     template_id = obj.template_id
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-    customer_obj = ''
+
     if parent_id:
         customer_obj = models.zgld_customer.objects.filter(id=parent_id)
     else:
         customer_obj = models.zgld_customer.objects.filter(id=customer_id)
 
-    now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
         customer_id=customer_id,
@@ -873,7 +880,7 @@ def get_latest_audit_status_and_release_code(request):
 def user_forward_send_activity_redPacket(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        print('------- 【大红包测试】user_send_activity_redPacket ------>>')
+        print('------- 【转发发送大红包】user_send_activity_redPacket ------>>')
 
         # ip = ''
         # if request.META.get('HTTP_X_FORWARDED_FOR'):
@@ -903,8 +910,8 @@ def user_forward_send_activity_redPacket(request):
             start_time = activity_obj.start_time
             end_time = activity_obj.end_time
 
-            forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                customer_parent_id=parent_id, article_id=article_id,create_date__lte=end_time,create_date__gte=start_time).values_list('customer_id').distinct().count()
+            forward_read_num = models.zgld_activity_redPacket.objects.filter(
+                customer_parent_id=parent_id, activity_id=activity_id,create_date__lte=end_time,create_date__gte=start_time).values_list('customer_id').distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
                 customer_parent_id=parent_id, article_id=article_id,create_date__lte=end_time,create_date__gte=start_time).aggregate(forward_stay_time=Sum('stay_time'))
@@ -1039,11 +1046,14 @@ def user_forward_send_activity_redPacket(request):
                     response.msg = '转发查看数未达到阈值'
                     print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num,
                           '|', already_send_redPacket_num)
+
         else:
             response.code = 301
             response.msg = '[无记录]活动发红包记录表'
             print('------[无记录]活动发红包记录表 parent_id | article_id | activity_id ----->>', parent_id, '|', article_id, "|",
                   activity_id)
+
+
 
     return JsonResponse(response.__dict__)
 
@@ -1371,8 +1381,8 @@ def binding_article_customer_relate(request):
     article_id = request.GET.get('article_id')  # 公众号文章ID
     customer_id = request.GET.get('customer_id')  # 公众号客户ID
     user_id = request.GET.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
-    level = request.GET.get('level')  # 公众号层级
-    parent_id = request.GET.get('pid')  # 所属的父级的客户ID。为空代表第一级。
+    level = request.GET.get('level')     # 公众号层级
+    parent_id = request.GET.get('pid')   # 所属的父级的客户ID。为空代表第一级。
     company_id = request.GET.get('company_id')  # 所属的父级的客户ID。为空代表第一级。
 
     q = Q()
@@ -1420,6 +1430,7 @@ def binding_article_customer_relate(request):
         models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1,2,4])
+    # 活动并且
     if activity_objs:
         activity_id = activity_objs[0].id
         print('------ 此文章有活动 article_id：----->', article_id)
@@ -1439,6 +1450,7 @@ def binding_article_customer_relate(request):
             models.zgld_activity_redPacket.objects.create(article_id=article_id,
                                                           activity_id=activity_id,
                                                           customer_id=customer_id,
+                                                          customer_parent_id=parent_id,
                                                           company_id=company_id,
                                                           )
             response.code = 200
