@@ -11,7 +11,7 @@ import json, base64
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def mallManageShow(request):
+def mallManage(request):
     # response = mallManagement.mallManagement(request, uid, goodsGroup, status, flag)
     response = Response.ResponseObj()
     uid = request.GET.get('uid')
