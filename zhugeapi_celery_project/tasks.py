@@ -100,6 +100,17 @@ def user_send_template_msg_to_customer(data):
     requests.get(url, params=get_data)
 
 
+# 发送模板消息。
+@app.task
+def bufa_send_activity_redPacket():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/bufa_send_activity_redPacket'
+    get_data = {
+
+    }
+    requests.get(url, params=get_data)
+
+
+
 # 发送公众号-模板消息。
 @app.task
 def user_send_gongzhonghao_template_msg(data):

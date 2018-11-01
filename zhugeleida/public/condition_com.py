@@ -9,7 +9,7 @@ from zhugeleida.views_dir.conf import *
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from publicFunc import account
-from zhugeapi_celery_project import tasks
+
 
 def conditionCom(data, field_dict):
     q = Q()

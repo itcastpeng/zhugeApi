@@ -9,6 +9,8 @@ urlpatterns = [
     url(r'^user_send_action_log', mycelery.user_send_action_log),   # 小程序访问动作日志的发送到企业微信
     url(r'^user_forward_send_activity_redPacket', mycelery.user_forward_send_activity_redPacket),   # 关注发红包和转发文章满足就发红包
     url(r'^user_focus_send_activity_redPacket', mycelery.user_focus_send_activity_redPacket),   # 关注发红包和转发文章满足就发红包
+    url(r'^bufa_send_activity_redPacket', mycelery.bufa_send_activity_redPacket),   # 关注发红包和转发文章满足就发红包
+
     url(r'^get_customer_gongzhonghao_userinfo', mycelery.get_customer_gongzhonghao_userinfo),   # 异步获取公众号用户信息[用三方平台token]
     url(r'^binding_article_customer_relate', mycelery.binding_article_customer_relate),   # 绑定客户和文章的关系
 

@@ -145,7 +145,7 @@ def activity_manage(request, oper_type):
                 print('-----q1---->>', q1)
                 objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
                 count = objs.count()
-                print('-----objs----->>', objs)
+                # print('-----objs----->>', objs)
 
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -157,6 +157,11 @@ def activity_manage(request, oper_type):
                 if objs:
 
                     for obj in objs:
+
+                        reason = obj.reason  # 已发红包金额
+                        if reason:
+                            if '成功' in reason:
+                                reason = ''
 
                         start_time = obj.start_time
                         end_time =   obj.end_time
@@ -192,7 +197,9 @@ def activity_manage(request, oper_type):
                             'status_text': status_text ,
                             'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
                             'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
-                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M')
+                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M'),
+                            'reason' : reason
+
                         })
 
                 #  查询成功 返回200 状态码
@@ -236,11 +243,10 @@ def activity_manage(request, oper_type):
                 if customer_name:
                     q1.children.append(('customer__username__contains', customer_name))
 
-
-
                 activity_redPacket_objs = models.zgld_activity_redPacket.objects.select_related('customer','article','activity','company').filter(
                                                                                         article_id=article_id,
-                                                                                        activity_id=activity_id
+                                                                                        activity_id=activity_id,
+                                                                                        should_send_redPacket_num__gt=0,
                                                                                         ).filter(q1).order_by(order)
 
                 count = activity_redPacket_objs.count()
@@ -255,11 +261,18 @@ def activity_manage(request, oper_type):
                     ret_data = []
                     for obj in activity_redPacket_objs:
 
+                        activity_objs = models.zgld_article_activity.objects.filter(id=activity_id).order_by('-create_date')
+                        activity_obj = activity_objs[0]
+                        start_time = activity_obj.start_time
+                        end_time = activity_obj.end_time
+
                         forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id,article_id=article_id).values_list('customer_id').distinct().count()
+                            customer_parent_id=obj.customer_id, article_id=article_id, create_date__lte=end_time,
+                            create_date__gte=start_time).values_list('customer_id').distinct().count()
 
                         forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id,article_id=article_id).aggregate(forward_stay_time=Sum('stay_time'))
+                            customer_parent_id=obj.customer_id, article_id=article_id, create_date__lte=end_time,
+                            create_date__gte=start_time).aggregate(forward_stay_time=Sum('stay_time'))
 
                         forward_stay_time = forward_stay_time_dict.get('forward_stay_time')
                         if not forward_stay_time:
@@ -276,6 +289,8 @@ def activity_manage(request, oper_type):
                         already_send_redPacket_num = obj.already_send_redPacket_num         # 已发放次数
                         already_send_redPacket_money = obj.already_send_redPacket_money     # 已发红包金额
 
+
+
                         shoudle_send_num = ''
                         if reach_forward_num != 0:  # 不能为0
                             forward_read_num = int(forward_read_num)
@@ -290,11 +305,18 @@ def activity_manage(request, oper_type):
                         customer_id =  obj.customer_id
                         customer_username =  obj.customer.username
                         customer_username = conversion_base64_customer_username_base64(customer_username,customer_id)
+                        status = obj.status
+                        if status in [2,3,4]:
+                            status_text = '未发'
+                            status = 2
+                        else:
+                            status_text = '已发'
+                            status = 1
 
                         ret_data.append({
                             'id': obj.id,
-                            'status': obj.status,  # 状态
-                            'status_text': obj.get_status_display(),  # 状态
+                            'status': status,  # 状态
+                            'status_text': status_text ,  # 状态
 
                             'customer_username': customer_username,      # 客户名字
                             'customer_id': obj.customer_id,      # 客户ID
@@ -309,6 +331,8 @@ def activity_manage(request, oper_type):
                             'already_send_redPacket_money': already_send_redPacket_money,  # 已发红包金额
                             'already_send_redPacket_num':   already_send_redPacket_num,    # 已经发放次数
                             'should_send_redPacket_num': shoudle_send_num,    # 应该发放的次数
+                            'send_log': json.loads(obj.send_log),    # 应该发放的次数
+
 
                         })
 
@@ -330,12 +354,18 @@ def activity_manage(request, oper_type):
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
 
-            objs = models.zgld_article_activity.objects.filter(company_id=company_id)
+            now_date_time = datetime.datetime.now()
+            objs = models.zgld_article_activity.objects.filter(company_id=company_id,end_time__gte=now_date_time).exclude(status=3)
 
             if objs:
                 obj = objs[0]
-                already_send_redPacket_money = obj.already_send_redPacket_money
-                activity_total_money_dict = objs.aggregate(activity_total_money=Count('activity_total_money'))
+                already_send_redPacket_money_dict = objs.aggregate(already_send_redPacket_money=Sum('already_send_redPacket_money'))
+                already_send_redPacket_money = already_send_redPacket_money_dict.get('already_send_redPacket_money')
+
+                if not already_send_redPacket_money:
+                    already_send_redPacket_money = 0
+
+                activity_total_money_dict = objs.aggregate(activity_total_money=Sum('activity_total_money'))
                 activity_total_money =  activity_total_money_dict.get('activity_total_money')
                 if not  activity_total_money:
                     activity_total_money = 0
@@ -354,7 +384,12 @@ def activity_manage(request, oper_type):
                 response.msg = '获取成功'
 
             else:
-                response.code = 301
+                response.data = {
+                    'activity_total_money': 0,  # 活动总金额
+                    'already_send_redPacket_money': 0,  # 已发红包
+                    'dai_xiaofei_money': 0  # 剩余待消费金额
+                }
+                response.code = 200
                 response.msg = '活动不存在'
 
 

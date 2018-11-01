@@ -97,7 +97,7 @@ def open_qiyeweixin(request, oper_type):
                             'company_id': company_id,
                             'userid': UserID,
                         }
-                        tasks.qiyeweixin_user_get_userinfo(_data) #异步获取用户的头像
+                        tasks.qiyeweixin_user_get_userinfo.delay(_data) #异步获取用户的头像
                     return HttpResponse("success")
 
                 elif not _Status: # 没有status ，说明 是用户的增删改查。
@@ -425,7 +425,7 @@ def open_qiyeweixin(request, oper_type):
                     'company_id': company_id,
                     'userid': userid,
                 }
-                tasks.qiyeweixin_user_get_userinfo(_data)
+                tasks.qiyeweixin_user_get_userinfo.delay(_data)
 
                 user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
                     userid=userid,
