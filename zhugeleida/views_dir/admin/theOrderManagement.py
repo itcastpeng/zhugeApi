@@ -8,7 +8,7 @@ from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm
 import json, base64, datetime, time
 from django.db.models import Q
 
-
+# 后台订单查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def theOrder(request):
@@ -112,15 +112,13 @@ def theOrder(request):
     return JsonResponse(response.__dict__)
 
 
-
-
-
-
+# 后台订单操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
     response = Response.ResponseObj()
     if request.method == 'POST':
+        # 修改订单状态
         if oper_type == 'update':
             otherData = {
                 'o_id': o_id,
@@ -163,7 +161,8 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
-        if oper_type == 'selectStatus':  # 查询所有状态
+        # 查询所有状态
+        if oper_type == 'selectStatus':
             objs = models.zgld_shangcheng_dingdan_guanli
             statusData = []
             for i in objs.order_status:
@@ -174,7 +173,9 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
             response.code = 200
             response.msg = '查询成功'
             response.data = statusData
-        elif oper_type == 'selectYeWu':     # 修改时查询所有 订单业务员
+
+        # 修改时查询所有 订单业务员
+        elif oper_type == 'selectYeWu':
             objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)  # 订单ID
             company_id = objs[0].shangpinguanli.parentName.mallSetting.xiaochengxucompany_id
             # companyObjs = models.zgld_company.objects.filter(id=company_id)
@@ -188,6 +189,7 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
             response.code = 200
             response.msg = '查询成功'
             response.data = otherData
+
         else:
             response.code = 402
             response.msg = "请求异常"

@@ -12,7 +12,8 @@ import json
 from django.db.models import Q
 
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 话术库详情查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def speechDetailsManage(request):
@@ -74,7 +75,7 @@ def speechDetailsManage(request):
     return JsonResponse(response.__dict__)
 
 
-#  增删改
+# 话术库详情操作
 #  csrf  token验证
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -87,6 +88,8 @@ def speechDetailsManageOper(request, oper_type, o_id):
             'userProfile': request.GET.get('user_id'),  # 归属用户
             'talkGroupName': request.POST.get('talkGroupName'),
         }
+
+        # 添加话术
         if oper_type == "add":
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
@@ -107,6 +110,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改话术
         elif oper_type == "update":
             # 获取需要修改的信息
             forms_obj = UpdateForm(form_data)
@@ -134,6 +138,8 @@ def speechDetailsManageOper(request, oper_type, o_id):
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
     else:
+
+        # 删除话术
         if oper_type == "delete":
             # 删除 ID
             objs = models.zgld_speech_details_management.objects.filter(id=o_id)
@@ -144,6 +150,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = '删除ID不存在'
+
         else:
             response.code = 402
             response.msg = '请求异常'

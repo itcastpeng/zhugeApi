@@ -17,13 +17,14 @@ import uuid
 import os
 import base64
 
+# 公众号商品查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def plugin_goods(request, oper_type):
     response = Response.ResponseObj()
-
     if request.method == "GET":
 
+        # 产品官网展示
         if oper_type == 'plugin_goods_single':
             plugin_goods_type = int(request.GET.get('plugin_goods_type')) if request.GET.get('plugin_goods_type') else ''
             user_id = request.GET.get('user_id')
@@ -83,7 +84,7 @@ def plugin_goods(request, oper_type):
                 response.code = 302
                 response.msg = "产品不存在"
 
-
+        # 名片商品展示
         elif oper_type == 'plugin_goods_list':
             print('request.GET----->', request.GET)
             forms_obj = PluginGoodsSelectForm(request.GET)
@@ -106,7 +107,6 @@ def plugin_goods(request, oper_type):
 
                     for obj in objs:
                         content =  json.loads(obj.content)
-
                         ret_data.append({
                             'goods_id': obj.id,
                             'title' : obj.title,
@@ -126,15 +126,20 @@ def plugin_goods(request, oper_type):
                     response.code = 302
                     response.msg = '产品列表无数据'
 
-            return JsonResponse(response.__dict__)
+    else:
+        response.code = 402
+        response.msg = '请求异常'
+    return JsonResponse(response.__dict__)
 
 
+# 公众号商品操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def plugin_goods_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
         # 删除-个人产品
         if oper_type == "delete":
             user_id = request.GET.get('user_id')
@@ -150,34 +155,34 @@ def plugin_goods_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '产品不存在'
 
+        # 修改状态
+        # elif oper_type == "change_status":
+        #     print('-------change_status------->>',request.POST)
+        #     status = int(request.POST.get('status'))
+        #     user_id = request.GET.get('user_id')
+        #     plugin_goods_objs = models.zgld_plugin_goods.objects.filter(id=o_id)
+        #     print('plugin_goods_objs--------->', plugin_goods_objs)
+        #
+        #     if plugin_goods_objs:
+        #
+        #         # if not plugin_goods_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
+        #         plugin_goods_objs.update(
+        #             status=status
+        #         )
+        #         response.code = 200
+        #         response.msg = "修改状态成功"
+        #         response.data = {
+        #             'plugin_goods_id': plugin_goods_objs[0].id,
+        #             'status': plugin_goods_objs[0].get_status_display(),
+        #             'status_code': plugin_goods_objs[0].status
+        #         }
+        #
+        #     else:
+        #
+        #         response.code = 302
+        #         response.msg = '产品不存在'
 
-        elif oper_type == "change_status":
-            print('-------change_status------->>',request.POST)
-            status = int(request.POST.get('status'))
-            user_id = request.GET.get('user_id')
-            plugin_goods_objs = models.zgld_plugin_goods.objects.filter(id=o_id)
-            print('plugin_goods_objs--------->', plugin_goods_objs)
-
-            if plugin_goods_objs:
-
-                # if not plugin_goods_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
-                plugin_goods_objs.update(
-                    status=status
-                )
-                response.code = 200
-                response.msg = "修改状态成功"
-                response.data = {
-                    'plugin_goods_id': plugin_goods_objs[0].id,
-                    'status': plugin_goods_objs[0].get_status_display(),
-                    'status_code': plugin_goods_objs[0].status
-                }
-
-            else:
-
-                response.code = 302
-                response.msg = '产品不存在'
-
-
+        # 修改-个人产品
         elif oper_type == "update":
             form_data = {
                 'goods_id' : o_id,
@@ -212,7 +217,7 @@ def plugin_goods_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        # 添加-个人产品
         elif oper_type == "add":
 
             form_data = {
@@ -240,8 +245,10 @@ def plugin_goods_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+    else:
+        response.code = 402
+        response.msg = '请求异常'
 
-
-        return JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
 
 
