@@ -11,7 +11,7 @@ from django.db.models import Q
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def theOrderShow(request):
+def theOrder(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
@@ -46,8 +46,10 @@ def theOrderShow(request):
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
             tuikuan = 0
+            tuiKuanStatus = 0
             if tuikuanObj:
                 tuikuan = 1
+                tuiKuanStatus = tuikuanObj[0].tuiKuanStatus
             # 轮播图
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
@@ -83,7 +85,8 @@ def theOrderShow(request):
                 'status':obj.get_theOrderStatus_display(),
                 'statusId': obj.theOrderStatus,
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                'tuikuan':tuikuan,
+                'tuikuan':tuikuan,         # 0为无退款   1为退款
+                'tuikuan_status':tuiKuanStatus,
                 'detailePicture':detailePicture,
             })
         response.code = 200

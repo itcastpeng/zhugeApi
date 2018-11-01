@@ -30,7 +30,6 @@ def product(request, oper_type):
             product_id = request.GET.get('product_id')
             field_dict = {
                 'id': '',
-
             }
             q = conditionCom(request, field_dict)
             q.add(Q(**{'id': product_id}), Q.AND)
@@ -101,16 +100,9 @@ def product(request, oper_type):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
                 status = request.GET.get('status_code')
-                # field_dict = {
-                #     'status': '',
-                #     'create_date': '',
-                # }
+
                 company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
 
-                # q = conditionCom(request, field_dict)
-                # q.add(Q(**{'user_id': user_id}), Q.AND)
-                # q.add(Q(**{'company_id': company_id}), Q.AND)
-                # q.add(Q(**{'user_id__isnull': True,'company_id': company_id},), Q.AND)
 
                 con = Q()
                 q1 = Q()
@@ -138,7 +130,6 @@ def product(request, oper_type):
                 con.add(q2, 'OR')
                 con.add(q3, 'AND')
 
-                print('-----con----->',con)
 
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(con).order_by(order)
                 count = objs.count()
@@ -192,61 +183,6 @@ def product(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
-
-# 添加企业的产品
-class imgUploadForm(forms.Form):
-    img_name = forms.CharField(
-        error_messages={
-            'required': "图片名不能为空"
-        }
-    )
-    timestamp = forms.CharField(
-        error_messages={
-            'required': "时间戳不能为空"
-        }
-    )
-
-    img_data = forms.CharField(
-        error_messages={
-            'required': "图片内容不能为空"
-        }
-    )
-
-    chunk = forms.IntegerField(
-        error_messages={
-            'required': "当前是第几份文件不能为空",
-            'invalid': '份数必须是整数类型'
-        }
-    )
-
-
-# 添加企业的产品
-class imgMergeForm(forms.Form):
-    img_name = forms.CharField(
-        error_messages={
-            'required': "文件名不能为空"
-        }
-    )
-    timestamp = forms.CharField(
-        error_messages={
-            'required': "时间戳不能为空"
-        }
-    )
-
-    chunk_num = forms.IntegerField(
-        error_messages={
-            'required': "总份数不能为空",
-            'invalid': '总份数必须是整数类型'
-        }
-    )
-
-
-    picture_type = forms.IntegerField(
-        error_messages={
-            'required': "图片不能为空",
-            'invalid': '总份数必须是整数类型'
-        }
-    )
 
 
 
@@ -403,52 +339,8 @@ def product_oper(request, oper_type, o_id):
                 response.msg = '产品不存在'
 
 
-
-
-
     return JsonResponse(response.__dict__)
 
-
-
-
-class create_product_picture:
-
-    def __init__(self, user_id, picture_obj, product_obj, type):
-        self.response = Response.ResponseObj()
-        self.user_id = user_id
-        self.picture_obj = picture_obj
-        self.product_obj = product_obj
-        self.picture_type = type
-        self.BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-    def comon_picture(self, p_obj, product_picture_obj):
-
-        userid = models.zgld_userprofile.objects.get(id=self.user_id).userid
-        product_picture = '/%s_%s_photo.jpg' % (product_picture_obj.id, userid)
-
-        photo_url = 'statics/zhugeleida/imgs/qiyeweixin/product%s' % (product_picture)
-        product_picture_obj.picture_url = photo_url
-        product_picture_obj.save()
-        IMG_PATH = os.path.join(self.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin',
-                                'product') + product_picture
-        with open('%s' % (IMG_PATH), 'wb') as f:
-            print('---p_obj-->>', p_obj)
-
-            for chunk in p_obj.chunks():
-                f.write(chunk)
-
-    def create_picture(self):
-        if self.picture_obj:  # 封面图片存在
-            for p_obj in self.picture_obj:
-                product_picture_obj = models.zgld_product_picture.objects.create(picture_type=1,
-                                                                                 product_id=self.product_obj.id)
-                self.comon_picture(p_obj, product_picture_obj)
-
-            return '200'
-        else:
-            self.response.code = 301
-            self.response.msg = "封面图片不能为空"
-            return '301'
 
 
 def sort_article_data(data):

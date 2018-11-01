@@ -14,7 +14,7 @@ import json
 # cerf  token验证 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def talkGroupManageShow(request):
+def talkGroupManage(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)

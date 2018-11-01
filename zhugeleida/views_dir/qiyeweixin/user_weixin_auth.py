@@ -108,14 +108,13 @@ def work_weixin_auth(request, company_id):
             print("---------------- 用户存在")
             user_profile_obj = user_profile_objs[0]
             status = user_profile_obj.status
-            boss_status = user_profile_obj.boss_status
 
             if status == 1: #
 
                 user_profile_obj.gender = gender
                 user_profile_obj.avatar = avatar
                 last_login_date = user_profile_obj.last_login_date
-                redirect_url = ''
+
                 if not last_login_date: # 为空说明第一次登陆
                     is_first_login = 'Yes'
                     user_profile_obj.last_login_date = datetime.datetime.now()
@@ -123,11 +122,7 @@ def work_weixin_auth(request, company_id):
                     is_first_login = 'No'
 
                 user_profile_obj.save()
-                # url = ''
-                # if status == 1:  #  (1, "AI雷达启用"),
-                #     url  = 'http://zhugeleida.zhugeyingxiao.com'
-                # elif status == 3: # (3, "Boss雷达启用"),
-                #     url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
+
                 url = 'http://zhugeleida.zhugeyingxiao.com'
                 redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
                     user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
@@ -157,6 +152,7 @@ def work_weixin_auth_oper(request,oper_type):
     response = Response.ResponseObj()
 
     if request.method == "GET":
+
         if oper_type == 'create_gongzhonghao_share_auth_url':
 
             forms_obj = CreateShareUrl(request.GET)

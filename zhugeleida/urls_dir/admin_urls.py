@@ -36,6 +36,9 @@ urlpatterns = [
 
     # 微信公众号通知+消息与事件接收
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)/(?P<app_id>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao_oper),
+
+
+
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao),
 
     # 小程序第三方进入认证
@@ -104,33 +107,33 @@ urlpatterns = [
     url(r'^article_tag$', article_tag.article_tag),
 
     # 话术分组管理
-    url(r'^talkGroupManageShow', talkGroupManagement.talkGroupManageShow),
-    url(r'^talkGroupManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),
+    url(r'^talkGroupManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),
+    url(r'^talkGroupManage$', talkGroupManagement.talkGroupManage),
 
     # 话术详情管理
-    url(r'^speechDetailsManageShow', speechDetailsManagement.speechDetailsManageShow),
-    url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
+    url(r'^speechDetailsManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManage),
+    url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
 
     # 商城基础设置
-    url(r'jiChuSheZhiShow', shangchengjichushezhi.jiChuSheZhiShow),                       # 商城基础查询
     url(r'addSmallProgram', shangchengjichushezhi.addSmallProgram),                       # 添加小程序ID
-    url(r'^jiChuSheZhiOper/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),
+    url(r'^jiChuSheZhi/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),
+    url(r'jiChuSheZhi$', shangchengjichushezhi.jiChuSheZhi),                       # 商城基础查询
 
     # 商品分类管理
-    url(r'goodsClassShow', goodsClassification.goodsClassShow),  # 商品分类管理查询
-    url(r'^goodsClassOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper),  # 商品分类管理操作
+    url(r'^goodsClass/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper),  # 商品分类管理操作
+    url(r'goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
     # 商品管理
-    url(r'mallManagementShow', mallManagement.mallManagementShow),  # 商品管理查询
-    url(r'^mallManagementOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品管理操作
+    url(r'^mallManagement/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品管理操作
+    url(r'mallManagement$', mallManagement.mallManagement),  # 商品管理查询
 
     # 订单管理
-    url(r'theOrderShow', theOrderManagement.theOrderShow),  # 订单管理查询
-    url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),  # 订单管理操作
+    url(r'theOrder', theOrderManagement.theOrder),  # 订单管理查询
+    url(r'^theOrder/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),  # 订单管理操作
 
     # 退款单管理
-    url(r'tuiKuanDingDanShow', tuiKuanDingDan.tuiKuanDingDanShow),  # 退款订单管理查询
-    url(r'^tuiKuanDingDanOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),  # 退款订单管理操作
+    url(r'tuiKuanDingDan', tuiKuanDingDan.tuiKuanDingDan),  # 退款订单管理查询
+    url(r'^tuiKuanDingDan/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),  # 退款订单管理操作
 
     # 员工订单管理
     url(r'employeesOrders', employeesOrders.employeesOrders),  # 订单管理查询

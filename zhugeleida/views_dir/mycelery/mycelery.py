@@ -649,10 +649,12 @@ def user_send_gongzhonghao_template_msg(request):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
+    p_customer_objs = ''
     if parent_id:
-        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
+        p_customer_objs = models.zgld_customer.objects.filter(id=parent_id)
+        c_customer_objs = models.zgld_customer.objects.filter(id=customer_id)
     else:
-        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+        c_customer_objs = models.zgld_customer.objects.filter(id=customer_id)
 
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
@@ -687,9 +689,9 @@ def user_send_gongzhonghao_template_msg(request):
         'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
     }
 
-    if customer_obj and objs:
-        openid = customer_obj[0].openid
-        username = customer_obj[0].username
+    if p_customer_objs and c_customer_objs and objs:
+        openid = p_customer_objs[0].openid
+        username = c_customer_objs[0].username
         username = common.conversion_base64_customer_username_base64(username, customer_id)
 
 

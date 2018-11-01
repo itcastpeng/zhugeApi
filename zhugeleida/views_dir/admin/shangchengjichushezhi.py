@@ -10,7 +10,7 @@ from zhugeleida.views_dir.xiaochengxu import prepaidManagement as yuzhifu
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def jiChuSheZhiShow(request):
+def jiChuSheZhi(request):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
     user_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
