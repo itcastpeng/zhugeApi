@@ -17,7 +17,8 @@ from django.db.models import Q
 import redis
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def user(request):
@@ -230,6 +231,7 @@ def user_oper(request, oper_type, o_id):
 
     if request.method == "POST":
         global userid
+        # 添加用户
         if oper_type == "add":
 
             form_data = {
@@ -358,6 +360,7 @@ def user_oper(request, oper_type, o_id):
                     print(forms_obj.errors.as_json())
                     response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除用户
         elif oper_type == "delete":
             # 删除 ID
             type = request.GET.get('type')
@@ -416,6 +419,7 @@ def user_oper(request, oper_type, o_id):
                         response.code = 302
                         response.msg = '用户ID不存在'
 
+        # 修改用户
         elif oper_type == "update":
 
             print('-------->>',request.POST)
@@ -554,6 +558,7 @@ def user_oper(request, oper_type, o_id):
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改用户启用状态
         elif oper_type == "update_status":
 
             status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
@@ -577,11 +582,12 @@ def user_oper(request, oper_type, o_id):
                     response.code = 200
                     response.msg = "修改成功"
 
+        # 生成企业用户二维码
         elif oper_type == 'create_small_program_qr_code':
             user_id = request.POST.get('user_id')
             user_obj = models.zgld_userprofile.objects.filter(id=user_id)
             if user_obj:
-                # 生成企业用户二维码
+
 
                 # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
@@ -610,6 +616,7 @@ def user_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = "用户不存在"
 
+        # 获取部门列表 接口返回
         elif oper_type == 'sync_user_tongxunlu':
             company_id = o_id
 
@@ -687,7 +694,6 @@ def user_oper(request, oper_type, o_id):
 
                     else:
                         print('---- 获取部门成员 [报错]：------>',errcode,"|",errmsg)
-
 
         # 用户添加自己的信息入临时库
         elif oper_type == 'scan_code_to_add_user':
@@ -863,11 +869,7 @@ def user_oper(request, oper_type, o_id):
                     response.code = 301
                     response.msg =  '用户临时表无数据'
 
-
-
-
-    elif request.method == 'GET':
-
+    else :
         # 生成 扫描的用户二维码
         if  oper_type == "create_scan_code":
             user_id = request.GET.get('user_id')
@@ -902,11 +904,9 @@ def user_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = "用户不存在"
 
-
-    else:
-        response.code = 402
-        response.msg = "请求异常"
-
+        else:
+            response.code = 402
+            response.msg = "请求异常"
     return JsonResponse(response.__dict__)
 
 

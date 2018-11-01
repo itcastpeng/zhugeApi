@@ -11,7 +11,8 @@ from zhugeleida.forms.admin.admin_role import AddForm, UpdateForm, SelectForm
 import json
 
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 角色查询展示
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def admin_role(request):
@@ -114,20 +115,21 @@ def admin_role(request):
     return JsonResponse(response.__dict__)
 
 
-#  增删改
+#  角色操作
 #  csrf  token验证
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def admin_role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
+
+        # 添加角色
         if oper_type == "add":
             form_data = {
                 'name': request.POST.get('name'),
             }
 
             rules_list = json.loads(request.POST.get('rules_list')) if request.POST.get('rules_list') else []
-
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
@@ -144,6 +146,7 @@ def admin_role_oper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除角色
         elif oper_type == "delete":
             # 删除 ID
             objs = models.zgld_admin_role.objects.filter(id=o_id)
@@ -155,6 +158,7 @@ def admin_role_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '删除ID不存在'
 
+        # 修改角色
         elif oper_type == "update":
             # 获取需要修改的信息
             form_data = {
@@ -194,7 +198,5 @@ def admin_role_oper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
-
-
 
     return JsonResponse(response.__dict__)

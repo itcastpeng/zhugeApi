@@ -12,23 +12,24 @@ urlpatterns = [
     url(r'^login_rules$', login.login_rules),
     url(r'^modify_password$', login.modify_password),
 
+    # 后台 - 首页功能 数据统计 名片状态+账号状态
+    url(r'^home_page/(?P<oper_type>\w+)$', home_page.home_page_oper),
     url(r'^home_page$', home_page.home_page),
-    url(r'^home_page/(?P<oper_type>\w+)', home_page.home_page_oper),
 
     # 后台用户操作
-    url(r'^admin_userprofile/(?P<oper_type>\w+)/(?P<o_id>\d+)', admin_userprofile.admin_userprofile_oper),
-    url(r'^admin_userprofile', admin_userprofile.admin_userprofile),
+    url(r'^admin_userprofile/(?P<oper_type>\w+)/(?P<o_id>\d+)$', admin_userprofile.admin_userprofile_oper),
+    url(r'^admin_userprofile$', admin_userprofile.admin_userprofile),
 
     # 后台-角色操作
-    url(r'^admin_role/(?P<oper_type>\w+)/(?P<o_id>\d+)', admin_role.admin_role_oper),
-    url(r'^admin_role', admin_role.admin_role),
+    url(r'^admin_role/(?P<oper_type>\w+)/(?P<o_id>\d+)$', admin_role.admin_role_oper),
+    url(r'^admin_role$', admin_role.admin_role),
 
     # 后台-权限管理
     url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)$', access_rules.access_rules_oper),
-    url(r'^access_rules', access_rules.access_rules),
+    url(r'^access_rules$', access_rules.access_rules),
 
     # 微信小程序通知
-    url(r'^open_weixin/(?P<oper_type>\w+)', open_weixin.open_weixin),
+    url(r'^open_weixin/(?P<oper_type>\w+)$', open_weixin.open_weixin),
 
     # 企业微信服务商认证接入
     url(r'^open_qiyeweixin/(?P<oper_type>\w+)$', open_qiyeweixin.open_qiyeweixin),
@@ -108,7 +109,7 @@ urlpatterns = [
     url(r'^talkGroupManage$', talkGroupManagement.talkGroupManage),
 
     # 话术详情管理
-    url(r'^speechDetailsManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManage),
+    url(r'^speechDetailsManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
     url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
 
     # 商城基础设置

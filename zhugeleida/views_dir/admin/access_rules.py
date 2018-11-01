@@ -11,7 +11,8 @@ from zhugeleida.forms.admin.access_roles import AddForm, UpdateForm, SelectForm
 import json
 
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 权限查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def access_rules(request):
@@ -68,9 +69,6 @@ def access_rules(request):
             }
             return JsonResponse(response.__dict__)
 
-
-
-
         else:
             response.code = 402
             response.msg = "请求异常"
@@ -78,13 +76,15 @@ def access_rules(request):
     return JsonResponse(response.__dict__)
 
 
-#  增删改
+#  权限操作
 #  csrf  token验证
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def access_rules_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
+
+        # 添加权限
         if oper_type == "add":
             form_data = {
                 'name': request.POST.get('name'),
@@ -108,6 +108,7 @@ def access_rules_oper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除权限
         elif oper_type == "delete":
             # 删除 ID
             objs = models.zgld_access_rules.objects.filter(id=o_id)
@@ -119,6 +120,7 @@ def access_rules_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '删除ID不存在'
 
+        # 修改权限
         elif oper_type == "update":
             # 获取需要修改的信息
             form_data = {

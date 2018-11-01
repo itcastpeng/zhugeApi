@@ -92,6 +92,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
+
                 obj = models.zgld_speech_details_management.objects.create(
                     contentWords=forms_obj.cleaned_data.get('contentWords'),
                     talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName'),

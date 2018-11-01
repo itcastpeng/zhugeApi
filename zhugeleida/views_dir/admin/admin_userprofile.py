@@ -11,7 +11,8 @@ from zhugeleida.forms.admin.admin_userprofile import AddForm, UpdateForm, Select
 import json
 
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def admin_userprofile(request):
@@ -83,7 +84,7 @@ def admin_userprofile(request):
 def admin_userprofile_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
-
+        # 添加用户
         if oper_type == "add":
             form_data = {
                 'login_user': request.POST.get('login_user'),
@@ -107,6 +108,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除用户
         elif oper_type == "delete":
             # 删除 ID
             objs = models.zgld_admin_userprofile.objects.filter(id=o_id)
@@ -125,6 +127,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '删除ID不存在'
 
+        # 修改用户
         elif oper_type == "update":
             # 获取需要修改的信息
             form_data = {
@@ -173,6 +176,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改用户 是否启用 状态
         elif oper_type == "update_status":
 
             status = request.POST.get('status')    #(1, "启用"),  (2, "未启用"),
@@ -191,6 +195,7 @@ def admin_userprofile_oper(request, oper_type, o_id):
                     response.code = 200
                     response.msg = "修改成功"
 
+        # 切换用户
         elif oper_type == "switch_admin_user":
             print('----->',request.POST)
 
@@ -234,7 +239,6 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 # print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
     else:
         response.code = 402
