@@ -7,12 +7,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.company_verify import CompanyAddForm, CompanyUpdateForm, \
     CompanySelectForm,AgentAddForm,TongxunluAddForm
-import time
 import datetime
 import json
-
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
+
+
+# 查询公司
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def company(request):
@@ -91,12 +92,13 @@ def company(request):
         response.msg = "请求异常"
 
 
-
+# 企业微信展示授权信息
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def author_status(request,oper_type):
     response = Response.ResponseObj()
     if request.method == "GET":
+
         # 获取参数 页数 默认1
         if oper_type == "author_status":
             company_id = request.GET.get('company_id')
@@ -157,14 +159,15 @@ def author_status(request,oper_type):
     return JsonResponse(response.__dict__)
 
 
-
-
+# 公司操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def company_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
+        # 添加公司
         if oper_type == "add_company":
             company_data = {
                 'name' : request.POST.get('name'),
@@ -217,6 +220,7 @@ def company_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改公司
         elif oper_type == "update_company":
 
             company_data = {
@@ -279,7 +283,8 @@ def company_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == "update_agent":  #雷达AI APP秘钥添加。
+        # 雷达AI APP秘钥添加。
+        elif oper_type == "update_agent":
             agent_data = {
                 'company_id': o_id,
                 # 'name' : request.POST.get('name').strip(), #应用的名字
@@ -349,6 +354,7 @@ def company_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改通讯录
         elif oper_type == "update_tongxunlu":
             company_data = {
                 'company_id': o_id,
@@ -393,6 +399,7 @@ def company_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除公司
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
             company_objs = models.zgld_company.objects.filter(id=o_id)
@@ -409,6 +416,7 @@ def company_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '公司ID不存在'
 
+        # 修改是否展示 产品还是商城
         elif oper_type == 'change_shopping_type':
 
             shopping_type = request.POST.get('shopping_type')
@@ -429,7 +437,6 @@ def company_oper(request, oper_type, o_id):
             else:
                 response.code = 303
                 response.msg = '购物类型不能为空'
-
 
     else:
         response.code = 402

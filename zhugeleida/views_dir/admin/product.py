@@ -4,22 +4,32 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm,imgMergeForm,imgUploadForm,FeedbackSelectForm
 from zhugeleida.forms.qiyeweixin.product_verify import  ProductUpdateForm,RecommendIndexForm
 import json
 from django.db.models import Q
-from django.db.models import F
-import uuid
 import os
 import base64
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+def sort_article_data(data):
+    ret_list = []
+    for obj in data:
+        if not ret_list:
+            # tmp_dict[obj['order']] = obj
+            ret_list.append(obj)
+
+        else:
+            for index, data in enumerate(ret_list):
+                if obj['order'] < data['order']:
+                    ret_list.insert(index, obj)
+                    break
+            else:
+                ret_list.append(obj)
+    return ret_list
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -526,19 +536,5 @@ def product_oper(request, oper_type, o_id):
 
 
 
-def sort_article_data(data):
-    ret_list = []
-    for obj in data:
-        if not ret_list:
-            # tmp_dict[obj['order']] = obj
-            ret_list.append(obj)
 
-        else:
-            for index, data in enumerate(ret_list):
-                if obj['order'] < data['order']:
-                    ret_list.insert(index, obj)
-                    break
-            else:
-                ret_list.append(obj)
-    return ret_list
 

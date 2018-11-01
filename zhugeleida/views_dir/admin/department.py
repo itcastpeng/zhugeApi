@@ -1,23 +1,22 @@
-from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.department_verify import DepartmentAddForm, DepartmentUpdateForm, DepartmentSelectForm
-import json
 from publicFunc.condition_com import conditionCom
-import requests
 from ..conf import *
 from django.db.models import Q
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
+import requests, json
 
+# 展示部门（雷达）用户
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def department(request):
     response = Response.ResponseObj()
     if request.method == "GET":
-        # 获取参数 页数 默认1   
+        # 获取参数 页数 默认1
         field_dict = {
             'id': '',
             'name': '__contains',
@@ -61,12 +60,14 @@ def department(request):
         response.msg = "请求异常"
 
 
+# 部门操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def department_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-
     if request.method == "POST":
+
+        # 添加部门
         if oper_type == "add":
 
             print('----department add ---->>',request.POST)
@@ -159,6 +160,7 @@ def department_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除部门
         elif oper_type == "delete":
             print('------delete o_id --------->>', o_id)
 
@@ -226,6 +228,7 @@ def department_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '部门ID不存在'
 
+        # 修改部门
         elif oper_type == "update":
             form_data = {
 

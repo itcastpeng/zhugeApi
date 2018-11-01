@@ -1,21 +1,13 @@
-from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
-from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import requests
 from zhugeleida.public.crypto_ import WXBizMsgCrypt_qiyeweixin
-import sys
 from zhugeleida.public import common
-import json
-import redis
-import xml.etree.cElementTree as ET
-from django import forms
 from django.shortcuts import render, redirect
-import datetime
 from zhugeapi_celery_project import tasks
-import xml.dom.minidom as xmldom
+import xml.dom.minidom as xmldom, datetime, xml.etree.cElementTree as ET
+import json, redis, sys, requests
 
 ## 第三方平台接入
 @csrf_exempt
@@ -38,7 +30,6 @@ def open_qiyeweixin(request, oper_type):
             'sCorpID': 'wx1cbe3089128fda03',
         },
     }
-
     if request.method == "POST":
 
         # 企业微信服务器会定时（每十分钟）推送ticket。https://work.weixin.qq.com/api/doc#10982/推送suite_ticket
@@ -103,9 +94,6 @@ def open_qiyeweixin(request, oper_type):
                 elif not _Status: # 没有status ，说明 是用户的增删改查。
 
                     return HttpResponse("success")
-
-
-
             xml_tree = ET.fromstring(sMsg)
             xml_tree.find("SuiteTicket")
 
@@ -203,6 +191,7 @@ def open_qiyeweixin(request, oper_type):
 
             return HttpResponse("success")
 
+        # 生成微信授权的页面
         elif oper_type == "create_grant_url":
 
             app_type = int(request.POST.get('app_type')) if request.POST.get('app_type') else ''
@@ -219,9 +208,6 @@ def open_qiyeweixin(request, oper_type):
                 suite_id = 'wx1cbe3089128fda03'
                 app_type = 'address_book'
 
-
-
-
             redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
 
             _data = {
@@ -231,8 +217,7 @@ def open_qiyeweixin(request, oper_type):
 
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
 
-            get_bind_auth_data = 'suite_id=%s&pre_auth_code=%s&redirect_uri=%s&state=%s' % (
-            suite_id, pre_auth_code, redirect_uri, suite_id)
+            get_bind_auth_data = 'suite_id={}&pre_auth_code={}&redirect_uri={}&state={}'.format(suite_id, pre_auth_code, redirect_uri, suite_id)
 
             pre_auth_code_url = 'https://open.work.weixin.qq.com/3rdapp/install?' + get_bind_auth_data
 
@@ -309,12 +294,10 @@ def open_qiyeweixin(request, oper_type):
 
             return HttpResponse('success')
 
+    else :
 
-
-    elif request.method == "GET":
-
+        # 微信发送要解密的ticket 获取票据
         if oper_type == 'get_ticket':
-
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
@@ -347,8 +330,8 @@ def open_qiyeweixin(request, oper_type):
             # 验证URL成功，将sEchoStr返回给企业号
             return HttpResponse(sEchoStr)
 
+        # 获取微信回调数据
         elif oper_type == 'callback_data':
-
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
@@ -586,43 +569,10 @@ def open_qiyeweixin(request, oper_type):
             else:
                 print('-------[企业微信] 获取企业永久授权码 报错：------->>')
 
+        else:
+            response.code = 402
+            response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
 
 
-class UpdateIDForm(forms.Form):
-    authorization_appid = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "authorization_appid 不能为空"
-        }
-    )
-
-
-class UpdateInfoForm(forms.Form):
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "小程序名称不能为空"
-        }
-    )
-
-    head_img = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "小程序头像不能为空"
-        }
-    )
-    introduce = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "小程序头像不能为空"
-        }
-    )
-
-    service_category = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "服务类目不能为空"
-        }
-    )

@@ -9,7 +9,7 @@ import json,os,sys
 from django.db.models import Q
 import datetime
 
-def mallManagement(request, user_id, goodsGroup, status, flag):
+def mallManagementshow(request, user_id, goodsGroup, status, flag):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -87,7 +87,7 @@ def mallManagement(request):
     goodsGroup = request.GET.get('goodsGroup')
     status = request.GET.get('status')
     flag = 'admin'
-    response = mallManagement(request, user_id, goodsGroup, status, flag)
+    response = mallManagementshow(request, user_id, goodsGroup, status, flag)
     return JsonResponse(response.__dict__)
 
 def updateInitData(result_data,xiaochengxu_id, pid=None):   # 更新查询 分类接口

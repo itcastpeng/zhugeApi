@@ -4,12 +4,13 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.website_verify import WebsiteAddForm,WebsiteTemplateUpdateForm,WebsiteTemplateAddForm, DepartmentUpdateForm, DepartmentSelectForm
+from zhugeleida.forms.admin.website_verify import WebsiteAddForm,WebsiteTemplateUpdateForm,WebsiteTemplateAddForm, DepartmentUpdateForm, DepartmentSelectForm, SelectForm
 import json
 from publicFunc.condition_com import conditionCom
 from django import forms
 from django.db.models import Q
 
+# 官网编辑查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def website(request):
@@ -51,12 +52,15 @@ def website(request):
         response.msg = "请求异常"
 
 
+# 官网编辑操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def website_oper(request, oper_type,o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
+        # 编辑并保存官网内容
         if oper_type == "edit":
             website_data = {
                 'user_id': request.GET.get('user_id'),
@@ -82,7 +86,6 @@ def website_oper(request, oper_type,o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
     else:
         response.code = 402
         response.msg = "请求异常"
@@ -90,7 +93,7 @@ def website_oper(request, oper_type,o_id):
     return JsonResponse(response.__dict__)
 
 
-
+# 展示所有模板
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def website_template(request):
@@ -137,19 +140,23 @@ def website_template(request):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
-        return JsonResponse(response.__dict__)
 
     else:
-        response.code = 402
         response.msg = "请求异常"
+        response.code = 402
+
+    return JsonResponse(response.__dict__)
 
 
+# 官网模板操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def website_template_oper(request, oper_type,o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
+        # 修改官网模板
         if oper_type == "update":
             template_data = {
                 'user_id': request.GET.get('user_id'),
@@ -178,7 +185,7 @@ def website_template_oper(request, oper_type,o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        # 添加官网模板
         elif oper_type == "add":
             template_data = {
                 'user_id': request.GET.get('user_id'),
@@ -205,6 +212,7 @@ def website_template_oper(request, oper_type,o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除官网模板
         elif oper_type == 'delete':
             template_id = o_id
 
@@ -228,32 +236,3 @@ def website_template_oper(request, oper_type,o_id):
 
 
 
-
-class SelectForm(forms.Form):
-    current_page = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': "页码数据类型错误"
-        }
-    )
-
-    length = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': "页显示数量类型错误"
-        }
-    )
-
-    def clean_current_page(self):
-        if 'current_page' not in self.data:
-            current_page = 1
-        else:
-            current_page = int(self.data['current_page'])
-        return current_page
-
-    def clean_length(self):
-        if 'length' not in self.data:
-            length = 10
-        else:
-            length = int(self.data['length'])
-        return length
