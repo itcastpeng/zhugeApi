@@ -907,7 +907,7 @@ class zgld_activity_redPacket(models.Model):
 
     class Meta:
         unique_together = [
-            ('article', 'customer'),
+            ('article','customer'),
         ]
         verbose_name_plural = "活动发红包记录表"
         app_label = "zhugeleida"
