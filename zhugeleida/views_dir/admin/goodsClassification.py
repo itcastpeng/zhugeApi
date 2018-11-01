@@ -8,12 +8,9 @@ from zhugeleida.forms.xiaochengxu.goodsClass_verify import AddForm, UpdateForm, 
 import json,os,sys
 from django.db.models import Q
 
+
+# 商品分级 查询
 def init_data(xiaochengxu_id, pid=None, level=1):
-    """
-    获取权限数据
-    :param pid:  权限父级id
-    :return:
-    """
     result_data = []
     print('level------> ',level)
     objs = models.zgld_goods_classification_management.objects.filter(
@@ -34,6 +31,7 @@ def init_data(xiaochengxu_id, pid=None, level=1):
         result_data.append(current_data)
     return result_data
 
+# 商城商品查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def goodsClass(request):
@@ -85,6 +83,8 @@ def goodsClass(request):
         response.msg = '请求异常'
     return JsonResponse(response.__dict__)
 
+
+# 判断分组是否会死关联
 def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id 判断是否会关联自己 如果o_id 在 result_data里会return
     objs = models.zgld_goods_classification_management.objects.filter(
         mallSetting_id=xiaochengxu_id,
@@ -98,7 +98,7 @@ def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id �
         parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id, o_id=o_id)
     return result_data
 
-
+# 商城商品操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def goodsClassOper(request, oper_type, o_id):
@@ -107,6 +107,7 @@ def goodsClassOper(request, oper_type, o_id):
     u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)                            # 查询 admin用户
     xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs.company_id) # 查询小程序ID
     userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)  #商城基础设置
+
     if request.method == "POST":
         dataDict = {
             'o_id':o_id,
@@ -115,6 +116,8 @@ def goodsClassOper(request, oper_type, o_id):
             'userProfile_id':request.GET.get('user_id'),
             'parentClassification_id':request.POST.get('parentClassification')
         }
+
+        # 添加商品分类
         if oper_type == 'add':
             forms_obj = AddForm(dataDict)
             if forms_obj.is_valid():
@@ -144,6 +147,7 @@ def goodsClassOper(request, oper_type, o_id):
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 修改前查询商品分类
         elif oper_type == 'Beforeupdate':
             result_data = []
             objs = models.zgld_goods_classification_management.objects.filter(id=o_id)
@@ -156,7 +160,7 @@ def goodsClassOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '分组ID错误'
 
-
+        # 确认修改商品分类
         elif oper_type == 'update':
             # 判断是否会关联自己
             result_data = []
@@ -201,6 +205,7 @@ def goodsClassOper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
                 response.data = {}
 
+        # 删除商品分类
         elif oper_type == 'delete':
             groupObjs = models.zgld_goods_classification_management.objects
             objs = groupObjs.filter(id=o_id)
@@ -216,6 +221,7 @@ def goodsClassOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = '删除ID不存在！'
+
     else:
         response.code = 402
         response.msg = "请求异常"

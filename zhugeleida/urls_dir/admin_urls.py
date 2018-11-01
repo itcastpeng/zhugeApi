@@ -54,51 +54,51 @@ urlpatterns = [
     url(r'^dai_xcx/(?P<oper_type>\w+)$', dai_xcx.dai_xcx_oper),
 
     # 用户操作
-    url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)', user.user_oper),
-    url(r'^user', user.user),
+    url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
+    url(r'^user$', user.user),
 
     # 角色操作
-    url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)', role.role_oper),
+    url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)$', role.role_oper),
     url(r'^role$', role.role),
 
     # 公司操作 + 验证雷达AI APP秘钥添加。
-    url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)', company.company_oper),
+    url(r'^company/(?P<oper_type>\w+)/(?P<o_id>\d+)$', company.company_oper),
     url(r'^company$', company.company),
 
     # 验证雷达，通讯录
-    url(r'^company/(?P<oper_type>\w+)', company.author_status),
+    url(r'^company/(?P<oper_type>\w+)$', company.author_status),
 
     # 部门操作
-    url(r'^department/(?P<oper_type>\w+)/(?P<o_id>\d+)', department.department_oper),
+    url(r'^department/(?P<oper_type>\w+)/(?P<o_id>\d+)$', department.department_oper),
     url(r'^department$', department.department),
 
     # 官网编辑
-    url(r'website/(?P<oper_type>\w+)/(?P<o_id>\d+)', website.website_oper),
+    url(r'website/(?P<oper_type>\w+)/(?P<o_id>\d+)$', website.website_oper),
     url(r'website$', website.website),
 
     # 官网模板管理
-    url(r'website_template/(?P<oper_type>\w+)/(?P<o_id>\d+)', website.website_template_oper),
+    url(r'website_template/(?P<oper_type>\w+)/(?P<o_id>\d+)$', website.website_template_oper),
     url(r'website_template$', website.website_template),
 
     # 后台产品管理
-    url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)', product.product_oper),
-    url(r'^product/(?P<oper_type>\w+)/', product.product),
+    url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)$', product.product_oper),
+    url(r'^product/(?P<oper_type>\w+)$', product.product),
 
     # 公众号-文章管理
-    url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
-    url(r'^article/(?P<oper_type>\w+)/', article.article),
+    url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
+    url(r'^article/(?P<oper_type>\w+)$', article.article),
 
     # 公众号-插件名片管理
-    url(r'^plugin_mingpian/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_mingpian.plugin_mingpian_oper),
+    url(r'^plugin_mingpian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_mingpian.plugin_mingpian_oper),
     url(r'^plugin_mingpian$', plugin_mingpian.plugin_mingpian),
 
     # 公众号插件报名管理
-    url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_report.plugin_report_oper),
+    url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_report.plugin_report_oper),
     url(r'^plugin_report$', plugin_report.plugin_report),
 
     # 公众号-商品管理
-    url(r'^plugin_goods/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_goods.plugin_goods_oper),
-    url(r'^plugin_goods/(?P<oper_type>\w+)/', plugin_goods.plugin_goods),
+    url(r'^plugin_goods/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_goods.plugin_goods_oper),
+    url(r'^plugin_goods/(?P<oper_type>\w+)$', plugin_goods.plugin_goods),
 
     # 文章的标签管理
     url(r'^article_tag/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article_tag.article_tag_oper),
@@ -113,33 +113,33 @@ urlpatterns = [
     url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
 
     # 商城基础设置
-    url(r'addSmallProgram', shangchengjichushezhi.addSmallProgram),                       # 添加小程序ID
-    url(r'^jiChuSheZhi/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),
-    url(r'jiChuSheZhi$', shangchengjichushezhi.jiChuSheZhi),                       # 商城基础查询
+    url(r'^jiChuSheZhi/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),    #  商城基础操作
+    url(r'^jiChuSheZhi$', shangchengjichushezhi.jiChuSheZhi),                       # 商城基础查询
+    # url(r'^addSmallProgram$', shangchengjichushezhi.addSmallProgram),                       # 添加小程序ID
 
     # 商品分类管理
     url(r'^goodsClass/(?P<oper_type>\w+)/(?P<o_id>\d+)$', goodsClassification.goodsClassOper),  # 商品分类管理操作
-    url(r'goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
+    url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
     # 商品管理
     url(r'^mallManagement/(?P<oper_type>\w+)/(?P<o_id>\d+)$', mallManagement.mallManagementOper),  # 商品管理操作
-    url(r'mallManagement$', mallManagement.mallManagement),  # 商品管理查询
+    url(r'^mallManagement$', mallManagement.mallManagement),  # 商品管理查询
 
     # 订单管理
-    url(r'theOrder', theOrderManagement.theOrder),  # 订单管理查询
     url(r'^theOrder/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),  # 订单管理操作
+    url(r'^theOrder$', theOrderManagement.theOrder),  # 订单管理查询
 
     # 退款单管理
-    url(r'tuiKuanDingDan', tuiKuanDingDan.tuiKuanDingDan),  # 退款订单管理查询
     url(r'^tuiKuanDingDan/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tuiKuanDingDan.tuiKuanDingDanOper),  # 退款订单管理操作
+    url(r'^tuiKuanDingDan$', tuiKuanDingDan.tuiKuanDingDan),  # 退款订单管理查询
 
     # 员工订单管理
-    url(r'employeesOrders', employeesOrders.employeesOrders),  # 订单管理查询
+    url(r'^employeesOrders$', employeesOrders.employeesOrders),  # 订单管理查询
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
 
     # 活动管理
-    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),                      # 关注领红包
     url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),   # 关注领红包
+    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),                      # 关注领红包
 
     # 关注公众号 发放红包管理
     # url(r'focusOnIssuedRedEnvelope', redEnvelopeToIssue.focusOnIssuedRedEnvelope),          # 关注发放红包

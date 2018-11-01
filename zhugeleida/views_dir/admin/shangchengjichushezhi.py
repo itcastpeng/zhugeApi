@@ -8,6 +8,8 @@ from zhugeleida.forms.admin.shangchengshezhi_verify import jichushezhi, zhifupei
 import json, zipfile, os, random, datetime, time, requests
 from zhugeleida.views_dir.xiaochengxu import prepaidManagement as yuzhifu
 
+
+# 商城基础查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhi(request):
@@ -46,27 +48,8 @@ def jiChuSheZhi(request):
     response.code = 200
     return JsonResponse(response.__dict__)
 
-def addSmallProgram(request):
-    xiaochengxuid = request.GET.get('xiaochengxuid')
-    response = Response.ResponseObj()
-    xiaochengxuObjs = models.zgld_xiaochengxu_app.objects.filter(id=xiaochengxuid)
-    if xiaochengxuObjs:
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
-        nowdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        if not userObjs:
-            models.zgld_shangcheng_jichushezhi.objects.create(
-                xiaochengxuApp_id=xiaochengxuid,
-                xiaochengxucompany_id=xiaochengxuObjs[0].company_id,
-                createDate=nowdate
-            )
-            response.code = 200
-            response.msg = '添加成功'
-        else:
-            response.code = 301
-            response.msg = '该小程序已创建设置'
-    return JsonResponse(response.__dict__)
 
-# 商城设置
+#  商城基础操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def jiChuSheZhiOper(request, oper_type):
@@ -78,7 +61,10 @@ def jiChuSheZhiOper(request, oper_type):
     userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         'xiaochengxuApp__company'
     ).filter(xiaochengxuApp__company_id=u_idObjs.company_id)
+
     if request.method == "POST":
+
+        # 商城基础设置 第一页基础设置
         if oper_type == 'jichushezhi':
             resultData = {
                 'mallStatus' : request.POST.get('mallStatus'),          # 是否打开 商城 1为产品 2为商城
@@ -111,7 +97,9 @@ def jiChuSheZhiOper(request, oper_type):
                 response.code = 301
                 response.msg = '未通过'
                 response.data = json.loads(forms_obj.errors.as_json())
-        if oper_type == 'zhifupeizhi':
+
+        # 商城基础设置 第二页支付设置
+        elif oper_type == 'zhifupeizhi':
             resultData = {
                 'shangHuHao': request.POST.get('shangHuHao'),
                 'shangHuMiYao': request.POST.get('shangHuMiYao'),
@@ -205,7 +193,8 @@ def jiChuSheZhiOper(request, oper_type):
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
 
-        if oper_type == 'yongjinshezhi':
+        # 商城基础设置 佣金配置
+        elif oper_type == 'yongjinshezhi':
             resultData = {
                 'yongjin': request.POST.get('yongjin'),
             }
@@ -230,7 +219,29 @@ def jiChuSheZhiOper(request, oper_type):
             else:
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
+
     else:
-        response.code = 402
-        response.msg = "请求异常"
+        # 添加小程序ID
+        if oper_type == 'addSmallProgram':
+            xiaochengxuid = request.GET.get('xiaochengxuid')
+            response = Response.ResponseObj()
+            xiaochengxuObjs = models.zgld_xiaochengxu_app.objects.filter(id=xiaochengxuid)
+            if xiaochengxuObjs:
+                userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
+                nowdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                if not userObjs:
+                    models.zgld_shangcheng_jichushezhi.objects.create(
+                        xiaochengxuApp_id=xiaochengxuid,
+                        xiaochengxucompany_id=xiaochengxuObjs[0].company_id,
+                        createDate=nowdate
+                    )
+                    response.code = 200
+                    response.msg = '添加成功'
+                else:
+                    response.code = 301
+                    response.msg = '该小程序已创建设置'
+
+        else:
+            response.code = 402
+            response.msg = "请求异常"
     return JsonResponse(response.__dict__)

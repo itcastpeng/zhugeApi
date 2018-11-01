@@ -11,7 +11,7 @@ import json
 
 from publicFunc.condition_com import conditionCom
 
-
+# 文章的标签查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def article_tag(request):
@@ -62,6 +62,8 @@ def article_tag(request):
 
     return JsonResponse(response.__dict__)
 
+
+# 文章的标签操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def article_tag_oper(request, oper_type,o_id):
@@ -159,6 +161,7 @@ def article_tag_oper(request, oper_type,o_id):
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 添加文章标签
         elif oper_type == "add":
 
             user_id = request.GET.get('user_id')
@@ -196,6 +199,7 @@ def article_tag_oper(request, oper_type,o_id):
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除文章标签
         elif oper_type == "delete":
             tag_id = o_id
             user_id = request.GET.get('user_id')
@@ -207,8 +211,6 @@ def article_tag_oper(request, oper_type,o_id):
             else:
                 response.code = 302
                 response.msg = '标签ID不存在'
-
-
 
         else:
             response.code = 302
@@ -222,7 +224,18 @@ def article_tag_oper(request, oper_type,o_id):
     return JsonResponse(response.__dict__)
 
 
-import collections
+def tree_search(d_dic,tag_dic):
+
+    for k,v in d_dic.items():
+
+        if k[0] == tag_dic[2]:
+
+            # d_dic[k][tag_dic] = collections.OrderedDict()
+            d_dic[k][tag_dic] = {}
+            return
+        else:
+            if v:
+                tree_search(d_dic[k],tag_dic)
 
 def build_tree(query_set_list):
     set_new_list  = []
@@ -241,15 +254,4 @@ def build_tree(query_set_list):
 
     return d_dic
 
-def tree_search(d_dic,tag_dic):
 
-    for k,v in d_dic.items():
-
-        if k[0] == tag_dic[2]:
-
-            # d_dic[k][tag_dic] = collections.OrderedDict()
-            d_dic[k][tag_dic] = {}
-            return
-        else:
-            if v:
-                tree_search(d_dic[k],tag_dic)

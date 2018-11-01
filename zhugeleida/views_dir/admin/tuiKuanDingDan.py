@@ -11,7 +11,7 @@ import requests
 import xml.dom.minidom as xmldom
 import os, random, datetime
 
-
+# 退款单 查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def tuiKuanDingDan(request):
@@ -71,14 +71,13 @@ def tuiKuanDingDan(request):
     return JsonResponse(response.__dict__)
 
 
-
-
-
+# 退款单操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def tuiKuanDingDanOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':
+        # 添加退款单
         if oper_type == 'add':
             otherData = {
                 'orderNumber':request.POST.get('orderNumber'),
@@ -104,6 +103,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 修改退款单状态
         elif oper_type == 'updateStatus':
             status = request.POST.get('status')
             user_id = request.GET.get('user_id')
@@ -186,6 +187,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                     response.msg = '卖家拒绝退款'
                     response.code = 301
                 # response.data = {'other':other}
+
     else:
         response.code = 402
         response.msg = "请求异常"
