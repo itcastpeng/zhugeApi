@@ -681,8 +681,13 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         obj = objs[0]
                         customer_id = obj.id
 
-                        if Content.startswith('T'):
-                            activity_id = int(Content.split('T')[1])
+                        if Content.startswith('T') or Content.startswith('t'):
+
+                            activity_id = ''
+                            if Content.startswith('t'):
+                                activity_id = int(Content.split('t')[1])
+                            elif Content.startswith('T'):
+                                activity_id = int(Content.split('T')[1])
 
                             redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,
                                                                                            activity_id=activity_id)
