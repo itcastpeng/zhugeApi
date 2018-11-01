@@ -285,6 +285,8 @@ def article_oper(request, oper_type, o_id):
 
                             if parent_id:
                                 _data = {
+                                    'customer_id': customer_id,
+                                    'user_id': uid,
                                     'parent_id': parent_id,
                                     'article_id': article_id,
                                     'activity_id': activity_id,

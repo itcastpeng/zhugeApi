@@ -855,8 +855,6 @@ def user_send_gongzhonghao_template_msg(request):
     return JsonResponse(response.__dict__)
 
 
-
-
 # 获取查询最新一次提交的审核状态 并提交审核通过的代码上线.
 @csrf_exempt
 def get_latest_audit_status_and_release_code(request):
@@ -900,6 +898,8 @@ def user_forward_send_activity_redPacket(request):
         parent_id = request.GET.get('parent_id')
         article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
+        customer_id = request.GET.get('customer_id')
+        user_id = request.GET.get('user_id')
 
         activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
                                                                                 article_id=article_id,
@@ -1036,6 +1036,17 @@ def user_forward_send_activity_redPacket(request):
                                 reason=response_ret.msg
                             )
 
+                            data_ = {
+                                'customer_id': parent_id,
+                                'user_id': user_id,
+                                'activity_id': activity_id,
+                                'type': 'gongzhonghao_send_kefu_msg',
+                                'content': '    活动可能太火爆啦~！导致商户账户刷爆啦,我已经提醒管理员及时充钱啦 \n后续会自动补发红包至此公众号,回复【T%s】查询红包活动进展呦！' % (activity_id),
+                            }
+
+                            print('--- 【公众号发送模板消息-提示余额不足】 user_send_gongzhonghao_template_msg --->')
+
+                            tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息提示余额不足】
 
                     else:
                         response.code = 301
@@ -1214,7 +1225,7 @@ def bufa_send_activity_redPacket(request):
 
 
 
-
+#关注公众号并发红包
 @csrf_exempt
 def user_focus_send_activity_redPacket(request):
     response = Response.ResponseObj()
