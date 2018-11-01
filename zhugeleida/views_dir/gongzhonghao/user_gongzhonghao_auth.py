@@ -5,19 +5,12 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm,LoginBindingForm,CreateShareUrl
-import time
-from django.db.models import Q
-import requests
 from zhugeapi_celery_project import tasks
-
-import random
 from  publicFunc.account import str_sha_encrypt
-import base64
-import json
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token,create_component_access_token
-import string
-import redis
 from urllib.parse import unquote
+from urllib.parse import quote
+import base64, random, json, string, redis, requests, time
 
 # 从微信公众号接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -273,71 +266,71 @@ def create_gongzhonghao_yulan_auth_url(data):
 
 
 
-def binding_article_customer_relate(data):
-
-    response = Response.ResponseObj()
-
-    article_id = data.get('article_id')    # 公众号文章ID
-    customer_id = data.get('customer_id')  # 公众号客户ID
-    user_id = data.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
-    level = data.get('level')      # 公众号层级
-    parent_id = data.get('pid')    # 所属的父级的客户ID。为空代表第一级。
-    company_id = data.get('company_id')    # 所属的父级的客户ID。为空代表第一级。
-
-    q = Q()
-    q.add(Q(**{'article_id': article_id}), Q.AND)
-    q.add(Q(**{'customer_id': customer_id}), Q.AND)
-    q.add(Q(**{'user_id': user_id}), Q.AND)
-    q.add(Q(**{'level': level}), Q.AND)
-
-    if parent_id:
-        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-    else:
-        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-
-    article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
-
-    if article_to_customer_belonger_obj:
-        response.code = 302
-        response.msg = "文章和客户\雷达用户-关系存在"
-
-    else:
-        models.zgld_article_to_customer_belonger.objects.create(
-            article_id=article_id,
-            customer_id=customer_id,
-            user_id=user_id,
-            customer_parent_id=parent_id,
-            level=level,
-        )
-
-    user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
-    if user_customer_belonger_obj:
-        response.code = 302
-        response.msg = "关系存在"
-
-    else:
-        models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
-
-    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
-    if activity_objs:
-        activity_id = activity_objs[0].id
-        redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id,activity_id=activity_id,customer_id=customer_id)
-
-        if redPacket_objs:
-            response.code = 302
-            response.msg = "关系存在"
-
-        else:
-
-            models.zgld_activity_redPacket.objects.create(article_id=article_id,
-                                                          activity_id=activity_id,
-                                                          customer_id=customer_id,
-                                                          company_id=company_id,
-                                                         )
-            response.code = 200
-            response.msg = "绑定成功"
-
-    return response
+# def binding_article_customer_relate(data):
+#
+#     response = Response.ResponseObj()
+#
+#     article_id = data.get('article_id')    # 公众号文章ID
+#     customer_id = data.get('customer_id')  # 公众号客户ID
+#     user_id = data.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
+#     level = data.get('level')      # 公众号层级
+#     parent_id = data.get('pid')    # 所属的父级的客户ID。为空代表第一级。
+#     company_id = data.get('company_id')    # 所属的父级的客户ID。为空代表第一级。
+#
+#     q = Q()
+#     q.add(Q(**{'article_id': article_id}), Q.AND)
+#     q.add(Q(**{'customer_id': customer_id}), Q.AND)
+#     q.add(Q(**{'user_id': user_id}), Q.AND)
+#     q.add(Q(**{'level': level}), Q.AND)
+#
+#     if parent_id:
+#         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+#     else:
+#         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+#
+#     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
+#
+#     if article_to_customer_belonger_obj:
+#         response.code = 302
+#         response.msg = "文章和客户\雷达用户-关系存在"
+#
+#     else:
+#         models.zgld_article_to_customer_belonger.objects.create(
+#             article_id=article_id,
+#             customer_id=customer_id,
+#             user_id=user_id,
+#             customer_parent_id=parent_id,
+#             level=level,
+#         )
+#
+#     user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+#     if user_customer_belonger_obj:
+#         response.code = 302
+#         response.msg = "关系存在"
+#
+#     else:
+#         models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+#
+#     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
+#     if activity_objs:
+#         activity_id = activity_objs[0].id
+#         redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id,activity_id=activity_id,customer_id=customer_id)
+#
+#         if redPacket_objs:
+#             response.code = 302
+#             response.msg = "关系存在"
+#
+#         else:
+#
+#             models.zgld_activity_redPacket.objects.create(article_id=article_id,
+#                                                           activity_id=activity_id,
+#                                                           customer_id=customer_id,
+#                                                           company_id=company_id,
+#                                                          )
+#             response.code = 200
+#             response.msg = "绑定成功"
+#
+#     return response
 
 
 
@@ -346,13 +339,12 @@ def binding_article_customer_relate(data):
 @account.is_token(models.zgld_customer)
 def user_gongzhonghao_auth_oper(request,oper_type):
     response = Response.ResponseObj()
-
     if request.method == "GET":
-        if oper_type == 'create_gongzhonghao_share_auth_url':
 
+        #
+        if oper_type == 'create_gongzhonghao_share_auth_url':
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
-
                 customer_id = request.GET.get('user_id')
                 uid = forms_obj.cleaned_data.get('uid') # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
                 # pid = forms_obj.cleaned_data.get('pid')
@@ -364,10 +356,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
                 if level:
                     level = int(level) + 1
-
                 pid =  customer_id
-
-
                 appid = authorization_appid
                 redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id,pid,level,uid,company_id)
 
@@ -378,7 +367,6 @@ def user_gongzhonghao_auth_oper(request,oper_type):
 
                 share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
 
-                from urllib.parse import quote
                 bianma_share_url = quote(share_url, 'utf-8')
 
                 share_url = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
@@ -484,14 +472,12 @@ def user_gongzhonghao_auth_oper(request,oper_type):
         return JsonResponse(response.__dict__)
 
 
-
+# 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
 @csrf_exempt
 def user_gongzhonghao_redirect_share_url(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        # 分享去的文章链接当点击后，出首先走到 api.zhugeleida.com 域名,程序帮他跳转到授权的URL上。
-
         share_url = request.GET.get('share_url')
 
         redirect_url = unquote(share_url, 'utf-8')

@@ -13,15 +13,15 @@ from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 
 
-
+# 插件活动报名
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def plugin_report_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
-
-        if oper_type == "sign_up_activity": # 客户 报名活动
+        # 客户 报名活动
+        if oper_type == "sign_up_activity":
             report_data = {
                 'customer_id': request.GET.get('user_id'),
                 'activity_id': o_id,      # 活动ID

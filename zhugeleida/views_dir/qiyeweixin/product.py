@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 from django.db.models import Q
 BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-
+# 企业产品查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def product(request, oper_type):
@@ -192,64 +192,7 @@ def product(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
-
-# 添加企业的产品
-class imgUploadForm(forms.Form):
-    img_name = forms.CharField(
-        error_messages={
-            'required': "图片名不能为空"
-        }
-    )
-    timestamp = forms.CharField(
-        error_messages={
-            'required': "时间戳不能为空"
-        }
-    )
-
-    img_data = forms.CharField(
-        error_messages={
-            'required': "图片内容不能为空"
-        }
-    )
-
-    chunk = forms.IntegerField(
-        error_messages={
-            'required': "当前是第几份文件不能为空",
-            'invalid': '份数必须是整数类型'
-        }
-    )
-
-
-# 添加企业的产品
-class imgMergeForm(forms.Form):
-    img_name = forms.CharField(
-        error_messages={
-            'required': "文件名不能为空"
-        }
-    )
-    timestamp = forms.CharField(
-        error_messages={
-            'required': "时间戳不能为空"
-        }
-    )
-
-    chunk_num = forms.IntegerField(
-        error_messages={
-            'required': "总份数不能为空",
-            'invalid': '总份数必须是整数类型'
-        }
-    )
-
-
-    picture_type = forms.IntegerField(
-        error_messages={
-            'required': "图片不能为空",
-            'invalid': '总份数必须是整数类型'
-        }
-    )
-
-
-
+# 企业产品操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def product_oper(request, oper_type, o_id):
@@ -257,6 +200,7 @@ def product_oper(request, oper_type, o_id):
 
     if request.method == "POST":
 
+        # 修改公司产品
         if oper_type == "update":
 
             form_data = {
@@ -283,20 +227,15 @@ def product_oper(request, oper_type, o_id):
                     reason=forms_obj.cleaned_data.get('reason'),
                     content = content
                 )
-
-
-                #
                 # product_obj.save()
-
                 response.code = 200
                 response.msg = "添加成功"
-
-
 
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 添加公司产品
         elif oper_type == "add":
 
             form_data = {
@@ -337,6 +276,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改公司产品状态
         elif oper_type == "change_status":
 
             status = int(request.POST.get('status'))
@@ -380,7 +320,6 @@ def product_oper(request, oper_type, o_id):
                     response.code = 302
                     response.msg = "没有权限修改"
 
-
             else:
 
                 response.code = 302
@@ -403,66 +342,63 @@ def product_oper(request, oper_type, o_id):
                 response.msg = '产品不存在'
 
 
-
-
-
     return JsonResponse(response.__dict__)
 
 
 
-
-class create_product_picture:
-
-    def __init__(self, user_id, picture_obj, product_obj, type):
-        self.response = Response.ResponseObj()
-        self.user_id = user_id
-        self.picture_obj = picture_obj
-        self.product_obj = product_obj
-        self.picture_type = type
-        self.BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-    def comon_picture(self, p_obj, product_picture_obj):
-
-        userid = models.zgld_userprofile.objects.get(id=self.user_id).userid
-        product_picture = '/%s_%s_photo.jpg' % (product_picture_obj.id, userid)
-
-        photo_url = 'statics/zhugeleida/imgs/qiyeweixin/product%s' % (product_picture)
-        product_picture_obj.picture_url = photo_url
-        product_picture_obj.save()
-        IMG_PATH = os.path.join(self.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin',
-                                'product') + product_picture
-        with open('%s' % (IMG_PATH), 'wb') as f:
-            print('---p_obj-->>', p_obj)
-
-            for chunk in p_obj.chunks():
-                f.write(chunk)
-
-    def create_picture(self):
-        if self.picture_obj:  # 封面图片存在
-            for p_obj in self.picture_obj:
-                product_picture_obj = models.zgld_product_picture.objects.create(picture_type=1,
-                                                                                 product_id=self.product_obj.id)
-                self.comon_picture(p_obj, product_picture_obj)
-
-            return '200'
-        else:
-            self.response.code = 301
-            self.response.msg = "封面图片不能为空"
-            return '301'
-
-
-def sort_article_data(data):
-    ret_list = []
-    for obj in data:
-        if not ret_list:
-            # tmp_dict[obj['order']] = obj
-            ret_list.append(obj)
-
-        else:
-            for index, data in enumerate(ret_list):
-                if obj['order'] < data['order']:
-                    ret_list.insert(index, obj)
-                    break
-            else:
-                ret_list.append(obj)
-    return ret_list
+#
+# class create_product_picture:
+#
+#     def __init__(self, user_id, picture_obj, product_obj, type):
+#         self.response = Response.ResponseObj()
+#         self.user_id = user_id
+#         self.picture_obj = picture_obj
+#         self.product_obj = product_obj
+#         self.picture_type = type
+#         self.BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+#
+#     def comon_picture(self, p_obj, product_picture_obj):
+#
+#         userid = models.zgld_userprofile.objects.get(id=self.user_id).userid
+#         product_picture = '/%s_%s_photo.jpg' % (product_picture_obj.id, userid)
+#
+#         photo_url = 'statics/zhugeleida/imgs/qiyeweixin/product%s' % (product_picture)
+#         product_picture_obj.picture_url = photo_url
+#         product_picture_obj.save()
+#         IMG_PATH = os.path.join(self.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin',
+#                                 'product') + product_picture
+#         with open('%s' % (IMG_PATH), 'wb') as f:
+#             print('---p_obj-->>', p_obj)
+#
+#             for chunk in p_obj.chunks():
+#                 f.write(chunk)
+#
+#     def create_picture(self):
+#         if self.picture_obj:  # 封面图片存在
+#             for p_obj in self.picture_obj:
+#                 product_picture_obj = models.zgld_product_picture.objects.create(picture_type=1,
+#                                                                                  product_id=self.product_obj.id)
+#                 self.comon_picture(p_obj, product_picture_obj)
+#
+#             return '200'
+#         else:
+#             self.response.code = 301
+#             self.response.msg = "封面图片不能为空"
+#             return '301'
+#
+#
+# def sort_article_data(data):
+#     ret_list = []
+#     for obj in data:
+#         if not ret_list:
+#             # tmp_dict[obj['order']] = obj
+#             ret_list.append(obj)
+#
+#         else:
+#             for index, data in enumerate(ret_list):
+#                 if obj['order'] < data['order']:
+#                     ret_list.insert(index, obj)
+#                     break
+#             else:
+#                 ret_list.append(obj)
+#     return ret_list

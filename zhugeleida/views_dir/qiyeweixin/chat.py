@@ -18,6 +18,7 @@ from zhugeleida import models
 import base64
 from zhugeleida.public.common import action_record
 
+# 获取所有的聊天信息
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def chat(request):
@@ -103,87 +104,16 @@ def chat(request):
             return JsonResponse(response.__dict__)
 
 
+# 聊天信息 操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def chat_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-    if request.method == "GET":
-        if oper_type == 'getmsg':
-
-            forms_obj = ChatGetForm(request.GET)
-            if forms_obj.is_valid():
-                response = Response.ResponseObj()
-                user_id = request.GET.get('user_id')
-                customer_id = request.GET.get('customer_id')
-
-                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-                    userprofile_id=user_id,
-                    customer_id=customer_id,
-                    is_user_new_msg=True
-
-                ).order_by('-create_date')
-
-                ret_data_list = []
-                count = objs.count()
-                for obj in objs:
-
-                    customer_name = base64.b64decode(obj.customer.username)
-                    customer_name = str(customer_name, 'utf-8')
-                    content = obj.content
-
-                    if not content:
-                        continue
-
-                    _content = json.loads(content)
-                    info_type = _content.get('info_type')
-                    if info_type:
-                        info_type = int(info_type)
-
-                        if info_type == 1:
-                            msg = _content.get('msg')
-                            msg = base64.b64decode(msg)
-                            msg = str(msg, 'utf-8')
-                            _content['msg'] = msg
-
-                    base_info_dict = {
-                        'customer_id': obj.customer_id,
-                        'customer_avatar': obj.customer.headimgurl,
-                        'user_id': obj.userprofile_id,
-                        'src': obj.customer.headimgurl,
-                        'name': customer_name,
-                        'dateTime': obj.create_date,
-                        # 'msg': obj.msg,
-                        # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                        'send_type': obj.send_type
-                    }
-                    base_info_dict.update(_content)
-
-                    ret_data_list.append(base_info_dict)
-
-                response.code = 200
-                response.msg = '实时获取-最新聊天信息成功'
-                print('--- list(msg_obj) -->>', ret_data_list)
-                ret_data_list.reverse()
-                response.data = {
-                    'ret_data': ret_data_list,
-                    'data_count': count,
-                }
-
-                objs.update(
-                    is_user_new_msg=False
-                )
-
-                if not ret_data_list:
-                    # 没有新消息
-                    response.msg = '没有得到实时聊天信息'
-                return JsonResponse(response.__dict__)
-
-    elif request.method == 'POST':
+    if request.method == 'POST':
         # 用户推送消息到server端,然后入库
         if  oper_type == 'send_msg':
             print('----send_msg--->>',request.POST)
             forms_obj = ChatPostForm(request.POST)
-
             if forms_obj.is_valid():
                 data = request.POST.copy()
                 user_id = int(data.get('user_id'))
@@ -278,13 +208,84 @@ def chat_oper(request, oper_type, o_id):
                     data['content'] = Content
                     tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
 
-
                 response.code = 200
                 response.msg = 'send msg successful'
-                return JsonResponse(response.__dict__)
 
     else:
-        response.code = 402
-        response.msg = "请求异常"
+
+        # 获取数据
+        if oper_type == 'getmsg':
+
+            forms_obj = ChatGetForm(request.GET)
+            if forms_obj.is_valid():
+                response = Response.ResponseObj()
+                user_id = request.GET.get('user_id')
+                customer_id = request.GET.get('customer_id')
+
+                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    is_user_new_msg=True
+
+                ).order_by('-create_date')
+
+                ret_data_list = []
+                count = objs.count()
+                for obj in objs:
+
+                    customer_name = base64.b64decode(obj.customer.username)
+                    customer_name = str(customer_name, 'utf-8')
+                    content = obj.content
+
+                    if not content:
+                        continue
+
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
+                    if info_type:
+                        info_type = int(info_type)
+
+                        if info_type == 1:
+                            msg = _content.get('msg')
+                            msg = base64.b64decode(msg)
+                            msg = str(msg, 'utf-8')
+                            _content['msg'] = msg
+
+                    base_info_dict = {
+                        'customer_id': obj.customer_id,
+                        'customer_avatar': obj.customer.headimgurl,
+                        'user_id': obj.userprofile_id,
+                        'src': obj.customer.headimgurl,
+                        'name': customer_name,
+                        'dateTime': obj.create_date,
+                        # 'msg': obj.msg,
+                        # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
+                        'send_type': obj.send_type
+                    }
+                    base_info_dict.update(_content)
+
+                    ret_data_list.append(base_info_dict)
+
+                response.code = 200
+                response.msg = '实时获取-最新聊天信息成功'
+                print('--- list(msg_obj) -->>', ret_data_list)
+                ret_data_list.reverse()
+                response.data = {
+                    'ret_data': ret_data_list,
+                    'data_count': count,
+                }
+
+                objs.update(
+                    is_user_new_msg=False
+                )
+
+                if not ret_data_list:
+                    # 没有新消息
+                    response.msg = '没有得到实时聊天信息'
+                return JsonResponse(response.__dict__)
+
+        else:
+            response.code = 402
+            response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)

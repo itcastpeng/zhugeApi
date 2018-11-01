@@ -21,6 +21,7 @@ from  publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 
+# 雷达用户登录
 @csrf_exempt
 def work_weixin_auth(request, company_id):
     response = Response.ResponseObj()
@@ -151,14 +152,16 @@ def work_weixin_auth(request, company_id):
     return JsonResponse(response.__dict__)
 
 
+# 雷达用户登录操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def work_weixin_auth_oper(request,oper_type):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        if oper_type == 'create_gongzhonghao_share_auth_url':
 
+        # 创建公众号分享url
+        if oper_type == 'create_gongzhonghao_share_auth_url':
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
 

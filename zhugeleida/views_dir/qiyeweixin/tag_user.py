@@ -11,7 +11,7 @@ import json
 
 from publicFunc.condition_com import conditionCom
 
-
+# 标签 和 标签用户的查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def tag_user(request):
@@ -43,6 +43,9 @@ def tag_user(request):
 
     return JsonResponse(response.__dict__)
 
+
+
+# 标签 和 标签用户的操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def tag_user_oper(request, oper_type):
@@ -50,6 +53,7 @@ def tag_user_oper(request, oper_type):
 
     if request.method == "POST":
 
+        # 添加用户标签
         if oper_type == "add":
 
             user_id = request.GET.get('user_id')
@@ -77,6 +81,7 @@ def tag_user_oper(request, oper_type):
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除用户标签
         elif oper_type == "delete":
             tag_id = request.POST.get('id')
             user_id = request.GET.get('user_id')
@@ -89,6 +94,7 @@ def tag_user_oper(request, oper_type):
                 response.code = 302
                 response.msg = '标签ID不存在'
 
+        # 保存用户标签
         elif oper_type == "save":
 
             user_id =  request.GET.get('user_id')
@@ -105,13 +111,9 @@ def tag_user_oper(request, oper_type):
                 response.code = 301
                 response.msg = "标签不存在"
 
-
-
-
         else:
             response.code = 302
             response.msg = '标签ID不存在'
-
 
     else:
         response.code = 402
