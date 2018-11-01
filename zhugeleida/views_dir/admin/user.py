@@ -340,7 +340,7 @@ def user_oper(request, oper_type, o_id):
                             'company_id': company_id,
                             'userid': userid,
                         }
-                        tasks.qiyeweixin_user_get_userinfo(_data)
+                        tasks.qiyeweixin_user_get_userinfo.delay(_data)
 
                         response.code = 200
                         response.msg = "添加用户成功"
@@ -525,7 +525,7 @@ def user_oper(request, oper_type, o_id):
                                 'company_id': company_id,
                                 'userid': userid,
                             }
-                            tasks.qiyeweixin_user_get_userinfo(_data) # 获取用户头像
+                            tasks.qiyeweixin_user_get_userinfo.delay(_data) # 获取用户头像
 
 
                             user_obj = user_objs[0]
@@ -672,7 +672,7 @@ def user_oper(request, oper_type, o_id):
                                     'company_id': company_id,
                                     'userid': userid,
                                 }
-                                tasks.qiyeweixin_user_get_userinfo(_data) # 获取头像信息
+                                tasks.qiyeweixin_user_get_userinfo.delay(_data) # 获取头像信息
 
                                 print('-------- 同步用户数据成功 user_id：-------->>',obj.id)
 
@@ -847,7 +847,7 @@ def user_oper(request, oper_type, o_id):
                                     'company_id': company_id,
                                     'userid': userid,
                                 }
-                                tasks.qiyeweixin_user_get_userinfo(_data)
+                                tasks.qiyeweixin_user_get_userinfo.delay(_data)
 
                                 response.code = 200
                                 response.msg = "添加用户成功"

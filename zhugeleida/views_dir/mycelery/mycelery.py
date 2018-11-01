@@ -634,7 +634,8 @@ def user_send_gongzhonghao_template_msg(request):
         activity_redPacket_objs =  models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,customer_parent_id=parent_id,activity_id=activity_id)
         if not activity_redPacket_objs:
             print('------ 【转发后查看 * 不发消息公众号模板消息提示】customer_id | parent_id | activity_id-------->>',customer_id,"|",parent_id,"|",activity_id)
-            return
+
+            return  HttpResponse('Dont send message')
 
 
     userprofile_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)

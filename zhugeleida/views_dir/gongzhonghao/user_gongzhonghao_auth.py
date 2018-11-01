@@ -133,7 +133,7 @@ def user_gongzhonghao_auth(request):
                         customer_username = str(customer_username, 'utf-8')
 
                     print('--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (uid,client_id,customer_username), '|', json.dumps(data))
-                    tasks.binding_article_customer_relate(data)
+                    tasks.binding_article_customer_relate.delay(data)
 
             else:
                 redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id, pid,level,uid,company_id)
@@ -215,7 +215,7 @@ def user_gongzhonghao_auth(request):
                 customer_id = int(obj.id)
                 if uid and pid != customer_id: # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
                     print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (uid,obj.id,customer_name), '|', json.dumps(data))
-                    tasks.binding_article_customer_relate(data)
+                    tasks.binding_article_customer_relate.delay(data)
 
             else:
                 errcode = ret_json.get('errcode')
@@ -229,7 +229,7 @@ def user_gongzhonghao_auth(request):
             'authorizer_appid': appid,
         }
         # 获取 公众号的用户信息
-        tasks.get_customer_gongzhonghao_userinfo(_data)
+        tasks.get_customer_gongzhonghao_userinfo.delay(_data)
 
         return redirect(redirect_url)
 
