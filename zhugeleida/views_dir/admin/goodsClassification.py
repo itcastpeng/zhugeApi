@@ -36,7 +36,7 @@ def init_data(xiaochengxu_id, pid=None, level=1):
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def goodsClassShow(request):
+def goodsClass(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         user_id = request.GET.get('user_id')
