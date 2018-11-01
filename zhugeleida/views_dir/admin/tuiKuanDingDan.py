@@ -14,7 +14,7 @@ import os, random, datetime
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def tuiKuanDingDanShow(request):
+def tuiKuanDingDan(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')

@@ -82,7 +82,7 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
 # 商城展示
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def mallManagementShow(request):
+def mallManagement(request):
     user_id = request.GET.get('user_id')
     goodsGroup = request.GET.get('goodsGroup')
     status = request.GET.get('status')

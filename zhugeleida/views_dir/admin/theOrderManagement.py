@@ -11,7 +11,7 @@ from django.db.models import Q
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def theOrderShow(request):
+def theOrder(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
