@@ -78,7 +78,7 @@ urlpatterns = [
 
     # 企业微信端-文章管理
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)', article.article_oper),
-    url(r'^article/(?P<oper_type>\w+)/', article.article),
+    url(r'^article', article.article),
 
     # 话术分组管理
     url(r'^talkGroupManageShow', talkGroupManagement.talkGroupManageShow),

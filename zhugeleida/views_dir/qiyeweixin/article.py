@@ -21,13 +21,13 @@ import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def article(request, oper_type):
+def article(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
         # 获取参数 页数 默认1
 
-        if oper_type == 'myarticle_list':
+        # if oper_type == 'myarticle_list':
 
             forms_obj = ArticleSelectForm(request.GET)
             if forms_obj.is_valid():
@@ -127,6 +127,7 @@ def article(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
             return JsonResponse(response.__dict__)
+
 
     return JsonResponse(response.__dict__)
 
