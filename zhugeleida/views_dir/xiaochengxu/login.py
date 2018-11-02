@@ -359,6 +359,7 @@ def bottom_button_info(request):
         ]
         obj = models.zgld_company.objects.get(id=company_id)
         shopping_type = obj.shopping_type
+        is_show_jszc = obj.is_show_jszc
         shopping_info_dict = ''
         ret_data = {}
 
@@ -383,6 +384,8 @@ def bottom_button_info(request):
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list
         ret_data['shop_type'] = shopping_type
         ret_data['shop_type_text'] = obj.get_shopping_type_display()
+        ret_data['is_show_jszc'] = is_show_jszc
+        ret_data['is_show_jszc_text'] = obj.get_is_show_jszc_display()
 
         print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200
