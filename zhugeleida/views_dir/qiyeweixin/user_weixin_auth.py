@@ -361,6 +361,3 @@ def enterprise_weixin_sign(request):
         response.msg = "请求方式异常"
 
     return JsonResponse(response.__dict__)
-
-
-

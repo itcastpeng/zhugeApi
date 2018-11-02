@@ -265,8 +265,9 @@ def activity_manage(request, oper_type):
                         start_time = activity_obj.start_time
                         end_time = activity_obj.end_time
 
-                        forward_read_num = models.zgld_article_to_customer_belonger.objects.filter(
-                            customer_parent_id=obj.customer_id, article_id=article_id, create_date__lte=end_time,
+
+                        forward_read_num = models.zgld_activity_redPacket.objects.filter(
+                            customer_parent_id=obj.customer_id, activity_id=activity_id, create_date__lte=end_time,
                             create_date__gte=start_time).values_list('customer_id').distinct().count()
 
                         forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
