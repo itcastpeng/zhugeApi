@@ -240,6 +240,26 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+            # 修改用户启用状态
+
+        elif oper_type == "is_show_technical_support":
+
+            status = request.POST.get('status')  # (1, "启用"),  (2, "未启用"),
+            user_id = request.GET.get('user_id')
+
+            objs = models.zgld_admin_userprofile.objects.filter(id=o_id)
+
+            if objs:
+                if status:
+                    objs.update(is_show_jszc=status)
+                    response.code = 200
+                    response.msg = "修改成功"
+            else:
+                response.code = 301
+                response.msg = "用户不存在"
+
+
+
     else:
         response.code = 402
         response.msg = "请求异常"

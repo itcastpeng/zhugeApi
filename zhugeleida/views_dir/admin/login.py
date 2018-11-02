@@ -96,16 +96,17 @@ def login(request):
 
 
 @csrf_exempt
+# @account.is_token(models.zgld_admin_userprofile)
 def modify_password(request):
     response = Response.ResponseObj()
 
     if request.method == "POST":
         print('-----request.method.post()-------->>', request.POST)
         user_id = request.GET.get('user_id')
-        modify_form = ModifyPwdForm(request.POST)
+        form_obj = ModifyPwdForm(request.POST)
 
-        if modify_form.is_valid():
-            password = modify_form.cleaned_data.get('password1')
+        if form_obj.is_valid():
+            password = form_obj.cleaned_data.get('password1')
             userprofile_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
 
             if userprofile_obj:
@@ -117,8 +118,9 @@ def modify_password(request):
                 response.msg = "修改密码成功"
         else:
             response.code = 402
-            response.msg = "请求异常"
-            response.data = json.loads(modify_form.errors.as_json())
+            # response.msg = "两次密码输入不一致"
+            print('---- 修改密码 formobj----->>',form_obj.errors.as_json())
+            response.msg = json.loads(form_obj.errors.as_json())
     else:
         response.code = 401
         response.msg = "请求异常"

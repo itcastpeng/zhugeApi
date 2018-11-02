@@ -255,6 +255,12 @@ class zgld_admin_userprofile(models.Model):
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=1)
 
+    is_show_jszc_choices = (
+        (1, "展示"),
+        (2, "不展示"),
+    )
+    is_show_jszc = models.SmallIntegerField(choices=is_show_jszc_choices, verbose_name="是否展示技术支持", default=1)
+
     is_reset_password = models.BooleanField(verbose_name="是否重置密码", default=False)
     token = models.CharField(verbose_name="token值", max_length=64, null=True, blank=True)
     role = models.ForeignKey("zgld_admin_role", verbose_name="角色")
@@ -331,13 +337,6 @@ class zgld_userprofile(models.Model):
         (2, "Boss雷达不启用"),
     )
     boss_status = models.SmallIntegerField(choices=boss_status_choices, verbose_name="Boss雷达状态", default=2)
-
-    is_show_jszc_choices = (
-        (1, "展示"),
-        (2, "不展示"),
-    )
-    is_show_jszc = models.SmallIntegerField(choices=is_show_jszc_choices, verbose_name="是否展示技术支持", default=1)
-
 
     popularity = models.IntegerField(verbose_name='人气数(被查看)', default=0)
     praise = models.IntegerField(verbose_name='被赞数', default=0)
