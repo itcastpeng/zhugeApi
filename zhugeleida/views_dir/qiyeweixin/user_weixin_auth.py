@@ -116,7 +116,7 @@ def work_weixin_auth(request, company_id):
                 user_profile_obj.gender = gender
                 user_profile_obj.avatar = avatar
                 last_login_date = user_profile_obj.last_login_date
-                is_show_technical_support = user_profile_obj.company.is_show_technical_support
+                is_show_technical_support = user_profile_obj.company.is_show_jszc
 
                 redirect_url = ''
                 if not last_login_date: # 为空说明第一次登陆
