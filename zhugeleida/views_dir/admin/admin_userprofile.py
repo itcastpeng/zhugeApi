@@ -60,6 +60,8 @@ def admin_userprofile(request):
                     'role_name': obj.role.name,
                     'status': obj.status,
                     'status_text': obj.get_status_display(),
+                    'is_show_jszc': obj.is_show_jszc,
+                    'is_show_jszc_text': obj.get_is_show_jszc_display(),
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                     # 'last_login_date': obj.last_login_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
