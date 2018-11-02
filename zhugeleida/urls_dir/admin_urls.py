@@ -8,8 +8,14 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
 
 
 urlpatterns = [
+    
+    # 登录
     url(r'^login$', login.login),
+
+    # 获取当前角色拥有的权限
     url(r'^login_rules$', login.login_rules),
+
+    # 修改密码
     url(r'^modify_password$', login.modify_password),
 
     # 后台 - 首页功能 数据统计 名片状态+账号状态
