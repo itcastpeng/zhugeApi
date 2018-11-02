@@ -66,13 +66,15 @@ def tag_list(request):
         response.msg = "请求异常"
 
 
+# 标签列表和标签列表的的操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def tag_list_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
-        if oper_type == "add_tag":   # 为客户新增加标签，然后绑定到这个客户。
+        # 为客户新增加标签，然后绑定到这个客户。
+        if oper_type == "add_tag":
 
             tag_data = {
                 'name': request.POST.get('name'),
@@ -100,8 +102,8 @@ def tag_list_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 清空标签
         elif oper_type == 'delete_tag':
-
             user_id = request.GET.get('user_id')
 
             objs = models.zgld_tag.objects.filter(id=o_id,user_id=user_id)
@@ -110,11 +112,10 @@ def tag_list_oper(request, oper_type, o_id):
                 objs.delete()
 
             response.code = 200
-            response.msg = "添加成功"
+            response.msg = "删除成功"
 
-
-
-        elif oper_type == "customer_tag":  # 操作tag，为客户添加多个标签
+        # 操作tag，为客户添加多个标签
+        elif oper_type == "customer_tag":
 
             tag_list = json.loads(request.POST.get('tag_list'))
             customer_obj = models.zgld_customer.objects.get(id=o_id)
@@ -126,7 +127,6 @@ def tag_list_oper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = "标签关联客户不能为空"
-
 
     else:
         response.code = 402

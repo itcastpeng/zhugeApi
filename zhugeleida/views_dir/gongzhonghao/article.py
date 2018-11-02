@@ -18,7 +18,7 @@ from django.db.models import Count
 import requests
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 
-
+# 公众号查询文章
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
 def article(request, oper_type):
@@ -111,6 +111,7 @@ def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     import json
     if request.method == "POST":
+        # 添加公众号文章
         if oper_type == "add":
             article_data = {
                 'user_id': request.GET.get('user_id'),
@@ -147,6 +148,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除公众号文章
         elif oper_type == "delete":
             print('------delete o_id --------->>', o_id)
             user_id = request.GET.get('user_id')
@@ -161,6 +163,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '文章不存在'
 
+        # 修改公众号文章
         elif oper_type == "update":
             article_data = {
                 'article_id': o_id,
@@ -201,6 +204,8 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
+
+        # 查看公众号文章详情
         if oper_type == 'myarticle':
 
             print('----- 公众号查看文章 request.GET myarticle----->>', request.GET)
@@ -392,6 +397,7 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
+        # 转发公众号
         elif oper_type == 'forward_article':
 
             uid = request.GET.get('uid')
@@ -455,6 +461,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 记录客户查看文章时间
         elif oper_type == 'staytime':
             uid = request.GET.get('uid')
             customer_id = request.GET.get('user_id')
@@ -513,6 +520,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 获取用户信息
         elif oper_type == 'test_send_redPacket':
 
             # _data = {

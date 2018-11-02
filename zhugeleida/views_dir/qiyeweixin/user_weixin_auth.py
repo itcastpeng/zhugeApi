@@ -21,6 +21,7 @@ from  publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 
+# 雷达用户登录
 @csrf_exempt
 def work_weixin_auth(request, company_id):
     response = Response.ResponseObj()
@@ -108,13 +109,14 @@ def work_weixin_auth(request, company_id):
             print("---------------- 用户存在")
             user_profile_obj = user_profile_objs[0]
             status = user_profile_obj.status
+            boss_status = user_profile_obj.boss_status
 
             if status == 1: #
 
                 user_profile_obj.gender = gender
                 user_profile_obj.avatar = avatar
                 last_login_date = user_profile_obj.last_login_date
-
+                redirect_url = ''
                 if not last_login_date: # 为空说明第一次登陆
                     is_first_login = 'Yes'
                     user_profile_obj.last_login_date = datetime.datetime.now()
@@ -122,7 +124,11 @@ def work_weixin_auth(request, company_id):
                     is_first_login = 'No'
 
                 user_profile_obj.save()
-
+                # url = ''
+                # if status == 1:  #  (1, "AI雷达启用"),
+                #     url  = 'http://zhugeleida.zhugeyingxiao.com'
+                # elif status == 3: # (3, "Boss雷达启用"),
+                #     url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
                 url = 'http://zhugeleida.zhugeyingxiao.com'
                 redirect_url = url + '?token=' + user_profile_obj.token + '&id=' + str(
                     user_profile_obj.id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
@@ -146,6 +152,7 @@ def work_weixin_auth(request, company_id):
     return JsonResponse(response.__dict__)
 
 
+# 雷达用户登录操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def work_weixin_auth_oper(request,oper_type):
@@ -153,8 +160,8 @@ def work_weixin_auth_oper(request,oper_type):
 
     if request.method == "GET":
 
+        # 创建公众号分享url
         if oper_type == 'create_gongzhonghao_share_auth_url':
-
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
 
@@ -354,6 +361,3 @@ def enterprise_weixin_sign(request):
         response.msg = "请求方式异常"
 
     return JsonResponse(response.__dict__)
-
-
-
