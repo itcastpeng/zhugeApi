@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import base64
 import json
 
+# 访问日志操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def action(request, oper_type):
@@ -23,6 +24,8 @@ def action(request, oper_type):
     :return:
     '''
     if request.method == 'GET':
+
+        # 根据时间查询 日志
         if oper_type == 'time':
             forms_obj = ActionSelectForm(request.GET)
             if forms_obj.is_valid():
@@ -103,6 +106,7 @@ def action(request, oper_type):
 
                 return JsonResponse(response.__dict__)
 
+        # 获取新的日志信息
         elif oper_type == 'get_new_log':
             forms_obj = ActionSelectForm(request.GET)
             if forms_obj.is_valid():
@@ -153,6 +157,7 @@ def action(request, oper_type):
 
                 return JsonResponse(response.__dict__)
 
+        # 查询日志记录
         elif oper_type == 'count':
             forms_obj = ActionCountForm(request.GET)
             if forms_obj.is_valid():
@@ -217,23 +222,20 @@ def action(request, oper_type):
 
                 return JsonResponse(response.__dict__)
 
+        # 查询访问动能日志记录
         elif oper_type == 'customer':
             forms_obj = ActionCustomerForm(request.GET)
+            response = Response.ResponseObj()
             if forms_obj.is_valid():
-                response = Response.ResponseObj()
-
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-
                 field_dict = {
                     'id': '',
                     'user_id': '',
                     'name': '__contains',
                     'create_date__gte': '',
                 }
-
                 q = conditionCom(request, field_dict)
-
                 create_date__gte = request.GET.get('create_date__gte')
                 create_date__lt = request.GET.get('create_date__lt')
                 if not create_date__gte:
@@ -247,10 +249,11 @@ def action(request, oper_type):
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
                 # print('----q-->>',q)
-                objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer__headimgurl', 'customer_id',
-                                                                      'customer__username').annotate(Count('action'))
-
-
+                objs = models.zgld_accesslog.objects.select_related(
+                    'user','customer'
+                ).filter(q).values(
+                    'customer__headimgurl', 'customer_id','customer__username'
+                ).annotate(Count('action'))
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
@@ -278,7 +281,6 @@ def action(request, oper_type):
                         'action_count': action_count,
                         'customer_username': customer_name,
                         'headimgurl': headimgurl,
-
                     }
                     if not ret_list:  # 首次添加
                         ret_list.append(insert_data)
@@ -292,13 +294,13 @@ def action(request, oper_type):
                             ret_list.append(insert_data)
 
                 # print('ret_list -->', ret_list)
-
                 response.code = 200
                 response.msg = '查询日志记录成功'
                 response.data = ret_list
 
-                return JsonResponse(response.__dict__)
+            return JsonResponse(response.__dict__)
 
+        # 查询日志记录
         elif oper_type == 'customer_detail':
             response = Response.ResponseObj()
             field_dict = {

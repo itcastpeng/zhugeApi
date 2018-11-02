@@ -12,6 +12,35 @@ import json
 
 from publicFunc.condition_com import conditionCom
 
+def insert_sort(objs):
+    for i in  range(1,len(objs)):
+        if  objs[i]['customer_num']  >  objs[i-1]['customer_num']:
+            temp = objs[i]['customer_num']
+            temp_tag_id = objs[i]['tag_id']
+            name = objs[i]['name']
+            id = objs[i]['id']
+            customer_list =  objs[i]['customer_list']
+
+            for j in range(i-1,-1,-1):
+                if objs[j]['customer_num'] < temp:
+                    objs[j + 1]['customer_num'] = objs[j]['customer_num']
+
+                    objs[j + 1]['tag_id'] = objs[j]['tag_id']
+                    objs[j + 1]['name'] = objs[j]['name']
+                    objs[j + 1]['id'] = objs[j]['id']
+                    objs[j + 1]['customer_list'] = objs[j]['customer_list']
+
+                    index = j  # 记下应该插入的位置
+                else:
+                    break
+                objs[index]['customer_num'] = temp
+                objs[index]['tag_id'] = temp_tag_id
+                objs[index]['name'] = name
+                objs[index]['id'] = id
+                objs[index]['customer_list'] = customer_list
+
+    return objs
+
 #查询标签和所属的用户
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -64,19 +93,21 @@ def tag_customer(request):
                 'ret_data': insert_sort(ret_data),
                 'ret_count': len(ret_data),
             }
-        return JsonResponse(response.__dict__)
 
     else:
         response.code = 402
         response.msg = "请求异常"
+    return JsonResponse(response.__dict__)
 
-
+# 标签 和 标签客户的操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def tag_customer_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
+        # 添加标签
         if oper_type == "add":
 
             tag_data = {
@@ -110,34 +141,7 @@ def tag_customer_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def insert_sort(objs):
-    for i in  range(1,len(objs)):
-        if  objs[i]['customer_num']  >  objs[i-1]['customer_num']:
-            temp = objs[i]['customer_num']
-            temp_tag_id = objs[i]['tag_id']
-            name = objs[i]['name']
-            id = objs[i]['id']
-            customer_list =  objs[i]['customer_list']
 
-            for j in range(i-1,-1,-1):
-                if objs[j]['customer_num'] < temp:
-                    objs[j + 1]['customer_num'] = objs[j]['customer_num']
-
-                    objs[j + 1]['tag_id'] = objs[j]['tag_id']
-                    objs[j + 1]['name'] = objs[j]['name']
-                    objs[j + 1]['id'] = objs[j]['id']
-                    objs[j + 1]['customer_list'] = objs[j]['customer_list']
-
-                    index = j  # 记下应该插入的位置
-                else:
-                    break
-                objs[index]['customer_num'] = temp
-                objs[index]['tag_id'] = temp_tag_id
-                objs[index]['name'] = name
-                objs[index]['id'] = id
-                objs[index]['customer_list'] = customer_list
-
-    return objs
 
 
 

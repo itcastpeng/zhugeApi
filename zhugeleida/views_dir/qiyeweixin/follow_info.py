@@ -65,7 +65,6 @@ def follow_info(request, ):
                     'data_count': count,
                 }
 
-
     else:
         response.code = 402
         response.msg = "请求异常"
@@ -73,12 +72,15 @@ def follow_info(request, ):
     return JsonResponse(response.__dict__)
 
 
+# 用户跟进信息操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def follow_info_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
+        # 添加用户跟进信息
         if oper_type == "add":
 
             print('----request.POST---->>', request.POST)
@@ -114,7 +116,6 @@ def follow_info_oper(request, oper_type, o_id):
                 print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
     else:
         response.code = 402

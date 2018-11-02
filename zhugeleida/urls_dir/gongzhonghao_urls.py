@@ -16,7 +16,7 @@ urlpatterns = [
     url(r'^work_gongzhonghao_auth/(?P<oper_type>\w+)$', user_gongzhonghao_auth.user_gongzhonghao_auth_oper),
 
     # 实时聊天
-    url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
+    url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)$', chat.chat_oper),
     url(r'^chat$', chat.chat),
 
     # 公众号文章管理
