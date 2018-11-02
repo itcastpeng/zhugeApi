@@ -332,6 +332,11 @@ class zgld_userprofile(models.Model):
     )
     boss_status = models.SmallIntegerField(choices=boss_status_choices, verbose_name="Boss雷达状态", default=2)
 
+    is_show_jszc_choices = (
+        (1, "展示"),
+        (2, "不展示"),
+    )
+    is_show_jszc = models.SmallIntegerField(choices=is_show_jszc_choices, verbose_name="是否展示技术支持", default=1)
 
 
     popularity = models.IntegerField(verbose_name='人气数(被查看)', default=0)
