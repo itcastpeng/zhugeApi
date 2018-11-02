@@ -332,7 +332,7 @@ def create_user_or_customer_qr_code(request):
 
     return JsonResponse(response.__dict__)
 
-
+# 获取企业用户信息
 def qiyeweixin_user_get_userinfo(request):
     response = ResponseObj()
     company_id = request.GET.get('company_id')
@@ -391,7 +391,7 @@ def qiyeweixin_user_get_userinfo(request):
 
     return JsonResponse(response.__dict__)
 
-
+# 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
     response = ResponseObj()
@@ -1212,7 +1212,7 @@ def bufa_send_activity_redPacket(request):
 
 
 
-
+# 关注发红包和转发文章满足就发红包
 @csrf_exempt
 def user_focus_send_activity_redPacket(request):
     response = Response.ResponseObj()

@@ -1,57 +1,11 @@
-from django.shortcuts import HttpResponse
-from django import forms
 from publicFunc import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import base64
-# BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-from zhugeleida import models
-from publicFunc import account
-
+# BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))t
+from zhugeleida.forms.public import img_upload_verify
+from zhugeleida.forms.public import img_merge_verify
 from django.http import HttpResponse
-from django.conf import settings
-
-import os
-import uuid
-import json
-import datetime as dt
-import time
-
-
-# 添加企业的产品
-class imgUploadForm(forms.Form):
-    img_name = forms.CharField(
-        error_messages={
-            'required': "图片名不能为空"
-        }
-    )
-    timestamp = forms.CharField(
-        error_messages={
-            'required': "时间戳不能为空"
-        }
-    )
-
-    img_data = forms.CharField(
-        error_messages={
-            'required': "图片内容不能为空"
-        }
-    )
-
-    chunk = forms.IntegerField(
-        error_messages={
-            'required': "当前是第几份文件不能为空",
-            'invalid': '份数必须是整数类型'
-        }
-    )
-
-    img_source =  forms.CharField(
-        error_messages={
-            'required': "文件类型不能为空",
-            'invalid':  "必须是字符串"
-        }
-    )
-
-
+import datetime as dt, time, json, uuid, os, base64
 
 # 上传图片（分片上传）
 @csrf_exempt
@@ -59,7 +13,7 @@ class imgUploadForm(forms.Form):
 def img_upload(request):
     response = Response.ResponseObj()
 
-    forms_obj = imgUploadForm(request.POST)
+    forms_obj = img_upload_verify.imgUploadForm(request.POST)
     if forms_obj.is_valid():
 
         img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
@@ -85,39 +39,12 @@ def img_upload(request):
     return JsonResponse(response.__dict__)
 
 
-# 合并图片 Form 验证
-class imgMergeForm(forms.Form):
-    img_name = forms.CharField(
-        error_messages={
-            'required': "文件名不能为空"
-        }
-    )
-    timestamp = forms.CharField(
-        error_messages={
-            'required': "时间戳不能为空"
-        }
-    )
-
-    chunk_num = forms.IntegerField(
-        error_messages={
-            'required': "总份数不能为空",
-            'invalid': '总份数必须是整数类型'
-        }
-    )
-    img_source =  forms.CharField(
-        error_messages={
-            'required': "文件类型不能为空",
-            'invalid':  "必须是字符串"
-        }
-    )
-
-
 # 合并图片
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
 def img_merge(request):
     response = Response.ResponseObj()
-    forms_obj = imgMergeForm(request.POST)
+    forms_obj = img_merge_verify.imgMergeForm(request.POST)
     if forms_obj.is_valid():
         img_name = forms_obj.cleaned_data.get('img_name')  # 图片名称
         timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
@@ -197,8 +124,6 @@ def img_merge(request):
         response.data = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
-
-
 
 
 # 目录创建
