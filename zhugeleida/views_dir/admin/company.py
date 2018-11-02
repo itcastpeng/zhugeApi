@@ -71,7 +71,8 @@ def company(request):
                     # 'corp_id': obj.corp_id,
                     # 'tongxunlu_secret': obj.tongxunlu_secret,
                     'create_date': obj.create_date.strftime('%Y-%m-%d'),
-
+                    'is_show_jszc': obj.is_show_jszc,
+                    'is_show_jszc_text': obj.get_is_show_jszc_display(),
                     'user_count': user_count,        # 用户总数
                     'customer_num': customer_num,    # 拥有的客户数量
                     'available_days': available_days, #剩余天数
