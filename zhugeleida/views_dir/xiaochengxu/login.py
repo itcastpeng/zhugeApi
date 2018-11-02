@@ -324,6 +324,7 @@ def login_oper(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
+
 def bottom_button_info(request):
     response = Response.ResponseObj()
 
