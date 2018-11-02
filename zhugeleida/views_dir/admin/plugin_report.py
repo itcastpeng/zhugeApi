@@ -12,7 +12,7 @@ import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 import base64
-
+# 公众号插件报名查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def plugin_report(request):
@@ -122,21 +122,21 @@ def plugin_report(request):
             response.code = 301
             response.msg = json.loads(forms_obj.errors.as_json())
 
-
-
     else:
         response.code = 402
         response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
 
-
+# 公众号插件报名操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def plugin_report_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
+        # 添加插件报名
         if oper_type == "add":
             report_data = {
                 'user_id': request.GET.get('user_id'),
@@ -183,6 +183,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除插件报名
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
             user_id = request.GET.get('user_id')
@@ -197,6 +198,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '活动不存在'
 
+        # 修改插件报名
         elif oper_type == "update":
             report_data = {
                 'id' : o_id,
@@ -244,7 +246,8 @@ def plugin_report_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == "sign_up_activity": # 客户 报名活动
+        # 客户 报名活动
+        elif oper_type == "sign_up_activity":
             report_data = {
                 'customer_id': request.GET.get('user_id'),
                 'activity_id': o_id,      # 活动ID
@@ -296,9 +299,6 @@ def plugin_report_oper(request, oper_type, o_id):
                 print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
-
-
 
     else:
         response.code = 402

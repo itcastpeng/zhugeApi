@@ -1,27 +1,21 @@
-from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import requests
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
-
-import json
-import redis
-import xml.etree.cElementTree as ET
-from django import forms
-import sys
 from zhugeapi_celery_project.tasks import celery_addSmallProgram
+import redis, json, xml.etree.cElementTree as ET, requests
+from zhugeleida.forms.admin import open_weixin_verify
 
 
 ## 第三方平台接入
 @csrf_exempt
 def open_weixin(request, oper_type):
     response = Response.ResponseObj()
-
     if request.method == "POST":
 
+        # 三方接入 返回状态通知
         if oper_type == 'tongzhi':
 
             print('------ 第三方 request.body tongzhi 通知内容 ------>>', request.body.decode(encoding='UTF-8'))
@@ -349,7 +343,6 @@ def open_weixin(request, oper_type):
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
 
-
     return JsonResponse(response.__dict__)
 
 
@@ -473,9 +466,10 @@ def xcx_auth_process_oper(request, oper_type):
 
     if request.method == "POST":
 
-        if oper_type == 'app_id':  # 修改更新 original_id
+        # 修改更新 original_id
+        if oper_type == 'app_id':
 
-            forms_obj = UpdateIDForm(request.POST)
+            forms_obj = open_weixin_verify.UpdateIDForm(request.POST)
             if forms_obj.is_valid():
                 authorization_appid = request.POST.get('authorization_appid').strip()
 
@@ -504,9 +498,10 @@ def xcx_auth_process_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'info':  # 更新授权修改的信息。
+        # 更新授权修改的信息
+        elif oper_type == 'info':
 
-            forms_obj = UpdateInfoForm(request.POST)
+            forms_obj = open_weixin_verify.UpdateInfoForm(request.POST)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
                 name = forms_obj.cleaned_data.get('name')  # 小程序名称
@@ -529,9 +524,9 @@ def xcx_auth_process_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-    elif request.method == 'GET':
+    else :
 
-        ###获取小程序基本信息
+        #获取小程序基本信息
         if oper_type == 'xcx_get_authorizer_info':
             user_id = request.GET.get('user_id')
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -596,10 +591,11 @@ def xcx_auth_process_oper(request, oper_type):
                 response.msg = '小程序不存在'
                 response.code = 302
 
+        else:
+            response.code = 402
+            response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
-
-
 
 
 ## 生成请 第三方平台 自己 的component_access_token
@@ -644,40 +640,3 @@ def create_component_access_token():
 
 
 
-# 添加企业的产品
-class UpdateIDForm(forms.Form):
-    authorization_appid = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "authorization_appid 不能为空"
-        }
-    )
-
-
-class UpdateInfoForm(forms.Form):
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "小程序名称不能为空"
-        }
-    )
-
-    head_img = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "小程序头像不能为空"
-        }
-    )
-    introduce = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "小程序头像不能为空"
-        }
-    )
-
-    service_category = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "服务类目不能为空"
-        }
-    )

@@ -12,7 +12,8 @@ import json
 from django.db.models import Q
 import base64
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 查询客户管理
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def customer(request):
@@ -123,7 +124,7 @@ def customer(request):
     return JsonResponse(response.__dict__)
 
 
-#  增删改 用户表
+#  增删改 客户管理
 #  csrf  token验证
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -131,6 +132,7 @@ def customer_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
 
+        # 删除客户
         if  oper_type == "delete":
             # 删除 ID
             user_objs = models.zgld_customer.objects.filter(id=o_id)
@@ -142,6 +144,7 @@ def customer_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '用户ID不存在'
 
+        # 添加客户
         elif oper_type == "update_tag":
 
                 tag_list =  json.loads(request.POST.get('tag_list'))
@@ -159,6 +162,7 @@ def customer_oper(request, oper_type, o_id):
                     response.code = 301
                     response.msg = '用户标签不存在'
 
+        # 添加消息跟进详情
         elif oper_type == "update_expected_time":
 
             form_data = {
@@ -196,6 +200,7 @@ def customer_oper(request, oper_type, o_id):
                 response.code = 303
                 response.msg =  forms_obj.errors.as_json()
 
+        # 添加 用户-客户关系
         elif oper_type == "update_expected_pr":
 
             form_data = {
@@ -238,6 +243,7 @@ def customer_oper(request, oper_type, o_id):
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 添加资料详情
         elif oper_type == "update_information":
 
             # 更新客户表的具体信息
@@ -307,7 +313,6 @@ def customer_oper(request, oper_type, o_id):
             else:
                 response.code = 303
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
     else:
         response.code = 402

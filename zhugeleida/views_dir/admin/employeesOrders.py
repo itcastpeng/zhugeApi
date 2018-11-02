@@ -8,7 +8,7 @@ from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm
 import json, base64, datetime, time
 from django.db.models import Q, Sum, Count
 
-
+# 员工订单查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def employeesOrders(request):

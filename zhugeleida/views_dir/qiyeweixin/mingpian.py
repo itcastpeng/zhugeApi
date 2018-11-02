@@ -194,7 +194,7 @@ def mingpian_oper(request, oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-
+        # 创建意见反馈
         elif oper_type == 'feedback':
             user_id = request.GET.get('user_id')
             content = request.POST.get('content')
@@ -211,6 +211,7 @@ def mingpian_oper(request, oper_type):
             response.code = 200
             response.msg = '保存成功'
 
+        # 生成用户二维码成功
         elif oper_type == 'create_small_program_qr_code':
 
             user_id = request.GET.get('user_id')
@@ -245,9 +246,9 @@ def mingpian_oper(request, oper_type):
                 response.code = 301
                 response.msg = "用户不存在"
 
+    else:
 
-
-    elif request.method == "GET":
+        # 查看用户照片和头像
         if oper_type == 'show_photo':
             user_id = request.GET.get('user_id')
             photo_query_list = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url')
@@ -259,6 +260,7 @@ def mingpian_oper(request, oper_type):
                 'user_id': user_id,
             }
 
+        # 添加用户照片和头像
         elif oper_type == "upload_complete":
             user_id = request.GET.get('user_id')
             target_filename = request.GET.get('filename')   # 获取上传文件的文件名
@@ -300,5 +302,8 @@ def mingpian_oper(request, oper_type):
                     }
             }
 
+        else:
+            response.code = 402
+            response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)

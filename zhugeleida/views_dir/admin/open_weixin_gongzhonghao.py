@@ -4,22 +4,14 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import requests
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
-import xml.dom.minidom as xmldom
 from zhugeapi_celery_project import tasks
-import time
-import os, datetime
-import base64
-
-import json
-import redis
-import xml.etree.cElementTree as ET
-from django import forms
-
 from wechatpy.replies import TextReply
 from wechatpy.crypto import WeChatCrypto
 from zhugeleida.public.common import action_record
+from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
+import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
+import xml.dom.minidom as xmldom, requests
 
 # 第三方平台接入
 @csrf_exempt
@@ -879,9 +871,10 @@ def gzh_auth_process_oper(request, oper_type):
 
     if request.method == "POST":
 
-        if oper_type == 'app_id':  # 修改更新 original_id
+        # 修改更新 original_id
+        if oper_type == 'app_id':
 
-            forms_obj = UpdateIDForm(request.POST)
+            forms_obj = open_weixin_gongzhonghao_verify.UpdateIDForm(request.POST)
             if forms_obj.is_valid():
                 authorization_appid = request.POST.get('authorization_appid').strip()
 
@@ -910,9 +903,10 @@ def gzh_auth_process_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'info':  # 更新授权修改的信息。
+        # 更新授权修改的信息
+        elif oper_type == 'info':
 
-            forms_obj = UpdateInfoForm(request.POST)
+            forms_obj = open_weixin_gongzhonghao_verify.UpdateInfoForm(request.POST)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')
                 name = forms_obj.cleaned_data.get('name')  # 公众号名称
@@ -936,9 +930,9 @@ def gzh_auth_process_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-    elif request.method == 'GET':
+    else :
 
-        ###获取公众号基本信息
+        #获取公众号基本信息
         if oper_type == 'gzh_get_authorizer_info':
             user_id = request.GET.get('user_id')
             company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -1005,6 +999,10 @@ def gzh_auth_process_oper(request, oper_type):
             else:
                 response.msg = '公众号不存在'
                 response.code = 302
+
+        else:
+            response.code = 402
+            response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
 
@@ -1119,40 +1117,3 @@ def create_authorizer_access_token(data):
 
     return response
 
-
-class UpdateIDForm(forms.Form):
-    authorization_appid = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "authorization_appid 不能为空"
-        }
-    )
-
-
-class UpdateInfoForm(forms.Form):
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "公众号名称不能为空"
-        }
-    )
-
-    head_img = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "公众号头像不能为空"
-        }
-    )
-    introduce = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "公众号头像不能为空"
-        }
-    )
-
-    service_category = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "服务类目不能为空"
-        }
-    )

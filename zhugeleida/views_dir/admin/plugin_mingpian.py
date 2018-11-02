@@ -12,7 +12,7 @@ import json
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 
-
+# 公众号-插件名片查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def plugin_mingpian (request):
@@ -20,7 +20,6 @@ def plugin_mingpian (request):
 
     if request.method == "GET":
             # 获取参数 页数 默认1
-
 
         forms_obj = MingpianSelectForm(request.GET)
         if forms_obj.is_valid():
@@ -75,8 +74,6 @@ def plugin_mingpian (request):
             response.code = 301
             response.msg = json.loads(forms_obj.errors.as_json())
 
-
-
     else:
         response.code = 402
         response.msg = "请求异常"
@@ -84,12 +81,14 @@ def plugin_mingpian (request):
     return JsonResponse(response.__dict__)
 
 
+# 公众号-插件名片操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def plugin_mingpian_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+        # 添加名片
         if oper_type == "add":
             article_data = {
                 'user_id': request.GET.get('user_id'),
@@ -127,6 +126,7 @@ def plugin_mingpian_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除名片
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
             user_id = request.GET.get('user_id')
@@ -141,6 +141,7 @@ def plugin_mingpian_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '文章不存在'
 
+        # 修改名片
         elif oper_type == "update":
             mingpain_data = {
                 'mingpain_id' : o_id,

@@ -73,6 +73,7 @@ def role_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+        # 添加角色
         if oper_type == "add":
             role_data = {
                 'name' : request.POST.get('name'),
@@ -89,6 +90,7 @@ def role_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除该角色
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
 
@@ -108,6 +110,7 @@ def role_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '角色ID不存在'
 
+        # 修改角色
         elif oper_type == "update":
             form_data = {
                 'role_id': o_id,

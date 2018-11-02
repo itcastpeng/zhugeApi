@@ -13,6 +13,35 @@ from publicFunc.condition_com import conditionCom
 from django.db.models import Q
 
 
+def insert_sort(objs):
+    for i in range(1, len(objs)):
+        if objs[i]['customer_num'] > objs[i - 1]['customer_num']:
+            temp = objs[i]['customer_num']
+            temp_tag_id = objs[i]['tag_id']
+            name = objs[i]['name']
+            id = objs[i]['id']
+            customer_list = objs[i]['customer_list']
+
+            for j in range(i - 1, -1, -1):
+                if objs[j]['customer_num'] < temp:
+                    objs[j + 1]['customer_num'] = objs[j]['customer_num']
+
+                    objs[j + 1]['tag_id'] = objs[j]['tag_id']
+                    objs[j + 1]['name'] = objs[j]['name']
+                    objs[j + 1]['id'] = objs[j]['id']
+                    objs[j + 1]['customer_list'] = objs[j]['customer_list']
+
+                    index = j  # 记下应该插入的位置
+                else:
+                    break
+                objs[index]['customer_num'] = temp
+                objs[index]['tag_id'] = temp_tag_id
+                objs[index]['name'] = name
+                objs[index]['id'] = id
+                objs[index]['customer_list'] = customer_list
+
+    return objs
+
 # 查询标签和所属的用户
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -119,31 +148,3 @@ def search(request, oper_type):
         response.msg = "请求异常"
 
 
-def insert_sort(objs):
-    for i in range(1, len(objs)):
-        if objs[i]['customer_num'] > objs[i - 1]['customer_num']:
-            temp = objs[i]['customer_num']
-            temp_tag_id = objs[i]['tag_id']
-            name = objs[i]['name']
-            id = objs[i]['id']
-            customer_list = objs[i]['customer_list']
-
-            for j in range(i - 1, -1, -1):
-                if objs[j]['customer_num'] < temp:
-                    objs[j + 1]['customer_num'] = objs[j]['customer_num']
-
-                    objs[j + 1]['tag_id'] = objs[j]['tag_id']
-                    objs[j + 1]['name'] = objs[j]['name']
-                    objs[j + 1]['id'] = objs[j]['id']
-                    objs[j + 1]['customer_list'] = objs[j]['customer_list']
-
-                    index = j  # 记下应该插入的位置
-                else:
-                    break
-                objs[index]['customer_num'] = temp
-                objs[index]['tag_id'] = temp_tag_id
-                objs[index]['name'] = name
-                objs[index]['id'] = id
-                objs[index]['customer_list'] = customer_list
-
-    return objs

@@ -9,7 +9,8 @@ import json,os,sys
 from django.db.models import Q
 import datetime
 
-def mallManagement(request, user_id, goodsGroup, status, flag):
+# 方便查询调用  封装接口
+def mallManagementshow(request, user_id, goodsGroup, status, flag):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -79,17 +80,7 @@ def mallManagement(request, user_id, goodsGroup, status, flag):
             }
     return response
 
-# 商城展示
-@csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
-def mallManagement(request):
-    user_id = request.GET.get('user_id')
-    goodsGroup = request.GET.get('goodsGroup')
-    status = request.GET.get('status')
-    flag = 'admin'
-    response = mallManagement(request, user_id, goodsGroup, status, flag)
-    return JsonResponse(response.__dict__)
-
+# 查询该商品 所有父级分组
 def updateInitData(result_data,xiaochengxu_id, pid=None):   # 更新查询 分类接口
     objs = models.zgld_goods_classification_management.objects.filter(
         mallSetting_id=xiaochengxu_id,
@@ -100,7 +91,20 @@ def updateInitData(result_data,xiaochengxu_id, pid=None):   # 更新查询 分�
         result_data.append(obj.id)
     return result_data
 
-# 商城操作
+
+# 商城商品查询
+@csrf_exempt
+@account.is_token(models.zgld_admin_userprofile)
+def mallManagement(request):
+    user_id = request.GET.get('user_id')
+    goodsGroup = request.GET.get('goodsGroup')
+    status = request.GET.get('status')
+    flag = 'admin'
+    response = mallManagementshow(request, user_id, goodsGroup, status, flag)
+    return JsonResponse(response.__dict__)
+
+
+# 商城商品操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def mallManagementOper(request, oper_type, o_id):
@@ -122,8 +126,9 @@ def mallManagementOper(request, oper_type, o_id):
     }
     print('resultData---------------->',resultData)
     user_id = request.GET.get('user_id')
+    nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     if request.method == "POST":
-        nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # 添加商品
         if oper_type == 'add':
             forms_obj = AddForm(resultData)
             if forms_obj.is_valid():
@@ -154,7 +159,8 @@ def mallManagementOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'Beforeupdate': # 查询该商品 分组信息
+        # 查询该商品 分组信息
+        elif oper_type == 'Beforeupdate':
             goodsObjs = models.zgld_goods_management.objects.get(id=o_id) # 商品ID
             u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
             userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=u_idObjs.company_id)
@@ -166,7 +172,7 @@ def mallManagementOper(request, oper_type, o_id):
             response.msg = '查询成功'
             response.data = parentData # 根据 分组上下级关系 由大到小列表排列ID
 
-
+        # 修改商品
         elif oper_type == 'update':
             forms_obj = UpdateForm(resultData)
             if forms_obj.is_valid():
@@ -193,6 +199,8 @@ def mallManagementOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 删除商品
         elif oper_type == 'delete':
             objs = models.zgld_goods_management.objects.filter(id=o_id)
             if objs:
@@ -203,7 +211,9 @@ def mallManagementOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = '删除ID不存在！'
+
     else:
+        # 查询商品所有状态
         if oper_type == 'goodsStatus': # 查询商品状态
             objs = models.zgld_goods_management
             otherData = []
@@ -215,6 +225,7 @@ def mallManagementOper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = otherData
+
         else:
             response.code = 402
             response.msg = "请求异常"

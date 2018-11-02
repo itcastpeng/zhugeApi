@@ -4,21 +4,32 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin.product_verify import ProductSelectForm, ProductGetForm,ProductAddForm,imgMergeForm,imgUploadForm,FeedbackSelectForm
 from zhugeleida.forms.qiyeweixin.product_verify import  ProductUpdateForm,RecommendIndexForm
 import json
 from django.db.models import Q
-from django.db.models import F
-import uuid
 import os
 import base64
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+def sort_article_data(data):
+    ret_list = []
+    for obj in data:
+        if not ret_list:
+            # tmp_dict[obj['order']] = obj
+            ret_list.append(obj)
+
+        else:
+            for index, data in enumerate(ret_list):
+                if obj['order'] < data['order']:
+                    ret_list.insert(index, obj)
+                    break
+            else:
+                ret_list.append(obj)
+    return ret_list
 
 
 @csrf_exempt
@@ -28,6 +39,7 @@ def product(request, oper_type):
 
     if request.method == "GET":
 
+        # 官网产品展示
         if oper_type == 'product_single':
             product_type = int(request.GET.get('product_type')) if request.GET.get('product_type') else ''
             user_id = request.GET.get('user_id')
@@ -88,7 +100,7 @@ def product(request, oper_type):
                 response.code = 302
                 response.msg = "产品不存在"
 
-
+        # 产品详情展示
         elif oper_type == 'product_list':
             print('request.GET----->', request.GET)
             forms_obj = ProductSelectForm(request.GET)
@@ -190,6 +202,7 @@ def product(request, oper_type):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 为超级管理员 展示出所有公司的产品
         elif oper_type == 'feedback_list':
             user_id = request.GET.get('user_id')
 
@@ -202,7 +215,7 @@ def product(request, oper_type):
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
 
-                if int(role_id) == 1:  # 为超级管理员 展示出所有公司的产品
+                if int(role_id) == 1:
                     search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
                     field_dict = {
                         'id': '',
@@ -253,8 +266,6 @@ def product(request, oper_type):
                     response.code = 302
                     response.msg = '列表无数据'
 
-
-
             return JsonResponse(response.__dict__)
 
     return JsonResponse(response.__dict__)
@@ -265,6 +276,7 @@ def product_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
+
         # 删除-个人产品
         if oper_type == "delete":
             user_id = request.GET.get('user_id')
@@ -294,6 +306,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '产品不存在'
 
+        # 修改 产品上下架 状态
         elif oper_type == "change_status":
             print('-------change_status------->>',request.POST)
             status = int(request.POST.get('status'))
@@ -320,7 +333,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '产品不存在'
 
-
+        # 修改产品
         elif oper_type == "update":
 
             form_data = {
@@ -353,6 +366,7 @@ def product_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 添加产品
         elif oper_type == "add":
 
             form_data = {
@@ -496,6 +510,7 @@ def product_oper(request, oper_type, o_id):
                 response.msg = "上传异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 修改意见反馈表状态
         elif oper_type == "change_feedback_status":
             print('-------change_status------->>', request.POST)
             status = int(request.POST.get('status'))
@@ -520,25 +535,14 @@ def product_oper(request, oper_type, o_id):
 
                 response.code = 302
                 response.msg = '产品不存在'
+    else:
+        response.code = 402
+        response.msg = '请求异常'
 
-        return JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)
 
 
 
 
-def sort_article_data(data):
-    ret_list = []
-    for obj in data:
-        if not ret_list:
-            # tmp_dict[obj['order']] = obj
-            ret_list.append(obj)
 
-        else:
-            for index, data in enumerate(ret_list):
-                if obj['order'] < data['order']:
-                    ret_list.insert(index, obj)
-                    break
-            else:
-                ret_list.append(obj)
-    return ret_list
 

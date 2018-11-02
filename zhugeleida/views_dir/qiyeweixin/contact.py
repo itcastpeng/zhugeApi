@@ -107,14 +107,15 @@ def contact(request):
 
     return JsonResponse(response.__dict__)
 
+
+# 聊天信息操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def contact_oper(request,oper_type):
-
-    # 查询聊天信息数量
     response = Response.ResponseObj()
-
     if request.method == 'GET':
+
+        # 查询聊天信息数量
         if  oper_type == 'query_num':
 
             response = Response.ResponseObj()

@@ -11,7 +11,8 @@ from zhugeleida.forms.admin.adminSpeechDetailsmanage import AddForm, UpdateForm
 import json
 
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 话术详情查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def speechDetailsManageShow(request):
@@ -65,8 +66,8 @@ def speechDetailsManageShow(request):
     return JsonResponse(response.__dict__)
 
 
-#  增删改
-#  csrf  token验证
+# csrf  token验证
+# 话术详情操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def speechDetailsManageOper(request, oper_type, o_id):
@@ -77,6 +78,8 @@ def speechDetailsManageOper(request, oper_type, o_id):
             'contentWords': request.POST.get('contentWords'),
             'talkGroupName': request.POST.get('talkGroupName'),
         }
+
+        # 添加话术详情
         if oper_type == "add":
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
@@ -95,6 +98,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改话术详情
         elif oper_type == "update":
             # 获取需要修改的信息
             forms_obj = UpdateForm(form_data)
@@ -120,7 +124,9 @@ def speechDetailsManageOper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
+
     else:
+        # 删除话术详情
         if oper_type == "delete":
             # 删除 ID
             objs = models.zgld_speech_details_management.objects.filter(id=o_id)
@@ -131,6 +137,7 @@ def speechDetailsManageOper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = '删除ID不存在'
+                
         else:
             response.code = 402
             response.msg = '请求异常'

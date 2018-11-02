@@ -13,7 +13,7 @@ from django.db.models import Q, Count
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
-
+# 文章管理查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
 def article(request,oper_type):
@@ -175,6 +175,7 @@ def init_data(user_id, pid=None, level=1):
     print('result_data -->', result_data)
     return result_data
 
+# 脉络图查询 调用init_data
 def mailuotu(q):
     # children_data = init_data(user_id)
     # print('children_data--------> ',children_data)
@@ -209,6 +210,8 @@ def article_oper(request, oper_type, o_id):
     timestamp = str(int(time.time() * 1000))
 
     if request.method == "POST":
+
+        # 添加文章
         if oper_type == "add":
             article_data = {
                 'user_id': request.GET.get('user_id'),
@@ -279,6 +282,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除文章
         elif oper_type == "delete":
             print('------delete o_id --------->>',o_id)
             user_id = request.GET.get('user_id')
@@ -293,6 +297,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '文章不存在'
 
+        # 修改文章
         elif oper_type == "update":
             article_data = {
                 'article_id' : o_id,
@@ -368,6 +373,7 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
+        # 获取文章详情
         if oper_type == 'myarticle':
             user_id = request.GET.get('user_id')
             request_data_dict = {
@@ -418,7 +424,8 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
-        elif oper_type == 'thread_base_info': # 脉络图
+        # 脉络图
+        elif oper_type == 'thread_base_info':
             user_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
             request_data_dict = {

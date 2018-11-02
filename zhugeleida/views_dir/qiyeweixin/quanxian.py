@@ -71,7 +71,8 @@ def get_paixu_data(models_obj, level=1, pid=None):
     return result_data_list, result_data_tree
 
 
-# cerf  token验证 用户展示模块
+# cerf  token验证
+# 查询所有权限
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def quanxian(request):
@@ -90,13 +91,15 @@ def quanxian(request):
     return JsonResponse(response.__dict__)
 
 
-#  增删改 用户表
+# 权限操作
 #  csrf  token验证
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def quanxian_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
+
+        # 添加权限
         if oper_type == "add":
             form_data = {
 
@@ -126,6 +129,7 @@ def quanxian_oper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除权限
         elif oper_type == "delete":
             # 删除 ID
             objs = models_obj.objects.filter(id=o_id)
@@ -142,6 +146,7 @@ def quanxian_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '用户ID不存在'
 
+        # 修改权限
         elif oper_type == "update":
 
             # 获取ID 用户名 及 角色

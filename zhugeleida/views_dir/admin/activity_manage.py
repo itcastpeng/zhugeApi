@@ -19,7 +19,6 @@ from django.db.models import Q,Sum,Count
 @account.is_token(models.zgld_admin_userprofile)
 def activity_manage(request, oper_type):
     response = Response.ResponseObj()
-
     if request.method == "POST":
 
         # 设置关注领红包
@@ -88,6 +87,7 @@ def activity_manage(request, oper_type):
                 response.code = 301
                 response.msg = '公众号不存在'
 
+        # 查询 文章-活动(任务)
         elif oper_type == 'activity_list':
 
             print('request.GET----->', request.GET)
@@ -216,6 +216,7 @@ def activity_manage(request, oper_type):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 查询 活动发红包记录
         elif oper_type == 'send_activity_redPacket':
 
             company_id = request.GET.get('company_id')
@@ -349,6 +350,7 @@ def activity_manage(request, oper_type):
                     response.msg = '[无记录]活动发红包记录表'
                     print('------[无记录]活动发红包记录表 activity_id ----->>', activity_id)
 
+        # 活动消费 查询
         elif oper_type == 'query_total_xiaofei':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
@@ -391,7 +393,6 @@ def activity_manage(request, oper_type):
                 response.code = 200
                 response.msg = '活动不存在'
 
-
     return JsonResponse(response.__dict__)
 
 
@@ -416,7 +417,7 @@ def activity_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '活动不存在或者正在进行中'
 
-
+        # 修改个人产品
         elif oper_type == 'update':
 
             user_id = request.GET.get('user_id')

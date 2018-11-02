@@ -77,6 +77,8 @@ def talkGroupManageOper(request, oper_type, o_id):
             'userProfile': request.POST.get('userProfile'),     # 归属用户
             'companyName': request.POST.get('companyName'),
         }
+
+        # 添加话术库分组
         if oper_type == "add":
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = AddForm(form_data)
@@ -95,6 +97,7 @@ def talkGroupManageOper(request, oper_type, o_id):
                 # print(forms_obj.errors.as_json())
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 修改话术库分组
         elif oper_type == "update":
             # 获取需要修改的信息
             forms_obj = UpdateForm(form_data)
@@ -126,6 +129,8 @@ def talkGroupManageOper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
+
+        # 删除话术库分组
         if oper_type == "delete":
             # 删除 ID
             objs = models.zgld_talk_group_management.objects.filter(id=o_id)
@@ -136,9 +141,9 @@ def talkGroupManageOper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = '删除ID不存在'
+
         else:
             response.code = 402
             response.msg = '请求异常'
-
 
     return JsonResponse(response.__dict__)

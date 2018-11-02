@@ -12,7 +12,7 @@ import json
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
 
-
+# 用户跟进常用语查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def follow_language(request, ):
@@ -67,14 +67,15 @@ def follow_language(request, ):
         response.msg = "请求异常"
 
 
+# 用户跟进常用语操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def follow_language_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-
     if request.method == "POST":
-        if oper_type == "add":
 
+        # 添加用户跟进常用语
+        if oper_type == "add":
             print('----request.POST---->>', request.POST)
             language_data = {
                 'user_id': request.GET.get('user_id'),
@@ -95,6 +96,7 @@ def follow_language_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除用户跟进常用语
         elif oper_type == "delete":
             print('------delete o_id --------->>', o_id)
             user_id = request.GET.get('user_id')
@@ -107,8 +109,6 @@ def follow_language_oper(request, oper_type, o_id):
             else:
                 response.code = 302
                 response.msg = 'ID不存在或者不允许删除'
-
-
 
     else:
         response.code = 402

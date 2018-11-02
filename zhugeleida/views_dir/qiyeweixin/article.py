@@ -18,7 +18,7 @@ from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import conversion_seconds_hms
 import base64
 
-
+# 企业微信端文章查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def article(request):
@@ -132,11 +132,14 @@ def article(request):
     return JsonResponse(response.__dict__)
 
 
+# 企业微信端文章操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
+
+        # 添加企业微信端文章
         if oper_type == "add":
             article_data = {
                 'user_id': request.GET.get('user_id'),
@@ -174,6 +177,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 删除企业微信端文章
         elif oper_type == "delete":
             print('------delete o_id --------->>', o_id)
             user_id = request.GET.get('user_id')
@@ -188,6 +192,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 302
                 response.msg = '文章不存在'
 
+        # 修改企业微信端文章
         elif oper_type == "update":
             article_data = {
                 'article_id': o_id,
@@ -228,6 +233,7 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
+        # 查询自己的文章
         if oper_type == 'myarticle':
             request_data_dict = {
                 'article_id': o_id,
@@ -593,6 +599,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 获取文章访问日志
         elif oper_type == 'get_article_access_log':
 
             user_id = request.GET.get('user_id')
@@ -681,10 +688,9 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        #
         elif oper_type == 'get_article_forward_info':
-
             print('----- request.GET ------->>',request.GET)
-
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
             parent_id = request.GET.get('pid')
@@ -753,31 +759,26 @@ def article_oper(request, oper_type, o_id):
 
                             data_dict = {
                                 'article_id': obj.article_id,
-                                'customer_id': obj.customer_id,  # 客户ID
-                                'customer_name': username,  # 客户姓名
-                                'customer_headimgurl': obj.customer.headimgurl,  # 客户头像
-                                'area': area,  # 地区
-                                'sex_text': obj.customer.get_sex_display(),  # 性别
-                                'sex': obj.customer.sex,  # 性别
-
+                                'customer_id': obj.customer_id,                                 # 客户ID
+                                'customer_name': username,                                      # 客户姓名
+                                'customer_headimgurl': obj.customer.headimgurl,                 # 客户头像
+                                'area': area,                                                   # 地区
+                                'sex_text': obj.customer.get_sex_display(),                     # 性别
+                                'sex': obj.customer.sex,                                        # 性别
                                 'forward_customer_read_people': forward_customer_read_people ,
                                 'forward_customer_read_num' : forward_customer_read_num,
                                 'level': obj.level,
-                                'forward_friend_count': obj.forward_friend_count,  # 转发给朋友的个数 分享方式(朋友圈/朋友)
+                                'forward_friend_count': obj.forward_friend_count,                # 转发给朋友的个数 分享方式(朋友圈/朋友)
                                 'forward_friend_circle_count': obj.forward_friend_circle_count,  # 转发给朋友圈的个数
                                 'pid': obj.customer_parent_id,
                             }
 
-
-
                             ret_data.append(data_dict)
-
                         response.code = 200
                         response.data = {
                             'ret_data': ret_data,
                             'data_count': count,
                         }
-
                         print('------ ret_data ------->>', ret_data)
 
                 else:
