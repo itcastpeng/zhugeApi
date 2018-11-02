@@ -444,7 +444,7 @@ def open_qiyeweixin(request, oper_type):
                         user_profile_obj.save()
 
                         redirect_url = url + '?token=' + token + '&id=' + str(
-                            user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
+                            user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login + '&is'
 
                         print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
