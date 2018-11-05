@@ -22,6 +22,13 @@ class zgld_company(models.Model):
         (2,'商城')
     )
     shopping_type = models.SmallIntegerField(verbose_name='购物类型',default=1, choices=shopping_type_choice)
+
+    is_show_jszc_choices = (
+        (1, "展示"),
+        (2, "不展示"),
+    )
+    is_show_jszc = models.SmallIntegerField(choices=is_show_jszc_choices, verbose_name="是否展示技术支持", default=1)
+
     open_length_time = models.SmallIntegerField(verbose_name="开通时长(按月份)",null=True)
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -331,8 +338,6 @@ class zgld_userprofile(models.Model):
         (2, "Boss雷达不启用"),
     )
     boss_status = models.SmallIntegerField(choices=boss_status_choices, verbose_name="Boss雷达状态", default=2)
-
-
 
     popularity = models.IntegerField(verbose_name='人气数(被查看)', default=0)
     praise = models.IntegerField(verbose_name='被赞数', default=0)

@@ -21,7 +21,7 @@ import base64
 # 企业微信端文章查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def article(request):
+def article(request,oper_type):
     response = Response.ResponseObj()
 
     if request.method == "GET":

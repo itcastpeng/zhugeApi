@@ -240,6 +240,11 @@ def admin_userprofile_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+            # 修改用户启用状态
+
+
+
+
     else:
         response.code = 402
         response.msg = "请求异常"

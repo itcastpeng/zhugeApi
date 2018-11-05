@@ -71,7 +71,8 @@ def company(request):
                     # 'corp_id': obj.corp_id,
                     # 'tongxunlu_secret': obj.tongxunlu_secret,
                     'create_date': obj.create_date.strftime('%Y-%m-%d'),
-
+                    'is_show_jszc': obj.is_show_jszc,
+                    'is_show_jszc_text': obj.get_is_show_jszc_display(),
                     'user_count': user_count,        # 用户总数
                     'customer_num': customer_num,    # 拥有的客户数量
                     'available_days': available_days, #剩余天数
@@ -437,6 +438,24 @@ def company_oper(request, oper_type, o_id):
             else:
                 response.code = 303
                 response.msg = '购物类型不能为空'
+
+        elif oper_type == "is_show_technical_support":
+
+            status = request.POST.get('status')  # (1, "启用"),  (2, "未启用"),
+            user_id = request.GET.get('user_id')
+
+            objs = models.zgld_company.objects.filter(id=o_id)
+
+            if objs:
+                if status:
+                    objs.update(is_show_jszc=status)
+                    response.code = 200
+                    response.msg = "修改成功"
+            else:
+                response.code = 301
+                response.msg = "用户不存在"
+
+
 
     else:
         response.code = 402

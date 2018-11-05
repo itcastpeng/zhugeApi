@@ -403,6 +403,7 @@ def open_qiyeweixin(request, oper_type):
 
             if company_objs:
                 company_id = company_objs[0].id
+                # is_show_technical_support = company_objs[0].is_show_jszc
 
                 _data = {
                     'company_id': company_id,

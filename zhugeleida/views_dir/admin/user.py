@@ -869,6 +869,7 @@ def user_oper(request, oper_type, o_id):
                     response.code = 301
                     response.msg =  '用户临时表无数据'
 
+
     else :
         # 生成 扫描的用户二维码
         if  oper_type == "create_scan_code":

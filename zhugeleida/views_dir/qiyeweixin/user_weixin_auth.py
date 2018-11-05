@@ -92,7 +92,7 @@ def work_weixin_auth(request, company_id):
 
         print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json),"|",userid)
 
-        user_profile_objs = models.zgld_userprofile.objects.filter(
+        user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
             userid=userid,
             company_id=company_id
         )
@@ -116,6 +116,8 @@ def work_weixin_auth(request, company_id):
                 user_profile_obj.gender = gender
                 user_profile_obj.avatar = avatar
                 last_login_date = user_profile_obj.last_login_date
+                # is_show_technical_support = user_profile_obj.company.is_show_jszc
+
                 redirect_url = ''
                 if not last_login_date: # 为空说明第一次登陆
                     is_first_login = 'Yes'
