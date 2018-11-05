@@ -927,10 +927,8 @@ def dai_xcx_oper(request, oper_type):
                     response.code = 301
                     response.msg = json.loads(forms_obj.errors.as_json())
 
-        else:
-            response.code = 402
-            response.msg = '请求异常'
-        return JsonResponse(response.__dict__)
+
+    return JsonResponse(response.__dict__)
 
 
 # 定时刷新 小程序审核
