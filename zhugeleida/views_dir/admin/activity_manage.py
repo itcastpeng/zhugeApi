@@ -406,7 +406,7 @@ def activity_manage_oper(request, oper_type, o_id):
         if oper_type == "delete":
 
 
-            objs = models.zgld_article_activity.objects.filter(id=o_id,status__in=[1,3,4])
+            objs = models.zgld_article_activity.objects.filter(id=o_id)
 
             if objs:
                 objs.delete()
