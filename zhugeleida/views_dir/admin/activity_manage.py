@@ -193,9 +193,9 @@ def activity_manage(request, oper_type):
                             'already_send_redPacket_num' :  obj.already_send_redPacket_num or 0,  #已发放发红包个数[领取条件]
                             'status': status,
                             'status_text': status_text ,
-                            'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
-                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
-                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M'),
+                            'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             'reason' : reason
 
                         })

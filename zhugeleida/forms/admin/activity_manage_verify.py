@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 # 添加企业的产品
 class SetFocusGetRedPacketForm(forms.Form):
 
-    is_focus_get_redpacket = forms.BooleanField(
+    is_focus_get_redpacket = forms.CharField(
         required=True,
         error_messages={
             'required': "关注领取红包是否开启不能为空"
