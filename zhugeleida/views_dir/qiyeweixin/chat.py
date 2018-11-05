@@ -282,6 +282,7 @@ def chat_oper(request, oper_type, o_id):
                 if not ret_data_list:
                     # 没有新消息
                     response.msg = '没有得到实时聊天信息'
+
                 return JsonResponse(response.__dict__)
 
         else:
