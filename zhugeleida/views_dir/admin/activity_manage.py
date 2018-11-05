@@ -359,7 +359,7 @@ def activity_manage(request, oper_type):
             objs = models.zgld_article_activity.objects.filter(company_id=company_id,end_time__gte=now_date_time).exclude(status=3)
 
             if objs:
-                obj = objs[0]
+
                 already_send_redPacket_money_dict = objs.aggregate(already_send_redPacket_money=Sum('already_send_redPacket_money'))
                 already_send_redPacket_money = already_send_redPacket_money_dict.get('already_send_redPacket_money')
 
