@@ -640,6 +640,7 @@ def home_page_oper(request, oper_type):
                 response.data = json.loads(forms_obj.errors.as_json())
 
     else:
+
         if oper_type == "acount_data":
             ret_data = {}
             data = request.GET.copy()
