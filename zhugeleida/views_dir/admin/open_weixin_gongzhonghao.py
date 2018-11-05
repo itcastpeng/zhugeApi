@@ -689,12 +689,15 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             elif Content.startswith('T'):
                                 activity_id = int(Content.split('T')[1])
 
-                            redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=customer_id,
-                                                                                           activity_id=activity_id)
+                            redPacket_objs = models.zgld_activity_redPacket.objects.select_related('article','activity').filter(customer_id=customer_id,activity_id=activity_id)
+                            _content = ''
                             if redPacket_objs:
                                 redPacket_obj = redPacket_objs[0]
                                 forward_read_count = redPacket_obj.forward_read_count
                                 already_send_redPacket_num = redPacket_obj.already_send_redPacket_num
+                                start_time = redPacket_obj.activity.start_time
+                                end_time = redPacket_obj.activity.end_time
+                                status = redPacket_obj.activity.status
 
                                 activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
                                 reach_forward_num = activity_obj.reach_forward_num
@@ -703,14 +706,22 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                 shoudle_send_num = divmod_ret[0]
                                 yushu = divmod_ret[1]
                                 short_num = reach_forward_num - yushu
+                                now_date_time = datetime.datetime.now()
 
-                                if forward_read_count >= reach_forward_num:
+                                if status != 3 and  now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
 
-                                    _content = '转发后阅读人数已达【%s】人,已发红包【%s】个,还差【%s】人又能再拿现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
-                                    forward_read_count, already_send_redPacket_num, short_num)
+                                    if forward_read_count >= reach_forward_num:
+
+                                        _content = '转发后阅读人数已达【%s】人,已发红包【%s】个,还差【%s】人又能再拿现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
+                                            forward_read_count, already_send_redPacket_num, short_num)
+
+                                    else:
+                                        _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
+                                            forward_read_count, short_num)
+
+
                                 else:
-                                    _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
-                                        forward_read_count, short_num)
+                                    _content = '此活动已经结束,转发后阅读人数【%s】人,已发红包【%s】个' % (forward_read_count, already_send_redPacket_num)
 
 
                             else:

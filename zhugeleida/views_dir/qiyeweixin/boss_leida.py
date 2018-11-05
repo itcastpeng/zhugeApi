@@ -40,8 +40,7 @@ def home_page(request):
         user_list = []
         if user_ids:
             for u_id in user_ids: user_list.append(u_id[0])
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).values_list(
-            'customer_id').distinct().count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).values_list('customer_id').distinct().count()  # 已获取客户数
 
         ret_data = {
             'company_name': company_name,
@@ -154,21 +153,6 @@ def deal_line_info(data):
         browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
             'customer_id').distinct().count()  # 浏览名片的总数(包含着保存名片)
         return browse_num
-
-    # elif index_type == 4:  # 被转发总数
-    #     forward_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,action=6).filter(q1).count()  # 被转发的总数-不包括转发产品
-    #     return forward_num
-    #
-    # elif index_type == 5:  # 被保存总数
-    #     saved_total_num = models.zgld_accesslog.objects.filter(user_id__in=user_list, action=8).filter(q1).count()  # 保存手机号
-    #     return saved_total_num
-    #
-    # elif index_type == 6:  # 被赞总数
-    #     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q1).values_list('popularity')
-    #     praise_sum = 0
-    #     for i in user_pop_queryset:
-    #         praise_sum = praise_sum + i[0]  # 被点赞总数
-    #     return  praise_sum
 
 
 def deal_sale_ranking_data(data, q):
@@ -736,10 +720,6 @@ def home_page_oper(request, oper_type):
 
                     ret_data[index] = ret_dict
 
-                # if index_type == 5: #客户与我的互动
-                # ret_data = {}
-                ret_dict = {}
-                ret_list = []
 
                 user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).aggregate(
                     praise_num=Count('praise'))  # 被点赞总数
