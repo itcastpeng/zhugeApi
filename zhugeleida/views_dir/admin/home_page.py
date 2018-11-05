@@ -18,29 +18,24 @@ def home_page(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         user_id = request.GET.get('user_id')
-        order = request.GET.get('order', '-create_date')
-        field_dict = {
-            'id': '',
-        }
-        q = conditionCom(request, field_dict)
         user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
-        print('------user_obj----->',user_obj)
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
         mingpian_available_num = user_obj[0].company.mingpian_available_num  # 可开通名片数量
         user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()    #  # 员工总数
-
-        available_days = (user_obj[0].company.account_expired_time - datetime.now()).days     # 还剩多天可以用
+        account_expired_time = user_obj[0].company.account_expired_time
+        create_date = user_obj[0].company.create_date
+        available_days = (account_expired_time - datetime.now()).days     # 还剩多天可以用
 
         used_days = (datetime.now() - user_obj[0].company.create_date).days                     #用户使用了多少天了
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.select_related('user').filter(user__company_id=company_id).count()  # 已获取客户数
         ret_data = {
             'company_name': company_name,
             'username': user_obj[0].username,
             'mingpian_num': mingpian_available_num,  # 可开通名片数
             'user_count': user_count,  # 员工总数
-            'expired_time': user_obj[0].company.account_expired_time.strftime("%Y-%m-%d"),  # 过期时间
-            'open_up_date': user_obj[0].company.create_date.strftime("%Y-%m-%d"),  # 开通时间
+            'expired_time': account_expired_time.strftime("%Y-%m-%d"),  # 过期时间
+            'open_up_date': create_date.strftime("%Y-%m-%d"),  # 开通时间
             'available_days': available_days,  # 可用天数
             'used_days': used_days,         # 剩余可用天数
             'customer_num': customer_num,   # 已获取客户数
@@ -82,9 +77,6 @@ def deal_search_time(data,q):
     browse_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,
                                                       action=1).filter(q).count()  # 浏览名片的总数(包含着保存名片)
 
-    # q1 = Q()
-    # q1.add(Q(**{'action': 1}), Q.AND)
-    # q1.add(Q(**{'action': 6}), Q.AND)
     forward_num = models.zgld_accesslog.objects.filter(user_id__in=user_list,
                                                        action=6).filter(q).count()  # 被转发的总数-不包括转发产品
     saved_total_num = models.zgld_accesslog.objects.filter(user_id__in=user_list, action=8).filter(q).count()  # 保存手机号
@@ -127,15 +119,8 @@ def deal_line_info(data):
         return customer_num
 
     elif index_type == 2:  # 跟进总数  last_follow_time__isnull
-        follow_customer_folowup_obj = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,last_follow_time__isnull=False)
-
-        follow_num = 0
-        if follow_customer_folowup_obj:
-            follow_id_list = []
-            for f_obj in follow_customer_folowup_obj:
-                follow_id_list.append(f_obj.id)
-            follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup_id__in=follow_id_list).filter(
-                q1).count()
+        follow_num = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(user_customer_flowup__user__company=company_id).filter(
+            q1).count()
         return follow_num
 
     elif index_type == 3:  # 浏览总数

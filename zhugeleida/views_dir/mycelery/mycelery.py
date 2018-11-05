@@ -370,6 +370,8 @@ def qiyeweixin_user_get_userinfo(request):
             mobile = user_list_ret_json.get('mobile')  # 加上100 获取小图
             gender = user_list_ret_json.get('gender')
             errmsg = user_list_ret_json.get('errmsg')
+            if not avatar:
+                avatar = 'statics/imgs/setAvator.jpg'
 
             if errmsg == 'ok':
                 print('----------【celery 企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(user_list_ret_json), "|",

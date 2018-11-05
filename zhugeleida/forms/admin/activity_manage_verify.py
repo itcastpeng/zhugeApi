@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 # 添加企业的产品
 class SetFocusGetRedPacketForm(forms.Form):
 
-    is_focus_get_redpacket = forms.BooleanField(
+    is_focus_get_redpacket = forms.CharField(
         required=True,
         error_messages={
             'required': "关注领取红包是否开启不能为空"
@@ -79,14 +79,14 @@ class ActivityAddForm(forms.Form):
     start_time = forms.CharField(
         required=True,
         error_messages={
-            'required': "设置转发次数不能为空"
+            'required': "设置开始时间不能为空"
         }
     )
 
     end_time = forms.CharField(
         required=True,
         error_messages={
-            'required': "设置转发次数不能为空"
+            'required': "设置结束时间不能为空"
         }
     )
 
@@ -104,6 +104,27 @@ class ActivityAddForm(forms.Form):
         else:
             return article_id
 
+
+    def clean_start_time(self):
+        start_time = self.data['start_time']
+        end_time = self.data['end_time']
+
+        start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+
+        if start_time >= end_time:
+            return self.add_error('start_time', '开始时间不能大于结束时间')
+
+        return start_time
+
+    # 判断文章是否存在
+    def clean_end_time(self):
+        end_time = self.data['end_time']
+        end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+        if end_time <= datetime.datetime.now():
+            return self.add_error('end_time', '结束时间不能小于当前时间')
+
+        return end_time
 
 
 #修改活动

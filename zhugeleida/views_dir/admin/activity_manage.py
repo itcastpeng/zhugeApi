@@ -193,9 +193,9 @@ def activity_manage(request, oper_type):
                             'already_send_redPacket_num' :  obj.already_send_redPacket_num or 0,  #已发放发红包个数[领取条件]
                             'status': status,
                             'status_text': status_text ,
-                            'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M'),
-                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M'),
-                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M'),
+                            'start_time' : obj.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+                            'end_time' : obj.end_time.strftime('%Y-%m-%d %H:%M:%S'),
+                            'create_date' : obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             'reason' : reason
 
                         })
@@ -406,7 +406,7 @@ def activity_manage_oper(request, oper_type, o_id):
         if oper_type == "delete":
 
 
-            objs = models.zgld_article_activity.objects.filter(id=o_id,status__in=[1,3,4])
+            objs = models.zgld_article_activity.objects.filter(id=o_id)
 
             if objs:
                 objs.delete()
