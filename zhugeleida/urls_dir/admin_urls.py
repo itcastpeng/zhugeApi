@@ -98,8 +98,8 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)$', article.article),
 
     # 公众号-文章管理
-    url(r'^help_doc/(?P<oper_type>\w+)/(?P<o_id>\d+)$', help_doc.article_oper),
-    url(r'^help_doc$', help_doc.article),
+    url(r'^help_doc/(?P<oper_type>\w+)/(?P<o_id>\d+)$', help_doc.help_doc_oper),
+    url(r'^help_doc$', help_doc.help_doc),
 
     # 公众号-插件名片管理
     url(r'^plugin_mingpian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_mingpian.plugin_mingpian_oper),
