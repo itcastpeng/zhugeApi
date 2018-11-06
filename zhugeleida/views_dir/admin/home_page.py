@@ -56,9 +56,7 @@ def deal_search_time(data,q):
     user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
     company_id = user_obj[0].company_id
 
-    customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
-    print('-----customer_num----->',customer_num)
-
+    customer_num = models.zgld_user_customer_belonger.objects.select_related('user').filter(user__company_id=company_id).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
 
     follow_num  = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(
         user_customer_flowup__user__company=company_id).filter(q).count()
@@ -95,11 +93,9 @@ def deal_line_info(data):
     stop_time = data.get('stop_time')
     company_id = data.get('company_id')
 
-
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
     q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
-    print('---->start_time',start_time)
 
     if index_type == 1:  # 客户总数
 
