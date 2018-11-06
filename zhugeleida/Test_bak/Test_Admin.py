@@ -31,10 +31,24 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 url =  ip + '/zhugeleida/admin/help_doc'  # 获取产品的列表
-# get_data['id'] = 1
+get_data['article_id'] = 1
 ret = requests.get(url, data = post_data ,params=get_data)
 
+# url =  ip + '/zhugeleida/admin/help_doc/add/0'  # 获取产品的列表
+# post_data['title'] = '我是标题'
+# post_data['content'] = '我是内容'
+# ret = requests.post(url, data = post_data ,params=get_data)
 
+
+# url =  ip + '/zhugeleida/admin/help_doc/update/1'  # 获取产品的列表
+# post_data['title'] = '我是标题xx'
+# post_data['content'] = '我是内容xx'
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+
+# url =  ip + '/zhugeleida/admin/help_doc/delete/1'  # 获取产品的列表
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
 
 
 # url =  ip + '/zhugeleida/admin/login'  # 获取产品的列表
