@@ -50,10 +50,7 @@ def search(request, oper_type):
     if request.method == "GET":
         # 切片获取 top9 标签[客户标签]
         if oper_type == 'get_tag':
-            print('------->>', request.GET)
 
-            # current_page = forms_obj.cleaned_data['current_page']
-            # length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', 'create_date')
 
             field_dict = {
@@ -65,13 +62,7 @@ def search(request, oper_type):
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
-            # if length != 0:
-            #     print('current_page -->', current_page)
-            #     start_line = (current_page - 1) * length
-            #     stop_line = start_line + length
-            #     objs = objs[start_line: stop_line]
 
-            # 获取所有数据
             ret_data = []
             for obj in objs:
                 customer_list = []
@@ -96,12 +87,6 @@ def search(request, oper_type):
             }
 
         elif oper_type == 'get_user':
-
-            # q = Q(Q(username='xxx') | Q(username='ddd'))
-            # q = Q()
-            # q.add(Q(**{'username': 'xxx', 'sex': '1'}), Q.OR)
-            # q.add(Q(**{'username': 'xxsssx'}), Q.OR)
-            # print('q --===->', q)
 
             order = request.GET.get('order', 'create_date')
             field_dict = {

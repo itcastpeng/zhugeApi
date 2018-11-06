@@ -50,10 +50,7 @@ def tag_customer(request):
         # 获取参数 页数 默认1
         forms_obj = TagCustomerSelectForm(request.GET)
         if forms_obj.is_valid():
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
 
-            # current_page = forms_obj.cleaned_data['current_page']
-            # length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', 'create_date')
 
             field_dict = {
@@ -61,15 +58,9 @@ def tag_customer(request):
                  'name': '__contains',
             }
             q = conditionCom(request, field_dict)
-            print('q -->', q)
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
-            # if length != 0:
-            #     print('current_page -->', current_page)
-            #     start_line = (current_page - 1) * length
-            #     stop_line = start_line + length
-            #     objs = objs[start_line: stop_line]
 
             # 获取所有数据
             ret_data = []

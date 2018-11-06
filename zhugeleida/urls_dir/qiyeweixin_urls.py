@@ -5,7 +5,6 @@ from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer
 from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product
 
 urlpatterns = [
-    # url(r'^login$', login.login),
 
     # 权限操作
     url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', quanxian.quanxian_oper),
