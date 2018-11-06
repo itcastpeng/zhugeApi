@@ -91,7 +91,7 @@ urlpatterns = [
 
     # 后台产品管理
     url(r'^product/(?P<oper_type>\w+)/(?P<o_id>\d+)$', product.product_oper),
-    url(r'^product/(?P<oper_type>\w+)', product.product),
+    url(r'^product/(?P<oper_type>\w+)$', product.product),
 
     # 公众号-文章管理
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
