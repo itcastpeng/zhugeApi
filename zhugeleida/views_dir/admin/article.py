@@ -104,42 +104,8 @@ def article(request,oper_type):
                 }
             return JsonResponse(response.__dict__)
 
-
     return JsonResponse(response.__dict__)
 
-# # 递归 脉络图
-# def init_data(user_id, article_id, o_id=None):
-#     datadict = []
-#     if o_id:
-#         objs = models.zgld_article_to_customer_belonger.objects.filter(customer_parent_id=o_id).filter(
-#             article_id=article_id).filter(user_id=user_id)
-#         for obj in objs:
-#             if obj.customer_parent.id == obj.customer.id:
-#                 continue
-#             decode_username = base64.b64decode(obj.customer_parent.username)
-#             username = str(decode_username, 'utf-8')
-#             parentId = obj.customer.id
-#             result = init_data(user_id, article_id, parentId)
-#             flag = True
-#             # print('result=====> ',result)
-#             for other in datadict:
-#                 if username in other.get('name'):
-#                     flag = False
-#                     if result:
-#                         print(result)
-#                         other.get('children').append(result[0])
-#             if flag:
-#                 if result:
-#                     datadict.append({
-#                         'name':username,
-#                         'children': result
-#                     })
-#                 else:
-#                     datadict.append({
-#                         'name': username,
-#                     })
-#
-#     return datadict
 
 
 def init_data(user_id, pid=None, level=1):
@@ -177,9 +143,7 @@ def init_data(user_id, pid=None, level=1):
 
 # 脉络图查询 调用init_data
 def mailuotu(q):
-    # children_data = init_data(user_id)
-    # print('children_data--------> ',children_data)
-    # print('q------------------------------> ',q)
+
     count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
         'user',
         'article'
@@ -207,7 +171,6 @@ def mailuotu(q):
 @account.is_token(models.zgld_admin_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-    timestamp = str(int(time.time() * 1000))
 
     if request.method == "POST":
 
@@ -474,6 +437,7 @@ def article_oper(request, oper_type, o_id):
         else:
             response.code = 402
             response.msg = '请求异常'
+
     return JsonResponse(response.__dict__)
 
 

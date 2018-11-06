@@ -6,8 +6,6 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.utils.timezone import timedelta,datetime
 from zhugeleida.forms.admin import homepage_verify
-from publicFunc.condition_com import conditionCom
-from django.db.models import Q
 import json
 from django.db.models import  Q, Sum
 

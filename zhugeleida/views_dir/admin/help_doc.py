@@ -44,12 +44,14 @@ def help_doc(request):
             # 获取所有数据
             ret_data = []
             # 获取第几页的数据
+            content = ''
             for obj in objs:
-
+                if article_id:
+                    content =  obj.content
                 ret_data.append({
                     'id': obj.id,
                     'title': obj.title,       # 文章标题
-                    # 'content': obj.content,  # 用户的头像
+                    'content': content,  # 用户的头像
                     'create_date': obj.create_date,      #文章创建时间
                 })
 

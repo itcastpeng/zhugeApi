@@ -20,9 +20,6 @@ def access_rules(request):
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
-            current_page = forms_obj.cleaned_data['current_page']
-            length = forms_obj.cleaned_data['length']
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
@@ -41,7 +38,7 @@ def access_rules(request):
 
             else:
                 objs = models.zgld_access_rules.objects.select_related('super_id').filter(q).order_by(order)
-                # objs = models.zgld_access_rules.objects.values_list('id','name','url_path','super_id_id')
+
 
             ret_data = []
             count = objs.count()
