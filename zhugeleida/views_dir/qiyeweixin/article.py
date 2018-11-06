@@ -87,7 +87,7 @@ def article(request,oper_type):
                         read_count = 0
 
                     article_id = obj.id
-                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3)
+                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
                     now_date_time = datetime.datetime.now()
                     is_have_activity = 2 #
                     if activity_objs:
