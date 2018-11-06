@@ -328,7 +328,6 @@ def chat_oper(request, oper_type, o_id):
                 ret_data_list.reverse()
                 response.code = 200
                 response.msg = '实时获取-最新聊天信息成功'
-                print('--- list(msg_obj) -->>', ret_data_list)
 
                 response.data = {
                     'ret_data': ret_data_list,

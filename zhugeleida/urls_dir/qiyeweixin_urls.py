@@ -65,6 +65,7 @@ urlpatterns = [
     # 企业微信网页登录认证
     url(r'^work_weixin_auth/(?P<company_id>\d+)$', user_weixin_auth.work_weixin_auth),
     url(r'^work_weixin_auth/(?P<oper_type>\w+)$', user_weixin_auth.work_weixin_auth_oper),
+
     #企业微信JS-SDK使用权限签名算法
     url(r'^enterprise_weixin_sign$', user_weixin_auth.enterprise_weixin_sign),
 

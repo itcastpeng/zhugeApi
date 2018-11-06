@@ -48,14 +48,12 @@ def product(request, oper_type):
                 'id': '',
             }
             q = conditionCom(request, field_dict)
-            # company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company_id
-            # q.add(Q(**{'company_id': company_id}), Q.AND)
             q.add(Q(**{'id': product_id}), Q.AND)
 
             if product_type  == 1:   #单个官网产品展示
                 q.add(Q(**{'user_id__isnull': True }), Q.AND)
+
             elif product_type == 2:
-                # q.add(Q(**{'user_id': user_id }), Q.AND)
                 q.add(Q(**{'user_id__isnull': False }), Q.AND)
 
             objs = models.zgld_product.objects.select_related('user', 'company').filter(q)
@@ -118,20 +116,12 @@ def product(request, oper_type):
                 q1.connector = 'and'
                 user_obj = models.zgld_admin_userprofile.objects.filter(id=user_id)[0]
                 company_id = user_obj.company_id
-                # role_id = user_obj.role_id
 
                 if product_type == 1:   # 展示公司 产品
                      q1.children.append(('user_id__isnull', True))
                 elif product_type == 2: # 展示个人 产品
                      q1.children.append(('user_id__isnull', False))
 
-
-                # if role_id == 1:  # 为超级管理员 展示出所有公司的产品
-                #     search_company_id = request.GET.get('company_id')  # 当有搜索条件,如 公司搜索
-                #     if search_company_id:
-                #         q1.children.append(('company_id', search_company_id))
-                #
-                # elif role_id == 2:  # 为管理员 展示出自己所属公司的产品
                 q1.children.append(('company_id', company_id))
 
                 search_product_name = request.GET.get('product_name')  # 当有搜索条件 如 搜索产品名称
@@ -151,7 +141,6 @@ def product(request, oper_type):
                 print('-----q1---->>',q1)
                 objs = models.zgld_product.objects.select_related('user', 'company').filter(q1).order_by(order)
                 count = objs.count()
-                print('-----objs----->>',objs)
 
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -284,8 +273,6 @@ def product_oper(request, oper_type, o_id):
             role_id = user_obj[0].role_id
             company_id = user_obj[0].company_id
 
-
-            # if role_id == 1:  # 管理员 ，能删除官网的产品和个人的所有的产品。
             product_objs = models.zgld_product.objects.filter(id=o_id,company_id=company_id)
             if product_objs:
                 product_objs.delete()
@@ -293,14 +280,6 @@ def product_oper(request, oper_type, o_id):
                 response.code = 200
                 response.msg = "删除成功"
 
-            # elif role_id == 2 or role_id == 3:  # 普通用户只能删除自己的公司的个人产品。
-            #     product_objs = models.zgld_product.objects.filter(id=o_id, company_id=company_id)
-            #
-            #     if product_objs:
-            #         product_objs.delete()
-            #
-            #         response.code = 200
-            #         response.msg = "删除成功"
 
             else:
                 response.code = 301
@@ -308,15 +287,13 @@ def product_oper(request, oper_type, o_id):
 
         # 修改 产品上下架 状态
         elif oper_type == "change_status":
-            print('-------change_status------->>',request.POST)
+
             status = int(request.POST.get('status'))
             user_id = request.GET.get('user_id')
             product_objs = models.zgld_product.objects.filter(id=o_id)
-            print('product_objs--------->', product_objs)
 
             if product_objs:
 
-                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
                 product_objs.update(
                     status=status
                 )
@@ -453,7 +430,7 @@ def product_oper(request, oper_type, o_id):
                 img_save_path = "/".join(
                     [BasePath, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'product', 'tmp', img_name])
                 print('img_save_path -->', img_save_path)
-                # print('img_data -->', img_data)
+
                 img_data = base64.b64decode(img_data.encode('utf-8'))
                 with open(img_save_path, 'wb') as f:
                     f.write(img_data)
@@ -490,7 +467,7 @@ def product_oper(request, oper_type, o_id):
 
                     with open(file_save_path, 'rb') as f:
                         file_obj.write(f.read())
-                        # file_content += f.read()
+
                     os.remove(file_save_path)
 
                 product_picture_obj = models.zgld_product_picture.objects.create(picture_type=picture_type,
@@ -519,17 +496,11 @@ def product_oper(request, oper_type, o_id):
 
             if feedback_objs:
 
-                # if not product_objs[0].user_id:  # 用户ID不存在，说明它是企业发布的产品，只能被推荐和取消推荐，不能被下架和上架。
                 feedback_objs.update(
                     status=status
                 )
                 response.code = 200
                 response.msg = "修改状态成功"
-                response.data = {
-                    # 'feedback_id': feedback_objs[0].id,
-                    # 'status': feedback_objs[0].get_status_display(),
-                    # 'status_code': feedback_objs[0].status
-                }
 
             else:
 
