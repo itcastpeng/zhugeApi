@@ -19,49 +19,46 @@ def help_doc(request,oper_type):
     if request.method == "GET":
             # 获取参数 页数 默认1
 
-       if oper_type == 'help_doc_list':
+        forms_obj = ArticleSelectForm(request.GET)
+        if forms_obj.is_valid():
 
-            forms_obj = ArticleSelectForm(request.GET)
-            if forms_obj.is_valid():
+            user_id = request.GET.get('user_id')
+            article_id = request.GET.get('article_id')
 
-                user_id = request.GET.get('user_id')
-                article_id = request.GET.get('article_id')
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            order = request.GET.get('order', '-create_date')
 
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')
+            q = Q()
+            if article_id:
+                q.add(Q(**{'id': article_id}), Q.AND)
 
-                q = Q()
-                if article_id:
-                    q.add(Q(**{'id': article_id}), Q.AND)
+            objs = models.zgld_help_doc.objects.filter(q).order_by(order)
+            count = objs.count()
 
-                objs = models.zgld_help_doc.objects.filter(q).order_by(order)
-                count = objs.count()
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
 
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
+            # 获取所有数据
+            ret_data = []
+            # 获取第几页的数据
+            for obj in objs:
 
-                # 获取所有数据
-                ret_data = []
-                # 获取第几页的数据
-                for obj in objs:
+                ret_data.append({
+                    'id': obj.id,
+                    'title': obj.title,       # 文章标题
+                    # 'content': obj.content,  # 用户的头像
+                    'create_date': obj.create_date,      #文章创建时间
+                })
 
-                    ret_data.append({
-                        'id': obj.id,
-                        'title': obj.title,       # 文章标题
-                        'content': obj.content,  # 用户的头像
-                        'create_date': obj.create_date,      #文章创建时间
-                    })
-
-                response.code = 200
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count,
-                }
-            return JsonResponse(response.__dict__)
-
+            response.code = 200
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+            }
+     
 
     return JsonResponse(response.__dict__)
 

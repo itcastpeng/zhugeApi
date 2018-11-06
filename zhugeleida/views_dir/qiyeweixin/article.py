@@ -25,108 +25,101 @@ def article(request,oper_type):
     response = Response.ResponseObj()
 
     if request.method == "GET":
-        # 获取参数 页数 默认1
 
-        # if oper_type == 'myarticle_list':
+        forms_obj = ArticleSelectForm(request.GET)
+        if forms_obj.is_valid():
+            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+            user_id = request.GET.get('user_id')
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
 
-            forms_obj = ArticleSelectForm(request.GET)
-            if forms_obj.is_valid():
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-                user_id = request.GET.get('user_id')
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
+            field_dict = {
+                'id': '',
+                # 'user_id' : '',
+                'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
+                # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
+                'title': '__contains',  # 按文章标题搜索
+            }
 
-                field_dict = {
-                    'id': '',
-                    # 'user_id' : '',
-                    'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发'),
-                    # 【暂时不用】 按员工搜索文章、目前只显示出自己的文章
-                    'title': '__contains',  # 按文章标题搜索
-                }
+            request_data = request.GET.copy()
 
-                request_data = request.GET.copy()
+            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
-                company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+            q = conditionCom(request_data, field_dict)
+            q.add(Q(**{'company_id': company_id}), Q.AND)
 
-                q = conditionCom(request_data, field_dict)
-                q.add(Q(**{'company_id': company_id}), Q.AND)
+            tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
+            if tag_list:
+                q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
-                tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
-                if tag_list:
-                    q.add(Q(**{'tags__in': tag_list}), Q.AND)
+            objs = models.zgld_article.objects.select_related('company', 'user').filter(q).order_by(order)
 
-                objs = models.zgld_article.objects.select_related('company', 'user').filter(q).order_by(order)
+            count = objs.count()
 
-                count = objs.count()
+            if length != 0:
+                print('current_page -->', current_page)
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
 
-                if length != 0:
-                    print('current_page -->', current_page)
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
+            # 获取所有数据
+            ret_data = []
+            # 获取第几页的数据
+            for obj in objs:
+                print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
 
-                # 获取所有数据
-                ret_data = []
-                # 获取第几页的数据
-                for obj in objs:
-                    print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
+                article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(
+                    article_id=obj.id, user_id=user_id).order_by('-stay_time')
 
-                    article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                           'customer').filter(
-                        article_id=obj.id, user_id=user_id).order_by('-stay_time')
+                total_forward_num_dict = article_to_customer_belonger_objs.aggregate(forward_num=Sum('forward_count'))
+                forward_count = total_forward_num_dict.get('forward_num')
+                if not  forward_count:
+                    forward_count = 0
 
-                    total_forward_num_dict = article_to_customer_belonger_objs.aggregate(forward_num=Sum('forward_count'))
-                    forward_count = total_forward_num_dict.get('forward_num')
-                    if not  forward_count:
-                        forward_count = 0
+                total_read_num_dict = article_to_customer_belonger_objs.aggregate(read_num=Sum('read_count'))
+                read_count =  total_read_num_dict.get('read_num')
+                if not read_count:
+                    read_count = 0
 
-                    total_read_num_dict = article_to_customer_belonger_objs.aggregate(read_num=Sum('read_count'))
-                    read_count =  total_read_num_dict.get('read_num')
-                    if not read_count:
-                        read_count = 0
+                article_id = obj.id
+                activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
+                now_date_time = datetime.datetime.now()
+                is_have_activity = 2 #
+                if activity_objs:
+                    activity_obj = activity_objs[0]
+                    start_time = activity_obj.start_time
+                    end_time = activity_obj.end_time
+                    if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                        is_have_activity = 1  # 活动已经开启
 
-                    article_id = obj.id
-                    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
-                    now_date_time = datetime.datetime.now()
-                    is_have_activity = 2 #
-                    if activity_objs:
-                        activity_obj = activity_objs[0]
-                        start_time = activity_obj.start_time
-                        end_time = activity_obj.end_time
-                        if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
-                            is_have_activity = 1  # 活动已经开启
+                ret_data.append({
+                    'id': article_id,
+                    'title': obj.title,  # 文章标题
+                    'status_code': obj.status,  # 状态
+                    'status': obj.get_status_display(),  # 状态
+                    'source_code': obj.source,  # 状态
+                    'source': obj.get_source_display(),  # 状态
+                    'author': obj.user.username,  # 如果为原创显示,文章作者
+                    'avatar': obj.user.avatar,  # 用户的头像
+                    'read_count': read_count,  # 被阅读数量
+                    'forward_count': forward_count ,  # 被转发个数
+                    'create_date': obj.create_date,  # 文章创建时间
+                    'cover_url': obj.cover_picture,  # 文章图片链接
+                    'tag_list': list(obj.tags.values('id', 'name')),
+                    'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
+                    'is_have_activity': is_have_activity
+                })
+            response.code = 200
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+            }
 
-                    ret_data.append({
-                        'id': article_id,
-                        'title': obj.title,  # 文章标题
-                        'status_code': obj.status,  # 状态
-                        'status': obj.get_status_display(),  # 状态
-                        'source_code': obj.source,  # 状态
-                        'source': obj.get_source_display(),  # 状态
-                        'author': obj.user.username,  # 如果为原创显示,文章作者
-                        'avatar': obj.user.avatar,  # 用户的头像
-                        'read_count': read_count,  # 被阅读数量
-                        'forward_count': forward_count ,  # 被转发个数
-                        'create_date': obj.create_date,  # 文章创建时间
-                        'cover_url': obj.cover_picture,  # 文章图片链接
-                        'tag_list': list(obj.tags.values('id', 'name')),
-                        'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
-                        'is_have_activity': is_have_activity
-                    })
-                response.code = 200
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count,
-                }
-
-            else:
-                # print("验证不通过")
-                print(forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-            return JsonResponse(response.__dict__)
+        else:
+            response.code = 301
+            response.msg = json.loads(forms_obj.errors.as_json())
 
 
     return JsonResponse(response.__dict__)

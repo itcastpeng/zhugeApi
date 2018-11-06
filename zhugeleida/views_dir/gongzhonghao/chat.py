@@ -226,18 +226,11 @@ def chat_oper(request, oper_type, o_id):
                     if xiaochengxu_app_objs:
                         authorization_appid = xiaochengxu_app_objs[0].authorization_appid
 
-                    print('----- authorization_appid ----->>',authorization_appid,session_key,'\n',encryptedData,iv)
                     pc = WXBizDataCrypt(authorization_appid, session_key)
                     ret =  pc.decrypt(encryptedData, iv)
-                    print('------ pc.decrypt(encryptedData) ------->>', ret)
+
 
                     phoneNumber = ret.get('phoneNumber')
-
-
-                    # { 'phoneNumber': '17326681685',
-                    #   'purePhoneNumber': '17326681685', 'countryCode': '86',
-                    #   'watermark': {'timestamp': 1537415579, 'appid': 'wx1add8692a23b5976'}}
-
 
                     if phoneNumber:
                         _msg = '我的手机号是: %s' % (phoneNumber)

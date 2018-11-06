@@ -23,9 +23,17 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
+
+
+
+
+url =  ip + '/zhugeleida/admin/help_doc'  # 获取产品的列表
+# get_data['id'] = 1
+ret = requests.get(url, data = post_data ,params=get_data)
+
 
 
 
@@ -35,11 +43,10 @@ ip = 'http://127.0.0.1:8001'
 #
 # ret = requests.post(url, data = post_data ,params=get_data)
 
-url =  ip + '/zhugeleida/admin/modify_password'  # 获取产品的列表
-post_data['password1'] = '1234qwerQWERA'
-post_data['password2'] = '1234qwerQWER'
-
-ret = requests.post(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/modify_password'  # 获取产品的列表
+# post_data['password1'] = '1234qwerQWERA'
+# post_data['password2'] = '1234qwerQWER'
+# ret = requests.post(url, data = post_data ,params=get_data)
 
 
 
@@ -75,12 +82,6 @@ ret = requests.post(url, data = post_data ,params=get_data)
 # #
 # url = ip + '/zhugeleida/admin/open_qiyeweixin/set_session_info'  # 获取 关联第三方的二维码
 # ret = requests.post(url, params=get_data,data=post_data)
-
-
-
-
-
-
 
 
 # url = ip + '/zhugeleida/admin/xcx_auth_process'
