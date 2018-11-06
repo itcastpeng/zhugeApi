@@ -13,7 +13,7 @@ from django.db.models import Q, Count
 # 文章管理查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def help_doc(request,oper_type):
+def help_doc(request):
     response = Response.ResponseObj()
 
     if request.method == "GET":
@@ -58,7 +58,7 @@ def help_doc(request,oper_type):
                 'ret_data': ret_data,
                 'data_count': count,
             }
-     
+
 
     return JsonResponse(response.__dict__)
 
