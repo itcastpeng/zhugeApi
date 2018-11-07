@@ -25,3 +25,5 @@ def fild_upload(request):
         }
 
     return JsonResponse(response.__dict__)
+
+

@@ -338,7 +338,7 @@ def action(request, oper_type):
                             }
                         ]
                     }
- 
+
 
             ret_data.append(temp_dict[customer_id])
 

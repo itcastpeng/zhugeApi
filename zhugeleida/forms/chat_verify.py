@@ -87,7 +87,7 @@ class ChatPostForm(forms.Form):
         }
     )
     send_type = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'invalid': "发送类型不能为空",
         }
