@@ -21,12 +21,20 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_
 
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
 
+import uwsgi
+
 @accept_websocket  # 既能接受http也能接受websocket请求
 def websocket(request, oper_type):
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    if not request.is_websocket():
+    if request.is_websocket():
+        websocket_obj = request
+    else:
+        websocket_obj = uwsgi
+
+
+    if not websocket_obj.is_websocket():
         try:
             print('---- request.GET 数据：--->>', request.GET)
             message = request.GET['message']
@@ -36,18 +44,18 @@ def websocket(request, oper_type):
             print('---- 报错: e--->>', e)
             return HttpResponse('链接-->')
 
-    elif oper_type == 'leida' and request.is_websocket():
+    elif oper_type == 'leida' and websocket_obj.is_websocket():
 
         redis_user_id_key = ''
         user_id = ''
         customer_id = ''
         while True:
 
-            if request.websocket.count_messages() > 0:
-                for data in request.websocket:
+            if websocket_obj.websocket.count_messages() > 0:
+                for data in websocket_obj.websocket:
 
                     # print('request.websocket._get_new_messages() -->', request.websocket._get_new_messages())
-                    if request.websocket.is_closed():
+                    if websocket_obj.websocket.is_closed():
                         print('--- 雷达-连接关闭 --->')
                         return HttpResponse('--- 连接断开 ---->>')
 
@@ -126,7 +134,7 @@ def websocket(request, oper_type):
 
                             rc.lpush(redis_user_id_key, msg)
                             rc.lpush(redis_customer_id_key, msg)
-                            request.websocket.send( json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
+                            websocket_obj.websocket.send( json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
                             break
 
                         else:
@@ -136,7 +144,7 @@ def websocket(request, oper_type):
                                     'code' : 401,
                                     'msg' : 'user_id和uid不能为空,终止连接'
                                 }
-                                request.websocket.send(json.dumps(ret_data))
+                                websocket_obj.websocket.send(json.dumps(ret_data))
                                 # request.websocket.close()
                                 return HttpResponse('user_id和uid不能为空,终止连接')
                             # elif not Content:
@@ -216,23 +224,23 @@ def websocket(request, oper_type):
                         )
 
                         print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
-                        request.websocket.send(json.dumps(response_data))
+                        websocket_obj.websocket.send(json.dumps(response_data))
 
 
 
 
-    elif oper_type == 'xiaochengxu' and request.is_websocket():
+    elif oper_type == 'xiaochengxu' and websocket_obj.is_websocket():
 
         redis_customer_id_key = ''
         user_id = ''
         customer_id = ''
         while True:
 
-            if request.websocket.count_messages() > 0:
-                for data in request.websocket:
+            if websocket_obj.websocket.count_messages() > 0:
+                for data in websocket_obj.websocket:
 
-                    print('request.websocket._get_new_messages() -->', request.websocket._get_new_messages())
-                    if request.websocket.is_closed():
+                    print('request.websocket._get_new_messages() -->', websocket_obj.websocket._get_new_messages())
+                    if websocket_obj.websocket.is_closed():
                         print('---- 【小程序】连接关闭 --->')
                         return HttpResponse('小程序连接断开')
 
@@ -299,7 +307,7 @@ def websocket(request, oper_type):
                             rc.lpush(redis_user_id_key, msg)
                             rc.lpush(redis_customer_id_key, msg)
                             print('----- redis_customer_id_key --->',redis_customer_id_key)
-                            request.websocket.send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
+                            websocket_obj.websocket.send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
                             break
 
                         else:
@@ -309,7 +317,7 @@ def websocket(request, oper_type):
                                     'code': 401,
                                     'msg': 'user_id和uid不能为空,终止连接'
                                 }
-                                request.websocket.send(json.dumps(ret_data))
+                                websocket_obj.websocket.send(json.dumps(ret_data))
                                 # request.websocket.close()
                                 return HttpResponse('user_id和uid不能为空,终止连接')
 
@@ -390,5 +398,5 @@ def websocket(request, oper_type):
                         )
 
                         print('------ 有新消息,实时推送给【小程序】 的数据：---->', response_data)
-                        request.websocket.send(json.dumps(response_data))
+                        websocket_obj.websocket.send(json.dumps(response_data))
 
