@@ -311,7 +311,7 @@ def chat_oper(request, oper_type, o_id):
                     base_info_dict = {
                         'customer_id': obj.customer_id,
                         'user_id': obj.userprofile_id,
-                        'user_avator': mingpian_avatar,
+                        'user_avatar': mingpian_avatar,
                         'customer_headimgurl': obj.customer.headimgurl,
                         'customer': customer_name,
                         'dateTime': obj.create_date,
