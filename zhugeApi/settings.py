@@ -215,3 +215,5 @@ USE_TZ = False
 
 STATIC_URL = '/statics/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'statics')]
+
+WEBSOCKET_FACTORY_CLASS ='dwebsocket.backends.uwsgi.factory.uWsgiWebSocketFactory'
