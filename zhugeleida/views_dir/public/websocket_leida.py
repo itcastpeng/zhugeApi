@@ -392,3 +392,20 @@ def websocket(request, oper_type):
                         print('------ 有新消息,实时推送给【小程序】 的数据：---->', response_data)
                         request.websocket.send(json.dumps(response_data))
 
+
+    elif oper_type == 'chat':
+
+            """接受websocket传递过来的信息"""
+            uwsgi.websocket_handshake()
+            uwsgi.websocket_send("你还，很高心为你服务")
+
+            while True:
+                msg = uwsgi.websocket_recv()
+                msg = msg.decode()
+                data = json.loads(msg)
+                data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+
+                print('--------->>>',data["text"])
+
+
+                uwsgi.websocket_send(data["text"])
