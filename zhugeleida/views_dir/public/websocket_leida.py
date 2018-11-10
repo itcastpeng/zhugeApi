@@ -20,6 +20,7 @@ from zhugeleida.public.common import action_record
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_ChatGetForm,  ChatPostForm as xiaochengxu_ChatPostForm
 
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
+import uwsgi
 
 @accept_websocket  # 既能接受http也能接受websocket请求
 def websocket(request, oper_type):
