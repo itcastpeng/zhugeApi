@@ -36,7 +36,6 @@ def follow_language(request, ):
             print('q -->', q)
 
             objs = models.zgld_follow_language.objects.filter(q).order_by(order)  # 查询出有user用户关联的跟进常用语
-            count = objs.count()
 
             if length != 0:
                 print('current_page -->', current_page)
@@ -48,8 +47,7 @@ def follow_language(request, ):
 
             if objs:
                 for obj in objs:
-                    language_list.append(
-                        {'language_id': obj.id, 'user_id': obj.user_id, 'language': obj.custom_language})
+                    language_list.append({'language_id': obj.id, 'user_id': obj.user_id, 'language': obj.custom_language})
 
             response.code = 200
             response.data = {
@@ -76,7 +74,6 @@ def follow_language_oper(request, oper_type, o_id):
 
         # 添加用户跟进常用语
         if oper_type == "add":
-            print('----request.POST---->>', request.POST)
             language_data = {
                 'user_id': request.GET.get('user_id'),
                 'custom_language': request.POST.get('custom_language'),

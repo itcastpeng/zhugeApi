@@ -22,7 +22,6 @@ def user(request):
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
@@ -34,9 +33,7 @@ def user(request):
 
             }
             q = conditionCom(request, field_dict)
-            print('q -->', q)
-            print('order -->', order)
-            print(models.zgld_userprofile.objects.all())
+
             objs = models.zgld_userprofile.objects.select_related('role','company').filter(q).order_by(order)
             count = objs.count()
 
@@ -45,13 +42,10 @@ def user(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-            # 返回的数据
-            print('------------->>>',objs)
+
             ret_data = []
             for obj in objs:
 
-                print('oper_user_username -->', obj)
-                #  将查询出来的数据 加入列表
                 ret_data.append({
                     'id': obj.id,
                     'username': obj.username,
@@ -135,16 +129,13 @@ def user_oper(request, oper_type, o_id):
             print(request.POST)
             forms_obj = UserUpdateForm(form_data)
             if forms_obj.is_valid():
-                print("验证通过")
-                print(forms_obj.cleaned_data)
+
                 user_id = forms_obj.cleaned_data['user_id']
                 username = forms_obj.cleaned_data['username']
                 role_id = forms_obj.cleaned_data['role_id']
-                #  查询数据库  用户id
                 user_obj = models.zgld_userprofile.objects.filter(
                     id=user_id
                 )
-                #  更新 数据
                 if user_obj:
                     user_obj.update(
                         username=username, role_id=role_id
@@ -156,11 +147,7 @@ def user_oper(request, oper_type, o_id):
                     response.msg = json.loads(forms_obj.errors.as_json())
 
             else:
-                print("验证不通过")
-                print(forms_obj.errors)
                 response.code = 301
-                print(forms_obj.errors.as_json())
-                #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:

@@ -104,7 +104,6 @@ def plugin_mingpian_oper(request, oper_type, o_id):
             forms_obj = MingpianAddForm(article_data)
 
             if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====??', forms_obj.cleaned_data)
 
                 dict_data = {
                     'user_id': request.GET.get('user_id'),
@@ -116,7 +115,7 @@ def plugin_mingpian_oper(request, oper_type, o_id):
                     'position' :forms_obj.cleaned_data['position'],
                 }
 
-                obj = models.zgld_plugin_mingpian.objects.create(**dict_data)
+                models.zgld_plugin_mingpian.objects.create(**dict_data)
 
                 response.code = 200
                 response.msg = "添加成功"

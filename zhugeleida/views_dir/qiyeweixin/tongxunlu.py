@@ -47,7 +47,6 @@ def tongxunlu(request):
 
             objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q).order_by(order)
 
-
             count = objs.count()
             if objs:
 

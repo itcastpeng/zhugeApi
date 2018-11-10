@@ -143,7 +143,6 @@ def activity_manage(request, oper_type):
                 print('-----q1---->>', q1)
                 objs = models.zgld_article_activity.objects.select_related('article', 'company').filter(q1).order_by(order)
                 count = objs.count()
-                # print('-----objs----->>', objs)
 
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -153,9 +152,7 @@ def activity_manage(request, oper_type):
 
                 ret_data = []
                 if objs:
-
                     for obj in objs:
-
                         reason = obj.reason  # 已发红包金额
                         if reason:
                             if '成功' in reason:
@@ -284,12 +281,9 @@ def activity_manage(request, oper_type):
 
 
                         activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
-
                         reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
                         already_send_redPacket_num = obj.already_send_redPacket_num         # 已发放次数
                         already_send_redPacket_money = obj.already_send_redPacket_money     # 已发红包金额
-
-
 
                         shoudle_send_num = ''
                         if reach_forward_num != 0:  # 不能为0

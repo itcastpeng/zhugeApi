@@ -25,8 +25,7 @@ def follow_info(request, ):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')
-            user_id = request.GET.get('user_id')
-            customer_id = request.GET.get('customer_id')
+
 
             field_dict = {
                 'user_id': '',
@@ -37,7 +36,7 @@ def follow_info(request, ):
 
             customer_flowup_objs = models.zgld_user_customer_belonger.objects.filter(q).order_by(order)  # 查询出有user用户关联的信心表
 
-            objs = models.zgld_follow_info.objects.filter(user_customer_flowup_id=customer_flowup_objs[0].id).order_by(order)
+            objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(user_customer_flowup_id=customer_flowup_objs[0].id).order_by(order)
 
             count = objs.count()
             ret_list = []
@@ -82,8 +81,6 @@ def follow_info_oper(request, oper_type, o_id):
 
         # 添加用户跟进信息
         if oper_type == "add":
-
-            print('----request.POST---->>', request.POST)
             language_data = {
                 'user_id': request.GET.get('user_id'),
                 'customer_id': o_id,

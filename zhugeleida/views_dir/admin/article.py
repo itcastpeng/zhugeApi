@@ -104,42 +104,8 @@ def article(request,oper_type):
                 }
             return JsonResponse(response.__dict__)
 
-
     return JsonResponse(response.__dict__)
 
-# # 递归 脉络图
-# def init_data(user_id, article_id, o_id=None):
-#     datadict = []
-#     if o_id:
-#         objs = models.zgld_article_to_customer_belonger.objects.filter(customer_parent_id=o_id).filter(
-#             article_id=article_id).filter(user_id=user_id)
-#         for obj in objs:
-#             if obj.customer_parent.id == obj.customer.id:
-#                 continue
-#             decode_username = base64.b64decode(obj.customer_parent.username)
-#             username = str(decode_username, 'utf-8')
-#             parentId = obj.customer.id
-#             result = init_data(user_id, article_id, parentId)
-#             flag = True
-#             # print('result=====> ',result)
-#             for other in datadict:
-#                 if username in other.get('name'):
-#                     flag = False
-#                     if result:
-#                         print(result)
-#                         other.get('children').append(result[0])
-#             if flag:
-#                 if result:
-#                     datadict.append({
-#                         'name':username,
-#                         'children': result
-#                     })
-#                 else:
-#                     datadict.append({
-#                         'name': username,
-#                     })
-#
-#     return datadict
 
 
 def init_data(user_id, pid=None, level=1):
@@ -155,50 +121,43 @@ def init_data(user_id, pid=None, level=1):
         level=level
     )
     for obj in objs:
-        print('pid------------> ',pid)
-        print('customer_parent_id------------> ',obj.customer_parent_id, obj.customer_id)
+        print('pid------------> ',pid, obj.id, user_id)
         if obj.customer_parent_id == obj.customer_id:
             continue
-
         decode_username = base64.b64decode(obj.customer.username)
-        customer_username = str(decode_username, 'utf-8')
+        customer_username = decode_username.decode('utf8')
         current_data = {
             'name': customer_username,
             'id':obj.id,
-            # 'user_id': obj.customer_id
         }
         children_data = init_data(user_id, pid=obj.customer_id, level=level+1)
         if children_data:
             current_data['children'] = children_data
         result_data.append(current_data)
-
-    print('result_data -->', result_data)
     return result_data
 
 # 脉络图查询 调用init_data
 def mailuotu(q):
-    # children_data = init_data(user_id)
-    # print('children_data--------> ',children_data)
-    # print('q------------------------------> ',q)
+
     count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
         'user',
         'article'
-    ).filter(q).values('user_id', 'user__username', 'article__title').annotate(Count('user'))
+    ).filter(q).values('id', 'user_id', 'user__username', 'article__title').annotate(Count('user'))
     result_data = []
     for obj in count_objs:
+        print('obj.id--------------> ',obj)
         user_id = obj['user_id']
         username = obj['user__username']
-        print('user_id -->', user_id)
-        print('username -->', username)
-
-        children_data = init_data(user_id)
-        print('children_data------> ',children_data)
+        # print('user_id -->', user_id)
+        # print('username -->', username)
+        print('user----id-----------> ',user_id, obj['id'])
+        children_data = init_data(user_id, pid=obj['id'])
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
         result_data.append(tmp)
 
-    print('result_data -->', result_data)
+    # print('result_data -->', result_data)
 
     article_title = count_objs[0]['article__title']
     return article_title, result_data
@@ -207,7 +166,6 @@ def mailuotu(q):
 @account.is_token(models.zgld_admin_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-    timestamp = str(int(time.time() * 1000))
 
     if request.method == "POST":
 
@@ -446,7 +404,7 @@ def article_oper(request, oper_type, o_id):
         # 脉络图 统计文章 转载情况
         elif oper_type == 'contextDiagram':
             article_id = o_id   # 文章id
-            uid = request.GET.get('uid')
+            uid = request.GET.get('uid') # 文章所属用户ID
             q = Q()
             q.add(Q(article_id=article_id), Q.AND)
             if uid:
@@ -474,6 +432,7 @@ def article_oper(request, oper_type, o_id):
         else:
             response.code = 402
             response.msg = '请求异常'
+
     return JsonResponse(response.__dict__)
 
 

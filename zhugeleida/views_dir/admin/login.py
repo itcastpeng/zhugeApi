@@ -119,7 +119,7 @@ def modify_password(request):
         else:
             response.code = 402
             # response.msg = "两次密码输入不一致"
-            print('---- 修改密码 formobj----->>',form_obj.errors.as_json())
+            # print('---- 修改密码 formobj----->>',form_obj.errors.as_json())
             response.msg = json.loads(form_obj.errors.as_json())
     else:
         response.code = 401

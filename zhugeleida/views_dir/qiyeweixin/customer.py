@@ -52,7 +52,6 @@ def customer(request):
 
             # 返回的数据
             ret_data = []
-            print('=====  objs ====>',objs)
             if objs:
                 for obj in objs:
 
@@ -61,7 +60,7 @@ def customer(request):
 
                     for t_obj in tag_obj:
                         tag_list.append(t_obj.name)
-                        print('--->>',tag_list)
+
                     info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
 
                     phone = info_obj[0].phone if info_obj else ''
@@ -104,10 +103,6 @@ def customer(request):
                         'mem': mem,  # 备注
                         'tag': tag_list
                     })
-
-
-                #  查询成功 返回200 状态码
-                print('----ret_data----->',ret_data)
 
                 response.code = 200
                 response.msg = '查询成功'

@@ -47,8 +47,6 @@ def admin_role(request):
                 #  将查询出来的数据 加入列表
                 rules_id_list = [i[0] for i in o.rules.values_list('id')]
 
-
-
                 access_rule_objs = models.zgld_access_rules.objects.values_list('id', 'name', 'title', 'super_id_id')
                 rules_data = []
                 rule_dict = {}
@@ -85,13 +83,6 @@ def admin_role(request):
 
                         rules_data.append(rule_dict)
                         rule_dict = {}
-
-                        # response.code = 200
-                        # response.msg = '查询成功'
-                        # response.data = {
-                        #     'ret_data': ret_data,
-                        #     'data_count': count,
-                        # }
 
                 ret_data.append({
                     'role_id': o.id,
@@ -168,18 +159,13 @@ def admin_role_oper(request, oper_type, o_id):
 
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
-                print("验证通过")
-                print(forms_obj.cleaned_data)
                 o_id = forms_obj.cleaned_data['o_id']
-
                 rules_list = json.loads(request.POST.get('rules_list')) if  request.POST.get('rules_list')  else []
 
-                response.code = 200
-                response.msg = "添加成功"
                 del forms_obj.cleaned_data['o_id']
-                #  查询数据库  用户id
+
                 objs = models.zgld_admin_role.objects.filter(id=o_id)
-                #  更新 数据
+
                 if objs:
                     objs[0].rules = rules_list
                     objs.update(**forms_obj.cleaned_data)
@@ -192,11 +178,7 @@ def admin_role_oper(request, oper_type, o_id):
 
             else:
                 print("验证不通过")
-                print('forms_obj.errors.as_json() -->', forms_obj.errors.as_json())
-                # print(forms_obj.errors)
                 response.code = 301
-                # print(forms_obj.errors.as_json())
-                #  字符串转换 json 字符串
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)

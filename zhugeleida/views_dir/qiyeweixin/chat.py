@@ -62,6 +62,14 @@ def chat(request):
 
                 if not content:
                     continue
+                is_customer_new_msg = obj.is_customer_new_msg
+
+                if is_customer_new_msg: # 为True时
+                    is_customer_already_read = 0 # 未读
+                    is_customer_already_read_text = '未读'
+                else:
+                    is_customer_already_read = 1  # 已读
+                    is_customer_already_read_text = '已读'
 
                 _content = json.loads(content)
                 info_type = _content.get('info_type')
@@ -81,9 +89,9 @@ def chat(request):
                     'src': obj.customer.headimgurl,
                     'name': customer_name,
                     'dateTime': obj.create_date,
-                    # 'msg': obj.msg,
-                    # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                    'send_type': obj.send_type
+                    'send_type': obj.send_type,
+                    'is_customer_already_read': is_customer_already_read,
+                    'is_customer_already_read_text' : is_customer_already_read_text
                 }
                 base_info_dict.update(_content)
 
@@ -99,7 +107,7 @@ def chat(request):
 
             if not ret_data_list:
                 # 没有新消息
-                response.msg = 'No new data'
+                response.msg = '没有新消息'
 
             return JsonResponse(response.__dict__)
 
@@ -240,6 +248,15 @@ def chat_oper(request, oper_type, o_id):
                     if not content:
                         continue
 
+                    is_customer_new_msg = obj.is_customer_new_msg
+
+                    if is_customer_new_msg:  # 为True时
+                        is_customer_already_read = 0  # 未读
+                        is_customer_already_read_text = '未读'
+                    else:
+                        is_customer_already_read = 1  # 已读
+                        is_customer_already_read_text = '已读'
+
                     _content = json.loads(content)
                     info_type = _content.get('info_type')
                     if info_type:
@@ -258,9 +275,9 @@ def chat_oper(request, oper_type, o_id):
                         'src': obj.customer.headimgurl,
                         'name': customer_name,
                         'dateTime': obj.create_date,
-                        # 'msg': obj.msg,
-                        # 'info_type': obj.info_type,  # (1, #客户和用户之间的聊天信息 (2,#客户和用户之间的产品咨询
-                        'send_type': obj.send_type
+                        'send_type': obj.send_type,
+                        'is_customer_already_read': is_customer_already_read,
+                        'is_customer_already_read_text': is_customer_already_read_text
                     }
                     base_info_dict.update(_content)
 

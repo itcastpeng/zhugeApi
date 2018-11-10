@@ -57,8 +57,6 @@ def product(request, oper_type):
                         user_avatar = user_photo_obj[0].photo_url
 
                     else:
-                        # if obj.avatar.startswith("http"):
-                        #     user_avatar = obj.avatar
                         user_obj = models.zgld_userprofile.objects.get(id=user_id)
                         if user_obj:
                             user_avatar = user_obj.avatar
@@ -101,16 +99,8 @@ def product(request, oper_type):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 order = request.GET.get('order', '-create_date')
                 status = request.GET.get('status_code')
-                # field_dict = {
-                #     'status': '',
-                #     'create_date': '',
-                # }
-                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
 
-                # q = conditionCom(request, field_dict)
-                # q.add(Q(**{'user_id': user_id}), Q.AND)
-                # q.add(Q(**{'company_id': company_id}), Q.AND)
-                # q.add(Q(**{'user_id__isnull': True,'company_id': company_id},), Q.AND)
+                company_id = models.zgld_userprofile.objects.filter(id=user_id)[0].company.id
 
                 con = Q()
                 q1 = Q()
@@ -172,11 +162,9 @@ def product(request, oper_type):
                         'price': obj.price,  # 价格
                         'publisher_date': obj.create_date,  # 发布日期。
                         'content': content,  # 封面地址的URL
-
                         'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
                         'status': obj.get_status_display(),
                         'status_code': obj.status  # 产品的动态。
-
                     })
                     #  查询成功 返回200 状态码
                     response.code = 200

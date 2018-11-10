@@ -90,13 +90,6 @@ def action(request, oper_type):
                         'create_date': obj.create_date,
                     })
 
-                # if current_page == 1:
-                #     count_action_data = models.zgld_accesslog.objects.filter(user_id=user_id).values('action').annotate(Count('action'))
-                #     print('count_action_data -->', count_action_data)
-
-                #     models.zgld_accesslog.objects.filter(user_id=user_id).values('action','customer_id','customer__username').annotate(Count('action'))
-                #     print('customer_action_data -->', customer_action_data)
-
                 response.code = 200
                 response.msg = '查询日志记录成功'
                 response.data = {
@@ -311,7 +304,6 @@ def action(request, oper_type):
             customer_id = request.GET.get('customer_id')
             q = conditionCom(request, field_dict)
             objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer_id', 'action').annotate(Count('action'))
-            # print('-------objs---->>', json.dumps(list(objs)))
 
             ret_data = []
             action_dict = {}
@@ -346,8 +338,7 @@ def action(request, oper_type):
                             }
                         ]
                     }
-                # ret_list.append(temp_dict)
-                # temp_dict = {}
+
 
             ret_data.append(temp_dict[customer_id])
 

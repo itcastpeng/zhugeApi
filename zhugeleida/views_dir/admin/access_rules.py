@@ -4,8 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
+from django.db.models import Q
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.admin.access_roles import AddForm, UpdateForm, SelectForm
 import json
@@ -20,33 +19,24 @@ def access_rules(request):
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
-            current_page = forms_obj.cleaned_data['current_page']
-            length = forms_obj.cleaned_data['length']
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             order = request.GET.get('order', '-create_date')
             field_dict = {
                 'id': '',
                 'name': '__contains',
-                'create_date': '',
-                'oper_user__username': '__contains',
             }
 
             q = conditionCom(request, field_dict)
-            print('q -->', q)
 
             if  request.GET.get('super_id_id__isnull'):
+                q.add(Q(**{"super_id_id__isnull": True}), Q.AND)
 
-                objs = models.zgld_access_rules.objects.filter(super_id_id__isnull=True).order_by(order)
-                print(objs)
 
-            else:
-                objs = models.zgld_access_rules.objects.select_related('super_id').filter(q).order_by(order)
-                # objs = models.zgld_access_rules.objects.values_list('id','name','url_path','super_id_id')
+            objs = models.zgld_access_rules.objects.select_related('super_id').filter(q).order_by(order)
 
             ret_data = []
             count = objs.count()
             for obj in objs:
-                # 将查询出来的数据 加入列表
+
                 super_name = ''
                 if obj.super_id:
                     super_name = obj.super_id.name

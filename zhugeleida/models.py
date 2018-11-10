@@ -825,12 +825,12 @@ class zgld_article(models.Model):
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
 
 
-
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "文章表"
         app_label = "zhugeleida"
+
 
 
 # 公众号-文章-活动(任务)管理表
@@ -855,10 +855,7 @@ class zgld_article_activity(models.Model):
     reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]',null=True)
     already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额', default=0, null=True)
-    # type_choices = (
-    #                 (1, '分享(转发)领红包'),
-    #                )
-    # type = models.SmallIntegerField(verbose_name='活动形式', choices=type_choices,null=True)
+
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
     reason = models.CharField(verbose_name='返回的发红包错误信息', max_length=512, null=True)
@@ -910,7 +907,6 @@ class zgld_activity_redPacket(models.Model):
 
 
 
-
 #公众号-文章标签表
 class zgld_article_tag(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile',verbose_name="标签所属用户",null=True)
@@ -934,11 +930,6 @@ class zgld_article_to_customer_belonger(models.Model):
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
-
-    # expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
-    # expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)
-    # last_follow_time = models.DateTimeField(verbose_name='最后跟进时间', null=True)  # 指的是 用户最后发留言时间和用户跟进用语的写入。
-    # last_activity_time = models.DateTimeField(verbose_name='最后活动时间', null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -1180,16 +1171,7 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
-# 员工订单统计
-# class zgld_yuangong_dingdan_tongji(models.Model):
-#     dingDanguanli = models.ForeignKey(to='zgld_shangcheng_dingdan_guanli', verbose_name='订单管理', null=True, blank=True)
-#     touxiang = models.CharField(verbose_name='头像', max_length=128, null=True, blank=True)
-#     employeesName = models.ForeignKey(to='zgld_userprofile', verbose_name='(员工/业务员)名称', null=True, blank=True)
-#     gongsimingcheng = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
-#     employeesPhone = models.IntegerField(verbose_name='(员工/业务员)电话', null=True, blank=True)
-#     bumen = models.CharField(verbose_name='部门', max_length=64, null=True, blank=True)
-#     numberOfSalesOrders = models.IntegerField(verbose_name='成交订单数', default=0)
-#     ClinchADealAmount = models.IntegerField(verbose_name='成交金额', default=0)
+
 
 # 发放红包
 class zgld_red_envelope_to_issue(models.Model):
@@ -1213,3 +1195,16 @@ class zgld_red_envelope_to_issue(models.Model):
 
     # endTheActivity = models.DateTimeField(verbose_name='活动结束时间', null=True, blank=True)
     articleId = models.IntegerField(verbose_name='文章ID', null=True, blank=True)
+
+
+
+#帮助文档
+class zgld_help_doc(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
+    title = models.CharField(verbose_name='文章标题', max_length=128)
+    content = models.TextField(verbose_name='文章内容', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "帮助文档表"
+        app_label = "zhugeleida"

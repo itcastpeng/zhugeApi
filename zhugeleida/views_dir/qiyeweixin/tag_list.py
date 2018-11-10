@@ -27,7 +27,6 @@ def tag_list(request):
         customer_id = request.GET.get('customer_id')
 
 
-
         tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id','user_id')
         tag_dict = {}
         ret_data = []
