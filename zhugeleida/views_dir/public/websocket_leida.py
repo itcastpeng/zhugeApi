@@ -22,7 +22,7 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
 import uwsgi
 
-@accept_websocket  # 既能接受http也能接受websocket请求
+# @accept_websocket  # 既能接受http也能接受websocket请求
 def websocket(request, oper_type):
     import redis
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
