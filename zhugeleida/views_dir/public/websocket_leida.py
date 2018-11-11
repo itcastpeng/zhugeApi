@@ -46,10 +46,10 @@ def websocket(request, oper_type):
 
         while True:
 
-            redis_user_id_key = rc.get(redis_user_id_key)
+            redis_user_id_key_flag = rc.get(redis_user_id_key)
 
-            if redis_user_id_key == 'True':
-                print('---- 雷达 Flag  --->>', redis_user_id_key)
+            if redis_user_id_key_flag == 'True':
+                print('---- 雷达 Flag  --->>', redis_user_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -246,10 +246,10 @@ def websocket(request, oper_type):
         uwsgi.websocket_handshake()
         while True:
 
-            redis_customer_id_key = rc.get(redis_customer_id_key)
+            redis_customer_id_key_flag = rc.get(redis_customer_id_key)
 
-            if redis_customer_id_key == 'True':
-                print('---- 小程序 Flag  --->>', redis_customer_id_key)
+            if redis_customer_id_key_flag == 'True':
+                print('---- 小程序 Flag  --->>', redis_customer_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
