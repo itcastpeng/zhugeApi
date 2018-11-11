@@ -354,6 +354,7 @@ def websocket(request, oper_type):
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
 
                 if type == 'register':
+                    Flag = True
                     continue
 
                 forms_obj = xiaochengxu_ChatPostForm(_data)
