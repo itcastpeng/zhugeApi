@@ -404,7 +404,7 @@ def websocket(request, oper_type):
                 data = json.loads(msg)
                 data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
-                print('--------->>>',data["text"])
+                print('----- websocket_recv ---->>>',data)
 
 
                 uwsgi.websocket_send(data["text"])
