@@ -127,7 +127,11 @@ def websocket(request, oper_type):
                     #
                     # else:
             else:
-                data = uwsgi.websocket_recv()
+                # data = uwsgi.websocket_recv()
+                data = uwsgi.websocket_recv_nb()
+                if not data:
+                    continue
+
                 _data = json.loads(data)
                 print('--- 【雷达用户】发送过来的 数据: --->>', _data)
 
@@ -238,8 +242,8 @@ def websocket(request, oper_type):
         uwsgi.websocket_handshake()
         while True:
 
-            data = rc.rpop(redis_customer_id_key)
-            if data:
+            redis_customer_id_key = rc.rpop(redis_customer_id_key)
+            if redis_customer_id_key:
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -317,7 +321,11 @@ def websocket(request, oper_type):
                     uwsgi.websocket_send(json.dumps(response_data))
 
             else:
-                data = uwsgi.websocket_recv()
+                # data = uwsgi.websocket_recv()
+                data = uwsgi.websocket_recv_nb()
+                if not data:
+                    continue
+
                 _data = json.loads(data.decode())
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
 
