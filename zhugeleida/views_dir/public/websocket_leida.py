@@ -134,7 +134,7 @@ def websocket(request, oper_type):
                 data = uwsgi.websocket_recv_nb()
                 # print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
 
-                _data = json.loads(data.decode())
+                _data = json.loads(data)
                 print('--- 【雷达用户】发送过来的 数据: --->>', _data)
                 user_id = _data.get('user_id')
                 customer_id = _data.get('customer_id')
@@ -331,7 +331,7 @@ def websocket(request, oper_type):
                 data = uwsgi.websocket_recv_nb()
                 # print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
 
-                _data = json.loads(data.decode())
+                _data = json.loads(data)
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
 
                 customer_id = _data.get('user_id')
