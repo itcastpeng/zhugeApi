@@ -133,18 +133,18 @@ def websocket(request, oper_type):
                 # data = uwsgi.websocket_recv()
                 data = uwsgi.websocket_recv_nb()
                 # print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
-                if not data:
-                    continue
 
-                _data = json.loads(data)
+                _data = json.loads(data.decode())
                 print('--- 【雷达用户】发送过来的 数据: --->>', _data)
-
                 user_id = _data.get('user_id')
                 customer_id = _data.get('customer_id')
                 Content = _data.get('content')
 
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+
+                if not data:
+                    continue
 
                 forms_obj = leida_ChatPostForm(_data)
 
@@ -330,9 +330,6 @@ def websocket(request, oper_type):
                 # data = uwsgi.websocket_recv()
                 data = uwsgi.websocket_recv_nb()
                 # print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
-                if not data:
-                    continue
-
 
                 _data = json.loads(data.decode())
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
@@ -344,6 +341,9 @@ def websocket(request, oper_type):
 
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+
+                if not data:
+                    continue
 
                 forms_obj = xiaochengxu_ChatPostForm(_data)
                 if forms_obj.is_valid():
