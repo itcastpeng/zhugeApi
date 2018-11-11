@@ -47,6 +47,7 @@ def websocket(request, oper_type):
         while True:
 
             redis_user_id_key = rc.get(redis_user_id_key)
+            print('---- 雷达 Flag  --->>',redis_user_id_key)
             if redis_user_id_key:
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -130,7 +131,7 @@ def websocket(request, oper_type):
             else:
                 # data = uwsgi.websocket_recv()
                 data = uwsgi.websocket_recv_nb()
-                print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
+                # print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
                 if not data:
                     continue
 
@@ -245,6 +246,7 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key = rc.get(redis_customer_id_key)
+            print('---- 小程序 Flag  --->>', redis_customer_id_key)
             if redis_customer_id_key:
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
@@ -326,7 +328,7 @@ def websocket(request, oper_type):
             else:
                 # data = uwsgi.websocket_recv()
                 data = uwsgi.websocket_recv_nb()
-                print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
+                # print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
                     continue
 
