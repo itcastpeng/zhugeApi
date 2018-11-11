@@ -285,7 +285,7 @@ def websocket(request, oper_type):
                             'user_avatar': mingpian_avatar,
                             'customer_headimgurl': obj.customer.headimgurl,
                             'customer': customer_name,
-                            'dateTime': obj.create_date.strptime('%Y-%m-%d %H:%M:%S'),
+                            'dateTime': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
                             'is_first_info': False,  # 是否为第一条的信息
                             # 'info_type': obj.info_type, # 消息的类型
@@ -381,7 +381,7 @@ def websocket(request, oper_type):
                     rc.lpush(redis_customer_id_key, msg)
                     print('----- redis_customer_id_key --->',redis_customer_id_key)
                     uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
-                    
+
 
                 else:
 
