@@ -115,7 +115,7 @@ def websocket(request, oper_type):
                     )
 
                     print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
-                    request.websocket.send(json.dumps(response_data))
+                    uwsgi.websocket_send(json.dumps(response_data))
 
             # if request.websocket.count_messages() > 0:
             #     for data in request.websocket:
@@ -203,7 +203,7 @@ def websocket(request, oper_type):
 
                     rc.lpush(redis_user_id_key, msg)
                     rc.lpush(redis_customer_id_key, msg)
-                    # request.websocket.send( json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
+                    # uwsgi.websocket_send( json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
                     print('---- 雷达消息-发送成功 --->>', '雷达消息-发送成功')
                     uwsgi.websocket_send(json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
 
@@ -215,7 +215,7 @@ def websocket(request, oper_type):
                             'code' : 401,
                             'msg' : 'user_id和uid不能为空,终止连接'
                         }
-                        # request.websocket.send(json.dumps(ret_data))
+                        # uwsgi.websocket_send(json.dumps(ret_data))
                         uwsgi.websocket_send(json.dumps(ret_data))
                         return HttpResponse('user_id和uid不能为空,终止连接')
                     # elif not Content:
@@ -223,7 +223,7 @@ def websocket(request, oper_type):
                     #         'code': 402,
                     #         'msg': 'content字段内容不能为空'
                     #     }
-                    #     request.websocket.send(json.dumps(ret_data))
+                    #     uwsgi.websocket_send(json.dumps(ret_data))
                     # break
 
             # else:
@@ -308,7 +308,7 @@ def websocket(request, oper_type):
                             rc.lpush(redis_user_id_key, msg)
                             rc.lpush(redis_customer_id_key, msg)
                             print('----- redis_customer_id_key --->',redis_customer_id_key)
-                            request.websocket.send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
+                            uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
                             break
 
                         else:
@@ -318,7 +318,7 @@ def websocket(request, oper_type):
                                     'code': 401,
                                     'msg': 'user_id和uid不能为空,终止连接'
                                 }
-                                request.websocket.send(json.dumps(ret_data))
+                                uwsgi.websocket_send(json.dumps(ret_data))
                                 # request.websocket.close()
                                 return HttpResponse('user_id和uid不能为空,终止连接')
 
@@ -399,7 +399,7 @@ def websocket(request, oper_type):
                         )
 
                         print('------ 有新消息,实时推送给【小程序】 的数据：---->', response_data)
-                        request.websocket.send(json.dumps(response_data))
+                        uwsgi.websocket_send(json.dumps(response_data))
 
 
     if  oper_type == 'chat':
