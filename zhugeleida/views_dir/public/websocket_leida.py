@@ -46,7 +46,7 @@ def websocket(request, oper_type):
 
         while True:
 
-            redis_user_id_key = rc.rpop(redis_user_id_key)
+            redis_user_id_key = rc.get(redis_user_id_key)
             if redis_user_id_key:
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -113,6 +113,7 @@ def websocket(request, oper_type):
                     objs.update(
                         is_user_new_msg=False
                     )
+                    rc.set(redis_user_id_key,False)
 
                     print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
@@ -206,8 +207,8 @@ def websocket(request, oper_type):
                         _data['content'] = Content
                         tasks.user_send_gongzhonghao_template_msg.delay(data)  # 发送【公众号发送模板消息】
 
-                    rc.lpush(redis_user_id_key, msg)
-                    rc.lpush(redis_customer_id_key, msg)
+                    rc.set(redis_user_id_key, True)
+                    rc.set(redis_customer_id_key, True)
                     # uwsgi.websocket_send( json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
                     print('---- 雷达消息-发送成功 --->>', '雷达消息-发送成功')
                     uwsgi.websocket_send(json.dumps({'code':200,'msg': "雷达消息-发送成功"}))
@@ -243,7 +244,7 @@ def websocket(request, oper_type):
         uwsgi.websocket_handshake()
         while True:
 
-            redis_customer_id_key = rc.rpop(redis_customer_id_key)
+            redis_customer_id_key = rc.get(redis_customer_id_key)
             if redis_customer_id_key:
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
@@ -317,6 +318,7 @@ def websocket(request, oper_type):
                     objs.update(
                         is_customer_new_msg=False
                     )
+                    rc.set(redis_customer_id_key,False)
 
                     print('------ 有新消息,实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
@@ -388,8 +390,8 @@ def websocket(request, oper_type):
                         _data['uid'] = user_id
                         action_record(_data, remark)
 
-                    rc.lpush(redis_user_id_key, msg)
-                    rc.lpush(redis_customer_id_key, msg)
+                    rc.set(redis_user_id_key, True)
+                    rc.set(redis_customer_id_key, True)
                     print('----- redis_customer_id_key --->',redis_customer_id_key)
                     uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
 
