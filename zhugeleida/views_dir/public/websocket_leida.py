@@ -247,9 +247,9 @@ def websocket(request, oper_type):
         redis_customer_id_key = ''
         user_id = ''
         customer_id = ''
-        global  Flag
+        # global  Flag
         uwsgi.websocket_handshake()
-        Flag= False
+        Flag = False
         while True:
 
             while Flag:
