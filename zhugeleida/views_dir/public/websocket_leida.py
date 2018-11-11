@@ -381,7 +381,7 @@ def websocket(request, oper_type):
                     rc.lpush(redis_customer_id_key, msg)
                     print('----- redis_customer_id_key --->',redis_customer_id_key)
                     uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
-                    break
+                    
 
                 else:
 
