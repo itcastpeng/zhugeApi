@@ -47,8 +47,9 @@ def websocket(request, oper_type):
         while True:
 
             redis_user_id_key = rc.get(redis_user_id_key)
-            print('---- 雷达 Flag  --->>',redis_user_id_key)
+
             if redis_user_id_key:
+                print('---- 雷达 Flag  --->>', redis_user_id_key)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -246,9 +247,9 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key = rc.get(redis_customer_id_key)
-            print('---- 小程序 Flag  --->>', redis_customer_id_key)
-            if redis_customer_id_key:
 
+            if redis_customer_id_key:
+                print('---- 小程序 Flag  --->>', redis_customer_id_key)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -322,7 +323,7 @@ def websocket(request, oper_type):
                     )
                     rc.set(redis_customer_id_key,False)
 
-                    print('------ 有新消息,实时推送给【小程序】 的数据：---->', response_data)
+                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
             else:
@@ -394,7 +395,7 @@ def websocket(request, oper_type):
 
                     rc.set(redis_user_id_key, True)
                     rc.set(redis_customer_id_key, True)
-                    print('----- redis_customer_id_key --->',redis_customer_id_key)
+
                     uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
 
 
