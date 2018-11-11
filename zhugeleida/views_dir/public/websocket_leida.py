@@ -250,7 +250,6 @@ def websocket(request, oper_type):
         customer_id = ''
 
         uwsgi.websocket_handshake()
-
         while True:
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
@@ -339,7 +338,8 @@ def websocket(request, oper_type):
                 data = uwsgi.websocket_recv_nb()
                 print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
-                    return HttpResponse('发送数据不能为空,终止连接')
+                    continue
+                    # return HttpResponse('发送数据不能为空,终止连接')
 
                 _data = json.loads(data)
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
@@ -405,7 +405,7 @@ def websocket(request, oper_type):
 
                     rc.set(redis_user_id_key, True)
                     rc.set(redis_customer_id_key, True)
-                    Flag = True
+
                     uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
 
 
