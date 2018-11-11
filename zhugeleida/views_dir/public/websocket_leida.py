@@ -48,7 +48,7 @@ def websocket(request, oper_type):
 
             redis_user_id_key = rc.get(redis_user_id_key)
 
-            if redis_user_id_key == True:
+            if redis_user_id_key == 'True':
                 print('---- 雷达 Flag  --->>', redis_user_id_key)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -248,7 +248,7 @@ def websocket(request, oper_type):
 
             redis_customer_id_key = rc.get(redis_customer_id_key)
 
-            if redis_customer_id_key == True:
+            if redis_customer_id_key == 'True':
                 print('---- 小程序 Flag  --->>', redis_customer_id_key)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
