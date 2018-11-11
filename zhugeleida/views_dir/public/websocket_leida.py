@@ -129,6 +129,7 @@ def websocket(request, oper_type):
             else:
                 # data = uwsgi.websocket_recv()
                 data = uwsgi.websocket_recv_nb()
+                print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
                 if not data:
                     continue
 
@@ -323,8 +324,10 @@ def websocket(request, oper_type):
             else:
                 # data = uwsgi.websocket_recv()
                 data = uwsgi.websocket_recv_nb()
+                print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
                     continue
+
 
                 _data = json.loads(data.decode())
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
