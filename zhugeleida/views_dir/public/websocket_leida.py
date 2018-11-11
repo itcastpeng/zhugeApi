@@ -251,96 +251,98 @@ def websocket(request, oper_type):
         Flag = False
         uwsgi.websocket_handshake()
         while True:
-            while Flag:
-                redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-                print('---- 小程序 Flag start  --->>')
-                if redis_customer_id_key_flag == 'True':
-                    print('---- 小程序 Flag True  --->>', redis_customer_id_key_flag)
-                    objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-                        userprofile_id=user_id,
-                        customer_id=customer_id,
-                        is_customer_new_msg=True
-                    ).order_by('-create_date')
+            # while Flag:
+            redis_customer_id_key_flag = rc.get(redis_customer_id_key)
+            print('---- 小程序 Flag start  --->>')
+            if redis_customer_id_key_flag == 'True':
+                print('---- 小程序 Flag True  --->>', redis_customer_id_key_flag)
+                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    is_customer_new_msg=True
+                ).order_by('-create_date')
 
-                    ret_data_list = []
-                    count = objs.count()
-                    if objs:
-                        for obj in objs:
+                ret_data_list = []
+                count = objs.count()
+                if objs:
+                    for obj in objs:
 
-                            mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,
-                                                                                        photo_type=2).order_by(
-                                '-create_date')
+                        mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,
+                                                                                    photo_type=2).order_by(
+                            '-create_date')
 
-                            if mingpian_avatar_obj:
-                                mingpian_avatar = mingpian_avatar_obj[0].photo_url
-                            else:
+                        if mingpian_avatar_obj:
+                            mingpian_avatar = mingpian_avatar_obj[0].photo_url
+                        else:
 
-                                mingpian_avatar = obj.userprofile.avatar
+                            mingpian_avatar = obj.userprofile.avatar
 
-                            customer_name = base64.b64decode(obj.customer.username)
-                            customer_name = str(customer_name, 'utf-8')
+                        customer_name = base64.b64decode(obj.customer.username)
+                        customer_name = str(customer_name, 'utf-8')
 
-                            content = obj.content
-                            if not content:
-                                continue
-                            _content = json.loads(content)
-                            info_type = _content.get('info_type')
-                            if info_type:
-                                info_type = int(info_type)
+                        content = obj.content
+                        if not content:
+                            continue
+                        _content = json.loads(content)
+                        info_type = _content.get('info_type')
+                        if info_type:
+                            info_type = int(info_type)
 
-                                if info_type == 1:
-                                    msg = _content.get('msg')
-                                    msg = base64.b64decode(msg)
-                                    msg = str(msg, 'utf-8')
-                                    _content['msg'] = msg
+                            if info_type == 1:
+                                msg = _content.get('msg')
+                                msg = base64.b64decode(msg)
+                                msg = str(msg, 'utf-8')
+                                _content['msg'] = msg
 
-                            base_info_dict = {
-                                'customer_id': obj.customer_id,
-                                'user_id': obj.userprofile_id,
-                                'user_avatar': mingpian_avatar,
-                                'customer_headimgurl': obj.customer.headimgurl,
-                                'customer': customer_name,
-                                'dateTime': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                                'is_first_info': False,  # 是否为第一条的信息
-                                # 'info_type': obj.info_type, # 消息的类型
-                            }
-
-                            base_info_dict.update(_content)
-
-                            ret_data_list.append(base_info_dict)
-
-                        ret_data_list.reverse()
-                        # response.code = 200
-                        # response.msg = '实时获取-最新聊天信息成功'
-                        print('--- list(msg_obj) -->>', ret_data_list)
-
-                        response_data = {
-                            'data': {
-                                'ret_data': ret_data_list,
-                                'data_count': count,
-                            },
-                            'code': 200,
-                            'msg': '实时推送小程序-最新聊天信息成功',
+                        base_info_dict = {
+                            'customer_id': obj.customer_id,
+                            'user_id': obj.userprofile_id,
+                            'user_avatar': mingpian_avatar,
+                            'customer_headimgurl': obj.customer.headimgurl,
+                            'customer': customer_name,
+                            'dateTime': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                            'is_first_info': False,  # 是否为第一条的信息
+                            # 'info_type': obj.info_type, # 消息的类型
                         }
 
-                        objs.update(
-                            is_customer_new_msg=False
-                        )
-                        rc.set(redis_customer_id_key, False)
+                        base_info_dict.update(_content)
 
-                        print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
-                        uwsgi.websocket_send(json.dumps(response_data))
+                        ret_data_list.append(base_info_dict)
+
+                    ret_data_list.reverse()
+                    # response.code = 200
+                    # response.msg = '实时获取-最新聊天信息成功'
+                    print('--- list(msg_obj) -->>', ret_data_list)
+
+                    response_data = {
+                        'data': {
+                            'ret_data': ret_data_list,
+                            'data_count': count,
+                        },
+                        'code': 200,
+                        'msg': '实时推送小程序-最新聊天信息成功',
+                    }
+
+                    objs.update(
+                        is_customer_new_msg=False
+                    )
+                    rc.set(redis_customer_id_key, False)
+
+                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                    uwsgi.websocket_send(json.dumps(response_data))
 
             else:
 
-                data = uwsgi.websocket_recv()
-                # data = uwsgi.websocket_recv_nb()
+                # data = uwsgi.websocket_recv()
+                data = uwsgi.websocket_recv_nb()
+
                 print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
                     Flag = True
-                    # continue
-                    return HttpResponse('发送数据不能为空,终止连接')
+                    time.sleep(1)
+                    continue
+                    # return HttpResponse('发送数据不能为空,终止连接')
 
                 _data = json.loads(data)
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
