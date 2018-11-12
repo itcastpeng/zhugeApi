@@ -273,7 +273,13 @@ def product_oper(request, oper_type, o_id):
             role_id = user_obj[0].role_id
             company_id = user_obj[0].company_id
 
-            product_objs = models.zgld_product.objects.filter(id=o_id,company_id=company_id)
+            ids_list = request.POST.get('ids_list')
+            if len(ids_list) > 0:
+                ids_list = json.loads(ids_list)
+            else:
+                ids_list = []
+            product_objs = models.zgld_product.objects.filter(id__in=ids_list,company_id=company_id)
+
             if product_objs:
                 product_objs.delete()
 
