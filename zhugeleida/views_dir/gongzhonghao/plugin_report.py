@@ -47,7 +47,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 obj = models.zgld_report_to_customer.objects.filter(
                     activity_id=activity_id,
                     customer_id=customer_id,
-                    user_id=uid,
+
                 )
 
                 if obj:
@@ -57,7 +57,8 @@ def plugin_report_oper(request, oper_type, o_id):
                     models.zgld_report_to_customer.objects.create(
                         activity_id =  activity_id,     #
                         customer_id =  customer_id,     #
-                        leave_message =  leave_message  #
+                        leave_message =  leave_message,  #
+                        user_id = uid,
                     )
 
                 customer_obj = models.zgld_customer.objects.get(id=customer_id)
