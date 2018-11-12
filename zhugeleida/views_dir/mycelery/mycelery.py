@@ -729,11 +729,11 @@ def user_send_gongzhonghao_template_msg(request):
                         'value': ''  # 回复者
                     },
                     'keyword1': {
-                        'value': consult_info,
+                        'value': consult_info + '\n',
                         "color": "#0000EE"
                     },
                     'keyword2': {
-                        'value': _content,
+                        'value': _content + '\n',
                         "color": "#FF0000"
                     },
                     'remark': {
