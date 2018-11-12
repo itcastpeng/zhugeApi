@@ -9,9 +9,8 @@ from zhugeleida.forms.gongzhonghao.plugin_verify import ReportAddForm,ReportUpda
 import time
 import datetime
 import json
-from django.db.models import Q
-from zhugeleida.public.condition_com import conditionCom
 
+from zhugeleida.public.common import action_record,conversion_base64_customer_username_base64
 
 # 插件活动报名
 @csrf_exempt
@@ -65,6 +64,19 @@ def plugin_report_oper(request, oper_type, o_id):
                 customer_obj.phone = phone  # 报名手机号
                 customer_obj.save()
 
+                if uid and customer_id:  # 发送的文字消息
+                    title = models.zgld_article.objects.get(id=activity_id).title
+                    username = customer_obj.username
+                    username = conversion_base64_customer_username_base64(username, customer_id)
+
+                    remark = '【报名进展】: 客户 %s 报名参加了您的文章《%s》的活动' % (username,title)
+
+                    data = {
+                        'action': 0,  # 代表发送客户聊天信息
+                        'uid': uid,
+                        'user_id': customer_id
+                    }
+                    action_record(data, remark)
 
                 response.code = 200
                 response.msg = "添加成功"

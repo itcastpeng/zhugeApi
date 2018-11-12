@@ -270,7 +270,6 @@ def product_oper(request, oper_type, o_id):
         if oper_type == "delete":
             user_id = request.GET.get('user_id')
             user_obj =  models.zgld_admin_userprofile.objects.filter(id=user_id)
-            role_id = user_obj[0].role_id
             company_id = user_obj[0].company_id
 
             ids_list = request.POST.get('ids_list')
