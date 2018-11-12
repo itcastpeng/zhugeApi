@@ -290,7 +290,12 @@ def product_oper(request, oper_type, o_id):
 
             status = int(request.POST.get('status'))
             user_id = request.GET.get('user_id')
-            product_objs = models.zgld_product.objects.filter(id=o_id)
+            ids_list = request.POST.get('ids_list')
+            if len(ids_list) > 0:
+                ids_list = json.loads(ids_list)
+            else:
+                ids_list = []
+            product_objs = models.zgld_product.objects.filter(id__in=ids_list)
 
             if product_objs:
 
