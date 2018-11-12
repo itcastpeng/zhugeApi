@@ -719,8 +719,11 @@ def user_send_gongzhonghao_template_msg(request):
                     if info_type == 1:
                         msg = _content.get('msg')
 
-                _content = '%s: %s' % (user_name, msg)
-                consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                _content = '%s' % (msg)
+                if position:
+                    consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                else:
+                    consult_info = ('%s - %s') % (company_name, user_name)
                 data = {
                     'first': {
                         'value': ''  # 回复者
@@ -734,7 +737,7 @@ def user_send_gongzhonghao_template_msg(request):
                         "color": "#FF0000"
                     },
                     'remark': {
-                        'value': '如需沟通,可在此公众号进行咨询'  # 回复内容
+                        'value': '如需沟通,可在此公众号进行回复'  # 回复内容
                     }
                 }
 
