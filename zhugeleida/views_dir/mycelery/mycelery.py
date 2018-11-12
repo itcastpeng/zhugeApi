@@ -16,7 +16,6 @@ from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
     create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
 
 import sys
-import logging.handlers
 from django.conf import settings
 from selenium import webdriver
 import requests
@@ -697,7 +696,7 @@ def user_send_gongzhonghao_template_msg(request):
 
         # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
 
-        if _type == 'gongzhonghao_template_chat' or _type == 'forward_look_article_tishi':
+        if _type == 'gongzhonghao_template_tishi' or _type == 'forward_look_article_tishi':
 
             path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
             xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
@@ -711,23 +710,34 @@ def user_send_gongzhonghao_template_msg(request):
             点击进入咨询页面
             '''
             data = ''
-            if _type == 'gongzhonghao_template_chat':
+            if _type == 'gongzhonghao_template_tishi':
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+                msg = ''
+                if info_type:
+                    info_type = int(info_type)
+                    if info_type == 1:
+                        msg = _content.get('msg')
 
-                consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                _content = '%s' % (msg)
+                if position:
+                    consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                else:
+                    consult_info = ('%s - %s') % (company_name, user_name)
                 data = {
                     'first': {
-                        'value': '您好,我叫“很高兴”！很高兴为您服务 😁！'  # 回复者
+                        'value': ''  # 回复者
                     },
                     'keyword1': {
-                        'value': consult_info,
+                        'value': consult_info + '\n',
                         "color": "#0000EE"
                     },
                     'keyword2': {
-                        'value': '您有未读消息',
+                        'value': _content + '\n',
                         "color": "#FF0000"
                     },
                     'remark': {
-                        'value': '了解更多请点击进入【我的名片小程序】哦'  # 回复内容
+                        'value': '如需沟通,可在此公众号进行回复'  # 回复内容
                     }
                 }
 
@@ -796,6 +806,8 @@ def user_send_gongzhonghao_template_msg(request):
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
 
+
+        # 企业微信-发送公众号的客服聊天消息
         elif _type == 'gongzhonghao_send_kefu_msg':
 
             kefu_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send'
@@ -842,7 +854,14 @@ def user_send_gongzhonghao_template_msg(request):
                 rc.delete(key_name)
 
             else:
-                print('-----企业用户 send to 小程序 kefu_客服 消息 Failed---->>', )
+                print('-----企业用户 发送【小程序_客服消息】失败 json.dumps(kefu_msg_post_data)---->>',kefu_msg_post_data)
+                a_data = {}
+                a_data['customer_id'] = customer_id
+                a_data['user_id'] = user_id
+                a_data['type'] = 'gongzhonghao_template_tishi'
+                a_data['content'] = content
+                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                print('-----企业用户 再次发送【小程序_模板消息】 json.dumps(a_data)---->>',json.dumps(a_data))
                 response.code = 301
                 response.msg = "企业用户发送客服消息成功失败"
 

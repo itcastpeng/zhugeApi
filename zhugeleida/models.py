@@ -1002,6 +1002,7 @@ class zgld_plugin_report(models.Model):
 # 公众号-报名的客户
 class zgld_report_to_customer(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
+    user = models.ForeignKey('zgld_userprofile', verbose_name='文章所属用户')
     activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)
 
     leave_message = models.TextField(verbose_name="客户留言", null=True)

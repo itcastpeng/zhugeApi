@@ -197,9 +197,7 @@ def chat_oper(request, oper_type, o_id):
                         customer_id=customer_id,
                         send_type=send_type
                 )
-                # if flow_up_obj:
-                #     flow_up_obj = flow_up_obj[0]
-                #     user_type = flow_up_obj.customer.user_type
+
                 user_type = obj.customer.user_type
 
                 if customer_id and user_id and user_type == 2:

@@ -34,7 +34,7 @@ def plugin_report_oper(request, oper_type, o_id):
             forms_obj = ReportSignUpAddForm(report_data)
 
             if forms_obj.is_valid():
-
+                uid = request.POST.get('uid')
                 activity_id =  o_id  # 广告语
                 customer_id =  int(forms_obj.cleaned_data.get('customer_id'))   # 报名按钮
                 # 报名页
@@ -47,6 +47,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 obj = models.zgld_report_to_customer.objects.filter(
                     activity_id=activity_id,
                     customer_id=customer_id,
+
                 )
 
                 if obj:
@@ -56,7 +57,8 @@ def plugin_report_oper(request, oper_type, o_id):
                     models.zgld_report_to_customer.objects.create(
                         activity_id =  activity_id,     #
                         customer_id =  customer_id,     #
-                        leave_message =  leave_message  #
+                        leave_message =  leave_message,  #
+                        user_id = uid,
                     )
 
                 customer_obj = models.zgld_customer.objects.get(id=customer_id)
