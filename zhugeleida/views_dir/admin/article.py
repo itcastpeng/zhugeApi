@@ -155,7 +155,8 @@ def mailuotu(q):
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
-        result_data.append(tmp)
+        if tmp not in result_data:
+            result_data.append(tmp)
 
     # print('result_data -->', result_data)
 
