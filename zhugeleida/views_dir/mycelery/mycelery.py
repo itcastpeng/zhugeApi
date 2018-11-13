@@ -521,6 +521,7 @@ def user_send_template_msg(request):
     exist_formid_json = json.loads(objs[0].customer.formid)
     user_name = objs[0].user.username
     flag = True
+    i = 0
     while flag:
 
         post_template_data = {}
@@ -607,6 +608,10 @@ def user_send_template_msg(request):
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
+            i = i + 1
+            if i  == 10:  # 限制最多重试十次。
+                flag = False
+                obj.update(formid='[]')
 
         else:
             response.msg = "客户不存在"
