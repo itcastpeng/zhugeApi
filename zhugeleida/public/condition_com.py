@@ -180,7 +180,6 @@ def validate_tongxunlu(data):
                 # ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
                 # ret_json = ret.json()
 
-                s = requests.session()
                 s.keep_alive = False  # 关闭多余连接
                 ret = s.get(Conf['tongxunlu_token_url'], params=get_token_data) # 你需要的网址
                 ret_json = ret.json()
@@ -199,7 +198,6 @@ def validate_tongxunlu(data):
             # department_list_ret = requests.get(department_list_url, params=get_user_data)
             # department_list_ret = department_list_ret.json()
 
-            s = requests.session()
             s.keep_alive = False  # 关闭多余连接
             department_list_ret = s.get(department_list_url, params=get_user_data)  # 你需要的网址
             department_list_ret = department_list_ret.json()
@@ -222,12 +220,11 @@ def validate_tongxunlu(data):
                     # user_simplelist_ret = requests.get(user_simplelist_url, params=get_user_data)
 
 
-                    s = requests.session()
                     s.keep_alive = False  # 关闭多余连接
                     user_simplelist_ret = s.get(user_simplelist_url, params=get_user_data)  # 你需要的网址
                     user_simplelist_ret = user_simplelist_ret.json()
 
-                    print('----- 获取部门成员 返回接口信息----->>', json.dumps(user_simplelist_ret.json()))
+                    print('----- 获取部门成员 返回接口信息----->>', json.dumps(user_simplelist_ret))
 
                     errcode = user_simplelist_ret.get('errcode')
                     errmsg = user_simplelist_ret.get('errmsg')
