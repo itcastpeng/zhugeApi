@@ -219,9 +219,10 @@ def validate_tongxunlu(data):
                     # get_user_data['department_id'] = department_id
                     # user_simplelist_ret = requests.get(user_simplelist_url, params=get_user_data)
 
-
+                    get_user_data['department_id'] = department_id
                     s.keep_alive = False  # 关闭多余连接
                     user_simplelist_ret = s.get(user_simplelist_url, params=get_user_data)  # 你需要的网址
+
                     user_simplelist_ret = user_simplelist_ret.json()
 
                     print('----- 获取部门成员 返回接口信息----->>', json.dumps(user_simplelist_ret))
