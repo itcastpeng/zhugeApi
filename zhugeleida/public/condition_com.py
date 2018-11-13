@@ -150,7 +150,12 @@ def validate_tongxunlu(data):
     get_token_data['corpid'] = corp_id
     get_token_data['corpsecret'] = tongxunlu_secret
 
-    ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+    # ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+    # ret_json = ret.json()
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    ret = s.get(Conf['tongxunlu_token_url'], params=get_token_data)  # 你需要的网址
     ret_json = ret.json()
 
     print('---- 企业微信验证 通讯录同步应用的secret  --->', ret_json)
@@ -172,8 +177,14 @@ def validate_tongxunlu(data):
             print('---token_ret---->>', token_ret)
 
             if not token_ret:
-                ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                # ret = requests.get(Conf['tongxunlu_token_url'], params=get_token_data)
+                # ret_json = ret.json()
+
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                ret = s.get(Conf['tongxunlu_token_url'], params=get_token_data) # 你需要的网址
                 ret_json = ret.json()
+
                 print('--------ret_json-->>', ret_json)
 
                 access_token = ret_json['access_token']
@@ -185,9 +196,14 @@ def validate_tongxunlu(data):
                 get_user_data['access_token'] = token_ret
 
             department_list_url = 'https://qyapi.weixin.qq.com/cgi-bin/department/list'
-            department_list_ret = requests.get(department_list_url, params=get_user_data)
+            # department_list_ret = requests.get(department_list_url, params=get_user_data)
+            # department_list_ret = department_list_ret.json()
 
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            department_list_ret = s.get(department_list_url, params=get_user_data)  # 你需要的网址
             department_list_ret = department_list_ret.json()
+
             errcode = department_list_ret.get('errcode')
             errmsg = department_list_ret.get('errmsg')
             department_list = department_list_ret.get('department')
@@ -202,11 +218,17 @@ def validate_tongxunlu(data):
                     department_liebiao = dep_dict.get('department')  # 已经存在的部门列表
 
                     user_simplelist_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/simplelist'
-                    get_user_data['department_id'] = department_id
+                    # get_user_data['department_id'] = department_id
+                    # user_simplelist_ret = requests.get(user_simplelist_url, params=get_user_data)
 
-                    user_simplelist_ret = requests.get(user_simplelist_url, params=get_user_data)
-                    print('----- 获取部门成员 返回接口信息----->>', json.dumps(user_simplelist_ret.json()))
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    user_simplelist_ret = s.get(user_simplelist_url, params=get_user_data)  # 你需要的网址
                     user_simplelist_ret = user_simplelist_ret.json()
+
+                    print('----- 获取部门成员 返回接口信息----->>', json.dumps(user_simplelist_ret.json()))
+
                     errcode = user_simplelist_ret.get('errcode')
                     errmsg = user_simplelist_ret.get('errmsg')
                     userlist = user_simplelist_ret.get('userlist')

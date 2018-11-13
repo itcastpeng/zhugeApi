@@ -27,6 +27,7 @@ def plugin_report(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')  #
+            company_id = request.GET.get('company_id')  #
 
             field_dict = {
                 'id': '',
@@ -36,7 +37,7 @@ def plugin_report(request):
             request_data = request.GET.copy()
             q = conditionCom(request_data, field_dict)
 
-            objs = models.zgld_plugin_report.objects.filter(q).order_by(order)
+            objs = models.zgld_plugin_report.objects.select_related('user').filter(user__company_id=company_id).order_by(order)
             count = objs.count()
 
             if length != 0:
