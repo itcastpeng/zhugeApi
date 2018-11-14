@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.admin.adminSpeechDetailsmanage import AddForm, UpdateForm
+from zhugeleida.forms.admin.adminSpeechDetailsmanage import SelectForm, AddForm, UpdateForm
 import json
 from django.db.models import Q
 
@@ -22,56 +22,64 @@ def speechDetailsManage(request):
         user_id = request.GET.get('user_id')
         groupSearch = request.GET.get('groupSearch')
         order = request.GET.get('order', '-createDate')
-        field_dict = {
-            'id': '',
-            'talkGroupName': '__contains',
-            'create_date': '',
-        }
-        q = conditionCom(request, field_dict)
-        print('q -->', q)
-        # companyName_id = request.GET.get('companyName_id')
-        companyName_id = models.zgld_admin_userprofile.objects.get(id=user_id)
-        objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName_id__companyName_id=companyName_id.company_id)
-        if groupSearch:
-            if groupSearch == 'groupSearch':
-                objs = objs.filter(talkGroupName_id__isnull=True)
-            else:
-                objs = objs.filter(talkGroupName_id=groupSearch)
-        objsCount = objs.count()
-        otherList = []
-        for obj in objs:
-            sendNum = 0
-            if obj.sendNum:
-                sendNum = obj.sendNum
-            talkGroupNameId = ''
-            groupName = ''
-            if obj.talkGroupName:
-                groupName = obj.talkGroupName.groupName
-                talkGroupNameId = obj.talkGroupName.id
-            username = ''
-            if obj.userProfile:
-                username = obj.userProfile.username
-            otherList.append({
-                'o_id':obj.id,
-                'p_id':talkGroupNameId,
-                'contentWords': obj.contentWords,  # 分组名
-                'sendNum': sendNum,  # 用户
-                'talkGroupName': groupName,  # 公司名
-                'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),  # 创建时间
-                'username':username,
-                'user_id':user_id,
-            })
+        forms_obj = SelectForm(request.GET)
+        if forms_obj.is_valid():
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            field_dict = {
+                'id': '',
+                'talkGroupName': '__contains',
+                'create_date': '',
+            }
+            q = conditionCom(request, field_dict)
+            print('q -->', q)
+            # companyName_id = request.GET.get('companyName_id')
+            companyName_id = models.zgld_admin_userprofile.objects.get(id=user_id)
+            objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName_id__companyName_id=companyName_id.company_id)
+            if groupSearch:
+                if groupSearch == 'groupSearch':
+                    objs = objs.filter(talkGroupName_id__isnull=True)
+                else:
+                    objs = objs.filter(talkGroupName_id=groupSearch)
+            objsCount = objs.count()
+            otherList = []
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
+            for obj in objs:
+                sendNum = 0
+                if obj.sendNum:
+                    sendNum = obj.sendNum
+                talkGroupNameId = ''
+                groupName = ''
+                if obj.talkGroupName:
+                    groupName = obj.talkGroupName.groupName
+                    talkGroupNameId = obj.talkGroupName.id
+                username = ''
+                if obj.userProfile:
+                    username = obj.userProfile.username
+                otherList.append({
+                    'o_id':obj.id,
+                    'p_id':talkGroupNameId,
+                    'contentWords': obj.contentWords,  # 分组名
+                    'sendNum': sendNum,  # 用户
+                    'talkGroupName': groupName,  # 公司名
+                    'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),  # 创建时间
+                    'username':username,
+                    'user_id':user_id,
+                })
 
-        response.code = 200
-        response.msg = '查询成功'
-        response.data = {
-            'otherList': otherList,
-            'objsCount': objsCount,
-        }
-        # else:
-        #     response.code = 402
-        #     response.msg = "请求异常"
-        #     response.data = json.loads(forms_obj.errors.as_json())
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'otherList': otherList,
+                'objsCount': objsCount,
+            }
+        else:
+            response.code = 301
+            response.msg = ""
+            response.data = json.loads(forms_obj.errors.as_json())
     return JsonResponse(response.__dict__)
 
 
