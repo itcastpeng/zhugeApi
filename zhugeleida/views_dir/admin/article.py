@@ -145,12 +145,12 @@ def mailuotu(q):
     ).filter(q).values('id', 'user_id', 'user__username', 'article__title').annotate(Count('user'))
     result_data = []
     for obj in count_objs:
-        print('obj.id--------------> ',obj)
+        # print('obj.id--------------> ',obj)
         user_id = obj['user_id']
         username = obj['user__username']
         # print('user_id -->', user_id)
         # print('username -->', username)
-        print('user----id-----------> ',user_id, obj['id'])
+        # print('user----id-----------> ',user_id, obj['id'])
         children_data = init_data(user_id, pid=obj['id'])
         tmp = {'name': username}
         if children_data:

@@ -32,8 +32,10 @@ def speechDetailsManage(request):
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            companyName_id = request.GET.get('companyName_id')
-            objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName_id__companyName_id=companyName_id)
+            # companyName_id = request.GET.get('companyName_id')
+            user_id = request.GET.get('user_id')
+            companyName_id = models.zgld_userprofile.objects.get(id=user_id)
+            objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName_id__companyName_id=companyName_id.company_id)
             objsCount = objs.count()
             # if length != 0:
             #     start_line = (current_page - 1) * length
