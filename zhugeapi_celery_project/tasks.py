@@ -19,7 +19,12 @@ def user_send_action_log(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_action_log'
     get_data = data
     print('----------小程序|公招号->访问动作日志的发送应用消息 requests调用 get_data数据 ------------>',json.dumps(get_data))
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 # 转发发送红包
@@ -28,7 +33,12 @@ def user_forward_send_activity_redPacket(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_forward_send_activity_redPacket'
     get_data = data
     print('----------[公众号]转发文章后得红包 -->requests调用 get_data数据 ------------>',get_data)
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 # 转发发送红包
@@ -37,7 +47,12 @@ def user_focus_send_activity_redPacket(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_focus_send_activity_redPacket'
     get_data = data
     print('----------[公众号]关注文章后得红包 -->requests调用 get_data数据 ------------>',get_data)
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 
@@ -47,7 +62,12 @@ def get_customer_gongzhonghao_userinfo(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/get_customer_gongzhonghao_userinfo'
     get_data = data
     print('----------[公众号] 公众号第三方平台拉取用户的信息 -->requests调用 get_data数据 ------------>', get_data)
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 ## 绑定客户和文章的关系
@@ -57,7 +77,11 @@ def binding_article_customer_relate(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/binding_article_customer_relate'
     get_data = data
     print('----------[公众号] 绑定客户和文章的关系 -->requests调用 get_data数据 ------------>', get_data)
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+    # requests.get(url, params=get_data)
 
 
 
@@ -74,7 +98,10 @@ def create_user_or_customer_small_program_qr_code(data):
     }
     print(get_data)
 
-    requests.get(url, params=get_data)
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
 
 
 # 企业用户生成小程序海报
@@ -86,7 +113,11 @@ def create_user_or_customer_small_program_poster(data):
     }
     print(get_data)
 
-    requests.get(url, params=get_data)
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 # 发送模板消息。
@@ -97,7 +128,12 @@ def user_send_template_msg_to_customer(data):
         'data': data
     }
     print(get_data)
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 # 发送模板消息。
@@ -107,7 +143,12 @@ def bufa_send_activity_redPacket():
     get_data = {
 
     }
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 
@@ -118,7 +159,12 @@ def user_send_gongzhonghao_template_msg(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_gongzhonghao_template_msg'
     get_data = data
     print('-----发送公众号-模板消息---->>',get_data)
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 ## 企业微信获取三方通讯录的人员信息
@@ -128,7 +174,12 @@ def qiyeweixin_user_get_userinfo(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/qiyeweixin_user_get_userinfo'
     get_data = data
 
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 @app.task
@@ -171,7 +222,12 @@ def get_latest_audit_status_and_release_code():
     get_data = {
 
     }
-    requests.get(url, params=get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
+
+    # requests.get(url, params=get_data)
 
 
 @app.task

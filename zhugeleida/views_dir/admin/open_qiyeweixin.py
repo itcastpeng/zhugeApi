@@ -9,6 +9,7 @@ from zhugeapi_celery_project import tasks
 import xml.dom.minidom as xmldom, datetime, xml.etree.cElementTree as ET
 import json, redis, sys, requests
 
+
 ## 第三方平台接入
 @csrf_exempt
 def open_qiyeweixin(request, oper_type):
@@ -66,11 +67,13 @@ def open_qiyeweixin(request, oper_type):
 
             DOMTree = xmldom.parseString(sMsg)
             collection = DOMTree.documentElement
-            ChangeType = collection.getElementsByTagName("ChangeType") #update_user
+            ChangeType = collection.getElementsByTagName("ChangeType")  # update_user
 
-            if ChangeType: # 通讯录的触发事件，增删改查用户 和关注微工作台的事件提示。
-                InfoType = collection.getElementsByTagName("InfoType")[0].childNodes[0].data       #<InfoType><![CDATA[change_contact]]></InfoType>
-                ChangeType = collection.getElementsByTagName("ChangeType")[0].childNodes[0].data   #<ChangeType><![CDATA[update_user]]></ChangeType>
+            if ChangeType:  # 通讯录的触发事件，增删改查用户 和关注微工作台的事件提示。
+                InfoType = collection.getElementsByTagName("InfoType")[0].childNodes[
+                    0].data  # <InfoType><![CDATA[change_contact]]></InfoType>
+                ChangeType = collection.getElementsByTagName("ChangeType")[0].childNodes[
+                    0].data  # <ChangeType><![CDATA[update_user]]></ChangeType>
                 UserID = collection.getElementsByTagName("UserID")[0].childNodes[0].data
                 AuthCorpId = collection.getElementsByTagName("AuthCorpId")[0].childNodes[0].data
 
@@ -80,24 +83,23 @@ def open_qiyeweixin(request, oper_type):
                     company_obj = company_objs[0]
                     company_id = company_obj.id
 
-                _Status = collection.getElementsByTagName("Status")   #<Status>1</Status></xml> #激活状态: 1=已激活，2=已禁用，4=未激活。
-                if _Status: # 代表既未激活企业微信又未关注微工作台（原企业号）。
+                _Status = collection.getElementsByTagName(
+                    "Status")  # <Status>1</Status></xml> #激活状态: 1=已激活，2=已禁用，4=未激活。
+                if _Status:  # 代表既未激活企业微信又未关注微工作台（原企业号）。
                     Status = collection.getElementsByTagName("Status")[0].childNodes[0].data
-                    if int(Status) == 1: # 1=已激活
+                    if int(Status) == 1:  # 1=已激活
                         _data = {
                             'company_id': company_id,
                             'userid': UserID,
                         }
-                        tasks.qiyeweixin_user_get_userinfo.delay(_data) #异步获取用户的头像
+                        tasks.qiyeweixin_user_get_userinfo.delay(_data)  # 异步获取用户的头像
                     return HttpResponse("success")
 
-                elif not _Status: # 没有status ，说明 是用户的增删改查。
+                elif not _Status:  # 没有status ，说明 是用户的增删改查。
 
                     return HttpResponse("success")
             xml_tree = ET.fromstring(sMsg)
             xml_tree.find("SuiteTicket")
-
-
 
             # 解密成功，sMsg即为xml格式的明文
             try:
@@ -126,10 +128,9 @@ def open_qiyeweixin(request, oper_type):
                 _app_type = ''
 
                 name = '通讯录应用'
-                if  SuiteId == 'wx1cbe3089128fda03':
+                if SuiteId == 'wx1cbe3089128fda03':
                     name = '通讯录'
                     _app_type = 3
-
 
                 _data = {
                     'SuiteId': SuiteId
@@ -144,7 +145,8 @@ def open_qiyeweixin(request, oper_type):
                     'auth_code': AuthCode
                 }
 
-                get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data, data=json.dumps(post_permanent_code_url_data))
+                get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data,
+                                                            data=json.dumps(post_permanent_code_url_data))
 
                 get_permanent_code_info = get_permanent_code_info_ret.json()
                 print('-------[企业微信-通讯录] 获取企业永久授权码 返回------->>', get_permanent_code_info)
@@ -153,9 +155,9 @@ def open_qiyeweixin(request, oper_type):
                 corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
                 # agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
 
-
                 access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
-                permanent_code = get_permanent_code_info.get('permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
+                permanent_code = get_permanent_code_info.get(
+                    'permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
 
                 if permanent_code:
                     key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
@@ -165,7 +167,8 @@ def open_qiyeweixin(request, oper_type):
                         company_id = objs[0].id
                         app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
                         if app_objs:
-                            print('----- [企业微信-通讯录] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+                            print('----- [企业微信-通讯录] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code,
+                                  corp_name)
 
                             app_objs.update(
                                 name=name,
@@ -176,7 +179,8 @@ def open_qiyeweixin(request, oper_type):
                             )
 
                         else:
-                            print('----- [企业微信-通讯录] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+                            print('----- [企业微信-通讯录] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code,
+                                  corp_name)
                             models.zgld_app.objects.create(
                                 is_validate=True,
                                 name=name,
@@ -187,7 +191,6 @@ def open_qiyeweixin(request, oper_type):
                             )
                 else:
                     print('-------[企业微信] 获取企业永久授权码 报错：------->>')
-
 
             return HttpResponse("success")
 
@@ -204,7 +207,7 @@ def open_qiyeweixin(request, oper_type):
                 suite_id = 'wx36c67dd53366b6f0'
                 app_type = 'boss'
 
-            elif app_type == 3: # 通讯录
+            elif app_type == 3:  # 通讯录
                 suite_id = 'wx1cbe3089128fda03'
                 app_type = 'address_book'
 
@@ -217,7 +220,8 @@ def open_qiyeweixin(request, oper_type):
 
             pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
 
-            get_bind_auth_data = 'suite_id={}&pre_auth_code={}&redirect_uri={}&state={}'.format(suite_id, pre_auth_code, redirect_uri, suite_id)
+            get_bind_auth_data = 'suite_id={}&pre_auth_code={}&redirect_uri={}&state={}'.format(suite_id, pre_auth_code,
+                                                                                                redirect_uri, suite_id)
 
             pre_auth_code_url = 'https://open.work.weixin.qq.com/3rdapp/install?' + get_bind_auth_data
 
@@ -287,14 +291,14 @@ def open_qiyeweixin(request, oper_type):
             postdata = request.body.decode(encoding='UTF-8')
             type = request.GET.get('state')
 
-            xml_tree = ET.fromstring(postdata) # 安装到这个企业后的 agent_id
+            xml_tree = ET.fromstring(postdata)  # 安装到这个企业后的 agent_id
 
             SuiteId = xml_tree.find("AgentID").text
-            print('-----post callback_data postdata 数据:------>',postdata)
+            print('-----post callback_data postdata 数据:------>', postdata)
 
             return HttpResponse('success')
 
-    else :
+    else:
 
         # 微信发送要解密的ticket 获取票据
         if oper_type == 'get_ticket':
@@ -377,7 +381,7 @@ def open_qiyeweixin(request, oper_type):
                 url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
 
             _data = {
-                'SuiteId': SuiteId , # 通讯录三方应用
+                'SuiteId': SuiteId,  # 通讯录三方应用
             }
 
             suite_access_token_ret = common.create_suite_access_token(_data)
@@ -422,7 +426,6 @@ def open_qiyeweixin(request, oper_type):
                     status = user_profile_obj.status
                     boss_status = user_profile_obj.boss_status
 
-
                     account_expired_time = company_objs[0].account_expired_time
                     if datetime.datetime.now() > account_expired_time:
                         response.code = 403
@@ -430,11 +433,10 @@ def open_qiyeweixin(request, oper_type):
                         print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
                         return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
 
-
                     avatar = user_profile_obj.avatar
                     user_id = user_profile_obj.id
                     token = user_profile_obj.token
-                    if status == 1 and  app_type == 'leida':  #
+                    if status == 1 and app_type == 'leida':  #
 
                         last_login_date = user_profile_obj.last_login_date
                         if not last_login_date:  # 为空说明第一次登陆
@@ -451,9 +453,9 @@ def open_qiyeweixin(request, oper_type):
                               userid, "\n", redirect_url)
                         return redirect(redirect_url)
 
-                    elif  boss_status == 1 and app_type == 'boss': #
+                    elif boss_status == 1 and app_type == 'boss':  #
                         redirect_url = url + '?token=' + token + '&id=' + str(
-                            user_id ) + '&avatar=' + avatar
+                            user_id) + '&avatar=' + avatar
 
                         print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
@@ -465,10 +467,10 @@ def open_qiyeweixin(request, oper_type):
                         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
                 else:
-                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid,"|",corpid)
+                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid, "|", corpid)
                     return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
             else:
-                print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid,"|",corpid)
+                print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid, "|", corpid)
                 return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
         #  用户确认授权后，会进入回调URI(即redirect_uri)，并在URI参数中带上临时授权码
@@ -517,7 +519,7 @@ def open_qiyeweixin(request, oper_type):
                                                         data=json.dumps(post_permanent_code_url_data))
 
             get_permanent_code_info = get_permanent_code_info_ret.json()
-            print('-------[企业微信] 获取企业永久授权码 返回------->>', get_permanent_code_info)
+            print('-------[企业微信] 获取企业永久授权码 返回------->>', json.dumps(get_permanent_code_info))
 
             corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
             corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
@@ -530,7 +532,6 @@ def open_qiyeweixin(request, oper_type):
 
             access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
             permanent_code = get_permanent_code_info.get('permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
-
 
             if permanent_code:
                 key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
@@ -559,7 +560,7 @@ def open_qiyeweixin(request, oper_type):
                             app_type=_app_type,
                             agent_id=agentid,
                             company_id=company_id,
-                            permanent_code = permanent_code
+                            permanent_code=permanent_code
                         )
 
 
@@ -575,5 +576,3 @@ def open_qiyeweixin(request, oper_type):
             response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
-
-

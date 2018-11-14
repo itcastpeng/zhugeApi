@@ -107,7 +107,12 @@ def create_small_program_qr_code(data):
 
     get_qr_data['access_token'] = authorizer_access_token
     post_qr_data = {'path': path, 'width': 430}
-    qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    qr_ret = s.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+
+    # qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
 
     if not qr_ret.content:
 

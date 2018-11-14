@@ -164,7 +164,11 @@ def user_send_action_log(request):
             print('-------- 企业ID | 应用的凭证密钥  get_token_data数据 ------->', get_token_data)
 
             if not token_ret:
-                ret = requests.get(Conf['token_url'], params=get_token_data)
+
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                ret = s.get(Conf['token_url'], params=get_token_data)
+                # ret = requests.get(Conf['token_url'], params=get_token_data)
 
                 weixin_ret_data = ret.json()
                 errcode = weixin_ret_data.get('errcode')
@@ -211,7 +215,10 @@ def user_send_action_log(request):
         }
         print('-------- 发送应用消息 POST json.dumps 格式数据:  ---------->>', json.dumps(post_send_data))
 
-        inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        inter_ret = s.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
+        # inter_ret = requests.post(Conf['send_msg_url'], params=send_token_data, data=json.dumps(post_send_data))
 
         weixin_ret_data = inter_ret.json()
         errcode = weixin_ret_data.get('errcode')
@@ -242,7 +249,7 @@ def user_send_action_log(request):
 @csrf_exempt
 def create_user_or_customer_qr_code(request):
     response = ResponseObj()
-    print('---- celery request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
+    print('---- 【生成小程序二维码 celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
     data = request.GET.get('data')
     if data:
@@ -294,7 +301,12 @@ def create_user_or_customer_qr_code(request):
     get_qr_data['access_token'] = authorizer_access_token
 
     post_qr_data = {'path': path, 'width': 430}
-    qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    qr_ret = s.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+
+    # qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
 
     if not qr_ret.content:
         rc.delete('xiaochengxu_token')
@@ -359,7 +371,12 @@ def qiyeweixin_user_get_userinfo(request):
                 'userid': userid
             }
             code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/get'
-            user_list_ret = requests.get(code_url, params=get_code_data)
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            user_list_ret = s.get(code_url, params=get_code_data)
+            # user_list_ret = requests.get(code_url, params=get_code_data)
+
             user_list_ret_json = user_list_ret.json()
             print('===========【celery 企业微信】 获取 user_ticket 返回:==========>', json.dumps(user_list_ret_json))
 
@@ -399,7 +416,7 @@ def create_user_or_customer_poster(request):
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
 
-    print('---- celery request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
+    print('---- 【生成海报celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
     data = json.loads(request.GET.get('data'))
     user_id = data.get('user_id')
@@ -589,8 +606,11 @@ def user_send_template_msg(request):
 
             # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
 
-            template_ret = requests.post(Conf['template_msg_url'], params=get_template_data,
-                                         data=json.dumps(post_template_data))
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            template_ret = s.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+
+            # template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
 
             print('--------企业用户 send to 小程序 Template 接口返回数据--------->', template_ret)
@@ -792,8 +812,13 @@ def user_send_gongzhonghao_template_msg(request):
 
             # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
             template_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/template/send'
-            template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            template_ret = s.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
+            # template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
+
 
             print('--------企业用户 send to 小程序 Template 接口返回数据--------->', template_ret)
 
@@ -844,7 +869,12 @@ def user_send_gongzhonghao_template_msg(request):
 
 
             kefu_msg_post_data =  json.dumps(kefu_msg_post_data, ensure_ascii=False)
-            kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=kefu_msg_post_data.encode('utf-8'))
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            kefu_ret = s.post(kefu_msg_url, params=kefu_msg_get_data,data=kefu_msg_post_data.encode('utf-8'))
+            # kefu_ret = requests.post(kefu_msg_url, params=kefu_msg_get_data,data=kefu_msg_post_data.encode('utf-8'))
+
             kefu_ret = kefu_ret.json()
 
             print('--------企业用户 send to 小程序 kefu_客服接口 - 返回数据--------->', kefu_ret)
@@ -1381,7 +1411,11 @@ def get_customer_gongzhonghao_userinfo(request):
         'lang': 'zh_CN',
     }
 
-    ret = requests.get(get_user_info_url, params=get_user_info_data)
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    ret = s.get(get_user_info_url, params=get_user_info_data)
+    # ret = requests.get(get_user_info_url, params=get_user_info_data)
+
     ret.encoding = 'utf-8'
     ret_json = ret.json()
     print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))

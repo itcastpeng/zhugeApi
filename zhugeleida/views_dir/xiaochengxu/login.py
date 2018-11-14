@@ -25,8 +25,12 @@ from zhugeleida.views_dir.admin.dai_xcx import create_component_access_token
 # 从微信小程序接口中获取openid等信息
 def get_openid_info(get_token_data):
     appurl = 'https://api.weixin.qq.com/sns/component/jscode2session'
-    print()
-    ret = requests.get(appurl, params=get_token_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    ret = s.get(appurl, params=get_token_data)
+
+    # ret = requests.get(appurl, params=get_token_data)
     ret_json = ret.json()
     print('------ 第三方平台 代替小程序实现【登录功能】接口返回 ----->>', ret_json)
 

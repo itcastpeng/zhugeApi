@@ -555,7 +555,11 @@ def article_oper(request, oper_type, o_id):
                 'lang': 'zh_CN',
             }
 
-            ret = requests.get(get_user_info_url, params=get_user_info_data)
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            ret = s.get(get_user_info_url, params=get_user_info_data)
+
+            # ret = requests.get(get_user_info_url, params=get_user_info_data)
             ret.encoding = 'utf-8'
             ret_json = ret.json()
 
