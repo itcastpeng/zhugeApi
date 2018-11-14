@@ -14,7 +14,7 @@ import json
 # cerf  token验证 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def talkGroupManageShow(request):
+def talkGroupManage(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
@@ -31,7 +31,10 @@ def talkGroupManageShow(request):
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            objs = models.zgld_talk_group_management.objects.filter(q).order_by(order)
+            # companyName_id = request.GET.get('companyName_id')
+            user_id = request.GET.get('user_id')
+            companyName_id = models.zgld_userprofile.objects.get(id=user_id)
+            objs = models.zgld_talk_group_management.objects.filter(q).order_by(order).filter(companyName_id=companyName_id.company_id)
             objsCount = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -43,6 +46,7 @@ def talkGroupManageShow(request):
                 if obj.companyName:
                     companyName = obj.companyName.name
                 otherList.append({
+                    'o_id':obj.id,
                     'groupName': obj.groupName,                 # 分组名
                     'userProfile': obj.userProfile.username,    # 用户
                     'companyName': companyName,                 # 公司名
