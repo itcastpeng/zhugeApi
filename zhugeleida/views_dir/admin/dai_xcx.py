@@ -720,75 +720,74 @@ def dai_xcx_oper(request, oper_type):
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
                         now_time = datetime.datetime.now()
-                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
+                        upload_code_objs = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
                                                                                               audit_result=2,
                                                                                               auditid__isnull=False).order_by(
                             '-upload_code_date')
-                        # if upload_code_obj:
-                        #     upload_code_obj = upload_code_obj[0]
+                        if upload_code_objs:
+                            upload_code_obj = upload_code_objs[0]
 
-                        undocode_audit_url = 'https://api.weixin.qq.com/wxa/undocodeaudit'
-                        key_name = '%s_authorizer_access_token' % (authorizer_appid)
-                        authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+                            undocode_audit_url = 'https://api.weixin.qq.com/wxa/undocodeaudit'
+                            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+                            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-                        if not authorizer_access_token:
-                            data = {
-                                'key_name': key_name,
-                                'authorizer_refresh_token': authorizer_refresh_token,
-                                'authorizer_appid': authorizer_appid
+                            if not authorizer_access_token:
+                                data = {
+                                    'key_name': key_name,
+                                    'authorizer_refresh_token': authorizer_refresh_token,
+                                    'authorizer_appid': authorizer_appid
+                                }
+                                print('--- 创建token 数据data-->>',data)
+                                authorizer_access_token_result = create_authorizer_access_token(data)
+                                if authorizer_access_token_result.code == 200:
+                                    authorizer_access_token = authorizer_access_token_result.data
+                                else:
+                                    return JsonResponse(authorizer_access_token_result.__dict__)
+
+                            print('---- 生成token authorizer_appid | authorizer_access_token -->',authorizer_appid,authorizer_access_token)
+
+
+                            undocode_audit_data = {
+                                'access_token': authorizer_access_token
                             }
-                            print('--- 创建token 数据data-->>',data)
-                            authorizer_access_token_result = create_authorizer_access_token(data)
-                            if authorizer_access_token_result.code == 200:
-                                authorizer_access_token = authorizer_access_token_result.data
+
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            undocode_audit_ret = s.get(undocode_audit_url, params=undocode_audit_data)
+
+                            # undocode_audit_ret = requests.get(undocode_audit_url, params=undocode_audit_data)
+
+                            undocode_audit_ret = undocode_audit_ret.json()
+                            reason = ''
+                            errmsg = undocode_audit_ret.get('errmsg')
+                            errcode = undocode_audit_ret.get('errcode')
+
+                            if errmsg == 'ok':
+                                response.code = 200
+                                response.msg = '小程序审核撤回成功'
+                                audit_result = 4  # (4,'审核撤回成功'),
+                                print('-------- 小程序审核撤回成功 --------->>',authorizer_appid)
                             else:
-                                return JsonResponse(authorizer_access_token_result.__dict__)
+                                response.code = 304
+                                response.msg = '小程序审核撤回失败'
+                                audit_result = 5  # (5,'审核撤回失败'),
+                                if int(errcode) == -1:
+                                    reason = '系统错误'
+                                elif int(errcode) == 87013:
+                                    reason = '撤回次数达到上限（每天一次，每个月10次）'
 
-                        print('---- 生成token authorizer_appid | authorizer_access_token -->',authorizer_appid,authorizer_access_token)
+                                reason = '审核撤回报错: %s:%s' % (errmsg, reason)
+                                print('-------- 小程序审核撤回失败  errcode | errmsg   --------->>', errcode, errmsg)
 
-                        continue
+                            upload_code_obj.reason = reason
+                            upload_code_obj.audit_result = audit_result
+                            upload_code_obj.audit_reply_date = now_time
+                            upload_code_obj.save()
 
-                        undocode_audit_data = {
-                            'access_token': authorizer_access_token
-                        }
-
-                        s = requests.session()
-                        s.keep_alive = False  # 关闭多余连接
-                        undocode_audit_ret = s.get(undocode_audit_url, params=undocode_audit_data)
-
-                        # undocode_audit_ret = requests.get(undocode_audit_url, params=undocode_audit_data)
-
-                        undocode_audit_ret = undocode_audit_ret.json()
-                        reason = ''
-                        errmsg = undocode_audit_ret.get('errmsg')
-                        errcode = undocode_audit_ret.get('errcode')
-
-                        if errmsg == 'ok':
-                            response.code = 200
-                            response.msg = '小程序审核撤回成功'
-                            audit_result = 4  # (4,'审核撤回成功'),
-                            print('-------- 小程序审核撤回成功 --------->>',authorizer_appid)
                         else:
-                            response.code = 304
-                            response.msg = '小程序审核撤回失败'
-                            audit_result = 5  # (5,'审核撤回失败'),
-                            if int(errcode) == -1:
-                                reason = '系统错误'
-                            elif int(errcode) == 87013:
-                                reason = '撤回次数达到上限（每天一次，每个月10次）'
-
-                            reason = '审核撤回报错: %s:%s' % (errmsg, reason)
-                            print('-------- 小程序审核撤回失败  errcode | errmsg   --------->>', errcode, errmsg)
-
-                        upload_code_obj.reason = reason
-                        upload_code_obj.audit_result = audit_result
-                        upload_code_obj.audit_reply_date = now_time
-                        upload_code_obj.save()
-
-                    else:
-                        response.code = 301
-                        response.msg = '没有正在审核中的代码'
-                        print('-------- 没有正在审核中的代码 xcx_app_id：---------->', obj.id)
+                            response.code = 301
+                            response.msg = '没有正在审核中的代码'
+                            print('-------- 没有正在审核中的代码 xcx_app_id：---------->', obj.id)
 
             else:
                 response.code = 402
