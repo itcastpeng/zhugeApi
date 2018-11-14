@@ -746,7 +746,7 @@ def dai_xcx_oper(request, oper_type):
 
                         print('---- 生成token authorizer_appid | authorizer_access_token -->',authorizer_appid,authorizer_access_token)
 
-                        return JsonResponse(authorizer_access_token_result.__dict__)
+                        continue
 
                         undocode_audit_data = {
                             'access_token': authorizer_access_token
