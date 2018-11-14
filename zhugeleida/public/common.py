@@ -238,7 +238,11 @@ def  create_suite_access_token(data):
 
     if not token_ret:
         post_component_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_suite_token'
-        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
 
         print('--------- [企业微信]获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
         component_token_ret = component_token_ret.json()
@@ -282,7 +286,12 @@ def create_pre_auth_code(data):
             'suite_access_token': suite_access_token
         }
         pre_auth_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_pre_auth_code'
-        pre_auth_code_ret = requests.get(pre_auth_code_url, params=get_pre_auth_data)
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        pre_auth_code_ret = s.get(pre_auth_code_url, params=get_pre_auth_data)
+        # pre_auth_code_ret = requests.get(pre_auth_code_url, params=get_pre_auth_data)
+
         pre_auth_code_ret = pre_auth_code_ret.json()
         pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
         print('------ [企业微信] 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
@@ -334,7 +343,11 @@ def create_qiyeweixin_access_token(data):
     if not access_token:
 
         get_corp_token_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_corp_token'
-        get_corp_token_ret = requests.post(get_corp_token_url, params=get_code_data,data=json.dumps(post_code_data))
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        get_corp_token_ret = s.post(get_corp_token_url, params=get_code_data,data=json.dumps(post_code_data))
+        # get_corp_token_ret = requests.post(get_corp_token_url, params=get_code_data,data=json.dumps(post_code_data))
 
         get_corp_token_ret = get_corp_token_ret.json()
         print('===========【企业微信】获取企业access_token 返回:==========>', json.dumps(get_corp_token_ret))
@@ -384,7 +397,13 @@ def  jianrong_create_qiyeweixin_access_token(company_id):
 
         if not access_token:
             tongxunlu_token_url =  "https://qyapi.weixin.qq.com/cgi-bin/gettoken"
-            ret = requests.get(tongxunlu_token_url, params=get_token_data)
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            ret = s.get(tongxunlu_token_url, params=get_token_data)
+
+            # ret = requests.get(tongxunlu_token_url, params=get_token_data)
+
             ret_json = ret.json()
             print('--------【企业微信】使用秘钥生成 access_token 返回-->>', ret_json)
             access_token = ret_json['access_token']

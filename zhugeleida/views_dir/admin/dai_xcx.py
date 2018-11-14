@@ -43,7 +43,13 @@ def relase_code(data):
     post_release_data = {
 
     }
-    get_release_ret = requests.post(release_url, params=get_release_data, data=json.dumps(post_release_data))
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    get_release_ret = s.post(release_url, params=get_release_data, data=json.dumps(post_release_data))
+
+    # get_release_ret = requests.post(release_url, params=get_release_data, data=json.dumps(post_release_data))
+
     get_release_ret = get_release_ret.json()
     errcode = int(get_release_ret.get('errcode'))
     errmsg = get_release_ret.get('errmsg')
@@ -138,7 +144,13 @@ def create_authorizer_access_token(data):
         post_component_data['component_verify_ticket'] = component_verify_ticket
 
         post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
-        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+
+        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
         print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
         component_token_ret = component_token_ret.json()
         access_token = component_token_ret.get('component_access_token')
@@ -164,8 +176,13 @@ def create_authorizer_access_token(data):
     }
 
     authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
-    authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,
-                                        data=json.dumps(post_auth_token_data))
+    print('---- 接口调用凭据 post_auth_token_data : --->',post_auth_token_data)
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    authorizer_info_ret = s.post(authorizer_token_url, params=get_auth_token_data,data=json.dumps(post_auth_token_data))
+
+    # authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,data=json.dumps(post_auth_token_data))
+
     authorizer_info_ret = authorizer_info_ret.json()
 
     print('-------获取（刷新）授权小程序的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)
@@ -211,7 +228,13 @@ def create_component_access_token():
         post_component_data['component_verify_ticket'] = component_verify_ticket
 
         post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
-        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+
+        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
         print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
         component_token_ret = component_token_ret.json()
         access_token = component_token_ret.get('component_access_token')
@@ -322,7 +345,12 @@ def dai_xcx_oper(request, oper_type):
                         }
 
                         commit_url = 'https://api.weixin.qq.com/wxa/commit'
-                        wxa_commit_info_ret = requests.post(commit_url, params=get_wxa_commit_data, data=json.dumps(post_wxa_commit_data))
+
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        wxa_commit_info_ret = s.post(commit_url, params=get_wxa_commit_data, data=json.dumps(post_wxa_commit_data))
+
+                        # wxa_commit_info_ret = requests.post(commit_url, params=get_wxa_commit_data, data=json.dumps(post_wxa_commit_data))
 
                         wxa_commit_info_ret = wxa_commit_info_ret.json()
                         print('--------为授权的小程序帐号上传小程序代码 接口返回---------->>',wxa_commit_info_ret)
@@ -394,7 +422,11 @@ def dai_xcx_oper(request, oper_type):
                             'path': path,
                         }
 
-                        get_qrcode_ret = requests.get(get_qrcode_url, params=get_qrcode_data)
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        get_qrcode_ret = s.get(get_qrcode_url, params=get_qrcode_data)
+
+                        # get_qrcode_ret = requests.get(get_qrcode_url, params=get_qrcode_data)
 
                         try:
 
@@ -479,7 +511,12 @@ def dai_xcx_oper(request, oper_type):
                                 get_page_data = {
                                     'access_token': authorizer_access_token,
                                 }
-                                page_data_ret = requests.get(get_page_url, params=get_page_data)
+
+                                s = requests.session()
+                                s.keep_alive = False  # 关闭多余连接
+                                page_data_ret = s.get(get_page_url, params=get_page_data)
+
+                                # page_data_ret = requests.get(get_page_url, params=get_page_data)
                                 page_data_ret = page_data_ret.json()
                                 errcode = page_data_ret.get('errcode')
                                 errmsg = page_data_ret.get('errmsg')
@@ -502,7 +539,12 @@ def dai_xcx_oper(request, oper_type):
                                 get_category_data = {
                                     'access_token': authorizer_access_token,
                                 }
-                                page_category_ret = requests.get(get_category_url, params=get_category_data)
+
+                                s = requests.session()
+                                s.keep_alive = False  # 关闭多余连接
+                                page_category_ret = s.get(get_category_url, params=get_category_data)
+
+                                # page_category_ret = requests.get(get_category_url, params=get_category_data)
                                 page_category_ret = page_category_ret.json()
                                 errcode = page_category_ret.get('errcode')
                                 errmsg = page_category_ret.get('errmsg')
@@ -561,8 +603,11 @@ def dai_xcx_oper(request, oper_type):
                                 post_submit_audit_data = json.dumps(post_submit_audit_data, ensure_ascii=False)
                                 print('---- json.dumps(post_submit_audit_data) --->>', post_submit_audit_data)
 
-                                submit_audit_ret = requests.post(submit_audit_url, params=get_submit_audit_data,
-                                                                 data=post_submit_audit_data.encode('utf-8'))
+                                s = requests.session()
+                                s.keep_alive = False  # 关闭多余连接
+                                submit_audit_ret = s.post(submit_audit_url, params=get_submit_audit_data, data=post_submit_audit_data.encode('utf-8'))
+
+                                # submit_audit_ret = requests.post(submit_audit_url, params=get_submit_audit_data, data=post_submit_audit_data.encode('utf-8'))
 
                                 submit_audit_ret = submit_audit_ret.json()
                                 auditid = submit_audit_ret.get('auditid')
@@ -675,12 +720,13 @@ def dai_xcx_oper(request, oper_type):
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
                         now_time = datetime.datetime.now()
-                        upload_code_obj = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
+                        upload_code_objs = models.zgld_xiapchengxu_upload_audit.objects.filter(app_id=obj.id,
                                                                                               audit_result=2,
                                                                                               auditid__isnull=False).order_by(
                             '-upload_code_date')
-                        if upload_code_obj:
-                            upload_code_obj = upload_code_obj[0]
+                        if upload_code_objs:
+                            upload_code_obj = upload_code_objs[0]
+
                             undocode_audit_url = 'https://api.weixin.qq.com/wxa/undocodeaudit'
                             key_name = '%s_authorizer_access_token' % (authorizer_appid)
                             authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
@@ -691,17 +737,26 @@ def dai_xcx_oper(request, oper_type):
                                     'authorizer_refresh_token': authorizer_refresh_token,
                                     'authorizer_appid': authorizer_appid
                                 }
+                                print('--- 创建token 数据data-->>',data)
                                 authorizer_access_token_result = create_authorizer_access_token(data)
                                 if authorizer_access_token_result.code == 200:
                                     authorizer_access_token = authorizer_access_token_result.data
                                 else:
-                                    return JsonResponse(authorizer_access_token.__dict__)
+                                    return JsonResponse(authorizer_access_token_result.__dict__)
+
+                            print('---- 生成token authorizer_appid | authorizer_access_token -->',authorizer_appid,authorizer_access_token)
+
 
                             undocode_audit_data = {
                                 'access_token': authorizer_access_token
                             }
 
-                            undocode_audit_ret = requests.get(undocode_audit_url, params=undocode_audit_data)
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            undocode_audit_ret = s.get(undocode_audit_url, params=undocode_audit_data)
+
+                            # undocode_audit_ret = requests.get(undocode_audit_url, params=undocode_audit_data)
+
                             undocode_audit_ret = undocode_audit_ret.json()
                             reason = ''
                             errmsg = undocode_audit_ret.get('errmsg')
@@ -711,7 +766,7 @@ def dai_xcx_oper(request, oper_type):
                                 response.code = 200
                                 response.msg = '小程序审核撤回成功'
                                 audit_result = 4  # (4,'审核撤回成功'),
-                                print('-------- 小程序审核撤回成功 --------->>')
+                                print('-------- 小程序审核撤回成功 --------->>',authorizer_appid)
                             else:
                                 response.code = 304
                                 response.msg = '小程序审核撤回失败'
@@ -780,7 +835,11 @@ def dai_xcx_oper(request, oper_type):
 
                             url = 'https://api.weixin.qq.com/wxa/revertcoderelease'
 
-                            authorizer_info_ret = requests.get(url, params=get_wx_info_data)
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            authorizer_info_ret = s.get(url, params=get_wx_info_data)
+
+                            # authorizer_info_ret = requests.get(url, params=get_wx_info_data)
                             authorizer_info_ret = authorizer_info_ret.json()
                             print('----------- 版库中的所有小程序代码模版 返回 ------------->', json.dumps(authorizer_info_ret))
                             errmsg = authorizer_info_ret.get('errmsg')
@@ -827,7 +886,11 @@ def dai_xcx_oper(request, oper_type):
                 'access_token': component_access_token
             }
 
-            gettemplate_list_ret = requests.post(gettemplate_list_url, params=gettemplate_list_data)
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            gettemplate_list_ret = s.post(gettemplate_list_url, params=gettemplate_list_data)
+
+            # gettemplate_list_ret = requests.post(gettemplate_list_url, params=gettemplate_list_data)
             gettemplate_list_ret = gettemplate_list_ret.json()
             errmsg = gettemplate_list_ret.get('errmsg')
             template_list = gettemplate_list_ret.get('template_list')
@@ -899,7 +962,11 @@ def dai_xcx_oper(request, oper_type):
                         'auditid': auditid
                     }
 
-                    get_audit_ret = requests.post(get_auditstatus_url, params=get_audit_data, data=post_audit_data)
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    get_audit_ret = s.post(get_auditstatus_url, params=get_audit_data, data=post_audit_data)
+
+                    # get_audit_ret = requests.post(get_auditstatus_url, params=get_audit_data, data=post_audit_data)
 
                     get_audit_ret = get_audit_ret.json()
                     errcode = get_audit_ret.get('errcode')
@@ -968,7 +1035,11 @@ def  batch_get_latest_audit_status(data):
             }
             print('------get_latest_audit_data--------<<', get_latest_audit_data)
 
-            get_latest_audit_ret = requests.get(get_latest_auditstatus_url, params=get_latest_audit_data)
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            get_latest_audit_ret = s.get(get_latest_auditstatus_url, params=get_latest_audit_data)
+
+            # get_latest_audit_ret = requests.get(get_latest_auditstatus_url, params=get_latest_audit_data)
 
             get_latest_audit_ret = get_latest_audit_ret.json()
             print('------获取查询审核中+最新一次提交的审核状态 接口返回----->>', get_latest_audit_ret)

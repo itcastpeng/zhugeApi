@@ -143,7 +143,11 @@ def department_oper(request, oper_type, o_id):
                 }
                 print('-----json.dumps(post_user_data)----->>',json.dumps(post_user_data))
 
-                ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                ret = s.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
+
+                # ret = requests.post(Conf['add_department_url'], params=get_user_data,data=json.dumps(post_user_data))
                 weixin_ret = ret.json()
 
                 if weixin_ret.get('errmsg') == 'created':
@@ -201,7 +205,12 @@ def department_oper(request, oper_type, o_id):
                         'access_token': token_ret,
                         'id' : o_id
                     }
-                    ret = requests.get(Conf['delete_department_url'], params=get_user_data)
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    ret = s.get(Conf['delete_department_url'], params=get_user_data)
+
+                    # ret = requests.get(Conf['delete_department_url'], params=get_user_data)
                     print(ret.json())
 
                     weixin_ret = json.loads(ret.text)
@@ -293,7 +302,13 @@ def department_oper(request, oper_type, o_id):
                     post_user_data['parentid'] = parentid
 
                     print('-----json.dumps(post_user_data)----->>', json.dumps(post_user_data),forms_obj.cleaned_data.get('name'))
-                    ret = requests.post(Conf['update_department_url'], params=get_user_data, data=json.dumps(post_user_data))
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    ret = s.post(Conf['update_department_url'], params=get_user_data, data=json.dumps(post_user_data))
+
+                    # ret = requests.post(Conf['update_department_url'], params=get_user_data, data=json.dumps(post_user_data))
+
                     print(ret.text)
 
                     weixin_ret = json.loads(ret.text)

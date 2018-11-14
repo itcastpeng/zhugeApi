@@ -75,55 +75,55 @@ app_id = 'wx67e2fde0f694111c'
 
 
 
-
-def  create_authorizer_access_token():
-
-    app_id = 'wx67e2fde0f694111c'
-    get_auth_token_data = {
-        'component_access_token': "13_-0xJnm3FKROqkZb2GvNvqsRUV3RmL1Q_iDZpyaIqh5V92ShjxkduabLIWuQdsc-LQ_p46XaocIW_XBWfcdjvC3EGR7-Ca9AmBeV9btjNIHKHynyW_zV0OG5ipK0CXpvJOq4vzIEodBpHOkrYIQHdAHAPXO"
-    }
-
-    post_auth_token_data = {
-        'component_appid': app_id,
-        'authorizer_appid': 'wx1add8692a23b5976',
-        'authorizer_refresh_token': 'refreshtoken@@@09yY9swB2BonuG6Yk_Q80AaCGCuc5ftYTZiwVNS9Byw'
-    }
-
-    authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
-    authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,
-                                        data=json.dumps(post_auth_token_data))
-    authorizer_info_ret = authorizer_info_ret.json()
-
-    print('-------获取（刷新）授权小程序的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)
-
-    authorizer_access_token = authorizer_info_ret.get('authorizer_access_token')
-    authorizer_refresh_token = authorizer_info_ret.get('authorizer_refresh_token')
-
-        # response.data = {
-        #     'authorizer_access_token' : authorizer_access_token
-        # }
-    print('------ 获取令牌（authorizer_access_token）成功------>>',authorizer_access_token)
-
-    get_wx_info_data = {
-        'access_token': authorizer_access_token
-
-    }
-    post_wx_info_data = {
-
-    }
-
-    #url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-    # url = 'https://api.weixin.qq.com/cgi-bin/account/getaccountbasicinfo'
-    # url = 'https://api.weixin.qq.com/cgi-bin/wxopen/getcategory'
-    url = 'https://api.weixin.qq.com/wxa/getwxasearchstatus'
-    authorizer_info_ret = requests.get(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
-    authorizer_info_ret = authorizer_info_ret.json()
-
-    print('-->', json.dumps(authorizer_info_ret))
-
-
-
-create_authorizer_access_token()
+#
+# def  create_authorizer_access_token():
+#
+#     app_id = 'wx67e2fde0f694111c'
+#     get_auth_token_data = {
+#         'component_access_token': "13_-0xJnm3FKROqkZb2GvNvqsRUV3RmL1Q_iDZpyaIqh5V92ShjxkduabLIWuQdsc-LQ_p46XaocIW_XBWfcdjvC3EGR7-Ca9AmBeV9btjNIHKHynyW_zV0OG5ipK0CXpvJOq4vzIEodBpHOkrYIQHdAHAPXO"
+#     }
+#
+#     post_auth_token_data = {
+#         'component_appid': app_id,
+#         'authorizer_appid': 'wx1add8692a23b5976',
+#         'authorizer_refresh_token': 'refreshtoken@@@09yY9swB2BonuG6Yk_Q80AaCGCuc5ftYTZiwVNS9Byw'
+#     }
+#
+#     authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
+#     authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,
+#                                         data=json.dumps(post_auth_token_data))
+#     authorizer_info_ret = authorizer_info_ret.json()
+#
+#     print('-------获取（刷新）授权小程序的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)
+#
+#     authorizer_access_token = authorizer_info_ret.get('authorizer_access_token')
+#     authorizer_refresh_token = authorizer_info_ret.get('authorizer_refresh_token')
+#
+#         # response.data = {
+#         #     'authorizer_access_token' : authorizer_access_token
+#         # }
+#     print('------ 获取令牌（authorizer_access_token）成功------>>',authorizer_access_token)
+#
+#     get_wx_info_data = {
+#         'access_token': authorizer_access_token
+#
+#     }
+#     post_wx_info_data = {
+#
+#     }
+#
+#     #url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+#     # url = 'https://api.weixin.qq.com/cgi-bin/account/getaccountbasicinfo'
+#     # url = 'https://api.weixin.qq.com/cgi-bin/wxopen/getcategory'
+#     url = 'https://api.weixin.qq.com/wxa/getwxasearchstatus'
+#     authorizer_info_ret = requests.get(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+#     authorizer_info_ret = authorizer_info_ret.json()
+#
+#     print('-->', json.dumps(authorizer_info_ret))
+#
+#
+#
+# create_authorizer_access_token()
 
 
 
@@ -132,5 +132,26 @@ create_authorizer_access_token()
 
 
 # access_token = "13_pD2PP2-ElQpVkbt03YpmgLMw11-ProDxZBtX9bkxw98QGoir3jhEcc_ohI98T4VO0thagj53xgp8WRTOzBiFpwOxQBewfuBm_D4nv94EVvANa4gg6Vn4m4OtnVeLbEZJux4tH5tR4KZXOPoNMYQgAMDIUM"
+
+
+# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
+get_data = {
+    'data': json.dumps({"user_id": 60, "customer_id": 1})
+}
+
+# print(get_data)
+
+s = requests.session()
+s.keep_alive = False  # 关闭多余连接
+ret = s.get(url, params=get_data)
+
+# ret = requests.get(url, params=get_data)
+
+
+print(json.dumps(ret.json()))
+
+
+
 
 

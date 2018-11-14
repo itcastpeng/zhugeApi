@@ -17,7 +17,11 @@ def get_openid_info(get_token_data):
 
     oauth_url = 'https://api.weixin.qq.com/sns/oauth2/component/access_token'
 
-    ret = requests.get(oauth_url, params=get_token_data)
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    ret = s.get(oauth_url, params=get_token_data)
+
+    # ret = requests.get(oauth_url, params=get_token_data)
     ret_json = ret.json()
 
     print('-------- 通过code换取 access_token、openid信息等  返回 ------->>', ret_json)
@@ -149,7 +153,12 @@ def user_gongzhonghao_auth(request):
                 'lang': 'zh_CN',
             }
 
-            ret = requests.get(get_user_info_url, params=get_user_info_data)
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            ret = s.get(get_user_info_url, params=get_user_info_data)
+
+            # ret = requests.get(get_user_info_url, params=get_user_info_data)
+
             ret.encoding = 'utf-8'
             ret_json = ret.json()
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
@@ -433,7 +442,12 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                         'access_token': authorizer_access_token,
                         'type' : 'jsapi'
                     }
-                    jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    jsapi_ticket_ret = s.get(get_jsapi_ticket_url, params=get_ticket_data)
+
+                    # jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
                     print('=========== 权限签名 jsapi_ticket_ret 接口返回 ==========>', jsapi_ticket_ret.json())
                     jsapi_ticket_ret = jsapi_ticket_ret.json()
                     ticket = jsapi_ticket_ret.get('ticket')

@@ -229,7 +229,11 @@ def mingpian_oper(request, oper_type):
 
                 print('--------mycelery 使用 request post_的数据 ------->>', data_dict)
 
-                response_ret = requests.post(url, data=data_dict)
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                response_ret = s.post(url, data=data_dict)
+
+                # response_ret = requests.post(url, data=data_dict)
                 response_ret = response_ret.json()
 
                 print('-------- mycelery/触发 celery  返回的结果 -------->>', response_ret)

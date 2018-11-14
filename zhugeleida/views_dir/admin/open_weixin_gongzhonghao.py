@@ -115,8 +115,12 @@ def open_weixin_gongzhonghao(request, oper_type):
                 post_access_token_data['component_appid'] = app_id
                 post_access_token_data['authorization_code'] = auth_code
 
-                access_token_ret = requests.post(access_token_url, params=get_access_token_data,
-                                                 data=json.dumps(post_access_token_data))
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                access_token_ret = s.post(access_token_url, params=get_access_token_data, data=json.dumps(post_access_token_data))
+
+                # access_token_ret = requests.post(access_token_url, params=get_access_token_data, data=json.dumps(post_access_token_data))
+
                 access_token_ret = access_token_ret.json()
                 print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',
                       access_token_ret)
@@ -136,11 +140,14 @@ def open_weixin_gongzhonghao(request, oper_type):
                     post_wx_info_data['authorizer_appid'] = authorizer_appid
                     get_wx_info_data['component_access_token'] = component_access_token
                     url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,
-                                                        data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取_公众号授权方的authorizer_info信息 返回 ------------->',
-                          json.dumps(authorizer_info_ret.json()))
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    authorizer_info_ret = s.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
+
+                    # authorizer_info_ret = requests.post(url, params=get_wx_info_data,data=json.dumps(post_wx_info_data))
+
+                    print('----------- 获取_公众号授权方的authorizer_info信息 返回 ------------->',json.dumps(authorizer_info_ret.json()))
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
@@ -178,7 +185,12 @@ def open_weixin_gongzhonghao(request, oper_type):
                                 service_category=categories,  # 服务类目
                             )
 
-                            html = requests.get(qrcode_url)
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            html = s.get(qrcode_url)
+
+                            # html = requests.get(qrcode_url)
+
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                             filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
                             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
@@ -197,8 +209,12 @@ def open_weixin_gongzhonghao(request, oper_type):
                             "industry_id1": "1",  # IT科技 互联网|电子商务，
                             "industry_id2": "2"
                         }
-                        template_list_ret = requests.post(api_set_industry_url, params=get_industry_data,
-                                                          data=json.dumps(post_industry_data))
+
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        template_list_ret = s.post(api_set_industry_url, params=get_industry_data, data=json.dumps(post_industry_data))
+
+                        # template_list_ret = requests.post(api_set_industry_url, params=get_industry_data, data=json.dumps(post_industry_data))
                         template_list_ret = template_list_ret.json()
                         errcode = template_list_ret.get('errcode')
                         errmsg = template_list_ret.get('errmsg')
@@ -227,8 +243,11 @@ def open_weixin_gongzhonghao(request, oper_type):
                             "template_id_short": "OPENTM202109783"
                         }
 
-                        industry_ret = requests.post(api_add_template_url, params=get_industry_data,
-                                                     data=json.dumps(post_add_template_data))
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        industry_ret = s.post(api_add_template_url, params=get_industry_data, data=json.dumps(post_add_template_data))
+
+                        # industry_ret = requests.post(api_add_template_url, params=get_industry_data, data=json.dumps(post_add_template_data))
                         industry_ret = industry_ret.json()
                         template_id = industry_ret.get('template_id')
                         errmsg = industry_ret.get('errmsg')
@@ -292,10 +311,15 @@ def open_weixin_gongzhonghao(request, oper_type):
 
             if not exist_pre_auth_code:
                 pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
-                pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data,
-                                                  data=json.dumps(post_pre_auth_data))
+
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                pre_auth_code_ret = s.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
+
+                # pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
                 pre_auth_code_ret = pre_auth_code_ret.json()
                 pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
+
                 print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
                 if pre_auth_code:
                     rc.set(pre_auth_code_key_name, pre_auth_code, 1600)
@@ -421,8 +445,11 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                 post_access_token_data['component_appid'] = app_id
                 post_access_token_data['authorization_code'] = auth_code
 
-                access_token_ret = requests.post(access_token_url, params=get_access_token_data,
-                                                 data=json.dumps(post_access_token_data))
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                access_token_ret = s.post(access_token_url, params=get_access_token_data, data=json.dumps(post_access_token_data))
+
+                # access_token_ret = requests.post(access_token_url, params=get_access_token_data, data=json.dumps(post_access_token_data))
                 access_token_ret = access_token_ret.json()
                 print('--------- 获取令牌 authorizer_access_token authorizer_refresh_token 返回---------->>',
                       access_token_ret)
@@ -441,12 +468,16 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                     post_wx_info_data['component_appid'] = app_id
                     post_wx_info_data['authorizer_appid'] = authorizer_appid
                     get_wx_info_data['component_access_token'] = component_access_token
-                    url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-                    authorizer_info_ret = requests.post(url, params=get_wx_info_data,
-                                                        data=json.dumps(post_wx_info_data))
 
-                    print('----------- 获取_公众号授权方的authorizer_info信息 返回 ------------->',
-                          json.dumps(authorizer_info_ret.json()))
+                    url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+
+                    # authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+
+                    print('----------- 获取_公众号授权方的authorizer_info信息 返回 ------------->', json.dumps(authorizer_info_ret.json()))
                     authorizer_info_ret = authorizer_info_ret.json()
                     original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
@@ -495,8 +526,12 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             "industry_id1": "1",  # IT科技 互联网|电子商务，
                             "industry_id2": "2"
                         }
-                        template_list_ret = requests.post(api_set_industry_url, params=get_industry_data,
-                                                          data=json.dumps(post_industry_data))
+
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        template_list_ret = s.post(api_set_industry_url, params=get_industry_data, data=json.dumps(post_industry_data))
+
+                        # template_list_ret = requests.post(api_set_industry_url, params=get_industry_data, data=json.dumps(post_industry_data))
                         template_list_ret = template_list_ret.json()
                         errcode = template_list_ret.get('errcode')
                         errmsg = template_list_ret.get('errmsg')
@@ -525,8 +560,11 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             "template_id_short": "OPENTM202109783"
                         }
 
-                        industry_ret = requests.post(api_add_template_url, params=get_industry_data,
-                                                     data=json.dumps(post_add_template_data))
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        industry_ret = s.post(api_add_template_url, params=get_industry_data,data=json.dumps(post_add_template_data))
+
+                        # industry_ret = requests.post(api_add_template_url, params=get_industry_data,data=json.dumps(post_add_template_data))
                         industry_ret = industry_ret.json()
                         template_id = industry_ret.get('template_id')
 
@@ -971,7 +1009,12 @@ def gzh_auth_process_oper(request, oper_type):
                 get_wx_info_data['component_access_token'] = component_access_token
 
                 url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info'
-                authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+
+                # authorizer_info_ret = requests.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
                 authorizer_info_ret = authorizer_info_ret.json()
                 print('---------- 公众号帐号基本信息authorizer_info 返回 ----------------->', json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
@@ -1050,7 +1093,12 @@ def create_component_access_token(data):
     if not token_ret:
 
         post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
-        component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+
+        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
         print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
         component_token_ret = component_token_ret.json()
         access_token = component_token_ret.get('component_access_token')
@@ -1105,8 +1153,13 @@ def create_authorizer_access_token(data):
     }
 
     authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
-    authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,
-                                        data=json.dumps(post_auth_token_data))
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    authorizer_info_ret = s.post(authorizer_token_url, params=get_auth_token_data, data=json.dumps(post_auth_token_data))
+
+
+    # authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data, data=json.dumps(post_auth_token_data))
     authorizer_info_ret = authorizer_info_ret.json()
 
     print('-------获取（刷新）授权【公众号】的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)

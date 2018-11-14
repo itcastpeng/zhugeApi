@@ -50,7 +50,13 @@ def work_weixin_auth(request, company_id):
             get_token_data['corpid'] = corpid
             get_token_data['corpsecret'] = corpsecret
 
-            ret = requests.get(Conf['token_url'], params=get_token_data)
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            ret = s.get(Conf['token_url'], params=get_token_data)
+
+            # ret = requests.get(Conf['token_url'], params=get_token_data)
+
+
             ret_json = ret.json()
             access_token = ret_json.get('access_token')
             print('===========【企业微信】access_token 请求接口返回 和 access_token ==========>', ret_json,'\n',access_token)
@@ -65,7 +71,11 @@ def work_weixin_auth(request, company_id):
         get_code_data['access_token'] = access_token
         code_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo'
 
-        code_ret = requests.get(code_url, params=get_code_data)
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        code_ret = s.get(code_url, params=get_code_data)
+
+        # code_ret = requests.get(code_url, params=get_code_data)
 
         code_ret_json = code_ret.json()
         print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
@@ -81,7 +91,12 @@ def work_weixin_auth(request, company_id):
         get_userlist_data['access_token'] = access_token
 
         print("Conf['userlist_url'] -->", Conf['userlist_url'])
-        user_list_ret = requests.post(Conf['userlist_url'], params=get_userlist_data,data=json.dumps(post_userlist_data))
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        user_list_ret = s.post(Conf['userlist_url'], params=get_userlist_data,data=json.dumps(post_userlist_data))
+
+        # user_list_ret = requests.post(Conf['userlist_url'], params=get_userlist_data,data=json.dumps(post_userlist_data))
         user_list_ret_json = user_list_ret.json()
 
         userid = user_list_ret_json['userid']
@@ -257,7 +272,12 @@ def work_weixin_auth_oper(request,oper_type):
                         'access_token': authorizer_access_token,
                         'type' : 'jsapi'
                     }
-                    jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    jsapi_ticket_ret = s.get(get_jsapi_ticket_url, params=get_ticket_data)
+
+                    # jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
                     print('=========== 权限签名 jsapi_ticket_ret 接口返回 ==========>', jsapi_ticket_ret.json())
                     jsapi_ticket_ret = jsapi_ticket_ret.json()
                     ticket = jsapi_ticket_ret.get('ticket')
@@ -329,7 +349,13 @@ def enterprise_weixin_sign(request):
             get_ticket_data  = {
                 'access_token' : token_ret
             }
-            jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            jsapi_ticket_ret = s.get(get_jsapi_ticket_url, params=get_ticket_data)
+
+
+            # jsapi_ticket_ret = requests.get(get_jsapi_ticket_url, params=get_ticket_data)
             print('=========== 权限签名 jsapi_ticket_ret 接口返回 ==========>', jsapi_ticket_ret.json())
             jsapi_ticket_ret = jsapi_ticket_ret.json()
             ticket = jsapi_ticket_ret.get('ticket')

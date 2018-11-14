@@ -312,7 +312,12 @@ def user_oper(request, oper_type, o_id):
                     add_user_url = Conf['add_user_url']
                     print('-------->>',json.dumps(post_user_data))
 
-                    ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    ret = s.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+
+                    # ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+
                     print('-----requests----->>', ret.text)
 
                     weixin_ret = json.loads(ret.text)
@@ -393,7 +398,12 @@ def user_oper(request, oper_type, o_id):
                         userid = user_objs[0].userid
                         if userid:
                             get_user_data['userid'] = userid
-                            ret = requests.get(Conf['delete_user_url'], params=get_user_data)
+
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            ret = s.get(Conf['delete_user_url'], params=get_user_data)
+
+                            # ret = requests.get(Conf['delete_user_url'], params=get_user_data)
 
                             weixin_ret = json.loads(ret.text)
 
@@ -501,7 +511,13 @@ def user_oper(request, oper_type, o_id):
                         post_user_data['department'] = department_id
                         post_user_data['mobile'] = wechat_phone
                         # print('------- 请求发送的数据 ----->>' ,get_user_data, department_id ,"\n" ,post_user_data,json.dumps(post_user_data))
-                        ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
+
+                        s = requests.session()
+                        s.keep_alive = False  # 关闭多余连接
+                        ret = s.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
+
+
+                        # ret = requests.post(Conf['update_user_url'], params=get_user_data, data=json.dumps(post_user_data))
 
                         weixin_ret = ret.json()
 
@@ -600,7 +616,11 @@ def user_oper(request, oper_type, o_id):
 
                 print('--------mycelery 使用 request post_的数据 ------->>',data_dict)
 
-                response_ret = requests.post(url , data=data_dict)
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                response_ret = s.post(url , data=data_dict)
+
+                # response_ret = requests.post(url , data=data_dict)
                 response_ret = response_ret.json()
 
                 print('-------- mycelery/触发 celery  返回的结果 -------->>',response_ret)
@@ -626,7 +646,12 @@ def user_oper(request, oper_type, o_id):
             }
 
             department_list_url =  'https://qyapi.weixin.qq.com/cgi-bin/department/list'
-            department_list_ret = requests.get(department_list_url, params=get_user_data)
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            department_list_ret = s.get(department_list_url, params=get_user_data)
+
+            # department_list_ret = requests.get(department_list_url, params=get_user_data)
 
             department_list_ret = department_list_ret.json()
             department_list = department_list_ret.get('department')
@@ -641,7 +666,12 @@ def user_oper(request, oper_type, o_id):
                     user_simplelist_url = 'https://qyapi.weixin.qq.com/cgi-bin/user/simplelist'
                     get_user_data['department_id'] = department_id
 
-                    user_simplelist_ret = requests.get(user_simplelist_url, params=get_user_data)
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    user_simplelist_ret = s.get(user_simplelist_url, params=get_user_data)
+
+                    # user_simplelist_ret = requests.get(user_simplelist_url, params=get_user_data)
+
                     print('----- 获取部门成员 返回接口信息----->>', json.dumps(user_simplelist_ret.json()))
                     user_simplelist_ret = user_simplelist_ret.json()
                     errcode = user_simplelist_ret.get('errcode')
@@ -830,7 +860,13 @@ def user_oper(request, oper_type, o_id):
                             key_name = "company_%s_tongxunlu_token" % (company_id)
                             print('-------->>', json.dumps(post_user_data))
 
-                            ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            ret = s.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+
+                            # ret = requests.post(add_user_url, params=get_user_data, data=json.dumps(post_user_data))
+
+
                             print('-----requests----->>', ret.text)
 
                             weixin_ret = json.loads(ret.text)

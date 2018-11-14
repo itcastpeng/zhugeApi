@@ -65,7 +65,12 @@ def validate_agent(data):
     get_token_data['corpid'] = corp_id
     # app_secret = models.zgld_app.objects.get(company_id=company_id, name='AI雷达').app_secret
     get_token_data['corpsecret'] = app_secret
-    ret = requests.get(Conf['token_url'], params=get_token_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    ret = s.get(Conf['token_url'], params=get_token_data)
+
+    # ret = requests.get(Conf['token_url'], params=get_token_data)
 
     weixin_ret_data = ret.json()
     print('---- 企业微信agent secret 验证接口返回 --->', weixin_ret_data)
@@ -76,7 +81,12 @@ def validate_agent(data):
         get_token_data = {
             'access_token' : access_token
         }
-        agent_list_ret = requests.get(agent_list_url, params=get_token_data)
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        agent_list_ret = s.get(agent_list_url, params=get_token_data)
+
+        # agent_list_ret = requests.get(agent_list_url, params=get_token_data)
         agent_list_ret = agent_list_ret.json()
         print('------- Agent_list_ret ----------->>',agent_list_ret)
 
@@ -112,7 +122,12 @@ def validate_agent(data):
                 }
                 print('---------- 修改home_url get_agent_data + post_agent_data ------------------>>',json.dumps(get_agent_data),'|',json.dumps(post_agent_data))
 
-                set_agent_ret = requests.post(set_agent_url, params=get_agent_data,data=json.dumps(post_agent_data))
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                set_agent_ret = s.post(set_agent_url, params=get_agent_data,data=json.dumps(post_agent_data))
+
+                # set_agent_ret = requests.post(set_agent_url, params=get_agent_data,data=json.dumps(post_agent_data))
+
                 set_agent_ret = set_agent_ret.json()
                 print('--------- 设置应用 set_agent_ret 返回 ----------->>', set_agent_ret)
                 errmsg = set_agent_ret.get('errmsg')

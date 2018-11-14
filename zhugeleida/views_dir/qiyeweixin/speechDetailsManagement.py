@@ -15,7 +15,7 @@ import json
 # 话术详情查询
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def speechDetailsManageShow(request):
+def speechDetailsManage(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # forms_obj = SelectForm(request.GET)
@@ -32,7 +32,10 @@ def speechDetailsManageShow(request):
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            objs = models.zgld_speech_details_management.objects.filter(q).order_by(order)
+            # companyName_id = request.GET.get('companyName_id')
+            user_id = request.GET.get('user_id')
+            companyName_id = models.zgld_userprofile.objects.get(id=user_id)
+            objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName_id__companyName_id=companyName_id.company_id)
             objsCount = objs.count()
             # if length != 0:
             #     start_line = (current_page - 1) * length
@@ -47,6 +50,7 @@ def speechDetailsManageShow(request):
                 if obj.talkGroupName:
                     groupName = obj.talkGroupName.groupName
                 otherList.append({
+                    'o_id': obj.id,
                     'contentWords': obj.contentWords,  # 分组名
                     'sendNum': sendNum,  # 用户
                     'talkGroupName': groupName,  # 公司名
