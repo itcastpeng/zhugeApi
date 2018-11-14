@@ -20,7 +20,7 @@ def speechDetailsManage(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         user_id = request.GET.get('user_id')
-        groupSearch = request.GET.get('groupSearch')
+        # groupSearch = request.GET.get('groupSearch')
         order = request.GET.get('order', '-createDate')
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
@@ -36,11 +36,11 @@ def speechDetailsManage(request):
             # companyName_id = request.GET.get('companyName_id')
             companyName_id = models.zgld_admin_userprofile.objects.get(id=user_id)
             objs = models.zgld_speech_details_management.objects.filter(q).order_by(order).filter(talkGroupName_id__companyName_id=companyName_id.company_id)
-            if groupSearch:
-                if groupSearch == 'groupSearch':
-                    objs = objs.filter(talkGroupName_id__isnull=True)
-                else:
-                    objs = objs.filter(talkGroupName_id=groupSearch)
+            # if groupSearch:
+            #     if groupSearch == 'groupSearch':
+            #         objs = objs.filter(talkGroupName_id__isnull=True)
+            #     else:
+            # objs = objs.filter(talkGroupName_id=groupSearch)
             objsCount = objs.count()
             otherList = []
             if length != 0:

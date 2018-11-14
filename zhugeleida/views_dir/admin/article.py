@@ -120,9 +120,9 @@ def init_data(user_id, pid=None, level=2):
         user_id=user_id,
         level=level
     )
-    print('user_id, pid==========> ', user_id, pid)
+    # print('user_id, pid==========> ', user_id, pid)
     for obj in objs:
-        print('pid------------> ',pid, obj.id, user_id)
+        # print('pid------------> ',pid, obj.id, user_id)
         if obj.customer_parent_id == obj.customer_id:
             continue
         decode_username = base64.b64decode(obj.customer.username)
@@ -152,14 +152,19 @@ def mailuotu(q):
         # print('user_id -->', user_id)
         # print('username -->', username)
         # print('user----id-----------> ',user_id, obj['id'])
-        children_data = init_data(user_id, pid=obj['customer_id'])
         tmp = {'name': username}
+        children_data = init_data(user_id, pid=obj['customer_id'])
         if children_data:
             tmp['children'] = children_data
         if tmp not in result_data:
-            result_data.append(tmp)
-
-    # print('result_data -->', result_data)
+            if tmp.get('name') not in [i.get('name') for i in result_data]:
+                result_data.append(tmp)
+            else:
+                name = tmp.get('name')
+                if tmp.get('children'):
+                    for i in result_data:
+                        if name == i.get('name'):
+                            i['children'] = tmp.get('children')
 
     article_title = count_objs[0]['article__title']
     return article_title, result_data
@@ -415,7 +420,6 @@ def article_oper(request, oper_type, o_id):
             if objs:
 
                 article_title, result_data = mailuotu(q)
-
                 dataList = {                    # 顶端 首级
                     'name': article_title,
                     'children': result_data
