@@ -27,6 +27,7 @@ def plugin_report(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')  #
+            company_id = request.GET.get('company_id')  #
 
             field_dict = {
                 'id': '',
@@ -36,7 +37,7 @@ def plugin_report(request):
             request_data = request.GET.copy()
             q = conditionCom(request_data, field_dict)
 
-            objs = models.zgld_plugin_report.objects.filter(q).order_by(order)
+            objs = models.zgld_plugin_report.objects.select_related('user').filter(user__company_id=company_id).order_by(order)
             count = objs.count()
 
             if length != 0:
@@ -52,19 +53,18 @@ def plugin_report(request):
             for obj in objs:
                 name_list_data = []
                 read_count =  obj.read_count
-                report_customer_obj = models.zgld_report_to_customer.objects.filter(activity_id=obj.id)
-                join_num = report_customer_obj.count()
+                report_customer_objs = models.zgld_report_to_customer.objects.select_related('user','customer','activity').filter(activity_id=obj.id)
+                join_num = report_customer_objs.count()
                 if read_count == 0:
                     convert_pr = 0
                 else:
                     convert_pr = format(float(join_num) / float(read_count), '.2f')
 
 
-                if report_customer_obj:
-                    for r_obj in report_customer_obj:
+                if report_customer_objs:
+                    for r_obj in report_customer_objs:
 
-                        j_objs = models.zgld_customer.objects.filter(id=r_obj.customer_id).values('id','username','phone',
-                                                                                                          )
+                        j_objs = models.zgld_customer.objects.filter(id=r_obj.customer_id).values('id','username','phone')
 
                         for j_obj in j_objs:
 
@@ -83,6 +83,8 @@ def plugin_report(request):
                                 'customer_phone': j_obj.get('phone'),
                                 'sign_up_time': r_obj.create_date,
                                 'leave_message': r_obj.leave_message,
+                                'user_id': r_obj.user_id,
+                                'user_name': r_obj.user.username,
                             })
                 else:
                     name_list_data = []
@@ -100,11 +102,6 @@ def plugin_report(request):
                     'join_num': join_num,  # 参与人数
                     'convert_pr': convert_pr,  # 转化率
                     'name_list' :name_list_data,
-                    # 'customer_username': obj.customer.username,    #客户姓名
-                    # 'customer_memo_name': obj.customer.memo_name,  #客户昵称
-                    # 'customer_phone':obj.phone,  #活动标题
-                    # 'phone' : obj.phone,    #手机号
-                    # 'leave_message' : obj.leave_message,     #留言
                     'leave_message': obj.leave_message,
                     'introduce': obj.introduce,      #活动说明
                     'is_get_phone_code' : obj.is_get_phone_code,    #是否获取手机验证码
