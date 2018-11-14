@@ -108,7 +108,7 @@ def article(request,oper_type):
 
 
 
-def init_data(user_id, pid=None, level=1):
+def init_data(user_id, pid=None, level=2):
     """
     获取权限数据
     :param pid:  权限父级id
@@ -120,6 +120,7 @@ def init_data(user_id, pid=None, level=1):
         user_id=user_id,
         level=level
     )
+    print('user_id, pid==========> ', user_id, pid)
     for obj in objs:
         print('pid------------> ',pid, obj.id, user_id)
         if obj.customer_parent_id == obj.customer_id:
@@ -142,7 +143,7 @@ def mailuotu(q):
     count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
         'user',
         'article'
-    ).filter(q).values('id', 'user_id', 'user__username', 'article__title').annotate(Count('user'))
+    ).filter(q).values('id', 'user_id', 'user__username', 'article__title', 'customer_id').annotate(Count('user'))
     result_data = []
     for obj in count_objs:
         # print('obj.id--------------> ',obj)
@@ -151,7 +152,7 @@ def mailuotu(q):
         # print('user_id -->', user_id)
         # print('username -->', username)
         # print('user----id-----------> ',user_id, obj['id'])
-        children_data = init_data(user_id, pid=obj['id'])
+        children_data = init_data(user_id, pid=obj['customer_id'])
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data

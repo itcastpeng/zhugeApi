@@ -10,13 +10,13 @@ class AddForm(forms.Form):
     groupName = forms.CharField(
         required=True,
         error_messages={
-            'required': "权限名称不能为空"
+            'required': "话术分组名称不能为空"
         }
     )
     userProfile = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "用户不能为空"
+            'required': "归属用户不能为空"
         }
     )
     companyName = forms.IntegerField(
@@ -29,13 +29,17 @@ class AddForm(forms.Form):
     def clean_groupName(self):
         groupName = self.data.get('groupName')
 
-        objs = models.zgld_talk_group_management.objects.filter(
+        objs = models.zgld_talk_group_management.objects
+        namesObj = objs.filter(
             groupName=groupName
         )
-        if objs:
+        if namesObj:
             self.add_error('groupName', '分组名称已存在！')
         else:
-            return groupName
+            if groupName == '未分组':
+                self.add_error('groupName', '分组名称不能为未分组')
+            else:
+                return groupName
 
 # 更新
 class UpdateForm(forms.Form):
@@ -75,7 +79,10 @@ class UpdateForm(forms.Form):
         if objs:
             self.add_error('groupName', '分组名称已存在！')
         else:
-            return groupName
+            if groupName == '未分组':
+                self.add_error('groupName', '分组名称不能为未分组')
+            else:
+                return groupName
 
 
 # 判断是否是数字
