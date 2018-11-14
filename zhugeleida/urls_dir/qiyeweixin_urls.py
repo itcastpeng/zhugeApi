@@ -81,10 +81,10 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)$', article.article),
 
     # 话术分组管理
-    url(r'^talkGroupManageShow$', talkGroupManagement.talkGroupManageShow),
+    url(r'^talkGroupManage$', talkGroupManagement.talkGroupManage),
     # url(r'^talkGroupManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),
 
     # 话术详情管理
-    url(r'^speechDetailsManageShow$', speechDetailsManagement.speechDetailsManageShow),
+    url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
     # url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 ]
