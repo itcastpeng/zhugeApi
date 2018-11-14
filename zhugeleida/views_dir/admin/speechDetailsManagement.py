@@ -103,14 +103,42 @@ def speechDetailsManageOper(request, oper_type, o_id):
             forms_obj = AddForm(form_data)
             if forms_obj.is_valid():
                 print("验证通过")
-
-                obj = models.zgld_speech_details_management.objects.create(
-                    contentWords=forms_obj.cleaned_data.get('contentWords'),
-                    talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName'),
-                    userProfile_id=forms_obj.cleaned_data.get('userProfile'),
-                )
-                response.code = 200
-                response.msg = "添加成功"
+                talkGroupName = forms_obj.cleaned_data.get('talkGroupName')
+                if not talkGroupName: # 判断如果没有传分组进来 创建一个未分组
+                    objs = models.zgld_talk_group_management.objects
+                    weifenzuObj = objs.filter(groupName='未分组')
+                    user_id = request.GET.get('user_id')
+                    if weifenzuObj:
+                        models.zgld_speech_details_management.objects.create(
+                            contentWords=forms_obj.cleaned_data.get('contentWords'),
+                            talkGroupName_id=weifenzuObj[0].id,
+                            userProfile_id=forms_obj.cleaned_data.get('userProfile'),
+                        )
+                        response.code = 200
+                        response.msg = "添加成功"
+                    else:
+                        userIdObj = models.zgld_admin_userprofile.objects.get(id=user_id)
+                        print('userIdObj.===========> ',userIdObj.company_id)
+                        groupId = objs.create(
+                            userProfile_id=user_id,
+                            groupName='未分组',
+                            companyName_id=userIdObj.company_id,
+                        )
+                        models.zgld_speech_details_management.objects.create(
+                            contentWords=forms_obj.cleaned_data.get('contentWords'),
+                            talkGroupName_id=groupId.id,
+                            userProfile_id=forms_obj.cleaned_data.get('userProfile'),
+                        )
+                        response.code = 200
+                        response.msg = "添加成功"
+                else:
+                    obj = models.zgld_speech_details_management.objects.create(
+                        contentWords=forms_obj.cleaned_data.get('contentWords'),
+                        talkGroupName_id=forms_obj.cleaned_data.get('talkGroupName'),
+                        userProfile_id=forms_obj.cleaned_data.get('userProfile'),
+                    )
+                    response.code = 200
+                    response.msg = "添加成功"
             else:
                 print("验证不通过")
                 # print(forms_obj.errors)
