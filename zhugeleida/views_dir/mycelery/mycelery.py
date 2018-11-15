@@ -430,7 +430,7 @@ def crontab_create_user_to_customer_qrCode_poster(request):
                     get_data = {
                         'data': json.dumps(data_dict)
                     }
-                    print('--- 小程序二维码: get_data-->',get_data)
+                    print('---【定时器生成】 小程序二维码: data_dict-->',data_dict)
 
                     s = requests.session()
                     s.keep_alive = False  # 关闭多余连接
@@ -439,9 +439,11 @@ def crontab_create_user_to_customer_qrCode_poster(request):
                     qr_code = obj.qr_code
 
                 if  not poster_url and qr_code:
-
+                    print('---【定时器生成】 小程序海报: data_dict-->', data_dict)
                     tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-
+                break
+        else:
+            print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
 
 # 生成小程序的海报
 @csrf_exempt
