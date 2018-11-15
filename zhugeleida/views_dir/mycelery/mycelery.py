@@ -445,6 +445,9 @@ def crontab_create_user_to_customer_qrCode_poster(request):
         else:
             print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
 
+    return  HttpResponse('执行_定时器生成海报')
+
+
 # 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
