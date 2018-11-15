@@ -783,6 +783,7 @@ def user_send_gongzhonghao_template_msg(request):
                         msg = _content.get('msg')
 
                 _content = '%s' % (msg)
+
                 if position:
                     consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
                 else:
@@ -1136,7 +1137,8 @@ def user_forward_send_activity_redPacket(request):
                                 a_data['customer_id'] = parent_id
                                 a_data['user_id'] = user_id
                                 a_data['type'] = 'gongzhonghao_template_tishi'
-                                a_data['content'] = '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值'
+                                a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值', 'info_type': 1})
+
                                 print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
                                 tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
