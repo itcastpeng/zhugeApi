@@ -344,7 +344,6 @@ def create_user_or_customer_qr_code(request):
     return JsonResponse(response.__dict__)
 
 # 获取企业用户信息
-@csrf_exempt
 def qiyeweixin_user_get_userinfo(request):
     response = ResponseObj()
     company_id = request.GET.get('company_id')
@@ -410,51 +409,6 @@ def qiyeweixin_user_get_userinfo(request):
 
     return JsonResponse(response.__dict__)
 
-
-@csrf_exempt
-def crontab_create_user_to_customer_qrCode_poster(request):
-
-    if request.method == "GET":
-        objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
-        if objs:
-            for obj in objs:
-                qr_code = obj.qr_code
-                poster_url = obj.poster_url
-                user_id = obj.user_id
-                customer_id = obj.customer_id
-
-                data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                if not qr_code:
-                    #生成小程序和企业用户对应的小程序二维码
-                    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
-                    get_data = {
-                        'data': json.dumps(data_dict)
-                    }
-                    print('--- 小程序二维码: get_data-->',get_data)
-
-                    s = requests.session()
-                    s.keep_alive = False  # 关闭多余连接
-                    s.get(url, params=get_data)
-
-                    qr_code = obj.qr_code
-
-                if  not poster_url and qr_code:
-
-                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-
-                    # _url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
-                    #
-                    # _get_data = {
-                    #     'data': json.dumps(data_dict)
-                    # }
-                    # print('--- 小程序海报: _get_data-->', _get_data)
-                    #
-                    # s = requests.session()
-                    # s.keep_alive = False  # 关闭多余连接
-                    # s.get(_url, params=_get_data)
-
-
-
 # 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
@@ -462,12 +416,12 @@ def create_user_or_customer_poster(request):
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
 
-    print('---- 【生成海报celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
+    print(' create_user_or_customer_poster ---- 【生成海报celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
     data = json.loads(request.GET.get('data'))
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
-    print('--- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
+    print(' create_user_or_customer_poster --- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
 
@@ -476,7 +430,7 @@ def create_user_or_customer_poster(request):
         response.msg = "传参异常"
     else:
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
-        print('---->', BASE_DIR)
+        print(' create_user_or_customer_poster ---->', BASE_DIR)
 
         platform = sys.platform  # 获取平台
         phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
@@ -487,15 +441,15 @@ def create_user_or_customer_poster(request):
         else:
             phantomjs_path = phantomjs_path + '/phantomjs.exe'
 
-        print('----- phantomjs_path ----->>', phantomjs_path)
+        print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-        driver.implicitly_wait(10)
+        # driver.implicitly_wait(10)
 
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
         customer_id, user_id)
 
-        print('---- poster_html url-->', url)
+        print('create_user_or_customer_poster ----url-->', url)
 
         try:
             driver.get(url)
@@ -512,8 +466,8 @@ def create_user_or_customer_poster(request):
             driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
             element = driver.find_element_by_id("jietu")
-            print(element.location)  # 打印元素坐标
-            print(element.size)  # 打印元素大小
+            print("create_user_or_customer_poster -->", element.location)  # 打印元素坐标
+            print("create_user_or_customer_poster -->", element.size)  # 打印元素大小
 
             left = element.location['x']
             top = element.location['y']
@@ -523,7 +477,7 @@ def create_user_or_customer_poster(request):
             im = Image.open(BASE_DIR + user_poster_file_temp)
             im = im.crop((left, top, right, bottom))
 
-            print(len(im.split()))  # test
+            print("create_user_or_customer_poster -->", len(im.split()))  # test
             if len(im.split()) == 4:
                 # prevent IOError: cannot write mode RGBA as BMP
                 r, g, b, a = im.split()
@@ -534,7 +488,7 @@ def create_user_or_customer_poster(request):
 
             poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-            print('--------- 生成海报URL -------->', poster_url)
+            print('"create_user_or_customer_poster -->", --------- 生成海报URL -------->', poster_url)
             objs.update(
                 poster_url=poster_url
             )
@@ -543,7 +497,7 @@ def create_user_or_customer_poster(request):
                 'user_id': user_id,
                 'poster_url': poster_url,
             }
-            print('-----save_poster ret_data --->>', ret_data)
+            print('"create_user_or_customer_poster -->", -----save_poster ret_data --->>', ret_data)
             response.data = ret_data
             response.msg = "请求成功"
             response.code = 200
