@@ -416,12 +416,12 @@ def create_user_or_customer_poster(request):
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
 
-    print('---- 【生成海报celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
+    print(' create_user_or_customer_poster ---- 【生成海报celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
     data = json.loads(request.GET.get('data'))
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
-    print('--- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
+    print(' create_user_or_customer_poster --- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
 
@@ -430,7 +430,7 @@ def create_user_or_customer_poster(request):
         response.msg = "传参异常"
     else:
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
-        print('---->', BASE_DIR)
+        print(' create_user_or_customer_poster ---->', BASE_DIR)
 
         platform = sys.platform  # 获取平台
         phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
@@ -441,7 +441,7 @@ def create_user_or_customer_poster(request):
         else:
             phantomjs_path = phantomjs_path + '/phantomjs.exe'
 
-        print('----- phantomjs_path ----->>', phantomjs_path)
+        print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
         # driver.implicitly_wait(10)
@@ -449,7 +449,7 @@ def create_user_or_customer_poster(request):
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
         customer_id, user_id)
 
-        print('----url-->', url)
+        print('create_user_or_customer_poster ----url-->', url)
 
         try:
             driver.get(url)
@@ -466,8 +466,8 @@ def create_user_or_customer_poster(request):
             driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
             element = driver.find_element_by_id("jietu")
-            print(element.location)  # 打印元素坐标
-            print(element.size)  # 打印元素大小
+            print("create_user_or_customer_poster -->", element.location)  # 打印元素坐标
+            print("create_user_or_customer_poster -->", element.size)  # 打印元素大小
 
             left = element.location['x']
             top = element.location['y']
@@ -477,7 +477,7 @@ def create_user_or_customer_poster(request):
             im = Image.open(BASE_DIR + user_poster_file_temp)
             im = im.crop((left, top, right, bottom))
 
-            print(len(im.split()))  # test
+            print("create_user_or_customer_poster -->", len(im.split()))  # test
             if len(im.split()) == 4:
                 # prevent IOError: cannot write mode RGBA as BMP
                 r, g, b, a = im.split()
@@ -488,7 +488,7 @@ def create_user_or_customer_poster(request):
 
             poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-            print('--------- 生成海报URL -------->', poster_url)
+            print('"create_user_or_customer_poster -->", --------- 生成海报URL -------->', poster_url)
             objs.update(
                 poster_url=poster_url
             )
@@ -497,7 +497,7 @@ def create_user_or_customer_poster(request):
                 'user_id': user_id,
                 'poster_url': poster_url,
             }
-            print('-----save_poster ret_data --->>', ret_data)
+            print('"create_user_or_customer_poster -->", -----save_poster ret_data --->>', ret_data)
             response.data = ret_data
             response.msg = "请求成功"
             response.code = 200
