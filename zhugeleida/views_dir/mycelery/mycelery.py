@@ -409,6 +409,45 @@ def qiyeweixin_user_get_userinfo(request):
 
     return JsonResponse(response.__dict__)
 
+
+#定时器生成海报或二维码
+@csrf_exempt
+def crontab_create_user_to_customer_qrCode_poster(request):
+
+    if request.method == "GET":
+        objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
+        if objs:
+            for obj in objs:
+                qr_code = obj.qr_code
+                poster_url = obj.poster_url
+                user_id = obj.user_id
+                customer_id = obj.customer_id
+
+                data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                if not qr_code:
+                    #生成小程序和企业用户对应的小程序二维码
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+                    get_data = {
+                        'data': json.dumps(data_dict)
+                    }
+                    print('---【定时器生成】 小程序二维码: data_dict-->',data_dict)
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    s.get(url, params=get_data)
+
+                    qr_code = obj.qr_code
+
+                if  not poster_url and qr_code:
+                    print('---【定时器生成】 小程序海报: data_dict-->', data_dict)
+                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
+        else:
+            print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
+
+    return  HttpResponse('执行_定时器生成海报')
+
+
 # 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
@@ -446,10 +485,9 @@ def create_user_or_customer_poster(request):
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
         # driver.implicitly_wait(10)
 
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
-        customer_id, user_id)
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
-        print('create_user_or_customer_poster ----url-->', url)
+        print('--- create_user_or_customer_poster ---- url -->', url)
 
         try:
             driver.get(url)
@@ -646,7 +684,7 @@ def user_send_template_msg(request):
 def user_send_gongzhonghao_template_msg(request):
     response = ResponseObj()
 
-    print('---request -->', request.GET)
+    print('---发送公众号模板消息request.GET -->', request.GET)
 
     user_id = request.GET.get('user_id')
     customer_id = request.GET.get('customer_id')
@@ -749,6 +787,7 @@ def user_send_gongzhonghao_template_msg(request):
                     consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
                 else:
                     consult_info = ('%s - %s') % (company_name, user_name)
+
                 data = {
                     'first': {
                         'value': ''  # 回复者
@@ -951,6 +990,7 @@ def user_forward_send_activity_redPacket(request):
 
         client_ip = ip
         company_id = request.GET.get('company_id')
+        user_id = request.GET.get('user_id')
         parent_id = request.GET.get('parent_id')
         article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
@@ -1089,6 +1129,19 @@ def user_forward_send_activity_redPacket(request):
                             activity_objs.update(
                                 reason=response_ret.msg
                             )
+
+                            if response_ret.code == 199:
+
+                                a_data = {}
+                                a_data['customer_id'] = parent_id
+                                a_data['user_id'] = user_id
+                                a_data['type'] = 'gongzhonghao_template_tishi'
+                                a_data['content'] = '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值'
+                                print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+                                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+                            response.code = response_ret.code
+                            response.msg = response_ret.msg
 
 
                     else:

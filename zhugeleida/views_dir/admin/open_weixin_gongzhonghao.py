@@ -759,7 +759,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                                 else:
-                                    _content = '此活动已经结束,转发后阅读人数【%s】人,已发红包【%s】个' % (forward_read_count, already_send_redPacket_num)
+                                    _content = '此活动已经结束,转发后阅读人数【%s】人,已发红包【%s】个, 请继续关注下次活动哦' % (forward_read_count, already_send_redPacket_num)
 
 
                             else:
