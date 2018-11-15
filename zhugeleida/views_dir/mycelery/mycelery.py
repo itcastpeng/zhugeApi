@@ -409,6 +409,40 @@ def qiyeweixin_user_get_userinfo(request):
 
     return JsonResponse(response.__dict__)
 
+
+#定时器生成海报或二维码
+@csrf_exempt
+def crontab_create_user_to_customer_qrCode_poster(request):
+
+    if request.method == "GET":
+        objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
+        if objs:
+            for obj in objs:
+                qr_code = obj.qr_code
+                poster_url = obj.poster_url
+                user_id = obj.user_id
+                customer_id = obj.customer_id
+
+                data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                if not qr_code:
+                    #生成小程序和企业用户对应的小程序二维码
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+                    get_data = {
+                        'data': json.dumps(data_dict)
+                    }
+                    print('--- 小程序二维码: get_data-->',get_data)
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    s.get(url, params=get_data)
+
+                    qr_code = obj.qr_code
+
+                if  not poster_url and qr_code:
+
+                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
+
 # 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
