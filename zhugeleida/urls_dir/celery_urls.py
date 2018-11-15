@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^user_send_gongzhonghao_template_msg$', mycelery.user_send_gongzhonghao_template_msg),     # 发送公众号的模板消息
     url(r'^get_latest_audit_status_and_release_code$', mycelery.get_latest_audit_status_and_release_code),     # 定时检测代小程序发布审核状态
 
-    url(r'^crontab_create_user_to_customer_qrCode_poster$', mycelery.crontab_create_user_to_customer_qrCode_poster),     # 定时生成海报
+    # url(r'^crontab_create_user_to_customer_qrCode_poster$', mycelery.crontab_create_user_to_customer_qrCode_poster),     # 定时生成海报
 
 
 

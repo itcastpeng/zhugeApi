@@ -446,10 +446,9 @@ def create_user_or_customer_poster(request):
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
         # driver.implicitly_wait(10)
 
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
-        customer_id, user_id)
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
-        print('create_user_or_customer_poster ----url-->', url)
+        print('--- create_user_or_customer_poster ---- url -->', url)
 
         try:
             driver.get(url)
