@@ -129,12 +129,20 @@ def init_data(user_id, pid=None, level=2):
         customer_username = decode_username.decode('utf8')
         current_data = {
             'name': customer_username,
-            'id':obj.id,
+            # 'id':obj.id,
         }
         children_data = init_data(user_id, pid=obj.customer_id, level=level+1)
         if children_data:
             current_data['children'] = children_data
-        result_data.append(current_data)
+        if current_data not in result_data:
+            if current_data.get('name') not in [i.get('name') for i in result_data]:
+                result_data.append(current_data)
+            else:
+                name = current_data.get('name')
+                if current_data.get('children'):
+                    for i in result_data:
+                        if name == i.get('name'):
+                            i['children'] = current_data.get('children')
     return result_data
 
 # 脉络图查询 调用init_data
