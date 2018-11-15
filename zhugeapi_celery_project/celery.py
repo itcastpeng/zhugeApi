@@ -30,10 +30,15 @@ app.conf.beat_schedule = {
         'schedule': crontab("*/20", '*', '*', '*', '*'),       # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
     },
-    # 配置每隔20分钟执行一次
+    # 配置每隔15分钟执行一次
     'get_latest_audit_status_and_release_code': {  # 此处的命名不要用 tasks 开头,否则会报错
         'task': 'zhugeapi_celery_project.tasks.get_latest_audit_status_and_release_code',  # 要执行的任务函数名
         'schedule': crontab("*/15", '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
+        # 'args': (2, 2),                                      # 传递的参数
+    },
+    'crontab_create_user_to_customer_qrCode_poster': {  # 此处的命名不要用 tasks 开头,否则会报错
+        'task': 'zhugeapi_celery_project.tasks.crontab_create_user_to_customer_qrCode_poster',  # 要执行的任务函数名
+        'schedule': crontab("*/30", '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
     },
     # 配置每隔一分钟执行一次

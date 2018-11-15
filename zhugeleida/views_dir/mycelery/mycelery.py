@@ -441,7 +441,7 @@ def crontab_create_user_to_customer_qrCode_poster(request):
                 if  not poster_url and qr_code:
                     print('---【定时器生成】 小程序海报: data_dict-->', data_dict)
                     tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-                break
+
         else:
             print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
 
@@ -684,7 +684,7 @@ def user_send_template_msg(request):
 def user_send_gongzhonghao_template_msg(request):
     response = ResponseObj()
 
-    print('---request -->', request.GET)
+    print('---发送公众号模板消息request.GET -->', request.GET)
 
     user_id = request.GET.get('user_id')
     customer_id = request.GET.get('customer_id')
@@ -787,6 +787,7 @@ def user_send_gongzhonghao_template_msg(request):
                     consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
                 else:
                     consult_info = ('%s - %s') % (company_name, user_name)
+
                 data = {
                     'first': {
                         'value': ''  # 回复者
@@ -989,6 +990,7 @@ def user_forward_send_activity_redPacket(request):
 
         client_ip = ip
         company_id = request.GET.get('company_id')
+        user_id = request.GET.get('user_id')
         parent_id = request.GET.get('parent_id')
         article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
@@ -1127,6 +1129,19 @@ def user_forward_send_activity_redPacket(request):
                             activity_objs.update(
                                 reason=response_ret.msg
                             )
+
+                            if response_ret.code == 199:
+
+                                a_data = {}
+                                a_data['customer_id'] = parent_id
+                                a_data['user_id'] = user_id
+                                a_data['type'] = 'gongzhonghao_template_tishi'
+                                a_data['content'] = '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值'
+                                print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+                                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+                            response.code = response_ret.code
+                            response.msg = response_ret.msg
 
 
                     else:
