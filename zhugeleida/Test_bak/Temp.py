@@ -134,8 +134,10 @@ app_id = 'wx67e2fde0f694111c'
 # access_token = "13_pD2PP2-ElQpVkbt03YpmgLMw11-ProDxZBtX9bkxw98QGoir3jhEcc_ohI98T4VO0thagj53xgp8WRTOzBiFpwOxQBewfuBm_D4nv94EVvANa4gg6Vn4m4OtnVeLbEZJux4tH5tR4KZXOPoNMYQgAMDIUM"
 
 
-# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
-url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
+url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
+# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/crontab_create_user_to_customer_qrCode_poster'
+
 get_data = {
     'data': json.dumps({"user_id": 60, "customer_id": 1})
 }
