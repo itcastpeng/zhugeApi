@@ -36,10 +36,10 @@ app.conf.beat_schedule = {
         'schedule': crontab("*/15", '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
     },
-    # 配置每隔5秒执行一次
+    # 配置每隔一分钟执行一次
     'mallOrderTimeToRefresh': {  # 此处的命名不要用 tasks 开头,否则会报错
         'task': 'zhugeapi_celery_project.tasks.mallOrderTimeToRefresh',  # 要执行的任务函数名
-        'schedule': 5  # 此处跟 linux 中 crontab 的格式一样
+         'schedule': crontab("*/1", '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
     },
 

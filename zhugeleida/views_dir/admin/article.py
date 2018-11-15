@@ -108,7 +108,8 @@ def article(request,oper_type):
 
 
 
-def init_data(user_id, pid=None, level=2):
+def init_data(article_id, pid=None, level=1):
+    print('article_id===========> ',article_id, pid)
     """
     获取权限数据
     :param pid:  权限父级id
@@ -117,7 +118,7 @@ def init_data(user_id, pid=None, level=2):
     result_data = []
     objs = models.zgld_article_to_customer_belonger.objects.select_related('user').filter(
         customer_parent_id=pid,
-        user_id=user_id,
+        article_id=article_id,
         level=level
     )
     # print('user_id, pid==========> ', user_id, pid)
@@ -131,7 +132,7 @@ def init_data(user_id, pid=None, level=2):
             'name': customer_username,
             # 'id':obj.id,
         }
-        children_data = init_data(user_id, pid=obj.customer_id, level=level+1)
+        children_data = init_data(article_id, pid=obj.customer_id, level=level+1)
         if children_data:
             current_data['children'] = children_data
         if current_data not in result_data:
@@ -151,17 +152,12 @@ def mailuotu(q):
     count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
         'user',
         'article'
-    ).filter(q).values('id', 'user_id', 'user__username', 'article__title', 'customer_id').annotate(Count('user'))
+    ).filter(q).filter(customer_parent_id__isnull=True)
     result_data = []
     for obj in count_objs:
-        # print('obj.id--------------> ',obj)
-        user_id = obj['user_id']
-        username = obj['user__username']
-        # print('user_id -->', user_id)
-        # print('username -->', username)
-        # print('user----id-----------> ',user_id, obj['id'])
+        username = obj.user.username
         tmp = {'name': username}
-        children_data = init_data(user_id, pid=obj['customer_id'])
+        children_data = init_data(obj.article_id)
         if children_data:
             tmp['children'] = children_data
         if tmp not in result_data:
@@ -174,7 +170,7 @@ def mailuotu(q):
                         if name == i.get('name'):
                             i['children'] = tmp.get('children')
 
-    article_title = count_objs[0]['article__title']
+    article_title = count_objs[0].article.title
     return article_title, result_data
 
 @csrf_exempt
