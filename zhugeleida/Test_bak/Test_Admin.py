@@ -863,8 +863,9 @@ ip = 'http://api.zhugeyingxiao.com'
 url = ip + '/zhugeleida/admin/plugin_report/plugin_list' # 添加产品
 ret = requests.get(url,params=get_data)
 
-# url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
-# ret = requests.get(url,params=get_data)
+url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
+
+ret = requests.get(url,params=get_data)
 
 # url = ip + '/zhugeleida/admin/plugin_report/add/0' # 添加活动
 # post_data['ad_slogan'] = '你值得拥有'   #广告语

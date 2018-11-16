@@ -143,9 +143,9 @@ def plugin_report(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
 
-        else:
-            response.code = 402
-            response.msg = "请求异常"
+    else:
+        response.code = 402
+        response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
 
