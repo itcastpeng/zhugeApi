@@ -304,11 +304,17 @@ def action(request, oper_type):
             customer_id = request.GET.get('customer_id')
             q = conditionCom(request, field_dict)
 
-            # create_date__gte = request.GET.get('create_date__gte')
-            # if not create_date__gte:
-            #     now_time = datetime.now()
-            #     create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
-            #     q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+            create_date__gte = request.GET.get('create_date__gte')
+            create_date__lt = request.GET.get('create_date__lt')
+            if not create_date__gte:
+                now_time = datetime.now()
+                create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+
+            if create_date__lt:
+                stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime(
+                    "%Y-%m-%d")
+                q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
             objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer_id', 'action').annotate(Count('action'))
 
@@ -341,7 +347,6 @@ def action(request, oper_type):
                                 "count": action_count,
                                 "name": action_dict[action],
                                 "action": action,
-
                             }
                         ]
                     }
