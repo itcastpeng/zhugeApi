@@ -36,13 +36,13 @@ def plugin_report(request, oper_type):
                 field_dict = {
                     'id': '',
                     'user_id': '',
+                    'user__company_id': company_id,
                 }
 
                 request_data = request.GET.copy()
                 q = conditionCom(request_data, field_dict)
 
-                objs = models.zgld_plugin_report.objects.select_related('user').filter(
-                    user__company_id=company_id).order_by(order)
+                objs = models.zgld_plugin_report.objects.select_related('user').filter(q).order_by(order)
                 count = objs.count()
 
                 if length != 0:
