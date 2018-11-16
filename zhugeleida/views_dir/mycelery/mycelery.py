@@ -713,16 +713,21 @@ def user_send_gongzhonghao_template_msg(request):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    if parent_id:
-        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
-    else:
-        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-
-
-    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+    objs = models.zgld_user_customer_belonger.objects.select_related('user','customer').filter(
         customer_id=customer_id,
         user_id=user_id
     )
+
+    customer_name = ''
+    if parent_id:
+        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
+        customer_name = objs[0].customer.username
+        customer_name = common.conversion_base64_customer_username_base64(customer_name, customer_id)
+
+
+    else:
+        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+
 
     user_name = objs[0].user.username
     position = objs[0].user.position
@@ -753,17 +758,14 @@ def user_send_gongzhonghao_template_msg(request):
 
     if customer_obj and objs:
         openid = customer_obj[0].openid
-        username = customer_obj[0].username
-        username = common.conversion_base64_customer_username_base64(username, customer_id)
-
 
         # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
 
         if _type == 'gongzhonghao_template_tishi' or _type == 'forward_look_article_tishi':
 
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-            xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            appid = xiaochengxu_app_obj.authorization_appid
+            # path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            # xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            # appid = xiaochengxu_app_obj.authorization_appid
 
             # 留言回复通知
             '''
@@ -825,7 +827,7 @@ def user_send_gongzhonghao_template_msg(request):
                         company_name, position, user_name))  # 回复者
                     },
                     'keyword1': {
-                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (username, activity_name),
+                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (customer_name, activity_name),
                         "color": "#0000EE"
                     },
                     'keyword2': {
