@@ -144,6 +144,10 @@ def yuZhiFu(request):
                 response.msg = '该用户没有小程序app'
                 return JsonResponse(response.__dict__)
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
+            if not goodsObjs:
+                response.code = 301
+                response.msg = '该商品不存在'
+                return JsonResponse(response.__dict__)
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
             # ==========商户KEY============
             global SHANGHUKEY
