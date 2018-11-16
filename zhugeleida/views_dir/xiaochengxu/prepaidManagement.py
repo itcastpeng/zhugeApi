@@ -130,8 +130,8 @@ def yuZhiFu(request):
         openid = userObjs[0].openid                                 # openid  用户标识
         if not fukuan :
             phoneNumber = request.POST.get('phoneNumber')  # 电话号码
-            print('u_id=======================.>',u_id)
             u_id=121
+            print('u_id=======================.>',u_id)
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
             print('u_idObjs-------------> ',u_idObjs)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
