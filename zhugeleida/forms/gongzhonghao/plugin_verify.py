@@ -406,3 +406,19 @@ class ReportSignUpAddForm(forms.Form):
             self.add_error('activity_id', '报名活动不存在')
         else:
             return activity_id
+
+    # 查询用户名判断是否存在
+    def clean_phone(self):
+        phone = self.data['phone']
+        activity_id = self.data['activity_id']
+        customer_id = self.data['customer_id']
+
+        customer_obj = models.zgld_customer.objects.get(id=customer_id)
+
+        objs = models.zgld_report_to_customer.objects.filter(
+            activity_id=activity_id,
+        )
+        if  not objs:
+            self.add_error('activity_id', '报名活动不存在')
+        else:
+            return activity_id
