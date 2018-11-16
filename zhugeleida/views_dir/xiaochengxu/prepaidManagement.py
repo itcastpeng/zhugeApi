@@ -131,8 +131,20 @@ def yuZhiFu(request):
         if not fukuan :
             phoneNumber = request.POST.get('phoneNumber')  # 电话号码
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+            if not u_idObjs[0].company_id:
+                response.code = 301
+                response.msg = '该用户没有公司!'
+                return JsonResponse(response.__dict__)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
+            if not xiaochengxu_app:
+                response.code = 301
+                response.msg = '该用户没有小程序app'
+                return JsonResponse(response.__dict__)
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
+            if not goodsObjs:
+                response.code = 301
+                response.msg = '该商品不存在'
+                return JsonResponse(response.__dict__)
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
             # ==========商户KEY============
             global SHANGHUKEY
@@ -155,6 +167,9 @@ def yuZhiFu(request):
                 goodNum = orderObjs[0].unitRiceNum
                 phoneNumber = orderObjs[0].phone
             total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
+            obj = orderObjs[0].shangpinguanli.parentName.mallSetting
+            appid = obj.xiaochengxuApp.authorization_appid
+            mch_id =obj.shangHuHao
         if phoneNumber:
             phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
             res = re.search(phone_pat, phoneNumber)
@@ -165,10 +180,10 @@ def yuZhiFu(request):
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
         result_data = {
-            'appid': 'wx1add8692a23b5976',                  # appid
-            # 'appid': appid,                               # 真实数据appid
-            'mch_id': '1513325051',                         # 商户号
-            # 'mch_id': mch_id,                             # 商户号真实数据
+            # 'appid': 'wx1add8692a23b5976',                  # appid
+            'appid': appid,                               # 真实数据appid
+            # 'mch_id': '1513325051',                         # 商户号
+            'mch_id': mch_id,                             # 商户号真实数据
             'nonce_str': generateRandomStamping(),          # 32位随机值a
             'openid': openid,
             'body': 'zhuge-vip',                            # 描述
