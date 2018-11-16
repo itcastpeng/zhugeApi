@@ -6,6 +6,9 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
+
+SHANGHUKEY = ''
+
 response = Response.ResponseObj()
 def md5(string):
     m = hashlib.md5()
@@ -48,7 +51,7 @@ def shengchengsign(result_data, KEY=None):
     return stringSignTemp
 
 
-SHANGHUKEY = ''
+
 @csrf_exempt
 def payback(request):
     resultBody = request.body
@@ -73,8 +76,7 @@ def payback(request):
                 'nonce_str': generateRandomStamping(),  # 32位随机值
             }
             url = 'https://api.mch.weixin.qq.com/pay/orderquery'
-            global SHANGHUKEY
-            SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
+            # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'  # 商户秘钥KEY
             stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
@@ -147,9 +149,9 @@ def yuZhiFu(request):
                 return JsonResponse(response.__dict__)
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
             # ==========商户KEY============
-            global SHANGHUKEY
-            SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
-            # SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
+
+            # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'            # 商户秘钥KEY
+            SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao             # 商户秘钥真实数据KEY
             total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)
             # total_fee = int(0.01 * 100)
             ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime()) # 年月日时分秒
