@@ -58,7 +58,7 @@ def action_record(data):
         response.code = 200
         response.msg = '发送消息提示成功'
 
-    elif action in [14, 15, 16]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
+    elif action in [14, 15, 16, 17]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
         # 创建访问日志
         models.zgld_accesslog.objects.create(
             user_id=user_id,
