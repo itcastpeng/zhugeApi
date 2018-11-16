@@ -296,9 +296,13 @@ def action(request, oper_type):
         # 查询日志记录
         elif oper_type == 'customer_detail':
             response = Response.ResponseObj()
+            print('------ request.GET ----->>',request.GET)
+
             field_dict = {
                 'customer_id': '',
                 'user_id': '',
+                'create_date__gte' : '',
+                'create_date__lt' : ''
             }
 
             customer_id = request.GET.get('customer_id')
