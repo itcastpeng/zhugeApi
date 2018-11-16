@@ -726,8 +726,8 @@ class zgld_accesslog(models.Model):
 
         (14,'查看文章'),
         (15,'转发文章到朋友'),
-        (16,'转发文章到朋友圈')
-
+        (16,'转发文章到朋友圈'),
+        (17,'报名活动')
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
@@ -1001,18 +1001,18 @@ class zgld_plugin_report(models.Model):
 
 # 公众号-报名的客户
 class zgld_report_to_customer(models.Model):
-    customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
+    # customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
     user = models.ForeignKey('zgld_userprofile', verbose_name='文章所属用户', null=True)
     activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)
-
+    customer_name = models.CharField(verbose_name="报名的客户", null=True,max_length=64)
+    phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     leave_message = models.TextField(verbose_name="客户留言", null=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
-    def __str__(self):
-        return 'Custer: %s | activity: %s ' % (self.customer_id,self.activity_id)
 
     class Meta:
-        unique_together = (("customer", "activity"))
+
         verbose_name_plural = "报名的客户和活动绑定的关系"
         app_label = "zhugeleida"
 

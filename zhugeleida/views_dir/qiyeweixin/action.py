@@ -40,6 +40,7 @@ def action(request, oper_type):
                 field_dict = {
                     'id': '',
                     'action': '',
+                    'create_date__gte': '',
 
                 }
 
@@ -296,15 +297,33 @@ def action(request, oper_type):
         # 查询日志记录
         elif oper_type == 'customer_detail':
             response = Response.ResponseObj()
+            print('------ request.GET ----->>',request.GET)
+
             field_dict = {
                 'customer_id': '',
                 'user_id': '',
+                'create_date__gte' : '',
+                # 'create_date__lt' : ''
             }
 
             customer_id = request.GET.get('customer_id')
             q = conditionCom(request, field_dict)
-            objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer_id', 'action').annotate(Count('action'))
 
+            create_date__gte = request.GET.get('create_date__gte')
+            create_date__lt = request.GET.get('create_date__lt')
+
+            if not create_date__gte:
+                now_time = datetime.now()
+                create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
+
+            if create_date__lt:
+                stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+
+            # print('----- 没毛病 customer_detail q --->>',q)
+            objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer_id', 'action').annotate(Count('action'))
+            # print('--- 没毛病 customer_detail objs---->>',list(objs))
             ret_data = []
             action_dict = {}
             for i in models.zgld_accesslog.action_choices:
@@ -334,7 +353,6 @@ def action(request, oper_type):
                                 "count": action_count,
                                 "name": action_dict[action],
                                 "action": action,
-
                             }
                         ]
                     }

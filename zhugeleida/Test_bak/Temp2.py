@@ -6,7 +6,7 @@ import requests,json
 url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/crontab_create_user_to_customer_qrCode_poster'
 
 get_data = {
-    'data': json.dumps({"user_id": 60, "customer_id": 1})
+    'data': json.dumps({"user_id": 87, "customer_id": 1090})
 }
 
 # print(get_data)
