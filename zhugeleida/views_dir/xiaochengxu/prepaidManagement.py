@@ -130,10 +130,7 @@ def yuZhiFu(request):
         openid = userObjs[0].openid                                 # openid  用户标识
         if not fukuan :
             phoneNumber = request.POST.get('phoneNumber')  # 电话号码
-            u_id=121
-            print('u_id=======================.>',u_id)
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
-            print('u_idObjs----------company_id---> ',u_idObjs, u_idObjs[0].company_id)
             if not u_idObjs[0].company_id:
                 response.code = 301
                 response.msg = '该用户没有公司!'
