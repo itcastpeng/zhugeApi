@@ -53,7 +53,7 @@ def plugin_report(request):
             for obj in objs:
                 name_list_data = []
                 read_count =  obj.read_count
-                report_customer_objs = models.zgld_report_to_customer.objects.select_related('user','customer','activity').filter(activity_id=obj.id)
+                report_customer_objs = models.zgld_report_to_customer.objects.select_related('user','activity').filter(activity_id=obj.id)
                 join_num = report_customer_objs.count()
                 if read_count == 0:
                     convert_pr = 0
