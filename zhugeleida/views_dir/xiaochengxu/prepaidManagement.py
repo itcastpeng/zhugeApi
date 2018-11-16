@@ -134,7 +134,15 @@ def yuZhiFu(request):
             print('u_id=======================.>',u_id)
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
             print('u_idObjs----------company_id---> ',u_idObjs, u_idObjs[0].company_id)
+            if not u_idObjs[0].company_id:
+                response.code = 301
+                response.msg = '该用户没有公司!'
+                return JsonResponse(response.__dict__)
             xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
+            if not xiaochengxu_app:
+                response.code = 301
+                response.msg = '该用户没有小程序app'
+                return JsonResponse(response.__dict__)
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
             jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
             # ==========商户KEY============
