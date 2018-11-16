@@ -315,8 +315,9 @@ def action(request, oper_type):
             #     stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
             #     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
+            print('----- 没毛病 customer_detail q --->>',q)
             objs = models.zgld_accesslog.objects.select_related('user','customer').filter(q).values('customer_id', 'action').annotate(Count('action'))
-
+            print('--- 没毛病 customer_detail objs---->>',list(objs))
             ret_data = []
             action_dict = {}
             for i in models.zgld_accesslog.action_choices:
