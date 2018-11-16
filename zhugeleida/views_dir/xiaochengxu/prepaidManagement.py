@@ -167,6 +167,9 @@ def yuZhiFu(request):
                 goodNum = orderObjs[0].unitRiceNum
                 phoneNumber = orderObjs[0].phone
             total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
+            obj = orderObjs[0].shangpinguanli.parentName.mallSetting
+            appid = obj.xiaochengxuApp.authorization_appid
+            mch_id =obj.shangHuHao
         if phoneNumber:
             phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
             res = re.search(phone_pat, phoneNumber)
@@ -177,10 +180,10 @@ def yuZhiFu(request):
         # client_ip = ip   # 用户ip
         client_ip = '0.0.0.0'
         result_data = {
-            'appid': 'wx1add8692a23b5976',                  # appid
-            # 'appid': appid,                               # 真实数据appid
-            'mch_id': '1513325051',                         # 商户号
-            # 'mch_id': mch_id,                             # 商户号真实数据
+            # 'appid': 'wx1add8692a23b5976',                  # appid
+            'appid': appid,                               # 真实数据appid
+            # 'mch_id': '1513325051',                         # 商户号
+            'mch_id': mch_id,                             # 商户号真实数据
             'nonce_str': generateRandomStamping(),          # 32位随机值a
             'openid': openid,
             'body': 'zhuge-vip',                            # 描述
