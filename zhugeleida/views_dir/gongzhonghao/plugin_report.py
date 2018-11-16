@@ -49,7 +49,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 )
 
                 if obj:
-                    obj.update(leave_message=leave_message)
+                    obj.update(customer_name =  customer_name,leave_message=leave_message)
 
                 else:
                     models.zgld_report_to_customer.objects.create(
