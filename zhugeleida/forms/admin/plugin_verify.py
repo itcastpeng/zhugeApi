@@ -311,7 +311,7 @@ class ReportUpdateForm(forms.Form):
         id = self.data['id']
         user_id = self.data['user_id']
         objs = models.zgld_plugin_report.objects.filter(
-          id = id,user_id=user_id
+          id = id
         )
 
         if not objs:
