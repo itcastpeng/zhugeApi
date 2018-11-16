@@ -256,7 +256,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 user_id = request.GET.get('user_id')
                 report_id = forms_obj.cleaned_data['id']
                 obj = models.zgld_plugin_report.objects.filter(
-                    id=report_id, user_id=user_id
+                    id=report_id
                 )
                 obj.update(**dict_data)
 
