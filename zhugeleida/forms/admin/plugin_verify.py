@@ -335,6 +335,12 @@ class ReportSelectForm(forms.Form):
             'required': "页显示数量类型错误"
         }
     )
+    activity_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': " 活动不能为空"
+        }
+    )
 
     def clean_current_page(self):
         if 'current_page' not in self.data:

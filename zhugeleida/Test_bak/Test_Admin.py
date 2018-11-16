@@ -860,12 +860,11 @@ ip = 'http://api.zhugeyingxiao.com'
 
 #############################  插件- 名片管理 活动报名 商品管理   ################################
 
-# url = ip + '/zhugeleida/admin/plugin_report/plugin_list' # 添加产品
-# ret = requests.get(url,params=get_data)
-
-
-url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
+url = ip + '/zhugeleida/admin/plugin_report/plugin_list' # 添加产品
 ret = requests.get(url,params=get_data)
+
+# url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
+# ret = requests.get(url,params=get_data)
 
 # url = ip + '/zhugeleida/admin/plugin_report/add/0' # 添加活动
 # post_data['ad_slogan'] = '你值得拥有'   #广告语
