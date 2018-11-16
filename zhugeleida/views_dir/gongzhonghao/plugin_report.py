@@ -66,7 +66,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     # username = models.zgld_customer.objects.get(id=customer_id).username
                     # username = conversion_base64_customer_username_base64(username, customer_id)
 
-                    remark = '报名参加了文章《%s》的活动' % (title)
+                    remark = '报名参加了文章《%s》的活动,具体详情在后台查看' % (title)
 
                     data = {
                         'action': 17,  # 代表发送客户聊天信息
