@@ -411,14 +411,12 @@ class ReportSignUpAddForm(forms.Form):
     def clean_phone(self):
         phone = self.data['phone']
         activity_id = self.data['activity_id']
-        customer_id = self.data['customer_id']
-
-        customer_obj = models.zgld_customer.objects.get(id=customer_id)
 
         objs = models.zgld_report_to_customer.objects.filter(
             activity_id=activity_id,
+            phone =  phone
         )
-        if  not objs:
-            self.add_error('activity_id', '报名活动不存在')
+        if  objs.count() >= 1:
+            self.add_error('phone', '手机号已存在')
         else:
-            return activity_id
+            return phone
