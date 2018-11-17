@@ -228,7 +228,7 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 url = ip + "/zhugeleida/xiaochengxu/test_login/send_form_id"
-post_data['formId'] = '121212'
+post_data['formId'] = 'wewewe'
 get_data['user_id'] = 1
 ret = requests.post(url, params=get_data, data=post_data)
 

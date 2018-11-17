@@ -74,7 +74,7 @@ def login(request):
             obj = models.zgld_customer.objects.create(
                 token=token,
                 openid=openid,
-                company_id=0,
+                
                 user_type=2,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
                 # superior=customer_id,  #上级人。
             )
@@ -336,7 +336,7 @@ def login_oper(request,oper_type):
             print(' ------ send_form_id request.POST -------->', request.POST)
             objs = models.zgld_customer.objects.filter(id=customer_id)
 
-            global list 
+            global list
             if objs and formid and 'formId' not in formid:
                 print('------- 发送过来的 formid ------>', formid)
 
