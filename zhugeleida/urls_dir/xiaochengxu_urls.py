@@ -38,8 +38,9 @@ urlpatterns = [
     url(r'^login/(?P<oper_type>\w+)', login.login_oper),
     url(r'^login$', login.login),
 
-    url(r'^test_login$', test_login.login),
     url(r'^test_login/(?P<oper_type>\w+)$', test_login.login_oper),
+    url(r'^test_login$', test_login.login),
+
 
     # 小程序官网
     url(r'website$', website.website),
