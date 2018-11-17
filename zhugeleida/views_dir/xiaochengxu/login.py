@@ -326,6 +326,7 @@ def login_oper(request, oper_type):
                 response.code = 200
                 response.msg = "保存成功"
 
+
     return JsonResponse(response.__dict__)
 
 

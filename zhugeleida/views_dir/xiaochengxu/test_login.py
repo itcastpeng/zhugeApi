@@ -288,7 +288,6 @@ def login_oper(request,oper_type):
 
         elif oper_type == 'send_formid_html':
 
-
             return render(request, 'test_send_formid.html', locals())
 
 
@@ -331,11 +330,13 @@ def login_oper(request,oper_type):
 
 
         elif oper_type == 'send_form_id':
+
             formid = request.POST.get('formId')
             customer_id = request.GET.get('user_id')
             print(' ------ send_form_id request.POST -------->', request.POST)
             objs = models.zgld_customer.objects.filter(id=customer_id)
 
+            global list 
             if objs and formid and 'formId' not in formid:
                 print('------- 发送过来的 formid ------>', formid)
 
@@ -427,7 +428,6 @@ def login_oper(request,oper_type):
                                                 data=json.dumps(post_bind_tester_data))
                 domain_data_ret = domain_data_ret.json()
                 print('---------- 第三方平台 - 绑定微信用户为小程序体验者 返回------------>>', domain_data_ret)
-
 
         elif oper_type == 'binding_domain':
 
