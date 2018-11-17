@@ -74,7 +74,7 @@ def login(request):
             obj = models.zgld_customer.objects.create(
                 token=token,
                 openid=openid,
-                
+
                 user_type=2,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
                 # superior=customer_id,  #上级人。
             )
@@ -354,7 +354,9 @@ def login_oper(request,oper_type):
 
                 response.code = 200
                 response.msg = "保存成功"
-
+            else:
+                response.code = 301
+                response.msg = "formID 不规矩"
 
         ## 为新小程序绑定 模板ID
         elif oper_type == 'binding_templateid':
