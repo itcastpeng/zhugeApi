@@ -535,7 +535,7 @@ class zgld_tag(models.Model):
 
 # 小程序-客户管理
 class zgld_customer(models.Model):
-    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司',null=True)
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)

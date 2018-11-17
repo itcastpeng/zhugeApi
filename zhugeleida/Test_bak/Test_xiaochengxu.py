@@ -189,10 +189,10 @@ ip = 'http://127.0.0.1:8001'
 
 ############################# 登录 ####################################
 
-url = ip + "/zhugeleida/xiaochengxu/login"
-get_data['company_id'] = 1
-
-ret = requests.get(url, params=get_data)
+# url = ip + "/zhugeleida/xiaochengxu/login"
+# get_data['company_id'] = 1
+#
+# ret = requests.get(url, params=get_data)
 
 
 
@@ -225,6 +225,24 @@ ret = requests.get(url, params=get_data)
 
 
 # content = ret.json()['data']['ret_data']
+
+
+# url = ip + "/zhugeleida/xiaochengxu/test_login/send_form_id"
+# post_data['formId'] = '121212'
+# get_data['user_id'] = 1
+# ret = requests.post(url, params=get_data, data=post_data)
+
+
+# url = ip + "/zhugeleida/xiaochengxu/test_login"
+# get_data['code'] = 1
+# ret = requests.get(url, params=get_data, data=post_data)
+
+# url = ip + "/zhugeleida/xiaochengxu/test_login/binding_templateid"
+# ret = requests.post(url, params=get_data, data=post_data)
+
+url = ip + "/zhugeleida/xiaochengxu/test_login/binding_tiyanzhe"
+ret = requests.post(url, params=get_data, data=post_data)
+
 
 print(ret.text)
 
