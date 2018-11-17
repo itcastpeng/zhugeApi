@@ -428,4 +428,37 @@ def login_oper(request,oper_type):
                 domain_data_ret = domain_data_ret.json()
                 print('---------- 第三方平台 - 绑定微信用户为小程序体验者 返回------------>>', domain_data_ret)
 
+
+        elif oper_type == 'binding_domain':
+
+            authorizer_access_token = crate_token_func()
+
+            get_domin_data = {
+                'access_token': authorizer_access_token
+            }
+            post_domain_data = {
+                'action': 'add',
+                'requestdomain': ['https://api.zhugeyingxiao.com'],
+                'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
+                'uploaddomain': ['https://api.zhugeyingxiao.com'],
+                'downloaddomain': ['https://api.zhugeyingxiao.com']
+            }
+            post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
+            domain_data_ret = requests.post(post_domain_url, params=get_domin_data, data=json.dumps(post_domain_data))
+            domain_data_ret = domain_data_ret.json()
+            print('--------- 修改小程序服务器 接口返回---------->>', domain_data_ret)
+
+            errcode = domain_data_ret.get('errcode')
+            errmsg = domain_data_ret.get('errmsg')
+
+            if errcode == 0:
+                response.code = 200
+                response.msg = "修改小程序服务器域名成功"
+                print('---------授权appid: %s , 修改小程序服务器域名 【成功】------------>>')
+            else:
+                response.code = errcode
+                response.msg = errmsg
+                print('---------授权appid: %s, 修改小程序服务器域名 【失败】------------>>' , errmsg, '|',errcode)
+
+
     return JsonResponse(response.__dict__)

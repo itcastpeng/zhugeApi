@@ -24,9 +24,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'https://api.zhugeyingxiao.com'
 
 
 
@@ -233,15 +233,20 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.post(url, params=get_data, data=post_data)
 
 
-# url = ip + "/zhugeleida/xiaochengxu/test_login"
-# get_data['code'] = 1
-# ret = requests.get(url, params=get_data, data=post_data)
+url = ip + "/zhugeleida/xiaochengxu/test_login"
+get_data['code'] = 1
+ret = requests.get(url, params=get_data, data=post_data)
 
 # url = ip + "/zhugeleida/xiaochengxu/test_login/binding_templateid"
 # ret = requests.post(url, params=get_data, data=post_data)
 
-url = ip + "/zhugeleida/xiaochengxu/test_login/binding_tiyanzhe"
-ret = requests.post(url, params=get_data, data=post_data)
+# url = ip + "/zhugeleida/xiaochengxu/test_login/binding_tiyanzhe"
+# ret = requests.post(url, params=get_data, data=post_data)
+
+
+# url = ip + "/zhugeleida/xiaochengxu/test_login/binding_domain"
+# ret = requests.post(url, params=get_data, data=post_data)
+
 
 
 print(ret.text)
