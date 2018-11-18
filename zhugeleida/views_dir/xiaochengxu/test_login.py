@@ -197,95 +197,6 @@ def login_oper(request,oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'user_send_template_msg':
-
-            response = Response.ResponseObj()
-
-            print('---- request -->', request.GET)
-
-            user_id = request.GET.get('user_id')
-            customer_id = request.GET.get('customer_id')
-
-            get_template_data = {}
-            post_template_data = {}
-
-            token_ret = crate_token_func()
-
-            get_template_data['access_token'] = token_ret
-
-            customer_objs = models.zgld_customer.objects.filter(id=customer_id)
-            if customer_objs:
-                customer_obj = customer_objs[0]
-                openid = customer_obj.openid
-                exist_formid_json = json.loads(customer_obj.formid)
-                # post_template_data['touser'] = openid
-                now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                # post_template_data['template_id'] = ''
-
-                path = 'pages/mingpian/index?uid=%s' % (user_id)
-
-                # post_template_data['page'] = path
-
-                if len(exist_formid_json) == 0:
-                    response.msg = "没有formID"
-                    response.code = 301
-                    print('------- 没有消费的formID -------->>')
-                    return JsonResponse(response.__dict__)
-
-                print('---------formId 消费前数据----------->>', exist_formid_json)
-                form_id = exist_formid_json.pop(-1)
-                obj = models.zgld_customer.objects.filter(id=customer_id)
-
-                obj.update(formid=json.dumps(exist_formid_json))
-                print('---------formId 消费了哪个 ----------->>', form_id)
-                # post_template_data['form_id'] = form_id
-                # 留言回复通知
-                data = {
-                    'keyword1': {
-                        'value': '测试人员'  # 回复者
-                    },
-                    'keyword2': {
-                        'value': now_time  # 回复时间
-                    },
-                    'keyword3': {
-                        'value': '您有未读消息,点击小程序查看哦。'  # 回复内容
-                    }
-                }
-                # post_template_data['data'] = data
-
-                post_template_data = {
-                    'touser' : openid,
-                    'template_id' : 'sg_YWTXaiV1-ZN8AHbv51tIqdANesDmaxqXYla9E904',
-                    'page'  : path,
-                    'form_id': form_id,
-                    'data': data
-                }
-
-                print('===========post_template_data=======>>', post_template_data)
-
-                # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
-                # return  HttpResponse(post_template_data)
-
-                template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
-                template_ret = template_ret.json()
-                print('--------企业用户 send to 小程序 Template 接口返回数据--------->', template_ret)
-
-                if template_ret.get('errmsg') == "ok":
-                    print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
-                    response.code = 200
-                    response.msg = "企业用户发送模板消息成功"
-
-                else:
-                    print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
-                    response.code = 200
-                    response.msg = "企业用户发送模板消息成功"
-
-            else:
-                response.msg = "客户不存在"
-                response.code = 301
-                print('---- Template Msg 客户不存在---->>')
-
         elif oper_type == 'send_formid_html':
 
             return render(request, 'test_send_formid.html', locals())
@@ -357,6 +268,96 @@ def login_oper(request,oper_type):
             else:
                 response.code = 301
                 response.msg = "formID 不规矩"
+
+        elif oper_type == 'user_send_template_msg':
+
+            response = Response.ResponseObj()
+
+            print('---- request -->', request.GET)
+
+            # user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('user_id')
+
+            get_template_data = {}
+            post_template_data = {}
+
+            token_ret = crate_token_func()
+
+            get_template_data['access_token'] = token_ret
+
+            customer_objs = models.zgld_customer.objects.filter(id=customer_id)
+            if customer_objs:
+                customer_obj = customer_objs[0]
+                openid = customer_obj.openid
+                exist_formid_json = json.loads(customer_obj.formid)
+                # post_template_data['touser'] = openid
+                now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                # post_template_data['template_id'] = ''
+
+                path = 'pages/mingpian/index?uid=%s' % (customer_id)
+
+                # post_template_data['page'] = path
+
+                if len(exist_formid_json) == 0:
+                    response.msg = "没有formID"
+                    response.code = 301
+                    print('------- 没有消费的formID customer_id: -------->>',customer_id)
+                    return JsonResponse(response.__dict__)
+
+                print('---------formId 消费前数据----------->>', exist_formid_json)
+                form_id = exist_formid_json.pop(-1)
+                obj = models.zgld_customer.objects.filter(id=customer_id)
+
+                obj.update(formid=json.dumps(exist_formid_json))
+                print('---------formId 消费了哪个 ----------->>', form_id)
+                # post_template_data['form_id'] = form_id
+                # 留言回复通知
+                data = {
+                    'keyword1': {
+                        'value': '客户ID:%s | 消费FormID: %s' % (customer_id,form_id)  # 回复者
+                    },
+                    'keyword2': {
+                        'value': now_time  # 回复时间
+                    },
+                    'keyword3': {
+                        'value': '您有未读消息哦'  # 回复内容
+                    }
+                }
+                # post_template_data['data'] = data
+
+                post_template_data = {
+                    'touser' : openid,
+                    'template_id' : 'sg_YWTXaiV1-ZN8AHbv51tIqdANesDmaxqXYla9E904',
+                    'page'  : path,
+                    'form_id': form_id,
+                    'data': data
+                }
+
+                print('===========post_template_data=======>>', post_template_data)
+
+                # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html#发送模板消息
+                # return  HttpResponse(post_template_data)
+
+                template_ret = requests.post(Conf['template_msg_url'], params=get_template_data, data=json.dumps(post_template_data))
+                template_ret = template_ret.json()
+                print('--------企业用户 send to 小程序 Template 接口返回数据--------->', template_ret)
+
+                if template_ret.get('errmsg') == "ok":
+                    print('-----企业用户 send to 小程序 Template 消息 Successful---->>', )
+                    response.code = 200
+                    response.msg = "企业用户发送模板消息成功"
+
+                else:
+                    print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
+                    response.code = 200
+                    response.msg = "企业用户发送模板消息成功"
+
+            else:
+                response.msg = "客户不存在"
+                response.code = 301
+                print('---- Template Msg 客户不存在---->>')
+
 
         ## 为新小程序绑定 模板ID
         elif oper_type == 'binding_templateid':
