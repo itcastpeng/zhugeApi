@@ -139,7 +139,7 @@ def websocket(request, oper_type):
                 if not data:
                     continue
 
-                _data = json.loads(data.encode('utf-8'))
+                _data = json.loads(data.decode('utf-8'))
                 print('--- 【雷达用户】发送过来的 数据: --->>', _data)
                 type = _data.get('type')
                 user_id = _data.get('user_id')
@@ -344,7 +344,7 @@ def websocket(request, oper_type):
                     continue
                     # return HttpResponse('发送数据不能为空,终止连接')
 
-                _data = json.loads(data.encode('utf-8'))
+                _data = json.loads(data.decode("utf-8"))
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
 
                 type = _data.get('type')
