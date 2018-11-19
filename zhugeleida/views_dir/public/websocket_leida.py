@@ -51,9 +51,9 @@ def websocket(request, oper_type):
 
             redis_user_id_key_flag = rc.get(redis_user_id_key)
             redis_customer_id_flag = rc.get(redis_customer_id_key) # 判断 小程序是否已读了
-
+            print('---- 雷达 Flag 循环  uid: %s | customer_id: %s --->>',user_id,customer_id)
             if redis_user_id_key_flag == 'True':
-                print('---- 雷达 Flag  --->>', redis_user_id_key_flag)
+                print('---- 雷达 Flag 为真 --->>', redis_user_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -172,6 +172,16 @@ def websocket(request, oper_type):
                 if type == 'register':
                     continue
 
+                if type == 'closed':
+                    ret_data = {
+                        'code': 200,
+                        'msg': '确认关闭'
+                    }
+                    # uwsgi.websocket_send(json.dumps(ret_data))
+                    uwsgi.websocket_send(json.dumps(ret_data))
+                    return HttpResponse('终止连接 uid:%s | customer_id: %s' %(user_id,customer_id))
+
+
                 forms_obj = leida_ChatPostForm(_data)
 
                 if forms_obj.is_valid():
@@ -273,9 +283,9 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 小程序 Flag start  --->>')
+            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % customer_id,user_id)
             if redis_customer_id_key_flag == 'True':
-                print('---- 小程序 Flag True  --->>', redis_customer_id_key_flag)
+                print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -459,7 +469,7 @@ def websocket(request, oper_type):
 
             msg = uwsgi.websocket_recv_nb()
 
-            print('------[小程序-非阻塞測試] websocket_recv_nb ----->>', msg)
+            print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
             if not msg:
                 time.sleep(1)
                 continue
