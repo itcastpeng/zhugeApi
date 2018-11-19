@@ -43,9 +43,7 @@ def chat(request):
                 userprofile_id=user_id,
                 customer_id=customer_id,
             ).order_by('-create_date')
-            objs.update(
-                is_user_new_msg=False
-            )
+
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -99,6 +97,11 @@ def chat(request):
                 ret_data_list.append(base_info_dict)
 
             ret_data_list.reverse()
+
+            objs.update(
+                is_user_new_msg=False
+            )
+
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
             response.data = {
@@ -238,9 +241,6 @@ def chat_oper(request, oper_type, o_id):
 
                 ret_data_list = []
                 count = objs.count()
-                objs.update(
-                    is_user_new_msg=False
-                )
 
                 for obj in objs:
 
@@ -294,6 +294,9 @@ def chat_oper(request, oper_type, o_id):
                     'ret_data': ret_data_list,
                     'data_count': count,
                 }
+                objs.update(
+                    is_user_new_msg=False
+                )
 
                 if not ret_data_list:
                     # 没有新消息

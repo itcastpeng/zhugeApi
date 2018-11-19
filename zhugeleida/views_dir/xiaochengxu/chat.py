@@ -51,9 +51,7 @@ def chat(request):
             print('---first_info->>', first_info)
 
             objs = objs.order_by('-create_date')
-            objs.update(
-                is_customer_new_msg=False
-            )
+
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -130,6 +128,9 @@ def chat(request):
 
                     ret_data_list.append(base_info_dict)
 
+                objs.update(
+                    is_customer_new_msg=False
+                )
                 ret_data_list.reverse()
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
