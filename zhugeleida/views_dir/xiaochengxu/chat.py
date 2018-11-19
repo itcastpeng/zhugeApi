@@ -63,6 +63,10 @@ def chat(request):
             wechat = ''
             mingpian_avatar = ''
             ret_data_list = []
+            objs.update(
+                is_customer_new_msg=False
+            )
+
             if objs:
 
                 phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
@@ -128,9 +132,7 @@ def chat(request):
 
                     ret_data_list.append(base_info_dict)
 
-                objs.update(
-                    is_customer_new_msg=False
-                )
+
                 ret_data_list.reverse()
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
