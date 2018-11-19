@@ -875,7 +875,7 @@ def dai_xcx_oper(request, oper_type):
 
     elif  request.method == "GET":
 
-        #获取模板列表
+        # 获取模板列表
         if oper_type == "template_list":
 
             gettemplate_list_url = 'https://api.weixin.qq.com/wxa/gettemplatelist'

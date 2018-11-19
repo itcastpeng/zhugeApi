@@ -117,11 +117,15 @@ def product(request, oper_type):
                 q3 = Q()
                 q3.connector = 'and'  # 满足只能看公司发布的
                 if status:
-                    if  int(status) in [1, 3]:  # 表示搜索了上架或者被推荐了的产品。
+                    if  int(status) == 1:  # 表示搜索了上架或者被推荐了的产品。
+                        q3.children.append(('status__in', [1,3]))
+
+                    elif int(status) == 3:
                         q3.children.append(('status', status))
+
                     elif int(status) == 2: # 表示下架了产品
                         q3.children.append(('status', status))
-                        q3.children.append(('status', status))
+
 
 
                 con.add(q1, 'OR')
