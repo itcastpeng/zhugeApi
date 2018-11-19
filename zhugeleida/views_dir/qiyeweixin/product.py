@@ -143,40 +143,42 @@ def product(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-
-                for obj in objs:
-                    product_id = obj.id
-                    if obj.user_id:
-                        if int(obj.user_id) == int(user_id):
-                            publisher = '我添加的'
+                if objs:
+                    for obj in objs:
+                        product_id = obj.id
+                        if obj.user_id:
+                            if int(obj.user_id) == int(user_id):
+                                publisher = '我添加的'
+                            else:
+                                publisher = obj.user.username + '添加的'
                         else:
-                            publisher = obj.user.username + '添加的'
-                    else:
-                        publisher = '企业发布'
+                            publisher = '企业发布'
 
-                    content = {
-                        'cover_data': json.loads(obj.content).get('cover_data')
+                        content = {
+                            'cover_data': json.loads(obj.content).get('cover_data')
 
-                    }
+                        }
 
-                    ret_data.append({
-                        'id': product_id,
-                        'name': obj.name ,# 标题
-                        'publisher': publisher,  # 发布者
-                        'price': obj.price,  # 价格
-                        'publisher_date': obj.create_date,  # 发布日期。
-                        'content': content,  # 封面地址的URL
-                        'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
-                        'status': obj.get_status_display(),
-                        'status_code': obj.status  # 产品的动态。
-                    })
+                        ret_data.append({
+                            'id': product_id,
+                            'name': obj.name ,# 标题
+                            'publisher': publisher,  # 发布者
+                            'price': obj.price,  # 价格
+                            'publisher_date': obj.create_date,  # 发布日期。
+                            'content': content,  # 封面地址的URL
+                            'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
+                            'status': obj.get_status_display(),
+                            'status_code': obj.status  # 产品的动态。
+                        })
+
                     #  查询成功 返回200 状态码
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
+
             else:
                 response.code = 402
                 response.msg = "请求异常"
