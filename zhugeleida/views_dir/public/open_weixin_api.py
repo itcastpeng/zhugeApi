@@ -66,37 +66,37 @@ def crate_token(request, oper_type):
     if request.method == 'POST':
 
         if oper_type == 'authorizer_token':
-        authorizer_appid = request.POST.get('authorizer_appid')
-        key_name = '%s_authorizer_access_token' % (authorizer_appid)
-        authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+            authorizer_appid = request.POST.get('authorizer_appid')
+            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-        objs = models.zgld_xiaochengxu_app.objects.filter(authorizer_appid=authorizer_appid)
-        if objs:
+            objs = models.zgld_xiaochengxu_app.objects.filter(authorizer_appid=authorizer_appid)
+            if objs:
 
-            if not authorizer_access_token:
+                if not authorizer_access_token:
 
-                obj = objs[0]
-                authorizer_refresh_token = obj.authorizer_refresh_token
-                authorizer_appid = obj.authorization_appid
+                    obj = objs[0]
+                    authorizer_refresh_token = obj.authorizer_refresh_token
+                    authorizer_appid = obj.authorization_appid
 
-                data = {
-                    'key_name': key_name,
-                    'authorizer_refresh_token': authorizer_refresh_token,
-                    'authorizer_appid': authorizer_appid
-                }
-                authorizer_access_token_result = xiaochengxu_create_authorizer_access_token(data)
-                if authorizer_access_token_result.code == 200:
-                    authorizer_access_token = authorizer_access_token_result.data
+                    data = {
+                        'key_name': key_name,
+                        'authorizer_refresh_token': authorizer_refresh_token,
+                        'authorizer_appid': authorizer_appid
+                    }
+                    authorizer_access_token_result = xiaochengxu_create_authorizer_access_token(data)
+                    if authorizer_access_token_result.code == 200:
+                        authorizer_access_token = authorizer_access_token_result.data
 
-                else:
-                    return JsonResponse(authorizer_access_token_result.__dict__)
+                    else:
+                        return JsonResponse(authorizer_access_token_result.__dict__)
 
-            response.code = 200
-            response.msg = "获取token成功"
-            response.data = authorizer_access_token
+                response.code = 200
+                response.msg = "获取token成功"
+                response.data = authorizer_access_token
 
-        else:
-            response.code = 301
-            response.msg = 'Authorizer_appid: %s 不存在于数据库' % authorizer_appid
+            else:
+                response.code = 301
+                response.msg = 'Authorizer_appid: %s 不存在于数据库' % authorizer_appid
 
     return JsonResponse(response.__dict__)
