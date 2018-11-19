@@ -66,6 +66,7 @@ def crate_token(request, oper_type):
     if request.method == 'POST':
 
         if oper_type == 'authorizer_token':
+            print('----- request.POST ----->>',request.POST)
             authorizer_appid = request.POST.get('authorizer_appid')
             key_name = '%s_authorizer_access_token' % (authorizer_appid)
             authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
