@@ -6,8 +6,6 @@
 
         <script type="text/javascript">//<![CDATA[
             $(function () {
-
-
                 $('#send_formid').click(function () {
                     //如果未连接到websocket
 
@@ -21,7 +19,7 @@
 
                         var url = 'http://api.zhugeyingxiao.com' + '/zhugeleida/xiaochengxu/test_login/user_send_template_msg';
 
-                        $.get(url, sendData, function (data) {   //post请求
+                        $.post(url, sendData, function (data) {   //post请求
 
                           console.log('---- message -->: ' + data);    //打印出服务端返回过来的数据
                           $('#messagecontainer').prepend('<p>' + JSON.stringify(data) + '</p>');
@@ -31,27 +29,58 @@
                     })
                 });
 
+
+            $(function () {
+                $('#create_token').click(function () {
+                    //如果未连接到websocket
+
+                        const authorization_appid=$('#authorization_appid').val();
+                        const sendData = {
+                            authorization_appid,
+                        };
+
+                        var url = 'http://api.zhugeyingxiao.com' + '/zhugeleida/public/create_token/authorizer_token';
+
+                        $.post(url, sendData, function (data) {   //post请求
+
+                          console.log('---- message -->: ' + data);    //打印出服务端返回过来的数据
+                          $('#messagecontainer').prepend('<p>' + JSON.stringify(data) + '</p>');
+
+                        })
+
+                    })
+                });
+
+
     //]]></script>
     </head>
 
 
     <body>
         <br>
-        <div>
-            雷达用户 UID: <input type="text" id="my_uuid" value=""/>
-        </div>
+{#        <div>#}
+{#            雷达用户 UID: <input type="text" id="my_uuid" value=""/>#}
+{#        </div>#}
         <div>
             小程序客户 CID: <input type="text" id="your_uuid" value=""/>
             <button type="button" id="send_formid">消费formID</button>
+        </div>
+
+        <hr>
+        <h4> 手动生成 authorizer_token </h4>
+        <div>
+            授权方appid: <input type="text" id="authorization_appid" value=""/>
+            <button type="button" id="create_token">点击生成</button>
         </div>
 
 {#        <input type="text" id="message" value=""/>#}
 
 
 
-        <h1>Received Messages</h1>
+        <h1>返回信息</h1>
         <div id="messagecontainer">
 
         </div>
+
     </body>
 </html>
