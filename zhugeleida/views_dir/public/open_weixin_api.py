@@ -65,7 +65,7 @@ def crate_token(request, oper_type):
 
     if request.method == 'POST':
 
-        if oper_type == 'authorizer_token':
+        if oper_type == 'xiaochengxu_authorizer_token':
             print('----- request.POST ----->>',request.POST)
             authorization_appid = request.POST.get('authorization_appid')
             key_name = '%s_authorizer_access_token' % (authorization_appid)
@@ -74,12 +74,12 @@ def crate_token(request, oper_type):
             objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
             if objs:
                 ret_data = {}
-                if not authorizer_access_token:
+                obj = objs[0]
+                authorizer_refresh_token = obj.authorizer_refresh_token
+                name = obj.name
+                authorizer_appid = obj.authorization_appid
 
-                    obj = objs[0]
-                    authorizer_refresh_token = obj.authorizer_refresh_token
-                    name = obj.name
-                    authorizer_appid = obj.authorization_appid
+                if not authorizer_access_token:
 
                     data = {
                         'key_name': key_name,
@@ -89,13 +89,14 @@ def crate_token(request, oper_type):
                     authorizer_access_token_result = xiaochengxu_create_authorizer_access_token(data)
                     if authorizer_access_token_result.code == 200:
                         authorizer_access_token = authorizer_access_token_result.data
-                        ret_data = {  'name' : name, 'appid': authorizer_appid, 'authorizer_access_token' : authorizer_access_token }
+                        # ret_data = {  'name' : name, 'appid': authorizer_appid, 'authorizer_access_token' : authorizer_access_token }
                     else:
-                        
+
                         return JsonResponse(authorizer_access_token_result.__dict__)
 
-                response.code = 200
-                response.msg = "获取token成功"
+                ret_data = {'name': name, 'appid': authorizer_appid,
+                                'authorizer_access_token': authorizer_access_token}
+
                 response.data = ret_data
 
             else:
