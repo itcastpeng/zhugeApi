@@ -15,6 +15,7 @@ from django.db.models import Q
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
 
 import json
+import redis
 from zhugeleida import models
 from zhugeleida.public.common import action_record
 
@@ -130,6 +131,9 @@ def chat(request):
                     ret_data_list.append(base_info_dict)
 
                 ret_data_list.reverse()
+                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                rc.set(redis_customer_id_key, False)
                 response.code = 200
                 response.msg = '分页获取-全部聊天消息成功'
                 response.data = {

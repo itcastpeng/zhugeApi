@@ -62,6 +62,7 @@ def chat(request):
 
                 if not content:
                     continue
+
                 is_customer_new_msg = obj.is_customer_new_msg
 
                 if is_customer_new_msg: # 为True时
@@ -237,6 +238,10 @@ def chat_oper(request, oper_type, o_id):
 
                 ret_data_list = []
                 count = objs.count()
+                objs.update(
+                    is_user_new_msg=False
+                )
+
                 for obj in objs:
 
                     customer_name = base64.b64decode(obj.customer.username)
@@ -289,10 +294,6 @@ def chat_oper(request, oper_type, o_id):
                     'ret_data': ret_data_list,
                     'data_count': count,
                 }
-
-                objs.update(
-                    is_user_new_msg=False
-                )
 
                 if not ret_data_list:
                     # 没有新消息

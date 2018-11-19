@@ -8,7 +8,6 @@ urlpatterns = [
     url(r'^img_merge$', img_upload.img_merge),
     url(r'^fild_upload$', fild_upload.fild_upload),
     url(r'^websocket/(?P<oper_type>\w+)$', websocket_leida.websocket),
-    url(r'^websocket/(?P<oper_type>\w+)$', websocket_leida.websocket),
     url(r'^create_token/(?P<oper_type>\w+)$', open_weixin_api.crate_token),
 
 ]

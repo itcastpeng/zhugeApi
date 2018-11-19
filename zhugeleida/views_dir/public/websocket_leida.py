@@ -22,11 +22,11 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_
 
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
 import uwsgi
-
+import redis
 
 # @accept_websocket  # 既能接受http也能接受websocket请求
 def websocket(request, oper_type):
-    import redis
+
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
     # if not request.is_websocket():
@@ -42,6 +42,7 @@ def websocket(request, oper_type):
     if oper_type == 'leida':
 
         redis_user_id_key = ''
+        redis_customer_id_key = ''
         user_id = ''
         customer_id = ''
         uwsgi.websocket_handshake()
@@ -49,6 +50,7 @@ def websocket(request, oper_type):
         while True:
 
             redis_user_id_key_flag = rc.get(redis_user_id_key)
+            redis_customer_id_flag = rc.get(redis_customer_id_key) # 判断 小程序是否已读了
 
             if redis_user_id_key_flag == 'True':
                 print('---- 雷达 Flag  --->>', redis_user_id_key_flag)
@@ -61,6 +63,10 @@ def websocket(request, oper_type):
                 ret_data_list = []
                 count = objs.count()
                 if objs:
+                    objs.update(
+                        is_user_new_msg=False
+                    )
+
                     for obj in objs:
 
                         customer_name = base64.b64decode(obj.customer.username)
@@ -70,13 +76,13 @@ def websocket(request, oper_type):
                         if not content:
                             continue
 
-                        is_customer_new_msg = obj.is_customer_new_msg
-                        if is_customer_new_msg:  # 为True时
-                            is_customer_already_read = 0  # 未读
-                            is_customer_already_read_text = '未读'
-                        else:
-                            is_customer_already_read = 1  # 已读
-                            is_customer_already_read_text = '已读'
+                        # is_customer_new_msg = obj.is_customer_new_msg
+                        # if is_customer_new_msg:  # 为True时
+                        #     is_customer_already_read = 0  # 未读
+                        #     is_customer_already_read_text = '未读'
+                        # else:
+                        #     is_customer_already_read = 1  # 已读
+                        #     is_customer_already_read_text = '已读'
 
                         _content = json.loads(content)
                         info_type = _content.get('info_type')
@@ -97,8 +103,8 @@ def websocket(request, oper_type):
                             'name': customer_name,
                             'dateTime': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             'send_type': obj.send_type,
-                            'is_customer_already_read': is_customer_already_read,
-                            'is_customer_already_read_text': is_customer_already_read_text
+                            # 'is_customer_already_read': is_customer_already_read,
+                            # 'is_customer_already_read_text': is_customer_already_read_text
                         }
                         base_info_dict.update(_content)
                         ret_data_list.append(base_info_dict)
@@ -114,13 +120,25 @@ def websocket(request, oper_type):
                         'code': 200
                     }
 
-                    objs.update(
-                        is_user_new_msg=False
-                    )
                     rc.set(redis_user_id_key, False)
 
                     print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
+
+            if redis_customer_id_flag == 'False':
+
+                response_data = {
+                    'data': {
+                        'is_customer_already_read' : 1  # 1已读  0未读
+                    },
+                    'msg': '实时通知小程序新消息-已读通知',
+                    'code': 202
+                }
+
+                rc.set(redis_customer_id_key, 'Stop')
+
+                print('------ 小程序新消息-已读, 实时推送给【雷达用户】 flag：---->', response_data)
+                uwsgi.websocket_send(json.dumps(response_data))
 
             # if request.websocket.count_messages() > 0:
             #     for data in request.websocket:
@@ -137,6 +155,7 @@ def websocket(request, oper_type):
                 # print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
 
                 if not data:
+                    time.sleep(1)
                     continue
 
                 _data = json.loads(data.decode('utf-8'))
@@ -175,7 +194,7 @@ def websocket(request, oper_type):
                     _content = json.loads(Content)
                     info_type = _content.get('info_type')
                     content = ''
-                    msg = ''
+
                     if info_type:
                         info_type = int(info_type)
                         if info_type == 1:
@@ -248,10 +267,10 @@ def websocket(request, oper_type):
         redis_customer_id_key = ''
         user_id = ''
         customer_id = ''
-        Flag = False
+
         uwsgi.websocket_handshake()
         while True:
-            # while Flag:
+
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
             print('---- 小程序 Flag start  --->>')
             if redis_customer_id_key_flag == 'True':
@@ -265,6 +284,9 @@ def websocket(request, oper_type):
                 ret_data_list = []
                 count = objs.count()
                 if objs:
+                    objs.update(
+                        is_customer_new_msg=False
+                    )
                     for obj in objs:
 
                         mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,
@@ -324,9 +346,6 @@ def websocket(request, oper_type):
                         'msg': '实时推送小程序-最新聊天信息成功',
                     }
 
-                    objs.update(
-                        is_customer_new_msg=False
-                    )
                     rc.set(redis_customer_id_key, False)
 
                     print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
@@ -339,7 +358,7 @@ def websocket(request, oper_type):
 
                 print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
-                    Flag = True
+
                     time.sleep(1)
                     continue
                     # return HttpResponse('发送数据不能为空,终止连接')
