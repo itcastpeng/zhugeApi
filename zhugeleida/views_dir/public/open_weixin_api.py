@@ -73,7 +73,7 @@ def crate_token(request, oper_type):
 
             objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
             if objs:
-                ret_data = {}
+
                 obj = objs[0]
                 authorizer_refresh_token = obj.authorizer_refresh_token
                 name = obj.name
@@ -97,7 +97,10 @@ def crate_token(request, oper_type):
                 ret_data = {'name': name, 'appid': authorizer_appid,
                                 'authorizer_access_token': authorizer_access_token}
 
+                print('-- ret_data -->>',ret_data)
                 response.data = ret_data
+                response.code = 200
+                response.msg = '查询成功'
 
             else:
                 response.code = 301
