@@ -455,9 +455,19 @@ def websocket(request, oper_type):
         uwsgi.websocket_send("你还，很高心为你服务")
 
         while True:
-            msg = uwsgi.websocket_recv()
+            #msg = uwsgi.websocket_recv()
+
+            msg = uwsgi.websocket_recv_nb()
+
+            print('------[小程序-非阻塞測試] websocket_recv_nb ----->>', msg)
+            if not msg:
+                time.sleep(1)
+                continue
+
             msg = msg.decode()
             data = json.loads(msg)
+
+
             data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
             print('----- websocket_recv ---->>>', data)
