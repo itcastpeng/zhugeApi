@@ -73,11 +73,12 @@ def crate_token(request, oper_type):
 
             objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
             if objs:
-
+                ret_data = {}
                 if not authorizer_access_token:
 
                     obj = objs[0]
                     authorizer_refresh_token = obj.authorizer_refresh_token
+                    name = obj.name
                     authorizer_appid = obj.authorization_appid
 
                     data = {
@@ -88,16 +89,17 @@ def crate_token(request, oper_type):
                     authorizer_access_token_result = xiaochengxu_create_authorizer_access_token(data)
                     if authorizer_access_token_result.code == 200:
                         authorizer_access_token = authorizer_access_token_result.data
-
+                        ret_data = {  'name' : name, 'appid': authorizer_appid, 'authorizer_access_token' : authorizer_access_token }
                     else:
+                        
                         return JsonResponse(authorizer_access_token_result.__dict__)
 
                 response.code = 200
                 response.msg = "获取token成功"
-                response.data = authorizer_access_token
+                response.data = ret_data
 
             else:
                 response.code = 301
-                response.msg = 'Authorizer_appid: %s 不存在于数据库' % authorizer_appid
+                response.msg = 'Authorizer_appid: %s 不存在于数据库' % authorization_appid
 
     return JsonResponse(response.__dict__)
