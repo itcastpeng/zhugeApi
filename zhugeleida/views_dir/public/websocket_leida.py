@@ -63,9 +63,6 @@ def websocket(request, oper_type):
                 ret_data_list = []
                 count = objs.count()
                 if objs:
-                    objs.update(
-                        is_user_new_msg=False
-                    )
 
                     for obj in objs:
 
@@ -119,6 +116,10 @@ def websocket(request, oper_type):
                         'msg': '实时推送雷达-最新聊天信息成功',
                         'code': 200
                     }
+                    objs.update(
+                        is_user_new_msg=False
+                    )
+
 
                     rc.set(redis_user_id_key, False)
 
@@ -284,9 +285,7 @@ def websocket(request, oper_type):
                 ret_data_list = []
                 count = objs.count()
                 if objs:
-                    objs.update(
-                        is_customer_new_msg=False
-                    )
+
                     for obj in objs:
 
                         mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,
@@ -336,6 +335,9 @@ def websocket(request, oper_type):
                     # response.code = 200
                     # response.msg = '实时获取-最新聊天信息成功'
                     print('--- list(msg_obj) -->>', ret_data_list)
+                    objs.update(
+                        is_customer_new_msg=False
+                    )
 
                     response_data = {
                         'data': {
