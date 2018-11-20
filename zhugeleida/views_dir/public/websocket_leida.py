@@ -469,7 +469,7 @@ def websocket(request, oper_type):
                     'code': 400,
                     'msg': '报错:%s 终止连接' % (e)
                 }
-                uwsgi.websocket_send(json.dumps(ret_data))
+                # uwsgi.websocket_send(json.dumps(ret_data))
 
                 return JsonResponse(ret_data.__dict__)
 
