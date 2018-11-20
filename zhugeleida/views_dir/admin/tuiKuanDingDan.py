@@ -23,7 +23,7 @@ def tuiKuanDingDan(request):
         length = forms_obj.cleaned_data['length']
         status = request.GET.get('status')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
         q = Q()
         if status:
             q.add(Q(tuiKuanStatus=status), Q.AND)
