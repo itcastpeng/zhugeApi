@@ -118,7 +118,7 @@ def yuZhiFu(request):
         phoneNumber = request.POST.get('phoneNumber')  # 电话号码
         forms_obj = yuzhifu_verify.yuZhiFu(request.POST)
         if forms_obj.is_valid():
-            print('=======================================userid================userid-------------------> ', user_id)
+            print('=======================================userid================userid-------------------> ', user_id, u_id)
             userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
             openid = userObjs[0].openid                                 # openid  用户标识
             if not fukuan:
