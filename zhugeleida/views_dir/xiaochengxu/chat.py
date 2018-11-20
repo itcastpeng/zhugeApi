@@ -49,6 +49,9 @@ def chat(request):
             # 第一条数据
             first_info = list(objs[:1].values('id'))
             print('---first_info->>', first_info)
+            objs.update(
+                is_customer_new_msg=False
+            )
 
             objs = objs.order_by('-create_date')
 
@@ -60,9 +63,6 @@ def chat(request):
 
             mingpian_avatar = ''
             ret_data_list = []
-            objs.update(
-                is_customer_new_msg=False
-            )
 
             if objs:
 
@@ -126,9 +126,7 @@ def chat(request):
                     }
 
                     base_info_dict.update(_content)
-
                     ret_data_list.append(base_info_dict)
-
 
                 ret_data_list.reverse()
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
@@ -318,6 +316,7 @@ def chat_oper(request, oper_type, o_id):
         return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':
+
         # 用户推送消息到server端,然后入库
         if  oper_type == 'send_msg':
 
@@ -383,8 +382,9 @@ def chat_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 response = Response.ResponseObj()
                 customer_id = request.GET.get('user_id')
+                type = request.GET.get('type')
 
-                print('---- request.POST --->>',json.dumps(request.POST))
+                print('---- [解密数据] POST数据: --->>',json.dumps(request.POST))
 
                 user_id = request.POST.get('u_id')
                 encryptedData = request.POST.get('encryptedData')
@@ -395,7 +395,6 @@ def chat_oper(request, oper_type, o_id):
                     models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                         is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
-
                     obj =objs[0]
                     customer_obj = models.zgld_customer.objects.get(id=customer_id)
                     session_key = customer_obj.session_key
@@ -405,10 +404,10 @@ def chat_oper(request, oper_type, o_id):
                     if xiaochengxu_app_objs:
                         authorization_appid = xiaochengxu_app_objs[0].authorization_appid
 
-                    print('----- authorization_appid ----->>',authorization_appid,session_key,'\n',encryptedData,iv)
+                    print('----- 手机号解密：appid | session_key | encryptedData | iv----->>',authorization_appid,"|",session_key,'\n',encryptedData,"|",iv)
                     pc = WXBizDataCrypt(authorization_appid, session_key)
                     ret =  pc.decrypt(encryptedData, iv)
-                    print('------ pc.decrypt(encryptedData) ------->>', ret)
+                    print('------ 解密后返回ret ------->>', ret)
 
                     phoneNumber = ret.get('phoneNumber')
 
@@ -419,30 +418,33 @@ def chat_oper(request, oper_type, o_id):
 
 
                     if phoneNumber:
-                        _msg = '我的手机号是: %s' % (phoneNumber)
 
-                        encodestr = base64.b64encode(_msg.encode('utf-8'))
-                        msg = str(encodestr, 'utf-8')
-                        _content =  {
-                           'info_type' : 1,
-                           'msg' : msg
-                        }
-                        content = json.dumps(_content)
+                        if type != 'shopping':
+                            _msg = '我的手机号是: %s' % (phoneNumber)
 
-                        models.zgld_chatinfo.objects.create(
-                            content=content,
-                            userprofile_id=user_id,
-                            customer_id=customer_id,
-                            send_type=2
-                        )
-                        customer_obj.phone = phoneNumber
-                        customer_obj.save()
+                            encodestr = base64.b64encode(_msg.encode('utf-8'))
+                            msg = str(encodestr, 'utf-8')
+                            _content =  {
+                               'info_type' : 1,
+                               'msg' : msg
+                            }
+                            content = json.dumps(_content)
+
+                            models.zgld_chatinfo.objects.create(
+                                content=content,
+                                userprofile_id=user_id,
+                                customer_id=customer_id,
+                                send_type=2
+                            )
+                            customer_obj.phone = phoneNumber
+                            customer_obj.save()
 
                         response.code = 200
                         response.msg = '获取成功'
                         response.data = {
                              'phoneNumber': phoneNumber,
                          }
+
                     else:
                         response.code = 200
                         response.msg = '获取失败'
