@@ -274,7 +274,7 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % customer_id,user_id)
+            print('---- 小程序 循环 customer_id: %d | uid: %d --->>' % customer_id,user_id)
             if redis_customer_id_key_flag == 'True':
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
@@ -381,7 +381,7 @@ def websocket(request, oper_type):
                 if type == 'closed':
                     ret_data = {
                         'code': 200,
-                        'msg': '确认关闭  customer_id: %s | uid:%s' %(customer_id,user_id)
+                        'msg': '确认关闭  customer_id: %d | uid: %d' %(customer_id,user_id)
                     }
                     # uwsgi.websocket_send(json.dumps(ret_data))
                     return JsonResponse(ret_data.__dict__)
