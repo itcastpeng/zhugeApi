@@ -403,7 +403,7 @@ def websocket(request, oper_type):
                     info_type = _content.get('info_type')
                     _msg = ''
                     content = ''
-                    msg = ''
+
                     if info_type:
                         info_type = int(info_type)
 
@@ -469,6 +469,7 @@ def websocket(request, oper_type):
                     'code': 400,
                     'msg': '报错:%s 终止连接' % (e)
                 }
+                print('----  --->>')
                 # uwsgi.websocket_send(json.dumps(ret_data))
 
                 return JsonResponse(ret_data.__dict__)
