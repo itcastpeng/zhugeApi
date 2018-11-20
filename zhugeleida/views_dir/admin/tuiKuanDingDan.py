@@ -55,8 +55,8 @@ def tuiKuanDingDan(request):
                 'tuiKuanStatus':obj.tuiKuanStatus,
                 'tuikuanzhanghao':'123456',
                 'tuikuanjine': obj.orderNumber.yingFuKuan,
-                'statusNameId':obj.tuiKuanStatus,
-                'statusName':obj.get_tuiKuanStatus_display(),
+                'statusNameId':obj.orderNumber.order_status,
+                'statusName':obj.orderNumber.get_theOrderStatus_display(),
             })
             response.data = {
                 'otherData':otherData,
@@ -116,7 +116,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 # 调用微信接口 申请退款
                 other = []
                 if int(status) == 2:
-                    objs.update(tuiKuanStatus=4) # 更新状态 退款中
+                    # objs.update(orderNumber__theOrderStatus=4) # 更新状态 退款中
                     # 获取appid
                     u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
                     xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
@@ -172,7 +172,10 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 return JsonResponse(response.__dict__)
                             else:
                                 nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                objs.update(tuiKuanStatus=2, tuiKuanDateTime=nowTime)
+                                objs.select_related('orderNumber').update(
+                                    tuiKuanDateTime=nowTime,
+                                    orderNumber__theOrderStatus=2
+                                )
                                 response.code = 200
                                 response.msg = '退款成功'
                         else:
@@ -183,7 +186,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         response.code = 301
                         response.msg = '无退款单号'
                 else:
-                    objs.update(tuiKuanStatus=3)
+                    objs.update(orderNumber__theOrderStatus=3)
                     response.msg = '卖家拒绝退款'
                     response.code = 301
                 # response.data = {'other':other}

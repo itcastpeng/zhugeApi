@@ -1134,18 +1134,17 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
     order_status = (
         (1, '待付款'),
-        # (2, '已收款'),
-        # (3, '等待移仓'),
-        # (4, '正在移仓'),
-        # (5, '已配货'),
-        # (6, '已发货'),
-        # (7, '已完成'),
         (8, '交易成功'),
         (9, '交易失败'),
         (10, '取消'),
-        (11, '等待处理'),
+        # (11, '等待处理'),
+        # (6, '退款中, 等待卖家确认'),
+        (2, '退款完成'),
+        (3, '退款失败'),
+        (4, '退款中'),
+        (5, '拒绝退款'),
     )
-    theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=11)
+    theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=1)
     createDate = models.DateTimeField(verbose_name="创建时间", null=True, blank=True)
     stopDateTime = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)
 
@@ -1162,14 +1161,14 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     # tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
     shengChengDateTime = models.DateTimeField(verbose_name='生成时间', auto_now_add=True)
     tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', null=True, blank=True)
-    tuikuan_status = (
-        (1, '退款中, 等待卖家确认'),
-        (2, '退款完成'),
-        (3, '退款失败'),
-        (4, '退款中'),
-        (5, '拒绝退款'),
-    )
-    tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
+    # tuikuan_status = (
+    #     (1, '退款中, 等待卖家确认'),
+    #     (2, '退款完成'),
+    #     (3, '退款失败'),
+    #     (4, '退款中'),
+    #     (5, '拒绝退款'),
+    # )
+    # tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
 
