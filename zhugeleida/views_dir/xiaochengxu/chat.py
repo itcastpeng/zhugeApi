@@ -58,9 +58,6 @@ def chat(request):
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-
-            phone = ''
-            wechat = ''
             mingpian_avatar = ''
             ret_data_list = []
             objs.update(

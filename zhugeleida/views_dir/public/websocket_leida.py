@@ -173,13 +173,12 @@ def websocket(request, oper_type):
                     continue
 
                 if type == 'closed':
-                    # ret_data = {
-                    #     'code': 200,
-                    #     'msg': '确认关闭'
-                    # }
-                    # # uwsgi.websocket_send(json.dumps(ret_data))
+                    ret_data = {
+                        'code': 200,
+                        'msg': '确认关闭 uid:%s | customer_id: %s' %(user_id,customer_id)
+                    }
                     # uwsgi.websocket_send(json.dumps(ret_data))
-                    return HttpResponse('终止连接 uid:%s | customer_id: %s' %(user_id,customer_id))
+                    return JsonResponse(ret_data.__dict__)
 
 
                 forms_obj = leida_ChatPostForm(_data)
@@ -260,16 +259,8 @@ def websocket(request, oper_type):
                         }
                         # uwsgi.websocket_send(json.dumps(ret_data))
                         uwsgi.websocket_send(json.dumps(ret_data))
-                        return HttpResponse('user_id和uid不能为空,终止连接')
-                    # elif not Content:
-                    #     ret_data = {
-                    #         'code': 402,
-                    #         'msg': 'content字段内容不能为空'
-                    #     }
-                    #     uwsgi.websocket_send(json.dumps(ret_data))
-                    # break
-
-            # else:
+                        # return HttpResponse('user_id和uid不能为空,终止连接')
+                        return JsonResponse(ret_data.__dict__)
 
 
 
@@ -314,6 +305,7 @@ def websocket(request, oper_type):
                         content = obj.content
                         if not content:
                             continue
+
                         _content = json.loads(content)
                         info_type = _content.get('info_type')
                         if info_type:
@@ -348,7 +340,6 @@ def websocket(request, oper_type):
                     objs.update(
                         is_customer_new_msg=False
                     )
-
                     response_data = {
                         'data': {
                             'ret_data': ret_data_list,
@@ -370,10 +361,8 @@ def websocket(request, oper_type):
 
                 print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
-
                     time.sleep(1)
                     continue
-                    # return HttpResponse('发送数据不能为空,终止连接')
 
                 _data = json.loads(data.decode("utf-8"))
                 print('------ 【小程序】发送过来的 数据:  ----->>', _data)
@@ -387,8 +376,16 @@ def websocket(request, oper_type):
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
 
                 if type == 'register':
-                    Flag = True
                     continue
+
+                if type == 'closed':
+                    ret_data = {
+                        'code': 200,
+                        'msg': '确认关闭  customer_id: %s | uid:%s' %(customer_id,user_id)
+                    }
+                    # uwsgi.websocket_send(json.dumps(ret_data))
+                    return JsonResponse(ret_data.__dict__)
+
 
                 forms_obj = xiaochengxu_ChatPostForm(_data)
                 if forms_obj.is_valid():
@@ -440,7 +437,7 @@ def websocket(request, oper_type):
 
                     rc.set(redis_user_id_key, True)
                     rc.set(redis_customer_id_key, True)
-                    Flag = True
+
                     uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
 
 
@@ -452,9 +449,8 @@ def websocket(request, oper_type):
                             'msg': 'user_id和uid不能为空,终止连接'
                         }
                         uwsgi.websocket_send(json.dumps(ret_data))
-                        # request.websocket.close()
 
-                        return HttpResponse('user_id和uid不能为空,终止连接')
+                        return JsonResponse(ret_data.__dict__)
 
             # else:
 
@@ -466,8 +462,16 @@ def websocket(request, oper_type):
 
         while True:
             #msg = uwsgi.websocket_recv()
+            try:
+                 msg = uwsgi.websocket_recv_nb()
+            except Exception as e:
+                ret_data = {
+                    'code': 400,
+                    'msg': '报错:%s 终止连接' % (e)
+                }
+                uwsgi.websocket_send(json.dumps(ret_data))
 
-            msg = uwsgi.websocket_recv_nb()
+                return JsonResponse(ret_data.__dict__)
 
             print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
             if not msg:
