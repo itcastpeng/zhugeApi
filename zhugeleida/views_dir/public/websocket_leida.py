@@ -173,12 +173,12 @@ def websocket(request, oper_type):
                     continue
 
                 if type == 'closed':
-                    ret_data = {
-                        'code': 200,
-                        'msg': '确认关闭'
-                    }
+                    # ret_data = {
+                    #     'code': 200,
+                    #     'msg': '确认关闭'
+                    # }
+                    # # uwsgi.websocket_send(json.dumps(ret_data))
                     # uwsgi.websocket_send(json.dumps(ret_data))
-                    uwsgi.websocket_send(json.dumps(ret_data))
                     return HttpResponse('终止连接 uid:%s | customer_id: %s' %(user_id,customer_id))
 
 
