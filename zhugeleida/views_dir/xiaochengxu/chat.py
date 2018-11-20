@@ -15,6 +15,7 @@ from django.db.models import Q
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
 
 import json
+import redis
 from zhugeleida import models
 from zhugeleida.public.common import action_record
 
@@ -50,20 +51,19 @@ def chat(request):
             print('---first_info->>', first_info)
 
             objs = objs.order_by('-create_date')
-            objs.update(
-                is_customer_new_msg=False
-            )
+
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
 
-
-            phone = ''
-            wechat = ''
             mingpian_avatar = ''
             ret_data_list = []
+            objs.update(
+                is_customer_new_msg=False
+            )
+
             if objs:
 
                 phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
@@ -129,7 +129,11 @@ def chat(request):
 
                     ret_data_list.append(base_info_dict)
 
+
                 ret_data_list.reverse()
+                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                rc.set(redis_customer_id_key, False)
                 response.code = 200
                 response.msg = '分页获取-全部聊天消息成功'
                 response.data = {

@@ -117,11 +117,15 @@ def product(request, oper_type):
                 q3 = Q()
                 q3.connector = 'and'  # 满足只能看公司发布的
                 if status:
-                    if  int(status) in [1, 3]:  # 表示搜索了上架或者被推荐了的产品。
+                    if  int(status) == 1:  # 表示搜索了上架或者被推荐了的产品。
+                        q3.children.append(('status__in', [1,3]))
+
+                    elif int(status) == 3:
                         q3.children.append(('status', status))
+
                     elif int(status) == 2: # 表示下架了产品
                         q3.children.append(('status', status))
-                        q3.children.append(('status', status))
+
 
 
                 con.add(q1, 'OR')
@@ -139,40 +143,42 @@ def product(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-
-                for obj in objs:
-                    product_id = obj.id
-                    if obj.user_id:
-                        if int(obj.user_id) == int(user_id):
-                            publisher = '我添加的'
+                if objs:
+                    for obj in objs:
+                        product_id = obj.id
+                        if obj.user_id:
+                            if int(obj.user_id) == int(user_id):
+                                publisher = '我添加的'
+                            else:
+                                publisher = obj.user.username + '添加的'
                         else:
-                            publisher = obj.user.username + '添加的'
-                    else:
-                        publisher = '企业发布'
+                            publisher = '企业发布'
 
-                    content = {
-                        'cover_data': json.loads(obj.content).get('cover_data')
+                        content = {
+                            'cover_data': json.loads(obj.content).get('cover_data')
 
-                    }
+                        }
 
-                    ret_data.append({
-                        'id': product_id,
-                        'name': obj.name ,# 标题
-                        'publisher': publisher,  # 发布者
-                        'price': obj.price,  # 价格
-                        'publisher_date': obj.create_date,  # 发布日期。
-                        'content': content,  # 封面地址的URL
-                        'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
-                        'status': obj.get_status_display(),
-                        'status_code': obj.status  # 产品的动态。
-                    })
+                        ret_data.append({
+                            'id': product_id,
+                            'name': obj.name ,# 标题
+                            'publisher': publisher,  # 发布者
+                            'price': obj.price,  # 价格
+                            'publisher_date': obj.create_date,  # 发布日期。
+                            'content': content,  # 封面地址的URL
+                            'create_date': obj.create_date.strftime("%Y-%m-%d"),  # 发布的日期
+                            'status': obj.get_status_display(),
+                            'status_code': obj.status  # 产品的动态。
+                        })
+
                     #  查询成功 返回200 状态码
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
+
             else:
                 response.code = 402
                 response.msg = "请求异常"
