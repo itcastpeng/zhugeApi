@@ -464,12 +464,13 @@ def websocket(request, oper_type):
             #msg = uwsgi.websocket_recv()
             try:
                  msg = uwsgi.websocket_recv_nb()
-            except Exception as e:
+
+            except OSError as  e:
                 ret_data = {
                     'code': 400,
                     'msg': '报错:%s 终止连接' % (e)
                 }
-                print('----  --->>')
+                print('----  报错:%s 终止连接 --->>' % e)
                 # uwsgi.websocket_send(json.dumps(ret_data))
 
                 return JsonResponse(ret_data.__dict__)
@@ -481,7 +482,6 @@ def websocket(request, oper_type):
 
             msg = msg.decode()
             data = json.loads(msg)
-
 
             data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
