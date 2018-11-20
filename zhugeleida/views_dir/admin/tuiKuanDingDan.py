@@ -23,7 +23,7 @@ def tuiKuanDingDan(request):
         length = forms_obj.cleaned_data['length']
         status = request.GET.get('status')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
         q = Q()
         if status:
             q.add(Q(tuiKuanStatus=status), Q.AND)
@@ -138,8 +138,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         result_data = {
                             # 'appid': 'wx1add8692a23b5976',                             # appid
                             'appid': appid,                                              # 真实数据appid
-                            'mch_id': '1513325051',                                      # 商户号
-                            # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,                   # 商户号真实数据
+                            # 'mch_id': '1513325051',                                      # 商户号
+                            'mch_id': jiChuSheZhiObjs[0].shangHuHao,                   # 商户号真实数据
                             'nonce_str': prepaidManagement.generateRandomStamping(),     # 32位随机值a
                             # 'out_trade_no': '2018100814582101197912',                  # 订单号
                             'out_trade_no': dingdan,                                     # 线上订单号
