@@ -13,6 +13,7 @@ import json
 import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
+import base64
 
 
 # 从微信小程序接口中获取openid等信息
@@ -218,16 +219,19 @@ def login_oper(request,oper_type):
             objs = models.zgld_customer.objects.filter(
                 id = customer_id,
             )
+
+
+            encodestr = base64.b64encode(username.encode('utf-8'))
+            customer_name = str(encodestr, 'utf-8')
+
             if objs:
-                objs.update( username = username,
+                objs.update( username = customer_name,
                              headimgurl=headimgurl,
                              city =city,
                              country=country,
                              province = province,
                              language = language,
                 )
-
-                models.zgld_information.objects.create(sex=gender,customer_id=objs[0].id)
                 response.code = 200
                 response.msg = "保存成功"
             else:

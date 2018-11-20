@@ -70,7 +70,9 @@ def payback(request):
 
     theOrderStatus = 9
     dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=resultData['out_trade_no'])
+    print('=========================回调订单号===============================> ', resultData['out_trade_no'])
     nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print('=-------------------------当前时间---------------------->', nowDate, type(nowDate))
     if resultData['return_code'] == 'SUCCESS':
         if dingDanobjs:
             # 二次 查询是否付款成功
@@ -91,6 +93,7 @@ def payback(request):
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+            print('===============================return_code======================> ', return_code)
             if return_code == 'SUCCESS':
                     theOrderStatus=8,        # 支付成功 改订单状态成功
     dingDanobjs.update(

@@ -154,8 +154,7 @@ app_id = 'wx67e2fde0f694111c'
 # print(json.dumps(ret.json()))
 
 
-authorizer_access_token = '15_RzEg4SwGnK4ocWrsnFJjkRm3cye_upP8Xu24aF3XkWfwOoiFr9mAbDIoprDIa75l42uncCku3lBZqd4eHUyaJLOdVN7eE73ukKVNqP1MUWfS516KEGSDCjz3AExFvajA8104IaOKlUprFKUnCUCiAHDLDL'
-
+authorizer_access_token = '15_4_FaXBldHX02B5fT-HH7p-HmiXIjYhbuUg0Mdl5PNCh_WqhvGrlcZdCxpyCDUub5svyQKYluuemJy5oCx30YeEGkrY8ymEvsSKUAvERdWmuA8N4WYwxdm1OqdbK6ldTuJyfhiyC-v1TZ_FQ5VBLhAEDQWG'
 get_domin_data = {
     'access_token': authorizer_access_token
 }
@@ -166,6 +165,7 @@ post_domain_data = {
     'uploaddomain': ['https://statics.api.zhugeyingxiao.com'],    #https://statics.api.zhugeyingxiao.com
     'downloaddomain': ['https://api.zhugeyingxiao.com','https://statics.api.zhugeyingxiao.com']
 }
+#
 
 post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
 domain_data_ret = requests.post(post_domain_url, params=get_domin_data, data=json.dumps(post_domain_data))
