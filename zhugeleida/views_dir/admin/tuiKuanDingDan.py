@@ -52,7 +52,7 @@ def tuiKuanDingDan(request):
                 'tuiKuanYuanYin':obj.get_tuiKuanYuanYin_display(),
                 'shengChengDateTime':obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuiKuanDateTime':tuikuan,
-                'tuiKuanStatus':obj.tuiKuanStatus,
+                'tuiKuanStatus':obj.orderNumber.theOrderStatus,
                 'tuikuanzhanghao':'123456',
                 'tuikuanjine': obj.orderNumber.yingFuKuan,
                 'statusNameId':obj.orderNumber.order_status,
