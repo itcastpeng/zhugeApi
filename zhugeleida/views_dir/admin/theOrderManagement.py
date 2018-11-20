@@ -99,10 +99,10 @@ def theOrder(request):
                 'detailePicture':detailePicture,
                 'phoneNumber':obj.phone
             })
-            response.data = {
-                'otherData':otherData,
-                'objsCount':objsCount,
-            }
+        response.data = {
+            'otherData':otherData,
+            'objsCount':objsCount,
+        }
         response.msg = '查询成功'
         response.code = 200
     else:

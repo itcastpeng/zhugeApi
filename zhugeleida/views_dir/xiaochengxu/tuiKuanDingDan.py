@@ -42,8 +42,8 @@ def tuiKuanDingDan(request):
                 'tuiKuanYuanYinId': obj.tuiKuanYuanYin,
                 'shengChengDateTime': obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuiKuanDateTime': tuikuan,
-                'tuiKuanStatus': obj.get_tuiKuanStatus_display(),
-                'tuiKuanStatusId': obj.tuiKuanStatus,
+                'tuiKuanStatus': obj.orderNumber.get_theOrderStatus_display(),
+                'tuiKuanStatusId': obj.orderNumber.theOrderStatus,
                 'goodsName':obj.orderNumber.goodsName,
                 'tuiKuanPrice':obj.orderNumber.yingFuKuan,
                 'detailePicture':detailePicture,
@@ -84,7 +84,12 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 models.zgld_shangcheng_tuikuan_dingdan_management.objects.create(
                     orderNumber_id=formObjs.get('orderNumber'),
                     tuiKuanYuanYin=formObjs.get('tuiKuanYuanYin'),
-                    tuikuandanhao = tuikuandanhao
+                    tuikuandanhao = tuikuandanhao,
+                )
+                models.zgld_shangcheng_dingdan_guanli.objects.filter(
+                    id=formObjs.get('orderNumber')
+                ).update(
+                    theOrderStatus=4
                 )
                 response.code = 200
                 response.msg = '添加退款订单成功！'

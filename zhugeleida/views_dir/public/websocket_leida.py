@@ -21,7 +21,7 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_
     ChatPostForm as xiaochengxu_ChatPostForm
 
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
-import uwsgi
+# import uwsgi
 import redis
 
 # @accept_websocket  # 既能接受http也能接受websocket请求
@@ -274,7 +274,7 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % customer_id,user_id)
+            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
             if redis_customer_id_key_flag == 'True':
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
@@ -379,9 +379,10 @@ def websocket(request, oper_type):
                     continue
 
                 if type == 'closed':
+                    msg = '确认关闭  customer_id | uid | '+ customer_id + "|" +  user_id
                     ret_data = {
                         'code': 200,
-                        'msg': '确认关闭  customer_id: %s | uid:%s' %(customer_id,user_id)
+                        'msg': msg
                     }
                     # uwsgi.websocket_send(json.dumps(ret_data))
                     return JsonResponse(ret_data.__dict__)
@@ -464,27 +465,27 @@ def websocket(request, oper_type):
             #msg = uwsgi.websocket_recv()
             try:
                  msg = uwsgi.websocket_recv_nb()
-            except Exception as e:
+                 print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
+                 if not msg:
+                     time.sleep(1)
+                     continue
+
+                 msg = msg.decode()
+                 data = json.loads(msg)
+
+                 data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+
+                 print('----- websocket_recv ---->>>', data)
+
+                 uwsgi.websocket_send(data["text"])
+
+
+            except Exception as  e:
                 ret_data = {
                     'code': 400,
                     'msg': '报错:%s 终止连接' % (e)
                 }
-                print('----  --->>')
+                print('----  报错:%s 终止连接 --->>' % e)
                 # uwsgi.websocket_send(json.dumps(ret_data))
 
                 return JsonResponse(ret_data.__dict__)
-
-            print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
-            if not msg:
-                time.sleep(1)
-                continue
-
-            msg = msg.decode()
-            data = json.loads(msg)
-
-
-            data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-
-            print('----- websocket_recv ---->>>', data)
-
-            uwsgi.websocket_send(data["text"])

@@ -10,7 +10,7 @@
 # img.save('test.jpg')
 
 
-url = 'http://mmbiz.qpic.cn/mmbiz_jpg/ToibUibDOYglV5HK4DBCUDgY7dSOv9Tu1d8KQMq0KU4W0dAAlU90JDgdibNhsyUxJ3CsJPyxaC2h26HEYKjyqTh0w/0'
+url = 'http://mmbiz.qpic.cn/mmbiz_jpg/pfdFlZRbI4F05DuMfyZrjjS5KdaJJwpV8Ww4BfYmINzzlP7R1SibOVqQv0JgibPzhm9WwdOIgYAEyQK0oOa0zAXw/0'
 
 import requests
 

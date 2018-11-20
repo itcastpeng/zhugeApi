@@ -116,9 +116,9 @@ def yuZhiFu(request):
         # 传 订单 ID
         fukuan = request.POST.get('fukuan')                 # 订单已存在 原有订单
         phoneNumber = request.POST.get('phoneNumber')  # 电话号码
-
         forms_obj = yuzhifu_verify.yuZhiFu(request.POST)
         if forms_obj.is_valid():
+            print('=======================================userid================userid-------------------> ', user_id, u_id)
             userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
             openid = userObjs[0].openid                                 # openid  用户标识
             if not fukuan:
@@ -137,9 +137,13 @@ def yuZhiFu(request):
                     response.code = 301
                     response.msg = '该商品不存在'
                     return JsonResponse(response.__dict__)
-
+                print(xiaochengxu_app)
                 jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
+                print('jiChuSheZhiObjs=========================> ',jiChuSheZhiObjs)
                 SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao                    # 商户秘钥真实数据KEY dNe089PsAVjQZPEL7ciETtj0DNX5W2RA
+
+                print('SHANGHUKEY==============> ',goodsObjs)
+
                 total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)  # 1:100 0.1*100
                 ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime())        # 年月日时分秒
                 shijianchuoafter5 = str(int(time.time() * 1000))[8:]            # 时间戳 后五位
@@ -183,10 +187,12 @@ def yuZhiFu(request):
             ret.encoding = 'utf8'
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
-            data = ['return_code', 'return_msg', 'prepay_id']
+            data = ['return_code', 'return_msg']
             resultData = xmldom_parsing.xmldom(collection, data)
             # print('return_code-------------------> ',return_code)
             if resultData['return_code'] == 'SUCCESS':        # 判断预支付返回参数 是否正确
+                data = ['prepay_id']
+                resultData = xmldom_parsing.xmldom(collection, data)
                 response.code = 200
                 response.msg = '预支付请求成功'
                 # 预支付成功 创建订单
@@ -230,7 +236,7 @@ def yuZhiFu(request):
                 return JsonResponse(response.__dict__)
             else:
                 if not fukuan:
-                    response.msg = '预支付失败'
+                    response.msg = '预支付失败, 原因:{}'.format(resultData['return_msg'])
                 else:
                     response.msg = '支付失败, 原因:{}'.format(resultData['return_msg'])
                 response.code = 301
