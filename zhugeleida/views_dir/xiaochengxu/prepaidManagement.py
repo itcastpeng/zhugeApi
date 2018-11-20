@@ -95,7 +95,7 @@ def payback(request):
             return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
             print('===============================return_code======================> ', return_code)
             if return_code == 'SUCCESS':
-                    theOrderStatus=8,        # 支付成功 改订单状态成功
+                    theOrderStatus=8        # 支付成功 改订单状态成功
     dingDanobjs.update(
         theOrderStatus=theOrderStatus,  # 支付失败 改订单状态失败
         stopDateTime=nowDate
