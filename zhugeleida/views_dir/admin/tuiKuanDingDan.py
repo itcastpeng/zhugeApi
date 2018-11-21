@@ -23,7 +23,7 @@ def tuiKuanDingDan(request):
         length = forms_obj.cleaned_data['length']
         status = request.GET.get('status')
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
         q = Q()
         if status:
             q.add(Q(tuiKuanStatus=status), Q.AND)
@@ -52,11 +52,11 @@ def tuiKuanDingDan(request):
                 'tuiKuanYuanYin':obj.get_tuiKuanYuanYin_display(),
                 'shengChengDateTime':obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
                 'tuiKuanDateTime':tuikuan,
-                'tuiKuanStatus':obj.tuiKuanStatus,
+                'tuiKuanStatus':obj.orderNumber.theOrderStatus,
                 'tuikuanzhanghao':'123456',
                 'tuikuanjine': obj.orderNumber.yingFuKuan,
-                'statusNameId':obj.tuiKuanStatus,
-                'statusName':obj.get_tuiKuanStatus_display(),
+                'statusNameId':obj.orderNumber.theOrderStatus,
+                'statusName':obj.orderNumber.get_theOrderStatus_display(),
             })
             response.data = {
                 'otherData':otherData,
@@ -116,7 +116,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 # 调用微信接口 申请退款
                 other = []
                 if int(status) == 2:
-                    objs.update(tuiKuanStatus=4) # 更新状态 退款中
+                    # objs.update(orderNumber__theOrderStatus=4) # 更新状态 退款中
                     # 获取appid
                     u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
                     xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
@@ -138,8 +138,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         result_data = {
                             # 'appid': 'wx1add8692a23b5976',                             # appid
                             'appid': appid,                                              # 真实数据appid
-                            'mch_id': '1513325051',                                      # 商户号
-                            # 'mch_id': jiChuSheZhiObjs[0].shangHuHao,                   # 商户号真实数据
+                            # 'mch_id': '1513325051',                                      # 商户号
+                            'mch_id': jiChuSheZhiObjs[0].shangHuHao,                   # 商户号真实数据
                             'nonce_str': prepaidManagement.generateRandomStamping(),     # 32位随机值a
                             # 'out_trade_no': '2018100814582101197912',                  # 订单号
                             'out_trade_no': dingdan,                                     # 线上订单号
@@ -172,7 +172,10 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 return JsonResponse(response.__dict__)
                             else:
                                 nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                objs.update(tuiKuanStatus=2, tuiKuanDateTime=nowTime)
+                                objs.select_related('orderNumber').update(
+                                    tuiKuanDateTime=nowTime,
+                                    orderNumber__theOrderStatus=2
+                                )
                                 response.code = 200
                                 response.msg = '退款成功'
                         else:
@@ -183,7 +186,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         response.code = 301
                         response.msg = '无退款单号'
                 else:
-                    objs.update(tuiKuanStatus=3)
+                    objs.update(orderNumber__theOrderStatus=3)
                     response.msg = '卖家拒绝退款'
                     response.code = 301
                 # response.data = {'other':other}

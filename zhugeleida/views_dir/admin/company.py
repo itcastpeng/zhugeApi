@@ -406,13 +406,23 @@ def company_oper(request, oper_type, o_id):
             company_objs = models.zgld_company.objects.filter(id=o_id)
 
             if company_objs:
-                if company_objs[0].zgld_admin_userprofile_set.all().count() == 0:
+                # if company_objs[0].zgld_admin_userprofile_set.all().count() == 0:
                    company_objs.delete()
+
+                   company_objs[0].zgld_admin_userprofile_set.all().delete()
+                   company_objs[0].zgld_userprofile_set.all().delete()
+                   company_objs[0].zgld_customer_set.all().delete()
+                   company_objs[0].zgld_gongzhonghao_app_set.all().delete()
+                   company_objs[0].zgld_xiaochengxu_app_set.all().delete()
+
+
                    response.code = 200
                    response.msg = "删除成功"
-                else:
-                    response.code = 303
-                    response.msg = "该企业有关联用户,请转移用户后再试"
+
+                # else:
+                #     response.code = 303
+                #     response.msg = "该企业有关联用户,请转移用户后再试"
+
             else:
                 response.code = 302
                 response.msg = '公司ID不存在'

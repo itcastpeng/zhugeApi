@@ -61,16 +61,21 @@ def chat(request):
 
             phone = ''
             wechat = ''
+            company_id = ''
+            company_name = ''
+            user_name = ''
             ret_data_list = []
+            user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+            if user_objs:
+                user_obj = user_objs[0]
+                company_id =  user_obj.company_id
+                company_name =  user_obj.company.name
+                user_name = user_obj.username
+                phone = user_obj.mingpian_phone if user_obj.mingpian_phone else user_obj.wechat_phone
+                wechat = user_obj.wechat  if user_obj.wechat else user_obj.wechat_phone
+
             if objs:
-                phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
-                wechat = objs[0].userprofile.wechat if objs[0].userprofile.wechat else objs[0].userprofile.wechat_phone
-                company_id = objs[0].userprofile.company_id
-                company_name = objs[0].userprofile.company.name
-                user_name = objs[0].userprofile.username
-
                 for obj in objs:
-
                     mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
                     mingpian_avatar = ''
                     if mingpian_avatar_obj:
@@ -121,18 +126,18 @@ def chat(request):
                     ret_data_list.append(base_info_dict)
 
 
-                ret_data_list.reverse()
-                response.code = 200
-                response.msg = '分页获取-全部聊天消息成功'
-                response.data = {
-                    'ret_data': ret_data_list,
-                    'mingpian_phone': phone,
-                    'wechat': wechat,
-                    'company_id': company_id,
-                    'company_name': company_name,
-                    'user_name': user_name,
-                    'data_count': count,
-                }
+            ret_data_list.reverse()
+            response.code = 200
+            response.msg = '分页获取-全部聊天消息成功'
+            response.data = {
+                'ret_data': ret_data_list,
+                'mingpian_phone': phone,
+                'wechat': wechat,
+                'company_id': company_id,
+                'company_name': company_name,
+                'user_name': user_name,
+                'data_count': count,
+            }
 
         else:
 

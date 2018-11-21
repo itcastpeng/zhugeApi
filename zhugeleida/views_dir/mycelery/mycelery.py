@@ -58,7 +58,7 @@ def action_record(data):
         response.code = 200
         response.msg = '发送消息提示成功'
 
-    elif action in [14, 15, 16]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
+    elif action in [14, 15, 16, 17]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
         # 创建访问日志
         models.zgld_accesslog.objects.create(
             user_id=user_id,
@@ -409,6 +409,45 @@ def qiyeweixin_user_get_userinfo(request):
 
     return JsonResponse(response.__dict__)
 
+
+#定时器生成海报或二维码
+@csrf_exempt
+def crontab_create_user_to_customer_qrCode_poster(request):
+
+    if request.method == "GET":
+        objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
+        if objs:
+            for obj in objs:
+                qr_code = obj.qr_code
+                poster_url = obj.poster_url
+                user_id = obj.user_id
+                customer_id = obj.customer_id
+
+                data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                if not qr_code:
+                    #生成小程序和企业用户对应的小程序二维码
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+                    get_data = {
+                        'data': json.dumps(data_dict)
+                    }
+                    print('---【定时器生成】 小程序二维码: data_dict-->',data_dict)
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    s.get(url, params=get_data)
+
+                    qr_code = obj.qr_code
+
+                if  not poster_url and qr_code:
+                    print('---【定时器生成】 小程序海报: data_dict-->', data_dict)
+                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
+        else:
+            print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
+
+    return  HttpResponse('执行_定时器生成海报')
+
+
 # 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
@@ -446,10 +485,9 @@ def create_user_or_customer_poster(request):
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
         # driver.implicitly_wait(10)
 
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
-        customer_id, user_id)
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
-        print('create_user_or_customer_poster ----url-->', url)
+        print('--- create_user_or_customer_poster ---- url -->', url)
 
         try:
             driver.get(url)
@@ -646,7 +684,7 @@ def user_send_template_msg(request):
 def user_send_gongzhonghao_template_msg(request):
     response = ResponseObj()
 
-    print('---request -->', request.GET)
+    print('---发送公众号模板消息request.GET -->', request.GET)
 
     user_id = request.GET.get('user_id')
     customer_id = request.GET.get('customer_id')
@@ -675,16 +713,21 @@ def user_send_gongzhonghao_template_msg(request):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    if parent_id:
-        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
-    else:
-        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
-
-
-    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+    objs = models.zgld_user_customer_belonger.objects.select_related('user','customer').filter(
         customer_id=customer_id,
         user_id=user_id
     )
+
+    customer_name = ''
+    if parent_id:
+        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
+        customer_name = objs[0].customer.username
+        customer_name = common.conversion_base64_customer_username_base64(customer_name, customer_id)
+
+
+    else:
+        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+
 
     user_name = objs[0].user.username
     position = objs[0].user.position
@@ -715,17 +758,14 @@ def user_send_gongzhonghao_template_msg(request):
 
     if customer_obj and objs:
         openid = customer_obj[0].openid
-        username = customer_obj[0].username
-        username = common.conversion_base64_customer_username_base64(username, customer_id)
-
 
         # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
 
         if _type == 'gongzhonghao_template_tishi' or _type == 'forward_look_article_tishi':
 
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-            xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            appid = xiaochengxu_app_obj.authorization_appid
+            # path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            # xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            # appid = xiaochengxu_app_obj.authorization_appid
 
             # 留言回复通知
             '''
@@ -745,10 +785,12 @@ def user_send_gongzhonghao_template_msg(request):
                         msg = _content.get('msg')
 
                 _content = '%s' % (msg)
+
                 if position:
                     consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
                 else:
                     consult_info = ('%s - %s') % (company_name, user_name)
+
                 data = {
                     'first': {
                         'value': ''  # 回复者
@@ -785,7 +827,7 @@ def user_send_gongzhonghao_template_msg(request):
                         company_name, position, user_name))  # 回复者
                     },
                     'keyword1': {
-                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (username, activity_name),
+                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (customer_name, activity_name),
                         "color": "#0000EE"
                     },
                     'keyword2': {
@@ -842,7 +884,7 @@ def user_send_gongzhonghao_template_msg(request):
 
             kefu_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send'
             kefu_msg_get_data = {
-                'access_token': authorizer_access_token,
+                'access_token': authorizer_access_token
             }
             _content = json.loads(content)
             info_type = _content.get('info_type')
@@ -852,7 +894,7 @@ def user_send_gongzhonghao_template_msg(request):
                 if info_type == 1:
                     msg = _content.get('msg')
 
-            _content  = '%s:\n        %s' % (user_name,msg)
+            _content  = '%s' % (msg)
             kefu_msg_post_data ={
                 "touser": openid,
                 "msgtype": "text",
@@ -951,6 +993,7 @@ def user_forward_send_activity_redPacket(request):
 
         client_ip = ip
         company_id = request.GET.get('company_id')
+        user_id = request.GET.get('user_id')
         parent_id = request.GET.get('parent_id')
         article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
@@ -1089,6 +1132,20 @@ def user_forward_send_activity_redPacket(request):
                             activity_objs.update(
                                 reason=response_ret.msg
                             )
+
+                            if response_ret.code == 199:
+
+                                a_data = {}
+                                a_data['customer_id'] = parent_id
+                                a_data['user_id'] = user_id
+                                a_data['type'] = 'gongzhonghao_template_tishi'
+                                a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值', 'info_type': 1})
+
+                                print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+                                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+                            response.code = response_ret.code
+                            response.msg = response_ret.msg
 
 
                     else:

@@ -43,10 +43,14 @@ def chat(request):
                 userprofile_id=user_id,
                 customer_id=customer_id,
             ).order_by('-create_date')
+
+            count = objs.count()
+
             objs.update(
                 is_user_new_msg=False
             )
-            count = objs.count()
+
+
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
@@ -62,6 +66,7 @@ def chat(request):
 
                 if not content:
                     continue
+
                 is_customer_new_msg = obj.is_customer_new_msg
 
                 if is_customer_new_msg: # 为True时
@@ -98,6 +103,7 @@ def chat(request):
                 ret_data_list.append(base_info_dict)
 
             ret_data_list.reverse()
+
             response.code = 200
             response.msg = '分页获取-全部聊天消息成功'
             response.data = {
@@ -237,6 +243,7 @@ def chat_oper(request, oper_type, o_id):
 
                 ret_data_list = []
                 count = objs.count()
+
                 for obj in objs:
 
                     customer_name = base64.b64decode(obj.customer.username)
@@ -289,7 +296,6 @@ def chat_oper(request, oper_type, o_id):
                     'ret_data': ret_data_list,
                     'data_count': count,
                 }
-
                 objs.update(
                     is_user_new_msg=False
                 )

@@ -24,11 +24,12 @@ def theOrder(request):
         orderStatus = request.GET.get('orderStatus')
         if orderStatus:
             if int(orderStatus) == 1:
-                q.add(Q(theOrderStatus=1) | Q(theOrderStatus=11), Q.AND)
+                q.add(Q(theOrderStatus=1), Q.AND)
             elif int(orderStatus) == 2:
                 q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
             else:
-                q.add(Q(theOrderStatus=8), Q.AND)
+                q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
+        print('q=============> ',q)
         if detailId:
             q.add(Q(id=detailId), Q.AND)
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=user_id, logicDelete=0).order_by('-createDate') # 小程序用户只能查看自己的订单
@@ -39,17 +40,17 @@ def theOrder(request):
             objs = objs[start_line: stop_line]
         otherData = []
         for obj in objs:
-            tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id, logicDelete=0)
+            # tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id, logicDelete=0)
             username = ''
             yewu = ''
             if obj.yewuUser:
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
-            tuikuan = 0
-            tuiKuanStatus = 0
-            if tuikuanObj:
-                tuikuan = 1
-                tuiKuanStatus = tuikuanObj[0].tuiKuanStatus
+            # tuikuan = 0
+            # tuiKuanStatus = 0
+            # if obj.theOrderStatus in [2, 3, 4, 5]:
+            #     tuikuan = 1
+            #     tuiKuanStatus = obj.theOrderStatus
             # 轮播图
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
@@ -85,8 +86,8 @@ def theOrder(request):
                 'status':obj.get_theOrderStatus_display(),
                 'statusId': obj.theOrderStatus,
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                'tuikuan':tuikuan,         # 0为无退款   1为退款
-                'tuikuan_status':tuiKuanStatus,
+                # 'tuikuan':tuikuan,         # 0为无退款   1为退款
+                # 'tuikuan_status':tuiKuanStatus,
                 'detailePicture':detailePicture,
             })
         response.code = 200

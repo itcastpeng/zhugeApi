@@ -134,22 +134,54 @@ app_id = 'wx67e2fde0f694111c'
 # access_token = "13_pD2PP2-ElQpVkbt03YpmgLMw11-ProDxZBtX9bkxw98QGoir3jhEcc_ohI98T4VO0thagj53xgp8WRTOzBiFpwOxQBewfuBm_D4nv94EVvANa4gg6Vn4m4OtnVeLbEZJux4tH5tR4KZXOPoNMYQgAMDIUM"
 
 
-# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
-url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
-get_data = {
-    'data': json.dumps({"user_id": 60, "customer_id": 1})
+# # url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_poster'
+# # url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/crontab_create_user_to_customer_qrCode_poster'
+#
+# get_data = {
+#     'data': json.dumps({"user_id": 60, "customer_id": 1})
+# }
+#
+# # print(get_data)
+#
+# s = requests.session()
+# s.keep_alive = False  # 关闭多余连接
+# ret = s.get(url, params=get_data)
+#
+# # ret = requests.get(url, params=get_data)
+#
+#
+# print(json.dumps(ret.json()))
+
+
+authorizer_access_token = '15_4_FaXBldHX02B5fT-HH7p-HmiXIjYhbuUg0Mdl5PNCh_WqhvGrlcZdCxpyCDUub5svyQKYluuemJy5oCx30YeEGkrY8ymEvsSKUAvERdWmuA8N4WYwxdm1OqdbK6ldTuJyfhiyC-v1TZ_FQ5VBLhAEDQWG'
+get_domin_data = {
+    'access_token': authorizer_access_token
 }
+post_domain_data = {
+    'action': 'set',
+    'requestdomain': ['https://api.zhugeyingxiao.com'],
+    'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
+    'uploaddomain': ['https://statics.api.zhugeyingxiao.com'],    #https://statics.api.zhugeyingxiao.com
+    'downloaddomain': ['https://api.zhugeyingxiao.com','https://statics.api.zhugeyingxiao.com']
+}
+#
 
-# print(get_data)
-
-s = requests.session()
-s.keep_alive = False  # 关闭多余连接
-ret = s.get(url, params=get_data)
-
-# ret = requests.get(url, params=get_data)
+post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'
+domain_data_ret = requests.post(post_domain_url, params=get_domin_data, data=json.dumps(post_domain_data))
+domain_data_ret = domain_data_ret.json()
+print('--------- 修改小程序服务器 接口返回---------->>', json.dumps(domain_data_ret))
 
 
-print(json.dumps(ret.json()))
+post_domain_data = {
+    'action': 'get'
+
+}
+domain_data_ret = requests.post(post_domain_url, params=get_domin_data, data=json.dumps(post_domain_data))
+domain_data_ret = domain_data_ret.json()
+print('--------- 修改小程序服务器 接口返回---------->>', json.dumps(domain_data_ret))
+
+
 
 
 

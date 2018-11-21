@@ -41,7 +41,7 @@ def theOrder(request):
             q.add(Q(goodsName__contains=goodsName), Q.AND)
         print('q)------------> ',q)
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
+        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
             shangpinguanli__parentName__mallSetting__xiaochengxuApp=xiaochengxu_id
@@ -99,10 +99,10 @@ def theOrder(request):
                 'detailePicture':detailePicture,
                 'phoneNumber':obj.phone
             })
-            response.data = {
-                'otherData':otherData,
-                'objsCount':objsCount,
-            }
+        response.data = {
+            'otherData':otherData,
+            'objsCount':objsCount,
+        }
         response.msg = '查询成功'
         response.code = 200
     else:

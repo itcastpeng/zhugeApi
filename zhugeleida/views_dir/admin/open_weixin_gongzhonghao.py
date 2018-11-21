@@ -703,10 +703,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                     print('------ [公众号]不存在: authorization_appid: %s ----->>', app_id)
 
-            elif MsgType == 'text':
-                Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
-                CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
-                print('-----【公众号】客户发送的内容 Content ---->>', Content)
+
+            else:
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
                 if gongzhonghao_app_objs:
@@ -719,118 +717,125 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         obj = objs[0]
                         customer_id = obj.id
 
-                        if Content.startswith('T') or Content.startswith('t'):
+                        Content = ''
+                        if MsgType == 'text':
 
-                            activity_id = ''
-                            if Content.startswith('t'):
-                                activity_id = int(Content.split('t')[1])
-                            elif Content.startswith('T'):
-                                activity_id = int(Content.split('T')[1])
+                            Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
+                            CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
+                            print('-----【公众号】客户发送的内容 Content ---->>', Content)
 
-                            redPacket_objs = models.zgld_activity_redPacket.objects.select_related('article','activity').filter(customer_id=customer_id,activity_id=activity_id)
-                            _content = ''
-                            if redPacket_objs:
-                                redPacket_obj = redPacket_objs[0]
-                                forward_read_count = redPacket_obj.forward_read_count
-                                already_send_redPacket_num = redPacket_obj.already_send_redPacket_num
-                                start_time = redPacket_obj.activity.start_time
-                                end_time = redPacket_obj.activity.end_time
-                                status = redPacket_obj.activity.status
+                            if Content.startswith('T') or Content.startswith('t'):
 
-                                activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
-                                reach_forward_num = activity_obj.reach_forward_num
-                                divmod_ret = divmod(forward_read_count, reach_forward_num)
+                                    activity_id = ''
+                                    if Content.startswith('t'):
+                                        activity_id = int(Content.split('t')[1])
+                                    elif Content.startswith('T'):
+                                        activity_id = int(Content.split('T')[1])
 
-                                shoudle_send_num = divmod_ret[0]
-                                yushu = divmod_ret[1]
-                                short_num = reach_forward_num - yushu
-                                now_date_time = datetime.datetime.now()
+                                    redPacket_objs = models.zgld_activity_redPacket.objects.select_related('article','activity').filter(customer_id=customer_id,activity_id=activity_id)
+                                    _content = ''
+                                    if redPacket_objs:
+                                        redPacket_obj = redPacket_objs[0]
+                                        forward_read_count = redPacket_obj.forward_read_count
+                                        already_send_redPacket_num = redPacket_obj.already_send_redPacket_num
+                                        start_time = redPacket_obj.activity.start_time
+                                        end_time = redPacket_obj.activity.end_time
+                                        status = redPacket_obj.activity.status
 
-                                if status != 3 and  now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                                        activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+                                        reach_forward_num = activity_obj.reach_forward_num
+                                        divmod_ret = divmod(forward_read_count, reach_forward_num)
 
-                                    if forward_read_count >= reach_forward_num:
+                                        shoudle_send_num = divmod_ret[0]
+                                        yushu = divmod_ret[1]
+                                        short_num = reach_forward_num - yushu
+                                        now_date_time = datetime.datetime.now()
 
-                                        _content = '转发后阅读人数已达【%s】人,已发红包【%s】个,还差【%s】人又能再拿现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
-                                            forward_read_count, already_send_redPacket_num, short_num)
+                                        if status != 3 and  now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+
+                                            if forward_read_count >= reach_forward_num:
+
+                                                _content = '转发后阅读人数已达【%s】人,已发红包【%s】个,还差【%s】人又能再拿现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
+                                                    forward_read_count, already_send_redPacket_num, short_num)
+
+                                            else:
+                                                _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
+                                                    forward_read_count, short_num)
+
+
+                                        else:
+                                            _content = '此活动已经结束,转发后阅读人数【%s】人,已发红包【%s】个, 请继续关注下次活动哦' % (forward_read_count, already_send_redPacket_num)
+
 
                                     else:
-                                        _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
-                                            forward_read_count, short_num)
+                                        _content = '输入查询ID可能有误, 客服已通知技术小哥👨🏻‍💻, 快马加鞭🕙为您解决问题,\n 请您及时关注消息提醒🔔!'
+
+                                    reply = TextReply(content=_content)
+                                    reply._data['ToUserName'] = openid
+                                    reply._data['FromUserName'] = original_id
+                                    xml = reply.render()
+
+                                    print('------ 被动回复消息【加密前】xml -->', xml)
+
+                                    timestamp = str(int(time.time()))
+                                    crypto = WeChatCrypto(token, encodingAESKey, appid)
+                                    encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                                    print('------ 被动回复消息【加密后】xml------>', encrypted_xml)  ## 加密后的xml 数据
+
+                                    return HttpResponse(encrypted_xml, content_type="application/xml")
+
+                        elif MsgType == 'voice':
+                            Content = '【收到不支持的消息类型，暂无法显示】'
 
 
-                                else:
-                                    _content = '此活动已经结束,转发后阅读人数【%s】人,已发红包【%s】个' % (forward_read_count, already_send_redPacket_num)
+                        flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
+                            customer_id=customer_id).order_by('-last_follow_time')
+                        if flow_up_objs:
+                            user_id = flow_up_objs[0].user_id
 
+                            models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                is_last_msg=True).update(
+                                is_last_msg=False)  # 把所有的重置为不是最后一条
 
-                            else:
-                                _content = '输入查询ID可能有误, 客服已通知技术小哥👨🏻‍💻, 快马加鞭🕙为您解决问题,\n 请您及时关注消息提醒🔔!'
+                            encodestr = base64.b64encode(Content.encode('utf-8'))
+                            msg = str(encodestr, 'utf-8')
+                            _content = {
+                                'msg': msg,
+                                'info_type': 1
+                            }
+                            content = json.dumps(_content)
 
-                            reply = TextReply(content=_content)
-                            reply._data['ToUserName'] = openid
-                            reply._data['FromUserName'] = original_id
-                            xml = reply.render()
+                            models.zgld_chatinfo.objects.create(
+                                content=content,
+                                userprofile_id=user_id,
+                                customer_id=customer_id,
+                                send_type=2
+                            )
 
-                            print('------ 被动回复消息【加密前】xml -->', xml)
+                            if user_id and customer_id:  # 发送的文字消息
+                                remark = ': %s' % (Content)
 
-                            timestamp = str(int(time.time()))
-                            crypto = WeChatCrypto(token, encodingAESKey, appid)
-                            encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
-                            print('------ 被动回复消息【加密后】xml------>', encrypted_xml)  ## 加密后的xml 数据
-
-                            return HttpResponse(encrypted_xml, content_type="application/xml")
-
-
-                        else:
-                            # 发送的聊天咨询信息；
-                            # print('----send_msg--->>', request.POST)
-                            # customer_id = int(request.GET.get('user_id'))
-                            # user_id = request.POST.get('u_id')
-                            # content = request.POST.get('content')
-
-                            flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
-                                customer_id=customer_id).order_by('-last_follow_time')
-                            if flow_up_objs:
-                                user_id = flow_up_objs[0].user_id
-
-                                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                    is_last_msg=True).update(
-                                    is_last_msg=False)  # 把所有的重置为不是最后一条
-
-
-                                encodestr = base64.b64encode(Content.encode('utf-8'))
-                                msg = str(encodestr, 'utf-8')
-                                _content= {
-                                    'msg' : msg,
-                                    'info_type' : 1
+                                data = {
+                                    'action': 0,  # 代表发送客户聊天信息
+                                    'uid': user_id,
+                                    'user_id': customer_id
                                 }
-                                content = json.dumps(_content)
+                                action_record(data, remark)
 
-                                models.zgld_chatinfo.objects.create(
-                                    content=content,
-                                    userprofile_id=user_id,
-                                    customer_id=customer_id,
-                                    send_type=2
-                                )
+                        response.code = 200
+                        response.msg = 'send msg successful'
 
-                                if user_id and  customer_id:  # 发送的文字消息
-                                    remark = ': %s' % (Content)
-
-                                    data = {
-                                        'action': 0 ,   # 代表发送客户聊天信息
-                                        'uid' : user_id,
-                                        'user_id' : customer_id
-                                    }
-                                    action_record(data, remark)
-
-                            response.code = 200
-                            response.msg = 'send msg successful'
 
 
                     else:
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
 
+
                 else:
                     print('------ [公众号]不存在: authorization_appid: %s ----->>', app_id)
+
+
+
 
         return HttpResponse("success")
 

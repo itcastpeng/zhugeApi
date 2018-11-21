@@ -311,7 +311,7 @@ class ReportUpdateForm(forms.Form):
         id = self.data['id']
         user_id = self.data['user_id']
         objs = models.zgld_plugin_report.objects.filter(
-          id = id,user_id=user_id
+          id = id
         )
 
         if not objs:
@@ -333,6 +333,12 @@ class ReportSelectForm(forms.Form):
         required=False,
         error_messages={
             'required': "页显示数量类型错误"
+        }
+    )
+    activity_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': " 活动不能为空"
         }
     )
 

@@ -535,7 +535,7 @@ class zgld_tag(models.Model):
 
 # 小程序-客户管理
 class zgld_customer(models.Model):
-    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司',null=True)
     username = models.CharField(verbose_name='客户姓名', max_length=128, null=True)
     memo_name = models.CharField(max_length=128, verbose_name='备注名', blank=True, null=True)
     openid = models.CharField(verbose_name='OpenID(用户唯一标识)', max_length=128)
@@ -726,8 +726,8 @@ class zgld_accesslog(models.Model):
 
         (14,'查看文章'),
         (15,'转发文章到朋友'),
-        (16,'转发文章到朋友圈')
-
+        (16,'转发文章到朋友圈'),
+        (17,'报名活动')
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
@@ -822,6 +822,7 @@ class zgld_article(models.Model):
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
 
     insert_ads = models.TextField(verbose_name='插入广告语',null=True)
+    plugin_report = models.ForeignKey('zgld_plugin_report', verbose_name="报名的插件", null=True)
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
 
 
@@ -1001,18 +1002,18 @@ class zgld_plugin_report(models.Model):
 
 # 公众号-报名的客户
 class zgld_report_to_customer(models.Model):
-    customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
+    # customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
     user = models.ForeignKey('zgld_userprofile', verbose_name='文章所属用户', null=True)
     activity = models.ForeignKey('zgld_plugin_report', verbose_name="报名的活动", null=True)
-
+    customer_name = models.CharField(verbose_name="报名的客户", null=True,max_length=64)
+    phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     leave_message = models.TextField(verbose_name="客户留言", null=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
-    def __str__(self):
-        return 'Custer: %s | activity: %s ' % (self.customer_id,self.activity_id)
 
     class Meta:
-        unique_together = (("customer", "activity"))
+
         verbose_name_plural = "报名的客户和活动绑定的关系"
         app_label = "zhugeleida"
 
@@ -1134,18 +1135,17 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
     order_status = (
         (1, '待付款'),
-        # (2, '已收款'),
-        # (3, '等待移仓'),
-        # (4, '正在移仓'),
-        # (5, '已配货'),
-        # (6, '已发货'),
-        # (7, '已完成'),
         (8, '交易成功'),
         (9, '交易失败'),
         (10, '取消'),
-        (11, '等待处理'),
+        # (11, '等待处理'),
+        # (6, '退款中, 等待卖家确认'),
+        (2, '退款完成'),
+        (3, '退款失败'),
+        (4, '退款中'),
+        (5, '拒绝退款'),
     )
-    theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=11)
+    theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=1)
     createDate = models.DateTimeField(verbose_name="创建时间", null=True, blank=True)
     stopDateTime = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)
 
@@ -1162,14 +1162,14 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     # tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
     shengChengDateTime = models.DateTimeField(verbose_name='生成时间', auto_now_add=True)
     tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', null=True, blank=True)
-    tuikuan_status = (
-        (1, '退款中, 等待卖家确认'),
-        (2, '退款完成'),
-        (3, '退款失败'),
-        (4, '退款中'),
-        (5, '拒绝退款'),
-    )
-    tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
+    # tuikuan_status = (
+    #     (1, '退款中, 等待卖家确认'),
+    #     (2, '退款完成'),
+    #     (3, '退款失败'),
+    #     (4, '退款中'),
+    #     (5, '拒绝退款'),
+    # )
+    # tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
 

@@ -13,10 +13,7 @@ from zhugeleida.forms.xiaochengxu.user_verify import UserAddForm, UserUpdateForm
 import json,os,sys
 from django.db.models import Q
 from django.db.models import F
-from time import sleep
-from selenium import webdriver
-from PIL import Image
-from django.conf import settings
+import requests
 from zhugeapi_celery_project import tasks
 
 # 展示单个的名片信息
@@ -352,9 +349,6 @@ def mingpian_oper(request, oper_type):
                         qr_code =  obj.qr_code
 
 
-
-
-
                 ret_data = {
                     'user_id': obj.id,
                     'user_avatar': mingpian_avatar,
@@ -557,57 +551,82 @@ def mingpian_oper(request, oper_type):
 @csrf_exempt
 def mingpian_poster_html_oper(request):
 
+
+
     customer_id = request.GET.get('user_id')
     user_id = request.GET.get('uid')  # 用户 id
 
-    obj = models.zgld_userprofile.objects.get(id=user_id)
+    if request.method == 'GET':
 
-    user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
+        obj = models.zgld_userprofile.objects.get(id=user_id)
 
-    if user_photo_obj:
-        user_avatar = "/" + user_photo_obj[0].photo_url
+        user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
 
-    else:
-        if obj.avatar.startswith("http"):
-            user_avatar = obj.avatar
+        if user_photo_obj:
+            user_avatar = "/" + user_photo_obj[0].photo_url
+
         else:
-            user_avatar = "/" + obj.avatar
+            if obj.avatar.startswith("http"):
+                user_avatar = obj.avatar
+            else:
+                user_avatar = "/" + obj.avatar
 
-    qr_code = ''
-    if  user_id and customer_id :
-         qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-         if qr_obj:
-             qr_code =   qr_obj[0].qr_code
+        qr_code = ''
+        if  user_id and customer_id :
+             qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+             if qr_obj:
+                 qr_code =   qr_obj[0].qr_code
+                 if not qr_code:
+                     # 异步生成小程序和企业用户对应的小程序二维码
+                     data_dict = {'user_id': user_id, 'customer_id': customer_id}
+
+                     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+                     get_data = {
+                         'data': json.dumps(data_dict)
+                     }
+                     print('--- 小程序二维码: get_data-->', get_data)
+
+                     s = requests.session()
+                     s.keep_alive = False  # 关闭多余连接
+                     s.get(url, params=get_data)
+
+                     # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+
+                 qr_code =  "/" + qr_obj[0].qr_code
+
+
+             print('--- 从 customer_belonger 里 --->>qr_code',qr_code)
+
+        elif user_id and  not customer_id:
+             qr_code = obj.qr_code
              if not qr_code:
                  # 异步生成小程序和企业用户对应的小程序二维码
-                 data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                 tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+                 data_dict = {'user_id': user_id, 'customer_id': ''}
+                 # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
 
-             qr_code =  "/" + qr_obj[0].qr_code
+                 url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+                 get_data = {
+                     'data': json.dumps(data_dict)
+                 }
+                 print('--- 小程序二维码: get_data-->', get_data)
 
+                 s = requests.session()
+                 s.keep_alive = False  # 关闭多余连接
+                 s.get(url, params=get_data)
 
-         print('--- 从 customer_belonger 里 --->>qr_code',qr_code)
+             qr_code = "/" +  obj.qr_code
+             print('--- 从 zgld_userprofile 里 --->>qr_code',qr_code)
 
-    elif user_id and  not customer_id:
-         qr_code = obj.qr_code
-         if not qr_code:
-             # 异步生成小程序和企业用户对应的小程序二维码
-             data_dict = {'user_id': user_id, 'customer_id': ''}
-             tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+        ret_data = {
+            'user_id': obj.id,
+            'user_avatar': user_avatar,
+            'username': obj.username,
+            'position': obj.position,
+            'mingpian_phone': obj.mingpian_phone,
+            'company': obj.company.name,
+            'qr_code_url': qr_code,
+        }
 
-         qr_code = "/" +  obj.qr_code
-         print('--- 从 zgld_userprofile 里 --->>qr_code',qr_code)
-
-    ret_data = {
-        'user_id': obj.id,
-        'user_avatar': user_avatar,
-        'username': obj.username,
-        'position': obj.position,
-        'mingpian_phone': obj.mingpian_phone,
-        'company': obj.company.name,
-        'qr_code_url': qr_code,
-    }
-
-    return render(request, 'create_poster.html', locals())
+        return render(request, 'create_poster.html', locals())
 
 

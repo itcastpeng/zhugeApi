@@ -35,44 +35,41 @@ def plugin_report_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 uid = request.POST.get('uid')
                 activity_id =  o_id  # 广告语
-                customer_id =  int(forms_obj.cleaned_data.get('customer_id'))   # 报名按钮
+                customer_id =  forms_obj.cleaned_data.get('customer_id')   # 报名按钮
+                customer_name =  forms_obj.cleaned_data.get('customer_name')   # 报名按钮
                 # 报名页
-                customer_name =  forms_obj.cleaned_data['customer_name']   # 活动标题
                 phone = forms_obj.cleaned_data['phone']                    # 活动说明
-                # phone_verify_code =  forms_obj.cleaned_data['phone_verify_code']
+
                 leave_message =  forms_obj.cleaned_data['leave_message']
                 print('------------>>',activity_id,customer_id)
 
                 obj = models.zgld_report_to_customer.objects.filter(
                     activity_id=activity_id,
-                    customer_id=customer_id,
-
+                    phone = phone
                 )
 
                 if obj:
-                    obj.update(leave_message = leave_message)
+                    obj.update(customer_name =  customer_name,leave_message=leave_message)
 
                 else:
                     models.zgld_report_to_customer.objects.create(
                         activity_id =  activity_id,     #
-                        customer_id =  customer_id,     #
+                        customer_name =  customer_name,     #
                         leave_message =  leave_message,  #
                         user_id = uid,
+                        phone = phone,
                     )
 
-                customer_obj = models.zgld_customer.objects.get(id=customer_id)
-                customer_obj.phone = phone  # 报名手机号
-                customer_obj.save()
 
                 if uid and customer_id:  # 发送的文字消息
                     title = models.zgld_article.objects.get(id=activity_id).title
-                    username = customer_obj.username
-                    username = conversion_base64_customer_username_base64(username, customer_id)
+                    # username = models.zgld_customer.objects.get(id=customer_id).username
+                    # username = conversion_base64_customer_username_base64(username, customer_id)
 
-                    remark = '【报名进展】: 客户 %s 报名参加了您的文章《%s》的活动' % (username,title)
+                    remark = '报名参加了文章《%s》的活动,具体详情在后台查看' % (title)
 
                     data = {
-                        'action': 0,  # 代表发送客户聊天信息
+                        'action': 17,  # 代表发送客户聊天信息
                         'uid': uid,
                         'user_id': customer_id
                     }

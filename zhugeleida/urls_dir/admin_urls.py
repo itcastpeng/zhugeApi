@@ -45,7 +45,6 @@ urlpatterns = [
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)/(?P<app_id>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao_oper),
 
 
-
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao),
 
     # 小程序第三方进入认证
@@ -107,7 +106,7 @@ urlpatterns = [
 
     # 公众号插件报名管理
     url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_report.plugin_report_oper),
-    url(r'^plugin_report$', plugin_report.plugin_report),
+    url(r'^plugin_report/(?P<oper_type>\w+)$', plugin_report.plugin_report),
 
     # 公众号-商品管理
     url(r'^plugin_goods/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_goods.plugin_goods_oper),

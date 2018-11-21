@@ -231,6 +231,14 @@ def get_latest_audit_status_and_release_code():
 
 
 @app.task
+def crontab_create_user_to_customer_qrCode_poster():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/crontab_create_user_to_customer_qrCode_poster'
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url)
+
+
+@app.task
 def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序ID
     if xiaochengxuid:
         url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/addSmallProgram?xiaochengxuid={}'.format(xiaochengxuid)

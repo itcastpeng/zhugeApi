@@ -449,8 +449,8 @@ def open_qiyeweixin(request, oper_type):
                         redirect_url = url + '?token=' + token + '&id=' + str(
                             user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
-                              userid, "\n", redirect_url)
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",userid, "\n", redirect_url)
+
                         return redirect(redirect_url)
 
                     elif boss_status == 1 and app_type == 'boss':  #

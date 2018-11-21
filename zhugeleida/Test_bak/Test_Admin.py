@@ -30,9 +30,9 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 
-url =  ip + '/zhugeleida/admin/help_doc'  # 获取产品的列表
-get_data['article_id'] = 1
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/help_doc'  # 获取产品的列表
+# get_data['article_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 # url =  ip + '/zhugeleida/admin/help_doc/add/0'  # 获取产品的列表
 # post_data['title'] = '我是标题'
@@ -860,9 +860,12 @@ ret = requests.get(url, data = post_data ,params=get_data)
 
 #############################  插件- 名片管理 活动报名 商品管理   ################################
 
-# url = ip + '/zhugeleida/admin/plugin_report' # 添加产品
+# url = ip + '/zhugeleida/admin/plugin_report/plugin_list' # 添加产品
 # ret = requests.get(url,params=get_data)
 
+url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
+# get_data['activity_id'] = 2
+ret = requests.get(url,params=get_data)
 
 # url = ip + '/zhugeleida/admin/plugin_report/add/0' # 添加活动
 # post_data['ad_slogan'] = '你值得拥有'   #广告语
