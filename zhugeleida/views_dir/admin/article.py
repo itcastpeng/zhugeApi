@@ -214,27 +214,10 @@ def article_oper(request, oper_type, o_id):
                 insert_ads =  request.POST.get('insert_ads')
                 if insert_ads:
                     insert_ads = json.loads(insert_ads)
-                    type = insert_ads.get('type')
-                    plugin_id = insert_ads.get('plugin_id')
-                    if  type == 'report_plugin' and plugin_id:
-                        content = {
-                            'id': obj.plugin_report.id,
-                            'belong_user_id': obj.plugin_report.user_id,
-                            'belong_user': obj.plugin_report.user.username,
-                            # 广告位
-                            'ad_slogan': obj.plugin_report.ad_slogan,  # 广告语
-                            'sign_up_button': obj.plugin_report.sign_up_button,  # 报名按钮
-                            # 报名页
-                            'title': obj.plugin_report.title,  # 活动标题
-                            # 'name_list' :name_list_data,
-                            'leave_message': obj.plugin_report.leave_message,
-                            'introduce': obj.plugin_report.introduce,  # 活动说明
-                            'is_get_phone_code': obj.plugin_report.is_get_phone_code,  # 是否获取手机验证码
-                            'skip_link': obj.plugin_report.skip_link,  # 跳转链接
-                            'create_date': obj.plugin_report.create_date.strftime("%Y-%m-%d %H:%M")
-                        }
-                        insert_ads['content'] = content
-                        obj.insert_ads = json.dumps(insert_ads)
+                    title = insert_ads.get('title')
+                    plugin_id = insert_ads.get('id')
+                    if  title and plugin_id:
+
                         obj.plugin_report = plugin_id
                         obj.save()
 
@@ -328,42 +311,19 @@ def article_oper(request, oper_type, o_id):
                 if insert_ads:
                     obj = objs[0]
                     insert_ads = json.loads(insert_ads)
-                    type = insert_ads.get('type')
-                    plugin_id = insert_ads.get('plugin_id')
-                    if  type == 'report_plugin' and plugin_id:
-                        content = {
-                            'id': obj.plugin_report.id,
-                            'belong_user_id': obj.plugin_report.user_id,
-                            'belong_user': obj.plugin_report.user.username,
-                            # 广告位
-                            'ad_slogan': obj.plugin_report.ad_slogan,  # 广告语
-                            'sign_up_button': obj.plugin_report.sign_up_button,  # 报名按钮
-                            # 报名页
-                            'title': obj.plugin_report.title,  # 活动标题
-                            # 'name_list' :name_list_data,
-                            'leave_message': obj.plugin_report.leave_message,
-                            'introduce': obj.plugin_report.introduce,  # 活动说明
-                            'is_get_phone_code': obj.plugin_report.is_get_phone_code,  # 是否获取手机验证码
-                            'skip_link': obj.plugin_report.skip_link,  # 跳转链接
-                            'create_date': obj.plugin_report.create_date.strftime("%Y-%m-%d %H:%M")
-                        }
-                        insert_ads['content'] = content
-                        obj.insert_ads = json.dumps(insert_ads)
+                    title = insert_ads.get('title')
+                    plugin_id = insert_ads.get('id')
+                    if title and plugin_id:
                         obj.plugin_report = plugin_id
                         obj.save()
+
 
 
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
                 if tags_id_list:
                     objs[0].tags = tags_id_list
 
-                # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
-                # data = {
-                #     'url': url,
-                #     'article_id' : obj[0].id,
-                # }
-                # response_ret = create_qrcode(data)
-                # pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+
                 company_id = objs[0].company_id
                 # token = obj.user.token
                 # rand_str = account.str_encrypt(timestamp + token)
@@ -423,14 +383,11 @@ def article_oper(request, oper_type, o_id):
                 for obj in objs:
                     tag_list = list(obj.tags.values('id', 'name'))
 
-                    insert_ads = json.loads(obj.insert_ads)
+                    insert_ads = obj.insert_ads
                     if insert_ads:
                         insert_ads = json.loads(insert_ads)
-                        type = insert_ads.get('type')
-                        plugin_id = insert_ads.get('plugin_id')
-                        if type == 'report_plugin' and plugin_id:
-                            insert_ads = insert_ads.get('content')
-                            insert_ads = json.dumps(insert_ads)
+                    else:
+                        insert_ads = ''
 
                     #         insert_ads =   {
                     #             'id': obj.plugin_report.id,

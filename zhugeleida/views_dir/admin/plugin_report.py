@@ -219,7 +219,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     response.msg = "删除成功"
                 else:
                     response.code = 300
-                    response.msg = '插件有关联的文章,可解除关系后删除'
+                    response.msg = '插件有关联的文章,可解除关联后删除'
 
             else:
                 response.code = 302
@@ -258,12 +258,38 @@ def plugin_report_oper(request, oper_type, o_id):
                     'skip_link': forms_obj.cleaned_data['skip_link'],
                     'leave_message': request.POST.get('leave_message')  # 留言
                 }
-                user_id = request.GET.get('user_id')
+
+
                 report_id = forms_obj.cleaned_data['id']
                 obj = models.zgld_plugin_report.objects.filter(
                     id=report_id
                 )
                 obj.update(**dict_data)
+
+                article_objs = models.zgld_article.objects.filter(plugin_report_id=report_id)
+                if article_objs:
+                    insert_ads =  {
+                        'id': obj.id,
+                        'belong_user_id': obj.user_id,
+                        'belong_user': obj.user.username,
+                        # 广告位
+                        'ad_slogan': forms_obj.cleaned_data['ad_slogan'],  # 广告语
+                        'sign_up_button': forms_obj.cleaned_data['sign_up_button'],  # 报名按钮
+                        # 报名页
+                        'title': forms_obj.cleaned_data['title'],  # 活动标题
+
+                        # 'name_list' :name_list_data,
+                        'leave_message': request.POST.get('leave_message'),
+                        'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
+
+                        'skip_link': forms_obj.cleaned_data['skip_link'],
+                        'create_date': obj.create_date.strftime("%Y-%m-%d %H:%M")
+                    }
+
+                    article_objs.update(
+                        insert_ads= json.dumps(insert_ads)
+                    )
+
 
                 response.code = 200
                 response.msg = "修改成功"

@@ -822,6 +822,7 @@ class zgld_article(models.Model):
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
 
     insert_ads = models.TextField(verbose_name='插入广告语',null=True)
+    plugin_report = models.ForeignKey('zgld_plugin_report', verbose_name="报名的插件", null=True)
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
 
 
