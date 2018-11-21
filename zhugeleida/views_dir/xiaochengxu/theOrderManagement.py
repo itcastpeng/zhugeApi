@@ -46,11 +46,11 @@ def theOrder(request):
             if obj.yewuUser:
                 username = obj.yewuUser.username
                 yewu = obj.yewuUser_id
-            tuikuan = 0
-            tuiKuanStatus = 0
-            if obj.theOrderStatus in [2, 3, 4, 5]:
-                tuikuan = 1
-                tuiKuanStatus = obj.theOrderStatus
+            # tuikuan = 0
+            # tuiKuanStatus = 0
+            # if obj.theOrderStatus in [2, 3, 4, 5]:
+            #     tuikuan = 1
+            #     tuiKuanStatus = obj.theOrderStatus
             # 轮播图
             topLunBoTu = ''
             if obj.shangpinguanli.topLunBoTu:
@@ -86,8 +86,8 @@ def theOrder(request):
                 'status':obj.get_theOrderStatus_display(),
                 'statusId': obj.theOrderStatus,
                 'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                'tuikuan':tuikuan,         # 0为无退款   1为退款
-                'tuikuan_status':tuiKuanStatus,
+                # 'tuikuan':tuikuan,         # 0为无退款   1为退款
+                # 'tuikuan_status':tuiKuanStatus,
                 'detailePicture':detailePicture,
             })
         response.code = 200
