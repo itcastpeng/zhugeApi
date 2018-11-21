@@ -24,6 +24,7 @@ from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
 # 雷达用户登录
 @csrf_exempt
 def work_weixin_auth(request, company_id):
+    print('work_weixin_auth -->', work_weixin_auth)
     response = Response.ResponseObj()
 
     if request.method == "GET":
@@ -173,6 +174,7 @@ def work_weixin_auth(request, company_id):
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def work_weixin_auth_oper(request,oper_type):
+    print('work_weixin_auth_oper -->', work_weixin_auth_oper)
     response = Response.ResponseObj()
 
     if request.method == "GET":
