@@ -218,7 +218,7 @@ def article_oper(request, oper_type, o_id):
                     plugin_id = insert_ads.get('id')
                     if  title and plugin_id:
 
-                        obj.plugin_report = plugin_id
+                        obj.plugin_report_id= plugin_id
                         obj.save()
 
 
@@ -314,7 +314,7 @@ def article_oper(request, oper_type, o_id):
                     title = insert_ads.get('title')
                     plugin_id = insert_ads.get('id')
                     if title and plugin_id:
-                        obj.plugin_report = plugin_id
+                        obj.plugin_report_id = plugin_id
                         obj.save()
 
 

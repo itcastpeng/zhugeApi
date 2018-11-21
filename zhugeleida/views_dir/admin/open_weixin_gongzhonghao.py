@@ -787,43 +787,43 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         elif MsgType == 'voice':
                             Content = '【收到不支持的消息类型，暂无法显示】'
 
+                        if MsgType == 'text' or MsgType == 'voice':
+                            flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
+                                customer_id=customer_id).order_by('-last_follow_time')
+                            if flow_up_objs:
+                                user_id = flow_up_objs[0].user_id
 
-                        flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
-                            customer_id=customer_id).order_by('-last_follow_time')
-                        if flow_up_objs:
-                            user_id = flow_up_objs[0].user_id
+                                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                                    is_last_msg=True).update(
+                                    is_last_msg=False)  # 把所有的重置为不是最后一条
 
-                            models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                is_last_msg=True).update(
-                                is_last_msg=False)  # 把所有的重置为不是最后一条
-
-                            encodestr = base64.b64encode(Content.encode('utf-8'))
-                            msg = str(encodestr, 'utf-8')
-                            _content = {
-                                'msg': msg,
-                                'info_type': 1
-                            }
-                            content = json.dumps(_content)
-
-                            models.zgld_chatinfo.objects.create(
-                                content=content,
-                                userprofile_id=user_id,
-                                customer_id=customer_id,
-                                send_type=2
-                            )
-
-                            if user_id and customer_id:  # 发送的文字消息
-                                remark = ': %s' % (Content)
-
-                                data = {
-                                    'action': 0,  # 代表发送客户聊天信息
-                                    'uid': user_id,
-                                    'user_id': customer_id
+                                encodestr = base64.b64encode(Content.encode('utf-8'))
+                                msg = str(encodestr, 'utf-8')
+                                _content = {
+                                    'msg': msg,
+                                    'info_type': 1
                                 }
-                                action_record(data, remark)
+                                content = json.dumps(_content)
 
-                        response.code = 200
-                        response.msg = 'send msg successful'
+                                models.zgld_chatinfo.objects.create(
+                                    content=content,
+                                    userprofile_id=user_id,
+                                    customer_id=customer_id,
+                                    send_type=2
+                                )
+
+                                if user_id and customer_id:  # 发送的文字消息
+                                    remark = ': %s' % (Content)
+
+                                    data = {
+                                        'action': 0,  # 代表发送客户聊天信息
+                                        'uid': user_id,
+                                        'user_id': customer_id
+                                    }
+                                    action_record(data, remark)
+
+                            response.code = 200
+                            response.msg = 'send msg successful'
 
 
 
