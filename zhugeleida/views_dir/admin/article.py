@@ -79,6 +79,7 @@ def article(request,oper_type):
                 # 获取第几页的数据
                 for obj in objs:
                     tag_list =  list(obj.tags.values('id', 'name'))
+
                     # print('-----obj.tags.values---->', obj.tags.values('id','name'))
                     ret_data.append({
                         'id': obj.id,
@@ -94,7 +95,7 @@ def article(request,oper_type):
                         'create_date': obj.create_date,      #文章创建时间
                         'cover_url' : obj.cover_picture,     #文章图片链接
                         'tag_list' : tag_list ,
-                        'insert_ads' : json.loads(obj.insert_ads)  if obj.insert_ads else '' # 插入的广告语
+                        # 'insert_ads' : json.loads(obj.insert_ads)  if obj.insert_ads else '' # 插入的广告语
                     })
 
                 response.code = 200
@@ -209,6 +210,35 @@ def article_oper(request, oper_type, o_id):
                 }
 
                 obj = models.zgld_article.objects.create(**dict_data)
+
+                insert_ads =  request.POST.get('insert_ads')
+                if insert_ads:
+                    insert_ads = json.loads(insert_ads)
+                    type = insert_ads.get('type')
+                    plugin_id = insert_ads.get('plugin_id')
+                    if  type == 'report_plugin' and plugin_id:
+                        content = {
+                            'id': obj.plugin_report.id,
+                            'belong_user_id': obj.plugin_report.user_id,
+                            'belong_user': obj.plugin_report.user.username,
+                            # 广告位
+                            'ad_slogan': obj.plugin_report.ad_slogan,  # 广告语
+                            'sign_up_button': obj.plugin_report.sign_up_button,  # 报名按钮
+                            # 报名页
+                            'title': obj.plugin_report.title,  # 活动标题
+                            # 'name_list' :name_list_data,
+                            'leave_message': obj.plugin_report.leave_message,
+                            'introduce': obj.plugin_report.introduce,  # 活动说明
+                            'is_get_phone_code': obj.plugin_report.is_get_phone_code,  # 是否获取手机验证码
+                            'skip_link': obj.plugin_report.skip_link,  # 跳转链接
+                            'create_date': obj.plugin_report.create_date.strftime("%Y-%m-%d %H:%M")
+                        }
+                        insert_ads['content'] = content
+                        obj.insert_ads = json.dumps(insert_ads)
+                        obj.plugin_report = plugin_id
+                        obj.save()
+
+
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
                 if  tags_id_list:
                     obj.tags = tags_id_list
@@ -287,16 +317,45 @@ def article_oper(request, oper_type, o_id):
                     'cover_picture': forms_obj.cleaned_data['cover_picture'],
                     'insert_ads': request.POST.get('insert_ads')
                 }
-                user_id = request.GET.get('user_id')
+
                 article_id = forms_obj.cleaned_data['article_id']
-                obj = models.zgld_article.objects.filter(
+                objs = models.zgld_article.objects.select_related('company','plugin_report').filter(
                     id=article_id
                 )
-                obj.update(**dict_data)
+                objs.update(**dict_data)
+
+                insert_ads =  request.POST.get('insert_ads')
+                if insert_ads:
+                    obj = objs[0]
+                    insert_ads = json.loads(insert_ads)
+                    type = insert_ads.get('type')
+                    plugin_id = insert_ads.get('plugin_id')
+                    if  type == 'report_plugin' and plugin_id:
+                        content = {
+                            'id': obj.plugin_report.id,
+                            'belong_user_id': obj.plugin_report.user_id,
+                            'belong_user': obj.plugin_report.user.username,
+                            # 广告位
+                            'ad_slogan': obj.plugin_report.ad_slogan,  # 广告语
+                            'sign_up_button': obj.plugin_report.sign_up_button,  # 报名按钮
+                            # 报名页
+                            'title': obj.plugin_report.title,  # 活动标题
+                            # 'name_list' :name_list_data,
+                            'leave_message': obj.plugin_report.leave_message,
+                            'introduce': obj.plugin_report.introduce,  # 活动说明
+                            'is_get_phone_code': obj.plugin_report.is_get_phone_code,  # 是否获取手机验证码
+                            'skip_link': obj.plugin_report.skip_link,  # 跳转链接
+                            'create_date': obj.plugin_report.create_date.strftime("%Y-%m-%d %H:%M")
+                        }
+                        insert_ads['content'] = content
+                        obj.insert_ads = json.dumps(insert_ads)
+                        obj.plugin_report = plugin_id
+                        obj.save()
+
 
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
                 if tags_id_list:
-                    obj[0].tags = tags_id_list
+                    objs[0].tags = tags_id_list
 
                 # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
                 # data = {
@@ -305,13 +364,13 @@ def article_oper(request, oper_type, o_id):
                 # }
                 # response_ret = create_qrcode(data)
                 # pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
-                company_id = obj[0].company_id
+                company_id = objs[0].company_id
                 # token = obj.user.token
                 # rand_str = account.str_encrypt(timestamp + token)
 
                 data = {
                     'company_id': company_id,
-                    'article_id': obj[0].id,
+                    'article_id': objs[0].id,
                     'uid': '',
                     'pid': '',
                     'level': 1,
@@ -322,7 +381,7 @@ def article_oper(request, oper_type, o_id):
 
                 qrcode_data = {
                     'url': authorize_url,
-                    'article_id': obj[0].id,
+                    'article_id': objs[0].id,
                 }
                 response_ret = create_qrcode(qrcode_data)
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
@@ -355,7 +414,7 @@ def article_oper(request, oper_type, o_id):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                objs = models.zgld_article.objects.select_related('user','company').filter(id=article_id)
+                objs = models.zgld_article.objects.select_related('user','company','plugin_report').filter(id=article_id)
                 count = objs.count()
 
                 # 获取所有数据
@@ -363,7 +422,35 @@ def article_oper(request, oper_type, o_id):
                 # 获取第几页的数据
                 for obj in objs:
                     tag_list = list(obj.tags.values('id', 'name'))
-                    # print('-----obj.tags.values---->', obj.tags.values('id', 'name'))
+
+                    insert_ads = json.loads(obj.insert_ads)
+                    if insert_ads:
+                        insert_ads = json.loads(insert_ads)
+                        type = insert_ads.get('type')
+                        plugin_id = insert_ads.get('plugin_id')
+                        if type == 'report_plugin' and plugin_id:
+                            insert_ads = insert_ads.get('content')
+                            insert_ads = json.dumps(insert_ads)
+
+                    #         insert_ads =   {
+                    #             'id': obj.plugin_report.id,
+                    #             'belong_user_id': obj.plugin_report.user_id,
+                    #             'belong_user': obj.plugin_report.user.username,
+                    #             # 广告位
+                    #             'ad_slogan': obj.plugin_report.ad_slogan,  # 广告语
+                    #             'sign_up_button': obj.plugin_report.sign_up_button,  # 报名按钮
+                    #             # 报名页
+                    #             'title': obj.plugin_report.title,  # 活动标题
+                    #             # 'name_list' :name_list_data,
+                    #             'leave_message': obj.plugin_report.leave_message,
+                    #             'introduce': obj.plugin_report.introduce,  # 活动说明
+                    #             'is_get_phone_code': obj.plugin_report.is_get_phone_code,  # 是否获取手机验证码
+                    #             'skip_link': obj.plugin_report.skip_link,  # 跳转链接
+                    #             'create_date': obj.plugin_report.create_date.strftime("%Y-%m-%d %H:%M")
+                    #         }
+                    # else:
+                    #     insert_ads = ''
+
                     ret_data.append({
                         'id': obj.id,
                         'title': obj.title,  # 文章标题
@@ -375,7 +462,7 @@ def article_oper(request, oper_type, o_id):
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'content': obj.content,  # 文章内容
                         'tag_list': tag_list,
-                        'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
+                        'insert_ads': insert_ads   # 插入的广告语
 
                     })
                 response.code = 200

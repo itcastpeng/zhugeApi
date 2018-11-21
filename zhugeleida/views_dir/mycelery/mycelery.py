@@ -884,7 +884,7 @@ def user_send_gongzhonghao_template_msg(request):
 
             kefu_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send'
             kefu_msg_get_data = {
-                'access_token': authorizer_access_token,
+                'access_token': authorizer_access_token
             }
             _content = json.loads(content)
             info_type = _content.get('info_type')
@@ -894,7 +894,7 @@ def user_send_gongzhonghao_template_msg(request):
                 if info_type == 1:
                     msg = _content.get('msg')
 
-            _content  = '%s:\n        %s' % (user_name,msg)
+            _content  = '%s' % (msg)
             kefu_msg_post_data ={
                 "touser": openid,
                 "msgtype": "text",

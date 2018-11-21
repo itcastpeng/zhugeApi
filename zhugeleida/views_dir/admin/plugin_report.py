@@ -212,9 +212,14 @@ def plugin_report_oper(request, oper_type, o_id):
             mingpian_objs = models.zgld_plugin_report.objects.filter(id=o_id, user_id=user_id)
 
             if mingpian_objs:
-                mingpian_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
+                article_set_count = mingpian_objs[0].zgld_article_set.all().count()
+                if article_set_count > 0:
+                    mingpian_objs.delete()
+                    response.code = 200
+                    response.msg = "删除成功"
+                else:
+                    response.code = 300
+                    response.msg = '插件有关联的文章,可解除关系后删除'
 
             else:
                 response.code = 302
