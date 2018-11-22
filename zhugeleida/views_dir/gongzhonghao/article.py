@@ -233,9 +233,17 @@ def article_oper(request, oper_type, o_id):
                 obj = zgld_article_objs[0]
                 insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
                 if insert_ads and insert_ads.get('mingpian'):
+
+                    mingpian_avatar_objs = models.zgld_user_photo.objects.select_related('user').filter(user_id=uid, photo_type=2).order_by('-create_date')
+                    mingpian_avatar = ''
+                    if mingpian_avatar_objs:
+                        mingpian_avatar = mingpian_avatar_objs[0].photo_url
+                    else:
+                        mingpian_avatar =  obj.userprofile.avatar
+
                     zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
                     insert_ads['username'] = zgld_userprofile_obj.username
-                    insert_ads['avatar'] = zgld_userprofile_obj.avatar
+                    insert_ads['avatar'] = mingpian_avatar
                     insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
                     insert_ads['position'] = zgld_userprofile_obj.position
                     insert_ads['webchat_code'] = zgld_userprofile_obj.qr_code  # 展示企业微信二维码

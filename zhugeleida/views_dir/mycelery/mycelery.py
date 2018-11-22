@@ -1414,10 +1414,23 @@ def user_focus_send_activity_redPacket(request):
                             app_objs.update(
                                 reason=response_ret.msg
                             )
-                    else:
+
+                    elif is_subscribe == 1 and is_receive_redPacket == 1:
+
+                        a_data = {}
+                        user_id = models.zgld_userprofile.objects.filter(company_id=company_id,status=1).order_by('?')[0].id
+                        a_data['customer_id'] = customer_id
+                        a_data['user_id'] = user_id
+                        a_data['type'] = 'gongzhonghao_template_tishi'
+                        a_data['content'] = json.dumps({'msg': '您好,您已经领取过红包喽,可转发【公众号】推荐给您的好友哦!', 'info_type': 1})
+
+                        print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+                        tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
                         response.code = 302
                         response.msg = '没有订阅公众号或者应发过红包'
                         print('------没有订阅公众号或者应发过红包 customer_id | openid ----->>', customer_id, "|", openid)
+
                 else:
                     response.code = 301
                     response.msg = '客户不存在'

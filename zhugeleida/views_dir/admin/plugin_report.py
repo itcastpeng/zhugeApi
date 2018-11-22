@@ -209,11 +209,11 @@ def plugin_report_oper(request, oper_type, o_id):
         elif oper_type == "delete":
             print('------delete o_id --------->>', o_id)
             user_id = request.GET.get('user_id')
-            mingpian_objs = models.zgld_plugin_report.objects.filter(id=o_id, user_id=user_id)
+            mingpian_objs = models.zgld_plugin_report.objects.filter(id=o_id)
 
             if mingpian_objs:
                 article_set_count = mingpian_objs[0].zgld_article_set.all().count()
-                if article_set_count > 0:
+                if article_set_count == 0:
                     mingpian_objs.delete()
                     response.code = 200
                     response.msg = "删除成功"
