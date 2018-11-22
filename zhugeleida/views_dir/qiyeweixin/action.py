@@ -87,6 +87,8 @@ def action(request, oper_type):
                         'user_id': obj.user_id,
                         'customer_id': obj.customer_id,
                         'headimgurl': obj.customer.headimgurl,
+                        'customer_source': obj.customer.user_type,
+                        'customer_source_text': obj.customer.get_user_type_display(),
                         'log': username + obj.remark,
                         'create_date': obj.create_date,
                     })

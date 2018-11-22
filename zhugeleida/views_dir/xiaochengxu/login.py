@@ -213,6 +213,8 @@ def login_oper(request, oper_type):
                     data_dict = {'user_id': user_id, 'customer_id': customer_id}
                     tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
 
+
+
                     response.code = 200
                     response.msg = "绑定关系成功"
 

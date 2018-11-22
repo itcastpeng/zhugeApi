@@ -129,8 +129,8 @@ def mingpian_oper(request, oper_type):
                     objs.update(mingpian_phone=mingpian_phone, is_show_phone=is_show_phone)
 
                     # 生成海报
-                    data_dict = {'user_id': user_id, 'customer_id': ''}
-                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                    # data_dict = {'user_id': user_id, 'customer_id': ''}
+                    # tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
                     response.code = 200
                     response.msg = '保存成功'
@@ -182,8 +182,8 @@ def mingpian_oper(request, oper_type):
                         models.zgld_user_photo.objects.create(user_id=user_id, photo_url=avator_picture_url, photo_type=2)
 
                 # 生成海报
-                data_dict = {'user_id': user_id, 'customer_id': ''}
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                # data_dict = {'user_id': user_id, 'customer_id': ''}
+                # tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
                 response.code = 200
                 response.msg = '保存成功'

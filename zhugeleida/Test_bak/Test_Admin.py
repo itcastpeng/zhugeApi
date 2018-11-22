@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -863,9 +863,17 @@ ip = 'http://api.zhugeyingxiao.com'
 # url = ip + '/zhugeleida/admin/plugin_report/plugin_list' # 添加产品
 # ret = requests.get(url,params=get_data)
 
-url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
+# url = ip + '/zhugeleida/admin/plugin_report/report_customer' # 添加产品
+# # get_data['activity_id'] = 2
+# ret = requests.get(url,params=get_data)
+#
+# '/zhugeleida/admin/article/contextDiagram/3'
+
+url = ip + '/zhugeleida/admin/article/contextDiagram/3' # 添加产品
 # get_data['activity_id'] = 2
 ret = requests.get(url,params=get_data)
+
+
 
 # url = ip + '/zhugeleida/admin/plugin_report/add/0' # 添加活动
 # post_data['ad_slogan'] = '你值得拥有'   #广告语
