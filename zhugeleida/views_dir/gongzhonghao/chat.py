@@ -76,7 +76,7 @@ def chat(request):
 
             if objs:
                 for obj in objs:
-                    mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
+                    mingpian_avatar_obj = models.zgld_user_photo.objects.select_related('user').filter(user_id=user_id, photo_type=2).order_by('-create_date')
                     mingpian_avatar = ''
                     if mingpian_avatar_obj:
                         mingpian_avatar = mingpian_avatar_obj[0].photo_url
