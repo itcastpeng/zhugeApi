@@ -339,8 +339,7 @@ def mingpian_oper(request, oper_type):
                     print('----- customer_belonger poster 页面二维码 ------>>',qr_code)
 
                     poster_url = qr_obj[0].poster_url
-
-                    if not poster_url:
+                    if not  poster_url:
                         data_dict = {'user_id': user_id, 'customer_id': customer_id}
                         tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
@@ -378,24 +377,20 @@ def mingpian_oper(request, oper_type):
 
                 poster_url = qr_obj[0].poster_url
 
-                if not poster_url:
+                # if not poster_url:
+                data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-                    data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                print ("------ celery 去生成海报 ---->",data_dict)
 
-                    response.msg = "去生成海报URl"
-                    response.code = 200
-
-                else:
-
-                    ret_data = {
-                            'uid': user_id,
-                            'poster_url': poster_url,
-                        }
-                    print('-----save_poster ret_data --->>',ret_data)
-                    response.data = ret_data
-                    response.msg = "请求成功"
-                    response.code = 200
+                ret_data = {
+                        'uid': user_id,
+                        'poster_url': poster_url,
+                    }
+                print('-----save_poster ret_data --->>',ret_data)
+                response.data = ret_data
+                response.msg = "请求成功"
+                response.code = 200
 
 
 
@@ -503,8 +498,7 @@ def mingpian_oper(request, oper_type):
                 q = conditionCom(request, field_dict)
                 q.add(Q(**{'customer_id': customer_id}), Q.AND)
 
-                objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q).order_by(
-                    order)
+                objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q).order_by(order)
                 count = objs.count()
 
                 # if length != 0:

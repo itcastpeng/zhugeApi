@@ -142,6 +142,7 @@ def article_oper(request, oper_type, o_id):
 
                 response.code = 200
                 response.msg = "添加成功"
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)
@@ -202,6 +203,7 @@ def article_oper(request, oper_type, o_id):
                 print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
 
     else:
 
