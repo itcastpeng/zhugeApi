@@ -261,15 +261,16 @@ def plugin_report_oper(request, oper_type, o_id):
 
 
                 report_id = forms_obj.cleaned_data['id']
-                obj = models.zgld_plugin_report.objects.filter(
+                objs = models.zgld_plugin_report.objects.filter(
                     id=report_id
                 )
-                obj.update(**dict_data)
+                objs.update(**dict_data)
 
                 article_objs = models.zgld_article.objects.filter(plugin_report_id=report_id)
                 if article_objs:
+                    obj = objs[0]
                     insert_ads =  {
-                        'id': obj.id,
+                        'id': report_id,
                         'belong_user_id': obj.user_id,
                         'belong_user': obj.user.username,
                         # 广告位
