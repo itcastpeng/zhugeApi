@@ -381,10 +381,10 @@ def bottom_button_info(request):
             }
         elif shopping_type == 2:  # 2、 代表商城
             shangChengName = ''
-            objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
-            if objs:
-                obj = objs[0]
-                shangChengName = obj.shangChengName
+            _objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+            if _objs:
+                _obj = _objs[0]
+                shangChengName = _obj.shangChengName
 
             shopping_info_dict = {
                 "default_url": "icon_store_01.png",
