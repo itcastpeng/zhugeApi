@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm 
+from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm
 import json, base64, datetime
 from django.db.models import Q
 
@@ -32,11 +32,12 @@ def theOrder(request):
                 q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
             else:
                 q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
-        print('q=============> ',q)
+        print('q=============> ', q)
         if detailId:
             q.add(Q(id=detailId), Q.AND)
 
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(shouHuoRen_id=user_id, logicDelete=0).order_by('-createDate') # 小程序用户只能查看自己的订单
+        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(
+            shouHuoRen_id=user_id, logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
         if objs:
 
             objsCount = objs.count()
@@ -62,47 +63,47 @@ def theOrder(request):
                 topLunBoTu = ''
                 if obj.shangpinguanli.topLunBoTu:
                     topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
-                shouhuoren = ''         # 收货人
-                shouHuoRen_id = ''      # 收货人ID
+                shouhuoren = ''  # 收货人
+                shouHuoRen_id = ''  # 收货人ID
                 if obj.shouHuoRen_id:
                     shouHuoRen_id = obj.shouHuoRen_id
                     decode_username = base64.b64decode(obj.shouHuoRen.username)
                     shouhuoren = str(decode_username, 'utf-8')
                 countPrice = 0
                 if obj.goodsPrice:
-                    countPrice =  obj.goodsPrice * obj.unitRiceNum
+                    countPrice = obj.goodsPrice * obj.unitRiceNum
                 detailePicture = ''
                 if objs[0].detailePicture:
                     detailePicture = json.loads(objs[0].detailePicture)
                 otherData.append({
-                    'goodsPicture':topLunBoTu,
-                    'id':obj.id,
+                    'goodsPicture': topLunBoTu,
+                    'id': obj.id,
                     # 'unitRiceNum':obj.unitRiceNum,
-                    'goodsId':obj.shangpinguanli.id,
-                    'goodsName' : obj.goodsName,
-                    'goodsPrice':obj.goodsPrice,
-                    'countPrice':countPrice,
-                    'yingFuKuan':obj.yingFuKuan,
-                    'youhui':obj.yongJin,
-                    'yewuyuan_id':yewu,
-                    'yewuyuan':username,
-                    'yongjin':obj.yongJin,
+                    'goodsId': obj.shangpinguanli.id,
+                    'goodsName': obj.goodsName,
+                    'goodsPrice': obj.goodsPrice,
+                    'countPrice': countPrice,
+                    'yingFuKuan': obj.yingFuKuan,
+                    'youhui': obj.yongJin,
+                    'yewuyuan_id': yewu,
+                    'yewuyuan': username,
+                    'yongjin': obj.yongJin,
                     # 'peiSong':obj.peiSong,
-                    'shouHuoRen_id':shouHuoRen_id,
-                    'shouHuoRen':shouhuoren,
-                    'status':obj.get_theOrderStatus_display(),
+                    'shouHuoRen_id': shouHuoRen_id,
+                    'shouHuoRen': shouhuoren,
+                    'status': obj.get_theOrderStatus_display(),
                     'statusId': obj.theOrderStatus,
-                    'createDate':obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                    'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                     # 'tuikuan':tuikuan,         # 0为无退款   1为退款
                     # 'tuikuan_status':tuiKuanStatus,
-                    'detailePicture':detailePicture,
+                    'detailePicture': detailePicture,
                 })
 
             response.code = 200
             response.msg = '查询成功'
             response.data = {
-                'otherData':otherData,
-                'objsCount':objsCount,
+                'otherData': otherData,
+                'objsCount': objsCount,
             }
 
         else:
@@ -117,8 +118,9 @@ def theOrder(request):
 
     return JsonResponse(response.__dict__)
 
+
 @csrf_exempt
-def timeToRefresh(request):# 定时刷新 订单超过十分钟 不付款 更改为取消订单
+def timeToRefresh(request):  # 定时刷新 订单超过十分钟 不付款 更改为取消订单
     response = Response.ResponseObj()
     nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # nowDate = (datetime.datetime.now() - datetime.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S')
@@ -173,7 +175,7 @@ def theOrderOper(request, oper_type, o_id):
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
             if orderObjs:
                 status = int(orderObjs[0].theOrderStatus)
-                print('status=============>',status)
+                print('status=============>', status)
                 if status in [1, 10]:
                     orderObjs.update(logicDelete=1)
                     response.code = 200
@@ -202,7 +204,3 @@ def theOrderOper(request, oper_type, o_id):
         response.code = 402
         response.msg = "请求异常"
     return JsonResponse(response.__dict__)
-
-
-
-
