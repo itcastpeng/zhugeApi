@@ -366,7 +366,8 @@ def login_oper(request,oper_type):
         ## 为新小程序绑定 模板ID
         elif oper_type == 'binding_templateid':
 
-            authorizer_access_token = crate_token_func()
+            # authorizer_access_token = crate_token_func()
+            authorizer_access_token = '15_TOfK_2ewwuw8vDMQkWKK4gxxYxaxWJOdp7z6GQZLBSKwDcq38AHe7stlgONtX97f43a9mTwk9tnHf5Sk7oe0aS3nBFllfFYOjLa7sAd16m2x8YuyI3G7Oq-z-g9MlseyHFEa7PQ4DRiIFefvVLHfALDCSO'
 
             get_template_add_data = {'access_token': authorizer_access_token}
 

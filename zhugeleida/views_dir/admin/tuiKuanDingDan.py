@@ -26,7 +26,7 @@ def tuiKuanDingDan(request):
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
         q = Q()
         if status:
-            q.add(Q(tuiKuanStatus=status), Q.AND)
+            q.add(Q(orderNumber__theOrderStatus=status), Q.AND)
 
         objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related(
             'orderNumber'
@@ -39,6 +39,7 @@ def tuiKuanDingDan(request):
             start_line = (current_page - 1) * length
             stop_line = start_line + length
             objs = objs[start_line: stop_line]
+
         otherData = []
         for obj in objs:
             tuikuan = ''
