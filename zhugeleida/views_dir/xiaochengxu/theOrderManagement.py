@@ -104,7 +104,7 @@ def theOrder(request):
             }
 
         else:
-            response.code = 301
+            response.code = 302
             response.msg = '无数据'
 
 

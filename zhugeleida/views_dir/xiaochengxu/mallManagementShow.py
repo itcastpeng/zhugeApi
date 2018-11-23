@@ -29,6 +29,7 @@ def mallManage(request):
     forms_obj = GoodsManagementSelectForm(request.GET)
     current_page = forms_obj.cleaned_data['current_page']
     length = forms_obj.cleaned_data['length']
+
     if forms_obj.is_valid():
 
 
@@ -81,7 +82,7 @@ def mallManage(request):
                      'otherData':otherData
                 }
             else:
-                response.code = 301
+                response.code = 302
                 response.msg = '无数据'
 
         else:
@@ -119,7 +120,7 @@ def mallManage(request):
                 }
 
             else:
-                response.code = 301
+                response.code = 302
                 response.msg = '无数据'
 
     return JsonResponse(response.__dict__)
