@@ -299,7 +299,7 @@ def login_oper(request,oper_type):
 
                 # post_template_data['template_id'] = ''
 
-                path = 'pages/mingpian/index?uid=%s' % (customer_id)
+                path = 'pages/test/test/' % (customer_id)
 
                 # post_template_data['page'] = path
 

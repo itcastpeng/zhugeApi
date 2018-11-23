@@ -291,9 +291,9 @@ def plugin_report_oper(request, oper_type, o_id):
                         insert_ads= json.dumps(insert_ads)
                     )
 
-
                 response.code = 200
                 response.msg = "修改成功"
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)
