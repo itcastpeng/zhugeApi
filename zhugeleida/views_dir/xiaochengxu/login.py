@@ -380,6 +380,12 @@ def bottom_button_info(request):
                 "order": 3
             }
         elif shopping_type == 2:  # 2、 代表商城
+            shangChengName = ''
+            objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+            if objs:
+                obj = objs[0]
+                shangChengName = obj.shangChengName
+
             shopping_info_dict = {
                 "default_url": "icon_store_01.png",
                 "selected_url": "icon_store_02.png",
@@ -387,6 +393,7 @@ def bottom_button_info(request):
                 "text": "商城",
                 "order": 3
             }
+            ret_data['shangChengName'] = shangChengName
 
         buttom_navigation_data_list.insert(2, shopping_info_dict)
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list
