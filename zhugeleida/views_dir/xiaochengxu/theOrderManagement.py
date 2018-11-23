@@ -19,8 +19,10 @@ def theOrder(request):
 
     if forms_obj.is_valid():
         q = Q()
+
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
+
         detailId = request.GET.get('detailId')
         orderStatus = request.GET.get('orderStatus')
         if orderStatus:

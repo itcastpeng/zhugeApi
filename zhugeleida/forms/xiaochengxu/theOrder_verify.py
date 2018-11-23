@@ -111,7 +111,7 @@ class GoodsManagementSelectForm(forms.Form):
 
     def clean_length(self):
         if 'length' not in self.data:
-            length = 10
+            length = 20
         else:
             length = int(self.data['length'])
         return length

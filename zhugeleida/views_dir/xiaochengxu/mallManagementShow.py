@@ -27,11 +27,9 @@ def mallManage(request):
     otherData = []
 
     forms_obj = GoodsManagementSelectForm(request.GET)
-    current_page = forms_obj.cleaned_data['current_page']
-    length = forms_obj.cleaned_data['length']
-
     if forms_obj.is_valid():
-
+        current_page = forms_obj.cleaned_data['current_page']
+        length = forms_obj.cleaned_data['length']
 
         if detaileId:
             print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
