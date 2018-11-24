@@ -352,7 +352,11 @@ ip = 'http://127.0.0.1:8001'
 
 
 
+url =  ip + '/zhugeleida/admin/activity_manage/query_focus_gongzhonghao_customer'  # 获取产品的列表
+get_data['company_id'] = 1
+get_data['is_receive_redPacket'] = 1
 
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 ##################################### 文章 + 文章标签 + 文章增删改查 ###############################
@@ -869,9 +873,9 @@ ip = 'http://127.0.0.1:8001'
 #
 # '/zhugeleida/admin/article/contextDiagram/3'
 
-url = ip + '/zhugeleida/admin/article/contextDiagram/3' # 添加产品
-# get_data['activity_id'] = 2
-ret = requests.get(url,params=get_data)
+# url = ip + '/zhugeleida/admin/article/contextDiagram/3' # 添加产品
+# # get_data['activity_id'] = 2
+# ret = requests.get(url,params=get_data)
 
 
 

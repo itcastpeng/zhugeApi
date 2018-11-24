@@ -54,6 +54,7 @@ def theOrder(request):
             start_line = (current_page - 1) * length
             stop_line = start_line + length
             objs = objs[start_line: stop_line]
+
         otherData = []
         for obj in objs:
             print('obj.shangpinguanli.goodsName----------> ',obj.shangpinguanli.goodsName)

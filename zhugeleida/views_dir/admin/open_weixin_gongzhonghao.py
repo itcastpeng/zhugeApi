@@ -685,7 +685,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             print('----- 公众号【点击关注】啦, 客户是: %s 【点击关注】公众号: %s | 公司ID: %s---->>', customer_id, name,
                                   company_id)
                             objs.update(
-                                is_subscribe=1  # 改为关注状态
+                                is_subscribe=1,  # 改为关注状态
+                                subscribe_time=datetime.datetime.now()
                             )
 
                             if is_focus_get_redpacket:  # 开启了

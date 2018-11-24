@@ -126,7 +126,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                     jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
                         xiaochengxuApp_id=xiaochengxu_app[0].id)
 
-                    SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
+                    # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
+                    SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao
                     url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
                     jine = 0
                     if objs[0].orderNumber.yingFuKuan:

@@ -120,13 +120,13 @@ def contact_oper(request,oper_type):
 
             response = Response.ResponseObj()
             user_id = request.GET.get('user_id')
-            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile__company_id=company_id,userprofile_id=user_id,send_type=2, is_user_new_msg=True).count()
+            # company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,send_type=2, is_user_new_msg=True).count()
 
             response.code = 200
             response.msg = '查询成功'
             response.data = {
-                'chatinfo_count': chatinfo_count,
+                'chatinfo_count': chatinfo_count
             }
 
         else:

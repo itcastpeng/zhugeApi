@@ -854,8 +854,8 @@ class zgld_article_activity(models.Model):
     activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',default=0,null=True)
 
     reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
-    already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]',null=True)
-    already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额', default=0, null=True)
+    already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]', default=0)
+    already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额', default=0)
 
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
