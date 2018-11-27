@@ -10,6 +10,39 @@ import xml.dom.minidom as xmldom, datetime, xml.etree.cElementTree as ET
 import json, redis, sys, requests
 
 
+
+def get_provider_token():
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+    get_token_data = {
+        "corpid": "wx81159f52aff62388",  # 服务商的corpid
+        "provider_secret": "HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt"  # 服务商的secret
+    }
+
+    key_name = "%s_provider_token" % get_token_data['corpid']
+
+    provider_access_token = rc.get(key_name)
+    print('----- 从 Redis 获取 %s: ------>>' % (key_name),provider_access_token)
+
+    if not provider_access_token:
+        appurl = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_provider_token'
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        ret = s.post(appurl, data=json.dumps(get_token_data))
+
+        ret_json = ret.json()
+        print('------ 第三方平台 【服务商的token】 接口返回 ----->>', ret_json)
+
+        provider_access_token = ret_json.get('provider_access_token')  # 用户唯一标识
+
+        print('-----第三方平台 生成 provider_access_token------->>',provider_access_token)
+        rc.set(key_name, provider_access_token, 7000)
+
+    return provider_access_token
+
+
+
+
 ## 第三方平台接入
 @csrf_exempt
 def open_qiyeweixin(request, oper_type):
@@ -298,7 +331,7 @@ def open_qiyeweixin(request, oper_type):
 
             return HttpResponse('success')
 
-    else:
+    elif request.method == "GET":
 
         # 微信发送要解密的ticket 获取票据
         if oper_type == 'get_ticket':
@@ -571,8 +604,127 @@ def open_qiyeweixin(request, oper_type):
             else:
                 print('-------[企业微信] 获取企业永久授权码 报错：------->>')
 
-        else:
-            response.code = 402
-            response.msg = '请求异常'
+        # 用户使用企业微信管理员或成员帐号登录第三方网站，该登录授权基于OAuth2.0协议标准构建。
+        elif oper_type == 'third_fang_single_login':
+
+            auth_code = request.GET.get('auth_code')
+            state = request.GET.get('state')  #
+
+            provider_access_token = get_provider_token()
+
+            if provider_access_token:
+
+                get_login_info_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_login_info'
+                s = requests.session()
+                s.keep_alive = False  # 关闭多余连接
+                get_login_info_data = {
+                    "access_token": provider_access_token
+                }
+                post_login_info_data = {
+                    "auth_code": auth_code
+                }
+                ret = s.post(get_login_info_url, params=get_login_info_data, data=json.dumps(post_login_info_data))
+
+                ret_json = ret.json()
+                print('------ 第三方平台 【服务商获取-登录用户信息】 接口返回 ----->>', json.dumps(ret_json))
+                # ret_json = {'usertype': 1,
+                #             'user_info':
+                #                 {'userid': 'ZhangJu',
+                #                  'name': '张炬1',
+                #                  'avatar': 'https://p.qlogo.cn/bizmail/Tj5TZc6xibicYIiaQm9mghQl5oE5712iaVIBYicEAM0C20zpn8FBZUnXKmQ/0'
+                #                  },
+                #             'corp_info':
+                #                 {'corpid': 'wwf358ba1c3f3560c5'},
+                #             'agent':
+                #                 [{'agentid': 1000007, 'auth_type': 1}, {'agentid': 1000009, 'auth_type': 1}],
+                #             'auth_info': {'department': [{'id': 1, 'writable': True}]}}
+
+
+                userid = ret_json.get('user_info')['userid']  # 用户唯一标识
+                name = ret_json.get('user_info')['name']  # 用户名字
+                avatar = ret_json.get('user_info')['avatar']  # 头像
+                corpid = ret_json.get('corp_info')['corpid']  #
+
+
+                if userid:
+                    print('-----第三方平台 【服务商获取-用户信息】UserId: %s | corpid : %s  ------->>' % (userid, corpid))
+                    company_objs = models.zgld_company.objects.filter(corp_id=corpid)
+                    if company_objs:
+                        obj = company_objs[0]
+                        company_id = obj.id
+                        user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
+                            userid=userid,
+                            company_id=company_id
+                        )
+
+                        # 如果用户存在
+                        if user_profile_objs:
+
+                            userprofile_obj = user_profile_objs[0]
+                            status = userprofile_obj.status
+
+                            account_expired_time = company_objs[0].account_expired_time
+                            if datetime.datetime.now() < account_expired_time:
+
+                                if status == 1:  # (1, "AI雷达启用"),
+
+                                    last_login_date_obj = userprofile_obj.last_login_date
+                                    last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
+
+                                    response.data = {
+                                        'user_id': userprofile_obj.id,
+                                        'token': userprofile_obj.token,
+
+                                        'username': name,
+                                        'avatar': avatar,
+
+                                        'company_name': userprofile_obj.company.name,
+                                        'company_id': userprofile_obj.company_id,
+
+                                        'weChatQrCode': userprofile_obj.company.weChatQrCode,
+                                        'state' : 'scan_code_web_login',
+                                        'last_login_date': last_login_date,
+
+                                    }
+
+                                    userprofile_obj.last_login_date = datetime.datetime.now()
+                                    userprofile_obj.avatar = avatar
+                                    userprofile_obj.save()
+                                    response.code = 200
+                                    response.msg = '登录成功'
+                                    print('----------【后台雷达用户】登录成功 userid: %s | corpid: %s ----<<' % (userid, corpid))
+
+                                else:
+                                    response.code = 405
+                                    response.msg = "账户未启用"
+                                    print('----------【雷达权限】未开通 ,未登录成功 userid | corpid ------>>', userid, corpid)
+
+                            else:
+                                company_name = userprofile_obj.company.name
+                                response.code = 403
+                                response.msg = '账户过期'
+                                print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (
+                                    company_id, company_name, account_expired_time))
+
+                        else:
+                            response.code = 402
+                            response.msg = "用户不存在 userid: %s" % (userid)
+                            print('----公司不存在 UserId: %s  | corpid : %s ----->>' % (userid, corpid))
+
+                    else:
+                        response.code = 401
+                        response.msg = "公司不存在 corpid: %s " % (corpid)
+                        print('----公司不存在 UserId: %s  | corpid : %s ----->>' % (userid, corpid))
+
+                else:
+                    response.code = 401
+                    response.msg = '服务商获取-用户信息报错'
+                    print('------第三方平台 【服务商获取-用户信息】报错 ----->')
+
+
+    else:
+
+        response.code = 400
+        response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)

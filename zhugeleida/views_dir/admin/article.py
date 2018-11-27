@@ -13,6 +13,8 @@ from django.db.models import Q, Count
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
+from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
+
 # 文章管理查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -109,7 +111,7 @@ def article(request,oper_type):
 
 
 
-def init_data(user_id, pid=None, level=1):
+def init_data(article_id,user_id, pid=None, level=1):
     """
     获取权限数据
     :param pid:  权限父级id
@@ -117,6 +119,7 @@ def init_data(user_id, pid=None, level=1):
     """
     result_data = []
     objs = models.zgld_article_to_customer_belonger.objects.select_related('user').filter(
+        article_id=article_id,
         customer_parent_id=pid,
         user_id=user_id,
         level=level
@@ -127,14 +130,18 @@ def init_data(user_id, pid=None, level=1):
         if obj.customer_parent_id == obj.customer_id:
             continue
 
-        decode_username = base64.b64decode(obj.customer.username)
-        customer_username = str(decode_username, 'utf-8')
+        # decode_username = base64.b64decode(obj.customer.username)
+        # customer_username = str(decode_username, 'utf-8')
+        customer_id = obj.customer_id
+        customer_username = obj.customer.username
+        customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
+
         current_data = {
             'name': customer_username,
             'id':obj.id,
             # 'user_id': obj.customer_id
         }
-        children_data = init_data(user_id, pid=obj.customer_id, level=level+1)
+        children_data = init_data(article_id,user_id, pid=obj.customer_id, level=level+1)
         if children_data:
             current_data['children'] = children_data
         result_data.append(current_data)
@@ -143,7 +150,7 @@ def init_data(user_id, pid=None, level=1):
     return result_data
 
 # 脉络图查询 调用init_data
-def mailuotu(q):
+def mailuotu(article_id,q):
     # children_data = init_data(user_id)
     # print('children_data--------> ',children_data)
     # print('q------------------------------> ',q)
@@ -158,7 +165,7 @@ def mailuotu(q):
         print('user_id -->', user_id)
         print('username -->', username)
 
-        children_data = init_data(user_id)
+        children_data = init_data(article_id,user_id)
         print('children_data------> ',children_data)
         tmp = {'name': username}
         if children_data:
@@ -357,6 +364,7 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
+
         # 获取文章详情
         if oper_type == 'myarticle':
             user_id = request.GET.get('user_id')
@@ -463,7 +471,7 @@ def article_oper(request, oper_type, o_id):
             objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id)
             if objs:
 
-                article_title, result_data = mailuotu(q)
+                article_title, result_data = mailuotu(article_id,q)
                 print('--- dataList --->>',result_data)
                 dataList = {                    # 顶端 首级
                     'name': article_title,
