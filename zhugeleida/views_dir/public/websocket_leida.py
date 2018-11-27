@@ -307,6 +307,7 @@ def websocket(request, oper_type):
 
                         customer_id = obj.customer_id
                         customer_username =obj.customer.username
+                        print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
                         customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
 
                         content = obj.content
