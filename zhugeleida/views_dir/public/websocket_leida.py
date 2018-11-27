@@ -1,11 +1,5 @@
 import json
-from django.http.response import HttpResponse
-from django.shortcuts import render
-from dwebsocket import require_websocket, accept_websocket
-from zhugeleida import models
-
-from publicFunc import Response
-from publicFunc import account
+from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
@@ -66,8 +60,9 @@ def websocket(request, oper_type):
 
                     for obj in objs:
 
-                        customer_name = base64.b64decode(obj.customer.username)
-                        customer_name = str(customer_name, 'utf-8')
+                        customer_id = obj.customer_id
+                        customer_username = obj.customer.username
+                        customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
                         content = obj.content
 
                         if not content:
@@ -309,8 +304,10 @@ def websocket(request, oper_type):
 
                             mingpian_avatar = obj.userprofile.avatar
 
-                        customer_name = base64.b64decode(obj.customer.username)
-                        customer_name = str(customer_name, 'utf-8')
+
+                        customer_id = obj.customer_id
+                        customer_username =obj.customer.username
+                        customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
 
                         content = obj.content
                         if not content:
