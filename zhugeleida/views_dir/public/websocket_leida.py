@@ -387,7 +387,7 @@ def websocket(request, oper_type):
                         continue
 
                     if type == 'closed':
-                        msg = '确认关闭  customer_id | uid | '+ customer_id + "|" +  user_id
+                        msg = '确认关闭  customer_id | uid | '+ str(customer_id) + "|" +  str(user_id)
                         ret_data = {
                             'code': 200,
                             'msg': msg
