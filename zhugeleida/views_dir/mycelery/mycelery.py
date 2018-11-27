@@ -597,6 +597,7 @@ def user_send_template_msg(request):
             }
             authorizer_access_token = create_authorizer_access_token(data)
 
+        print('------- 使用的 authorizer_access_token ------>>',authorizer_access_token)
         get_template_data = {
             'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
         }
@@ -661,6 +662,7 @@ def user_send_template_msg(request):
 
             elif template_ret.get('errcode') == 40001:
                 rc.delete(key_name)
+                continue
 
             else:
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
@@ -668,6 +670,7 @@ def user_send_template_msg(request):
                 response.msg = "企业用户发送模板消息失败"
             i = i + 1
             if i  == 10:  # 限制最多重试十次。
+                print('---- 限制最多重试十次 ---->>')
                 flag = False
                 obj.update(formid='[]')
 
