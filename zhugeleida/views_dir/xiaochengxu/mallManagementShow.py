@@ -88,7 +88,7 @@ def mallManage(request):
         else:
             objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).exclude(goodsStatus=2)
             count = objs.count()
-            
+
             if objs:
                 if length != 0:
                     start_line = (current_page - 1) * length

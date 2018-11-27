@@ -27,7 +27,7 @@ class AddForm(forms.Form):
         if not objs:
             self.add_error('orderNumber', '无此订单！')
         else:
-            tuiKuanObjs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=orderNumber)
+            tuiKuanObjs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=objs[0].id)
             if not tuiKuanObjs:
                 return orderNumber
             else:

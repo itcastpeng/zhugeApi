@@ -16,6 +16,7 @@ def theOrder(request):
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
     u_id = request.GET.get('u_id')
+    company_id = request.GET.get('company_id')
 
     if forms_obj.is_valid():
         q = Q()
@@ -37,7 +38,8 @@ def theOrder(request):
             q.add(Q(id=detailId), Q.AND)
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(
-            shouHuoRen_id=user_id, logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
+            shouHuoRen_id=user_id,gongsimingcheng_id=company_id,yewuUser_id=u_id, logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
+
         if objs:
 
             objsCount = objs.count()
@@ -54,11 +56,7 @@ def theOrder(request):
                 if obj.yewuUser:
                     username = obj.yewuUser.username
                     yewu = obj.yewuUser_id
-                # tuikuan = 0
-                # tuiKuanStatus = 0
-                # if obj.theOrderStatus in [2, 3, 4, 5]:
-                #     tuikuan = 1
-                #     tuiKuanStatus = obj.theOrderStatus
+
                 # 轮播图
                 topLunBoTu = ''
                 if obj.shangpinguanli.topLunBoTu:

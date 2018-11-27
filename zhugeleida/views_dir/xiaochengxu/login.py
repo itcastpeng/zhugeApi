@@ -51,7 +51,6 @@ def login(request):
 
     if request.method == "GET":
         print('-------【小程序登录啦】 request.GET 数据是: ------->', request.GET)
-        customer_id = request.GET.get('user_id')
         version_num = request.GET.get('user_version')
 
         forms_obj = SmallProgramAddForm(request.GET)

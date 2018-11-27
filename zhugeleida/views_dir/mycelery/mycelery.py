@@ -581,10 +581,9 @@ def user_send_template_msg(request):
     while flag:
 
         post_template_data = {}
-
-        component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
         key_name = '%s_authorizer_access_token' % (authorizer_appid)
         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+        print('------- [1] redis取出的 authorizer_access_token ------>>', authorizer_access_token)
 
         if not authorizer_access_token:
             data = {
@@ -594,8 +593,9 @@ def user_send_template_msg(request):
 
             }
             authorizer_access_token = create_authorizer_access_token(data)
+            print('------- [3] 新出锅的 authorizer_access_token ------>>', authorizer_access_token)
 
-        print('------- 使用的 authorizer_access_token ------>>',authorizer_access_token)
+        print('------- [3] 最后的 authorizer_access_token ------>>',authorizer_access_token)
         get_template_data = {
             'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
         }
