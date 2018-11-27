@@ -21,7 +21,7 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_
     ChatPostForm as xiaochengxu_ChatPostForm
 
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
-# import uwsgi
+import uwsgi
 import redis
 
 # @accept_websocket  # 既能接受http也能接受websocket请求
