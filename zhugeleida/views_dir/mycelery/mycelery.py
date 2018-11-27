@@ -577,12 +577,10 @@ def user_send_template_msg(request):
     user_name = objs[0].user.username
     flag = True
     i = 0
+    j = 0
     while flag:
 
         post_template_data = {}
-        # get_token_data['appid'] = authorization_appid
-        # get_token_data['secret'] = authorization_secret
-        # get_token_data['grant_type'] = 'client_credential'
 
         component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
         key_name = '%s_authorizer_access_token' % (authorizer_appid)
@@ -661,13 +659,20 @@ def user_send_template_msg(request):
                 flag = False
 
             elif template_ret.get('errcode') == 40001:
+                # 如果是token不对的话,只重试3次
+                j = j + 1
                 rc.delete(key_name)
+                authorizer_access_token = ''
+                if j == 3:
+                    flag = False
+
                 continue
 
             else:
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
+
             i = i + 1
             if i  == 10:  # 限制最多重试十次。
                 print('---- 限制最多重试十次 ---->>')

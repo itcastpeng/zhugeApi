@@ -34,6 +34,7 @@ def mallManage(request):
         if detaileId:
             print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
             objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).filter(id=detaileId).exclude(goodsStatus=2)
+            count = objs.count()
             if objs:
 
                 if length != 0:
@@ -77,7 +78,8 @@ def mallManage(request):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                     'otherData':otherData
+                     'otherData':otherData,
+                     'count' : count
                 }
             else:
                 response.code = 302
@@ -85,10 +87,9 @@ def mallManage(request):
 
         else:
             objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).exclude(goodsStatus=2)
-
+            count = objs.count()
+            
             if objs:
-
-
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
@@ -115,6 +116,7 @@ def mallManage(request):
                 response.data = {
                     'indexLunBoTu':indexLunBoTu,
                     'otherData':otherData,
+                    'count': count
                 }
 
             else:
