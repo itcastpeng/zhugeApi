@@ -592,6 +592,7 @@ def user_send_template_msg(request):
                 'authorizer_appid': authorizer_appid,
 
             }
+            print('------ 使用的 data ------>>',data)
             authorizer_access_token = create_authorizer_access_token(data)
             print('------- [3] 新出锅的 authorizer_access_token ------>>', authorizer_access_token)
 
