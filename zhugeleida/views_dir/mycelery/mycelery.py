@@ -593,7 +593,9 @@ def user_send_template_msg(request):
 
             }
             print('------ 使用的 data ------>>',data)
-            authorizer_access_token = create_authorizer_access_token(data)
+            authorizer_access_token_ret = create_authorizer_access_token(data)
+            authorizer_access_token = authorizer_access_token_ret.data
+
             print('------- [3] 新出锅的 authorizer_access_token ------>>', authorizer_access_token)
 
         print('------- [3] 最后的 authorizer_access_token ------>>',authorizer_access_token)
