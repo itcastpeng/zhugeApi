@@ -258,7 +258,7 @@ def chat_oper(request, oper_type, o_id):
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
-                    'chatinfo_count': chatinfo_count,
+                    'chatinfo_count': chatinfo_count
                 }
 
             else:

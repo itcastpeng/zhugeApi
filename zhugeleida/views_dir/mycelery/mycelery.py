@@ -577,16 +577,13 @@ def user_send_template_msg(request):
     user_name = objs[0].user.username
     flag = True
     i = 0
+    j = 0
     while flag:
 
         post_template_data = {}
-        # get_token_data['appid'] = authorization_appid
-        # get_token_data['secret'] = authorization_secret
-        # get_token_data['grant_type'] = 'client_credential'
-
-        component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
         key_name = '%s_authorizer_access_token' % (authorizer_appid)
         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+        print('------- [1] redis取出的 authorizer_access_token ------>>', authorizer_access_token)
 
         if not authorizer_access_token:
             data = {
@@ -595,8 +592,13 @@ def user_send_template_msg(request):
                 'authorizer_appid': authorizer_appid,
 
             }
-            authorizer_access_token = create_authorizer_access_token(data)
+            print('------ 使用的 data ------>>',data)
+            authorizer_access_token_ret = create_authorizer_access_token(data)
+            authorizer_access_token = authorizer_access_token_ret.data
 
+            print('------- [3] 新出锅的 authorizer_access_token ------>>', authorizer_access_token)
+
+        print('------- [3] 最后的 authorizer_access_token ------>>',authorizer_access_token)
         get_template_data = {
             'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
         }
@@ -660,14 +662,23 @@ def user_send_template_msg(request):
                 flag = False
 
             elif template_ret.get('errcode') == 40001:
+                # 如果是token不对的话,只重试3次
+                j = j + 1
                 rc.delete(key_name)
+                authorizer_access_token = ''
+                if j == 3:
+                    flag = False
+
+                continue
 
             else:
                 print('-----企业用户 send to 小程序 Template 消息 Failed---->>', )
                 response.code = 301
                 response.msg = "企业用户发送模板消息失败"
+
             i = i + 1
             if i  == 10:  # 限制最多重试十次。
+                print('---- 限制最多重试十次 ---->>')
                 flag = False
                 obj.update(formid='[]')
 
@@ -1414,10 +1425,23 @@ def user_focus_send_activity_redPacket(request):
                             app_objs.update(
                                 reason=response_ret.msg
                             )
-                    else:
+
+                    elif is_subscribe == 1 and is_receive_redPacket == 1:
+
+                        a_data = {}
+                        user_id = models.zgld_userprofile.objects.filter(company_id=company_id,status=1).order_by('?')[0].id
+                        a_data['customer_id'] = customer_id
+                        a_data['user_id'] = user_id
+                        a_data['type'] = 'gongzhonghao_template_tishi'
+                        a_data['content'] = json.dumps({'msg': '您好,您已经领取过红包喽,可转发【公众号】推荐给您的好友哦!', 'info_type': 1})
+
+                        print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+                        tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
                         response.code = 302
                         response.msg = '没有订阅公众号或者应发过红包'
                         print('------没有订阅公众号或者应发过红包 customer_id | openid ----->>', customer_id, "|", openid)
+
                 else:
                     response.code = 301
                     response.msg = '客户不存在'

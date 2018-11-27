@@ -209,11 +209,11 @@ def plugin_report_oper(request, oper_type, o_id):
         elif oper_type == "delete":
             print('------delete o_id --------->>', o_id)
             user_id = request.GET.get('user_id')
-            mingpian_objs = models.zgld_plugin_report.objects.filter(id=o_id, user_id=user_id)
+            mingpian_objs = models.zgld_plugin_report.objects.filter(id=o_id)
 
             if mingpian_objs:
                 article_set_count = mingpian_objs[0].zgld_article_set.all().count()
-                if article_set_count > 0:
+                if article_set_count == 0:
                     mingpian_objs.delete()
                     response.code = 200
                     response.msg = "删除成功"
@@ -261,15 +261,16 @@ def plugin_report_oper(request, oper_type, o_id):
 
 
                 report_id = forms_obj.cleaned_data['id']
-                obj = models.zgld_plugin_report.objects.filter(
+                objs = models.zgld_plugin_report.objects.filter(
                     id=report_id
                 )
-                obj.update(**dict_data)
+                objs.update(**dict_data)
 
                 article_objs = models.zgld_article.objects.filter(plugin_report_id=report_id)
                 if article_objs:
+                    obj = objs[0]
                     insert_ads =  {
-                        'id': obj.id,
+                        'id': report_id,
                         'belong_user_id': obj.user_id,
                         'belong_user': obj.user.username,
                         # 广告位
@@ -290,9 +291,9 @@ def plugin_report_oper(request, oper_type, o_id):
                         insert_ads= json.dumps(insert_ads)
                     )
 
-
                 response.code = 200
                 response.msg = "修改成功"
+
             else:
                 # print("验证不通过")
                 print(forms_obj.errors)

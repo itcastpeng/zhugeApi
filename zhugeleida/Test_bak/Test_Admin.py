@@ -111,9 +111,11 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, params=get_data)
 
 
-# url = ip + "/zhugeleida/admin/gzh_auth_process/update/gzh_get_authorizer_info"
-# ret = requests.get(url, params=get_data)
-
+# url = ip + '/zhugeleida/admin/open_qiyeweixin/third_fang_single_login'  #
+# get_data['auth_code'] = 'CdpUdlQg3fLfi2-L6yzODsknfrCsMmIlOFpKEiQfslt5pTMLfEX2XquQESxfCTyBdZT1LwMNF4PIgGXsEpHoZ8kKqlu-iKlICMRgcjBRw0kclDg6y_FrGAw4JjWn2tpd'
+# get_data['state'] = 'scan_code_web_login'
+# ret = requests.get(url, params=get_data,data=post_data)
+#
 
 
 # url = ip + "/zhugeleida/admin/xcx_auth_process/update/3" #
@@ -152,6 +154,11 @@ ip = 'http://127.0.0.1:8001'
 
 # url = ip + '/zhugeleida/admin/gzh_auth_process'
 # ret = requests.get(url, params=get_data, data=post_data)
+
+
+# url = ip + '/zhugeleida/admin/gzh_auth_process'
+# ret = requests.get(url, params=get_data, data=post_data)
+
 
 
 # url = ip + "/zhugeleida/admin/gzh_auth_process/update/app_id" #
@@ -352,7 +359,11 @@ ip = 'http://127.0.0.1:8001'
 
 
 
-
+# url =  ip + '/zhugeleida/admin/activity_manage/query_focus_gongzhonghao_customer'  # 获取产品的列表
+# get_data['company_id'] = 1
+# get_data['is_receive_redPacket'] = 1
+#
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 
 ##################################### 文章 + 文章标签 + 文章增删改查 ###############################

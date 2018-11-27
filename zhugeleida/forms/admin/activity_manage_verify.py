@@ -255,6 +255,43 @@ class ActivitySelectForm(forms.Form):
         return length
 
 
+class QueryFocusCustomerSelectForm(forms.Form):
+
+
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
+
+
 
 class ArticleRedPacketSelectForm(forms.Form):
 

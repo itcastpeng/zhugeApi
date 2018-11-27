@@ -26,7 +26,7 @@ def tuiKuanDingDan(request):
         xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
         q = Q()
         if status:
-            q.add(Q(tuiKuanStatus=status), Q.AND)
+            q.add(Q(orderNumber__theOrderStatus=status), Q.AND)
 
         objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related(
             'orderNumber'
@@ -39,6 +39,7 @@ def tuiKuanDingDan(request):
             start_line = (current_page - 1) * length
             stop_line = start_line + length
             objs = objs[start_line: stop_line]
+
         otherData = []
         for obj in objs:
             tuikuan = ''
@@ -125,7 +126,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                     jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
                         xiaochengxuApp_id=xiaochengxu_app[0].id)
 
-                    SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
+                    # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
+                    SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao
                     url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
                     jine = 0
                     if objs[0].orderNumber.yingFuKuan:

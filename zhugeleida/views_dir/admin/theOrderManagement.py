@@ -27,6 +27,7 @@ def theOrder(request):
         theOrderStatus = request.GET.get('theOrderStatus')              # 订单状态
         startCompletionTime = request.GET.get('startCompletionTime')    # 开始完成时间
         stopCompletionTime = request.GET.get('stopCompletionTime')      # 结束完成时间
+
         if start_createDate and stop_createDate:
             q.add(Q(createDate__gte=start_createDate) & Q(createDate__lte=stop_createDate), Q.AND)
         if startCompletionTime and stopCompletionTime:
@@ -41,16 +42,19 @@ def theOrder(request):
             q.add(Q(goodsName__contains=goodsName), Q.AND)
         print('q)------------> ',q)
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
+        company_id = u_idObjs[0].company_id
+
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
-            shangpinguanli__parentName__mallSetting__xiaochengxuApp=xiaochengxu_id
+            gongsimingcheng_id=company_id
         ).filter(q).order_by('-createDate')
         objsCount = objs.count()
+
         if length != 0:
             start_line = (current_page - 1) * length
             stop_line = start_line + length
             objs = objs[start_line: stop_line]
+
         otherData = []
         for obj in objs:
             print('obj.shangpinguanli.goodsName----------> ',obj.shangpinguanli.goodsName)
@@ -67,12 +71,6 @@ def theOrder(request):
             if obj.shangpinguanli.topLunBoTu:
                 topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
 
-            # countPrice = ''
-            # num = 1
-            # if obj.unitRiceNum:
-            #     num = obj.unitRiceNum
-            # if num and shangpinguanli.goodsPrice:
-            #     countPrice = int(shangpinguanli.goodsPrice) * int(num)
             detailePicture = ''
             if objs[0].detailePicture:
                 detailePicture = json.loads(objs[0].detailePicture)

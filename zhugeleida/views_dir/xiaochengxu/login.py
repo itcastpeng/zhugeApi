@@ -51,7 +51,6 @@ def login(request):
 
     if request.method == "GET":
         print('-------【小程序登录啦】 request.GET 数据是: ------->', request.GET)
-        customer_id = request.GET.get('user_id')
         version_num = request.GET.get('user_version')
 
         forms_obj = SmallProgramAddForm(request.GET)
@@ -72,7 +71,7 @@ def login(request):
                 print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
 
             if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
-                user_id = models.zgld_userprofile.objects.filter(company_id=company_id).order_by('?')[0].id
+                user_id = models.zgld_userprofile.objects.filter(company_id=company_id,status=1).order_by('?')[0].id
                 print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,user_id)
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
@@ -380,6 +379,12 @@ def bottom_button_info(request):
                 "order": 3
             }
         elif shopping_type == 2:  # 2、 代表商城
+            shangChengName = ''
+            _objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+            if _objs:
+                _obj = _objs[0]
+                shangChengName = _obj.shangChengName
+
             shopping_info_dict = {
                 "default_url": "icon_store_01.png",
                 "selected_url": "icon_store_02.png",
@@ -387,6 +392,7 @@ def bottom_button_info(request):
                 "text": "商城",
                 "order": 3
             }
+            ret_data['shangChengName'] = shangChengName
 
         buttom_navigation_data_list.insert(2, shopping_info_dict)
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list

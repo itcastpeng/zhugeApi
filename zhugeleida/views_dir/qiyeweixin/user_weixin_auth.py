@@ -170,6 +170,9 @@ def work_weixin_auth(request, company_id):
     return JsonResponse(response.__dict__)
 
 
+    # 从微信小程序接口中获取openid等信息
+
+
 # 雷达用户登录操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -312,6 +315,11 @@ def work_weixin_auth_oper(request,oper_type):
             else:
                 response.code = 301
                 response.msg = "没有公众号app"
+
+
+
+
+
 
     return JsonResponse(response.__dict__)
 

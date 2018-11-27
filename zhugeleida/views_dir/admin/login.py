@@ -28,7 +28,7 @@ def login(request):
             password=account.str_encrypt(password),
             status=1
         )
-
+        print('--- password=account.str_encrypt(password) --->>',account.str_encrypt(password))
         if userprofile_objs:
             print('用户存在')
             # 如果有数据 查询第一条对象
@@ -91,7 +91,7 @@ def login(request):
         response.code = 402
         response.msg = "请求异常"
         response.data = json.loads(form_obj.errors.as_json())
-    print('调试登录 ->', response.__dict__)
+
     return JsonResponse(response.__dict__)
 
 
