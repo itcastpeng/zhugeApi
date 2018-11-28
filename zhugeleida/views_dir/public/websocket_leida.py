@@ -268,7 +268,7 @@ def websocket(request, oper_type):
                     return JsonResponse(ret_data.__dict__)
 
     elif oper_type == 'xiaochengxu':
-
+        redis_user_query_info_key = ''
         redis_customer_id_key = ''
         user_id = ''
         customer_id = ''
@@ -445,7 +445,7 @@ def websocket(request, oper_type):
 
                         rc.set(redis_user_id_key, True)
                         rc.set(redis_customer_id_key, True)
-
+                        rc.set(redis_user_query_info_key, True)  # 代表 客户消息的数量发生了变化
 
                         uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
 
