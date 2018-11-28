@@ -578,7 +578,7 @@ def websocket(request, oper_type):
                 chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
 
                 response_data = {
-                    'data': {
+                    'msg_data': {
                          'chatinfo_count': chatinfo_count,
                     },
                     'code': 200,
