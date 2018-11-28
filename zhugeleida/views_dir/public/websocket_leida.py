@@ -508,7 +508,7 @@ def websocket(request, oper_type):
 
                     print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(1)
+                        time.sleep(2)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
