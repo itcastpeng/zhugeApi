@@ -527,7 +527,20 @@ def websocket(request, oper_type):
                     redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                     if type == 'register':
-                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                        chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                             customer_id=customer_id,
+                                                                             send_type=2, is_user_new_msg=True).count()
+
+                        response_data = {
+                            'data': {
+                                'chatinfo_count': chatinfo_count,
+                            },
+                            'code': 200,
+                            'msg': '注册成功',
+                        }
+
+                        uwsgi.websocket_send(json.dumps(response_data))
+                        # uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
                         continue
 
                     if type == 'closed':
@@ -612,8 +625,19 @@ def websocket(request, oper_type):
                     redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
 
                     if type == 'register':
+                        chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                             customer_id=customer_id, send_type=1,
+                                                                             is_customer_new_msg=True).count()
 
-                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                        response_data = {
+                            'msg_data': {
+                                'chatinfo_count': chatinfo_count,
+                            },
+                            'code': 200,
+                            'msg': '注册成功',
+                        }
+                        # uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                        uwsgi.websocket_send(json.dumps(response_data))
                         continue
 
                     if type == 'closed':
