@@ -38,6 +38,7 @@ def websocket(request, oper_type):
         redis_user_id_key = ''
         redis_customer_id_key = ''
         redis_customer_query_info_key = ''
+        redis_user_query_info_key = ''
         user_id = ''
         customer_id = ''
         uwsgi.websocket_handshake()
@@ -46,9 +47,11 @@ def websocket(request, oper_type):
 
             redis_user_id_key_flag = rc.get(redis_user_id_key)
             redis_customer_id_flag = rc.get(redis_customer_id_key) # 判断 小程序是否已读了
+            if user_id:
+                rc.set(redis_user_query_info_key, False)
 
             print('---- 雷达 Flag 循环  uid: %s | customer_id: %s --->>',user_id,customer_id)
-            if redis_user_id_key_flag == 'True':
+            if redis_user_id_key_flag == 'True' and user_id and customer_id:
                 print('---- 雷达 Flag 为真 --->>', redis_user_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -123,7 +126,7 @@ def websocket(request, oper_type):
                     print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
-            if redis_customer_id_flag == 'False':
+            if redis_customer_id_flag == 'False' and user_id and customer_id:
 
                 response_data = {
                     'data': {
@@ -160,6 +163,7 @@ def websocket(request, oper_type):
                     redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                     redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
                     redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
+                    redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                     if type == 'register':
                         continue
@@ -278,7 +282,7 @@ def websocket(request, oper_type):
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
             print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
-            if redis_customer_id_key_flag == 'True':
+            if redis_customer_id_key_flag == 'True' and user_id and customer_id:
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
