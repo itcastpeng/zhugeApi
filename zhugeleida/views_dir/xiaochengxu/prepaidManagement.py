@@ -68,38 +68,46 @@ def payback(request):
     # cash_fee = collection.getElementsByTagName("cash_fee")[0].childNodes[0].data        # 钱数
     # out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
 
-    theOrderStatus = 9
-    dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=resultData['out_trade_no'])
+
+    dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=resultData['out_trade_no'],theOrderStatus=1)
     print('=========================回调订单号===============================> ', resultData['out_trade_no'])
     nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print('=-------------------------当前时间---------------------->', nowDate, type(nowDate))
-    if resultData['return_code'] == 'SUCCESS':
-        if dingDanobjs:
-            # 二次 查询是否付款成功
-            result_data = {
-                'appid': resultData['appid'],                 # appid
-                'mch_id': resultData['mch_id'],               # 商户号
-                'out_trade_no': resultData['out_trade_no'],   # 订单号
-                'nonce_str': generateRandomStamping(),  # 32位随机值
-            }
-            url = 'https://api.mch.weixin.qq.com/pay/orderquery'
-            objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxuApp').filter(xiaochengxuApp__authorization_appid=resultData['appid'])
-            SHANGHUKEY = objs[0].shangHuMiYao
-            stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
-            result_data['sign'] = md5(stringSignTemp).upper()
-            xml_data = toXml(result_data)
-            ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
-            ret.encoding = 'utf8'
-            DOMTree = xmldom.parseString(ret.text)
-            collection = DOMTree.documentElement
-            return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-            print('===============================return_code======================> ', return_code)
-            if return_code == 'SUCCESS':
-                    theOrderStatus=8        # 支付成功 改订单状态成功
-    dingDanobjs.update(
-        theOrderStatus=theOrderStatus,  # 支付失败 改订单状态失败
-        stopDateTime=nowDate
-    )
+
+    if dingDanobjs:
+        if resultData['return_code'] == 'SUCCESS':
+            if dingDanobjs:
+                # 二次 查询是否付款成功
+                result_data = {
+                    'appid': resultData['appid'],                 # appid
+                    'mch_id': resultData['mch_id'],               # 商户号
+                    'out_trade_no': resultData['out_trade_no'],   # 订单号
+                    'nonce_str': generateRandomStamping(),  # 32位随机值
+                }
+                url = 'https://api.mch.weixin.qq.com/pay/orderquery'
+                objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxuApp').filter(xiaochengxuApp__authorization_appid=resultData['appid'])
+                SHANGHUKEY = objs[0].shangHuMiYao
+                stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
+                result_data['sign'] = md5(stringSignTemp).upper()
+                xml_data = toXml(result_data)
+                ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
+                ret.encoding = 'utf8'
+                DOMTree = xmldom.parseString(ret.text)
+                collection = DOMTree.documentElement
+                return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+                print('===============================return_code======================> ', return_code)
+                if return_code == 'SUCCESS':
+                    dingDanobjs.update(
+                            theOrderStatus=8,   # 支付成功 改订单状态成功
+                            stopDateTime=nowDate
+                        )
+
+        else:
+            dingDanobjs.update(
+                theOrderStatus=9,  # 支付失败 改订单状态失败
+                stopDateTime=nowDate
+            )
+
     response.code = 200
     response.data = ''
     response.msg = ''
@@ -248,6 +256,7 @@ def yuZhiFu(request):
         else:
             response.code = 301
             response.msg = json.loads(forms_obj.errors.as_json())
+
             return JsonResponse(response.__dict__)
     else:
         response.code = 402
