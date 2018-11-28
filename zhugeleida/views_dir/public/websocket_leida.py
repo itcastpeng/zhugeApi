@@ -165,6 +165,7 @@ def websocket(request, oper_type):
                         continue
 
                     if type == 'closed':
+                        rc.set(redis_customer_query_info_key, True)  # 代表 客户消息的数量发生了变化
                         ret_data = {
                             'code': 200,
                             'msg': '确认关闭 uid:%s | customer_id: %s' %(user_id,customer_id)
@@ -484,27 +485,21 @@ def websocket(request, oper_type):
             print('---- 小程序【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
             if redis_customer_query_info_key_flag == 'True':
                 print('---- 小程序【消息数量】 Flag 为 True  --->>', redis_customer_query_info_key_flag)
-                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-                    userprofile_id=user_id,
-                    customer_id=customer_id,
-                    is_customer_new_msg=True
-                )
-                count = objs.count()
-                if objs:
+                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
 
-                    response_data = {
-                        'data': {
+                response_data = {
+                    'data': {
 
-                            'data_count': count,
-                        },
-                        'code': 200,
-                        'msg': '实时获取小程序【消息数量】成功',
-                    }
+                         'data_count': chatinfo_count,
+                    },
+                    'code': 200,
+                    'msg': '实时获取小程序【消息数量】成功',
+                }
 
-                    rc.set(redis_customer_query_info_key, False)
+                rc.set(redis_customer_query_info_key, False)
 
-                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
-                    uwsgi.websocket_send(json.dumps(response_data))
+                print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                uwsgi.websocket_send(json.dumps(response_data))
 
             else:
                 try:
