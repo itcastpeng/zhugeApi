@@ -277,9 +277,10 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            # print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
+            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
             if redis_customer_id_key_flag == 'True':
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
+                print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
