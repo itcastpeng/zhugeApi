@@ -268,7 +268,7 @@ def websocket(request, oper_type):
                     return JsonResponse(ret_data.__dict__)
 
     elif oper_type == 'xiaochengxu':
-        redis_user_query_info_key = ''
+
         redis_customer_id_key = ''
         user_id = ''
         customer_id = ''
@@ -277,7 +277,7 @@ def websocket(request, oper_type):
         while True:
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
+            # print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
             if redis_customer_id_key_flag == 'True':
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
