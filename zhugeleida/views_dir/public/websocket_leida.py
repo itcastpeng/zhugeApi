@@ -388,6 +388,7 @@ def websocket(request, oper_type):
                     redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                     if type == 'register':
+                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
                         continue
 
                     if type == 'closed':
