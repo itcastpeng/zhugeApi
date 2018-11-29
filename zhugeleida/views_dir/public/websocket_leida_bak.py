@@ -15,11 +15,7 @@ from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_
     ChatPostForm as xiaochengxu_ChatPostForm
 
 from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
-try:
-    import uwsgi
-except ImportError as e:
-    pass
-
+import uwsgi
 import redis
 
 # @accept_websocket  # 既能接受http也能接受websocket请求
@@ -41,7 +37,7 @@ def websocket(request, oper_type):
 
         redis_user_id_key = ''
         redis_customer_id_key = ''
-        redis_user_query_info_key = ''
+        redis_customer_query_info_key = ''
         user_id = ''
         customer_id = ''
         uwsgi.websocket_handshake()
@@ -50,11 +46,9 @@ def websocket(request, oper_type):
 
             redis_user_id_key_flag = rc.get(redis_user_id_key)
             redis_customer_id_flag = rc.get(redis_customer_id_key) # 判断 小程序是否已读了
-            if user_id:
-                rc.set(redis_user_query_info_key, False)
 
             print('---- 雷达 Flag 循环  uid: %s | customer_id: %s --->>',user_id,customer_id)
-            if redis_user_id_key_flag == 'True' and user_id and customer_id:
+            if redis_user_id_key_flag == 'True':
                 print('---- 雷达 Flag 为真 --->>', redis_user_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -129,7 +123,7 @@ def websocket(request, oper_type):
                     print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
-            if redis_customer_id_flag == 'False' and user_id and customer_id:
+            if redis_customer_id_flag == 'False':
 
                 response_data = {
                     'data': {
@@ -166,7 +160,6 @@ def websocket(request, oper_type):
                     redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                     redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
                     redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
-                    redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                     if type == 'register':
                         continue
@@ -269,7 +262,7 @@ def websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
 
-                    print('----  报错:%s [雷达] 终止连接 uid: %s | customer_id: %s --->>' % e,str(user_id), str(customer_id))
+                    print('----  报错:%s [雷达] 终止连接 uid: %s | customer_id: %s --->>' % e,user_id, customer_id)
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data.__dict__)
@@ -285,7 +278,7 @@ def websocket(request, oper_type):
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
             print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
-            if redis_customer_id_key_flag == 'True' and user_id and customer_id:
+            if redis_customer_id_key_flag == 'True':
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
@@ -390,8 +383,7 @@ def websocket(request, oper_type):
                     redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
                     redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
-                    if type == 'register' or type == 'query_num':
-                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                    if type == 'register':
                         continue
 
                     if type == 'closed':
@@ -526,40 +518,25 @@ def websocket(request, oper_type):
                     user_id = _data.get('user_id')
                     customer_id = _data.get('customer_id')
 
+                    # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                    redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
+
+                    if type == 'register':
+                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                        continue
+
+                    if type == 'closed':
+                        msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
+                        ret_data = {
+                            'code': 200,
+                            'msg': msg
+                        }
+                        # uwsgi.websocket_send(json.dumps(ret_data))
+                        return JsonResponse(ret_data.__dict__)
 
                     forms_obj = leida_ChatPostForm(_data)
-                    if  forms_obj.is_valid():
-                        # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-                        redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
+                    if not  forms_obj.is_valid():
 
-                        if type == 'register':
-                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                                 customer_id=customer_id,
-                                                                                 send_type=2,
-                                                                                 is_user_new_msg=True).count()
-
-                            response_data = {
-                                'data': {
-                                    'chatinfo_count': chatinfo_count,
-                                },
-                                'code': 200,
-                                'msg': '注册成功',
-                            }
-
-                            uwsgi.websocket_send(json.dumps(response_data))
-                            # uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
-
-                        elif type == 'closed':
-                            msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
-                            ret_data = {
-                                'code': 200,
-                                'msg': msg
-                            }
-                            # uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data.__dict__)
-
-
-                    else:
                         if not user_id or not customer_id:
                             ret_data = {
                                 'code': 401,
@@ -596,7 +573,7 @@ def websocket(request, oper_type):
                 chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
 
                 response_data = {
-                    'msg_data': {
+                    'data': {
                          'chatinfo_count': chatinfo_count,
                     },
                     'code': 200,
@@ -627,34 +604,25 @@ def websocket(request, oper_type):
 
 
                     # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                    redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
+
+                    if type == 'register':
+
+                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                        continue
+
+                    if type == 'closed':
+                        msg = '确认关闭  customer_id | uid | '+ str(customer_id) + "|" +  str(user_id)
+                        ret_data = {
+                            'code': 200,
+                            'msg': msg
+                        }
+                        # uwsgi.websocket_send(json.dumps(ret_data))
+                        return JsonResponse(ret_data.__dict__)
 
                     forms_obj = xiaochengxu_ChatPostForm(_data)
-                    if  forms_obj.is_valid():
-                        redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
-
-                        chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                             customer_id=customer_id, send_type=1,
-                                                                             is_customer_new_msg=True).count()
-
-
-                        if  type == 'query_num':
-                            response_data = {
-                                'msg_data': {
-                                    'chatinfo_count': chatinfo_count,
-                                },
-                                'code': 200,
-                                'msg': '获取成功',
-                            }
-                            uwsgi.websocket_send(json.dumps(response_data))
-
-                        elif type == 'closed':
-                            msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
-                            ret_data = {
-                                'code': 200,
-                                'msg': msg
-                            }
-                            # uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data.__dict__)
+                    if forms_obj.is_valid():
+                        pass
 
 
                     else:

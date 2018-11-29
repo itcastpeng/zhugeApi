@@ -82,7 +82,7 @@ class ChatPostForm(forms.Form):
     )
 
     content = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "消息不能为空"
         }

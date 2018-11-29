@@ -583,7 +583,7 @@ def user_send_template_msg(request):
         post_template_data = {}
         key_name = '%s_authorizer_access_token' % (authorizer_appid)
         authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
-        print('------- [1] redis取出的 authorizer_access_token ------>>', authorizer_access_token)
+        # print('------- [1] redis取出的 authorizer_access_token ------>>', authorizer_access_token)
 
         if not authorizer_access_token:
             data = {
@@ -592,11 +592,11 @@ def user_send_template_msg(request):
                 'authorizer_appid': authorizer_appid,
 
             }
-            print('------ 使用的 data ------>>',data)
+            # print('------ 使用的 data ------>>',data)
             authorizer_access_token_ret = create_authorizer_access_token(data)
             authorizer_access_token = authorizer_access_token_ret.data
 
-            print('------- [3] 新出锅的 authorizer_access_token ------>>', authorizer_access_token)
+            # print('------- [3] 新出锅的 authorizer_access_token ------>>', authorizer_access_token)
 
         print('------- [3] 最后的 authorizer_access_token ------>>',authorizer_access_token)
         get_template_data = {

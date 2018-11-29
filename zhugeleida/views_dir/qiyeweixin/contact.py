@@ -42,17 +42,22 @@ def contact(request):
                 chat_info_objs = chat_info_objs[start_line: stop_line]
 
             ret_data_list = []
-
             for obj in chat_info_objs:
-                print('--------chat_info_objs-------->>', obj.create_date)
+                print('-------- obj.id -------->>', obj.id)
 
                 # username = base64.b64decode(obj.customer.username)
                 # customer_name = str(username, 'utf-8')
 
                 try:
-                    username = base64.b64decode(obj.customer.username)
+                    customer_id = obj.customer_id
+                    if not customer_id:  # 没有customer_id
+                        continue
+
+                    _username = obj.customer.username
+
+                    username = base64.b64decode(_username)
                     customer_name = str(username, 'utf-8')
-                    print('----- 解密b64decode username----->', username)
+                    print('----- 解密b64decode username----->',customer_id,'|', username)
                 except Exception as e:
                     print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                     customer_name = '客户ID%s' % (obj.customer_id)
@@ -77,6 +82,7 @@ def contact(request):
 
                     elif info_type == 3:
                         msg = _content.get('msg')
+
                 _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=obj.userprofile_id,
                     customer_id=obj.customer_id,
@@ -87,7 +93,7 @@ def contact(request):
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,
-                    'customer_source' : obj.customer.user_type,
+                    'customer_source' : obj.customer.user_type or '',
                     'customer_source_text' : obj.customer.get_user_type_display(),
                     'src': obj.customer.headimgurl,
                     'name': customer_name,
