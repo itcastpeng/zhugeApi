@@ -92,8 +92,8 @@ def contact(request):
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,
-                    'customer_source' : obj.customer.user_type or '',
-                    'customer_source_text' : obj.customer.get_user_type_display(),
+                    # 'customer_source' : obj.customer.user_type or '',
+                    # 'customer_source_text' : obj.customer.get_user_type_display(),
                     'src': obj.customer.headimgurl,
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
