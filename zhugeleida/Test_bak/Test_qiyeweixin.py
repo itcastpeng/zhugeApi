@@ -491,10 +491,10 @@ import json
 # ret = requests.get(url, params=get_data)
 
 
-# url =  ip + '/zhugeleida/qiyeweixin/article/thread_base_info/1'  # 公众号文章基础信息
+url =  ip + '/zhugeleida/qiyeweixin/article/customer_base_info/1'  # 公众号文章基础信息
 # get_data['uid'] = 1
-# ret = requests.get(url, data = post_data ,params=get_data)
-#
+ret = requests.get(url, data = post_data ,params=get_data)
+
 
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/customer_effect_ranking_by_level/2'  # 获取产品的列表
@@ -726,12 +726,12 @@ import json
 # ret = requests.get(url, params=get_data)
 
 
-url = ip +   '/zhugeleida/mycelery/user_send_template_msg' # 分页 聊天信息记录
-get_data['data'] = json.dumps({'user_id': 14 , 'customer_id' : 24 })
-
-# get_data['type'] = 'gongzhonghao_template_chat'
-
-ret = requests.get(url, params=get_data)
+# url = ip +   '/zhugeleida/mycelery/user_send_template_msg' # 分页 聊天信息记录
+# get_data['data'] = json.dumps({'user_id': 14 , 'customer_id' : 24 })
+#
+# # get_data['type'] = 'gongzhonghao_template_chat'
+#
+# ret = requests.get(url, params=get_data)
 
 
 print(ret.text)

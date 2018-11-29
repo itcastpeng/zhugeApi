@@ -41,7 +41,6 @@ def websocket(request, oper_type):
 
         redis_user_id_key = ''
         redis_customer_id_key = ''
-        redis_customer_query_info_key = ''
         redis_user_query_info_key = ''
         user_id = ''
         customer_id = ''

@@ -289,10 +289,19 @@ def article_oper(request, oper_type, o_id):
             forms_obj = ThreadPictureForm(request_data_dict)
             if forms_obj.is_valid():
                 article_id = forms_obj.cleaned_data.get('article_id')
-                objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(
-                    article_id=article_id,
-                    # user_id=user_id
-                ).order_by('-level')
+                uid = forms_obj.cleaned_data.get('uid')
+                q1 = Q()
+                q1.connector = 'AND'
+                q1.children.append(('article_id', article_id))
+                if uid:
+                    q1.children.append(('user_id', uid))
+
+                # q1.add(Q(**{'id': user_id}), Q.AND)
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(q1).order_by(
+                    '-level')
+
                 if objs:
                     level_num = objs[0].level
                     title = objs[0].article.title
