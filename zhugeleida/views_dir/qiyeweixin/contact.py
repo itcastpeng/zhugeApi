@@ -50,7 +50,11 @@ def contact(request):
                 # customer_name = str(username, 'utf-8')
 
                 try:
-                    username = base64.b64decode(obj.customer.username)
+                    _username = obj.customer.username
+
+                    if not _username:
+                        continue
+                    username = base64.b64decode(_username)
                     customer_name = str(username, 'utf-8')
                     print('----- 解密b64decode username----->', username)
                 except Exception as e:
