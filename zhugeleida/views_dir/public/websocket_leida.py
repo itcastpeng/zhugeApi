@@ -633,19 +633,8 @@ def websocket(request, oper_type):
                                                                              customer_id=customer_id, send_type=1,
                                                                              is_customer_new_msg=True).count()
 
-                        if type == 'register':
-                            response_data = {
-                                'msg_data': {
-                                    'chatinfo_count': chatinfo_count,
-                                },
-                                'code': 200,
-                                'msg': '注册成功',
-                            }
-                            # uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
-                            uwsgi.websocket_send(json.dumps(response_data))
 
-
-                        elif type == 'query_num':
+                        if  type == 'query_num':
                             response_data = {
                                 'msg_data': {
                                     'chatinfo_count': chatinfo_count,
