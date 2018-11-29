@@ -239,7 +239,7 @@ def article_oper(request, oper_type, o_id):
                     if mingpian_avatar_objs:
                         mingpian_avatar = mingpian_avatar_objs[0].photo_url
                     else:
-                        mingpian_avatar =  obj.userprofile.avatar
+                        mingpian_avatar =  obj.user.avatar
 
                     zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
                     insert_ads['username'] = zgld_userprofile_obj.username

@@ -491,8 +491,8 @@ import json
 # ret = requests.get(url, params=get_data)
 
 
-url =  ip + '/zhugeleida/qiyeweixin/article/customer_base_info/1'  # 公众号文章基础信息
-# get_data['uid'] = 1
+url =  ip + '/zhugeleida/qiyeweixin/article/customer_base_info/2'  # 公众号文章基础信息
+get_data['uid'] = 18
 ret = requests.get(url, data = post_data ,params=get_data)
 
 
