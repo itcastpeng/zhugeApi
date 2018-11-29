@@ -54,7 +54,7 @@ def contact(request):
                         continue
 
                     _username = obj.customer.username
-                
+
                     username = base64.b64decode(_username)
                     customer_name = str(username, 'utf-8')
                     print('----- 解密b64decode username----->',customer_id,'|', username)

@@ -291,7 +291,7 @@ def article_oper(request, oper_type, o_id):
                 article_id = forms_obj.cleaned_data.get('article_id')
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(
                     article_id=article_id,
-                    user_id=user_id
+                    # user_id=user_id
                 ).order_by('-level')
                 if objs:
                     level_num = objs[0].level
@@ -475,6 +475,7 @@ def article_oper(request, oper_type, o_id):
                 print('------- 未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
 
         # 每个文章的潜在客户的访问数据和访问日志
         elif oper_type == 'hide_customer_data':
