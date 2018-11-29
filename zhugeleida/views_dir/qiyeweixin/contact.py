@@ -51,8 +51,9 @@ def contact(request):
 
                 try:
                     _username = obj.customer.username
+                    user_type = obj.customer.user_type
 
-                    if not _username:
+                    if not _username and not user_type:
                         continue
                     username = base64.b64decode(_username)
                     customer_name = str(username, 'utf-8')
