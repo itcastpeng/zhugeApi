@@ -57,7 +57,7 @@ def contact(request):
                         continue
                     username = base64.b64decode(_username)
                     customer_name = str(username, 'utf-8')
-                    print('----- 解密b64decode username----->', username)
+                    print('----- 解密b64decode username----->',obj.customer_id, username)
                 except Exception as e:
                     print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                     customer_name = '客户ID%s' % (obj.customer_id)
