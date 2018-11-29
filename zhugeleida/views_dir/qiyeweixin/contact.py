@@ -49,14 +49,17 @@ def contact(request):
                 # customer_name = str(username, 'utf-8')
 
                 try:
+                    customer_id = obj.customer_id
                     _username = obj.customer.username
                     user_type = obj.customer.user_type
 
-                    if not _username and not user_type:
+                    if not customer_id: # 没有customer_id
                         continue
+
+
                     username = base64.b64decode(_username)
                     customer_name = str(username, 'utf-8')
-                    print('----- 解密b64decode username----->',obj.customer_id, username)
+                    print('----- 解密b64decode username----->',customer_id,'|', username)
                 except Exception as e:
                     print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                     customer_name = '客户ID%s' % (obj.customer_id)
@@ -92,8 +95,8 @@ def contact(request):
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,
-                    # 'customer_source' : obj.customer.user_type or '',
-                    # 'customer_source_text' : obj.customer.get_user_type_display(),
+                    'customer_source' : obj.customer.user_type or '',
+                    'customer_source_text' : obj.customer.get_user_type_display(),
                     'src': obj.customer.headimgurl,
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
