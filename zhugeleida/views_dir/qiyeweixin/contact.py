@@ -42,9 +42,8 @@ def contact(request):
                 chat_info_objs = chat_info_objs[start_line: stop_line]
 
             ret_data_list = []
-
             for obj in chat_info_objs:
-                print('--------chat_info_objs-------->>', obj.create_date)
+                print('-------- obj.id -------->>', obj.id)
 
                 # username = base64.b64decode(obj.customer.username)
                 # customer_name = str(username, 'utf-8')
@@ -82,6 +81,7 @@ def contact(request):
 
                     elif info_type == 3:
                         msg = _content.get('msg')
+
                 _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=obj.userprofile_id,
                     customer_id=obj.customer_id,
