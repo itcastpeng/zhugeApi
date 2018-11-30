@@ -14,7 +14,7 @@ timestamp = str(int(time.time() * 1000))
 get_data = {
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
-    'user_id': 55,  # 线上
+    'user_id': 1,  # 线上
     # 'user_id': 1,  # 线上
 
 }
@@ -504,7 +504,7 @@ import json
 
 url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_transmit_path/3'  # 获取产品的列表
 get_data['level'] =  5             # 用户所在层级
-get_data['customer_id'] = 855      # 客户ID
+get_data['customer_id'] = 1031      # 客户ID
 ret = requests.get(url, data = post_data ,params=get_data)
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/hide_customer_data/2'  # 获取产品的列表
