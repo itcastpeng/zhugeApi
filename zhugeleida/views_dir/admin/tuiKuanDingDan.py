@@ -129,12 +129,14 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                     # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
                     SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao
                     url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
+                    orderNumber_id = objs[0].orderNumber_id
                     jine = 0
                     if objs[0].orderNumber.yingFuKuan:
                         jine = int((objs[0].orderNumber.yingFuKuan) *100)
                     dingdan = ''
                     if objs[0].orderNumber.orderNumber:
                         dingdan = objs[0].orderNumber.orderNumber
+
                     if objs[0].tuikuandanhao:
                         TUIKUANDANHAO = objs[0].tuikuandanhao
                         result_data = {
@@ -174,10 +176,15 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 return JsonResponse(response.__dict__)
                             else:
                                 nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                objs.select_related('orderNumber').update(
-                                    tuiKuanDateTime=nowTime,
-                                    orderNumber__theOrderStatus=2
+                                objs.update(
+                                    tuiKuanDateTime=nowTime
+
                                 )
+                                dingdan_guanli_objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=orderNumber_id)
+                                if dingdan_guanli_objs:
+                                    dingdan_guanli_objs.update(
+                                        theOrderStatus=2,
+                                    )
                                 response.code = 200
                                 response.msg = '退款成功'
                         else:
