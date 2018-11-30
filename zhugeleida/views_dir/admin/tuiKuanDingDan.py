@@ -110,13 +110,14 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             status = request.POST.get('status')
             user_id = request.GET.get('user_id')
             objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(id=o_id)
-            if status:
-                # if int(status) == 1:
-                #     objs.update(tuiKuanStatus=2)
-                #     response.msg = '修改成功'
+            if status and objs:
+
                 # 调用微信接口 申请退款
                 other = []
-                if int(status) == 2:
+                orderNumber_id = objs[0].orderNumber_id
+                dingdan_guanli_objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=orderNumber_id)
+
+                if int(status) == 2 and dingdan_guanli_objs:
                     # objs.update(orderNumber__theOrderStatus=4) # 更新状态 退款中
                     # 获取appid
                     u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
@@ -129,7 +130,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                     # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
                     SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao
                     url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
-                    orderNumber_id = objs[0].orderNumber_id
+
                     jine = 0
                     if objs[0].orderNumber.yingFuKuan:
                         jine = int((objs[0].orderNumber.yingFuKuan) *100)
@@ -169,6 +170,10 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         collection = DOMTree.documentElement
                         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
 
+                        # 记录返回的xml日志
+                        objs.update(
+                            remark=ret.text
+                        )
                         if return_code == 'SUCCESS':
                             if collection.getElementsByTagName("err_code_des"):
                                 err_code_des = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
@@ -180,25 +185,35 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                     tuiKuanDateTime=nowTime
 
                                 )
-                                dingdan_guanli_objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=orderNumber_id)
-                                if dingdan_guanli_objs:
-                                    dingdan_guanli_objs.update(
-                                        theOrderStatus=2,
-                                    )
+
+                                dingdan_guanli_objs.update(
+                                    theOrderStatus=2,
+                                )
                                 response.code = 200
                                 response.msg = '退款成功'
+
                         else:
+                            dingdan_guanli_objs.update( # (3, '退款失败'),
+                                theOrderStatus=3
+                            )
                             response.code = 301
                             response.msg = '退款失败'
-                            # objs.update(tuiKuanStatus=1)
+
                     else:
                         response.code = 301
                         response.msg = '无退款单号'
-                else:
-                    objs.update(orderNumber__theOrderStatus=3)
+
+                elif int(status) == 5:
+                    dingdan_guanli_objs.update( # (5, '拒绝退款'),
+                        theOrderStatus=5,
+                    )
                     response.msg = '卖家拒绝退款'
                     response.code = 301
-                # response.data = {'other':other}
+
+
+            else:
+                response.code = 301
+                response.msg = "退款订单不存在"
 
     else:
         response.code = 402

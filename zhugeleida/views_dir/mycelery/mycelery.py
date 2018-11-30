@@ -1523,8 +1523,8 @@ def binding_article_customer_relate(request):
     article_id = request.GET.get('article_id')  # 公众号文章ID
     customer_id = request.GET.get('customer_id')  # 公众号客户ID
     user_id = request.GET.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
-    level = request.GET.get('level')     # 公众号层级
-    parent_id = request.GET.get('pid')   # 所属的父级的客户ID。为空代表第一级。
+    level = request.GET.get('level')      # 公众号层级
+    parent_id = request.GET.get('pid')    # 所属的父级的客户ID。为空代表第一级。
     company_id = request.GET.get('company_id')  # 所属的父级的客户ID。为空代表第一级。
 
     q = Q()
@@ -1534,7 +1534,27 @@ def binding_article_customer_relate(request):
     q.add(Q(**{'level': level}), Q.AND)
 
     if parent_id:
+        # 找到这个用户的父级并给它打上一个有[孩子的]的标签
+        if level:
+            level = int(level) - 1
+        q1 = Q()
+        q1.add(Q(**{'article_id': article_id}), Q.AND)
+        q1.add(Q(**{'customer_id': parent_id}), Q.AND)
+        q1.add(Q(**{'user_id': user_id}), Q.AND)
+        q1.add(Q(**{'level': level}), Q.AND)
+        _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
+        if _objs:
+            print('----- 给父级的客户,打上一个有[孩子的]的标签【成功】 |  搜索条件 q1:----->>',q1)
+            _objs.update(
+                is_have_child = True
+            )
+
+        else:
+            print('----- [没有找到]父级的客户, 打有[孩子的]的标签【失败】 |  搜索条件 q1:----->>', q1)
+
         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+
+
     else:
         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
@@ -1567,8 +1587,7 @@ def binding_article_customer_relate(request):
         # response.msg = "关系存在"
 
     else:
-        print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
-              user_id)
+        print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
         models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1,2,4])

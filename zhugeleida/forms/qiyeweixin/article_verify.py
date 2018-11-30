@@ -218,7 +218,7 @@ class ThreadPictureForm(forms.Form):
             return article_id
 
 class EffectRankingByLevelForm(forms.Form):
-    level = forms.CharField(
+    level = forms.IntegerField(
         required=True,
         error_messages={
             'required': '层级不能为空'

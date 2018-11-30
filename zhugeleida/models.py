@@ -931,7 +931,7 @@ class zgld_article_to_customer_belonger(models.Model):
     forward_count = models.IntegerField(verbose_name="被转发个数",default=0)
     forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
-
+    is_have_child =  models.BooleanField(verbose_name='这个客户是否有子级',default=False)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -1161,16 +1161,9 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     # tuiKuanJin_e = models.CharField(verbose_name='退款金额', max_length=64, null=True, blank=True)
     shengChengDateTime = models.DateTimeField(verbose_name='生成时间', auto_now_add=True)
     tuiKuanDateTime = models.DateTimeField(verbose_name='退款时间', null=True, blank=True)
-    # tuikuan_status = (
-    #     (1, '退款中, 等待卖家确认'),
-    #     (2, '退款完成'),
-    #     (3, '退款失败'),
-    #     (4, '退款中'),
-    #     (5, '拒绝退款'),
-    # )
-    # tuiKuanStatus = models.SmallIntegerField(verbose_name='退款状态', choices=tuikuan_status, default=1)
     tuikuandanhao = models.CharField(verbose_name='退款单号', max_length=128, null=True, blank=True)
     logicDelete = models.IntegerField(verbose_name='逻辑删除', default=0)
+    remark = models.TextField(verbose_name='备注', null=True)
 
 
 # 发放红包

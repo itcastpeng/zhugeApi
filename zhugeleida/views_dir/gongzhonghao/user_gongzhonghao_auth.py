@@ -211,7 +211,8 @@ def user_gongzhonghao_auth(request):
                     'user_id' : uid,       # 文章作者-ID
                     'customer_id' : obj.id,
                     'level' : level,
-                    'pid' : pid
+                    'pid' : pid,
+                    'company_id' : company_id,
                 }
                 pid =  int(pid) if pid else ''
                 customer_id = int(obj.id)

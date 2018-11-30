@@ -336,7 +336,6 @@ def article_oper(request, oper_type, o_id):
                 'level': level,  # 文章所属用户的ID
                 'current_page': current_page,
                 'length': length
-
             }
 
             forms_obj = EffectRankingByLevelForm(request_data_dict)
@@ -356,13 +355,10 @@ def article_oper(request, oper_type, o_id):
                 ret_data = []
                 if objs:
                     level_num = objs[0].level
+                    title = objs[0].article.title
 
-                    if int(level) != 0:
+                    if int(level) >= 1:
                         objs = objs.filter(level=level).order_by('-stay_time')
-
-                    if int(level) == 0 and level_num:
-                        objs = objs.filter(level=1).order_by('-stay_time')
-                        level = int(level) + 1
 
                     if length != 0:
                         start_line = (current_page - 1) * length
@@ -381,17 +377,21 @@ def article_oper(request, oper_type, o_id):
                         area = obj.customer.province + obj.customer.city
 
                         data_dict = {
-                            'article_id': obj.article_id,
-                            'uid': obj.user_id,
+                            'id' : obj.id,
+                            'uid': obj.user_id, #所属雷达用户
                             'user_name': obj.user.username,
                             'customer_id': obj.customer_id,
                             'customer_name': username,
                             'customer_headimgurl': obj.customer.headimgurl,
-                            'sex': obj.customer.get_sex_display(),
+                            'sex': obj.customer.get_sex_display() or '',
                             'area': area,
                             'read_count': obj.read_count,
                             'stay_time': stay_time,
-                            'level': level
+
+                            'forward_friend_circle_count' : obj.forward_friend_circle_count,
+                            'forward_friend_count' : obj.forward_friend_count,
+
+                            'level': level   # 所在的层级
                         }
 
                         ret_data.append(data_dict)
@@ -399,9 +399,11 @@ def article_oper(request, oper_type, o_id):
                     response.code = 200
                     response.msg = '返回成功'
                     response.data = {
-                        'level_num': level_num,
+
                         'ret_data': ret_data,
+                        'total_level_num': level_num,  # 总共的层级
                         'article_id': article_id,
+                        'article_title': title,
                         'count': count,
                     }
 
@@ -418,7 +420,7 @@ def article_oper(request, oper_type, o_id):
             request_data_dict = {
                 'article_id': o_id,
                 'customer_id': customer_id,  # 文章所属用户的ID
-                'level': level,  # 文章所属用户的ID
+                'level': level,              # 文章所属用户的ID
             }
 
             forms_obj = QueryCustomerTransmitForm(request_data_dict)
@@ -434,10 +436,10 @@ def article_oper(request, oper_type, o_id):
 
                 ret_data = []
                 if objs:
-                    level_num = objs[0].level
+
                     customer_parent_id = objs.filter(customer_id=customer_id, level=level)[0].customer_parent_id
 
-                    for l in range(int(level) - 1, 0, -1):
+                    for l in range(int(level)-1, 0 ,-1):
                         _objs = objs.filter(level=l)
                         print('------ objs ------>>', _objs.values_list('customer_id', 'user_id', 'level'))
 
