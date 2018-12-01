@@ -491,9 +491,9 @@ import json
 # ret = requests.get(url, params=get_data)
 
 
-# url =  ip + '/zhugeleida/qiyeweixin/article/customer_base_info/2'  # 公众号文章基础信息
-# get_data['uid'] = 18
-# ret = requests.get(url, data = post_data ,params=get_data)
+url =  ip + '/zhugeleida/qiyeweixin/article/customer_read_info/0'  # 公众号文章基础信息
+get_data['customer_id'] = 925
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 
@@ -502,10 +502,10 @@ import json
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_transmit_path/3'  # 获取产品的列表
-get_data['level'] =  5             # 用户所在层级
-get_data['customer_id'] = 1031      # 客户ID
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_transmit_path/3'  # 获取产品的列表
+# get_data['level'] =  5             # 用户所在层级
+# get_data['customer_id'] = 1031      # 客户ID
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/hide_customer_data/2'  # 获取产品的列表
 #

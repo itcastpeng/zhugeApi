@@ -190,32 +190,32 @@ class MyarticleForm(forms.Form):
 
 # 判断是否是数字
 class ThreadPictureForm(forms.Form):
-    article_id = forms.CharField(
+    customer_id = forms.CharField(
         required=True,
         error_messages={
             'required': '文章ID不能为空'
         }
     )
 
-    uid = forms.CharField(
+    company_id = forms.CharField(
         required=False,
         error_messages={
-            'required': '文章所属用户ID不存在'
+            'required': '公司ID不存在'
         }
     )
 
 
-    def clean_article_id(self):
-        article_id = self.data['article_id']
-
-        objs = models.zgld_article.objects.filter(
-            id=article_id
-        )
-
-        if not objs:
-            self.add_error('article_id', '文章不存在')
-        else:
-            return article_id
+    # def clean_article_id(self):
+    #     article_id = self.data['article_id']
+    #
+    #     objs = models.zgld_article.objects.filter(
+    #         id=article_id
+    #     )
+    #
+    #     if not objs:
+    #         self.add_error('article_id', '文章不存在')
+    #     else:
+    #         return article_id
 
 class EffectRankingByLevelForm(forms.Form):
     level = forms.IntegerField(
