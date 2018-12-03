@@ -277,6 +277,7 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
+
         ## 客户基本信息和所看到的所有文章数据展示
         elif oper_type == 'customer_read_info':  # 脉络图
             user_id = request.GET.get('user_id')
@@ -855,6 +856,41 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '该文章无查看'
                 response.data = {}
+
+        elif oper_type == 'test_update_customer_child_status':
+            article_id = request.GET.get('article_id')
+
+            objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id).order_by('level')
+            if objs:
+                for obj in objs:
+                    level = obj.level
+                    customer_id = obj.customer_id
+                    _article_id = obj.article_id
+                    user_id = obj.user_id
+
+
+                    q1 = Q()
+                    q1.add(Q(**{'article_id': _article_id}), Q.AND)
+                    if level:
+                        level = int(level) + 1
+
+                    q1.add(Q(**{'user_id': user_id}), Q.AND)
+                    q1.add(Q(**{'level': level}), Q.AND)
+                    q1.add(Q(**{'customer_parent_id': customer_id}), Q.AND)
+
+                    _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
+                    if _objs:
+                        print('----- 给父级的客户,打上一个有[孩子的]的标签【成功】 |  搜索条件 q1:----->>', q1)
+                        obj.is_have_child = True
+                        obj.save()
+
+                    else:
+                        print('----- [没有找到]父级的客户, 打有[孩子的]的标签【失败】 |  搜索条件 q1:----->>', q1)
+
+                    break
+
+
+
 
     else:
         response.code = 402
