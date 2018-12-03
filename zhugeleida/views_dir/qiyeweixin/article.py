@@ -308,7 +308,7 @@ def article_oper(request, oper_type, o_id):
                 #     customer_id=925)
 
                 if objs:
-                    obj = objs[0]
+
                     _article_num = objs.values_list('article_id').distinct()
                     _objs = objs.values('article_id', 'article__title').annotate(Sum('stay_time'), Sum('read_count'),
                                                                                  Sum('forward_count'))
@@ -324,11 +324,13 @@ def article_oper(request, oper_type, o_id):
                                                                                          customer_id=customer_id).order_by('-last_access_date')[0].last_access_date
                         level = list(objs.filter(article_id=article_id).values_list('level', flat=True).distinct())
                         print('--- last_access_date ---->>',last_access_date)
+                        stay_time = _obj.get('stay_time__sum')
+                        stay_time = conversion_seconds_hms(stay_time)
                         ret_data.append({
                             'article_num': article_num,
                             'article_id': article_id,
                             'article__title': _obj.get('article__title'),
-                            'stay_time__sum': _obj.get('stay_time__sum'),
+                            'stay_time__sum': stay_time,
                             'read_count__sum': _obj.get('read_count__sum'),
                             'forward_count__sum': _obj.get('forward_count__sum'),
                             'level': sorted(level),
