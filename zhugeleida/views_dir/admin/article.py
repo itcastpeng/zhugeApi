@@ -144,6 +144,7 @@ def init_data(article_id,user_id, pid=None, level=1):
         children_data = init_data(article_id,user_id, pid=obj.customer_id, level=level+1)
         if children_data:
             current_data['children'] = children_data
+
         result_data.append(current_data)
 
     print('result_data -->', result_data)

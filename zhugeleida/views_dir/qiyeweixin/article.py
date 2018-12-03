@@ -297,14 +297,10 @@ def article_oper(request, oper_type, o_id):
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
                                                                                        'customer').filter(q1)
                 if objs:
-
-                    _article_num = objs.values_list('article_id').distinct()
                     _objs = objs.values('article_id', 'article__title').annotate(Sum('stay_time'), Sum('read_count'),
                                                                                  Sum('forward_count'))
 
-
                     article_num = _objs.count()
-                    print('--- _objs--->>', _objs)
 
                     ret_data = []
                     for _obj in _objs:
@@ -325,8 +321,6 @@ def article_oper(request, oper_type, o_id):
                             'level': sorted(level),
                             'create_date': last_access_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
-                    print('------- _article_num -------->>', _article_num)
-                    print('------- ret_data -------->>', ret_data)
 
                     response.code = 200
                     response.msg = '返回成功'
@@ -845,7 +839,7 @@ def article_oper(request, oper_type, o_id):
                 q.add(Q(article_id=article_id), Q.AND)
                 if uid:
                     q.add(Q(user_id=uid), Q.AND)
-                article_title, result_data = mailuotu(q)
+                article_title, result_data = mailuotu(article_id,q)
 
                 dataList = {  # 顶端 首级
                     'name': article_title,
