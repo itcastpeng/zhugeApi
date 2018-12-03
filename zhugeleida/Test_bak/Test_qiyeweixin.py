@@ -491,10 +491,14 @@ import json
 # ret = requests.get(url, params=get_data)
 
 
-url =  ip + '/zhugeleida/qiyeweixin/article/customer_read_info/0'  # 公众号文章基础信息
-get_data['customer_id'] = 925
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/qiyeweixin/article/customer_read_info/0'  # 公众号文章基础信息
+# get_data['customer_id'] = 925
+# ret = requests.get(url, data = post_data ,params=get_data)
 
+
+url =  ip + '/zhugeleida/qiyeweixin/article/test_update_customer_child_status/0'  # 公众号文章基础信息
+get_data['article_id'] = 3
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/customer_effect_ranking_by_level/3'  # 获取产品的列表

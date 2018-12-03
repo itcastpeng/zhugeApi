@@ -673,7 +673,7 @@ def open_qiyeweixin(request, oper_type):
                                     response.data = {
                                         'user_id': userprofile_obj.id,
                                         'token': userprofile_obj.token,
-
+                                        'role_id' : 1 ,
                                         'username': name,
                                         'avatar': avatar,
 
