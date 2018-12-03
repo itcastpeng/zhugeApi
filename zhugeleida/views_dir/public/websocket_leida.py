@@ -22,20 +22,10 @@ except ImportError as e:
 
 import redis
 
-# @accept_websocket  # 既能接受http也能接受websocket请求
+
 def websocket(request, oper_type):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-    # if not request.is_websocket():
-    #     try:
-    #         print('---- request.GET 数据：--->>', request.GET)
-    #         message = request.GET['message']
-    #         return HttpResponse(message)
-    #
-    #     except Exception as e:
-    #         print('---- 报错: e--->>', e)
-    #         return HttpResponse('链接-->')
 
     if oper_type == 'leida':
 
@@ -178,7 +168,7 @@ def websocket(request, oper_type):
                             'msg': '确认关闭 uid:%s | customer_id: %s' %(user_id,customer_id)
                         }
                         # uwsgi.websocket_send(json.dumps(ret_data))
-                        return JsonResponse(ret_data.__dict__)
+                        return JsonResponse(ret_data)
 
 
                     forms_obj = leida_ChatPostForm(_data)
@@ -261,7 +251,7 @@ def websocket(request, oper_type):
                             # uwsgi.websocket_send(json.dumps(ret_data))
                             uwsgi.websocket_send(json.dumps(ret_data))
                             # return HttpResponse('user_id和uid不能为空,终止连接')
-                            return JsonResponse(ret_data.__dict__)
+                            return JsonResponse(ret_data)
 
                 except Exception as  e:
                     ret_data = {
@@ -272,7 +262,7 @@ def websocket(request, oper_type):
                     print('----  报错:%s [雷达] 终止连接 uid: %s | customer_id: %s --->>' % e,str(user_id), str(customer_id))
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
-                    return JsonResponse(ret_data.__dict__)
+                    return JsonResponse(ret_data)
 
     elif oper_type == 'xiaochengxu':
 
@@ -401,7 +391,7 @@ def websocket(request, oper_type):
                             'msg': msg
                         }
                         # uwsgi.websocket_send(json.dumps(ret_data))
-                        return JsonResponse(ret_data.__dict__)
+                        return JsonResponse(ret_data)
 
 
                     forms_obj = xiaochengxu_ChatPostForm(_data)
@@ -468,7 +458,7 @@ def websocket(request, oper_type):
                             }
                             uwsgi.websocket_send(json.dumps(ret_data))
 
-                            return JsonResponse(ret_data.__dict__)
+                            return JsonResponse(ret_data)
 
                 except Exception as  e:
                     ret_data = {
@@ -478,7 +468,7 @@ def websocket(request, oper_type):
                     print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
-                    return JsonResponse(ret_data.__dict__)
+                    return JsonResponse(ret_data)
 
 
     elif oper_type == 'leida_query_info_num':
@@ -556,7 +546,7 @@ def websocket(request, oper_type):
                                 'msg': msg
                             }
                             # uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data.__dict__)
+                            return JsonResponse(ret_data)
 
 
                     else:
@@ -566,7 +556,7 @@ def websocket(request, oper_type):
                                 'msg': 'user_id和uid不能为空,终止连接'
                             }
                             uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data.__dict__)
+                            return JsonResponse(ret_data)
 
                 except Exception as  e:
                     ret_data = {
@@ -576,7 +566,7 @@ def websocket(request, oper_type):
                     print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e, str(customer_id), str(user_id))
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
-                    return JsonResponse(ret_data.__dict__)
+                    return JsonResponse(ret_data)
 
 
 
@@ -654,7 +644,7 @@ def websocket(request, oper_type):
                                 'msg': msg
                             }
                             # uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data.__dict__)
+                            return JsonResponse(ret_data)
 
 
                     else:
@@ -666,7 +656,7 @@ def websocket(request, oper_type):
                             }
                             uwsgi.websocket_send(json.dumps(ret_data))
 
-                            return JsonResponse(ret_data.__dict__)
+                            return JsonResponse(ret_data)
 
                 except Exception as  e:
                     ret_data = {
@@ -676,7 +666,7 @@ def websocket(request, oper_type):
                     print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
-                    return JsonResponse(ret_data.__dict__)
+                    return JsonResponse(ret_data)
 
 
 
@@ -716,4 +706,4 @@ def websocket(request, oper_type):
                 print('----  报错:%s 终止连接 --->>' % e)
                 # uwsgi.websocket_send(json.dumps(ret_data))
 
-                return JsonResponse(ret_data.__dict__)
+                return JsonResponse(ret_data)

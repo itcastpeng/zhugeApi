@@ -280,7 +280,6 @@ def article_oper(request, oper_type, o_id):
         ## 客户基本信息和所看到的所有文章数据展示
         elif oper_type == 'customer_read_info':  # 脉络图
             user_id = request.GET.get('user_id')
-            # company_id = request.GET.get('company_id')
             customer_id = request.GET.get('customer_id')
             request_data_dict = {
                 # 'article_id': o_id,
@@ -290,23 +289,13 @@ def article_oper(request, oper_type, o_id):
 
             forms_obj = ThreadPictureForm(request_data_dict)
             if forms_obj.is_valid():
-                article_id = forms_obj.cleaned_data.get('article_id')
-                uid = forms_obj.cleaned_data.get('uid')
                 q1 = Q()
                 q1.connector = 'AND'
                 q1.children.append(('customer_id', customer_id))
+                q1.children.append(('user_id', user_id))
 
-                # q1.add(Q(**{'id': user_id}), Q.AND)
-
-                article_id = forms_obj.cleaned_data.get('article_id')
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(
-                    customer_id=customer_id)
-
-                # objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                #                                                                        'customer').filter(
-                #     customer_id=925)
-
+                                                                                       'customer').filter(q1)
                 if objs:
 
                     _article_num = objs.values_list('article_id').distinct()
@@ -329,10 +318,10 @@ def article_oper(request, oper_type, o_id):
                         ret_data.append({
                             'article_num': article_num,
                             'article_id': article_id,
-                            'article__title': _obj.get('article__title'),
-                            'stay_time__sum': stay_time,
-                            'read_count__sum': _obj.get('read_count__sum'),
-                            'forward_count__sum': _obj.get('forward_count__sum'),
+                            'article_title': _obj.get('article__title'),
+                            'stay_time': stay_time,
+                            'read_count': _obj.get('read_count__sum'),
+                            'forward_count': _obj.get('forward_count__sum'),
                             'level': sorted(level),
                             'create_date': last_access_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
