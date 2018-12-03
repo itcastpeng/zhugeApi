@@ -107,6 +107,8 @@ def action_record(data,remark):
 def create_qrcode(data):
     url = data.get('url')
     article_id = data.get('article_id')
+    type = data.get('type')
+
 
     response = Response.ResponseObj()
     qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3)
@@ -116,13 +118,25 @@ def create_qrcode(data):
     img.show()
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
 
-    qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
-    path_qr_code_name = BASE_DIR + qr_code_name
-    qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
+    qr_url = ''
+    if type == 'web_scan_authorize_qrcode':
 
-    img.save(path_qr_code_name)
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'webLogin')
+        qr_code_name = '/uid_%s_qrCode.jpg' % (now_time)
+        path_qr_code_name = BASE_DIR + qr_code_name
+        qr_url = 'statics/zhugeleida/imgs/qiyeweixin/webLogin%s' % (qr_code_name)
+        img.save(path_qr_code_name)
+        qr_url_dict = {'pre_qrcode_url': qr_url}
+        return qr_url_dict
+
+    else:
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
+        qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
+        path_qr_code_name = BASE_DIR + qr_code_name
+        qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
+        img.save(path_qr_code_name)
+
     response.data = {'pre_qrcode_url': qr_url}
     response.code = 200
     response.msg = '生成文章体验二维码成功'

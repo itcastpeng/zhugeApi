@@ -840,12 +840,14 @@ def article_oper(request, oper_type, o_id):
                 q.add(Q(article_id=article_id), Q.AND)
                 if uid:
                     q.add(Q(user_id=uid), Q.AND)
+
                 article_title, result_data = mailuotu(article_id,q)
 
                 dataList = {  # 顶端 首级
                     'name': article_title,
                     'children': result_data
                 }
+
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
@@ -854,7 +856,7 @@ def article_oper(request, oper_type, o_id):
                 }
             else:
                 response.code = 301
-                response.msg = '该文章无查看'
+                response.msg = '该文章无数据'
                 response.data = {}
 
         elif oper_type == 'test_update_customer_child_status':

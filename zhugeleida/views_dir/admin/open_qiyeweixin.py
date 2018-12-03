@@ -10,7 +10,6 @@ import xml.dom.minidom as xmldom, datetime, xml.etree.cElementTree as ET
 import json, redis, sys, requests
 
 
-
 def get_provider_token():
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
@@ -22,7 +21,7 @@ def get_provider_token():
     key_name = "%s_provider_token" % get_token_data['corpid']
 
     provider_access_token = rc.get(key_name)
-    print('----- 从 Redis 获取 %s: ------>>' % (key_name),provider_access_token)
+    print('----- 从 Redis 获取 %s: ------>>' % (key_name), provider_access_token)
 
     if not provider_access_token:
         appurl = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_provider_token'
@@ -35,12 +34,10 @@ def get_provider_token():
 
         provider_access_token = ret_json.get('provider_access_token')  # 用户唯一标识
 
-        print('-----第三方平台 生成 provider_access_token------->>',provider_access_token)
+        print('-----第三方平台 生成 provider_access_token------->>', provider_access_token)
         rc.set(key_name, provider_access_token, 7000)
 
     return provider_access_token
-
-
 
 
 ## 第三方平台接入
@@ -405,6 +402,7 @@ def open_qiyeweixin(request, oper_type):
 
             SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
             url = ''
+            auth_code = ''
             if app_type == 'leida':
                 SuiteId = 'wx5d26a7a856b22bec'
                 url = 'http://zhugeleida.zhugeyingxiao.com/'
@@ -412,6 +410,13 @@ def open_qiyeweixin(request, oper_type):
             elif app_type == 'boss':
                 SuiteId = 'wx36c67dd53366b6f0'
                 url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
+
+
+            elif 'scan_code_web_login' in app_type:
+                auth_code = app_type.split('|')[1]
+
+                SuiteId = 'wx5d26a7a856b22bec'
+                url = 'http://zhugeleida.zhugeyingxiao.com/'
 
             _data = {
                 'SuiteId': SuiteId,  # 通讯录三方应用
@@ -482,7 +487,8 @@ def open_qiyeweixin(request, oper_type):
                         redirect_url = url + '?token=' + token + '&id=' + str(
                             user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
 
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",userid, "\n", redirect_url)
+                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_id, "|", userid,
+                              "\n", redirect_url)
 
                         return redirect(redirect_url)
 
@@ -495,8 +501,15 @@ def open_qiyeweixin(request, oper_type):
 
                         return redirect(redirect_url)
 
+                    elif status == 1 and app_type == 'scan_code_web_login':
+                        user_profile_obj.password = auth_code
+                        user_profile_obj.save()
+                        print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
+
+                        return HttpResponse('授权登录成功')
+
                     else:
-                        print('----------【雷达权限】未开通 ,未登录成功 userid | corpid ------>', userid, corpid)
+                        print('----------【雷达权限】未开通 ,未登录成功 user_id | corpid ------>', user_id, corpid)
                         return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
 
                 else:
@@ -608,7 +621,6 @@ def open_qiyeweixin(request, oper_type):
         elif oper_type == 'third_fang_single_login':
 
             auth_code = request.GET.get('auth_code')
-
             provider_access_token = get_provider_token()
 
             if provider_access_token:
@@ -638,12 +650,10 @@ def open_qiyeweixin(request, oper_type):
                 #                 [{'agentid': 1000007, 'auth_type': 1}, {'agentid': 1000009, 'auth_type': 1}],
                 #             'auth_info': {'department': [{'id': 1, 'writable': True}]}}
 
-
                 userid = ret_json.get('user_info')['userid']  # 用户唯一标识
                 name = ret_json.get('user_info')['name']  # 用户名字
                 avatar = ret_json.get('user_info')['avatar']  # 头像
                 corpid = ret_json.get('corp_info')['corpid']  #
-
 
                 if userid:
                     print('-----第三方平台 【服务商获取-用户信息】UserId: %s | corpid : %s  ------->>' % (userid, corpid))
@@ -668,12 +678,13 @@ def open_qiyeweixin(request, oper_type):
                                 if status == 1:  # (1, "AI雷达启用"),
 
                                     last_login_date_obj = userprofile_obj.last_login_date
-                                    last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
+                                    last_login_date = last_login_date_obj.strftime(
+                                        '%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
 
                                     response.data = {
                                         'user_id': userprofile_obj.id,
                                         'token': userprofile_obj.token,
-                                        'role_id' : 1 ,
+                                        'role_id': 1,
                                         'username': name,
                                         'avatar': avatar,
 
@@ -681,7 +692,7 @@ def open_qiyeweixin(request, oper_type):
                                         'company_id': userprofile_obj.company_id,
 
                                         'weChatQrCode': userprofile_obj.company.weChatQrCode,
-                                        'state' : 'scan_code_web_login',
+                                        'state': 'scan_code_web_login',
                                         'last_login_date': last_login_date,
 
                                     }
@@ -719,6 +730,34 @@ def open_qiyeweixin(request, oper_type):
                     response.code = 401
                     response.msg = '服务商获取-用户信息报错'
                     print('------第三方平台 【服务商获取-用户信息】报错 ----->')
+
+        elif oper_type == 'web_scan_authorize_qrcode':
+            from zhugeleida.public.common import create_qrcode
+            import uuid
+            uuid = str(uuid.uuid1())
+
+            authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5d26a7a856b22bec&redirect_uri=http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/work_weixin_auth&response_type=code&scope=snsapi_userinfo&state=scan_code_web_login|%s#wechat_redirect' % (
+                uuid)
+
+            qrcode_data = {
+                'url': authorize_url,
+                'type': 'web_scan_authorize_qrcode'
+            }
+            response_ret = create_qrcode(qrcode_data)
+            pre_qrcode_url = response_ret.get('pre_qrcode_url')
+
+            if pre_qrcode_url:
+                response.data = {
+                    'auth_qrcode_url': pre_qrcode_url,
+                    'auth_code' : uuid
+                }
+                response.code = 200
+                response.msg = '生成二维码成功'
+
+            else:
+                response.code = 401
+                response.msg = '生成二维码失败'
+
 
 
     else:

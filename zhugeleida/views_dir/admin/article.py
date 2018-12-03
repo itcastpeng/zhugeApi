@@ -155,10 +155,18 @@ def mailuotu(article_id,q):
     # children_data = init_data(user_id)
     # print('children_data--------> ',children_data)
     # print('q------------------------------> ',q)
-    count_objs = models.zgld_article_to_customer_belonger.objects.select_related(
-        'user',
-        'article'
-    ).filter(q).values('user_id', 'user__username', 'article__title').annotate(Count('user'))
+
+    _objs  = models.zgld_article_to_customer_belonger.objects.select_related('user','article').filter(q)
+
+    # _objs.values_list('level').annotate(Count('level'))
+    # < QuerySet[{'level': 1, 'level__count': 81}, {'level': 2, 'level__count': 49}, {'level': 3, 'level__count': 10}, {
+    #     'level': 4, 'level__count': 9}, {'level': 5, 'level_
+    #     _count': 8}]>
+
+
+
+    count_objs = _objs.values('user_id', 'user__username', 'article__title').annotate(Count('user'))
+
     result_data = []
     for obj in count_objs:
         user_id = obj['user_id']
@@ -353,6 +361,7 @@ def article_oper(request, oper_type, o_id):
 
                 if pre_qrcode_url:
                     response = response_ret
+
                 else:
                     response.code = 303
                     response.msg = '生成文章体验二维码失败'
