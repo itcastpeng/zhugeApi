@@ -115,7 +115,7 @@ ip = 'http://127.0.0.1:8001'
 # get_data['auth_code'] = 'CdpUdlQg3fLfi2-L6yzODsknfrCsMmIlOFpKEiQfslt5pTMLfEX2XquQESxfCTyBdZT1LwMNF4PIgGXsEpHoZ8kKqlu-iKlICMRgcjBRw0kclDg6y_FrGAw4JjWn2tpd'
 # get_data['state'] = 'scan_code_web_login'
 # ret = requests.get(url, params=get_data,data=post_data)
-#
+
 
 
 # url = ip + "/zhugeleida/admin/xcx_auth_process/update/3" #
@@ -880,9 +880,9 @@ ip = 'http://127.0.0.1:8001'
 #
 # '/zhugeleida/admin/article/contextDiagram/3'
 
-url = ip + '/zhugeleida/admin/article/contextDiagram/3' # 添加产品
-# get_data['activity_id'] = 2
-ret = requests.get(url,params=get_data)
+# url = ip + '/zhugeleida/admin/article/contextDiagram/3' # 添加产品
+# # get_data['activity_id'] = 2
+# ret = requests.get(url,params=get_data)
 
 
 

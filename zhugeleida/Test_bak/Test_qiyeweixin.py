@@ -14,7 +14,7 @@ timestamp = str(int(time.time() * 1000))
 get_data = {
     'rand_str': account.str_encrypt(timestamp + token),
     'timestamp': timestamp,
-    'user_id': 55,  # 线上
+    'user_id': 1,  # 线上
     # 'user_id': 1,  # 线上
 
 }
@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -491,22 +491,20 @@ import json
 # ret = requests.get(url, params=get_data)
 
 
-url =  ip + '/zhugeleida/qiyeweixin/article/customer_base_info/2'  # 公众号文章基础信息
-get_data['uid'] = 18
+url =  ip + '/zhugeleida/qiyeweixin/article/customer_read_info/0'  # 公众号文章基础信息
+get_data['customer_id'] = 925
 ret = requests.get(url, data = post_data ,params=get_data)
 
 
 
-# url =  ip + '/zhugeleida/qiyeweixin/article/customer_effect_ranking_by_level/2'  # 获取产品的列表
-#
-# get_data['level'] = 0
+# url =  ip + '/zhugeleida/qiyeweixin/article/customer_effect_ranking_by_level/3'  # 获取产品的列表
+# get_data['level'] = 1
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-
-# url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_transmit_path/2'  # 获取产品的列表
-# get_data['level'] =  5 # 用户所在层级
-# get_data['customer_id'] = 898  # 客户ID
+# url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_transmit_path/3'  # 获取产品的列表
+# get_data['level'] =  5             # 用户所在层级
+# get_data['customer_id'] = 1031      # 客户ID
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/hide_customer_data/2'  # 获取产品的列表

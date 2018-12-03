@@ -608,7 +608,6 @@ def open_qiyeweixin(request, oper_type):
         elif oper_type == 'third_fang_single_login':
 
             auth_code = request.GET.get('auth_code')
-            state = request.GET.get('state')  #
 
             provider_access_token = get_provider_token()
 

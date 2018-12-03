@@ -322,7 +322,6 @@ def article_oper(request, oper_type, o_id):
                                 tasks.user_send_gongzhonghao_template_msg.delay(data_)  # 发送【公众号发送模板消息】
 
 
-
                     if parent_id:
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
 
@@ -332,7 +331,6 @@ def article_oper(request, oper_type, o_id):
                     customer_objs = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     zgld_article_objs.update(status=1)  # 改为已发状态
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
-
                     models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
 
                     is_subscribe = ''
