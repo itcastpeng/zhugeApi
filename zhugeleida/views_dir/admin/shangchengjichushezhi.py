@@ -108,6 +108,7 @@ def jiChuSheZhiOper(request, oper_type):
             if forms_obj.is_valid():
                 formObjs = forms_obj.cleaned_data
                 zhengShuPath = formObjs.get('zhengshu')
+                shangHuMiYao = formObjs.get('shangHuMiYao')
                 shangHuHao = formObjs.get('shangHuHao') # 1516421881
                 if userObjs:
                     try:
@@ -129,17 +130,10 @@ def jiChuSheZhiOper(request, oper_type):
 
                         file_zip.close()
 
-                        # os.remove(zhengShuPath)
+                        os.remove(zhengShuPath)
 
-                        print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)  #statics/zhugeleida/imgs/admin/secretKeyFile/1543924902964.zip
+                        print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)  # statics/zhugeleida/imgs/admin/secretKeyFile/1543924902964.zip
                         print('------ file_dir ------> ',file_dir)                  # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881
-
-                        print('----- 前 userObjs[0].zhengshu ------->> ', userObjs[0].zhengshu)
-                        userObjs[0].zhengshu=file_dir
-                        userObjs[0].save()
-
-                        print('---- userObjs ----->',userObjs)
-                        print('----- 后 userObjs[0].zhengshu ------->> ',userObjs[0].zhengshu)
 
                         response.code = 200
 
@@ -168,7 +162,7 @@ def jiChuSheZhiOper(request, oper_type):
                         'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
                         'client_ip': '192.168.1.1',  # 终端IP
-                        'mch_id': formObjs.get('mch_id'),  # 商户号
+                        'mch_id': shangHuHao,  # 商户号
                         'total_num': 1,  # 红包发放总人数
                         'send_name': '诸葛雷达',  # 商户名称 中文
                         'act_name': '测试商户',  # 活动名称 32长度
@@ -195,9 +189,9 @@ def jiChuSheZhiOper(request, oper_type):
 
                     if return_code == 'SUCCESS':  # 判断预支付返回参数 是否正确
                         userObjs.update(
-                            shangHuHao=formObjs.get('shangHuHao'),
-                            shangHuMiYao=formObjs.get('shangHuMiYao'),
-                            zhengshu=shanghuzhengshupath
+                            shangHuHao=shangHuHao,
+                            shangHuMiYao=shangHuMiYao,
+                            zhengshu=file_dir
                         )
                         response.code = 200
                         response.msg = '修改成功'
