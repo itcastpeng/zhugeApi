@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm, ArticleSelectForm, \
     ArticleUpdateForm, MyarticleForm, ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, \
-    HideCustomerDataForm, ArticleAccessLogForm, ArticleForwardInfoForm
+    HideCustomerDataForm, ArticleAccessLogForm, ArticleForwardInfoForm,EffectRankingByTableForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 from zhugeleida.views_dir.admin.article import mailuotu
@@ -277,10 +277,10 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
+
         ## 客户基本信息和所看到的所有文章数据展示
         elif oper_type == 'customer_read_info':  # 脉络图
             user_id = request.GET.get('user_id')
-            # company_id = request.GET.get('company_id')
             customer_id = request.GET.get('customer_id')
             request_data_dict = {
                 # 'article_id': o_id,
@@ -290,32 +290,18 @@ def article_oper(request, oper_type, o_id):
 
             forms_obj = ThreadPictureForm(request_data_dict)
             if forms_obj.is_valid():
-                article_id = forms_obj.cleaned_data.get('article_id')
-                uid = forms_obj.cleaned_data.get('uid')
                 q1 = Q()
                 q1.connector = 'AND'
                 q1.children.append(('customer_id', customer_id))
+                q1.children.append(('user_id', user_id))
 
-                # q1.add(Q(**{'id': user_id}), Q.AND)
-
-                article_id = forms_obj.cleaned_data.get('article_id')
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(
-                    customer_id=customer_id)
-
-                # objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                #                                                                        'customer').filter(
-                #     customer_id=925)
-
+                                                                                       'customer').filter(q1)
                 if objs:
-
-                    _article_num = objs.values_list('article_id').distinct()
                     _objs = objs.values('article_id', 'article__title').annotate(Sum('stay_time'), Sum('read_count'),
                                                                                  Sum('forward_count'))
 
-
                     article_num = _objs.count()
-                    print('--- _objs--->>', _objs)
 
                     ret_data = []
                     for _obj in _objs:
@@ -329,15 +315,13 @@ def article_oper(request, oper_type, o_id):
                         ret_data.append({
                             'article_num': article_num,
                             'article_id': article_id,
-                            'article__title': _obj.get('article__title'),
-                            'stay_time__sum': stay_time,
-                            'read_count__sum': _obj.get('read_count__sum'),
-                            'forward_count__sum': _obj.get('forward_count__sum'),
+                            'article_title': _obj.get('article__title'),
+                            'stay_time': stay_time,
+                            'read_count': _obj.get('read_count__sum'),
+                            'forward_count': _obj.get('forward_count__sum'),
                             'level': sorted(level),
                             'create_date': last_access_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
-                    print('------- _article_num -------->>', _article_num)
-                    print('------- ret_data -------->>', ret_data)
 
                     response.code = 200
                     response.msg = '返回成功'
@@ -856,7 +840,7 @@ def article_oper(request, oper_type, o_id):
                 q.add(Q(article_id=article_id), Q.AND)
                 if uid:
                     q.add(Q(user_id=uid), Q.AND)
-                article_title, result_data = mailuotu(q)
+                article_title, result_data = mailuotu(article_id,q)
 
                 dataList = {  # 顶端 首级
                     'name': article_title,
@@ -872,6 +856,141 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '该文章无查看'
                 response.data = {}
+
+        elif oper_type == 'test_update_customer_child_status':
+            article_id = request.GET.get('article_id')
+
+            objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id).order_by('level')
+            if objs:
+                i = 0
+                for obj in objs:
+                    id = obj.id
+                    level = obj.level
+                    customer_id = obj.customer_id
+                    _article_id = obj.article_id
+                    user_id = obj.user_id
+
+
+                    q1 = Q()
+                    q1.add(Q(**{'article_id': _article_id}), Q.AND)
+                    if level:
+                        level = int(level) + 1
+
+                    q1.add(Q(**{'user_id': user_id}), Q.AND)
+                    q1.add(Q(**{'level': level}), Q.AND)
+                    q1.add(Q(**{'customer_parent_id': customer_id}), Q.AND)
+
+                    _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
+                    if _objs:
+                        print('-----  打标签【成功】  q1:----->>', id,'|',q1)
+                        obj.is_have_child = True
+                        obj.save()
+
+                    else:
+                        print('-----  打有标签【失败】 |  搜索条件 q1:----->>',id,q1)
+
+                    # i = i +1
+                    # if i > 10:
+
+
+        elif oper_type == 'query_customer_table_by_level':
+
+            level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            # current_page = request.GET.get('current_page')
+            # length = request.GET.get('length')
+
+            query_customer_id = request.GET.get('query_customer_id')
+            request_data_dict = {
+                'article_id': o_id,
+                # 'uid': uid,  # 文章所属用户的ID
+                'level': level,  # 文章所属用户的ID
+                # 'current_page': current_page,
+                # 'length': length
+            }
+
+            forms_obj = EffectRankingByTableForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                level = forms_obj.cleaned_data.get('level')
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(
+                    article_id=article_id,
+                    user_id=user_id
+                ).order_by('-level')
+                #
+                # current_page = forms_obj.cleaned_data['current_page']
+                # length = forms_obj.cleaned_data['length']
+
+                ret_data = []
+                if objs:
+                    level_num = objs[0].level
+                    title = objs[0].article.title
+
+                    if  level == 0:
+                        objs = objs.filter(level=1).order_by('-stay_time')
+
+                    elif level > 0 and query_customer_id:
+                        level = level + 1
+                        objs = objs.filter(level=level,customer_id=query_customer_id).order_by('-stay_time')
+
+                    # if length != 0:
+                    #     start_line = (current_page - 1) * length
+                    #     stop_line = start_line + length
+                    #     objs = objs[start_line: stop_line]
+
+                    count = objs.count()
+
+                    for obj in objs:
+                        stay_time = obj.stay_time
+                        stay_time = conversion_seconds_hms(stay_time)
+
+                        username = obj.customer.username
+                        username = base64.b64decode(username)
+                        username = str(username, 'utf-8')
+                        area = obj.customer.province + obj.customer.city
+
+                        data_dict = {
+                            'id': obj.id,
+                            'uid': obj.user_id,  # 所属雷达用户
+                            'user_name': obj.user.username,
+                            'customer_id': obj.customer_id,
+                            'customer_name': username,
+                            'customer_headimgurl': obj.customer.headimgurl,
+                            'sex': obj.customer.get_sex_display() or '',
+                            'area': area,
+                            'read_count': obj.read_count,
+                            'stay_time': stay_time,
+
+                            'forward_friend_circle_count': obj.forward_friend_circle_count,
+                            'forward_friend_count': obj.forward_friend_count,
+
+                            'level': level  # 所在的层级
+                        }
+
+                        ret_data.append(data_dict)
+
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+
+                        'ret_data': ret_data,
+                        'total_level_num': level_num,  # 总共的层级
+                        'article_id': article_id,
+                        'article_title': title,
+                        'count': count,
+                    }
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+
+
+
+
 
     else:
         response.code = 402
