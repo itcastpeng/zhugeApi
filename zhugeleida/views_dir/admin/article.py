@@ -457,7 +457,7 @@ def article_oper(request, oper_type, o_id):
 
         ## 客户基本信息和所看到的所有文章数据展示
         elif oper_type == 'customer_read_info':  # 脉络图
-            user_id = request.GET.get('user_id')
+
             customer_id = request.GET.get('customer_id')
             request_data_dict = {
                 # 'article_id': o_id,
