@@ -832,14 +832,14 @@ def article_oper(request, oper_type, o_id):
 
         # 脉络图 统计文章 转载情况
         elif oper_type == 'contextDiagram':
-            article_id = o_id  # 文章id
-            uid = request.GET.get('uid')
+            article_id = 3  # 文章id
+            user_id = request.GET.get('user_id')
             objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id)
             if objs:
                 q = Q()
                 q.add(Q(article_id=article_id), Q.AND)
-                if uid:
-                    q.add(Q(user_id=uid), Q.AND)
+                # if user_id:
+                #     q.add(Q(user_id=user_id), Q.AND)
 
                 article_title, result_data,max_person_num = mailuotu(article_id,q)
 
