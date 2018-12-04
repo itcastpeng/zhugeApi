@@ -56,11 +56,10 @@ def jiChuSheZhiOper(request, oper_type):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
     u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
-    # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(id=u_idObjs[0].company_id)
-    # userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id[0].id)
+    company_id = u_idObjs.company_id
     userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         'xiaochengxuApp__company'
-    ).filter(xiaochengxuApp__company_id=u_idObjs.company_id)
+    ).filter(xiaochengxuApp__company_id=company_id)
 
     if request.method == "POST":
 
@@ -109,30 +108,42 @@ def jiChuSheZhiOper(request, oper_type):
             if forms_obj.is_valid():
                 formObjs = forms_obj.cleaned_data
                 zhengShuPath = formObjs.get('zhengshu')
+                shangHuHao = formObjs.get('shangHuHao') # 1516421881
                 if userObjs:
                     try:
-                        shanghuzhengshupath = os.path.dirname(os.path.dirname(
-                            os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
-                        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin',
-                            'secretKeyFile') + '/' + formObjs.get('shangHuHao')
+                        print('---- shangHuHao ---->>',shangHuHao)
+
+
+                        shanghuzhengshupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
+                        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin','secretKeyFile') + '/' + shangHuHao
+                                              # statics/zhugeleida/imgs/admin/secretKeyFile/1543922970035.zip
+
+                        print('---- os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) ---->>', '\n' ,os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+                        print('---- shanghuzhengshupath ---->>', shanghuzhengshupath)
+
                         file_zip = zipfile.ZipFile(shanghuzhengshupath, 'r')
                         for file in file_zip.namelist():
                             file_zip.extract(file, r'{}'.format(file_dir))
+
                         file_zip.close()
                         os.remove(zhengShuPath)
-                        # print('file_dir-----------> ',file_dir)
+
+                        print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)
+                        print('------ file_dir ------> ',file_dir)
+
                         userObjs.update(zhengshu=file_dir)
                         response.code = 200
-                        response.data = ''
+
                     except Exception:
                         response.code = 301
                         response.msg = '请添加正确 微信证书压缩包'
                         return JsonResponse(response.__dict__)
+
                     # 生成预支付订单 判断商户KEY 和 商户号 是否正确
-                    u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
+
                     # xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
                     xiaochengxu_app = models.zgld_gongzhonghao_app.objects.filter(
-                        company_id=u_idObjs.company_id)  # 真实数据appid
+                        company_id=company_id)  # 真实数据appid
                     appid = xiaochengxu_app[0].authorization_appid
                     ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime())
                     shijianchuoafter5 = str(int(time.time() * 1000))[8:]  # 时间戳 后五位
@@ -155,23 +166,24 @@ def jiChuSheZhiOper(request, oper_type):
                         'remark': '测试备注信息',  # 备注信息 256长度
                         'wishing': '测试红包祝福语',  # 红包祝福语 128长度
                     }
-                    print('result_data----------> ',result_data)
+                    print('--------- result_data --------> ',result_data)
                     SHANGHUKEY = formObjs.get('shangHuMiYao')    # 商户KEY
                     stringSignTemp = yuzhifu.shengchengsign(result_data, SHANGHUKEY)
                     result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
                     xml_data = yuzhifu.toXml(result_data).encode('utf8')
-                    # shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '\\' + file_dir
-                    # shanghupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-                    # shanghupath = shanghupath + '\\' + 'statics\zhugeleida\imgs\\admin\secretKeyFile/1513325051'
                     cret = os.path.join(file_dir, 'apiclient_cert.pem')
                     key = os.path.join(file_dir, 'apiclient_key.pem')
+                    print('--- cret -->>',cret)
+                    print('--- key -->>',key)
+
                     ret = requests.post(url, data=xml_data, cert=(cret, key))
                     print(ret.text)
                     DOMTree = yuzhifu.xmldom.parseString(ret.text)
                     collection = DOMTree.documentElement
                     return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
-                    print('return_code--> ',return_code)
+                    print('----- return_code --> ',return_code)
+
                     if return_code == 'SUCCESS':  # 判断预支付返回参数 是否正确
                         userObjs.update(
                             shangHuHao=formObjs.get('shangHuHao'),
@@ -184,6 +196,7 @@ def jiChuSheZhiOper(request, oper_type):
                         return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
                         response.code = 301
                         response.msg = '请输入正确商户号和商户秘钥, 微信接口返回错误：{return_code}'.format(return_code=return_code)
+
                         return JsonResponse(response.__dict__)
                 else:
                     response.code = 301

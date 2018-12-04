@@ -458,11 +458,15 @@ def article_oper(request, oper_type, o_id):
         ## 客户基本信息和所看到的所有文章数据展示
         elif oper_type == 'customer_read_info':  # 脉络图
 
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
+
             customer_id = request.GET.get('customer_id')
             request_data_dict = {
                 'article_id': o_id,
                 'customer_id': customer_id,  # 文章所属用户的ID
-                # 'company_id': company_id,  # 文章所属用户的ID
+                'current_page': current_page,  # 文章所属用户的ID
+                'length': length,  # 文章所属用户的ID
             }
 
             forms_obj = ThreadPictureForm(request_data_dict)
@@ -481,6 +485,12 @@ def article_oper(request, oper_type, o_id):
                     article_num = _objs.count()
 
                     ret_data = []
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        _objs = _objs[start_line: stop_line]
+
+
                     for _obj in _objs:
                         article_id = _obj.get('article_id')
                         _access_log_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
@@ -495,7 +505,7 @@ def article_oper(request, oper_type, o_id):
                         stay_time = _obj.get('stay_time__sum')
                         stay_time = conversion_seconds_hms(stay_time)
                         ret_data.append({
-                            'article_num': article_num,
+
                             'article_id': article_id,
                             'article_title': _obj.get('article__title'),
                             'stay_time': stay_time,
@@ -509,7 +519,7 @@ def article_oper(request, oper_type, o_id):
                     response.msg = '返回成功'
                     response.data = {
                         'ret_data': ret_data,
-                        # 'article_num': _article_num,
+                        'article_num': article_num,
                     }
 
                 else:
