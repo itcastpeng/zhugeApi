@@ -676,38 +676,37 @@ def websocket(request, oper_type):
 
         uwsgi.websocket_handshake()
         while True:
+            pass
 
-
-
-                response_data = {
-                    'msg_data': {
-                        'chatinfo_count': chatinfo_count,
-                    },
-                    'code': 200,
-                    'msg': '实时获取小程序【消息数量】成功',
-                }
-
-                rc.set(redis_customer_query_info_key, False)
-
-                print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
-                uwsgi.websocket_send(json.dumps(response_data))
-
-            else:
-                try:
-                    data = uwsgi.websocket_recv()
-                    # data = uwsgi.websocket_recv_nb()
-
-                    print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
-                    if not data:
-                        time.sleep(2)
-                        continue
-
-                    _data = json.loads(data.decode("utf-8"))
-                    print('------ 【小程序-【消息数量】】发送过来的 数据:  ----->>', _data)
-
-                    type = _data.get('type')
-                    customer_id = _data.get('user_id')
-                    user_id = _data.get('u_id')
+            #     response_data = {
+            #         'msg_data': {
+            #             'chatinfo_count': chatinfo_count,
+            #         },
+            #         'code': 200,
+            #         'msg': '实时获取小程序【消息数量】成功',
+            #     }
+            #
+            #     rc.set(redis_customer_query_info_key, False)
+            #
+            #     print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+            #     uwsgi.websocket_send(json.dumps(response_data))
+            #
+            # else:
+            #     try:
+            #         data = uwsgi.websocket_recv()
+            #         # data = uwsgi.websocket_recv_nb()
+            #
+            #         print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
+            #         if not data:
+            #             time.sleep(2)
+            #             continue
+            #
+            #         _data = json.loads(data.decode("utf-8"))
+            #         print('------ 【小程序-【消息数量】】发送过来的 数据:  ----->>', _data)
+            #
+            #         type = _data.get('type')
+            #         customer_id = _data.get('user_id')
+            #         user_id = _data.get('u_id')
 
 
 

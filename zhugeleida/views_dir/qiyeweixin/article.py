@@ -841,7 +841,7 @@ def article_oper(request, oper_type, o_id):
                 if uid:
                     q.add(Q(user_id=uid), Q.AND)
 
-                article_title, result_data = mailuotu(article_id,q)
+                article_title, result_data,max_level = mailuotu(article_id,q)
 
                 dataList = {  # 顶端 首级
                     'name': article_title,
@@ -852,7 +852,8 @@ def article_oper(request, oper_type, o_id):
                 response.msg = '查询成功'
                 response.data = {
                     'dataList': dataList,
-                    'article_title': article_title
+                    'article_title': article_title,
+                    'max_level' : max_level
                 }
             else:
                 response.code = 301

@@ -158,10 +158,19 @@ def mailuotu(article_id,q):
 
     _objs  = models.zgld_article_to_customer_belonger.objects.select_related('user','article').filter(q)
 
-    # _objs.values_list('level').annotate(Count('level'))
+    _objs_list = _objs.values_list('level').annotate(Count('level'))
+    level_list = []
+    for _obj in _objs_list:
+        level_count = _obj[1]
+        level_list.append(level_count)
+
+    if len(level_list) != 0:
+        max_level = max(level_list)
+    else:
+        max_level = 0
+
     # < QuerySet[{'level': 1, 'level__count': 81}, {'level': 2, 'level__count': 49}, {'level': 3, 'level__count': 10}, {
-    #     'level': 4, 'level__count': 9}, {'level': 5, 'level_
-    #     _count': 8}]>
+    #     'level': 4, 'level__count': 9}, {'level': 5, 'level__count': 8}]>
 
 
 
@@ -184,7 +193,7 @@ def mailuotu(article_id,q):
     print('result_data -->', result_data)
 
     article_title = count_objs[0]['article__title']
-    return article_title, result_data
+    return article_title, result_data, max_level
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -481,7 +490,7 @@ def article_oper(request, oper_type, o_id):
             objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id)
             if objs:
 
-                article_title, result_data = mailuotu(article_id,q)
+                article_title, result_data,max_level = mailuotu(article_id,q)
                 print('--- dataList --->>',result_data)
                 dataList = {                    # 顶端 首级
                     'name': article_title,
@@ -491,7 +500,8 @@ def article_oper(request, oper_type, o_id):
                 response.msg = '查询成功'
                 response.data = {
                     'dataList': dataList,
-                    'article_title': article_title
+                    'article_title': article_title,
+                    'max_level' : max_level
                 }
             else:
                 response.code = 301
