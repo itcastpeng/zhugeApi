@@ -128,14 +128,16 @@ def jiChuSheZhiOper(request, oper_type):
                             file_zip.extract(file, r'{}'.format(file_dir))
 
                         file_zip.close()
-                        
+
                         # os.remove(zhengShuPath)
 
                         print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)  #statics/zhugeleida/imgs/admin/secretKeyFile/1543924902964.zip
                         print('------ file_dir ------> ',file_dir)                  # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881
 
                         print('----- 前 userObjs[0].zhengshu ------->> ', userObjs[0].zhengshu)
-                        userObjs.update(zhengshu=file_dir)
+                        userObjs[0].zhengshu=file_dir
+                        userObjs[0].save()
+
                         print('---- userObjs ----->',userObjs)
                         print('----- 后 userObjs[0].zhengshu ------->> ',userObjs[0].zhengshu)
 
@@ -240,7 +242,8 @@ def jiChuSheZhiOper(request, oper_type):
                 response.code = 301
                 response.data = json.loads(forms_obj.errors.as_json())
 
-    else:
+
+    elif request.method == 'GET':
         # 添加小程序ID
         if oper_type == 'addSmallProgram':
             xiaochengxuid = request.GET.get('xiaochengxuid')
@@ -252,7 +255,7 @@ def jiChuSheZhiOper(request, oper_type):
                 if not userObjs:
                     models.zgld_shangcheng_jichushezhi.objects.create(
                         xiaochengxuApp_id=xiaochengxuid,
-                        xiaochengxucompany_id=xiaochengxuObjs[0].company_id,
+                        xiaochengxucompany_id=company_id,
                         createDate=nowdate
                     )
                     response.code = 200
