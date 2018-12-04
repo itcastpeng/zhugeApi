@@ -204,6 +204,13 @@ class ThreadPictureForm(forms.Form):
         }
     )
 
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
 
     # def clean_article_id(self):
     #     article_id = self.data['article_id']

@@ -460,7 +460,7 @@ def article_oper(request, oper_type, o_id):
 
             customer_id = request.GET.get('customer_id')
             request_data_dict = {
-                # 'article_id': o_id,
+                'article_id': o_id,
                 'customer_id': customer_id,  # 文章所属用户的ID
                 # 'company_id': company_id,  # 文章所属用户的ID
             }
@@ -483,11 +483,15 @@ def article_oper(request, oper_type, o_id):
                     ret_data = []
                     for _obj in _objs:
                         article_id = _obj.get('article_id')
-                        last_access_date = models.zgld_article_access_log.objects.filter(article_id=article_id,
-                                                                                         customer_id=customer_id).order_by(
-                            '-last_access_date')[0].last_access_date
+                        _access_log_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
+
+                                                                                         customer_id=customer_id).order_by('-last_access_date')
+                        last_access_date = ''
+                        if _access_log_objs:
+                            last_access_date =  _access_log_objs[0].last_access_date.strftime('%Y-%m-%d %H:%M:%S')
+
                         level = list(objs.filter(article_id=article_id).values_list('level', flat=True).distinct())
-                        print('--- last_access_date ---->>', last_access_date)
+
                         stay_time = _obj.get('stay_time__sum')
                         stay_time = conversion_seconds_hms(stay_time)
                         ret_data.append({
@@ -498,7 +502,7 @@ def article_oper(request, oper_type, o_id):
                             'read_count': _obj.get('read_count__sum'),
                             'forward_count': _obj.get('forward_count__sum'),
                             'level': sorted(level),
-                            'create_date': last_access_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            'create_date': last_access_date or '',
                         })
 
                     response.code = 200
