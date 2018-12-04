@@ -165,9 +165,9 @@ def mailuotu(article_id,q):
         level_list.append(level_count)
 
     if len(level_list) != 0:
-        max_level = max(level_list)
+        max_person_num = max(level_list)
     else:
-        max_level = 0
+        max_person_num = 0
 
     # < QuerySet[{'level': 1, 'level__count': 81}, {'level': 2, 'level__count': 49}, {'level': 3, 'level__count': 10}, {
     #     'level': 4, 'level__count': 9}, {'level': 5, 'level__count': 8}]>
@@ -193,7 +193,7 @@ def mailuotu(article_id,q):
     print('result_data -->', result_data)
 
     article_title = count_objs[0]['article__title']
-    return article_title, result_data, max_level
+    return article_title, result_data, max_person_num
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -490,7 +490,7 @@ def article_oper(request, oper_type, o_id):
             objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id)
             if objs:
 
-                article_title, result_data,max_level = mailuotu(article_id,q)
+                article_title, result_data,max_person_num = mailuotu(article_id,q)
                 print('--- dataList --->>',result_data)
                 dataList = {                    # 顶端 首级
                     'name': article_title,
@@ -501,7 +501,7 @@ def article_oper(request, oper_type, o_id):
                 response.data = {
                     'dataList': dataList,
                     'article_title': article_title,
-                    'max_level' : max_level
+                    'max_person_num' : max_person_num
                 }
             else:
                 response.code = 301
