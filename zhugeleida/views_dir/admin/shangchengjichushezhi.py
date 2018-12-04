@@ -129,9 +129,7 @@ def jiChuSheZhiOper(request, oper_type):
                             file_zip.extract(file, r'{}'.format(file_dir))
 
                         file_zip.close()
-
                         os.remove(zhengShuPath)
-
                         print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)  # statics/zhugeleida/imgs/admin/secretKeyFile/1543924902964.zip
                         print('------ file_dir ------> ',file_dir)                  # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881
 
@@ -143,8 +141,6 @@ def jiChuSheZhiOper(request, oper_type):
                         return JsonResponse(response.__dict__)
 
                     # 生成预支付订单 判断商户KEY 和 商户号 是否正确
-
-                    # xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
                     xiaochengxu_app = models.zgld_gongzhonghao_app.objects.filter(
                         company_id=company_id)  # 真实数据appid
                     appid = xiaochengxu_app[0].authorization_appid
@@ -184,6 +180,7 @@ def jiChuSheZhiOper(request, oper_type):
                     print(ret.text)
                     DOMTree = yuzhifu.xmldom.parseString(ret.text)
                     collection = DOMTree.documentElement
+                    return_msg = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
                     return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
                     print('----- return_code --> ',return_code)
 
@@ -197,9 +194,8 @@ def jiChuSheZhiOper(request, oper_type):
                         response.msg = '修改成功'
                     else:
                         return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
-                        response.code = 301
-                        response.msg = '请输入正确商户号和商户秘钥, 微信接口返回错误：{return_code}'.format(return_code=return_code)
-
+                        response.code = '%s' % (return_code)
+                        response.msg = '微信接口返回错误: {return_msg}'.format(return_msg=return_msg)
                         return JsonResponse(response.__dict__)
                 else:
                     response.code = 301

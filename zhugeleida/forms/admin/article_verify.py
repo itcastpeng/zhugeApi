@@ -211,6 +211,18 @@ class ThreadPictureForm(forms.Form):
         }
     )
 
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "页显示数量类型错误"
+        }
+    )
 
     def clean_current_page(self):
         if not self.data.get('current_page'):
@@ -225,7 +237,6 @@ class ThreadPictureForm(forms.Form):
         else:
             length = int(self.data['length'])
         return length
-
 
 
 class EffectRankingByLevelForm(forms.Form):

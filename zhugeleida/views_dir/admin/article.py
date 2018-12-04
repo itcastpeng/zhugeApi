@@ -474,7 +474,7 @@ def article_oper(request, oper_type, o_id):
                 q1 = Q()
                 q1.connector = 'AND'
                 q1.children.append(('customer_id', customer_id))
-                # q1.children.append(('user_id', user_id))
+
 
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
                                                                                        'customer').filter(q1)
@@ -698,6 +698,7 @@ def article_oper(request, oper_type, o_id):
                     customer_username = ''
                     headimgurl = ''
                     sex = ''
+                    area = ''
                     if objs:
                         obj = objs[0]
                         customer_username = obj.customer.username
@@ -705,6 +706,7 @@ def article_oper(request, oper_type, o_id):
                         customer_username = str(customer_username, 'utf-8')
                         headimgurl = obj.customer.headimgurl
                         sex = obj.customer.get_sex_display()
+                        area = obj.customer.province + obj.customer.city
 
                         data_dict = {
                             'uid': uid,
@@ -721,7 +723,8 @@ def article_oper(request, oper_type, o_id):
                         'uid': uid,
                         'user_name': user_name,
                         'user_avatar': avatar,
-                        'level': 0
+                        'level': 0,
+
                     }
                     ret_data.insert(0, data_dict)
 
@@ -736,6 +739,7 @@ def article_oper(request, oper_type, o_id):
                         'customer_id': customer_id,
                         'customer_name': customer_username,  # 昵称
                         'sex': sex,  # 性别
+                        'area': area,  # 性别
                         'level': level,  # 客户所在层级
                     }
 

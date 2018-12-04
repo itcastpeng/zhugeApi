@@ -282,10 +282,15 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'customer_read_info':  # 脉络图
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
+
+
+            current_page = request.GET.get('current_page')
+            length = request.GET.get('length')
             request_data_dict = {
-                # 'article_id': o_id,
+                'article_id': o_id,
                 'customer_id': customer_id,  # 文章所属用户的ID
-                # 'company_id': company_id,  # 文章所属用户的ID
+                'current_page': current_page,  # 文章所属用户的ID
+                'length': length,  # 文章所属用户的ID
             }
 
             forms_obj = ThreadPictureForm(request_data_dict)
@@ -304,6 +309,12 @@ def article_oper(request, oper_type, o_id):
                     article_num = _objs.count()
 
                     ret_data = []
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        _objs = _objs[start_line: stop_line]
+
+
                     for _obj in _objs:
                         article_id = _obj.get('article_id')
                         last_access_date = models.zgld_article_access_log.objects.filter(article_id=article_id,
@@ -313,7 +324,7 @@ def article_oper(request, oper_type, o_id):
                         stay_time = _obj.get('stay_time__sum')
                         stay_time = conversion_seconds_hms(stay_time)
                         ret_data.append({
-                            'article_num': article_num,
+
                             'article_id': article_id,
                             'article_title': _obj.get('article__title'),
                             'stay_time': stay_time,
@@ -327,7 +338,7 @@ def article_oper(request, oper_type, o_id):
                     response.msg = '返回成功'
                     response.data = {
                         'ret_data': ret_data,
-                        # 'article_num': _article_num,
+                        'article_num': article_num,
                     }
 
                 else:
@@ -474,7 +485,7 @@ def article_oper(request, oper_type, o_id):
                                 customer_username = obj.customer.username
                                 customer_username = base64.b64decode(customer_username)
                                 customer_username = str(customer_username, 'utf-8')
-                                area = obj.customer.province + obj.customer.city
+
                                 data_dict = {
                                     'uid': user_id,
                                     'user_name': user_name,
@@ -500,8 +511,9 @@ def article_oper(request, oper_type, o_id):
                         customer_id=customer_id,
                         level=level)
                     customer_username = ''
-                    headimgurl = ''
+
                     sex = ''
+                    area = ''
                     if objs:
                         obj = objs[0]
                         customer_username = obj.customer.username
@@ -509,6 +521,7 @@ def article_oper(request, oper_type, o_id):
                         customer_username = str(customer_username, 'utf-8')
                         headimgurl = obj.customer.headimgurl
                         sex = obj.customer.get_sex_display()
+                        area = obj.customer.province + obj.customer.city
 
                         data_dict = {
                             'uid': user_id,
@@ -520,6 +533,7 @@ def article_oper(request, oper_type, o_id):
                             'level': level
                         }
                         ret_data.append(data_dict)
+
 
                     data_dict = {
                         'uid': user_id,
@@ -540,6 +554,7 @@ def article_oper(request, oper_type, o_id):
                         'customer_id': customer_id,
                         'customer_name': customer_username,  # 昵称
                         'sex': sex,  # 性别
+                        'area': area,  # 性别
                         'level': level,  # 客户所在层级
                     }
 
@@ -1019,6 +1034,7 @@ def jisuan_level_num(article_id, user_id, pid=None, level=1):
     :return:
     """
     _level = 0
+    result_level = []
     result_data = []
     objs = models.zgld_article_to_customer_belonger.objects.select_related('user').filter(
         article_id=article_id,
@@ -1026,29 +1042,37 @@ def jisuan_level_num(article_id, user_id, pid=None, level=1):
         user_id=user_id,
         level=level
     )
+
     for obj in objs:
         print('pid------------> ', pid)
         print('customer_parent_id------------> ', obj.customer_parent_id, obj.customer_id)
         if obj.customer_parent_id == obj.customer_id:
             continue
 
-        # decode_username = base64.b64decode(obj.customer.username)
-        # customer_username = str(decode_username, 'utf-8')
-        customer_id = obj.customer_id
-        customer_username = obj.customer.username
+        decode_username = base64.b64decode(obj.customer.username)
+        customer_username = str(decode_username, 'utf-8')
+        # customer_id = obj.customer_id
+        # customer_username = obj.customer.username
 
         current_data = {
             'name': customer_username,
             'id': obj.id,
             # 'user_id': obj.customer_id
         }
-        children_data = jisuan_level_num(article_id, user_id, pid=obj.customer_id, level=level + 1)
+        children_data,result_level_ret = jisuan_level_num(article_id, user_id, pid=obj.customer_id, level=level + 1)
         if children_data:
-
             current_data['children'] = children_data
+
+            result_level.extend(result_level_ret[:])
+
+
+        result_level.append(level)
 
         result_data.append(current_data)
 
+    print('level -->', result_level)
+    print('len*(level) -->', len(result_level))
+
     print('data -->', json.dumps(result_data))
 
-    return result_data
+    return result_data,result_level
