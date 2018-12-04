@@ -557,12 +557,13 @@ def article_oper(request, oper_type, o_id):
                     if int(level) >= 1:
                         objs = objs.filter(level=level).order_by('-stay_time')
 
+                    count = objs.count()
                     if length != 0:
                         start_line = (current_page - 1) * length
                         stop_line = start_line + length
                         objs = objs[start_line: stop_line]
 
-                    count = objs.count()
+
 
                     for obj in objs:
                         stay_time = obj.stay_time

@@ -698,15 +698,56 @@ def websocket(request, oper_type):
             if auth_code and  type == 'query_login_status':
                 auth_code_flag = rc.get(auth_code)
                 if auth_code_flag == 'True':
-                    response_data = {
-                        'code': 200,
-                        'msg': '登录成功',
-                    }
 
-                    rc.delete(auth_code)
-                    print('----- 登录成功 --->>',auth_code,'|','True')
-                    uwsgi.websocket_send(json.dumps(response_data))
-                    return JsonResponse(response_data)
+                    objs = models.zgld_userprofile.objects.filter(password=auth_code)
+                    if objs:
+                        obj = objs[0]
+                        name = obj.username
+                        avatar = obj.avatar
+                        last_login_date_obj = obj.last_login_date
+                        last_login_date = last_login_date_obj.strftime(
+                            '%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
+
+
+                        response_data = {
+                                'data' :  {
+                                'user_id': obj.id,
+                                'token': obj.token,
+                                'role_id': 1,
+                                'username': name,
+                                'avatar':   avatar,
+
+                                'company_name': obj.company.name,
+                                'company_id': obj.company_id,
+
+                                'weChatQrCode': obj.company.weChatQrCode,
+                                'state': 'scan_code_web_login',
+                                'last_login_date': last_login_date,
+
+                            },
+                            'code': 200,
+                            'msg': '登录成功',
+                        }
+
+                        rc.delete(auth_code)
+                        objs.update(
+                            password = ''
+                        )
+
+
+                        print('----- 登录成功 --->>',auth_code,'|','True')
+                        uwsgi.websocket_send(json.dumps(response_data))
+                        return JsonResponse(response_data)
+
+                    else:
+                        response_data = {
+                            'code': 301,
+                            'msg': '登录失败',
+                        }
+
+                        print('----- 登录失败 --->>',auth_code,'|','True')
+                        uwsgi.websocket_send(json.dumps(response_data))
+                        return JsonResponse(response_data)
 
                 elif auth_code_flag == 'False':
                     response_data = {
@@ -728,10 +769,10 @@ def websocket(request, oper_type):
 
                 i = i + 1
                 if i > 115:
-                    msg = '等待超时,关闭长连接'
+
                     ret_data = {
                         'code': 504,
-                        'msg': msg
+                        'msg': '等待超时,关闭长连接'
                     }
                     uwsgi.websocket_send(json.dumps(ret_data))
                     return JsonResponse(ret_data)

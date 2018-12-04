@@ -504,6 +504,9 @@ def open_qiyeweixin(request, oper_type):
                     elif status == 1 and app_type == 'scan_code_web_login':
                         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                         rc.set(auth_code,True,60)
+                        user_profile_obj.password = auth_code
+                        user_profile_obj.save()
+
                         print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
 
                         return HttpResponse('授权登录成功')
