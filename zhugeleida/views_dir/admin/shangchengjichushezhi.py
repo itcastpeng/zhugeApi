@@ -111,27 +111,34 @@ def jiChuSheZhiOper(request, oper_type):
                 shangHuHao = formObjs.get('shangHuHao') # 1516421881
                 if userObjs:
                     try:
-                        print('---- shangHuHao ---->>',shangHuHao)
+                        print('---- shangHuHao ---->>',shangHuHao) # 1516421881
 
-
-                        shanghuzhengshupath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) + '/' + zhengShuPath
+                        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+                        shanghuzhengshupath =  base_path + '/' + zhengShuPath
                         file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin','secretKeyFile') + '/' + shangHuHao
                                               # statics/zhugeleida/imgs/admin/secretKeyFile/1543922970035.zip
 
                         print('---- os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))) ---->>', '\n' ,os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+                        #/data/www/zhugeApi
                         print('---- shanghuzhengshupath ---->>', shanghuzhengshupath)
+                        # /data/www/zhugeApi/statics/zhugeleida/imgs/admin/secretKeyFile/1543924902964.zip
 
                         file_zip = zipfile.ZipFile(shanghuzhengshupath, 'r')
                         for file in file_zip.namelist():
                             file_zip.extract(file, r'{}'.format(file_dir))
 
                         file_zip.close()
-                        os.remove(zhengShuPath)
+                        
+                        # os.remove(zhengShuPath)
 
-                        print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)
-                        print('------ file_dir ------> ',file_dir)
+                        print('---- os.remove(zhengShuPath) ---->>', zhengShuPath)  #statics/zhugeleida/imgs/admin/secretKeyFile/1543924902964.zip
+                        print('------ file_dir ------> ',file_dir)                  # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881
 
+                        print('----- 前 userObjs[0].zhengshu ------->> ', userObjs[0].zhengshu)
                         userObjs.update(zhengshu=file_dir)
+                        print('---- userObjs ----->',userObjs)
+                        print('----- 后 userObjs[0].zhengshu ------->> ',userObjs[0].zhengshu)
+
                         response.code = 200
 
                     except Exception:
@@ -172,10 +179,10 @@ def jiChuSheZhiOper(request, oper_type):
                     result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
                     xml_data = yuzhifu.toXml(result_data).encode('utf8')
 
-                    cret = os.path.join(file_dir, 'apiclient_cert.pem')
-                    key = os.path.join(file_dir, 'apiclient_key.pem')
-                    print('--- cret -->>',cret)
-                    print('--- key -->>',key)
+                    cret = base_path + "/" +  os.path.join(file_dir, 'apiclient_cert.pem')
+                    key =  base_path + "/" +  os.path.join(file_dir, 'apiclient_key.pem')
+                    print('--- cret -->>',cret) # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881/apiclient_cert.pem
+                    print('--- key -->>',key)   # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881/apiclient_key.pem
 
                     ret = requests.post(url, data=xml_data, cert=(cret, key))
                     print(ret.text)
