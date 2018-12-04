@@ -217,6 +217,7 @@ class ThreadPictureForm(forms.Form):
     #     else:
     #         return article_id
 
+
 class EffectRankingByLevelForm(forms.Form):
     level = forms.IntegerField(
         required=True,

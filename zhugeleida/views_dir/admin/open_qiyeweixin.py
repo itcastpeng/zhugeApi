@@ -502,8 +502,8 @@ def open_qiyeweixin(request, oper_type):
                         return redirect(redirect_url)
 
                     elif status == 1 and app_type == 'scan_code_web_login':
-                        user_profile_obj.password = auth_code
-                        user_profile_obj.save()
+                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                        rc.set(auth_code,True,60)
                         print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
 
                         return HttpResponse('授权登录成功')
@@ -747,10 +747,13 @@ def open_qiyeweixin(request, oper_type):
             pre_qrcode_url = response_ret.get('pre_qrcode_url')
 
             if pre_qrcode_url:
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                 response.data = {
                     'auth_qrcode_url': pre_qrcode_url,
                     'auth_code' : uuid
                 }
+                rc.set(uuid,False,120)
+
                 response.code = 200
                 response.msg = '生成二维码成功'
 

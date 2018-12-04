@@ -117,6 +117,10 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, params=get_data,data=post_data)
 
 
+url = ip + '/zhugeleida/admin/open_qiyeweixin/web_scan_authorize_qrcode'  #
+
+ret = requests.get(url, params=get_data,data=post_data)
+
 
 # url = ip + "/zhugeleida/admin/xcx_auth_process/update/3" #
 # post_data['name'] = '测试小程序'

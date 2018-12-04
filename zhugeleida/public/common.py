@@ -117,7 +117,7 @@ def create_qrcode(data):
     img = qr.make_image()
     img.show()
 
-    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
 
     qr_url = ''
     if type == 'web_scan_authorize_qrcode':

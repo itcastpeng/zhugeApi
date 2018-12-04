@@ -672,41 +672,89 @@ def websocket(request, oper_type):
 
 
     elif oper_type == 'scan_code_web_login':
-        redis_customer_query_info_key = ''
 
         uwsgi.websocket_handshake()
+        i = 0
         while True:
-            pass
+            data = uwsgi.websocket_recv()
+            # data = uwsgi.websocket_recv_nb()
 
-            #     response_data = {
-            #         'msg_data': {
-            #             'chatinfo_count': chatinfo_count,
-            #         },
-            #         'code': 200,
-            #         'msg': '实时获取小程序【消息数量】成功',
-            #     }
-            #
-            #     rc.set(redis_customer_query_info_key, False)
-            #
-            #     print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
-            #     uwsgi.websocket_send(json.dumps(response_data))
-            #
-            # else:
-            #     try:
-            #         data = uwsgi.websocket_recv()
-            #         # data = uwsgi.websocket_recv_nb()
-            #
-            #         print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
-            #         if not data:
-            #             time.sleep(2)
-            #             continue
-            #
-            #         _data = json.loads(data.decode("utf-8"))
-            #         print('------ 【小程序-【消息数量】】发送过来的 数据:  ----->>', _data)
-            #
-            #         type = _data.get('type')
-            #         customer_id = _data.get('user_id')
-            #         user_id = _data.get('u_id')
+            print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
+            if not data:
+                time.sleep(30)
+                response_data = {
+                    'code': 504,
+                    'msg': '链接超时,关闭长连接',
+                }
+                uwsgi.websocket_send(json.dumps(response_data))
+                return JsonResponse(response_data)
+
+            _data = json.loads(data.decode("utf-8"))
+            print('------ [扫码登录验证[auth_code] 发送过来的 数据:  ----->>', _data)
+
+            type = _data.get('type')
+            auth_code = _data.get('auth_code')
+
+            if auth_code and  type == 'query_login_status':
+                auth_code_flag = rc.get(auth_code)
+                if auth_code_flag == 'True':
+                    response_data = {
+                        'code': 200,
+                        'msg': '登录成功',
+                    }
+
+                    rc.delete(auth_code)
+                    print('----- 登录成功 --->>',auth_code,'|','True')
+                    uwsgi.websocket_send(json.dumps(response_data))
+                    return JsonResponse(response_data)
+
+                elif auth_code_flag == 'False':
+                    response_data = {
+                        'code': 201,
+                        'msg': '等待验证中',
+                    }
+                    print('----- 等待验证中 --->>',auth_code,'|', 'False')
+                    uwsgi.websocket_send(json.dumps(response_data))
+
+                else:
+                    response_data = {
+                        'code': 303,
+                        'msg': 'Auth code已经失效',
+                    }
+                    print('----- Auth code已经失效 --->>',auth_code)
+                    uwsgi.websocket_send(json.dumps(response_data))
+                    return JsonResponse(response_data)
+
+
+                i = i + 1
+                if i > 115:
+                    msg = '等待超时,关闭长连接'
+                    ret_data = {
+                        'code': 504,
+                        'msg': msg
+                    }
+                    uwsgi.websocket_send(json.dumps(ret_data))
+                    return JsonResponse(ret_data)
+
+
+            elif type == 'closed':
+                msg = '确认关闭'
+                ret_data = {
+                    'code': 200,
+                    'msg': msg
+                }
+                # uwsgi.websocket_send(json.dumps(ret_data))
+                return JsonResponse(ret_data)
+
+            elif type == 'register':
+
+                response_data = {
+                    'code': 200,
+                    'msg': '注册成功',
+                }
+
+                uwsgi.websocket_send(json.dumps(response_data))
+
 
 
 
