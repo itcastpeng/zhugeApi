@@ -165,7 +165,7 @@ def jiChuSheZhiOper(request, oper_type):
                         'client_ip': '192.168.1.1',  # 终端IP
                         'mch_id': shangHuHao,  # 商户号
                         'total_num': 1,  # 红包发放总人数
-                        'send_name': '诸葛雷达',  # 商户名称 中文
+                        'send_name': '诸葛雷达_测试发红包',  # 商户名称 中文
                         'act_name': '测试商户',  # 活动名称 32长度
                         'remark': '测试备注信息',  # 备注信息 256长度
                         'wishing': '测试红包祝福语',  # 红包祝福语 128长度
@@ -259,7 +259,11 @@ def jiChuSheZhiOper(request, oper_type):
                     response.code = 301
                     response.msg = '该小程序已创建设置'
 
-        else:
-            response.code = 402
-            response.msg = "请求异常"
+
+
+
+
+    else:
+        response.code = 402
+        response.msg = "请求异常"
     return JsonResponse(response.__dict__)

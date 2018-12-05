@@ -203,6 +203,7 @@ def login_oper(request,oper_type):
             return render(request, 'test_send_formid.html', locals())
 
 
+
     else:
 
         if oper_type == 'send_user_info':
@@ -243,7 +244,7 @@ def login_oper(request,oper_type):
             #     response.code = 301
             #     response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        # 发送FormID
         elif oper_type == 'send_form_id':
 
             formid = request.POST.get('formId')
@@ -273,6 +274,7 @@ def login_oper(request,oper_type):
                 response.code = 301
                 response.msg = "formID 不规矩"
 
+        # 小程序发送模板消息
         elif oper_type == 'user_send_template_msg':
 
             response = Response.ResponseObj()
@@ -420,6 +422,7 @@ def login_oper(request,oper_type):
                 response.msg = errmsg
                 print('---------授权appid: %s , 组合模板并添加 【失败】------------>>', errmsg, '|', errcode)
 
+        ## 为小程序绑定体验者
         elif oper_type == 'binding_tiyanzhe':
 
             authorizer_access_token = crate_token_func()
@@ -437,6 +440,7 @@ def login_oper(request,oper_type):
                 domain_data_ret = domain_data_ret.json()
                 print('---------- 第三方平台 - 绑定微信用户为小程序体验者 返回------------>>', domain_data_ret)
 
+        # 为小程序绑定域名
         elif oper_type == 'binding_domain':
 
             authorizer_access_token = crate_token_func()
@@ -467,6 +471,7 @@ def login_oper(request,oper_type):
                 response.code = errcode
                 response.msg = errmsg
                 print('---------授权appid: %s, 修改小程序服务器域名 【失败】------------>>' , errmsg, '|',errcode)
+
 
 
     return JsonResponse(response.__dict__)

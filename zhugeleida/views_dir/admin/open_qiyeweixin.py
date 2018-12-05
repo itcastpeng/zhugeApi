@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from zhugeapi_celery_project import tasks
 import xml.dom.minidom as xmldom, datetime, xml.etree.cElementTree as ET
 import json, redis, sys, requests
+from zhugeleida.public.common import create_qrcode
 
 
 def get_provider_token():
@@ -735,7 +736,6 @@ def open_qiyeweixin(request, oper_type):
                     print('------第三方平台 【服务商获取-用户信息】报错 ----->')
 
         elif oper_type == 'web_scan_authorize_qrcode':
-            from zhugeleida.public.common import create_qrcode
             import uuid
             uuid = str(uuid.uuid1())
 
