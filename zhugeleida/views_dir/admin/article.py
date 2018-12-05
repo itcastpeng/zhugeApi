@@ -524,6 +524,7 @@ def article_oper(request, oper_type, o_id):
                     response.data = {
                         'ret_data': ret_data,
                         'article_num': article_num,
+
                     }
 
                 else:
