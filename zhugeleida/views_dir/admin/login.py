@@ -49,8 +49,6 @@ def login(request):
                     else:
                         token = userprofile_obj.token
 
-                    response.code = 200
-                    response.msg = '登录成功'
 
                     last_login_date_obj = userprofile_obj.last_login_date
                     last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
@@ -72,7 +70,8 @@ def login(request):
 
                     userprofile_obj.last_login_date = datetime.datetime.now()
                     userprofile_obj.save()
-                    print('保存')
+                    response.code = 200
+                    response.msg = '登录成功'
 
                 else:
                     company_name = userprofile_obj.company.name
@@ -81,7 +80,7 @@ def login(request):
                     print('-------- 雷达后台账户过期: %s-%s | 过期时间:%s ------->>' % (company_id, company_name, account_expired_time))
             else:
                 response.code = 306
-            response.msg = "账户未启用"
+                response.msg = "账户未启用"
 
         else:
             response.code = 401

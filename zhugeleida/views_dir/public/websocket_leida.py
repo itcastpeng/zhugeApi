@@ -578,96 +578,106 @@ def websocket(request, oper_type):
 
         uwsgi.websocket_handshake()
         while True:
+            try:
+                redis_customer_query_info_key_flag = rc.get(redis_customer_query_info_key)
+                print('---- 小程序【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
+                if redis_customer_query_info_key_flag == 'True':
+                    print('---- 小程序【消息数量】 Flag 为 True  --->>', redis_customer_query_info_key_flag)
+                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
 
-            redis_customer_query_info_key_flag = rc.get(redis_customer_query_info_key)
-            print('---- 小程序【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
-            if redis_customer_query_info_key_flag == 'True':
-                print('---- 小程序【消息数量】 Flag 为 True  --->>', redis_customer_query_info_key_flag)
-                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
-
-                response_data = {
-                    'msg_data': {
-                         'chatinfo_count': chatinfo_count,
-                    },
-                    'code': 200,
-                    'msg': '实时获取小程序【消息数量】成功',
-                }
-
-                rc.set(redis_customer_query_info_key, False)
-
-                print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
-                uwsgi.websocket_send(json.dumps(response_data))
-
-            else:
-                try:
-                    # data = uwsgi.websocket_recv()
-                    data = uwsgi.websocket_recv_nb()
-
-                    print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
-                    if not data:
-                        time.sleep(2)
-                        continue
-
-                    _data = json.loads(data.decode("utf-8"))
-                    print('------ 【小程序-【消息数量】】发送过来的 数据:  ----->>', _data)
-
-                    type = _data.get('type')
-                    customer_id = _data.get('user_id')
-                    user_id = _data.get('u_id')
-
-
-                    # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-
-                    forms_obj = xiaochengxu_ChatPostForm(_data)
-                    if  forms_obj.is_valid():
-                        redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
-
-                        chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                             customer_id=customer_id, send_type=1,
-                                                                             is_customer_new_msg=True).count()
-
-
-                        if  type == 'query_num':
-                            response_data = {
-                                'msg_data': {
-                                    'chatinfo_count': chatinfo_count,
-                                },
-                                'code': 200,
-                                'msg': '获取成功',
-                            }
-                            uwsgi.websocket_send(json.dumps(response_data))
-
-                        elif type == 'closed':
-                            msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
-                            ret_data = {
-                                'code': 200,
-                                'msg': msg
-                            }
-                            # uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data)
-
-
-                    else:
-
-                        if not user_id or not customer_id:
-                            ret_data = {
-                                'code': 401,
-                                'msg': 'user_id和uid不能为空,终止连接'
-                            }
-                            uwsgi.websocket_send(json.dumps(ret_data))
-
-                            return JsonResponse(ret_data)
-
-                except Exception as  e:
-                    ret_data = {
-                        'code': 400,
-                        'msg': '报错:%s 终止连接' % (e)
+                    response_data = {
+                        'msg_data': {
+                             'chatinfo_count': chatinfo_count,
+                        },
+                        'code': 200,
+                        'msg': '实时获取小程序【消息数量】成功',
                     }
-                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
-                    # uwsgi.websocket_send(json.dumps(ret_data))
 
-                    return JsonResponse(ret_data)
+                    rc.set(redis_customer_query_info_key, False)
 
+                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                    uwsgi.websocket_send(json.dumps(response_data))
+
+                else:
+                    try:
+                        # data = uwsgi.websocket_recv()
+                        data = uwsgi.websocket_recv_nb()
+
+                        print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
+                        if not data:
+                            time.sleep(2)
+                            continue
+
+                        _data = json.loads(data.decode("utf-8"))
+                        print('------ 【小程序-【消息数量】】发送过来的 数据:  ----->>', _data)
+
+                        type = _data.get('type')
+                        customer_id = _data.get('user_id')
+                        user_id = _data.get('u_id')
+
+
+                        # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+
+                        forms_obj = xiaochengxu_ChatPostForm(_data)
+                        if  forms_obj.is_valid():
+                            redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
+
+                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                                 customer_id=customer_id, send_type=1,
+                                                                                 is_customer_new_msg=True).count()
+
+
+                            if  type == 'query_num':
+                                response_data = {
+                                    'msg_data': {
+                                        'chatinfo_count': chatinfo_count,
+                                    },
+                                    'code': 200,
+                                    'msg': '获取成功',
+                                }
+                                uwsgi.websocket_send(json.dumps(response_data))
+
+                            elif type == 'closed':
+                                msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
+                                ret_data = {
+                                    'code': 200,
+                                    'msg': msg
+                                }
+                                # uwsgi.websocket_send(json.dumps(ret_data))
+                                return JsonResponse(ret_data)
+
+
+                        else:
+
+                            if not user_id or not customer_id:
+                                ret_data = {
+                                    'code': 401,
+                                    'msg': 'user_id和uid不能为空,终止连接'
+                                }
+                                uwsgi.websocket_send(json.dumps(ret_data))
+
+                                return JsonResponse(ret_data)
+
+                    except Exception as  e:
+                        ret_data = {
+                            'code': 400,
+                            'msg': '报错:%s 终止连接' % (e)
+                        }
+                        print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
+                        # uwsgi.websocket_send(json.dumps(ret_data))
+
+                        return JsonResponse(ret_data)
+
+
+            except Exception as  e:
+                ret_data = {
+                    'code': 400,
+                    'msg': '报错:%s 终止连接' % (e)
+                }
+                print('----  报错:%s 终止连接 --->>' % e)
+                # uwsgi.websocket_send(json.dumps(ret_data))
+
+                return JsonResponse(ret_data)
 
 
 
@@ -676,128 +686,137 @@ def websocket(request, oper_type):
         uwsgi.websocket_handshake()
         i = 0
         while True:
-            data = uwsgi.websocket_recv()
-            # data = uwsgi.websocket_recv_nb()
 
-            print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
-            if not data:
-                time.sleep(30)
-                response_data = {
-                    'code': 504,
-                    'msg': '链接超时,关闭长连接',
-                }
-                uwsgi.websocket_send(json.dumps(response_data))
-                return JsonResponse(response_data)
-
-            _data = json.loads(data.decode("utf-8"))
-            print('------ [扫码登录验证[auth_code] 发送过来的 数据:  ----->>', _data)
-
-            type = _data.get('type')
-            auth_code = _data.get('auth_code')
-
-            if auth_code and  type == 'query_login_status':
-                auth_code_flag = rc.get(auth_code)
-                if auth_code_flag == 'True':
-
-                    objs = models.zgld_userprofile.objects.filter(password=auth_code)
-                    if objs:
-                        obj = objs[0]
-                        name = obj.username
-                        avatar = obj.avatar
-                        last_login_date_obj = obj.last_login_date
-                        last_login_date = last_login_date_obj.strftime(
-                            '%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
-
-
-                        response_data = {
-                                'data' :  {
-                                'user_id': obj.id,
-                                'token': obj.token,
-                                'role_id': 1,
-                                'username': name,
-                                'avatar':   avatar,
-
-                                'company_name': obj.company.name,
-                                'company_id': obj.company_id,
-
-                                'weChatQrCode': obj.company.weChatQrCode,
-                                'state': 'scan_code_web_login',
-                                'last_login_date': last_login_date,
-
-                            },
-                            'code': 200,
-                            'msg': '登录成功',
-                        }
-
-                        rc.delete(auth_code)
-                        objs.update(
-                            password = ''
-                        )
-
-
-                        print('----- 登录成功 --->>',auth_code,'|','True')
-                        uwsgi.websocket_send(json.dumps(response_data))
-                        return JsonResponse(response_data)
-
-                    else:
-                        response_data = {
-                            'code': 301,
-                            'msg': '登录失败',
-                        }
-                        print('----- 登录失败 --->>',auth_code,'|','True')
-                        uwsgi.websocket_send(json.dumps(response_data))
-                        return JsonResponse(response_data)
-
-                elif auth_code_flag == 'False':
+            try:
+                data = uwsgi.websocket_recv()
+                # data = uwsgi.websocket_recv_nb()
+                print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
+                if not data:
+                    time.sleep(30)
                     response_data = {
-                        'code': 201,
-                        'msg': '等待验证中',
+                        'code': 504,
+                        'msg': '链接超时,关闭长连接',
                     }
-                    print('----- 等待验证中 --->>',auth_code,'|', 'False')
-                    uwsgi.websocket_send(json.dumps(response_data))
-
-                else:
-                    response_data = {
-                        'code': 303,
-                        'msg': 'Auth code已经失效',
-                    }
-                    rc.delete(auth_code)
-                    print('----- Auth code已经失效 --->>',auth_code)
                     uwsgi.websocket_send(json.dumps(response_data))
                     return JsonResponse(response_data)
 
+                _data = json.loads(data.decode("utf-8"))
+                print('------ [扫码登录验证[auth_code] 发送过来的 数据:  ----->>', _data)
 
-                i = i + 1
-                if i > 115:
+                type = _data.get('type')
+                auth_code = _data.get('auth_code')
 
+                if auth_code and  type == 'query_login_status':
+                    auth_code_flag = rc.get(auth_code)
+                    if auth_code_flag == 'True':
+
+                        objs = models.zgld_userprofile.objects.filter(password=auth_code)
+                        if objs:
+                            obj = objs[0]
+                            name = obj.username
+                            avatar = obj.avatar
+                            last_login_date_obj = obj.last_login_date
+                            last_login_date = last_login_date_obj.strftime(
+                                '%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
+
+
+                            response_data = {
+                                    'data' :  {
+                                    'user_id': obj.id,
+                                    'token': obj.token,
+                                    'role_id': 1,
+                                    'username': name,
+                                    'avatar':   avatar,
+
+                                    'company_name': obj.company.name,
+                                    'company_id': obj.company_id,
+
+                                    'weChatQrCode': obj.company.weChatQrCode,
+                                    'state': 'scan_code_web_login',
+                                    'last_login_date': last_login_date,
+
+                                },
+                                'code': 200,
+                                'msg': '登录成功',
+                            }
+
+                            rc.delete(auth_code)
+                            objs.update(
+                                password = ''
+                            )
+
+
+                            print('----- 登录成功 --->>',auth_code,'|','True')
+                            uwsgi.websocket_send(json.dumps(response_data))
+                            return JsonResponse(response_data)
+
+                        else:
+                            response_data = {
+                                'code': 301,
+                                'msg': '登录失败',
+                            }
+                            print('----- 登录失败 --->>',auth_code,'|','True')
+                            uwsgi.websocket_send(json.dumps(response_data))
+                            return JsonResponse(response_data)
+
+                    elif auth_code_flag == 'False':
+                        response_data = {
+                            'code': 201,
+                            'msg': '等待验证中',
+                        }
+                        print('----- 等待验证中 --->>',auth_code,'|', 'False')
+                        uwsgi.websocket_send(json.dumps(response_data))
+
+                    else:
+                        response_data = {
+                            'code': 303,
+                            'msg': 'Auth code已经失效',
+                        }
+                        rc.delete(auth_code)
+                        print('----- Auth code已经失效 --->>',auth_code)
+                        uwsgi.websocket_send(json.dumps(response_data))
+                        return JsonResponse(response_data)
+
+
+                    i = i + 1
+                    if i > 115:
+
+                        ret_data = {
+                            'code': 504,
+                            'msg': '等待超时,关闭长连接'
+                        }
+                        rc.delete(auth_code)
+                        uwsgi.websocket_send(json.dumps(ret_data))
+                        return JsonResponse(ret_data)
+
+
+                elif type == 'closed':
+                    msg = '确认关闭'
                     ret_data = {
-                        'code': 504,
-                        'msg': '等待超时,关闭长连接'
+                        'code': 200,
+                        'msg': msg
                     }
-                    rc.delete(auth_code)
-                    uwsgi.websocket_send(json.dumps(ret_data))
+                    # uwsgi.websocket_send(json.dumps(ret_data))
                     return JsonResponse(ret_data)
 
+                elif type == 'register':
 
-            elif type == 'closed':
-                msg = '确认关闭'
+                    response_data = {
+                        'code': 200,
+                        'msg': '注册成功',
+                    }
+
+                    uwsgi.websocket_send(json.dumps(response_data))
+
+            except Exception as  e:
                 ret_data = {
-                    'code': 200,
-                    'msg': msg
+                    'code': 400,
+                    'msg': '报错:%s 终止连接' % (e)
                 }
+                print('----  报错:%s 终止连接 --->>' % e)
                 # uwsgi.websocket_send(json.dumps(ret_data))
+
                 return JsonResponse(ret_data)
-
-            elif type == 'register':
-
-                response_data = {
-                    'code': 200,
-                    'msg': '注册成功',
-                }
-
-                uwsgi.websocket_send(json.dumps(response_data))
-
-
 
 
 
