@@ -161,7 +161,7 @@ def jiChuSheZhiOper(request, oper_type):
                         'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
                         'mch_id': shangHuHao,      # 商户号
-                        'appid': appid,  # 真实数据appid
+                        'wxappid': appid,  # 真实数据appid
                         're_openid': re_openid,  # 用户唯一标识
                         'total_amount': 100,  # 付款金额 1:100 | 发送一分钱
                         'client_ip': '192.168.1.1',  # 终端IP
