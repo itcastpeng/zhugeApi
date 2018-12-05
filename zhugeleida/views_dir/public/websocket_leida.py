@@ -744,7 +744,6 @@ def websocket(request, oper_type):
                             'code': 301,
                             'msg': '登录失败',
                         }
-
                         print('----- 登录失败 --->>',auth_code,'|','True')
                         uwsgi.websocket_send(json.dumps(response_data))
                         return JsonResponse(response_data)
