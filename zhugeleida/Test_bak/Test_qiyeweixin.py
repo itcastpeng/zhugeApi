@@ -501,11 +501,13 @@ import json
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_table_by_level/0'  # 公众号文章基础信息
-get_data['article_id'] = 3
+url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
+
 get_data['uid'] = 17
 get_data['pid'] = 857
-get_data['level'] = 1
+
+get_data['query_customer_id'] = 1
+get_data['level'] = 0
 
 ret = requests.get(url, data = post_data ,params=get_data)
 

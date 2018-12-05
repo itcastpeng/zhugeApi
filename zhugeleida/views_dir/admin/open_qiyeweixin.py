@@ -509,7 +509,6 @@ def open_qiyeweixin(request, oper_type):
                         rc.set(auth_code,True,60)
                         user_profile_obj.password = auth_code
                         user_profile_obj.save()
-
                         print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
 
                         return HttpResponse('授权登录成功')

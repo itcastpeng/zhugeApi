@@ -278,6 +278,11 @@ def websocket(request, oper_type):
             if redis_customer_id_key_flag == 'True' and user_id and customer_id:
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
+
+                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                     customer_id=customer_id, send_type=1,
+                                                                     is_customer_new_msg=True).count()
+
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -347,7 +352,8 @@ def websocket(request, oper_type):
                     response_data = {
                         'data': {
                             'ret_data': ret_data_list,
-                            'data_count': count,
+                            'count': count,
+                            'unread_msg_num': chatinfo_count
                         },
                         'code': 200,
                         'msg': '实时推送小程序-最新聊天信息成功',
@@ -376,9 +382,6 @@ def websocket(request, oper_type):
                     user_id = _data.get('u_id')
                     Content = _data.get('content')
 
-                    redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-                    redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
-                    redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                     if type == 'register' or type == 'query_num':
                         uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
@@ -397,10 +400,10 @@ def websocket(request, oper_type):
                     forms_obj = xiaochengxu_ChatPostForm(_data)
                     if forms_obj.is_valid():
 
-                        # customer_id = int(request.GET.get('user_id'))
-                        # user_id = request.POST.get('u_id')
-                        # content = request.POST.get('content')
-                        # send_type = int(request.POST.get('send_type'))
+                        redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                        redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                        redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
+
 
                         models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                             is_last_msg=True).update(
