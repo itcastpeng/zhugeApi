@@ -60,6 +60,7 @@ def jiChuSheZhiOper(request, oper_type):
     userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         'xiaochengxuApp__company'
     ).filter(xiaochengxuApp__company_id=company_id)
+    base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     if request.method == "POST":
 
@@ -114,7 +115,7 @@ def jiChuSheZhiOper(request, oper_type):
                     try:
                         print('---- shangHuHao ---->>',shangHuHao) # 1516421881
 
-                        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
                         shanghuzhengshupath =  base_path + '/' + zhengShuPath
                         file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin','secretKeyFile') + '/' + shangHuHao
                                               # statics/zhugeleida/imgs/admin/secretKeyFile/1543922970035.zip
@@ -156,14 +157,14 @@ def jiChuSheZhiOper(request, oper_type):
                         re_openid = customer_obj.openid
 
                     result_data = {
-                        'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
-                        'wxappid': appid,  # 真实数据appid
-                        're_openid': re_openid,  # 用户唯一标识
-                        'total_amount': 1,  # 付款金额 1:100 | 发送一分钱
+                        # 'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
                         'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
+                        'mch_id': shangHuHao,      # 商户号
+                        'appid': appid,  # 真实数据appid
+                        're_openid': re_openid,  # 用户唯一标识
+                        'total_amount': 100,  # 付款金额 1:100 | 发送一分钱
                         'client_ip': '192.168.1.1',  # 终端IP
-                        'mch_id': shangHuHao,  # 商户号
                         'total_num': 1,  # 红包发放总人数
                         'send_name': '诸葛雷达_测试发红包',  # 商户名称 中文
                         'act_name': '测试商户',  # 活动名称 32长度
@@ -259,8 +260,76 @@ def jiChuSheZhiOper(request, oper_type):
                     response.code = 301
                     response.msg = '该小程序已创建设置'
 
+        # 用于商户对已发放的红包进行查询红包的具体信息，可支持普通红包和裂变包。
+        elif oper_type == 'myself_query_fafang_info':
+            dingdanhao = request.GET.get('mch_billno')
+            company_id = request.GET.get('company_id')
 
+            # 生成预支付订单 判断商户KEY 和 商户号 是否正确
+            xiaochengxu_app = models.zgld_gongzhonghao_app.objects.filter(
+                company_id=company_id)  # 真实数据appid
 
+            jichushezhi_objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+            shangHuMiYao = ''
+            shangHuHao = ''
+            file_dir = ''
+            if jichushezhi_objs:
+                jichushezhi_obj = jichushezhi_objs[0]
+                shangHuMiYao = jichushezhi_obj.shangHuMiYao
+                shangHuHao = jichushezhi_obj.shangHuHao
+                file_dir = jichushezhi_obj.zhengshu
+
+            appid = xiaochengxu_app[0].authorization_appid
+
+            url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/gethbinfo'  # 微信支付接口
+            # customer_objs = models.zgld_customer.objects.filter(user_type=1, company_id=company_id,
+            #                                                     openid__isnull=False)
+            # re_openid = ''
+            # if customer_objs:
+            #     customer_obj = customer_objs[0]
+            #     re_openid = customer_obj.openid
+
+            result_data = {
+                # 'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
+                'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
+                'mch_billno': dingdanhao,  # 订单号
+                'mch_id': shangHuHao,  # 商户号
+
+                'appid': appid,  # 真实数据appid
+                'bill_type': 'MCHT',
+            }
+            print('--------- result_data --------> ', result_data)
+              # 商户KEY
+            stringSignTemp = yuzhifu.shengchengsign(result_data, shangHuMiYao)
+            result_data['sign'] = yuzhifu.md5(stringSignTemp).upper()
+            xml_data = yuzhifu.toXml(result_data).encode('utf8')
+
+            cret = base_path + "/" + os.path.join(file_dir, 'apiclient_cert.pem')
+            key = base_path + "/" + os.path.join(file_dir, 'apiclient_key.pem')
+            print('--- cret -->>', cret)  # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881/apiclient_cert.pem
+            print('--- key -->>', key)  # statics/zhugeleida/imgs/admin/secretKeyFile/1516421881/apiclient_key.pem
+
+            ret = requests.post(url, data=xml_data, cert=(cret, key))
+            print(ret.text)
+            DOMTree = yuzhifu.xmldom.parseString(ret.text)
+            collection = DOMTree.documentElement
+            return_msg = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
+            return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+            print('----- return_code --> ', return_code)
+
+            if return_code == 'SUCCESS':  # 判断预支付返回参数 是否正确
+                # userObjs.update(
+                #     shangHuHao=shangHuHao,
+                #     shangHuMiYao=shangHuMiYao,
+                #     zhengshu=file_dir
+                # )
+                response.code = 200
+                response.msg = 'chaxun 成功'
+            else:
+                return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
+                response.code = '%s' % (return_code)
+                response.msg = '微信接口返回错误: {return_msg}'.format(return_msg=return_msg)
+                return JsonResponse(response.__dict__)
 
 
     else:
