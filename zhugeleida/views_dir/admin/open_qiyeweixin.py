@@ -414,6 +414,7 @@ def open_qiyeweixin(request, oper_type):
 
 
             elif 'scan_code_web_login' in app_type:
+                app_type = app_type.split('|')[0]
                 auth_code = app_type.split('|')[1]
 
                 SuiteId = 'wx5d26a7a856b22bec'
@@ -522,6 +523,7 @@ def open_qiyeweixin(request, oper_type):
             else:
                 print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid, "|", corpid)
                 return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+
 
         #  用户确认授权后，会进入回调URI(即redirect_uri)，并在URI参数中带上临时授权码
         elif oper_type == 'get_auth_code':

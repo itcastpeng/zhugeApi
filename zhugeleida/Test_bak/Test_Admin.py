@@ -121,7 +121,7 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, params=get_data,data=post_data)
 
 url = ip + '/zhugeleida/admin/jiChuSheZhi/myself_query_fafang_info'  #
-get_data['mch_billno'] = '201812051030494953312'
+get_data['mch_billno'] =   '201812051030494953312' # '201812051240434358450'
 get_data['company_id'] = 2
 
 ret = requests.get(url, params=get_data,data=post_data)

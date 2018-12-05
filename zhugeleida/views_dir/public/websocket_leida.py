@@ -762,6 +762,7 @@ def websocket(request, oper_type):
                         'code': 303,
                         'msg': 'Auth code已经失效',
                     }
+                    rc.delete(auth_code)
                     print('----- Auth code已经失效 --->>',auth_code)
                     uwsgi.websocket_send(json.dumps(response_data))
                     return JsonResponse(response_data)
