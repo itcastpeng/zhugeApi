@@ -950,13 +950,73 @@ def article_oper(request, oper_type, o_id):
                     level_num = objs[0].level
                     title = objs[0].article.title
 
-                    if  level == 0:
-                        level = level + 1
-                        objs = objs.filter(level=1)
+                    if level == 0:
+                        objs = objs.filter(level=1).values('user_id','user__username').annotate(Count('user'))
+                        count = objs.count()
 
-                    elif level > 0 and query_customer_id:
-                        level = level + 1
-                        objs = objs.filter(level=level,customer_id=query_customer_id)
+                        for obj in  objs:
+                            user_id = obj.get('user_id')
+                            username = obj.get('user__username')
+                            gender = obj.get('user__gender')
+                            user__count = obj.get('user__count')
+
+
+                            print('-------> user_id username -------->>',user__count,"|",user_id,username)
+
+
+
+                            result_data, result_level = jisuan_level_num(article_id, user_id)
+
+                            lower_people_count = len(result_level)
+                            if lower_people_count > 0:
+                                lower_level = max(result_level) - min(result_level) + 1
+                            else:
+                                lower_level = 0
+
+                            data_dict = {
+                                # 'id': obj.id,
+                                'uid': user_id,  # 所属雷达用户
+                                'user_name': username,
+
+                                # 'customer_id': customer_id,
+                                # 'customer_name': username,
+                                # 'customer_headimgurl': obj.customer.headimgurl,
+                                'sex': gender,
+                                # 'area': area,
+
+                                # 'read_count': obj.read_count,
+                                # 'stay_time': stay_time,
+
+                                # 'forward_friend_circle_count': obj.forward_friend_circle_count,
+                                # 'forward_friend_count': obj.forward_friend_count,
+
+                                'lower_people_count': lower_people_count,
+                                'lower_level': lower_level,
+
+                                # 'is_have_child': obj.is_have_child,
+                                'level': level  # 所在的层级
+                            }
+
+                            ret_data.append(data_dict)
+
+                        response.code = 200
+                        response.msg = '返回成功'
+                        response.data = {
+
+                            'ret_data': ret_data,
+                            'total_level_num': level_num,  # 总共的层级
+                            'article_id': article_id,
+                            'article_title': title,
+                            'count': count,
+                        }
+                        return JsonResponse(response.__dict__)
+
+                    elif  level == 1 and not query_customer_id:
+                        objs = objs.filter(level=1,user_id=user_id)
+
+                    elif level >=1 and query_customer_id:
+
+                        objs = objs.filter(level=level+1,customer_id=query_customer_id)
 
                     # if length != 0:
                     #     start_line = (current_page - 1) * length
@@ -969,18 +1029,19 @@ def article_oper(request, oper_type, o_id):
                         customer_id = obj.customer_id
                         user_id = obj.user_id
 
-                        level = int(level) + 1
-                        print('---- article_id, user_id, customer_id, level ----->>',article_id, user_id, customer_id, level)
 
-                        result_data,result_level = jisuan_level_num(article_id, user_id, customer_id, level)
+                        print('---- article_id, user_id, customer_id, level ----->>',article_id, user_id, customer_id, level + 1 )
+
+
+                        result_data,result_level = jisuan_level_num(article_id, user_id, customer_id, level + 1)
 
                         lower_people_count = len(result_level)
                         if lower_people_count > 0:
                             lower_level = max(result_level) - min(result_level) + 1
                         else:
                             lower_level = 0
-
-
+                        print('--- result_level -->>',result_level)
+                        print('----- lower_people_count ------>>',lower_people_count)
                         stay_time = obj.stay_time
                         stay_time = conversion_seconds_hms(stay_time)
 
@@ -1014,6 +1075,7 @@ def article_oper(request, oper_type, o_id):
                         }
 
                         ret_data.append(data_dict)
+
 
                     response.code = 200
                     response.msg = '返回成功'
