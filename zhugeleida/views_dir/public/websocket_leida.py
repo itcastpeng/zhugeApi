@@ -280,9 +280,6 @@ def websocket(request, oper_type):
                 print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
                 print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
 
-                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                     customer_id=customer_id, send_type=1,
-                                                                     is_customer_new_msg=True).count()
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -353,11 +350,16 @@ def websocket(request, oper_type):
                             is_customer_new_msg=False
                         )
 
+                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                         customer_id=customer_id, send_type=1,
+                                                                         is_customer_new_msg=True).count()
+
+
                     response_data = {
                         'data': {
                             'ret_data': ret_data_list,
                             'count': count,
-                            'unread_msg_num': chatinfo_count
+                            'unread_msg_num': chatinfo_count # 未读消息
                         },
                         'code': 200,
                         'msg': '实时推送小程序-最新聊天信息成功',
