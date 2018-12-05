@@ -307,6 +307,9 @@ def article_oper(request, oper_type, o_id):
                                                                                  Sum('forward_count'))
 
                     article_num = _objs.count()
+                    current_page = forms_obj.cleaned_data['current_page']
+                    length = forms_obj.cleaned_data['length']
+
 
                     ret_data = []
                     if length != 0:

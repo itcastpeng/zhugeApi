@@ -484,6 +484,10 @@ def article_oper(request, oper_type, o_id):
 
                     article_num = _objs.count()
 
+                    current_page = forms_obj.cleaned_data['current_page']
+                    length = forms_obj.cleaned_data['length']
+
+
                     ret_data = []
                     if length != 0:
                         start_line = (current_page - 1) * length
