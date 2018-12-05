@@ -774,6 +774,7 @@ def websocket(request, oper_type):
                         'code': 504,
                         'msg': '等待超时,关闭长连接'
                     }
+                    rc.delete(auth_code)
                     uwsgi.websocket_send(json.dumps(ret_data))
                     return JsonResponse(ret_data)
 
