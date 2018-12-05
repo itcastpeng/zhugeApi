@@ -416,12 +416,6 @@ def websocket(request, oper_type):
                             uwsgi.websocket_send(json.dumps(response_data))
                             continue
 
-                        # elif  type == 'input':
-                        #     rc.set(customer_id_position_key, 'input')
-
-                        elif type == 'output':
-                            rc.set(customer_id_position_key, 'output')
-
                         elif type == 'closed':
                             msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
                             ret_data = {
