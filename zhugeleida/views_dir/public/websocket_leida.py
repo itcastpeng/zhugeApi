@@ -399,7 +399,20 @@ def websocket(request, oper_type):
                         redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                         if type == 'register' or type == 'query_num':
-                            uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                                 customer_id=customer_id, send_type=1,
+                                                                                 is_customer_new_msg=True).count()
+
+                            response_data = {
+                                'data': {
+
+                                    'unread_msg_num': chatinfo_count  # 未读消息
+                                },
+                                'code': 200,
+                                'msg': '实时推送小程序-最新聊天信息成功',
+                            }
+
+                            uwsgi.websocket_send(json.dumps(response_data))
                             continue
 
                         # elif  type == 'input':
