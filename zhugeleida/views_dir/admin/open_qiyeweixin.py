@@ -404,6 +404,7 @@ def open_qiyeweixin(request, oper_type):
             SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
             url = ''
             auth_code = ''
+            _app_type = ''
             if app_type == 'leida':
                 SuiteId = 'wx5d26a7a856b22bec'
                 url = 'http://zhugeleida.zhugeyingxiao.com/'
@@ -414,7 +415,7 @@ def open_qiyeweixin(request, oper_type):
 
 
             elif 'scan_code_web_login' in app_type:
-                app_type = app_type.split('|')[0]
+                _app_type = app_type.split('|')[0]
                 auth_code = app_type.split('|')[1]
 
                 SuiteId = 'wx5d26a7a856b22bec'
@@ -503,7 +504,7 @@ def open_qiyeweixin(request, oper_type):
 
                         return redirect(redirect_url)
 
-                    elif status == 1 and app_type == 'scan_code_web_login':
+                    elif status == 1 and _app_type == 'scan_code_web_login':
                         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                         rc.set(auth_code,True,60)
                         user_profile_obj.password = auth_code
