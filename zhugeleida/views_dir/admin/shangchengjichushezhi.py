@@ -149,12 +149,17 @@ def jiChuSheZhiOper(request, oper_type):
                     dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99))
 
                     url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack'  # 微信支付接口
+                    customer_objs = models.zgld_customer.objects.filter(user_type=1,company_id=company_id,openid__isnull=False)
+                    re_openid = ''
+                    if customer_objs:
+                        customer_obj = customer_objs[0]
+                        re_openid = customer_obj.openid
+
                     result_data = {
-                        # 'appid': 'wx0f55c67abd0ebf3d',  # appid
-                        # 'mch_id': '1513325051',  # 商户号
+                        'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
                         'wxappid': appid,  # 真实数据appid
-                        're_openid': 'o2ZPb4qZTfb7BOe92eh8ipVWilCc',  # 用户唯一标识
-                        'total_amount': 100,  # 付款金额 1:100
+                        're_openid': re_openid,  # 用户唯一标识
+                        'total_amount': 1,  # 付款金额 1:100 | 发送一分钱
                         'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
                         'client_ip': '192.168.1.1',  # 终端IP

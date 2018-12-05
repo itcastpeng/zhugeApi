@@ -160,7 +160,7 @@ def focusOnIssuedRedEnvelope(resultDict):
         objsForm = forms_obj.cleaned_data
         # redEnvelope = models.zgld_red_envelope_to_issue.objects.filter(articleId__isnull=True)
         nowDateTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        redEnvelopeObjs = models.zgld_red_envelope_to_issue.objects.create(
+        models.zgld_red_envelope_to_issue.objects.create(
             wxappid = objsForm.get('appid'),                        # appid
             mch_id = objsForm.get('mch_id'),                        # 商户号
             re_openid = objsForm.get('openid'),                 # 用户唯一标识
@@ -175,6 +175,7 @@ def focusOnIssuedRedEnvelope(resultDict):
         )
         SHANGHUKEY = objsForm.get('SHANGHUKEY')
         result_data = {
+            'scene_id' : 'PRODUCT_1',               # 发放红包使用场景，红包金额大于200或者小于1元时必传 PRODUCT_1:商品促销
             'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
             'wxappid': objsForm.get('appid'),                           # appid
             'mch_id':objsForm.get('mch_id'),                            # 商户号
@@ -300,6 +301,7 @@ def articleForwardingRedEnvelope(resultDict):
         )
         SHANGHUKEY = objsForm.get('SHANGHUKEY')
         result_data = {
+            'scene_id' : 'PRODUCT_1' , #发放红包使用场景，红包金额大于200或者小于1元时必传 PRODUCT_1:商品促销
             'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
             'wxappid': objsForm.get('appid'),                           # appid
             'mch_id':objsForm.get('mch_id'),                            # 商户号
