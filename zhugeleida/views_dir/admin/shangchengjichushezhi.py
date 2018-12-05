@@ -156,7 +156,7 @@ def jiChuSheZhiOper(request, oper_type):
                         re_openid = customer_obj.openid
 
                     result_data = {
-                        'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
+                        # 'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
                         'wxappid': appid,  # 真实数据appid
                         're_openid': re_openid,  # 用户唯一标识
                         'total_amount': 100,  # 付款金额 1:100 | 发送一分钱
