@@ -130,8 +130,12 @@ def chat(request):
 
                 ret_data_list.reverse()
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)
+
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                 rc.set(redis_customer_id_key, False)
+                rc.set(customer_id_position_key, 'input') # 代表用户进去里面的聊天框
+
                 response.code = 200
                 response.msg = '分页获取-全部聊天消息成功'
                 response.data = {
@@ -143,6 +147,7 @@ def chat(request):
                     'user_name': objs[0].userprofile.username,
                     'user_avatar': mingpian_avatar,
                 }
+
 
         else:
             response.code = 402

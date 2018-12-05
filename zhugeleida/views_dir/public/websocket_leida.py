@@ -267,6 +267,7 @@ def websocket(request, oper_type):
     elif oper_type == 'xiaochengxu':
 
         redis_customer_id_key = ''
+        customer_id_position_key = ''
         user_id = ''
         customer_id = ''
 
@@ -343,12 +344,15 @@ def websocket(request, oper_type):
                         ret_data_list.append(base_info_dict)
 
                     ret_data_list.reverse()
-                    # response.code = 200
-                    # response.msg = '实时获取-最新聊天信息成功'
+
+                    customer_id_position_key_flag = rc.get(customer_id_position_key)
+
                     print('--- list(msg_obj) -->>', ret_data_list)
-                    objs.update(
-                        is_customer_new_msg=False
-                    )
+                    if customer_id_position_key_flag == 'input':
+                        objs.update(
+                            is_customer_new_msg=False
+                        )
+
                     response_data = {
                         'data': {
                             'ret_data': ret_data_list,
@@ -389,13 +393,20 @@ def websocket(request, oper_type):
 
                         redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                         redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                        customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)
                         redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                         if type == 'register' or type == 'query_num':
                             uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
                             continue
 
-                        if type == 'closed':
+                        # elif  type == 'input':
+                        #     rc.set(customer_id_position_key, 'input')
+
+                        elif type == 'output':
+                            rc.set(customer_id_position_key, 'output')
+
+                        elif type == 'closed':
                             msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
                             ret_data = {
                                 'code': 200,
