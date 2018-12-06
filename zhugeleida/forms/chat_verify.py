@@ -80,6 +80,15 @@ class ChatSelectForm(forms.Form):
 
 
 class ChatPostForm(forms.Form):
+
+    user_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'invalid': "user_id不能为空",
+        }
+    )
+
+
     customer_id = forms.IntegerField(
         required=True,
         error_messages={
@@ -174,7 +183,7 @@ class LeidaQueryChatPostForm(forms.Form):
 
     def clean_length(self):
         if 'length' not in self.data:
-            length = 20
+            length = 10
         else:
             length = int(self.data['length'])
         return length

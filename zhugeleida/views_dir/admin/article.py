@@ -15,7 +15,7 @@ from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-# from  zhugeleida.views_dir.qiyeweixin.article import  jisuan_level_num
+
 
 # 文章管理查询
 @csrf_exempt
@@ -822,6 +822,7 @@ def article_oper(request, oper_type, o_id):
                 # length = forms_obj.cleaned_data['length']
 
                 ret_data = []
+                # from  zhugeleida.views_dir.qiyeweixin.article import  jisuan_level_num
                 if objs:
                     level_num = objs[0].level
                     title = objs[0].article.title
