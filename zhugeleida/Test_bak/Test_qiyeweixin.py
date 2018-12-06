@@ -501,7 +501,7 @@ import json
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
+url =  ip + '/zhugeleida/admin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
 
 get_data['uid'] = 17
 get_data['pid'] = 857

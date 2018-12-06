@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
-    ThreadPictureForm, EffectRankingByLevelForm,QueryCustomerTransmitForm
+    ThreadPictureForm, EffectRankingByLevelForm,QueryCustomerTransmitForm,EffectRankingByTableForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 import datetime
@@ -376,7 +376,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-    else:
+    elif request.method == 'GET':
 
         # 获取文章详情
         if oper_type == 'myarticle':
@@ -782,6 +782,237 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '该文章无查看'
                 response.data = {}
+
+
+
+        elif oper_type == 'query_customer_table_by_level':
+
+            level = request.GET.get('level')
+            user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+            # current_page = request.GET.get('current_page')
+            # length = request.GET.get('length')
+
+            query_customer_id = request.GET.get('query_customer_id')
+            request_data_dict = {
+                'article_id': o_id,
+                # 'uid': uid,  # 文章所属用户的ID
+                'level': level,  # 文章所属用户的ID
+                # 'current_page': current_page,
+                # 'length': length
+            }
+
+            forms_obj = EffectRankingByTableForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                article_id = forms_obj.cleaned_data.get('article_id')
+                level = forms_obj.cleaned_data.get('level')
+
+                q1 = Q()
+                q1.connector = 'AND'
+                q1.children.append(('article_id', article_id))
+                if uid:
+                     q1.children.append(('user_id', uid))
+
+
+                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                       'customer').filter(q1) #.order_by('-level')
+
+                # current_page = forms_obj.cleaned_data['current_page']
+                # length = forms_obj.cleaned_data['length']
+
+                ret_data = []
+                from  zhugeleida.views_dir.qiyeweixin.article import  jisuan_level_num
+
+                if objs:
+                    level_num = objs[0].level
+                    title = objs[0].article.title
+
+                    if level == 0 and not uid:
+                        objs = objs.filter(level=1).values('user_id','user__username').annotate(Count('user'))
+                        count = objs.count()
+
+                        for obj in  objs:
+                            user_id = obj.get('user_id')
+                            username = obj.get('user__username')
+                            gender = obj.get('user__gender')
+                            user__count = obj.get('user__count')
+
+                            print('-------> user_id username -------->>',user__count,"|",user_id,username)
+
+                            data_dict = {
+                                'uid': user_id,  # 所属雷达用户
+                                'user_name': username,
+                                'sex': gender
+                            }
+                            ret_data.append(data_dict)
+
+                        response.code = 200
+                        response.msg = '返回成功'
+                        response.data = {
+                            'ret_data': ret_data,
+                            'total_level_num': level_num,  # 总共的层级
+                            'article_id': article_id,
+                            'article_title': title,
+                            'count': count,
+                        }
+                        return JsonResponse(response.__dict__)
+
+                    elif level == 0 and uid:
+                        objs = objs.filter(level=1)
+                        count = objs.count()
+
+                        # for obj in  objs:
+                        #     user_id = obj.get('user_id')
+                        #     username = obj.get('user__username')
+                        #     gender = obj.get('user__gender')
+                        #     user__count = obj.get('user__count')
+
+                            # if uid == user_id:
+                        if objs:
+                            obj = objs[0]
+                            username =  obj.user.username
+                            gender =  obj.user.gender
+                            level =  obj.level
+                            print('-------> [ 只算一个人 ] user_id username -------->>',username,'|',uid)
+
+                            result_data, result_level = jisuan_level_num(article_id, uid)
+
+                            lower_people_count = len(result_level)
+                            if lower_people_count > 0:
+                                lower_level = max(result_level) - min(result_level) + 1
+                            else:
+                                lower_level = 0
+
+                            data_dict = {
+                                # 'id': obj.id,
+                                'uid': user_id,  # 所属雷达用户
+                                'user_name': username,
+
+                                # 'customer_id': customer_id,
+                                # 'customer_name': username,
+                                # 'customer_headimgurl': obj.customer.headimgurl,
+                                'sex': gender,
+                                # 'area': area,
+
+                                # 'read_count': obj.read_count,
+                                # 'stay_time': stay_time,
+
+                                # 'forward_friend_circle_count': obj.forward_friend_circle_count,
+                                # 'forward_friend_count': obj.forward_friend_count,
+
+                                'lower_people_count': lower_people_count,
+                                'lower_level': lower_level,
+
+                                # 'is_have_child': obj.is_have_child,
+                                'level': level  # 所在的层级
+                            }
+
+                            ret_data.append(data_dict)
+
+                        response.code = 200
+                        response.msg = '返回成功'
+                        response.data = {
+
+                            'ret_data': ret_data,
+                            'total_level_num': level_num,  # 总共的层级
+                            'article_id': article_id,
+                            'article_title': title,
+                            'count': count,
+                        }
+                        return JsonResponse(response.__dict__)
+
+                    elif  level == 1 and not query_customer_id:
+                        objs = objs.filter(level=1,user_id=user_id)
+
+                    elif level >=1 and query_customer_id:
+
+                        objs = objs.filter(level=level+1,customer_id=query_customer_id)
+
+                    # if length != 0:
+                    #     start_line = (current_page - 1) * length
+                    #     stop_line = start_line + length
+                    #     objs = objs[start_line: stop_line]
+
+                    count = objs.count()
+
+                    for obj in objs:
+                        customer_id = obj.customer_id
+                        user_id = obj.user_id
+
+
+                        print('---- article_id, user_id, customer_id, level ----->>',article_id, user_id, customer_id, level + 1 )
+
+
+                        result_data,result_level = jisuan_level_num(article_id, user_id, customer_id, level + 1)
+
+                        lower_people_count = len(result_level)
+                        if lower_people_count > 0:
+                            lower_level = max(result_level) - min(result_level) + 1
+                        else:
+                            lower_level = 0
+                        print('--- result_level -->>',result_level)
+                        print('----- lower_people_count ------>>',lower_people_count)
+                        stay_time = obj.stay_time
+                        stay_time = conversion_seconds_hms(stay_time)
+
+                        username = obj.customer.username
+                        username = base64.b64decode(username)
+                        username = str(username, 'utf-8')
+                        area = obj.customer.province + obj.customer.city
+
+                        data_dict = {
+                            'id': obj.id,
+                            'uid': obj.user_id,  # 所属雷达用户
+                            'user_name': obj.user.username,
+
+                            'customer_id': customer_id,
+                            'customer_name': username,
+                            'customer_headimgurl': obj.customer.headimgurl,
+                            'sex': obj.customer.get_sex_display() or '',
+                            'area': area,
+
+                            'read_count': obj.read_count,
+                            'stay_time': stay_time,
+
+                            'forward_friend_circle_count': obj.forward_friend_circle_count,
+                            'forward_friend_count': obj.forward_friend_count,
+
+                            'lower_people_count' : lower_people_count,
+                            'lower_level' : lower_level,
+
+                            'is_have_child' : obj.is_have_child,
+                            'level': level  # 所在的层级
+                        }
+
+                        ret_data.append(data_dict)
+
+
+                    response.code = 200
+                    response.msg = '返回成功'
+                    response.data = {
+
+                        'ret_data': ret_data,
+                        'total_level_num': level_num,  # 总共的层级
+                        'article_id': article_id,
+                        'article_title': title,
+                        'count': count,
+                    }
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+            # article_id = request.GET.get('article_id')
+            # user_id = request.GET.get('uid')
+            # pid = request.GET.get('pid') or None
+            # level = request.GET.get('level')
+            # if level:
+            #     level = int(level) + 1
+            #
+            # jisuan_level_num(article_id,user_id,pid,level)
+
+
 
         else:
             response.code = 402

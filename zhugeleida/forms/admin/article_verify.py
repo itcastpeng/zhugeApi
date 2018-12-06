@@ -423,3 +423,5 @@ class QueryCustomerTransmitForm(forms.Form):
         else:
             length = int(self.data['length'])
         return length
+
+
