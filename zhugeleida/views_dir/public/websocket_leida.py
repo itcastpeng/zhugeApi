@@ -526,7 +526,7 @@ def websocket(request, oper_type):
 
                 rc.set(redis_user_query_info_key, False)
 
-                print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                print('------ 有新消息, 实时推送给【雷达】 的数据：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
 
             else:
@@ -534,13 +534,13 @@ def websocket(request, oper_type):
                     # data = uwsgi.websocket_recv()
                     data = uwsgi.websocket_recv_nb()
 
-                    print('------[小程序【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
+                    print('------[雷达【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
                         time.sleep(2)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
-                    print('------ 【小程序-【消息数量】】发送过来的 数据:  ----->>', _data)
+                    print('------ 【雷达-【消息数量】】发送过来的 数据:  ----->>', _data)
 
                     type = _data.get('type')
                     user_id = _data.get('user_id')
@@ -584,6 +584,7 @@ def websocket(request, oper_type):
                                 'length': length,
                                 'user_id': user_id
                             }
+                            print('----- 数据 contact_data---->>',contact_data)
                             ret_data_list, chatinfo_count = query_contact_list(contact_data)
 
                             response_data = {
