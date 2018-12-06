@@ -227,12 +227,12 @@ def websocket(request, oper_type):
 
                         elif user_type == 1 and customer_id and user_id:
                             print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->')
-                            _data['customer_id'] = customer_id
-                            _data['user_id'] = user_id
+                            # _data['customer_id'] = customer_id
+                            # _data['user_id'] = user_id
                             # data['type'] = 'gongzhonghao_template_chat'
                             _data['type'] = 'gongzhonghao_send_kefu_msg'
                             _data['content'] = Content
-                            tasks.user_send_gongzhonghao_template_msg.delay(data)  # 发送【公众号发送模板消息】
+                            tasks.user_send_gongzhonghao_template_msg.delay(_data)  # 发送【公众号发送模板消息】
 
                         rc.set(redis_user_id_key, True)
                         rc.set(redis_customer_id_key, True)
