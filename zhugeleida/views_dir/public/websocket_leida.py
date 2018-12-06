@@ -14,7 +14,7 @@ from zhugeleida.public.common import action_record
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_ChatGetForm, \
     ChatPostForm as xiaochengxu_ChatPostForm
 
-from zhugeleida.forms.chat_verify import ChatGetForm as leida_ChatGetForm, ChatPostForm as leida_ChatPostForm
+from zhugeleida.forms.chat_verify import LeidaQueryChatPostForm , ChatPostForm as leida_ChatPostForm
 try:
     import uwsgi
 except ImportError as e:
@@ -547,7 +547,7 @@ def websocket(request, oper_type):
                     # customer_id = _data.get('customer_i、d')
 
 
-                    forms_obj = leida_ChatPostForm(_data)
+                    forms_obj = LeidaQueryChatPostForm(_data)
                     if  forms_obj.is_valid():
                         # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                         redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
