@@ -259,7 +259,7 @@ def websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
 
-                    print('----  报错:%s [雷达] 终止连接 uid: %s | customer_id: %s --->>' % e,user_id, customer_id)
+                    print('----  报错:%s [雷达] 终止连接 uid  | customer_id --->>' % e,user_id, customer_id)
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
