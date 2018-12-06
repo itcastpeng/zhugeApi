@@ -574,8 +574,24 @@ def websocket(request, oper_type):
                             # print('------ 注册成功并获取雷达：---->', response_data)
                             #
                             # uwsgi.websocket_send(json.dumps(response_data))
+                        if type  == 'register':
 
-                        if  type == 'query_num' or type == 'register':
+                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,
+                                                                                 is_user_new_msg=True).count()
+
+                            response_data = {
+                                'data': {
+                                    # 'data_count' : contact_num,
+                                    'unread_msg_num': chatinfo_count
+                                },
+                                'code': 200,
+                                'msg': '注册成功返回【消息数量】成功',
+                            }
+                            print('------ 注册成功返回【消息数量】成功---->', response_data)
+                            uwsgi.websocket_send(json.dumps(response_data))
+
+
+                        elif  type == 'query_num':
                             current_page = forms_obj.cleaned_data['current_page']
                             length = forms_obj.cleaned_data['length']
 
