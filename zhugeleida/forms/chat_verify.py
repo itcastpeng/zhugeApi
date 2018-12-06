@@ -80,12 +80,12 @@ class ChatSelectForm(forms.Form):
 
 
 class ChatPostForm(forms.Form):
-    customer_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'invalid': "客户ID不能为空",
-        }
-    )
+    # customer_id = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'invalid': "客户ID不能为空",
+    #     }
+    # )
     send_type = forms.IntegerField(
         required=False,
         error_messages={

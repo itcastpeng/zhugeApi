@@ -498,13 +498,13 @@ def websocket(request, oper_type):
     elif oper_type == 'leida_query_info_num':
         redis_user_query_info_key = ''
         user_id = ''
-        customer_id = ''
+        # customer_id = ''
 
         uwsgi.websocket_handshake()
         while True:
 
             redis_user_query_info_key_flag = rc.get(redis_user_query_info_key)
-            print('---- 雷达【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
+            print('---- 雷达【消息数量】 循环 | uid: %s --->>' % str(user_id))
             if redis_user_query_info_key_flag == 'True':
                 print('---- 雷达【消息数量】 Flag 为 True  --->>', redis_user_query_info_key_flag)
 
@@ -544,7 +544,7 @@ def websocket(request, oper_type):
 
                     type = _data.get('type')
                     user_id = _data.get('user_id')
-                    customer_id = _data.get('customer_id')
+                    # customer_id = _data.get('customer_i、d')
 
 
                     forms_obj = leida_ChatPostForm(_data)
@@ -554,7 +554,6 @@ def websocket(request, oper_type):
 
                         if type == 'register':
                             chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                                 customer_id=customer_id,
                                                                                  send_type=2,
                                                                                  is_user_new_msg=True).count()
 
@@ -592,7 +591,7 @@ def websocket(request, oper_type):
                             uwsgi.websocket_send(json.dumps(response_data))
 
                         elif type == 'closed':
-                            msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
+                            msg = '确认关闭  customer_id | uid | ' + "|" + str(user_id)
                             ret_data = {
                                 'code': 200,
                                 'msg': msg
@@ -602,7 +601,7 @@ def websocket(request, oper_type):
 
 
                     else:
-                        if not user_id or not customer_id:
+                        if not user_id:
                             ret_data = {
                                 'code': 401,
                                 'msg': 'user_id和uid不能为空,终止连接'
@@ -615,7 +614,7 @@ def websocket(request, oper_type):
                         'code': 400,
                         'msg': '报错:%s 终止连接' % (e)
                     }
-                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e, str(customer_id), str(user_id))
+                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e , str(user_id))
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
