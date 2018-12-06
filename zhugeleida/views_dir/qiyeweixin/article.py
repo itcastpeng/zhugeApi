@@ -960,10 +960,7 @@ def article_oper(request, oper_type, o_id):
                             gender = obj.get('user__gender')
                             user__count = obj.get('user__count')
 
-
                             print('-------> user_id username -------->>',user__count,"|",user_id,username)
-
-
 
                             result_data, result_level = jisuan_level_num(article_id, user_id)
 

@@ -1,7 +1,7 @@
 import json
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from publicFunc import deal_time
 import time
 import datetime
 from zhugeapi_celery_project import tasks
@@ -507,15 +507,21 @@ def websocket(request, oper_type):
             print('---- 雷达【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
             if redis_user_query_info_key_flag == 'True':
                 print('---- 雷达【消息数量】 Flag 为 True  --->>', redis_user_query_info_key_flag)
-                chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                     send_type=2, is_user_new_msg=True).count()
+
+                contact_data = {
+                    'current_page': 1,
+                    'length': 10,
+                    'user_id' : user_id
+                }
+                ret_data_list,chatinfo_count = query_contact_list(contact_data)
 
                 response_data = {
                     'data': {
-                        'chatinfo_count': chatinfo_count,
+                        'ret_data': ret_data_list,
+                        'unread_msg_num': chatinfo_count,
                     },
                     'code': 200,
-                    'msg': '实时获取小程序【消息数量】成功',
+                    'msg': '实时获取雷达【消息数量】成功',
                 }
 
                 rc.set(redis_user_query_info_key, False)
@@ -562,6 +568,28 @@ def websocket(request, oper_type):
 
                             uwsgi.websocket_send(json.dumps(response_data))
                             # uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
+
+                        elif type == 'query_num':
+                            current_page = forms_obj.cleaned_data['current_page']
+                            length = forms_obj.cleaned_data['length']
+
+                            contact_data = {
+                                'current_page': current_page,
+                                'length': length,
+                                'user_id': user_id
+                            }
+                            ret_data_list, chatinfo_count = query_contact_list(contact_data)
+
+                            response_data = {
+                                'data': {
+                                    'ret_data': ret_data_list,
+                                    'unread_msg_num': chatinfo_count,
+                                },
+                                'code': 200,
+                                'msg': '实时获取雷达【消息数量】成功',
+                            }
+                            print('------ 分页获取获取雷达【消息数量】成功---->', response_data)
+                            uwsgi.websocket_send(json.dumps(response_data))
 
                         elif type == 'closed':
                             msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
@@ -879,3 +907,92 @@ def websocket(request, oper_type):
                 # uwsgi.websocket_send(json.dumps(ret_data))
 
                 return JsonResponse(ret_data)
+
+
+def query_contact_list(data):
+    user_id = data.get('user_id')
+    current_page = data.get('current_page')
+    length = data.get('length')
+
+    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,
+                                                         is_user_new_msg=True).count()
+
+
+    chat_info_objs = models.zgld_chatinfo.objects.select_related(
+        'userprofile',
+        'customer'
+    ).filter(
+        userprofile_id=user_id,
+        is_last_msg=True
+    ).order_by('-create_date')
+
+    # count = chat_info_objs.count()
+
+    if length != 0:
+        start_line = (current_page - 1) * length
+        stop_line = start_line + length
+        chat_info_objs = chat_info_objs[start_line: stop_line]
+
+    ret_data_list = []
+    for obj in chat_info_objs:
+        print('-------- obj.id -------->>', obj.id)
+
+        # username = base64.b64decode(obj.customer.username)
+        # customer_name = str(username, 'utf-8')
+
+        try:
+            customer_id = obj.customer_id
+            if not customer_id:  # 没有customer_id
+                continue
+
+            _username = obj.customer.username
+
+            username = base64.b64decode(_username)
+            customer_name = str(username, 'utf-8')
+            print('----- 解密b64decode username----->', customer_id, '|', username)
+        except Exception as e:
+            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
+            customer_name = '客户ID%s' % (obj.customer_id)
+
+        content = obj.content
+
+        if not content:
+            continue
+
+        _content = json.loads(content)
+        info_type = _content.get('info_type')
+        msg = ''
+        if info_type:
+            info_type = int(info_type)
+            if info_type == 1:
+                msg = _content.get('msg')
+                msg = base64.b64decode(msg)
+                msg = str(msg, 'utf-8')
+
+            elif info_type == 2:
+                msg = '向您咨询:' + _content.get('product_name')
+
+            elif info_type == 3:
+                msg = _content.get('msg')
+
+        _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+            userprofile_id=obj.userprofile_id,
+            customer_id=obj.customer_id,
+            is_user_new_msg=True,
+            send_type=2
+        )
+        _count = _objs.count()
+
+        base_info_dict = {
+            'customer_id': obj.customer_id,
+            'customer_source': obj.customer.user_type or '',
+            'customer_source_text': obj.customer.get_user_type_display(),
+            'src': obj.customer.headimgurl,
+            'name': customer_name,
+            'dateTime': deal_time.deal_time(obj.create_date),
+            'msg': msg,
+            'count': _count
+        }
+
+        ret_data_list.append(base_info_dict)
+    return  ret_data_list,chatinfo_count
