@@ -552,23 +552,30 @@ def websocket(request, oper_type):
                         # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                         redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
-                        if type == 'register':
-                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                                 send_type=2,
-                                                                                 is_user_new_msg=True).count()
+                        # if type == 'register':
+                            # contact_data = {
+                            #     'current_page': 1,
+                            #     'length': 10,
+                            #     'user_id': user_id
+                            # }
+                            # ret_data_list, chatinfo_count = query_contact_list(contact_data)
+                            #
+                            # response_data = {
+                            #     'data': {
+                            #         'ret_data': ret_data_list,
+                            #         'unread_msg_num': chatinfo_count,
+                            #     },
+                            #     'code': 200,
+                            #     'msg': '注册成功并获取雷达【消息数量】成功',
+                            # }
+                            #
+                            # rc.set(redis_user_query_info_key, False)
+                            #
+                            # print('------ 注册成功并获取雷达：---->', response_data)
+                            #
+                            # uwsgi.websocket_send(json.dumps(response_data))
 
-                            response_data = {
-                                'data': {
-                                    'chatinfo_count': chatinfo_count,
-                                },
-                                'code': 200,
-                                'msg': '注册成功',
-                            }
-
-                            uwsgi.websocket_send(json.dumps(response_data))
-                            # uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "注册成功"}))
-
-                        elif type == 'query_num':
+                        if  type == 'query_num' or type == 'register':
                             current_page = forms_obj.cleaned_data['current_page']
                             length = forms_obj.cleaned_data['length']
 
