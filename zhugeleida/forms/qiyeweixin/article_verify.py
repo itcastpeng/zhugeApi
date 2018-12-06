@@ -188,7 +188,7 @@ class MyarticleForm(forms.Form):
         else:
             return article_id
 
-# 判断是否是数字
+#
 class ThreadPictureForm(forms.Form):
     customer_id = forms.CharField(
         required=True,
@@ -204,18 +204,43 @@ class ThreadPictureForm(forms.Form):
         }
     )
 
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
 
-    # def clean_article_id(self):
-    #     article_id = self.data['article_id']
-    #
-    #     objs = models.zgld_article.objects.filter(
-    #         id=article_id
-    #     )
-    #
-    #     if not objs:
-    #         self.add_error('article_id', '文章不存在')
-    #     else:
-    #         return article_id
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "页显示数量类型错误"
+        }
+    )
+
+    def clean_current_page(self):
+        if not self.data.get('current_page'):
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if not self.data.get('length'):
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
+
+
+
+
 
 class EffectRankingByLevelForm(forms.Form):
     level = forms.IntegerField(
@@ -406,13 +431,6 @@ class QueryCustomerTransmitForm(forms.Form):
 
 
 class HideCustomerDataForm(forms.Form):
-    # level = forms.CharField(
-    #     required=True,
-    #     error_messages={
-    #         'required': '层级不能为空'
-    #     }
-    # )
-
 
     article_id = forms.CharField(
         required=True,

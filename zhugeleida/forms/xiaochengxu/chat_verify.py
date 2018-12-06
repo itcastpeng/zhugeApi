@@ -64,9 +64,17 @@ class ChatPostForm(forms.Form):
     u_id = forms.IntegerField(
         required=True,
         error_messages={
-            'invalid': "用户ID不能为空",
+            'invalid': "UID不能为空",
         }
     )
+
+    user_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'invalid': "user_id不能为空",
+        }
+    )
+
     send_type = forms.IntegerField(
         required=False,
         error_messages={

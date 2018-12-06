@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -115,6 +115,19 @@ ip = 'http://127.0.0.1:8001'
 # get_data['auth_code'] = 'CdpUdlQg3fLfi2-L6yzODsknfrCsMmIlOFpKEiQfslt5pTMLfEX2XquQESxfCTyBdZT1LwMNF4PIgGXsEpHoZ8kKqlu-iKlICMRgcjBRw0kclDg6y_FrGAw4JjWn2tpd'
 # get_data['state'] = 'scan_code_web_login'
 # ret = requests.get(url, params=get_data,data=post_data)
+
+
+# url = ip + '/zhugeleida/admin/open_qiyeweixin/web_scan_authorize_qrcode'  #
+# ret = requests.get(url, params=get_data,data=post_data)
+
+url = ip + '/zhugeleida/admin/jiChuSheZhi/myself_query_fafang_info'  #
+get_data['mch_billno'] =   '201812051030494953312' # '201812051240434358450'
+get_data['company_id'] = 2
+
+ret = requests.get(url, params=get_data,data=post_data)
+
+
+
 
 
 
