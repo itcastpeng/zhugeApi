@@ -259,7 +259,7 @@ def websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
 
-                    print('----  报错:%s [雷达] 终止连接 uid: %s | customer_id: %s --->>' % e,str(user_id), str(customer_id))
+                    print('----  报错:%s [雷达] 终止连接 uid: %s | customer_id: %s --->>' % e,user_id, customer_id)
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
@@ -589,6 +589,7 @@ def websocket(request, oper_type):
 
                             response_data = {
                                 'data': {
+                                    # 'data_count' : contact_num,
                                     'ret_data': ret_data_list,
                                     'unread_msg_num': chatinfo_count,
                                 },
@@ -933,7 +934,7 @@ def query_contact_list(data):
         is_last_msg=True
     ).order_by('-create_date')
 
-    # count = chat_info_objs.count()
+    # contact_num = chat_info_objs.count()
 
     if length != 0:
         start_line = (current_page - 1) * length

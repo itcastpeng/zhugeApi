@@ -816,13 +816,14 @@ def article_oper(request, oper_type, o_id):
 
 
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(q1).order_by('-level')
+                                                                                       'customer').filter(q1) #.order_by('-level')
 
                 # current_page = forms_obj.cleaned_data['current_page']
                 # length = forms_obj.cleaned_data['length']
 
                 ret_data = []
-                # from  zhugeleida.views_dir.qiyeweixin.article import  jisuan_level_num
+                from  zhugeleida.views_dir.qiyeweixin.article import  jisuan_level_num
+
                 if objs:
                     level_num = objs[0].level
                     title = objs[0].article.title
@@ -858,64 +859,68 @@ def article_oper(request, oper_type, o_id):
                         return JsonResponse(response.__dict__)
 
                     elif level == 0 and uid:
-                        objs = objs.filter(level=1).values('user_id','user__username').annotate(Count('user'))
+                        objs = objs.filter(level=1)
                         count = objs.count()
 
-                        for obj in  objs:
-                            user_id = obj.get('user_id')
-                            username = obj.get('user__username')
-                            gender = obj.get('user__gender')
-                            user__count = obj.get('user__count')
+                        # for obj in  objs:
+                        #     user_id = obj.get('user_id')
+                        #     username = obj.get('user__username')
+                        #     gender = obj.get('user__gender')
+                        #     user__count = obj.get('user__count')
 
-                            if uid == user_id:
+                            # if uid == user_id:
+                        if objs:
+                            obj = objs[0]
+                            username =  obj.user.username
+                            gender =  obj.user.gender
+                            level =  obj.level
+                            print('-------> [ 只算一个人 ] user_id username -------->>',username,'|',uid)
 
-                                print('-------> user_id username -------->>',user__count,"|",user_id,username)
+                            result_data, result_level = jisuan_level_num(article_id, uid)
 
-                                result_data, result_level = jisuan_level_num(article_id, user_id)
+                            lower_people_count = len(result_level)
+                            if lower_people_count > 0:
+                                lower_level = max(result_level) - min(result_level) + 1
+                            else:
+                                lower_level = 0
 
-                                lower_people_count = len(result_level)
-                                if lower_people_count > 0:
-                                    lower_level = max(result_level) - min(result_level) + 1
-                                else:
-                                    lower_level = 0
+                            data_dict = {
+                                # 'id': obj.id,
+                                'uid': user_id,  # 所属雷达用户
+                                'user_name': username,
 
-                                data_dict = {
-                                    # 'id': obj.id,
-                                    'uid': user_id,  # 所属雷达用户
-                                    'user_name': username,
+                                # 'customer_id': customer_id,
+                                # 'customer_name': username,
+                                # 'customer_headimgurl': obj.customer.headimgurl,
+                                'sex': gender,
+                                # 'area': area,
 
-                                    # 'customer_id': customer_id,
-                                    # 'customer_name': username,
-                                    # 'customer_headimgurl': obj.customer.headimgurl,
-                                    'sex': gender,
-                                    # 'area': area,
+                                # 'read_count': obj.read_count,
+                                # 'stay_time': stay_time,
 
-                                    # 'read_count': obj.read_count,
-                                    # 'stay_time': stay_time,
+                                # 'forward_friend_circle_count': obj.forward_friend_circle_count,
+                                # 'forward_friend_count': obj.forward_friend_count,
 
-                                    # 'forward_friend_circle_count': obj.forward_friend_circle_count,
-                                    # 'forward_friend_count': obj.forward_friend_count,
+                                'lower_people_count': lower_people_count,
+                                'lower_level': lower_level,
 
-                                    'lower_people_count': lower_people_count,
-                                    'lower_level': lower_level,
-
-                                    # 'is_have_child': obj.is_have_child,
-                                    'level': level  # 所在的层级
-                                }
-
-                                ret_data.append(data_dict)
-
-                            response.code = 200
-                            response.msg = '返回成功'
-                            response.data = {
-
-                                'ret_data': ret_data,
-                                'total_level_num': level_num,  # 总共的层级
-                                'article_id': article_id,
-                                'article_title': title,
-                                'count': count,
+                                # 'is_have_child': obj.is_have_child,
+                                'level': level  # 所在的层级
                             }
-                            return JsonResponse(response.__dict__)
+
+                            ret_data.append(data_dict)
+
+                        response.code = 200
+                        response.msg = '返回成功'
+                        response.data = {
+
+                            'ret_data': ret_data,
+                            'total_level_num': level_num,  # 总共的层级
+                            'article_id': article_id,
+                            'article_title': title,
+                            'count': count,
+                        }
+                        return JsonResponse(response.__dict__)
 
                     elif  level == 1 and not query_customer_id:
                         objs = objs.filter(level=1,user_id=user_id)
