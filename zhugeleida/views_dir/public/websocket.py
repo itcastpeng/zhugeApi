@@ -266,9 +266,9 @@ def leida_websocket(request, oper_type):
                         }
 
                         print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id,_data)
-                        # uwsgi.websocket_send(json.dumps(ret_data))
-
-                        return JsonResponse(ret_data)
+                        uwsgi.websocket_send(json.dumps(ret_data))
+                        break
+                        # return JsonResponse(ret_data)
 
                 except Exception as  e:
                     ret_data = {
@@ -277,9 +277,9 @@ def leida_websocket(request, oper_type):
                     }
 
                     print('----  报错:%s [雷达] 终止连接 uid  | customer_id --->>' % e,user_id, customer_id)
-                    # uwsgi.websocket_send(json.dumps(ret_data))
-
-                    return JsonResponse(ret_data)
+                    uwsgi.websocket_send(json.dumps(ret_data))
+                    break
+                    # return JsonResponse(ret_data)
 
     # 雷达获取消息未读数量
     elif oper_type == 'leida_query_info_num':
@@ -401,7 +401,7 @@ def leida_websocket(request, oper_type):
                         }
 
                         print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id,_data)
-                        #uwsgi.websocket_send(json.dumps(ret_data))
+                        uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
 
@@ -540,7 +540,7 @@ def leida_websocket(request, oper_type):
                         }
 
                         print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id)
-                        # uwsgi.websocket_send(json.dumps(ret_data))
+                        uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
 
@@ -551,7 +551,7 @@ def leida_websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
                     print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e, str(user_id))
-                    # uwsgi.websocket_send(json.dumps(ret_data))
+                    uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
 
@@ -802,7 +802,7 @@ def xiaochengxu_websocket(request, oper_type):
                         }
 
                         print('----  【小程序验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id, _data)
-                        # uwsgi.websocket_send(json.dumps(ret_data))
+                        uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
 
@@ -814,7 +814,7 @@ def xiaochengxu_websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
                     print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
-                    # uwsgi.websocket_send(json.dumps(ret_data))
+                    uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
 

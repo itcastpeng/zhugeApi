@@ -73,7 +73,6 @@ def is_token(table_obj):
 
 # 装饰器 判断token 是否正确
 def socket_is_token(table_obj,data):
-    response = Response.ResponseObj()
 
     rand_str = data.get('rand_str')
     timestamp = data.get('timestamp', '')

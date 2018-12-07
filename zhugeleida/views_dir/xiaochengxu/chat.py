@@ -452,6 +452,9 @@ def chat_oper(request, oper_type, o_id):
                             response.data = {
                                  'phoneNumber': phoneNumber,
                              }
+                            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                            redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                            rc.set(redis_customer_id_key, True)
 
                         else:
                             response.code = 200
