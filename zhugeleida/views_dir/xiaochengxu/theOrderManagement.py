@@ -186,8 +186,10 @@ def theOrderOper(request, oper_type, o_id):
 
                     else:
                         orderObjs.update(logicDelete=1)
-                        response.code = 200
-                        response.msg = '删除成功'
+
+                    response.code = 200
+                    response.msg = '删除成功'
+
                 else:
                     response.code = 301
                     response.msg = '删除失败,当前状态不可删除'
