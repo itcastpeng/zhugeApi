@@ -271,7 +271,6 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-
         elif oper_type == 'history_chatinfo_store_content':
 
 
@@ -317,6 +316,7 @@ def chat_oper(request, oper_type, o_id):
 
             response.code = 200
             response.msg = '成功'
+
 
         return JsonResponse(response.__dict__)
 
@@ -366,11 +366,11 @@ def chat_oper(request, oper_type, o_id):
                     )
 
                 if info_type == 1:  # 发送的图文消息
-                    remark = ':%s' % (_msg)
+                    # remark = ':%s' % (_msg)
                     data = request.GET.copy()
                     data['action'] = 0  # 代表用客户咨询产品
                     data['uid'] = user_id
-                    action_record(data, remark)
+                    action_record(data, '')
 
                 response.code = 200
                 response.msg = 'send msg successful'
@@ -397,6 +397,7 @@ def chat_oper(request, oper_type, o_id):
 
                 objs =  models.zgld_userprofile.objects.filter(id=user_id)
                 if objs:
+
                     models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                         is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
@@ -410,49 +411,68 @@ def chat_oper(request, oper_type, o_id):
                         authorization_appid = xiaochengxu_app_objs[0].authorization_appid
 
                     print('----- 手机号解密：appid | session_key | encryptedData | iv----->>',authorization_appid,"|",session_key,'\n',encryptedData,"|",iv)
-                    pc = WXBizDataCrypt(authorization_appid, session_key)
-                    ret =  pc.decrypt(encryptedData, iv)
-                    print('------ 解密后返回ret ------->>', ret)
 
-                    phoneNumber = ret.get('phoneNumber')
+                    try:
+                        pc = WXBizDataCrypt(authorization_appid, session_key)
+                        ret =  pc.decrypt(encryptedData, iv)
+                        print('------ 解密后返回ret ------->>', ret)
 
-
-                    # { 'phoneNumber': '17326681685',
-                    #   'purePhoneNumber': '17326681685', 'countryCode': '86',
-                    #   'watermark': {'timestamp': 1537415579, 'appid': 'wx1add8692a23b5976'}}
+                        phoneNumber = ret.get('phoneNumber')
 
 
-                    if phoneNumber:
+                        # { 'phoneNumber': '17326681685',
+                        #   'purePhoneNumber': '17326681685', 'countryCode': '86',
+                        #   'watermark': {'timestamp': 1537415579, 'appid': 'wx1add8692a23b5976'}}
 
-                        if type != 'shopping':
-                            _msg = '我的手机号是: %s' % (phoneNumber)
 
-                            encodestr = base64.b64encode(_msg.encode('utf-8'))
-                            msg = str(encodestr, 'utf-8')
-                            _content =  {
-                               'info_type' : 1,
-                               'msg' : msg
-                            }
-                            content = json.dumps(_content)
+                        if phoneNumber:
 
-                            models.zgld_chatinfo.objects.create(
-                                content=content,
-                                userprofile_id=user_id,
-                                customer_id=customer_id,
-                                send_type=2
-                            )
-                            customer_obj.phone = phoneNumber
-                            customer_obj.save()
+                            if type != 'shopping':
+                                _msg = '我的手机号是: %s' % (phoneNumber)
 
-                        response.code = 200
-                        response.msg = '获取成功'
-                        response.data = {
-                             'phoneNumber': phoneNumber,
-                         }
+                                encodestr = base64.b64encode(_msg.encode('utf-8'))
+                                msg = str(encodestr, 'utf-8')
+                                _content =  {
+                                   'info_type' : 1,
+                                   'msg' : msg
+                                }
+                                content = json.dumps(_content)
 
-                    else:
-                        response.code = 200
-                        response.msg = '获取失败'
+                                models.zgld_chatinfo.objects.create(
+                                    content=content,
+                                    userprofile_id=user_id,
+                                    customer_id=customer_id,
+                                    send_type=2
+                                )
+                                customer_obj.phone = phoneNumber
+                                customer_obj.save()
+
+                                # 聊天中获取手机号,推送给前端聊天页面
+                                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                                rc.set(redis_customer_id_key, True)
+
+                                # 获取手机号提醒到雷达用户
+                                data = request.GET.copy()
+                                data['action'] = 0  # 代表用客户咨询产品
+                                data['uid'] = user_id
+                                action_record(data, '')
+
+
+                            response.code = 200
+                            response.msg = '获取成功'
+                            response.data = {
+                                 'phoneNumber': phoneNumber,
+                             }
+
+
+                        else:
+                            response.code = 200
+                            response.msg = '获取失败'
+                    except Exception as e:
+
+                        response.code = 250
+                        response.msg = '解密报错'
 
 
     else:
