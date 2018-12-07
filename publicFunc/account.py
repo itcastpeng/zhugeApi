@@ -62,11 +62,38 @@ def is_token(table_obj):
                 response.code = 400
                 response.msg = "token异常"
                 return JsonResponse(response.__dict__)
+
             return func(request, *args, **kwargs)
+
         return inner
 
     return is_token_decorator
 
+
+
+# 装饰器 判断token 是否正确
+def socket_is_token(table_obj,data):
+    response = Response.ResponseObj()
+
+    rand_str = data.get('rand_str')
+    timestamp = data.get('timestamp', '')
+    user_id = data.get('user_id')
+
+    objs = table_obj.objects.filter(id=user_id)
+    if objs:
+        obj = objs[0]
+        # print('str_encrypt(timestamp + obj.token) -->', str_encrypt(timestamp + obj.token))
+        # print('rand_str -->', rand_str)
+        if str_encrypt(timestamp + obj.token) == rand_str:
+            # print("已经登录")
+            flag = True
+        else:
+            flag = False
+    else:
+        flag = False
+
+
+    return flag
 
 
 
