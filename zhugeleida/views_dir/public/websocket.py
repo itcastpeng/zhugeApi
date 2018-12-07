@@ -25,11 +25,11 @@ import redis
 
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def websocket(request, oper_type):
+def leida_websocket(request, oper_type):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    if oper_type == 'leida':
+    if oper_type == 'leida_chat':
 
         redis_user_id_key = ''
         redis_customer_id_key = ''
@@ -262,243 +262,6 @@ def websocket(request, oper_type):
                     }
 
                     print('----  报错:%s [雷达] 终止连接 uid  | customer_id --->>' % e,user_id, customer_id)
-                    # uwsgi.websocket_send(json.dumps(ret_data))
-
-                    return JsonResponse(ret_data)
-
-
-    elif oper_type == 'xiaochengxu':
-
-        redis_customer_id_key = ''
-        customer_id_position_key = ''
-        user_id = ''
-        customer_id = ''
-
-        uwsgi.websocket_handshake()
-        while True:
-
-            redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
-            if redis_customer_id_key_flag == 'True' and user_id and customer_id:
-                print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
-                print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
-
-
-                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-                    userprofile_id=user_id,
-                    customer_id=customer_id,
-                    is_customer_new_msg=True
-                ).order_by('-create_date')
-
-                ret_data_list = []
-                count = objs.count()
-                if objs:
-
-                    for obj in objs:
-
-                        mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,
-                                                                                    photo_type=2).order_by(
-                            '-create_date')
-
-                        if mingpian_avatar_obj:
-                            mingpian_avatar = mingpian_avatar_obj[0].photo_url
-                        else:
-
-                            mingpian_avatar = obj.userprofile.avatar
-
-
-                        customer_id = obj.customer_id
-                        customer_username =obj.customer.username
-                        print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
-                        customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
-
-                        content = obj.content
-                        if not content:
-                            continue
-
-                        _content = json.loads(content)
-                        info_type = _content.get('info_type')
-                        if info_type:
-                            info_type = int(info_type)
-
-                            if info_type == 1:
-                                msg = _content.get('msg')
-                                msg = base64.b64decode(msg)
-                                msg = str(msg, 'utf-8')
-                                _content['msg'] = msg
-
-                        base_info_dict = {
-                            'customer_id': obj.customer_id,
-                            'user_id': obj.userprofile_id,
-                            'user_avatar': mingpian_avatar,
-                            'customer_headimgurl': obj.customer.headimgurl,
-                            'customer': customer_name,
-                            'dateTime': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                            'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
-                            'is_first_info': False,  # 是否为第一条的信息
-                            # 'info_type': obj.info_type, # 消息的类型
-                        }
-
-                        base_info_dict.update(_content)
-
-                        ret_data_list.append(base_info_dict)
-
-                    ret_data_list.reverse()
-
-                    customer_id_position_key_flag = rc.get(customer_id_position_key)
-
-                    print('--- list(msg_obj) -->>', ret_data_list)
-                    if customer_id_position_key_flag == 'input':
-                        objs.update(
-                            is_customer_new_msg=False
-                        )
-
-                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                         customer_id=customer_id, send_type=1,
-                                                                         is_customer_new_msg=True).count()
-
-
-                    response_data = {
-                        'data': {
-                            'ret_data': ret_data_list,
-                            'count': count,
-                            'unread_msg_num': chatinfo_count # 未读消息
-                        },
-                        'code': 200,
-                        'msg': '实时推送小程序-最新聊天信息成功',
-                    }
-
-                    rc.set(redis_customer_id_key, False)
-
-                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
-                    uwsgi.websocket_send(json.dumps(response_data))
-
-            else:
-                try:
-                    # data = uwsgi.websocket_recv()
-                    data = uwsgi.websocket_recv_nb()
-
-                    print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
-                    if not data:
-                        time.sleep(1)
-                        continue
-
-                    _data = json.loads(data.decode("utf-8"))
-                    print('------ 【小程序】发送过来的 数据:  ----->>', _data)
-
-                    type = _data.get('type')
-                    customer_id = _data.get('user_id')
-                    user_id = _data.get('u_id')
-                    Content = _data.get('content')
-
-
-
-                    forms_obj = xiaochengxu_ChatPostForm(_data)
-                    if forms_obj.is_valid():
-
-                        redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-                        redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
-                        customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)
-                        redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id) # 小程序发过去消息,雷达用户的key 消息数量发生变化
-                        redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
-
-                        if type == 'query_num':
-                            rc.set(customer_id_position_key, 'output')
-
-                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
-                                                                                 customer_id=customer_id, send_type=1,
-                                                                                 is_customer_new_msg=True).count()
-
-                            response_data = {
-                                'data': {
-                                    'unread_msg_num': chatinfo_count  # 未读消息
-                                },
-                                'code': 200,
-                                'msg': '查询成功-获取聊天数量',
-                            }
-
-                            uwsgi.websocket_send(json.dumps(response_data))
-                            continue
-
-                        elif  type == 'register': # 当进入聊天页面时,发送
-                            rc.set(customer_id_position_key, 'input')
-                            continue
-
-                        elif type == 'closed':
-                            msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
-                            ret_data = {
-                                'code': 200,
-                                'msg': msg
-                            }
-                            # uwsgi.websocket_send(json.dumps(ret_data))
-                            return JsonResponse(ret_data)
-
-
-                        models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                            is_last_msg=True).update(
-                            is_last_msg=False)  # 把所有的重置为不是最后一条
-
-                        _content = json.loads(Content)
-                        info_type = _content.get('info_type')
-                        _msg = ''
-                        content = ''
-
-                        if info_type:
-                            info_type = int(info_type)
-
-                            if info_type == 1:
-                                _msg = _content.get('msg')
-                                encodestr = base64.b64encode(_msg.encode('utf-8'))
-                                msg = str(encodestr, 'utf-8')
-                                _content['msg'] = msg
-                                content = json.dumps(_content)
-
-                        models.zgld_chatinfo.objects.create(
-                            content=content,
-                            userprofile_id=user_id,
-                            customer_id=customer_id,
-                            send_type=2
-                        )
-
-                        flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,
-                                                                                         customer_id=customer_id)
-                        if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
-                            flow_up_objs.update(
-                                is_customer_msg_num=F('is_customer_msg_num') + 1,
-                                last_activity_time=datetime.datetime.now()
-                            )
-
-                        if info_type == 1:  # 发送的图文消息
-                            remark = ':%s' % (_msg)
-                            _data['action'] = 0  # 代表用客户咨询产品
-                            _data['uid'] = user_id
-                            action_record(_data, remark)
-
-                        rc.set(redis_user_id_key, True)
-                        rc.set(redis_customer_id_key, True)
-                        rc.set(redis_user_query_info_key, True)     # 代表 雷达用户 消息数量发生了变化
-                        rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
-
-                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
-
-
-                    else:
-
-                        if not user_id or not customer_id:
-                            ret_data = {
-                                'code': 401,
-                                'msg': 'user_id和uid不能为空,终止连接'
-                            }
-                            uwsgi.websocket_send(json.dumps(ret_data))
-
-                            return JsonResponse(ret_data)
-
-                except Exception as  e:
-                    ret_data = {
-                        'code': 400,
-                        'msg': '报错:%s 终止连接' % (e)
-                    }
-                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     # uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
@@ -751,6 +514,250 @@ def websocket(request, oper_type):
 
 
 
+@csrf_exempt
+@account.is_token(models.zgld_customer)
+def xiaochengxu_websocket(request, oper_type):
+
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+
+    if oper_type == 'xiaochengxu_chat':
+
+        redis_customer_id_key = ''
+        customer_id_position_key = ''
+        user_id = ''
+        customer_id = ''
+
+        uwsgi.websocket_handshake()
+        while True:
+
+            redis_customer_id_key_flag = rc.get(redis_customer_id_key)
+            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
+            if redis_customer_id_key_flag == 'True' and user_id and customer_id:
+                print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
+                print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
+
+
+                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    is_customer_new_msg=True
+                ).order_by('-create_date')
+
+                ret_data_list = []
+                count = objs.count()
+                if objs:
+
+                    for obj in objs:
+
+                        mingpian_avatar_obj = models.zgld_user_photo.objects.filter(user_id=user_id,
+                                                                                    photo_type=2).order_by(
+                            '-create_date')
+
+                        if mingpian_avatar_obj:
+                            mingpian_avatar = mingpian_avatar_obj[0].photo_url
+                        else:
+
+                            mingpian_avatar = obj.userprofile.avatar
+
+
+                        customer_id = obj.customer_id
+                        customer_username =obj.customer.username
+                        print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
+                        customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
+
+                        content = obj.content
+                        if not content:
+                            continue
+
+                        _content = json.loads(content)
+                        info_type = _content.get('info_type')
+                        if info_type:
+                            info_type = int(info_type)
+
+                            if info_type == 1:
+                                msg = _content.get('msg')
+                                msg = base64.b64decode(msg)
+                                msg = str(msg, 'utf-8')
+                                _content['msg'] = msg
+
+                        base_info_dict = {
+                            'customer_id': obj.customer_id,
+                            'user_id': obj.userprofile_id,
+                            'user_avatar': mingpian_avatar,
+                            'customer_headimgurl': obj.customer.headimgurl,
+                            'customer': customer_name,
+                            'dateTime': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            'send_type': obj.send_type,  # (1, 'user_to_customer'),  (2, 'customer_to_user')
+                            'is_first_info': False,  # 是否为第一条的信息
+                            # 'info_type': obj.info_type, # 消息的类型
+                        }
+
+                        base_info_dict.update(_content)
+
+                        ret_data_list.append(base_info_dict)
+
+                    ret_data_list.reverse()
+
+                    customer_id_position_key_flag = rc.get(customer_id_position_key)
+
+                    print('--- list(msg_obj) -->>', ret_data_list)
+                    if customer_id_position_key_flag == 'input':
+                        objs.update(
+                            is_customer_new_msg=False
+                        )
+
+                    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                         customer_id=customer_id, send_type=1,
+                                                                         is_customer_new_msg=True).count()
+
+
+                    response_data = {
+                        'data': {
+                            'ret_data': ret_data_list,
+                            'count': count,
+                            'unread_msg_num': chatinfo_count # 未读消息
+                        },
+                        'code': 200,
+                        'msg': '实时推送小程序-最新聊天信息成功',
+                    }
+
+                    rc.set(redis_customer_id_key, False)
+
+                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                    uwsgi.websocket_send(json.dumps(response_data))
+
+            else:
+                try:
+                    # data = uwsgi.websocket_recv()
+                    data = uwsgi.websocket_recv_nb()
+
+                    print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
+                    if not data:
+                        time.sleep(1)
+                        continue
+
+                    _data = json.loads(data.decode("utf-8"))
+                    print('------ 【小程序】发送过来的 数据:  ----->>', _data)
+
+                    type = _data.get('type')
+                    customer_id = _data.get('user_id')
+                    user_id = _data.get('u_id')
+                    Content = _data.get('content')
+
+
+
+                    forms_obj = xiaochengxu_ChatPostForm(_data)
+                    if forms_obj.is_valid():
+
+                        redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                        redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                        customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)
+                        redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id) # 小程序发过去消息,雷达用户的key 消息数量发生变化
+                        redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
+
+                        if type == 'query_num':
+                            rc.set(customer_id_position_key, 'output')
+
+                            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
+                                                                                 customer_id=customer_id, send_type=1,
+                                                                                 is_customer_new_msg=True).count()
+
+                            response_data = {
+                                'data': {
+                                    'unread_msg_num': chatinfo_count  # 未读消息
+                                },
+                                'code': 200,
+                                'msg': '查询成功-获取聊天数量',
+                            }
+
+                            uwsgi.websocket_send(json.dumps(response_data))
+                            continue
+
+                        elif  type == 'register': # 当进入聊天页面时,发送
+                            rc.set(customer_id_position_key, 'input')
+                            continue
+
+                        elif type == 'closed':
+                            msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
+                            ret_data = {
+                                'code': 200,
+                                'msg': msg
+                            }
+                            # uwsgi.websocket_send(json.dumps(ret_data))
+                            return JsonResponse(ret_data)
+
+
+                        models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                            is_last_msg=True).update(
+                            is_last_msg=False)  # 把所有的重置为不是最后一条
+
+                        _content = json.loads(Content)
+                        info_type = _content.get('info_type')
+                        _msg = ''
+                        content = ''
+
+                        if info_type:
+                            info_type = int(info_type)
+
+                            if info_type == 1:
+                                _msg = _content.get('msg')
+                                encodestr = base64.b64encode(_msg.encode('utf-8'))
+                                msg = str(encodestr, 'utf-8')
+                                _content['msg'] = msg
+                                content = json.dumps(_content)
+
+                        models.zgld_chatinfo.objects.create(
+                            content=content,
+                            userprofile_id=user_id,
+                            customer_id=customer_id,
+                            send_type=2
+                        )
+
+                        flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,
+                                                                                         customer_id=customer_id)
+                        if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
+                            flow_up_objs.update(
+                                is_customer_msg_num=F('is_customer_msg_num') + 1,
+                                last_activity_time=datetime.datetime.now()
+                            )
+
+                        if info_type == 1:  # 发送的图文消息
+                            remark = ':%s' % (_msg)
+                            _data['action'] = 0  # 代表用客户咨询产品
+                            _data['uid'] = user_id
+                            action_record(_data, remark)
+
+                        rc.set(redis_user_id_key, True)
+                        rc.set(redis_customer_id_key, True)
+                        rc.set(redis_user_query_info_key, True)     # 代表 雷达用户 消息数量发生了变化
+                        rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
+
+                        uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
+
+
+                    else:
+
+                        if not user_id or not customer_id:
+                            ret_data = {
+                                'code': 401,
+                                'msg': 'user_id和uid不能为空,终止连接'
+                            }
+                            uwsgi.websocket_send(json.dumps(ret_data))
+
+                            return JsonResponse(ret_data)
+
+                except Exception as  e:
+                    ret_data = {
+                        'code': 400,
+                        'msg': '报错:%s 终止连接' % (e)
+                    }
+                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
+                    # uwsgi.websocket_send(json.dumps(ret_data))
+
+                    return JsonResponse(ret_data)
+
+
     elif oper_type == 'xiaochengxu_query_info_num':
 
         redis_customer_query_info_key = ''
@@ -861,7 +868,12 @@ def websocket(request, oper_type):
                 return JsonResponse(ret_data)
 
 
-    elif oper_type == 'scan_code_web_login':
+
+
+@csrf_exempt
+def public_websocket(request, oper_type):
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    if oper_type == 'scan_code_web_login':
 
         uwsgi.websocket_handshake()
         i = 0
@@ -998,9 +1010,6 @@ def websocket(request, oper_type):
 
                 return JsonResponse(ret_data)
 
-
-
-
     if oper_type == 'chat':
 
         """接受websocket传递过来的信息"""
@@ -1008,22 +1017,22 @@ def websocket(request, oper_type):
         uwsgi.websocket_send("你还，很高心为你服务")
 
         while True:
-            #msg = uwsgi.websocket_recv()
+            # msg = uwsgi.websocket_recv()
             try:
-                 msg = uwsgi.websocket_recv_nb()
-                 print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
-                 if not msg:
-                     time.sleep(1)
-                     continue
+                msg = uwsgi.websocket_recv_nb()
+                print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
+                if not msg:
+                    time.sleep(1)
+                    continue
 
-                 msg = msg.decode()
-                 data = json.loads(msg)
+                msg = msg.decode()
+                data = json.loads(msg)
 
-                 data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+                data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 
-                 print('----- websocket_recv ---->>>', data)
+                print('----- websocket_recv ---->>>', data)
 
-                 uwsgi.websocket_send(data["text"])
+                uwsgi.websocket_send(data["text"])
 
 
             except Exception as  e:

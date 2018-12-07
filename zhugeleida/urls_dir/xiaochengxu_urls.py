@@ -4,6 +4,7 @@ from zhugeleida.views_dir.qiyeweixin import user, quanxian, customer
 from zhugeleida.views_dir.xiaochengxu import login, mingpian, product, prepaidManagement, theOrderManagement, \
     tuiKuanDingDan, mallManagementShow,test_login
 from zhugeleida.views_dir.xiaochengxu import chat, website
+from zhugeleida.views_dir.public import  websocket
 
 urlpatterns = [
 
@@ -22,6 +23,9 @@ urlpatterns = [
     # 实时聊天
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)$', chat.chat_oper),
     url(r'^chat$', chat.chat),
+
+    # 实时聊天
+    url(r'^websocket/(?P<oper_type>\w+)$', websocket.xiaochengxu_websocket),
 
     # 访问小程序的名片\并记录访问功能。
     url(r'^mingpian/poster_html$', mingpian.mingpian_poster_html_oper),
