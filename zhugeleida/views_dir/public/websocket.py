@@ -167,7 +167,7 @@ def leida_websocket(request, oper_type):
                         if type == 'register':
                             continue
 
-                        if type == 'closed':
+                        elif type == 'closed':
 
                             ret_data = {
                                 'code': 200,

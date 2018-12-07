@@ -54,13 +54,13 @@ def login(request):
         version_num = request.GET.get('user_version')
 
         forms_obj = SmallProgramAddForm(request.GET)
-
         if forms_obj.is_valid():
 
             js_code = forms_obj.cleaned_data.get('code')
             user_type = forms_obj.cleaned_data.get('user_type')
             company_id = forms_obj.cleaned_data.get('company_id')
             user_id = forms_obj.cleaned_data.get('uid')
+
             company_id = int(company_id) if company_id else ''
 
             is_release_version_num = True
@@ -123,8 +123,6 @@ def login(request):
                     # superior=customer_id,  #上级人。
                 )
 
-                # models.zgld_information.objects.filter(customer_id=obj.id,source=source)
-                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
                 client_id = obj.id
                 print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
 

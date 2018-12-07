@@ -366,11 +366,11 @@ def chat_oper(request, oper_type, o_id):
                     )
 
                 if info_type == 1:  # 发送的图文消息
-                    remark = ':%s' % (_msg)
+                    # remark = ':%s' % (_msg)
                     data = request.GET.copy()
                     data['action'] = 0  # 代表用客户咨询产品
                     data['uid'] = user_id
-                    action_record(data, remark)
+                    action_record(data, '')
 
                 response.code = 200
                 response.msg = 'send msg successful'
@@ -447,14 +447,24 @@ def chat_oper(request, oper_type, o_id):
                                 customer_obj.phone = phoneNumber
                                 customer_obj.save()
 
+                                # 聊天中获取手机号,推送给前端聊天页面
+                                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                                rc.set(redis_customer_id_key, True)
+
+                                # 获取手机号提醒到雷达用户
+                                data = request.GET.copy()
+                                data['action'] = 0  # 代表用客户咨询产品
+                                data['uid'] = user_id
+                                action_record(data, '')
+
+
                             response.code = 200
                             response.msg = '获取成功'
                             response.data = {
                                  'phoneNumber': phoneNumber,
                              }
-                            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                            redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
-                            rc.set(redis_customer_id_key, True)
+
 
                         else:
                             response.code = 200
