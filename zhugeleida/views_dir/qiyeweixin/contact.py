@@ -36,6 +36,10 @@ def contact(request):
 
             count = chat_info_objs.count()
 
+            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,
+                                                                 is_user_new_msg=True).count()
+
+
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
@@ -109,6 +113,7 @@ def contact(request):
             response.data = {
                 'ret_data': ret_data_list,
                 'data_count': count,
+                'unread_msg_num': chatinfo_count,
             }
 
     return JsonResponse(response.__dict__)

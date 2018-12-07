@@ -398,7 +398,7 @@ def websocket(request, oper_type):
                         customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)
                         redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
-                        if type == 'register' or type == 'query_num':
+                        if type == 'query_num':
                             rc.set(customer_id_position_key, 'output')
 
                             chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
@@ -414,6 +414,10 @@ def websocket(request, oper_type):
                             }
 
                             uwsgi.websocket_send(json.dumps(response_data))
+                            continue
+
+                        elif  type == 'register':
+                            rc.set(customer_id_position_key, 'input')
                             continue
 
                         elif type == 'closed':
