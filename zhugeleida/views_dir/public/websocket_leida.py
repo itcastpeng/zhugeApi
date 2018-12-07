@@ -416,7 +416,7 @@ def websocket(request, oper_type):
                             uwsgi.websocket_send(json.dumps(response_data))
                             continue
 
-                        elif  type == 'register':
+                        elif  type == 'register': # 当进入聊天页面时,发送
                             rc.set(customer_id_position_key, 'input')
                             continue
 
