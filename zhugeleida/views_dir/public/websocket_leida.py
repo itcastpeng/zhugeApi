@@ -13,7 +13,8 @@ import base64
 from zhugeleida.public.common import action_record
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_ChatGetForm, \
     ChatPostForm as xiaochengxu_ChatPostForm
-
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from publicFunc import account
 from zhugeleida.forms.chat_verify import LeidaQueryChatPostForm , ChatPostForm as leida_ChatPostForm
 try:
     import uwsgi
@@ -22,7 +23,8 @@ except ImportError as e:
 
 import redis
 
-
+@csrf_exempt
+@account.is_token(models.zgld_userprofile)
 def websocket(request, oper_type):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
