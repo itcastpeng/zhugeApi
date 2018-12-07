@@ -169,7 +169,7 @@ def theOrderOper(request, oper_type, o_id):
                 response.msg = '订单无法取消'
 
         elif oper_type == 'deleteOrder':
-            print('=-==========================================')
+
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
             if orderObjs:
                 status = int(orderObjs[0].theOrderStatus)
@@ -181,10 +181,11 @@ def theOrderOper(request, oper_type, o_id):
                 elif status in [8, 9]:
                     tuiKuanObjs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=o_id)
                     if tuiKuanObjs:
-                        tuikuanstatus = int(tuiKuanObjs[0].tuiKuanStatus)
-                        if tuikuanstatus in [2, 3]:
+                        
+                        if status in [2, 3]:
                             orderObjs.update(logicDelete=1)
                             tuiKuanObjs.update(logicDelete=1)
+
                         else:
                             response.code = 301
                             response.msg = '该订单有退款业务, 不可删除！'

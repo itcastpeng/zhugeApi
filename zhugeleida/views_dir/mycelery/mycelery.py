@@ -50,7 +50,8 @@ def action_record(data):
         # data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = agent_id
         # tasks.user_send_action_log.delay(json.dumps(data))
-        content = '%s%s' % (customer_name, remark)
+        _remark = ':发送了一条新消息'
+        content = '【%s】%s' % (customer_name, _remark)
         response.data = {
             'content': content,
             'agentid': agent_id
