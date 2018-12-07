@@ -706,6 +706,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
             else:
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
                 if gongzhonghao_app_objs:
@@ -788,6 +789,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         elif MsgType == 'voice':
                             Content = '【收到不支持的消息类型，暂无法显示】'
 
+
                         if MsgType == 'text' or MsgType == 'voice':
                             flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
                                 customer_id=customer_id).order_by('-last_follow_time')
@@ -822,6 +824,20 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         'user_id': customer_id
                                     }
                                     action_record(data, remark)
+
+                                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                                redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(
+                                    uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
+                                redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(
+                                    uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
+
+                                ##
+                                rc.set(redis_customer_id_key, False)     # 说明 公众号已经获取过用户发送给他的消息。标记为已读。
+                                rc.set(redis_user_id_key, True)          # 触发雷达的循环，让其获取公众号发出去的消息
+                                rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
+                                rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
+
 
                             response.code = 200
                             response.msg = 'send msg successful'
