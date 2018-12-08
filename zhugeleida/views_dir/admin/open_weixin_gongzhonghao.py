@@ -797,6 +797,13 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             if flow_up_objs:
                                 user_id = flow_up_objs[0].user_id
 
+                                models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                                    userprofile_id=user_id,
+                                    customer_id=customer_id,
+                                ).update(
+                                    is_customer_new_msg=False
+                                ) # 把客户标记为自己已经读取了。
+
                                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                                     is_last_msg=True).update(
                                     is_last_msg=False)  # 把所有的重置为不是最后一条
