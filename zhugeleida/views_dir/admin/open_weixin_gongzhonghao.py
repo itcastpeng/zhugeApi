@@ -12,6 +12,7 @@ from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
 import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
+from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 
 # 第三方平台接入
 @csrf_exempt
@@ -609,8 +610,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            # postdata = request.body.decode(encoding='UTF-8')
-            postdata = request.POST.get('xml')
+            postdata = request.body.decode(encoding='UTF-8')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -690,7 +690,27 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                 subscribe_time=datetime.datetime.now()
                             )
 
-                            if is_focus_get_redpacket:  # 开启了
+                            user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                                customer_id=customer_id, user__company_id=company_id)
+                            user_id = ''
+                            customer_username = ''
+                            if user_objs:
+                                user_id = user_objs[0].user_id
+                                customer_username = user_objs[0].customer.username
+                                customer_username = conversion_base64_customer_username_base64(customer_username,
+                                                                                               customer_id)
+
+                            a_data = {}
+                            a_data['customer_id'] = customer_id
+                            a_data['user_id'] = user_id
+                            a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
+                            a_data['content'] = json.dumps({'msg': 'Say 嗨~ %s，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，欢迎来撩~' % (customer_username), 'info_type': 1})
+
+                            print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
+                            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+
+                            if is_focus_get_redpacket:  # 开启了发红包的活动
                                 _data = {
                                     'company_id': company_id,
                                     'customer_id': customer_id,

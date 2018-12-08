@@ -774,13 +774,8 @@ def user_send_gongzhonghao_template_msg(request):
     if customer_obj and objs:
         openid = customer_obj[0].openid
 
-        # 发送公众号模板消息聊天消息 和 公众号客户查看文章后的红包活动提示
-
+        # 发送公众号模板消息聊天消息 or  公众号客户查看文章后的红包活动提示
         if _type == 'gongzhonghao_template_tishi' or _type == 'forward_look_article_tishi':
-
-            # path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
-            # xiaochengxu_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            # appid = xiaochengxu_app_obj.authorization_appid
 
             # 留言回复通知
             '''
@@ -790,6 +785,7 @@ def user_send_gongzhonghao_template_msg(request):
             点击进入咨询页面
             '''
             data = ''
+            ## 言简意赅的模板消息提示消息
             if _type == 'gongzhonghao_template_tishi':
                 _content = json.loads(content)
                 info_type = _content.get('info_type')
@@ -823,7 +819,7 @@ def user_send_gongzhonghao_template_msg(request):
                     }
                 }
 
-
+            ## 参加活动后模板消息提示[活动规则]
             elif _type == 'forward_look_article_tishi':
                 activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
@@ -873,7 +869,6 @@ def user_send_gongzhonghao_template_msg(request):
             s = requests.session()
             s.keep_alive = False  # 关闭多余连接
             template_ret = s.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
-            # template_ret = requests.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
 
             print('--------企业用户 send to 公众号 Template 接口返回数据--------->', template_ret)
@@ -1451,8 +1446,8 @@ def user_focus_send_activity_redPacket(request):
 
                         a_data['customer_id'] = customer_id
                         a_data['user_id'] = user_id
-                        a_data['type'] = 'gongzhonghao_template_tishi'
-                        a_data['content'] = json.dumps({'msg': '您好,您已经领取过红包喽,可转发【公众号】推荐给您的好友领取现金红包!', 'info_type': 1})
+                        a_data['type'] = 'gongzhonghao_template_tishi' # 简单的公众号模板消息提示。
+                        a_data['content'] = json.dumps({'msg': '您好,您已经领取过红包喽,可转发【公众号】给您的好友领取现金红包!', 'info_type': 1})
 
                         print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
                         tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
