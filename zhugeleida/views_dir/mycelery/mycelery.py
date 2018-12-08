@@ -50,7 +50,7 @@ def action_record(data):
         # data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = agent_id
         # tasks.user_send_action_log.delay(json.dumps(data))
-        _remark = ': 发送了一条新消息，请点击查看!'
+        _remark = ':发送给您一条新消息，请点击查看!'
         content = '【%s】%s' % (customer_name, _remark)
         response.data = {
             'content': content,
@@ -292,8 +292,7 @@ def create_user_or_customer_qr_code(request):
         data = {
             'key_name': key_name,
             'authorizer_refresh_token': authorizer_refresh_token,
-            'authorizer_appid': authorizer_appid,
-
+            'authorizer_appid': authorizer_appid
         }
         authorizer_access_token_ret = create_authorizer_access_token(data)
         authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
