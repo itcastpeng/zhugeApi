@@ -166,15 +166,20 @@ def login_oper(request, oper_type):
                 user_id = forms_obj.cleaned_data.get('uid')  # 所属的企业用户的ID
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
                 parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
+                user_objs = models.zgld_userprofile.objects.filter(id=user_id)
+                company_id = ''
+                if user_objs:
+                    company_id = user_objs[0].company_id
+
 
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
-                                                                                               user_id=user_id)
+                                                                                               user__company_id=company_id)
 
                 if user_customer_belonger_obj:
                     response.code = 302
                     response.msg = "关系存在"
 
-                else:
+                elif company_id and user_customer_belonger_obj:
 
                     obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,
                                                                             source=source)
