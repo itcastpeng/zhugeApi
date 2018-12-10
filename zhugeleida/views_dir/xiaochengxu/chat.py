@@ -330,7 +330,7 @@ def chat_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
 
                 print('----send_msg--->>',request.POST)
-                customer_id = int(request.GET.get('user_id'))
+                customer_id = request.GET.get('user_id')
                 user_id =  request.POST.get('u_id')
                 content = request.POST.get('content')
                 send_type = int(request.POST.get('send_type'))
