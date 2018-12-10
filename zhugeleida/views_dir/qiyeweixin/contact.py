@@ -100,6 +100,8 @@ def contact(request):
                     'customer_source' : obj.customer.user_type or '',
                     'customer_source_text' : obj.customer.get_user_type_display(),
                     'src': obj.customer.headimgurl,
+                    'is_subscribe': obj.customer.is_subscribe,
+                    'is_subscribe_text': obj.customer.get_is_subscribe_display(),
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
                     'msg': msg,

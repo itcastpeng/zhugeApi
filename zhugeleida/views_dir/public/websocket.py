@@ -1198,6 +1198,8 @@ def query_contact_list(data):
             'customer_id': obj.customer_id,
             'customer_source': obj.customer.user_type or '',
             'customer_source_text': obj.customer.get_user_type_display(),
+            'is_subscribe': obj.customer.is_subscribe,
+            'is_subscribe_text': obj.customer.get_is_subscribe_display(),
             'src': obj.customer.headimgurl,
             'name': customer_name,
             'dateTime': deal_time.deal_time(obj.create_date),

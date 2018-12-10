@@ -1528,7 +1528,7 @@ def get_customer_gongzhonghao_userinfo(request):
     print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
 
     if 'errcode' not in ret_json:
-        openid = ret_json['openid']  # 用户唯一标
+        openid = ret_json['openid']        # 用户唯一标
         subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
 
         objs = models.zgld_customer.objects.filter(openid=openid)
