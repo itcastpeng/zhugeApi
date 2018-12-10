@@ -376,10 +376,10 @@ def bottom_button_info(request):
         shopping_info_dict = ''
         ret_data = {}
 
-        obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+        _obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
 
         # if  version_num: # 有版本号(从ext 里读取的)
-        online_version_num = obj.version_num
+        online_version_num = _obj.version_num
         print('---- Ext里的版本号: ---->', version_num)
 
         if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮

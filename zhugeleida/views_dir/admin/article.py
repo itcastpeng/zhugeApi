@@ -811,8 +811,7 @@ def article_oper(request, oper_type, o_id):
                     q1.children.append(('user_id', uid))
 
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(q1).order_by(
-                    '-level')
+                                                                                       'customer').filter(q1).order_by('-level')
 
                 # current_page = forms_obj.cleaned_data['current_page']
                 # length = forms_obj.cleaned_data['length']
@@ -861,14 +860,14 @@ def article_oper(request, oper_type, o_id):
 
                         username = obj.user.username
                         gender = obj.user.gender
-                        user_dict = objs.values().annotate(Count('read_count'), Count(
-                            'forward_friend_circle_count'), Count('forward_friend_count'))
+                        user_dict = objs.values('user_id').annotate(Sum('read_count'), Sum(
+                            'forward_friend_circle_count'), Sum('forward_friend_count'))[0]
                         print('---- user_dict 数据 ---->>',user_dict)
 
 
-                        read_count__count = user_dict.get('read_count__count')
-                        forward_friend_count = user_dict.get('forward_friend_count')
-                        forward_friend_circle_count = user_dict.get('forward_friend_circle_count')
+                        read_count_sum = user_dict.get('read_count__sum')
+                        forward_friend_sum = user_dict.get('forward_friend_count__sum')
+                        forward_friend_circle_sum = user_dict.get('forward_friend_circle_count__sum')
                         print('-------> [ 只算一个人 ] user_id username -------->>', username, '|', uid)
 
                         # result_data, result_level = jisuan_level_num(article_id, uid)
@@ -891,9 +890,9 @@ def article_oper(request, oper_type, o_id):
                             'sex': gender,
                             # 'area': area,
 
-                            'read_count': read_count__count,
-                            'forward_friend_circle_count':forward_friend_count,
-                            'forward_friend_count': forward_friend_circle_count,
+                            'read_count': read_count_sum,
+                            'forward_friend_circle_count':forward_friend_sum,
+                            'forward_friend_count': forward_friend_circle_sum,
 
                             'lower_people_count': total_count,
                             'lower_level': level_num,
