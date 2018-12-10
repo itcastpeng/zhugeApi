@@ -92,9 +92,13 @@ def deal_line_info(data):
 
 
     elif index_type == 3:  # 跟进客户数  # 近15日客户活跃度
-        follow_num = models.zgld_follow_info.objects.filter(
-            user_customer_flowup__customer__company_id=company_id).filter(q1).count()
+        follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+                                                                       is_user_msg_num__gte=1).filter(q1).count()
         return follow_num
+
+        # follow_num = models.zgld_follow_info.objects.filter(
+        #     user_customer_flowup__customer__company_id=company_id).filter(q1).count()
+        # return follow_num
 
     elif index_type == 4:  # 浏览总数 [客户活跃度]
         browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
