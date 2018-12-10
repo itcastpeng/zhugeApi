@@ -56,6 +56,15 @@ def action_record(data):
             'content': content,
             'agentid': agent_id
         }
+        flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,
+                                                                         customer_id=customer_id)
+        if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
+            flow_up_objs.update(
+                is_customer_msg_num=F('is_customer_msg_num') + 1, # 说明用户发过消息给雷达用户。
+                last_activity_time=datetime.datetime.now()        # 用户的最后活动时间。
+            )
+
+
         response.code = 200
         response.msg = '发送消息提示成功'
 
@@ -68,6 +77,16 @@ def action_record(data):
             remark=remark,
             action=action
         )
+        follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+            user_id=user_id,
+            customer_id=customer_id
+        )
+        now_time = datetime.datetime.now()
+        if follow_objs:  # 已经有关系了
+            follow_objs.update(
+                last_activity_time=now_time
+            )
+
         content = '%s%s' % (customer_name, remark)
         print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
         response.data = {
@@ -92,7 +111,7 @@ def action_record(data):
             customer_id=customer_id
         )
         now_time = datetime.datetime.now()
-        if follow_objs:  # 已经有关系了
+        if follow_objs:  # 记录 最后活动时间
             follow_objs.update(
                 last_activity_time=now_time
             )
@@ -1662,5 +1681,7 @@ def binding_article_customer_relate(request):
                                                           )
             response.code = 200
             response.msg = "绑定成功"
-    #
+
+
+
     return JsonResponse(response.__dict__)
