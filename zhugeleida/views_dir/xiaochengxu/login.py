@@ -387,8 +387,6 @@ def bottom_button_info(request):
             print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',(company_id, online_version_num, version_num))
 
 
-
-
         if shopping_type == 1:  # 1、代表产品
             shopping_info_dict = {
                 "default_url": "icon_chanpin_01.png",
