@@ -339,10 +339,13 @@ def bottom_button_info(request):
 
     if request.method == "GET":
         company_id = request.GET.get('company_id')
+        version_num = request.GET.get('version_num')
 
+        is_release_version_num = True
         if not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
             # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
             company_id = 1
+            is_release_version_num = False
 
         buttom_navigation_data_list = [
             {
@@ -373,6 +376,19 @@ def bottom_button_info(request):
         shopping_info_dict = ''
         ret_data = {}
 
+        obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+
+        # if  version_num: # 有版本号(从ext 里读取的)
+        online_version_num = obj.version_num
+        print('---- Ext里的版本号: ---->', version_num)
+
+        if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
+            is_release_version_num = False  # 不相等说明要隐藏按钮。
+            print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',(company_id, online_version_num, version_num))
+
+
+
+
         if shopping_type == 1:  # 1、代表产品
             shopping_info_dict = {
                 "default_url": "icon_chanpin_01.png",
@@ -381,6 +397,7 @@ def bottom_button_info(request):
                 "text": "产品",
                 "order": 3
             }
+
         elif shopping_type == 2:  # 2、 代表商城
             shangChengName = ''
             _objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
@@ -403,6 +420,7 @@ def bottom_button_info(request):
         ret_data['shop_type_text'] = obj.get_shopping_type_display()
         ret_data['is_show_jszc'] = is_show_jszc
         ret_data['is_show_jszc_text'] = obj.get_is_show_jszc_display()
+        ret_data['is_release_version_num'] = is_release_version_num
 
         print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200

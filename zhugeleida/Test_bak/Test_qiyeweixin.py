@@ -502,7 +502,7 @@ import json
 
 
 url =  ip + '/zhugeleida/admin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
-get_data['uid'] = 17
+# get_data['uid'] = 17
 get_data['pid'] = 857
 # get_data['query_customer_id'] = 1
 get_data['level'] = 0
