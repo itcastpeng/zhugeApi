@@ -160,20 +160,25 @@ def mingpian_oper(request, oper_type):
                 data = request.GET.copy()
                 data['action'] = 10
                 action_record(data, remark)
+                response.code = 200
+                response.msg = '记录成功'
 
 
-            if oper_type == 'save_phone':
+            elif oper_type == 'save_phone': # 弃用 小程序 没有拨打手机号。
                 remark = '保存了您的电话,可以考虑拜访'
                 data = request.GET.copy()
                 data['action'] = 8
                 action_record(data, remark)
+                response.code = 200
+                response.msg = '记录成功'
 
             elif oper_type == 'save_wechat':
-                if oper_type == 'save_wechat':
-                    remark = '复制了您的微信,留意微信新朋友消息'
-                    data = request.GET.copy()
-                    data['action'] = 5
-                    action_record(data, remark)
+                remark = '复制了您的微信,留意微信新朋友消息'
+                data = request.GET.copy()
+                data['action'] = 5
+                action_record(data, remark)
+                response.code = 200
+                response.msg = '记录成功'
 
 
             elif oper_type == 'praise':  # 点赞功能，觉得你靠谱

@@ -12,6 +12,7 @@ from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
 import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
+from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 
 # 第三方平台接入
 @csrf_exempt
@@ -689,7 +690,27 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                 subscribe_time=datetime.datetime.now()
                             )
 
-                            if is_focus_get_redpacket:  # 开启了
+                            user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                                customer_id=customer_id, user__company_id=company_id)
+                            user_id = ''
+                            customer_username = ''
+                            if user_objs:
+                                user_id = user_objs[0].user_id
+                                customer_username = user_objs[0].customer.username
+                                customer_username = conversion_base64_customer_username_base64(customer_username,
+                                                                                               customer_id)
+
+                            a_data = {}
+                            a_data['customer_id'] = customer_id
+                            a_data['user_id'] = user_id
+                            a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
+                            a_data['content'] = json.dumps({'msg': 'Say 嗨~ %s，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，欢迎来撩~' % (customer_username), 'info_type': 1})
+
+                            print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
+                            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+
+                            if is_focus_get_redpacket:  # 开启了发红包的活动
                                 _data = {
                                     'company_id': company_id,
                                     'customer_id': customer_id,
@@ -706,6 +727,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
             else:
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
                 if gongzhonghao_app_objs:
@@ -788,11 +810,19 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         elif MsgType == 'voice':
                             Content = '【收到不支持的消息类型，暂无法显示】'
 
+
                         if MsgType == 'text' or MsgType == 'voice':
                             flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
                                 customer_id=customer_id).order_by('-last_follow_time')
                             if flow_up_objs:
                                 user_id = flow_up_objs[0].user_id
+
+                                models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                                    userprofile_id=user_id,
+                                    customer_id=customer_id,
+                                ).update(
+                                    is_customer_new_msg=False
+                                ) # 把客户标记为自己已经读取了。
 
                                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                                     is_last_msg=True).update(
@@ -822,6 +852,20 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         'user_id': customer_id
                                     }
                                     action_record(data, remark)
+
+                                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                                redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(
+                                    uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
+                                redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(
+                                    uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
+
+                                ##
+                                rc.set(redis_customer_id_key, False)     # 说明 公众号已经获取过用户发送给他的消息。标记为已读。
+                                rc.set(redis_user_id_key, True)          # 触发雷达的循环，让其获取公众号发出去的消息
+                                rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
+                                rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
+
 
                             response.code = 200
                             response.msg = 'send msg successful'

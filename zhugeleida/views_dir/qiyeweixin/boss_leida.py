@@ -43,8 +43,7 @@ def deal_search_time(data, q):
     user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).aggregate(
         forward_num=Count('forward'))  # 被点赞总数
     forward_num = user_forward_queryset.get('forward_num')
-    saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=8).filter(
-        q).count()  # 保存
+    saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).count()  # 保存
     query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(
         q).count()  # 咨询产品
     view_website_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=4).filter(q).count()
@@ -88,14 +87,18 @@ def deal_line_info(data):
 
     elif index_type == 2:  # 咨询客户数
         comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                                 is_customer_msg_num__gte=1).count()
+                                                                                 is_customer_msg_num__gte=1).filter(q1).count()
         return comm_num_of_customer
 
 
     elif index_type == 3:  # 跟进客户数  # 近15日客户活跃度
-        follow_num = models.zgld_follow_info.objects.filter(
-            user_customer_flowup__customer__company_id=company_id).filter(q1).count()
+        follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+                                                                       is_user_msg_num__gte=1).filter(q1).count()
         return follow_num
+
+        # follow_num = models.zgld_follow_info.objects.filter(
+        #     user_customer_flowup__customer__company_id=company_id).filter(q1).count()
+        # return follow_num
 
     elif index_type == 4:  # 浏览总数 [客户活跃度]
         browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
@@ -633,12 +636,13 @@ def home_page_oper(request, oper_type):
                 data['company_id'] = company_id
 
                 ret_data = {}
-                for index in ['index_type_1', 'index_type_2', 'index_type_2', 'index_type_3', 'index_type_4']:
+                for index in ['index_type_1', 'index_type_2', 'index_type_3', 'index_type_4']:
                     ret_dict = {}
                     if index == 'index_type_1':
                         data['index_type'] = 1
                     elif index == 'index_type_2':
                         data['index_type'] = 2
+
                     elif index == 'index_type_3':
                         data['index_type'] = 3
                     elif index == 'index_type_4':
@@ -674,7 +678,7 @@ def home_page_oper(request, oper_type):
                 praise_num = user_pop_queryset.get('praise_num')
 
                 saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
-                    action=8).count()  # 保存电话
+                    action=5).count()  # 保存微信
                 query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                     action=7).count()  # 咨询产品
 
@@ -691,7 +695,7 @@ def home_page_oper(request, oper_type):
                     'query_product_num': query_product_num,  # 咨询产品
                     'forward_mingpian_num': forward_num,  # 转发名片
                     'call_phone_num': call_phone_num,  # 拨打电话
-                    'saved_phone_num': saved_total_num,  # 保存电话
+                    'saved_phone_num': saved_total_num,  # 保存微信
                 }
 
                 # ret_list.append(_ret_dict)

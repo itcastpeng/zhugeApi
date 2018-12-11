@@ -748,7 +748,8 @@ class zgld_accesslog(models.Model):
 # 聊天室记录表
 class zgld_chatinfo(models.Model):
     send_type_choice = ((1, 'user_to_customer'),
-                        (2, 'customer_to_user')
+                        (2, 'customer_to_user'),
+                        (3, 'chat_help_tips_info'), # 聊天的温馨提示信息
                         )
     send_type = models.SmallIntegerField(choices=send_type_choice, verbose_name='发送类型', blank=True, null=True)
     is_customer_new_msg = models.BooleanField(default=True, verbose_name='是否为客户的新消息')

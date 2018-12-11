@@ -117,6 +117,8 @@ def tongxunlu(request):
                         'customer_source': obj.customer.user_type,
                         'customer_source_text': obj.customer.get_user_type_display(),
 
+                        'is_subscribe': obj.customer.is_subscribe ,                        # 来源
+                        'is_subscribe_text': obj.customer.get_is_subscribe_display() ,                        # 来源
                         'source': obj.source ,                        # 来源
                         'source_text': obj.get_source_display() ,     # 来源
                         'last_follow_time': last_interval_msg,    # 最后跟进时间
