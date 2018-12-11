@@ -204,7 +204,9 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'delete':
             objs = models.zgld_goods_management.objects.filter(id=o_id)
             if objs:
-                objs.delete()
+                # objs.delete()
+                objs.update(goodsStatus=4)
+
                 response.code = 200
                 response.msg = '删除成功'
                 response.data = {}
