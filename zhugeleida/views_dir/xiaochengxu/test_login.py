@@ -198,14 +198,11 @@ def login_oper(request,oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'send_formid_html':
-
-            return render(request, 'test_send_formid.html', locals())
-
 
 
     else:
 
+        #小程序发送 用户信息
         if oper_type == 'send_user_info':
             customer_id = request.GET.get('user_id')
             headimgurl = request.POST.get('avatarUrl')

@@ -792,10 +792,18 @@ def user_oper(request, oper_type, o_id):
 
         # 管理员审核用户【批量】入库
         elif oper_type == 'approval_storage_user_info':
-
+            print('---- 审核de 批量 ----->>')
             user_id_list = request.POST.get('user_id_list')
+            print('---- 审核de user_id_list 1  ----->>', user_id_list)
+
             if user_id_list:
                 user_id_list = json.loads(user_id_list)
+                print('---- 审核de user_id_list 2 ----->>', user_id_list)
+
+                response.code = 200
+                response.msg = "审核用户成功"
+
+                return JsonResponse(response.__dict__)
 
                 temp_userprofile_objs =models.zgld_temp_userprofile.objects.filter(id__in=user_id_list)
                 if temp_userprofile_objs:
