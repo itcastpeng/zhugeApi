@@ -4,7 +4,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     home_page, product, help_doc, article,article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, redEnvelopeToIssue
+    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, tongxunlu
 
 
 urlpatterns = [
@@ -62,6 +62,11 @@ urlpatterns = [
     # 用户操作
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
     url(r'^user$', user.user),
+
+    # 所有客户的通讯录
+    url(r'^tongxunlu/(?P<oper_type>\w+)$', tongxunlu.tongxunlu_oper),
+    url(r'^tongxunlu$', tongxunlu.tongxunlu),
+
 
     # 角色操作
     url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)$', role.role_oper),
