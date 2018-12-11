@@ -24,6 +24,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 q.add(Q(parentName_id=goodsGroup), Q.AND)
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
+                
             if flag == 'admin':
                 u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
             else:
@@ -62,6 +63,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                     'parentName':parentGroup_name,
                     'goodsPrice':obj.goodsPrice,
                     # 'inventoryNum':obj.inventoryNum,
+                    'goodsStatus_code':obj.goodsStatus,
                     'goodsStatus':obj.get_goodsStatus_display(),
                     'xianshangjiaoyi':xianshangjiaoyi,
                     'shichangjiage':obj.shichangjiage,
