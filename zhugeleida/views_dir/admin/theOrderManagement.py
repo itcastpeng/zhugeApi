@@ -41,6 +41,7 @@ def theOrder(request):
         if goodsName:
             q.add(Q(goodsName__contains=goodsName), Q.AND)
         print('q)------------> ',q)
+
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
         company_id = u_idObjs[0].company_id
 

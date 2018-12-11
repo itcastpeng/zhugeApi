@@ -9,7 +9,7 @@ from django.db.models import Count
 from django.db.models import Q
 from zhugeleida.forms.boosleida.boos_leida_verify import QueryHaveCustomerDetailForm, QueryHudongHaveCustomerDetailPeopleForm, LineInfoForm
 import base64, json
-
+from django.db.models import Q, Sum
 
 def deal_search_time(data, q):
     user_id = data.get('user_id')
@@ -33,7 +33,7 @@ def deal_search_time(data, q):
         q).count()
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).aggregate(
-        praise_num=Count('praise'))  # 被点赞总数
+        praise_num=Sum('praise'))  # 被点赞总数
     praise_num = user_pop_queryset.get('praise_num')
 
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
@@ -673,8 +673,9 @@ def home_page_oper(request, oper_type):
                     ret_data[index] = ret_dict
 
 
-                user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).aggregate(
-                    praise_num=Count('praise'))  # 被点赞总数
+                user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).annotate(
+                    praise_num=Sum('praise'))  # 被点赞总数
+
                 praise_num = user_pop_queryset.get('praise_num')
 
                 saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
