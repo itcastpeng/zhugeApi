@@ -16,7 +16,7 @@ import requests
 from publicFunc.condition_com import conditionCom
 from ..conf import *
 import base64
-
+from zhugeleida.public.WorkWeixinOper import WorkWeixinOper
 
 
 @csrf_exempt
@@ -28,6 +28,7 @@ def tools_oper(request,oper_type):
 
         ## 生成小程序 authrizition token
         if  oper_type == 'send_formid_html':
+
 
             return render(request, 'test_send_formid.html', locals())
 

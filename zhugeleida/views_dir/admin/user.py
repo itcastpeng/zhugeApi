@@ -16,6 +16,8 @@ from zhugeapi_celery_project import tasks
 from django.db.models import Q
 import redis
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
+from zhugeleida.public.WorkWeixinOper import WorkWeixinOper
+
 
 # cerf  token验证
 # 用户展示模块
@@ -765,9 +767,6 @@ def user_oper(request, oper_type, o_id):
                 wechat = request.POST.get('wechat')
 
 
-                # if len(depart_id_list) == 0:
-                #     depart_id_list = [1]
-
                 obj = models.zgld_temp_userprofile.objects.create(
 
                     username=username,
@@ -782,8 +781,28 @@ def user_oper(request, oper_type, o_id):
                 obj.department = json.dumps(depart_id_list)
                 obj.save()
 
+                ### 提醒董庆豪和尚露 审核用户
+                corpid = 'wx81159f52aff62388'  # 企业ID
+                corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
+                redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
+                _obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
+                url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/approval_audit'
+                msg = """【审核用户】：{username}\n【点击链接】：{url}\n """.format(
+                    username=username,
+                    url=url,
+                )
+                _obj.send_message(
+                    agentid=1000005,
+                    msg=msg,
+                    # touser="zhangcong"
+                    touser="1531186501974|1531464629357|1531476018476"
+                )
+
                 response.code = 200
                 response.msg = "添加用户成功"
+
+
+
 
 
             else:
@@ -800,10 +819,9 @@ def user_oper(request, oper_type, o_id):
                 user_id_list = json.loads(user_id_list)
                 print('---- 审核de user_id_list 2 ----->>', user_id_list)
 
-                response.code = 200
-                response.msg = "审核用户成功"
-
-                return JsonResponse(response.__dict__)
+                # response.code = 200
+                # response.msg = "审核用户成功"
+                # return JsonResponse(response.__dict__)
 
                 temp_userprofile_objs =models.zgld_temp_userprofile.objects.filter(id__in=user_id_list)
                 if temp_userprofile_objs:
