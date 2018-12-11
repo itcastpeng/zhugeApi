@@ -25,24 +25,29 @@ def deal_search_time(data, q):
     # customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
     #print('-----customer_num----->', customer_num)
 
-    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(browse_num=Sum('popularity'))
-
-    print('---- 受欢迎 数量 --->>',q,customer_num_dict,company_id)
-    browse_num = customer_num_dict[0].get('browse_num')
+    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(create_date__gte='2018-12-10',create_date__lte='2018-12-11').values('company_id').annotate(browse_num=Sum('popularity'))
+    browse_num = 0
+    if len(customer_num_dict[0]) != 0:
+        # print('---- 受欢迎 数量 --->>',q,customer_num_dict,company_id)
+        browse_num = customer_num_dict[0].get('browse_num')
 
     follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(
         q).count()
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
-
-    praise_num = user_pop_queryset[0].get('praise_num')
+    praise_num = 0
+    if len(user_pop_queryset[0]) != 0:
+        praise_num = user_pop_queryset[0].get('praise_num')
 
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                              is_customer_msg_num__gte=1,
                                                                              is_user_msg_num__gte=1).count()
 
     user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
-    forward_num = user_forward_queryset[0].get('forward_num')
+
+    forward_num = 0
+    if len(user_forward_queryset[0]) != 0:
+        forward_num = user_forward_queryset[0].get('forward_num')
 
     saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).count()  # 保存
     query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(
@@ -676,23 +681,25 @@ def home_page_oper(request, oper_type):
 
                 user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).values('company_id').annotate(
                     praise_num=Sum('praise'))  # 被点赞总数
-
-                praise_num = user_pop_queryset[0].get('praise_num')
+                praise_num = 0
+                if len(user_pop_queryset[0]) != 0:
+                    praise_num = user_pop_queryset[0].get('praise_num')
 
                 saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                     action=5).count()  # 保存微信
                 query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                     action=7).count()  # 咨询产品
 
-                user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).values('company_id').annotate(
-                    forward_num=Sum('forward'))  # 转发名片
-                forward_num = user_forward_queryset[0].get('forward_num')
+                user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).values('company_id').annotate(forward_num=Sum('forward'))  # 转发名片
+
+                forward_num = 0
+                if len(user_forward_queryset[0]) !=0:
+                    forward_num = user_forward_queryset[0].get('forward_num')
 
                 call_phone_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,  # 拨打电话
                     action=10).count()
 
                 _ret_dict = {
-
                     'praise_num': praise_num,  # 被点赞总数
                     'query_product_num': query_product_num,  # 咨询产品
                     'forward_mingpian_num': forward_num,  # 转发名片

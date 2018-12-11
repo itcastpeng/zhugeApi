@@ -347,6 +347,7 @@ def bottom_button_info(request):
             company_id = 1
             is_release_version_num = False
 
+
         buttom_navigation_data_list = [
             {
                 "default_url": "icon_mingpian_01.png",
@@ -380,11 +381,11 @@ def bottom_button_info(request):
 
         # if  version_num: # 有版本号(从ext 里读取的)
         online_version_num = _obj.version_num
-        print('---- Ext里的版本号: ---->', version_num)
+        print('---- 按钮 Ext里的版本号: ---->', version_num)
 
         if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
             is_release_version_num = False  # 不相等说明要隐藏按钮。
-            print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',(company_id, online_version_num, version_num))
+        print('-------- 按钮 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',(company_id, online_version_num, version_num))
 
 
         if shopping_type == 1:  # 1、代表产品
@@ -420,7 +421,7 @@ def bottom_button_info(request):
         ret_data['is_show_jszc_text'] = obj.get_is_show_jszc_display()
         ret_data['is_release_version_num'] = is_release_version_num
 
-        print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
+        print('-------- 按钮 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200
         response.msg = "返回成功"
         response.data = ret_data
