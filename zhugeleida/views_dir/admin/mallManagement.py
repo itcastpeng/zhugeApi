@@ -24,12 +24,12 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 q.add(Q(parentName_id=goodsGroup), Q.AND)
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
-                
+
             if flag == 'admin':
                 u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
             else:
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
-            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id)
+            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id,goodsStatus__in=[1,2,3])
             objsCount = objs.count()
             otherData = []
             if length != 0:

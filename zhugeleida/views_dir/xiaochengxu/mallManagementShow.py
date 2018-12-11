@@ -33,7 +33,7 @@ def mallManage(request):
 
         if detaileId:
             print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
-            objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).filter(id=detaileId).exclude(goodsStatus=2)
+            objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).filter(id=detaileId,goodsStatus__in=[1,3])
             count = objs.count()
             if objs:
 
@@ -65,6 +65,7 @@ def mallManage(request):
                         'parentName_id':parentGroup_id,
                         'parentName':parentGroup_name,
                         'goodsPrice':obj.goodsPrice,
+                        'goodsStatus_code':obj.goodsStatus,
                         'goodsStatus':obj.get_goodsStatus_display(),
                         'xianshangjiaoyi':xianshangjiaoyi,
                         'shichangjiage':obj.shichangjiage,
