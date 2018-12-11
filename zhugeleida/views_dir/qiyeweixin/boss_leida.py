@@ -25,24 +25,24 @@ def deal_search_time(data, q):
     # customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
     #print('-----customer_num----->', customer_num)
 
-    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).aggregate(
-        browse_num=Count('popularity'))
-    browse_num = customer_num_dict.get('browse_num')
+    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(
+        browse_num=Sum('popularity'))
+    browse_num = customer_num_dict[0].get('browse_num')
 
     follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(
         q).count()
 
-    user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).aggregate(
-        praise_num=Sum('praise'))  # 被点赞总数
-    praise_num = user_pop_queryset.get('praise_num')
+    user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
+
+    praise_num = user_pop_queryset[0].get('praise_num')
 
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                              is_customer_msg_num__gte=1,
                                                                              is_user_msg_num__gte=1).count()
 
-    user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).aggregate(
-        forward_num=Count('forward'))  # 被点赞总数
-    forward_num = user_forward_queryset.get('forward_num')
+    user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
+    forward_num = user_forward_queryset[0].get('forward_num')
+
     saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).count()  # 保存
     query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(
         q).count()  # 咨询产品
@@ -683,9 +683,9 @@ def home_page_oper(request, oper_type):
                 query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                     action=7).count()  # 咨询产品
 
-                user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).aggregate(
-                    forward_num=Count('forward'))  # 转发名片
-                forward_num = user_forward_queryset.get('forward_num')
+                user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).values('company_id').annotate(
+                    forward_num=Sum('forward'))  # 转发名片
+                forward_num = user_forward_queryset[0].get('forward_num')
 
                 call_phone_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,  # 拨打电话
                     action=10).count()

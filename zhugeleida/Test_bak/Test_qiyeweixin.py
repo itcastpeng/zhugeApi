@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -496,18 +496,18 @@ import json
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-# url =  ip + '/zhugeleida/qiyeweixin/article/test_update_customer_child_status/0'  # 公众号文章基础信息
-# get_data['article_id'] = 3
-# ret = requests.get(url, data = post_data ,params=get_data)
-
-
-url =  ip + '/zhugeleida/admin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
-get_data['uid'] = 17
-# get_data['query_customer_id'] = 857
-#
-get_data['level'] =  1
-
+url =  ip + '/zhugeleida/qiyeweixin/article/test_update_customer_child_status/0'  # 公众号文章基础信息
+get_data['article_id'] = 74
 ret = requests.get(url, data = post_data ,params=get_data)
+
+
+# url =  ip + '/zhugeleida/admin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
+# get_data['uid'] = 17
+# # get_data['query_customer_id'] = 857
+# #
+# get_data['level'] =  1
+#
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 
 
