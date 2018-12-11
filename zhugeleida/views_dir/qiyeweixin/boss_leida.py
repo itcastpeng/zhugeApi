@@ -25,10 +25,10 @@ def deal_search_time(data, q):
     # customer_num = models.zgld_user_customer_belonger.objects.filter(user_id__in=user_list).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
     #print('-----customer_num----->', customer_num)
 
-    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(create_date__gte='2018-12-10',create_date__lte='2018-12-11').values('company_id').annotate(browse_num=Sum('popularity'))
+    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(browse_num=Sum('popularity'))
     browse_num = 0
     if len(customer_num_dict[0]) != 0:
-        # print('---- 受欢迎 数量 --->>',q,customer_num_dict,company_id)
+        print('---- 受欢迎 数量 --->>',q,customer_num_dict,company_id)
         browse_num = customer_num_dict[0].get('browse_num')
 
     follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(
