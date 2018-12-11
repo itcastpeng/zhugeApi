@@ -673,10 +673,10 @@ def home_page_oper(request, oper_type):
                     ret_data[index] = ret_dict
 
 
-                user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).annotate(
+                user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).values('company_id').annotate(
                     praise_num=Sum('praise'))  # 被点赞总数
 
-                praise_num = user_pop_queryset.get('praise_num')
+                praise_num = user_pop_queryset[0].get('praise_num')
 
                 saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                     action=5).count()  # 保存微信
