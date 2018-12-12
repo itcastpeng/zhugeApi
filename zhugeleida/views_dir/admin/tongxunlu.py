@@ -6,12 +6,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
-from django.db.models import Max, Avg, F, Q, Min, Count,Sum
-from zhugeleida.forms.admin.tongxunlu_verify import TongxunluSelectForm,TongxunluUserListSelectForm
+from django.db.models import Max, Avg, F, Q, Min, Count, Sum
+from zhugeleida.forms.admin.tongxunlu_verify import TongxunluSelectForm, TongxunluUserListSelectForm
 import json
 import datetime
 from django.db.models import Q
 import base64
+
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -28,16 +29,16 @@ def tongxunlu(request):
             order = request.GET.get('order', '-create_date')
             # -expedted_pr 预计成交率 | -last_activity_time 最后活动时间 | -last_follow_time 最后跟进时间  排序为【默认为】成交率; 最后跟进时间; 最后活动时间
 
-
             q1 = Q()
             q1.connector = 'AND'
             q1.children.append(('user_id', uid))
 
-            user_type = request.GET.get('user_type') #  (1, '扫码'), (2, '转发'), (3, '搜索'), (4, '公众号文章'),
-            if user_type: # 搜索进来
+            user_type = request.GET.get('user_type')  # (1, '扫码'), (2, '转发'), (3, '搜索'), (4, '公众号文章'),
+            if user_type:  # 搜索进来
                 q1.add(Q(**{'customer__user_type': user_type}), Q.AND)
 
-            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q1).order_by(order).distinct()
+            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q1).order_by(
+                order).distinct()
 
             count = objs.count()
             if objs:
@@ -47,7 +48,7 @@ def tongxunlu(request):
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
 
-                #返回的数据
+                # 返回的数据
                 ret_data = []
                 for obj in objs:
 
@@ -96,26 +97,26 @@ def tongxunlu(request):
                         customer_name = str(username, 'utf-8')
                         print('----- 解密b64decode username----->', username)
                     except Exception as e:
-                        print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id,"|",e)
+                        print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                         customer_name = '客户ID%s' % (obj.customer_id)
 
                     ret_data.append({
-                        'id' : obj.id,
+                        'id': obj.id,
                         'customer_id': obj.customer_id,
                         'customer_username': customer_name,
                         'headimgurl': obj.customer.headimgurl,
-                        'expected_time':  obj.expected_time,  # 预计成交时间
-                        'expedted_pr':  obj.expedted_pr,      # 预计成交概率
+                        'expected_time': obj.expected_time,  # 预计成交时间
+                        'expedted_pr': obj.expedted_pr,  # 预计成交概率
                         'customer_source': obj.customer.user_type,
                         'customer_source_text': obj.customer.get_user_type_display(),
 
-                        'is_subscribe': obj.customer.is_subscribe ,                        # 用户是否订阅该公众号
-                        'is_subscribe_text': obj.customer.get_is_subscribe_display() ,
-                        'source': obj.source ,                        # 来源
-                        'source_text': obj.get_source_display() ,     # 来源
-                        'last_follow_time': last_interval_msg,    # 最后跟进时间
+                        'is_subscribe': obj.customer.is_subscribe,  # 用户是否订阅该公众号
+                        'is_subscribe_text': obj.customer.get_is_subscribe_display(),
+                        'source': obj.source,  # 来源
+                        'source_text': obj.get_source_display(),  # 来源
+                        'last_follow_time': last_interval_msg,  # 最后跟进时间
                         'last_activity_time': last_activity_msg,  # 最后活动时间
-                        'follow_status': customer_status,         # 跟进状态
+                        'follow_status': customer_status,  # 跟进状态
                     })
 
                 response.code = 200
@@ -134,29 +135,30 @@ def tongxunlu(request):
             response.msg = "请求异常"
             response.data = json.loads(forms_obj.errors.as_json())
 
-
     return JsonResponse(response.__dict__)
-
 
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def tongxunlu_oper(request,oper_type):
+def tongxunlu_oper(request, oper_type):
     response = Response.ResponseObj()
     if request.method == "GET":
 
+        ## 查询雷达用户列表
         if oper_type == 'quey_user_list':
 
             forms_obj = TongxunluUserListSelectForm(request.GET)
             if forms_obj.is_valid():
 
                 company_id = forms_obj.cleaned_data.get('company_id')
-                user_objs_list = models.zgld_user_customer_belonger.objects.select_related('user').filter(user__company_id=company_id).values('user_id','user__username').annotate(user__sum=Count('user_id'))
-                count =  len(list(user_objs_list))
+                user_objs_list = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                    user__company_id=company_id).values('user_id', 'user__username').annotate(
+                    user__sum=Count('user_id'))
+                count = len(list(user_objs_list))
 
-                print('---- list(user_objs_list) --->>',list(user_objs_list))
-                if  count > 0:
+                print('---- list(user_objs_list) --->>', list(user_objs_list))
+                if count > 0:
 
                     # 返回的数据
                     ret_data = []
@@ -187,16 +189,18 @@ def tongxunlu_oper(request,oper_type):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-
+        ## 内部使用工具 删除绑定的关系-处理成唯一性
         elif oper_type == 'myself_delete_binding_relate':
 
-            customer_list = list(set(models.zgld_user_customer_belonger.objects.all().values_list('customer_id', flat=True)))
+            customer_list = list(
+                set(models.zgld_user_customer_belonger.objects.all().values_list('customer_id', flat=True)))
             customer_count = len(customer_list)
 
             if customer_count > 0:
-                print('----- 客户集合列表------>',customer_list)
+                print('----- 客户集合列表------>', customer_list)
                 for customer_id in customer_list:
-                    objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id).order_by('create_date')
+                    objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id).order_by(
+                        'create_date')
                     if objs:
                         print('------- 正在处理 customer_id------》', customer_id)
 
@@ -204,7 +208,7 @@ def tongxunlu_oper(request,oper_type):
                         for obj in objs:
                             user_id = obj.user_id
                             if i == 0:
-                                print('----- 【没有删除】 customer_id : %s | uid : %s ----->>' % (customer_id,user_id))
+                                print('----- 【没有删除】 customer_id : %s | uid : %s ----->>' % (customer_id, user_id))
                                 i = i + 1
                                 continue
 
@@ -214,10 +218,71 @@ def tongxunlu_oper(request,oper_type):
 
             else:
 
-                print('-- customer_list 为空---->>',customer_list)
+                print('-- customer_list 为空---->>', customer_list)
 
 
+    elif request.method == "POST":
 
+        #更改所属客户关系
+        if oper_type == 'change_customer_ownership':
+
+            user_id = request.GET.get('user_id')
+
+            customer_id_list = request.POST.get('customer_id_list')
+            old_uid = request.POST.get('old_uid')
+            new_uid = request.POST.get('new_uid')
+            company_id =  request.POST.get('company_id')
+            type =  request.POST.get('type')
+            
+            form_data = {
+                'company_id' : company_id,
+                'customer_id_list' : customer_id_list,
+                'old_uid' : old_uid,
+                'new_uid' : new_uid,
+                'type' : type,
+            }
+
+            forms_obj = TongxunluUserListSelectForm(form_data)
+
+            if forms_obj.is_valid():
+
+                ## 工作交接
+                if type == 'all_customer':
+                    customer_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                        user_id=old_uid,user__company_id=company_id)
+                    if customer_objs:
+                        customer_objs.update(
+                            user_id=new_uid
+                        )
+
+                    else:
+                        response.code = 301
+                        response.msg = '没有数据'
+                else:
+
+                    customer_id_list = forms_obj.cleaned_data.get('customer_id_list')
+                    company_id = forms_obj.cleaned_data.get('company_id')
+                    customer_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(customer_id__in=customer_id_list,user__company_id=company_id)
+
+                    print('---- list(customer_objs) --->>', list(customer_objs))
+                    if customer_objs > 0:
+                        customer_objs.update(
+                            user_id = new_uid
+                        )
+
+                        # 返回的数据
+                        response.code = 200
+                        response.msg = '改变成功'
+
+
+                    else:
+                        response.code = 301
+                        response.msg = '没有数据'
+
+            else:
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
 
 
