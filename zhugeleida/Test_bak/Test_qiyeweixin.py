@@ -514,12 +514,15 @@ import json
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/tongxunlu'  # 公众号文章基础信息
-get_data['uid'] = 3
-get_data['order'] = '-expedted_pr'
+# url =  ip + '/zhugeleida/admin/tongxunlu'  # 公众号文章基础信息
+# get_data['uid'] = 3
+# get_data['order'] = '-expedted_pr'
+# ret = requests.get(url, data = post_data ,params=get_data)
 
+
+
+url =  ip + '/zhugeleida/admin/tongxunlu/myself_delete_binding_relate'  # 公众号文章基础信息
 ret = requests.get(url, data = post_data ,params=get_data)
-
 
 
 

@@ -37,7 +37,7 @@ def tongxunlu(request):
             if user_type: # 搜索进来
                 q1.add(Q(**{'customer__user_type': user_type}), Q.AND)
 
-            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q1).order_by(order)
+            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q1).order_by(order).distinct()
 
             count = objs.count()
             if objs:
@@ -105,7 +105,7 @@ def tongxunlu(request):
                         'customer_username': customer_name,
                         'headimgurl': obj.customer.headimgurl,
                         'expected_time':  obj.expected_time,  # 预计成交时间
-                        'expedted_pr':  obj.expedted_pr,   # 预计成交概率
+                        'expedted_pr':  obj.expedted_pr,      # 预计成交概率
                         'customer_source': obj.customer.user_type,
                         'customer_source_text': obj.customer.get_user_type_display(),
 
@@ -186,6 +186,39 @@ def tongxunlu_oper(request,oper_type):
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+
+        elif oper_type == 'myself_delete_binding_relate':
+
+            customer_list = list(set(models.zgld_user_customer_belonger.objects.filter(customer_id=5).values_list('customer_id', flat=True)))
+            customer_count = len(customer_list)
+
+            if customer_count > 0:
+                print('----- 客户集合列表------>',customer_list)
+                for customer_id in customer_list:
+                    objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id).order_by('create_date')
+                    if objs:
+                        print('------- 正在处理 customer_id------》', customer_id)
+
+                        i = 0
+                        for obj in objs:
+                            user_id = obj.user_id
+                            if i == 0:
+                                print('----- 【没有删除】 customer_id : %s | uid : %s ----->>' % (customer_id,user_id))
+                                i = i + 1
+                                continue
+
+                            i = i + 1
+                            print('----- 【已删除】 customer_id : %s | uid : %s ----->>' % (customer_id, user_id))
+                            obj.delete()
+                    break
+            else:
+
+                print('-- customer_list 为空---->>',customer_list)
+
+
+
+
 
 
 
