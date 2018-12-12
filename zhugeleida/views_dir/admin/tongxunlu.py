@@ -12,7 +12,7 @@ import json
 import datetime
 from django.db.models import Q
 import base64
-
+from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
 
 # cerf  token验证 用户展示模块
 @csrf_exempt
@@ -166,10 +166,17 @@ def tongxunlu_oper(request, oper_type):
                         user_id = obj.get('user_id')
                         user__username = obj.get('user__username')
                         user_num = obj.get('user__sum')
+                        gongzhonghao_customer_num = models.zgld_user_customer_belonger.objects.select_related(
+                            'customer').filter(user_id=user_id, customer__user_type=1).count()
+                        
+                        xiaochengxu_customer_num = user_num - gongzhonghao_customer_num
+
                         ret_data.append({
                             'user_id': user_id,
                             'username': user__username,
-                            'total_customer_num': user_num
+                            'total_customer_num': user_num,
+                            'xiaochengxu_customer_num' : xiaochengxu_customer_num,
+                            'gongzhonghao_customer_num' : gongzhonghao_customer_num
                         })
 
                     response.code = 200
@@ -221,6 +228,90 @@ def tongxunlu_oper(request, oper_type):
                 print('-- customer_list 为空---->>', customer_list)
 
 
+        ## 展示聊天历史信息
+        elif oper_type == 'chat_info':
+
+            forms_obj = ChatSelectForm(request.GET)
+            if forms_obj.is_valid():
+                response = Response.ResponseObj()
+                user_id = request.GET.get('uid')
+                customer_id = request.GET.get('customer_id')
+                # send_type = request.GET.get('send_type')
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+                objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                ).order_by('-create_date')
+
+                count = objs.count()
+
+                objs.update(
+                    is_user_new_msg=False
+                )
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                ret_data_list = []
+                for obj in objs:
+
+                    customer_name = base64.b64decode(obj.customer.username)
+                    customer_name = str(customer_name, 'utf-8')
+                    content = obj.content
+
+                    if not content:
+                        continue
+
+                    is_customer_new_msg = obj.is_customer_new_msg
+
+                    if is_customer_new_msg:  # 为True时
+                        is_customer_already_read = 0  # 未读
+                        is_customer_already_read_text = '未读'
+                    else:
+                        is_customer_already_read = 1  # 已读
+                        is_customer_already_read_text = '已读'
+
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
+                    if info_type:
+                        info_type = int(info_type)
+
+                        if info_type == 1:
+                            msg = _content.get('msg')
+                            msg = base64.b64decode(msg)
+                            msg = str(msg, 'utf-8')
+                            _content['msg'] = msg
+
+                    base_info_dict = {
+                        'customer_id': obj.customer_id,
+                        'customer_avatar': obj.customer.headimgurl,
+                        'user_id': obj.userprofile_id,
+                        'src': obj.customer.headimgurl,
+                        'name': customer_name,
+                        'dateTime': obj.create_date,
+                        'send_type': obj.send_type,
+                        'is_customer_already_read': is_customer_already_read,
+                        'is_customer_already_read_text': is_customer_already_read_text
+                    }
+                    base_info_dict.update(_content)
+
+                    ret_data_list.append(base_info_dict)
+
+                ret_data_list.reverse()
+
+                response.code = 200
+                response.msg = '分页获取-全部聊天消息成功'
+                response.data = {
+                    'ret_data': ret_data_list,
+                    'data_count': count,
+                }
+
+
     elif request.method == "POST":
 
         #更改所属客户关系
@@ -233,7 +324,7 @@ def tongxunlu_oper(request, oper_type):
             new_uid = request.POST.get('new_uid')
             company_id =  request.POST.get('company_id')
             type =  request.POST.get('type')
-            
+
             form_data = {
                 'company_id' : company_id,
                 'customer_id_list' : customer_id_list,
