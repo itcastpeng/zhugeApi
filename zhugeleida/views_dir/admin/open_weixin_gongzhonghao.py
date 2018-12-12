@@ -704,7 +704,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             a_data['customer_id'] = customer_id
                             a_data['user_id'] = user_id
                             a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
-                            a_data['content'] = json.dumps({'msg': 'Say 嗨~ %s，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，欢迎来撩~' % (customer_username), 'info_type': 1})
+                            a_data['content'] = json.dumps({'msg': '%s ~ 终于等到您🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username), 'info_type': 1})
 
                             print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
                             tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
@@ -809,6 +809,26 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                         elif MsgType == 'voice':
                             Content = '【收到不支持的消息类型，暂无法显示】'
+
+
+                        elif MsgType == 'image':
+                            PicUrl = collection.getElementsByTagName("PicUrl")[0].childNodes[0].data
+
+                            print('-----【公众号】客户发送的图片 PicUrl ---->>', PicUrl)
+                            s = requests.session()
+                            s.keep_alive = False  # 关闭多余连接
+                            html = s.get(PicUrl)
+
+                            # html = requests.get(qrcode_url)
+
+                            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                            filename = "/%s_%s.jpg" % ('YYYYY', now_time)
+                            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
+                            with open(file_dir, 'wb') as file:
+                                file.write(html.content)
+
+
+
 
 
                         if MsgType == 'text' or MsgType == 'voice':
