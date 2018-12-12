@@ -194,7 +194,7 @@ def open_weixin(request, oper_type):
                             'action': 'add',
                             'requestdomain': ['https://api.zhugeyingxiao.com'],
                             'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
-                            'uploaddomain': ['https://statics.api.zhugeyingxiao.com'],
+                            'uploaddomain': ['https://statics.api.zhugeyingxiao.com','https://statics.api.zhugeyingxiao.com'],
                             'downloaddomain': ['https://api.zhugeyingxiao.com', 'https://statics.api.zhugeyingxiao.com']
                         }
                         post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'

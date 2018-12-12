@@ -154,7 +154,8 @@ app_id = 'wx67e2fde0f694111c'
 # print(json.dumps(ret.json()))
 
 
-authorizer_access_token = '15_4_FaXBldHX02B5fT-HH7p-HmiXIjYhbuUg0Mdl5PNCh_WqhvGrlcZdCxpyCDUub5svyQKYluuemJy5oCx30YeEGkrY8ymEvsSKUAvERdWmuA8N4WYwxdm1OqdbK6ldTuJyfhiyC-v1TZ_FQ5VBLhAEDQWG'
+authorizer_access_token = '16_QYOo8rOBtXfh7Hn2S5DmPZFLwPw0TZTheC1TTUy2iqGvDooNQjMR0pWnJ2MQZSCThvOs9g4eT4vflf-M8bN9S-oXDSca7Mx0I3h_CO978wk39FvTTrdYjMS1kniX3GVyyJABCroTA02EDshOPPXhAHDEEM'
+
 get_domin_data = {
     'access_token': authorizer_access_token
 }
@@ -175,7 +176,6 @@ print('--------- 修改小程序服务器 接口返回---------->>', json.dumps(
 
 post_domain_data = {
     'action': 'get'
-
 }
 domain_data_ret = requests.post(post_domain_url, params=get_domin_data, data=json.dumps(post_domain_data))
 domain_data_ret = domain_data_ret.json()
