@@ -174,15 +174,14 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
-get_data['signature']= '4ac43d66317a08646cd2ca9dbd43d3cb7166c58c'
-get_data['timestamp']= '1544607632'
-get_data['nonce']= '1014258518'
+get_data['signature']= 'c5bc48585e01036ef82d231a4c08bf5ac5cdb78d'
+get_data['timestamp']= '1544609755'
+get_data['nonce']= '1201552276'
 get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
 get_data['encrypt_type']= 'aes'
-get_data['msg_signature']= '2e8d1150e04aacdd19a9f60187482fed5523a800'
+get_data['msg_signature']= '63432e2c7494d8291c0f4c1ee97714d2778d81e5'
 
-post_data['xml'] = '<xml><ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName><Encrypt><![CDATA[RPrE4Q21Y+Y2dOr0mYeFMkbRpqOiIRgimSq7q2vE1YviHbjfO56wZllkaeHZHFy+s0chRagiCCktyyLevSykLeJ20SP8QGDhm5B1S4LPR+U3dDWCgKgpaKBt+biq7I2k7It1ws7uUKTTbdTp37d5Ch7LoFcBpTBBJAxOjEDHwNnk0pCd63CCpBrTyMfj7HJmZGyllTlfBT2C+beRhzrVise2PG/EdtpyeSRpsqef9QMGCu7/WUsy5Jt+UVAYlK+QyXunOX0JmtC+MZ7V68uGwObHHiDau+rYG0O8nDnzo/7G3P33tx8smUnBPe4CYw8dWYJhpC/6t43dn05lGEfbJdzhBJ7XO2/VW4DepeLLMen4O/F/f5/op66eb8RVp3L0enxPJ1X1k9gulKHVhbz9PBezRExFJiftvjkioTTeCoiDv4khI3F6a0EnuqfmIKLTcD9NwmsC2WGEbhjYZzE/qyVlTRh6kk70TX5jP5GxVqiVsJy3zT+WShpX0+iORAczu3j0oVao2Yv4i1trT0XI+cjsGyhZPRY24wZG13smXLUSK+N4LqCyzFjh+iSCe8H5PJjPAaPYTGFZqUTDnUz9RqK944bEH4UuV6HopXchCdg0oOzjVcCkxzhfD/J56EsO]]></Encrypt>\n</xml>'
-
+post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[M4ZM7/Ktom0qYVBibzJ1CQwsgqeZuXP+PqRreDqD3kWHJ4rUVJgTfeqrh6rXoBpeKNqAl4flZFRy3g2Vn6ixwxZsSeqLPoacjBiRDFBXW+osN5BX7xpxsagqEKcRuk6AInffJ4gh0x4Y5b73iGsfI3GcT0ovds5eJkJeOHdPT2oQXFDGLQnninn8zi+yecSo+NCfsBH0P3BPAcJJoEq67gOt3NZ5Y+Z14Urtgfq37I04qVlBobP0KH3p2IqdxFfBMDwhPRFI47gi1NEcw+5/tiXiVeIpB03jpmogGELIFFLvhD9mbFUiJZ0HfLl74oADd/pFaMBZ+gp1hhhBFspe+S2jbKA0zx0BiPMogReLNDge2sY683mErmNda9fsINlJKv/5wwteBCdqJ23Fdcii98dM5VLJ0aHkSae+VoK1ec5APoZPO2q9bMscJj/twMr799kPZkVFw4r1vA8rZbBEQP2vj94TwZA4ya36EK4M/Vko+tTo+87YRC65h/cKvZ9rDCqdY6TXm2+AiqQHIlfYE8MJuOHYhXm9Oc7MDN6CiB3srM8zxaIiHfCOM20dXdJZ3JpofMKFtBTNBTtBSMyXPoaGcfEmWxrY+5Kv9k0co3KKUSMAeHPbO6qcPYFoc6il]]></Encrypt>\x0A</xml>'
 
 ret = requests.post(url, params=get_data,data=post_data)
 

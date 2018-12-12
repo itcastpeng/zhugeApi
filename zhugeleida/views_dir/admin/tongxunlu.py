@@ -345,6 +345,8 @@ def tongxunlu_oper(request, oper_type):
                         customer_objs.update(
                             user_id=new_uid
                         )
+                        response.code = 200
+                        response.msg = '交接成功'
 
                     else:
                         response.code = 301
