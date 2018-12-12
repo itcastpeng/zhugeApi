@@ -37,8 +37,7 @@ def tongxunlu(request):
             if user_type:  # 搜索进来
                 q1.add(Q(**{'customer__user_type': user_type}), Q.AND)
 
-            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q1).order_by(
-                order).distinct()
+            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q1).order_by(order)
 
             count = objs.count()
             if objs:
@@ -100,6 +99,12 @@ def tongxunlu(request):
                         print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                         customer_name = '客户ID%s' % (obj.customer_id)
 
+
+                    if obj.source == 4:
+                        source_text = '文章'
+                    else:
+                        source_text = obj.get_source_display()
+
                     ret_data.append({
                         'id': obj.id,
                         'customer_id': obj.customer_id,
@@ -113,10 +118,11 @@ def tongxunlu(request):
                         'is_subscribe': obj.customer.is_subscribe,  # 用户是否订阅该公众号
                         'is_subscribe_text': obj.customer.get_is_subscribe_display(),
                         'source': obj.source,  # 来源
-                        'source_text': obj.get_source_display(),  # 来源
+                        'source_text': source_text,  # 来源
                         'last_follow_time': last_interval_msg,  # 最后跟进时间
                         'last_activity_time': last_activity_msg,  # 最后活动时间
                         'follow_status': customer_status,  # 跟进状态
+                        'create_date': obj.create_date,  # 跟进状态
                     })
 
                 response.code = 200
