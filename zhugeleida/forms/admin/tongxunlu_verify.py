@@ -47,6 +47,17 @@ class TongxunluSelectForm(forms.Form):
 
 
 # 判断查询通讯录验证
+class TongxunluUserList(forms.Form):
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'invalid': "UID不能为空",
+        }
+    )
+
+
+
+# 判断查询通讯录验证
 class TongxunluUserListSelectForm(forms.Form):
     company_id = forms.IntegerField(
         required=True,
@@ -86,17 +97,17 @@ class TongxunluUserListSelectForm(forms.Form):
     def clean_customer_id_list(self):
         customer_id_list = self.data.get('customer_id_list')
         type = self.data.get('type')
-        customer_id_list = json.loads(customer_id_list)
+        if customer_id_list:
+            customer_id_list = json.loads(customer_id_list)
 
-        if type != 'all_customer' and len(customer_id_list) == 0:
-            self.add_error('customer_id_list', 'customer_id_list不能为空')
+            if type != 'all_customer' and len(customer_id_list) == 0:
+                self.add_error('customer_id_list', 'customer_id_list不能为空')
 
         return customer_id_list
 
     def clean_new_uid(self):
         old_uid = self.data.get('old_uid')
         new_uid = self.data.get('new_uid')
-
 
         if old_uid == new_uid:
             self.add_error('new_uid', ' new_uid 和 new_uid不能一样')

@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
-from zhugeleida.forms.admin.tongxunlu_verify import TongxunluSelectForm, TongxunluUserListSelectForm
+from zhugeleida.forms.admin.tongxunlu_verify import TongxunluSelectForm, TongxunluUserListSelectForm,TongxunluUserList
 import json
 import datetime
 from django.db.models import Q
@@ -148,7 +148,7 @@ def tongxunlu_oper(request, oper_type):
         ## 查询雷达用户列表
         if oper_type == 'quey_user_list':
 
-            forms_obj = TongxunluUserListSelectForm(request.GET)
+            forms_obj = TongxunluUserList(request.GET)
             if forms_obj.is_valid():
 
                 company_id = forms_obj.cleaned_data.get('company_id')
