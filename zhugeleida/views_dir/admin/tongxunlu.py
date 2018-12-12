@@ -356,7 +356,7 @@ def tongxunlu_oper(request, oper_type):
                     customer_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(customer_id__in=customer_id_list,user__company_id=company_id)
 
                     print('---- list(customer_objs) --->>', list(customer_objs))
-                    if customer_objs > 0:
+                    if customer_objs:
                         customer_objs.update(
                             user_id = new_uid
                         )
