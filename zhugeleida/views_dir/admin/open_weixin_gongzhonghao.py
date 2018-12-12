@@ -610,7 +610,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            postdata = request.body.decode(encoding='UTF-8')
+            # postdata = request.body.decode(encoding='UTF-8')
+            postdata = request.GET.get('xml')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -859,16 +860,15 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                                 elif MsgType == 'voice':
+                                    MediaId = collection.getElementsByTagName("MediaId")[0].childNodes[0].data
                                     # Content = '【收到不支持的消息类型，暂无法显示】'
                                     objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                                     if objs:
                                         authorizer_refresh_token = objs[0].authorizer_refresh_token
                                         authorizer_appid = objs[0].authorization_appid
-                                        authorizer_access_token_key_name = 'authorizer_access_token_%s' % (
-                                            authorizer_appid)
+                                        authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
 
-                                        authorizer_access_token = rc.get(
-                                            authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+                                        authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
                                         if not authorizer_access_token:
                                             data = {
@@ -885,10 +885,19 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                         s = requests.session()
                                         s.keep_alive = False  # 关闭多余连接
-                                        url = 'https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID'
-                                        res = requests.get(url,data=get_data,stream=True)
+                                        url = 'https://api.weixin.qq.com/cgi-bin/media/get'
+                                        get_data = {
+                                              'access_token' : authorizer_access_token,
+                                              'media_id' : MediaId
+                                        }
+                                        res = requests.get(url,params=get_data,stream=True)
+
+                                        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+                                        filename = "/customer_%s_user_%s_%s.amr" % (customer_id, user_id, now_time)
+                                        file_dir = os.path.join('statics', 'zhugeleida', 'voice', 'qiyeweixin','gongzhonghao') + filename
+
                                         # 写入收到的视频数据
-                                        with open(path, 'ab') as file:
+                                        with open(file_dir, 'ab') as file:
                                             file.write(res.content)
                                             file.flush()
 
