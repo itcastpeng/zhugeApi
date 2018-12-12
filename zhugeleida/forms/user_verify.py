@@ -51,7 +51,7 @@ class ScanCodeToAddUserForm(forms.Form):
     )
 
     wechat = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "微信不能为空"
         }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/mint-ui/lib/style.css">
+</head>
+<body>
+  <div id="app">
+    <mt-header fixed title="审核用户" style="font-size: 16px;"></mt-header>
+      <div style="padding-top: 40px; overflow-y: scroll;" v-if="userData.length > 0">
+          <mt-checklist
+          align="right"
+          :options = "userData"
+          v-model="chooseUser">
+        </mt-checklist>
+      </div>
+      <div style="padding-top: 40px; overflow-y: scroll; text-align: center; font-size: 14px; color: #666;" v-else>暂无数据</div>
+      <div style="width:100%;position: fixed; z-index: 2000; background: #fff; bottom:0; padding: 10px 0 10px 0; text-align: center;">
+          <mt-button type="primary" size="small" @click="cancelChoose" v-if="userData.length > 0">重置</mt-button>
+          <mt-button type="primary" size="small" v-else disabled>重置</mt-button>
+          <mt-button type="danger"  size="small" @click="chooseAll" v-if="userData.length > 0">全选</mt-button>
+          <mt-button type="danger"  size="small" v-else disabled>全选</mt-button>
+          <mt-button type="primary" size="small" @click="submit"  v-if="userData.length > 0">提交审核</mt-button>
+          <mt-button type="primary" size="small" v-else disabled>提交审核</mt-button>
+      </div>
+
+  </div>
+</body>
+  <!-- 先引入 Vue -->
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <!-- 引入组件库 -->
+  <script src="https://unpkg.com/mint-ui/lib/index.js"></script>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+          chooseUser: [],
+          userData: []
+      },
+
+      methods: {
+
+         cancelChoose () {
+             this.chooseUser = []
+         },
+          chooseAll () {
+             for (let i = 0; i < this.userData.length; i++) {
+                    this.chooseUser.push(this.userData[i].value);
+                 }
+          },
+          submit () {
+             console.log('提交', this.chooseUser);
+                let _this = this;
+             axios.post('http://127.0.0.1:8001/zhugeleida/admin/user/approval_storage_user_info/0?rand_str=a3bab5a140482756d28c23920f62377e&timestamp=1544515022966&user_id=14', {
+                    user_id_list: JSON.stringify(this.chooseUser)
+
+                  },{
+                        transformRequest:[
+                            function(data){
+                                let params='';
+                                for(let index in data){
+                                    params+=index+'='+data[index]+'&';
+                                }
+                                return params;
+                            }
+                        ]
+                  })
+                  .then(function (response) {
+                    if (response.data.code === 200) {
+                        _this.$toast(response.data.msg);
+                    }
+                  })
+
+
+          },
+         initData () {
+            let url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/user?type=temp_user&length=20&current_page=1&rand_str=a3bab5a140482756d28c23920f62377e&timestamp=1544515022966&user_id=14';
+            let _this = this;
+             axios.get(url)
+                .then(function (response) {
+                 console.log(response);
+                 if (response.data.code === 200 && response.data.data.ret_data) {
+                     let temp_list = response.data.data.ret_data;
+                      for (let i = 0; i < temp_list.length; i++) {
+                        _this.userData.push({
+                            label: temp_list[i].username + ' - ' +temp_list[i].wechat_phone ,
+                            value: temp_list[i].temp_user_id
+                        });
+                     }
+                 }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+
+
+         },
+
+      },
+
+      created() {
+             this.initData()
+
+         }
+
+
+
+    })
+  </script>
+</html>

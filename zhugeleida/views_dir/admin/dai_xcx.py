@@ -1102,7 +1102,7 @@ def  batch_get_latest_audit_status(data):
                 corpid = 'wx81159f52aff62388'  # 企业ID
                 corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
                 redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
-                obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
+                _obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
 
                 xcx_app_name = xcx_app_obj.name
                 msg = """【小程序名称】：{xcx_app_name}\n【审核状态】：{status}\n【备注】：{remark}""".format(
@@ -1110,7 +1110,7 @@ def  batch_get_latest_audit_status(data):
                     status="审核通过" if status == 0 else "审核失败",
                     remark="" if status == 0 else xcx_app_obj.code_release_result,
                 )
-                obj.send_message(
+                _obj.send_message(
                     agentid=1000005,
                     msg=msg,
                     # touser="zhangcong"

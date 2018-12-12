@@ -497,19 +497,28 @@ import json
 
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/test_update_customer_child_status/0'  # 公众号文章基础信息
-# get_data['article_id'] = 3
+# get_data['article_id'] = 74
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
-get_data['uid'] = 17
+# url =  ip + '/zhugeleida/qiyeweixin/article/query_customer_table_by_level/3'  # 公众号文章基础信息
+# # get_data['uid'] = 17
 # get_data['query_customer_id'] = 857
+# get_data['level'] =  1
+# ret = requests.get(url, data = post_data ,params=get_data)
 #
-get_data['level'] =  1
+
+
+# url =  ip + '/zhugeleida/admin/tongxunlu/quey_user_list'  # 公众号文章基础信息
+# get_data['company_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/admin/tongxunlu'  # 公众号文章基础信息
+get_data['uid'] = 3
+get_data['order'] = '-expedted_pr'
 
 ret = requests.get(url, data = post_data ,params=get_data)
-
-
 
 
 

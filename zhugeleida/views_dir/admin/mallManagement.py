@@ -24,11 +24,12 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 q.add(Q(parentName_id=goodsGroup), Q.AND)
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
+
             if flag == 'admin':
                 u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
             else:
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
-            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id)
+            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id,goodsStatus__in=[1,2,3])
             objsCount = objs.count()
             otherData = []
             if length != 0:
@@ -62,6 +63,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                     'parentName':parentGroup_name,
                     'goodsPrice':obj.goodsPrice,
                     # 'inventoryNum':obj.inventoryNum,
+                    'goodsStatus_code':obj.goodsStatus,
                     'goodsStatus':obj.get_goodsStatus_display(),
                     'xianshangjiaoyi':xianshangjiaoyi,
                     'shichangjiage':obj.shichangjiage,
@@ -204,7 +206,9 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'delete':
             objs = models.zgld_goods_management.objects.filter(id=o_id)
             if objs:
-                objs.delete()
+                # objs.delete()
+                objs.update(goodsStatus=4)
+
                 response.code = 200
                 response.msg = '删除成功'
                 response.data = {}

@@ -10,5 +10,4 @@ urlpatterns = [
     url(r'^mycelery/', include('zhugeleida.urls_dir.celery_urls')),
     url(r'^public/', include('zhugeleida.urls_dir.public_urls')),
     url(r'^boosleida/', include('zhugeleida.urls_dir.boosleida_urls'))
-
 ]

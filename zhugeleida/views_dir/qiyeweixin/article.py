@@ -882,53 +882,53 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'test_update_customer_child_status':
             article_id = request.GET.get('article_id')
 
-            objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id).order_by('level')
-            if objs:
-                i = 0
-                for obj in objs:
-                    id = obj.id
-                    level = obj.level
-                    customer_id = obj.customer_id
-                    _article_id = obj.article_id
-                    user_id = obj.user_id
+            for article_id in  list(models.zgld_article_to_customer_belonger.objects.all().values_list('article_id', flat=True).distinct()):
+
+                objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id).order_by('level')
+                if objs:
+                    i = 0
+                    for obj in objs:
+                        id = obj.id
+                        level = obj.level
+                        customer_id = obj.customer_id
+                        _article_id = obj.article_id
+                        user_id = obj.user_id
 
 
-                    q1 = Q()
-                    q1.add(Q(**{'article_id': _article_id}), Q.AND)
-                    if level:
-                        level = int(level) + 1
+                        q1 = Q()
+                        q1.add(Q(**{'article_id': _article_id}), Q.AND)
+                        if level:
+                            level = int(level) + 1
 
-                    q1.add(Q(**{'user_id': user_id}), Q.AND)
-                    q1.add(Q(**{'level': level}), Q.AND)
-                    q1.add(Q(**{'customer_parent_id': customer_id}), Q.AND)
+                        q1.add(Q(**{'user_id': user_id}), Q.AND)
+                        q1.add(Q(**{'level': level}), Q.AND)
+                        q1.add(Q(**{'customer_parent_id': customer_id}), Q.AND)
 
-                    _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
-                    if _objs:
-                        print('-----  打标签【成功】  q1:----->>', id,'|',q1)
-                        obj.is_have_child = True
-                        obj.save()
+                        _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
+                        if _objs:
+                            print('-----  打标签【成功】  q1:----->>', id,'|',q1)
+                            obj.is_have_child = True
+                            obj.save()
 
-                    else:
-                        print('-----  打有标签【失败】 |  搜索条件 q1:----->>',id,q1)
+                        else:
+                            print('-----  打有标签【失败】 |  搜索条件 q1:----->>',id,q1)
 
-                    # i = i +1
-                    # if i > 10:
+                        # i = i +1
+                        # if i > 10:
+
 
 
         elif oper_type == 'query_customer_table_by_level':
 
             level = request.GET.get('level')
-            user_id = request.GET.get('user_id')
-            # current_page = request.GET.get('current_page')
-            # length = request.GET.get('length')
+            # user_id = request.GET.get('user_id')
+            user_id = 17
 
             query_customer_id = request.GET.get('query_customer_id')
             request_data_dict = {
                 'article_id': o_id,
-                # 'uid': uid,  # 文章所属用户的ID
                 'level': level,  # 文章所属用户的ID
-                # 'current_page': current_page,
-                # 'length': length
+
             }
 
             forms_obj = EffectRankingByTableForm(request_data_dict)
@@ -936,109 +936,88 @@ def article_oper(request, oper_type, o_id):
 
                 article_id = forms_obj.cleaned_data.get('article_id')
                 level = forms_obj.cleaned_data.get('level')
+
+                q1 = Q()
+                q1.connector = 'AND'
+                q1.children.append(('article_id', article_id))
+                q1.children.append(('user_id', user_id))
+
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(
-                    article_id=article_id,
-                    # user_id=user_id
-                ).order_by('-level')
-                #
-                # current_page = forms_obj.cleaned_data['current_page']
-                # length = forms_obj.cleaned_data['length']
+                                                                                       'customer').filter(q1)
 
                 ret_data = []
                 if objs:
-                    level_num = objs[0].level
-                    title = objs[0].article.title
+                    obj = objs[0]
+                    level_num = objs.order_by('-level')[0].level
+                    title = obj.article.title
+                    total_count = objs.count()
 
-                    if level == 0:
-                        objs = objs.filter(level=1).values('user_id','user__username').annotate(Count('user'))
-                        count = objs.count()
+                    # 初始化数据，只获取用户的下拉列表。
 
-                        for obj in  objs:
-                            user_id = obj.get('user_id')
-                            username = obj.get('user__username')
-                            gender = obj.get('user__gender')
-                            user__count = obj.get('user__count')
+                    if level == 0 and user_id:
 
-                            print('-------> user_id username -------->>',user__count,"|",user_id,username)
+                        username = obj.user.username
+                        gender = obj.user.gender
+                        user_dict = objs.values('user_id').annotate(Sum('read_count'), Sum(
+                            'forward_friend_circle_count'), Sum('forward_friend_count'))[0]
+                        print('---- user_dict 数据 ---->>', user_dict)
 
-                            result_data, result_level = jisuan_level_num(article_id, user_id)
+                        read_count_sum = user_dict.get('read_count__sum')
+                        forward_friend_sum = user_dict.get('forward_friend_count__sum')
+                        forward_friend_circle_sum = user_dict.get('forward_friend_circle_count__sum')
+                        print('-------> [ 只算一个人 ] user_id username -------->>', username, '|', user_id)
 
-                            lower_people_count = len(result_level)
-                            if lower_people_count > 0:
-                                lower_level = max(result_level) - min(result_level) + 1
-                            else:
-                                lower_level = 0
+                        data_dict = {
+                            'uid': user_id,  # 所属雷达用户
+                            'user_name': username,
+                            'sex': gender,
+                            'read_count': read_count_sum,
+                            'forward_friend_circle_count': forward_friend_sum,
+                            'forward_friend_count': forward_friend_circle_sum,
 
-                            data_dict = {
-                                # 'id': obj.id,
-                                'uid': user_id,  # 所属雷达用户
-                                'user_name': username,
+                            'lower_people_count': total_count,
+                            'lower_level': level_num,
 
-                                # 'customer_id': customer_id,
-                                # 'customer_name': username,
-                                # 'customer_headimgurl': obj.customer.headimgurl,
-                                'sex': gender,
-                                # 'area': area,
-
-                                # 'read_count': obj.read_count,
-                                # 'stay_time': stay_time,
-
-                                # 'forward_friend_circle_count': obj.forward_friend_circle_count,
-                                # 'forward_friend_count': obj.forward_friend_count,
-
-                                'lower_people_count': lower_people_count,
-                                'lower_level': lower_level,
-
-                                # 'is_have_child': obj.is_have_child,
-                                'level': level  # 所在的层级
-                            }
-
-                            ret_data.append(data_dict)
+                            'level': 0  # 所在的层级
+                        }
+                        ret_data.append(data_dict)
 
                         response.code = 200
                         response.msg = '返回成功'
                         response.data = {
-
                             'ret_data': ret_data,
-                            'total_level_num': level_num,  # 总共的层级
                             'article_id': article_id,
-                            'article_title': title,
-                            'count': count,
+                            'article_title': title
                         }
                         return JsonResponse(response.__dict__)
 
-                    elif  level == 1 and not query_customer_id:
-                        objs = objs.filter(level=1,user_id=user_id)
+                    # 查询第一层所有的用户的下级层人数和层级数
+                    elif level == 1 and not query_customer_id:
+                        level = level + 1
+                        objs = objs.order_by('level').filter(level=1, user_id=user_id)
 
-                    elif level >=1 and query_customer_id:
+                    elif level >= 1 and query_customer_id:
 
-                        objs = objs.filter(level=level+1,customer_id=query_customer_id)
+                        objs = objs.order_by('level').filter(level=level+1, customer_parent_id=query_customer_id)
+                        level = level + 2
 
-                    # if length != 0:
-                    #     start_line = (current_page - 1) * length
-                    #     stop_line = start_line + length
-                    #     objs = objs[start_line: stop_line]
-
-                    count = objs.count()
-
+                    # count = objs.count()
                     for obj in objs:
                         customer_id = obj.customer_id
-                        user_id = obj.user_id
+                        _level = obj.level
 
+                        print('---- article_id, uid, customer_id, level ----->>', article_id, user_id, customer_id,level)
 
-                        print('---- article_id, user_id, customer_id, level ----->>',article_id, user_id, customer_id, level + 1 )
-
-
-                        result_data,result_level = jisuan_level_num(article_id, user_id, customer_id, level + 1)
+                        result_data, result_level = jisuan_level_num(article_id, user_id, customer_id, level )
 
                         lower_people_count = len(result_level)
                         if lower_people_count > 0:
-                            lower_level = max(result_level) - min(result_level) + 1
+                            # lower_level = max(result_level) - min(result_level) + 1
+                            lower_level = len(list(set(result_level)))
                         else:
                             lower_level = 0
-                        print('--- result_level -->>',result_level)
-                        print('----- lower_people_count ------>>',lower_people_count)
+                        print('--- result_level -->>', result_level)
+                        print('----- lower_people_count ------>>', lower_people_count)
                         stay_time = obj.stay_time
                         stay_time = conversion_seconds_hms(stay_time)
 
@@ -1064,11 +1043,11 @@ def article_oper(request, oper_type, o_id):
                             'forward_friend_circle_count': obj.forward_friend_circle_count,
                             'forward_friend_count': obj.forward_friend_count,
 
-                            'lower_people_count' : lower_people_count,
-                            'lower_level' : lower_level,
+                            'lower_people_count': lower_people_count,
+                            'lower_level': lower_level,
 
-                            'is_have_child' : obj.is_have_child,
-                            'level': level  # 所在的层级
+                            'is_have_child': obj.is_have_child,
+                            'level': _level  # 所在的层级
                         }
 
                         ret_data.append(data_dict)
@@ -1077,12 +1056,11 @@ def article_oper(request, oper_type, o_id):
                     response.code = 200
                     response.msg = '返回成功'
                     response.data = {
-
                         'ret_data': ret_data,
                         'total_level_num': level_num,  # 总共的层级
                         'article_id': article_id,
                         'article_title': title,
-                        'count': count,
+                        # 'count': count,
                     }
 
             else:
@@ -1097,6 +1075,8 @@ def article_oper(request, oper_type, o_id):
             #     level = int(level) + 1
             #
             # jisuan_level_num(article_id,user_id,pid,level)
+
+
 
 
 

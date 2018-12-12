@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.public import img_upload, fild_upload,websocket,open_weixin_api
+from zhugeleida.views_dir.public import img_upload, fild_upload,websocket,open_weixin_api,myself_tools
 
 urlpatterns = [
     url(r'^img_upload$', img_upload.img_upload),
@@ -9,5 +9,5 @@ urlpatterns = [
     url(r'^fild_upload$', fild_upload.fild_upload),
     url(r'^websocket/(?P<oper_type>\w+)$', websocket.public_websocket),
     url(r'^create_token/(?P<oper_type>\w+)$', open_weixin_api.crate_token),
-
+    url(r'^myself_tools/(?P<oper_type>\w+)$',myself_tools.tools_oper) #内部工具的链接
 ]

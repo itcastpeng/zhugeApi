@@ -1104,7 +1104,8 @@ class zgld_goods_management(models.Model):
     status_choices = (
         (1, '已上架'),
         (2, '未上架'),
-        (3, '已售罄')
+        (3, '已售罄'),
+        (4, '下架')
     )
     goodsStatus = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
