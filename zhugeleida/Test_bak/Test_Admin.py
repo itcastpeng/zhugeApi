@@ -120,11 +120,11 @@ ip = 'http://api.zhugeyingxiao.com'
 # url = ip + '/zhugeleida/admin/open_qiyeweixin/web_scan_authorize_qrcode'  #
 # ret = requests.get(url, params=get_data,data=post_data)
 
-url = ip + '/zhugeleida/admin/jiChuSheZhi/myself_query_fafang_info'  #
-get_data['mch_billno'] =  '201812101344448436727' #  '201812051030494953312' # '201812051240434358450'
-get_data['company_id'] = 2
-
-ret = requests.get(url, params=get_data,data=post_data)
+# url = ip + '/zhugeleida/admin/jiChuSheZhi/myself_query_fafang_info'  #
+# get_data['mch_billno'] =  '201812101344448436727' #  '201812051030494953312' # '201812051240434358450'
+# get_data['company_id'] = 2
+#
+# ret = requests.get(url, params=get_data,data=post_data)
 
 
 
@@ -169,8 +169,26 @@ ret = requests.get(url, params=get_data,data=post_data)
 # get_data['encrypt_type']= 'aes'
 # get_data['msg_signature']= '32d3d8385bccdb9bfe9e05cc306162a96158234d'
 # post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[4y3yzJB/v7v1aw/VhxruDUIo0s0cYlbBzovtqmDkNsWE44nPN7u/Mwy1dZgYSNs7iTMFpf2RlLulc2BNl16S8Jc10Rl8hsLalSIYRjB2DY+PIy6dyI15kXdKzQz6W7/mRqU0BxFPfcO2NnCmuePiyYScPCMC1XWHO0YmYO1nGZqdByH8i9bH26t+6px6ipwMyyWsh2zwBJnFzCGFSB5uyLdMV2ZssbVZvdVdcC/45IUIGbol8n99G0M7JVzPkdHWaq1WMU8jOJWe3VBrlWrn5VpHCqxbVy8aAwBiL1yKkut+xJuGkZDtWNHG80uEXGE1Fx6ukwxBUjgARwBkTG3vu2we3jTuAkuqKO0cNln+PVaOqQblyWXM4JV2BL8BFUrXu9ob3DngrxFl0MV97Tu4NA7cGdhgJtsLgelYo2ei3JXd3TgTne9Qimr5SX9rCKh2PFbQbohuIM8i/gfgrbnRBA==]]></Encrypt>\x0A</xml>\x0A'
-#
+
 # ret = requests.post(url, params=get_data,data=post_data)
+
+
+url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
+get_data['signature']= 'c5bc48585e01036ef82d231a4c08bf5ac5cdb78d'
+get_data['timestamp']= '1544609755'
+get_data['nonce']= '1201552276'
+get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
+get_data['encrypt_type']= 'aes'
+get_data['msg_signature']= '63432e2c7494d8291c0f4c1ee97714d2778d81e5'
+
+post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[M4ZM7/Ktom0qYVBibzJ1CQwsgqeZuXP+PqRreDqD3kWHJ4rUVJgTfeqrh6rXoBpeKNqAl4flZFRy3g2Vn6ixwxZsSeqLPoacjBiRDFBXW+osN5BX7xpxsagqEKcRuk6AInffJ4gh0x4Y5b73iGsfI3GcT0ovds5eJkJeOHdPT2oQXFDGLQnninn8zi+yecSo+NCfsBH0P3BPAcJJoEq67gOt3NZ5Y+Z14Urtgfq37I04qVlBobP0KH3p2IqdxFfBMDwhPRFI47gi1NEcw+5/tiXiVeIpB03jpmogGELIFFLvhD9mbFUiJZ0HfLl74oADd/pFaMBZ+gp1hhhBFspe+S2jbKA0zx0BiPMogReLNDge2sY683mErmNda9fsINlJKv/5wwteBCdqJ23Fdcii98dM5VLJ0aHkSae+VoK1ec5APoZPO2q9bMscJj/twMr799kPZkVFw4r1vA8rZbBEQP2vj94TwZA4ya36EK4M/Vko+tTo+87YRC65h/cKvZ9rDCqdY6TXm2+AiqQHIlfYE8MJuOHYhXm9Oc7MDN6CiB3srM8zxaIiHfCOM20dXdJZ3JpofMKFtBTNBTtBSMyXPoaGcfEmWxrY+5Kv9k0co3KKUSMAeHPbO6qcPYFoc6il]]></Encrypt>\x0A</xml>'
+
+ret = requests.post(url, params=get_data,data=post_data)
+
+
+
+
+
 
 
 

@@ -496,8 +496,7 @@ def open_qiyeweixin(request, oper_type):
                         return redirect(redirect_url)
 
                     elif boss_status == 1 and app_type == 'boss':  #
-                        redirect_url = url + '?token=' + token + '&id=' + str(
-                            user_id) + '&avatar=' + avatar
+                        redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar
 
                         print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                               userid, "\n", redirect_url)
@@ -506,12 +505,16 @@ def open_qiyeweixin(request, oper_type):
 
                     elif status == 1 and _app_type == 'scan_code_web_login':
                         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                        rc.set(auth_code,True,60)
+                        rc.set(auth_code,True,120)
                         user_profile_obj.password = auth_code
                         user_profile_obj.save()
-                        print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
 
-                        return HttpResponse('授权登录成功')
+                        print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
+                        return HttpResponse('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=200')
+
+                    elif status != 1 and _app_type == 'scan_code_web_login':
+                        print('----------【雷达用户】《扫码登录失败》没权限，user_id | userid  ---->', user_id, "|", userid)
+                        return HttpResponse('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=403')
 
                     else:
                         print('----------【雷达权限】未开通 ,未登录成功 user_id | corpid ------>', user_id, corpid)
@@ -737,6 +740,7 @@ def open_qiyeweixin(request, oper_type):
                     response.msg = '服务商获取-用户信息报错'
                     print('------第三方平台 【服务商获取-用户信息】报错 ----->')
 
+        # 雷达后台扫码登录
         elif oper_type == 'web_scan_authorize_qrcode':
             import uuid
             uuid = str(uuid.uuid1())

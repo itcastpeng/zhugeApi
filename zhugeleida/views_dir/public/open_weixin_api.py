@@ -13,8 +13,7 @@ import requests
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
 import json
 import redis
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
-    create_authorizer_access_token as gongzhonghao_create_authorizer_access_token, create_component_access_token
+
 
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token as xiaochengxu_create_authorizer_access_token
 

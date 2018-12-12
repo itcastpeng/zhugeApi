@@ -610,7 +610,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            postdata = request.body.decode(encoding='UTF-8')
+            # postdata = request.body.decode(encoding='UTF-8')
+            postdata = request.POST.get('xml')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -704,7 +705,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             a_data['customer_id'] = customer_id
                             a_data['user_id'] = user_id
                             a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
-                            a_data['content'] = json.dumps({'msg': 'Say 嗨~ %s，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，欢迎来撩~' % (customer_username), 'info_type': 1})
+                            a_data['content'] = json.dumps({'msg': '%s ~ 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username), 'info_type': 1})
 
                             print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
                             tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
@@ -741,10 +742,11 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         customer_id = obj.id
 
                         Content = ''
+                        _content = ''
                         if MsgType == 'text':
 
                             Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
-                            CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
+                            # CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
                             print('-----【公众号】客户发送的内容 Content ---->>', Content)
 
                             if Content.startswith('T') or Content.startswith('t'):
@@ -756,7 +758,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         activity_id = int(Content.split('T')[1])
 
                                     redPacket_objs = models.zgld_activity_redPacket.objects.select_related('article','activity').filter(customer_id=customer_id,activity_id=activity_id)
-                                    _content = ''
+
                                     if redPacket_objs:
                                         redPacket_obj = redPacket_objs[0]
                                         forward_read_count = redPacket_obj.forward_read_count
@@ -807,11 +809,9 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                     return HttpResponse(encrypted_xml, content_type="application/xml")
 
-                        elif MsgType == 'voice':
-                            Content = '【收到不支持的消息类型，暂无法显示】'
 
+                        if MsgType == 'text' or MsgType == 'voice' or  MsgType == 'image':
 
-                        if MsgType == 'text' or MsgType == 'voice':
                             flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
                                 customer_id=customer_id).order_by('-last_follow_time')
                             if flow_up_objs:
@@ -828,14 +828,85 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                                                     is_last_msg=True).update(
                                     is_last_msg=False)  # 把所有的重置为不是最后一条
 
-                                encodestr = base64.b64encode(Content.encode('utf-8'))
-                                msg = str(encodestr, 'utf-8')
-                                _content = {
-                                    'msg': msg,
-                                    'info_type': 1
-                                }
-                                content = json.dumps(_content)
 
+                                if  MsgType == 'text':
+                                    encodestr = base64.b64encode(Content.encode('utf-8'))
+                                    msg = str(encodestr, 'utf-8')
+                                    _content = {
+                                        'msg': msg,
+                                        'info_type': 1
+                                    }
+
+                                elif MsgType ==  'image':
+                                    PicUrl = collection.getElementsByTagName("PicUrl")[0].childNodes[0].data
+
+                                    print('-----【公众号】客户发送的图片 PicUrl ---->>', PicUrl)
+                                    s = requests.session()
+                                    s.keep_alive = False  # 关闭多余连接
+                                    html = s.get(PicUrl)
+
+                                    # html = requests.get(qrcode_url)
+
+                                    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+                                    filename = "/customer_%s_user_%s_%s.jpg" % (customer_id,user_id, now_time)
+                                    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin','chat') + filename
+                                    with open(file_dir, 'wb') as file:
+                                        file.write(html.content)
+
+                                    _content = {
+                                        'url': file_dir,
+                                        'info_type': 4 # 图片
+                                    }
+
+
+                                elif MsgType == 'voice':
+                                    MediaId = collection.getElementsByTagName("MediaId")[0].childNodes[0].data
+                                    # Content = '【收到不支持的消息类型，暂无法显示】'
+                                    objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                                    if objs:
+                                        authorizer_refresh_token = objs[0].authorizer_refresh_token
+                                        authorizer_appid = objs[0].authorization_appid
+                                        authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
+                                        authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                                        if not authorizer_access_token:
+                                            data = {
+                                                'key_name': authorizer_access_token_key_name,
+                                                'authorizer_refresh_token': authorizer_refresh_token,
+                                                'authorizer_appid': authorizer_appid,
+                                                'app_id': 'wx6ba07e6ddcdc69b3',
+                                                'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                                            }
+
+                                            authorizer_access_token_result = create_authorizer_access_token(data)
+                                            if authorizer_access_token_result.code == 200:
+                                                authorizer_access_token = authorizer_access_token_result.data
+
+                                        s = requests.session()
+                                        s.keep_alive = False  # 关闭多余连接
+                                        url = 'https://api.weixin.qq.com/cgi-bin/media/get'
+                                        get_data = {
+                                              'access_token' : authorizer_access_token,
+                                              'media_id' : MediaId
+                                        }
+                                        res = requests.get(url,params=get_data,stream=True)
+
+                                        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+                                        filename = "/customer_%s_user_%s_%s.mp3" % (customer_id, user_id, now_time) #amr
+                                        file_dir = os.path.join('statics', 'zhugeleida', 'voice','gongzhonghao') + filename
+
+                                        # 写入收到的视频数据
+                                        with open(file_dir, 'ab') as file:
+                                            file.write(res.content)
+                                            file.flush()
+
+                                        _content = {
+                                            'url': file_dir,
+                                            'info_type': 4  # 图片
+                                        }
+
+                                content = json.dumps(_content)
                                 models.zgld_chatinfo.objects.create(
                                     content=content,
                                     userprofile_id=user_id,
