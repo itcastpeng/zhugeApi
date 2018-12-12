@@ -73,7 +73,7 @@ class TongxunluUserListSelectForm(forms.Form):
         }
     )
 
-    type = forms.IntegerField(
+    type = forms.CharField(
         required=False,
         error_messages={
             'invalid': "type 不能为空",
@@ -87,7 +87,7 @@ class TongxunluUserListSelectForm(forms.Form):
         }
     )
 
-    customer_id_list = forms.IntegerField(
+    customer_id_list = forms.CharField(
         required=False,
         error_messages={
             'invalid': "customer_id_list 不能为空",
