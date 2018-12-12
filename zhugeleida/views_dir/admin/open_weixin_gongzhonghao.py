@@ -893,7 +893,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         res = requests.get(url,params=get_data,stream=True)
 
                                         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-                                        filename = "/customer_%s_user_%s_%s.amr" % (customer_id, user_id, now_time)
+                                        filename = "/customer_%s_user_%s_%s.mp3" % (customer_id, user_id, now_time) #amr
                                         file_dir = os.path.join('statics', 'zhugeleida', 'voice','gongzhonghao') + filename
 
                                         # 写入收到的视频数据
@@ -901,8 +901,10 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                             file.write(res.content)
                                             file.flush()
 
-
-
+                                        _content = {
+                                            'url': file_dir,
+                                            'info_type': 4  # 图片
+                                        }
 
                                 content = json.dumps(_content)
                                 models.zgld_chatinfo.objects.create(
