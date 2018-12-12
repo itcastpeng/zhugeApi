@@ -190,7 +190,7 @@ def tongxunlu_oper(request,oper_type):
 
         elif oper_type == 'myself_delete_binding_relate':
 
-            customer_list = list(set(models.zgld_user_customer_belonger.objects.filter(customer_id=5).values_list('customer_id', flat=True)))
+            customer_list = list(set(models.zgld_user_customer_belonger.objects.all().values_list('customer_id', flat=True)))
             customer_count = len(customer_list)
 
             if customer_count > 0:
@@ -211,7 +211,7 @@ def tongxunlu_oper(request,oper_type):
                             i = i + 1
                             print('----- 【已删除】 customer_id : %s | uid : %s ----->>' % (customer_id, user_id))
                             obj.delete()
-                    break
+
             else:
 
                 print('-- customer_list 为空---->>',customer_list)
