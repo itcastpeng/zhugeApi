@@ -705,7 +705,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             a_data['customer_id'] = customer_id
                             a_data['user_id'] = user_id
                             a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
-                            a_data['content'] = json.dumps({'msg': '%s ~ 终于等到您🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username), 'info_type': 1})
+                            a_data['content'] = json.dumps({'msg': '%s ~ 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username), 'info_type': 1})
 
                             print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
                             tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
@@ -894,7 +894,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
                                         filename = "/customer_%s_user_%s_%s.amr" % (customer_id, user_id, now_time)
-                                        file_dir = os.path.join('statics', 'zhugeleida', 'voice', 'qiyeweixin','gongzhonghao') + filename
+                                        file_dir = os.path.join('statics', 'zhugeleida', 'voice','gongzhonghao') + filename
 
                                         # 写入收到的视频数据
                                         with open(file_dir, 'ab') as file:
