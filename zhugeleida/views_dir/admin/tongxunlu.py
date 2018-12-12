@@ -168,7 +168,7 @@ def tongxunlu_oper(request, oper_type):
                         user_num = obj.get('user__sum')
                         gongzhonghao_customer_num = models.zgld_user_customer_belonger.objects.select_related(
                             'customer').filter(user_id=user_id, customer__user_type=1).count()
-                        
+
                         xiaochengxu_customer_num = user_num - gongzhonghao_customer_num
 
                         ret_data.append({
