@@ -26,7 +26,9 @@ def tongxunlu(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             uid = forms_obj.cleaned_data.get('uid')
-            order = request.GET.get('order', '-create_date')
+            order = request.GET.get('order')
+            if not order:
+                order =  '-create_date'
             # -expedted_pr 预计成交率 | -last_activity_time 最后活动时间 | -last_follow_time 最后跟进时间  排序为【默认为】成交率; 最后跟进时间; 最后活动时间
 
             q1 = Q()
