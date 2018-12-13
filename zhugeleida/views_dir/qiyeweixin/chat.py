@@ -145,7 +145,7 @@ def chat_oper(request, oper_type, o_id):
 
                 _content = json.loads(Content)
                 info_type = _content.get('info_type')
-                content = ''
+
                 if info_type:
                     info_type = int(info_type)
 
@@ -154,12 +154,12 @@ def chat_oper(request, oper_type, o_id):
                         encodestr = base64.b64encode(msg.encode('utf-8'))
                         msg = str(encodestr, 'utf-8')
                         _content['msg'] = msg
-                        content = json.dumps(_content)
+                        Content = json.dumps(_content)
 
                     elif info_type == 3:
                         msg = '您好,请问能否告诉我您的手机号?'
                         _content['msg'] = msg
-                        content = json.dumps(_content)
+                        Content = json.dumps(_content)
 
                 '''
                 content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。
@@ -197,7 +197,7 @@ def chat_oper(request, oper_type, o_id):
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
                 obj = models.zgld_chatinfo.objects.create(
-                        content=content,
+                        content=Content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=1

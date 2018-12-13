@@ -90,6 +90,20 @@ class ActivityAddForm(forms.Form):
         }
     )
 
+    reach_stay_time = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': " reach_stay_time 不能为空"
+        }
+    )
+
+    is_limit_area = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "是否限制区域"
+        }
+    )
+
 
 
 
