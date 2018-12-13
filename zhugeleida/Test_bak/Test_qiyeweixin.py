@@ -497,7 +497,6 @@ import json
 
 
 # url =  ip + '/zhugeleida/qiyeweixin/article/test_update_customer_child_status/0'  # 公众号文章基础信息
-# get_data['article_id'] = 74
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 

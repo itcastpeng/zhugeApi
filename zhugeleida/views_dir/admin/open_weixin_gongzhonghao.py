@@ -13,6 +13,7 @@ from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
 import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
+import subprocess,os
 
 # 第三方平台接入
 @csrf_exempt
@@ -893,18 +894,25 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         res = requests.get(url,params=get_data,stream=True)
 
                                         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-                                        filename = "/customer_%s_user_%s_%s.mp3" % (customer_id, user_id, now_time) #amr
+                                        filename = "/customer_%s_user_%s_%s.amr" % (customer_id, user_id, now_time) #amr
                                         file_dir = os.path.join('statics', 'zhugeleida', 'voice','gongzhonghao') + filename
 
-                                        # 写入收到的视频数据
-                                        with open(file_dir, 'ab') as file:
-                                            file.write(res.content)
-                                            file.flush()
-
-                                        _content = {
-                                            'url': file_dir,
-                                            'info_type': 5  #
-                                        }
+                                        ###amr2转mp3
+                                        print('----- 语音amr 地址 --->>',file_dir)
+                                        mp3_file_dir = amr2mp3(file_dir)
+                                        if mp3_file_dir == 1:
+                                            Content = '【收到不支持的消息类型，暂无法显示】'
+                                            encodestr = base64.b64encode(Content.encode('utf-8'))
+                                            msg = str(encodestr, 'utf-8')
+                                            _content = {
+                                                'msg': msg,
+                                                'info_type': 1
+                                            }
+                                        else:
+                                            _content = {
+                                                'url': mp3_file_dir,
+                                                'info_type': 5  #
+                                            }
 
                                 content = json.dumps(_content)
                                 models.zgld_chatinfo.objects.create(
@@ -1307,3 +1315,20 @@ def create_authorizer_access_token(data):
 
     return response
 
+
+## 把amr2转成mp3
+def amr2mp3(amr_path, mp3_path=None):
+    path, name = os.path.split(amr_path)
+    if name.split('.')[-1] != 'amr':
+        print(' ----- amr file ----->')
+        return 1
+    if mp3_path is None or mp3_path.split('.')[-1] != 'mp3':
+        mp3_path = os.path.join(path, name.split('.')[0] + '.mp3')
+    error = subprocess.call(['/usr/bin/ffmpeg', '-i', amr_path, mp3_path])
+    print('------ subprocess 返回码 -------->>', error)
+    if error:
+        return 1
+
+    print(' ---- 转码成功 mp3地址 success ----->>',mp3_path)
+
+    return mp3_path

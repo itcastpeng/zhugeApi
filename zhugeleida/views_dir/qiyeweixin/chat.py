@@ -12,7 +12,7 @@ from zhugeapi_celery_project import tasks
 from django.db.models import F
 import json
 from django.db.models import Q
-
+import  redis
 import json
 from zhugeleida import models
 import base64
@@ -147,7 +147,6 @@ def chat_oper(request, oper_type, o_id):
                 info_type = _content.get('info_type')
                 content = ''
                 if info_type:
-
                     info_type = int(info_type)
 
                     if info_type == 1:
@@ -201,7 +200,7 @@ def chat_oper(request, oper_type, o_id):
                         content=content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
-                        send_type=send_type
+                        send_type=1
                 )
 
                 user_type = obj.customer.user_type
@@ -220,8 +219,14 @@ def chat_oper(request, oper_type, o_id):
                     data['content'] = Content
                     tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
 
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                rc.set(redis_user_id_key, True)
+                rc.set(redis_customer_id_key, True)
+
                 response.code = 200
-                response.msg = 'send msg successful'
+                response.msg = '发送成功'
 
     else:
 

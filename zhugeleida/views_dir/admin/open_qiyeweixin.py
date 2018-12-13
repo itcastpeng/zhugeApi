@@ -510,11 +510,11 @@ def open_qiyeweixin(request, oper_type):
                         user_profile_obj.save()
 
                         print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
-                        return HttpResponse('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=200')
+                        return redirect('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=200')
 
                     elif status != 1 and _app_type == 'scan_code_web_login':
                         print('----------【雷达用户】《扫码登录失败》没权限，user_id | userid  ---->', user_id, "|", userid)
-                        return HttpResponse('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=403')
+                        return redirect('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=403')
 
                     else:
                         print('----------【雷达权限】未开通 ,未登录成功 user_id | corpid ------>', user_id, corpid)
