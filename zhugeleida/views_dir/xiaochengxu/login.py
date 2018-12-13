@@ -70,9 +70,6 @@ def login(request):
                 is_release_version_num = False
                 print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
 
-            if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
-                user_id = models.zgld_userprofile.objects.filter(company_id=company_id,status=1).order_by('?')[0].id
-                print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id,user_id)
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             authorizer_appid = obj.authorization_appid
@@ -126,6 +123,13 @@ def login(request):
                 client_id = obj.id
                 print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
 
+            if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
+                user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
+                print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
+
+
+
+
             ret_data = {
                 'cid': client_id,
                 'token': token,
@@ -166,59 +170,67 @@ def login_oper(request, oper_type):
                 user_id = forms_obj.cleaned_data.get('uid')  # 所属的企业用户的ID
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
                 parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
-                user_objs = models.zgld_userprofile.objects.filter(id=user_id)
+                user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
                 company_id = ''
                 if user_objs:
                     company_id = user_objs[0].company_id
+                    is_customer_unique = user_objs[0].company.is_customer_unique
 
+                    user_customer_belonger_obj = ''
+                    if is_customer_unique:  # 唯一性
 
-                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+                        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                                user__company_id=company_id)
+                    else:
 
-                if user_customer_belonger_obj:
-                    response.code = 302
-                    response.msg = "关系存在"
-
-                elif company_id and user_customer_belonger_obj:
-
-                    obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,
-                                                                            source=source)
-                    obj.customer_parent_id = parent_id  # 上级人。
-                    obj.save()
-
-                    user_obj = models.zgld_userprofile.objects.get(id=user_id)
-                    company_id = user_obj.company_id
-                    objs = models.zgld_customer.objects.filter(
-                        id=customer_id,
-                    )
-                    if objs:
-                        objs.update(company_id=company_id)
-
-                    # 插入第一条用户和客户的对话信息
-                    msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name, obj.user.username)
-                    # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
-                    #                                     msg=msg)
-
-                    _content = { 'info_type': 1 }
-                    encodestr = base64.b64encode(msg.encode('utf-8'))
-                    msg = str(encodestr, 'utf-8')
-                    _content['msg'] = msg
-                    content = json.dumps(_content)
+                        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+                                                                                               user_id=user_id)
 
 
-                    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
-                                                        content=content)
+                    if user_customer_belonger_obj:
+                        response.code = 302
+                        response.msg = "关系存在"
 
-                    print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
+                    elif company_id and user_customer_belonger_obj:
 
-                    # 异步生成小程序和企业用户对应的小程序二维码
-                    data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
+                        obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,
+                                                                                source=source)
+                        obj.customer_parent_id = parent_id  # 上级人。
+                        obj.save()
+
+                        user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                        company_id = user_obj.company_id
+                        objs = models.zgld_customer.objects.filter(
+                            id=customer_id,
+                        )
+                        if objs:
+                            objs.update(company_id=company_id)
+
+                        # 插入第一条用户和客户的对话信息
+                        msg = '您好,我是%s的%s,欢迎进入我的名片,有什么可以帮到您的吗?您可以在这里和我及时沟通。' % (obj.user.company.name, obj.user.username)
+                        # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+                        #                                     msg=msg)
+
+                        _content = { 'info_type': 1 }
+                        encodestr = base64.b64encode(msg.encode('utf-8'))
+                        msg = str(encodestr, 'utf-8')
+                        _content['msg'] = msg
+                        content = json.dumps(_content)
+
+
+                        models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+                                                            content=content)
+
+                        print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
+
+                        # 异步生成小程序和企业用户对应的小程序二维码
+                        data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                        tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
 
 
 
-                    response.code = 200
-                    response.msg = "绑定关系成功"
+                        response.code = 200
+                        response.msg = "绑定关系成功"
 
             else:
                 response.code = 301

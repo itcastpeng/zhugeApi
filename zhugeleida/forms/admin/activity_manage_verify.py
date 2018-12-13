@@ -207,6 +207,20 @@ class ActivityUpdateForm(forms.Form):
         }
     )
 
+    reach_stay_time = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': " 限制时间秒数 不能为空"
+        }
+    )
+
+    is_limit_area = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "是否限制区域 不能为空"
+        }
+    )
+
 
 
 

@@ -484,6 +484,10 @@ def activity_manage_oper(request, oper_type, o_id):
             reach_forward_num = request.POST.get('reach_forward_num')
             start_time = request.POST.get('start_time')
             end_time = request.POST.get('end_time')
+            reach_stay_time = request.POST.get('reach_stay_time')  # 达到多少秒发红包
+            limit_area = request.POST.get('limit_area')
+            is_limit_area = request.POST.get('is_limit_area')
+
 
             form_data = {
 
@@ -497,10 +501,19 @@ def activity_manage_oper(request, oper_type, o_id):
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
                 'start_time': start_time,  # 达到多少次发红包(转发次数)
                 'end_time': end_time,  # 达到多少次发红包(转发次数)
+
+                'reach_stay_time': reach_stay_time,  # 达到多少秒
+                'is_limit_area': is_limit_area,  # 是否限制区域
             }
 
             forms_obj = ActivityUpdateForm(form_data)
             if forms_obj.is_valid():
+
+                reach_stay_time = forms_obj.cleaned_data.get('reach_stay_time')
+
+                if not  is_limit_area: # 没有限制
+                    limit_area = json.dumps('[]')
+
 
                 objs = models.zgld_article_activity.objects.filter(id=activity_id, company_id=company_id)
 
@@ -512,7 +525,11 @@ def activity_manage_oper(request, oper_type, o_id):
                         activity_single_money=activity_single_money,
                         reach_forward_num=reach_forward_num,
                         start_time=start_time,
-                        end_time=end_time
+                        end_time=end_time,
+
+                        reach_stay_time=reach_stay_time,
+                        is_limit_area=is_limit_area,
+                        limit_area=limit_area,
                     )
 
                 response.code = 200
@@ -534,6 +551,11 @@ def activity_manage_oper(request, oper_type, o_id):
             reach_forward_num = request.POST.get('reach_forward_num')
             start_time = request.POST.get('start_time')
             end_time = request.POST.get('end_time')
+            reach_stay_time = request.POST.get('reach_stay_time')  #达到多少秒发红包
+            limit_area = request.POST.get('limit_area')
+            is_limit_area = request.POST.get('is_limit_area')
+
+
 
             form_data = {
 
@@ -545,10 +567,19 @@ def activity_manage_oper(request, oper_type, o_id):
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
                 'start_time': start_time,  #
                 'end_time': end_time,  #
+
+                'reach_stay_time' : reach_stay_time, #达到多少秒
+                'is_limit_area' : is_limit_area,     # 是否限制区域
+
             }
 
             forms_obj = ActivityAddForm(form_data)
             if forms_obj.is_valid():
+                reach_stay_time = forms_obj.cleaned_data.get('reach_stay_time')
+
+                if not  is_limit_area: # 没有限制
+                    limit_area = json.dumps('[]')
+
 
                 models.zgld_article_activity.objects.create(
                     article_id=article_id,
@@ -558,7 +589,10 @@ def activity_manage_oper(request, oper_type, o_id):
                     activity_single_money=activity_single_money,
                     reach_forward_num=reach_forward_num,
                     start_time=start_time,
-                    end_time=end_time
+                    end_time=end_time,
+                    reach_stay_time=reach_stay_time,
+                    is_limit_area=is_limit_area,
+                    limit_area=limit_area,
                 )
 
                 response.code = 200

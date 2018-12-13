@@ -234,11 +234,17 @@ def article_oper(request, oper_type, o_id):
                 insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
                 if insert_ads and insert_ads.get('mingpian'):
 
-                    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-                        customer_id=customer_id,
-                        user__company_id=company_id)
+                    company_objs = models.zgld_company.objects.filter(id=company_id)
+                    if  company_objs:
+                        company_obj = company_objs[0]
+                        is_customer_unique = company_obj.is_customer_unique
 
-                    uid = objs[0].user_id  # 找到那个建立关系的人。
+                        if is_customer_unique: # 唯一性
+                            objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                                customer_id=customer_id,
+                                user__company_id=company_id)
+                            uid = objs[0].user_id  # 找到那个建立关系的人。
+
 
                     mingpian_avatar_objs = models.zgld_user_photo.objects.select_related('user').filter(user_id=uid, photo_type=2).order_by('-create_date')
                     mingpian_avatar = ''

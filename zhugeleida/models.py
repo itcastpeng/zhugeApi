@@ -31,6 +31,8 @@ class zgld_company(models.Model):
 
     open_length_time = models.SmallIntegerField(verbose_name="开通时长(按月份)",null=True)
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
+    is_customer_unique = models.BooleanField(verbose_name="客户(通讯录)唯一性", default=False)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
