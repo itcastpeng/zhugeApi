@@ -53,6 +53,7 @@ def img_merge(request):
         picture_type = request.POST.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
+
         print('-----img_source----->', img_source)
 
         file_dir = ''
@@ -87,6 +88,9 @@ def img_merge(request):
         elif  img_source == 'secretKeyFile':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'secretKeyFile')
 
+        elif img_source == 'leida_chat':
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'chat')
+
         fileData = ''
 
         for chunk in range(chunk_num):
@@ -103,6 +107,7 @@ def img_merge(request):
                         fileData += f.read()
                     os.remove(file_save_path)
                     break
+
                 except FileNotFoundError:
                     time.sleep(0.1)
 

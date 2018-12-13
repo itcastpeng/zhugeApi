@@ -854,9 +854,14 @@ class zgld_article_activity(models.Model):
     redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True,default=0)
     activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',default=0,null=True)
 
+    is_limit_area = models.BooleanField(verbose_name='是否地区限制', default=False)  # 默认不限制
+    limit_area = models.TextField(verbose_name='限制的区域', null=True,default="[]")
+
+    reach_stay_time = models.SmallIntegerField(verbose_name='达到多少秒发红包', default=0) # 0 代表 没有限制
     reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]', default=0)
     already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额', default=0)
+
 
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
