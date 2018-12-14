@@ -1629,8 +1629,6 @@ def binding_article_customer_relate(request):
         is_customer_unique = company_obj.is_customer_unique
 
         if is_customer_unique:  # 唯一性
-
-
             article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id,customer_id=customer_id)
 
             if article_to_customer_belonger_objs:

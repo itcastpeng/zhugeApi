@@ -194,7 +194,12 @@ def activity_manage(request, oper_type):
                             'start_time': obj.start_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'end_time': obj.end_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                            'reason': reason
+                            'reason': reason,
+
+                            'reach_stay_time' : obj.reach_stay_time,   # 满足多少秒发红包；默认是0,代表不设限制。
+                            'is_limit_area' : obj.is_limit_area,       # 是否地区限制
+                            'limit_area' : json.loads(obj.limit_area), # 限制的地区列表 ['山西','广东','河北']
+
 
                         })
 
@@ -203,8 +208,7 @@ def activity_manage(request, oper_type):
                 response.msg = '查询成功'
                 response.data = {
                     'ret_data': ret_data,
-                    'data_count': count,
-
+                    'data_count': count
                 }
 
 
@@ -503,7 +507,7 @@ def activity_manage_oper(request, oper_type, o_id):
                 'end_time': end_time,  # 达到多少次发红包(转发次数)
 
                 'reach_stay_time': reach_stay_time,  # 达到多少秒
-                'is_limit_area': is_limit_area,  # 是否限制区域
+                'is_limit_area': is_limit_area       # 是否限制区域
             }
 
             forms_obj = ActivityUpdateForm(form_data)

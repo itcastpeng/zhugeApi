@@ -5,7 +5,8 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, \
-    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm
+    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm,LocationForm
+
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
 
@@ -204,6 +205,49 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 经纬度转换成 地理位置
+        elif oper_type == 'location_convert':
+
+            x_num = '34.264642646862'
+            y_num = '108.95108518068'
+            request_data_dict = {
+                'x_num' :   x_num,
+                'y_num' : y_num
+            }
+            customer_id = request.GET.get('user_id')
+            forms_obj = LocationForm(request_data_dict)
+            if forms_obj.is_valid():
+                location = x_num +',' + y_num
+
+                url = 'http://api.map.baidu.com/geocoder/v2'
+                ak = 'NLVvUqThVdf38Gkyb1kizrqRC2yxa7t7'
+                real_url = url + '/?callback=renderReverse&location=' + location + '&output=json&pois=1&ak=' + ak
+                req = requests.get(real_url)
+                print('------ 【百度接口返回】---->>', req.text)
+                ret = req.text[29:-1]
+                print('-------【百度接口返回json.dump】--------->>', ret)
+
+                data = json.loads(ret)
+                formatted_address = data.get('result').get('formatted_address')
+                country = data.get('result').get('addressComponent').get('country')
+                province = data.get('result').get('addressComponent').get('province')
+                city = data.get('result').get('addressComponent').get('city')
+                print('---- 解析出的具体位置 formatted_address ----->>',formatted_address)  # 输出具体位置
+                objs = models.zgld_customer.objects.filter(id=customer_id)
+                if objs:
+                    objs.update(
+                        country=country,
+                        province=province,
+                        city=city,
+                        formatted_address=formatted_address
+                    )
+                response.code = 200
+                response.msg = '解析成功'
+
+            else:
+                print('------- 验证未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
 
@@ -297,10 +341,12 @@ def article_oper(request, oper_type, o_id):
 
                     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
                     now_date_time = datetime.datetime.now()
+                    is_limit_area = ''
                     if activity_objs:
                         activity_obj = activity_objs[0]
                         start_time = activity_obj.start_time
                         end_time = activity_obj.end_time
+                        is_limit_area = activity_obj.is_limit_area
 
                         if now_date_time >= start_time and now_date_time <= end_time: # 活动开启并活动在进行中
                             _start_time = start_time.strftime('%Y-%m-%d %H:%M')
@@ -308,6 +354,7 @@ def article_oper(request, oper_type, o_id):
                             activity_id = activity_obj.id
                             reach_forward_num = activity_obj.reach_forward_num
                             activity_single_money = activity_obj.activity_single_money
+
                             is_have_activity = 1  # 活动已经开启
 
                             if parent_id:
@@ -395,6 +442,7 @@ def article_oper(request, oper_type, o_id):
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         'qrcode_url': qrcode_url,
+                        'is_limit_area' : is_limit_area,
                         'reach_forward_num': reach_forward_num,  #达到多少次发红包
                         'activity_single_money': activity_single_money, #单个金额
                         'start_time' : _start_time,

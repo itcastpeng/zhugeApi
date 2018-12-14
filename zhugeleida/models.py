@@ -565,7 +565,8 @@ class zgld_customer(models.Model):
     city = models.CharField(max_length=32, verbose_name='客户所在城市', blank=True, null=True)
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
-    # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
+    formatted_address = models.CharField(verbose_name='具体位置', max_length=2048, null=True)
+
     subscribe_choices = (
         (0, '取消订阅该公众号'),
         (1, '已经订阅该公众号')

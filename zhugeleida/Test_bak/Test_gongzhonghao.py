@@ -15,18 +15,16 @@ get_data = {
     # 'user_id': 1,
     'user_id': 9,
 
-
-
 }
 
 post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
 
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -65,6 +63,12 @@ ip = 'http://api.zhugeyingxiao.com'
 # get_data['article_access_log_id'] = 6
 # ret = requests.get(url, data = post_data ,params=get_data)
 
+
+url =  ip + '/zhugeleida/gongzhonghao/article/location_convert/0'  # 获取产品的列表
+post_data['x_num'] = '34.264642646862'
+post_data['y_num'] = '108.95108518068'
+
+ret = requests.post(url, data = post_data ,params=get_data)
 
 
 ####################################################################################
@@ -364,9 +368,9 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/mycelery/bufa_send_activity_redPacket'  # 获取产品的列表
-
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/mycelery/bufa_send_activity_redPacket'  # 获取产品的列表
+#
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 
 

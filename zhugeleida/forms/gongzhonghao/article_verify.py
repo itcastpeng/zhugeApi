@@ -241,6 +241,24 @@ class MyarticleForm(forms.Form):
 
 
 
+class LocationForm(forms.Form):
+        x_num = forms.CharField(
+            required=True,
+            error_messages={
+                'required': '经度不能为空'
+            }
+        )
+
+        y_num = forms.CharField(
+            required=True,
+            error_messages={
+                'required': '纬度不能为空'
+            }
+        )
+
+
+
+
 class StayTime_ArticleForm(forms.Form):
     article_id = forms.CharField(
         required=True,
