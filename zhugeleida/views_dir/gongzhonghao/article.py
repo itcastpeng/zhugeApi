@@ -437,7 +437,7 @@ def article_oper(request, oper_type, o_id):
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
                         'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否开启。 'true' 或   'false'
-                        'focus_get_money': focus_get_money, #关注领取红包金额
+                        'focus_get_money': focus_get_money,                # 关注领取红包金额
                         'is_subscribe': is_subscribe,  # 是否关注了公众号。0 为没有关注 1为关注了。
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
@@ -536,6 +536,9 @@ def article_oper(request, oper_type, o_id):
             parent_id = request.GET.get('pid')
             article_access_log_id = request.GET.get('article_access_log_id')
 
+            activity_id = request.GET.get('activity_id')
+            is_have_activity = request.GET.get('is_have_activity')
+
             request_data_dict = {
                 'article_id': o_id,
                 'uid': uid,  # 文章所属用户的ID
@@ -561,24 +564,56 @@ def article_oper(request, oper_type, o_id):
                     objs = models.zgld_article_to_customer_belonger.objects.filter(q)
                     if objs:
                         objs.update(stay_time=F('stay_time') + 5)  #
-                    # else:
-                    #     models.zgld_article_to_customer_belonger.objects.create(
-                    #         article_id=article_id,
-                    #         customer_id=customer_id,
-                    #         user_id=uid,
-                    #         customer_parent_id=parent_id
-                    #         # stay_time=0
-                    #     )
 
-                    article_access_log_obj = models.zgld_article_access_log.objects.filter(
+                    article_access_log_objs = models.zgld_article_access_log.objects.filter(
                         id=article_access_log_id,
                     )
                     now_date_time = datetime.datetime.now()
-                    if article_access_log_obj:
-                        article_access_log_obj.update(
+                    if article_access_log_objs:
+                        article_access_log_objs.update(
                             stay_time=F('stay_time') + 5,
                             last_access_date=now_date_time
-                        )  #
+                        )
+                        # 'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
+                        is_have_activity = int(is_have_activity) if is_have_activity else ''
+
+                        if activity_id and is_have_activity == 1:
+
+                            activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
+                            now_date_time = datetime.datetime.now()
+                            is_limit_area = ''
+                            if activity_objs:
+                                activity_obj = activity_objs[0]
+                                start_time = activity_obj.start_time
+                                end_time = activity_obj.end_time
+                                reach_stay_time = activity_obj.reach_stay_time
+
+                                if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                                    article_access_log_obj = article_access_log_objs[0]
+                                    if reach_stay_time != 0: # 0 代表 没有时间限制
+                                        stay_time = article_access_log_obj.stay_time
+                                        if stay_time >= reach_stay_time:
+
+                                            if parent_id:
+                                                company_id = ''
+                                                userprofile_objs = models.zgld_userprofile.objects.filter(id=uid)
+                                                if userprofile_objs:
+                                                    company_id = userprofile_objs[0].company_id
+
+                                                _data = {
+                                                    'article_access_log_id' : article_access_log_id,
+                                                    'customer_id': customer_id,
+                                                    'user_id': uid,
+                                                    'parent_id': parent_id,
+                                                    'article_id': article_id,
+                                                    'activity_id': activity_id,
+                                                    'company_id': company_id,
+                                                }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
+                                                tasks.user_forward_send_activity_redPacket.delay(_data)
+
+
+
+
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
