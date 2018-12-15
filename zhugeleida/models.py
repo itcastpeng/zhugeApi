@@ -902,6 +902,7 @@ class zgld_activity_redPacket(models.Model):
     forward_stay_time = models.IntegerField(verbose_name='转发后阅读的时长', default=0)
 
     send_log = models.TextField(verbose_name='红包发放日志记录', null=True,default="[]")
+    access_log = models.TextField(verbose_name='客户红包访问日志', null=True,default="[]")
     already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额',default=0, null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已经发放次数(实发)[个人]',default=0 ,null=True)
     should_send_redPacket_num = models.SmallIntegerField(verbose_name='应该发放的次数(应发)',default=0 ,null=True)

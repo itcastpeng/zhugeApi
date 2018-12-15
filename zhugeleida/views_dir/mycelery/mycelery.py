@@ -1076,7 +1076,7 @@ def user_forward_send_activity_redPacket(request):
         parent_id = request.GET.get('parent_id')
         article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
-        # activity_id = request.GET.get('activity_id')
+        article_access_log_id = request.GET.get('article_access_log_id')
 
         activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
                                                                                 article_id=article_id,
@@ -1123,30 +1123,71 @@ def user_forward_send_activity_redPacket(request):
 
                     shoudle_send_num = divmod_ret[0]
                     yushu = divmod_ret[1]
-
+                    _send_log_dict = {}
                     if shoudle_send_num > already_send_redPacket_num: # 应发数量 > 已发放的数量（数据库中记录值）
 
                         customer_obj = models.zgld_customer.objects.get(id=parent_id)
                         openid = customer_obj.openid # 对应的发放用户openid
                         formatted_address = customer_obj.formatted_address # 客户具体地址
-
-                        area_Flag = ''
+                        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        area_Flag = False
                         if is_limit_area: # True 地域限制条件开启了 并且 获取到了用户的具体位置
 
                             limit_area = json.loads(limit_area)
                             for area in limit_area:
                                 if area in formatted_address: # 如果本区域满足发放
                                     area_Flag = True
+                                    _send_log_dict = {
+                                        'type': '有地域限制【在发放范围内】',
+                                        'activity_single_money': '发送的地域area: %s | 客户具体地址: formatted_address: %s' % (area,formatted_address),
+                                        'send_time': now_time,
+                                    }
+
+                            if not area_Flag:
+                                _send_log_dict = {
+                                    'type': '有地域限制【没有在发放范围内】',
+                                    'activity_single_money': '客户具体地址: formatted_address: %s' % (formatted_address),
+                                    'send_time': now_time,
+                                }
+
+
                         else: # 没有开启限制
                             area_Flag = True
 
+                        time_Flag = ''
                         if reach_stay_time == 0: # 代表没有时间秒数的限制,立即发放这个用户的红包
-                             time_Flag = True
+                            time_Flag = True
 
                         else:
+                            time_Flag = False
+                            if article_access_log_id:
+                                 objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
+                                 stay_time = ''
+                                 if objs:
+                                     obj = objs[0]
+                                     stay_time =  obj.stay_time
+                                     if stay_time >= reach_stay_time: # 单次查看时间大于 时间限制
+                                        time_Flag = True
 
-                             time_Flag = False
+                                 _send_log_dict = {
+                                    'type': '有时间限制|Time_Flag: %s' % (time_Flag),
+                                    'activity_single_money': 'Log_id:%s | 单次查看时间:%s | 时间限制: %s' % (article_access_log_id,stay_time,reach_stay_time),
+                                    'send_time': now_time,
+                                 }
 
+                            else:
+                                _send_log_dict = {
+                                    'type': '有时间限制|Time_Flag: %s' % (time_Flag),
+                                    'activity_single_money': '无log_id | 无统计单次阅读时间 | 时间限制: %s' % (reach_stay_time),
+                                    'send_time': now_time,
+                                }
+
+                        send_log_list = activity_redPacket_obj.access_log
+                        _send_log_list = json.loads(send_log_list)
+                        _send_log_list.append(_send_log_dict)
+                        send_log_list = json.dumps(_send_log_list)
+
+                        activity_redPacket_objs.update(access_log=send_log_list)
 
                         if area_Flag and time_Flag: # 满足发送的时间和地区限制
 
