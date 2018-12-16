@@ -1236,7 +1236,7 @@ def user_forward_send_activity_redPacket(request):
 
 
 def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
-
+    response = Response.ResponseObj()
     company_id =  data.get('company_id')
     openid = data.get('openid')
     user_id =  data.get('user_id')
