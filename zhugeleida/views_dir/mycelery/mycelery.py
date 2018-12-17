@@ -221,15 +221,24 @@ def user_send_action_log(request):
 
         else:
 
-            SuiteId = 'wx5d26a7a856b22bec'  # '雷达AI | 三方应用id'
-            _data = {
-                'SuiteId': SuiteId,  # 三方应用IP 。
-                'corp_id': corp_id,  # 授权方企业corpid
-                'permanent_code': permanent_code
-            }
-            access_token_ret = common.create_qiyeweixin_access_token(_data)
-            access_token = access_token_ret.data.get('access_token')
-            send_token_data['access_token'] = access_token
+            three_service_objs = models.zgld_three_service_setting.objects.all()
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+
+                # SuiteId = 'wx5d26a7a856b22bec'  # '雷达AI | 三方应用id'
+                SuiteId =  qywx_config_dict['leida'].get('sCorpID')
+                _data = {
+                    'SuiteId': SuiteId,  # 三方应用IP 。
+                    'corp_id': corp_id,  # 授权方企业corpid
+                    'permanent_code': permanent_code
+                }
+                access_token_ret = common.create_qiyeweixin_access_token(_data)
+                access_token = access_token_ret.data.get('access_token')
+                send_token_data['access_token'] = access_token
 
         userid = user_obj.userid
         post_send_data = {

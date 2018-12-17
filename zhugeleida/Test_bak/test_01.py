@@ -57,10 +57,41 @@ import json
 # print(conversion_seconds_hms(2400))
 
 from urllib.parse import unquote
-share_url = '/zhugeleida/mycelery/user_send_action_log?action=2&remark=%E6%AD%A3%E5%9C%A8%E6%9F%A5%E7%9C%8B%E7%A5%9B%E7%97%98%E5%A5%97%E9%A4%90A%2C%E5%B0%BD%E5%BF%AB%E6%8A%8A%E6%8F%A1%E5%95%86%E6%9C%BA&user_id=1230&timestamp=1543309333073&product_id=60&uid=60&rand_str=b530e68f2d0e4919f8b6fb2aab8ecad7'
+
+## 解析URl
+# share_url = '/zhugeleida/mycelery/user_send_action_log?action=2&remark=%E6%AD%A3%E5%9C%A8%E6%9F%A5%E7%9C%8B%E7%A5%9B%E7%97%98%E5%A5%97%E9%A4%90A%2C%E5%B0%BD%E5%BF%AB%E6%8A%8A%E6%8F%A1%E5%95%86%E6%9C%BA&user_id=1230&timestamp=1543309333073&product_id=60&uid=60&rand_str=b530e68f2d0e4919f8b6fb2aab8ecad7'
+#
+# ## 解码URl
+# redirect_url = unquote(share_url, 'utf-8')
+# print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
 
 
-redirect_url = unquote(share_url, 'utf-8')
-print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
+application_data = {
+    'leida': {
+        'sToken': '5lokfwWTqHXnb58VCV',
+        'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
+        'sCorpID': 'wx5d26a7a856b22bec',
+    },
+    'boss': {
+        'sToken': '22LlaSyBP',
+        'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
+        'sCorpID': 'wx36c67dd53366b6f0',
+    },
+    'address_book': {
+        'sToken': '8sCAJ3YuU6EfYWxI',
+        'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
+        'sCorpID': 'wx1cbe3089128fda03',
+    },
+    'general_parm': {
+        'sEncodingAESKey': 'HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt',
+        'sCorpID': 'wx81159f52aff62388',
+    },
+    'domain_urls': {
+        'leida_http_url': 'http://zhugeleida.zhugeyingxiao.com',
+
+    }
+}
+
+print(json.dumps(application_data))
 
 

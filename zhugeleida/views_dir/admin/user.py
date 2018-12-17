@@ -813,6 +813,8 @@ def user_oper(request, oper_type, o_id):
         elif oper_type == 'approval_storage_user_info':
             print('---- 审核de 批量 ----->>')
             user_id_list = request.POST.get('user_id_list')
+            type = request.GET.get('type')
+
             print('---- 审核de user_id_list 1  ----->>', user_id_list)
 
             if user_id_list:
@@ -903,6 +905,9 @@ def user_oper(request, oper_type, o_id):
                                     department_id_list = []
 
                                 obj.department = department_id_list
+                                if type == 'phone_audit':
+                                    obj.status = 1
+
                                 obj.save()
                                 models.zgld_temp_userprofile.objects.filter(id=temp_obj.id).delete() # 删除已经通过审核的员工。
 
@@ -970,6 +975,7 @@ def user_oper(request, oper_type, o_id):
         else:
             response.code = 402
             response.msg = "请求异常"
+
     return JsonResponse(response.__dict__)
 
 

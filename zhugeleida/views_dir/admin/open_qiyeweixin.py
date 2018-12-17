@@ -14,7 +14,7 @@ from zhugeleida.public.common import create_qrcode
 def get_provider_token():
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    get_token_data = {
+    get_token_data = {  # 通用开发参数
         "corpid": "wx81159f52aff62388",  # 服务商的corpid
         "provider_secret": "HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt"  # 服务商的secret
     }
@@ -45,23 +45,23 @@ def get_provider_token():
 @csrf_exempt
 def open_qiyeweixin(request, oper_type):
     response = Response.ResponseObj()
-    application_data = {
-        'leida': {
-            'sToken': '5lokfwWTqHXnb58VCV',
-            'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
-            'sCorpID': 'wx5d26a7a856b22bec',
-        },
-        'boss': {
-            'sToken': '22LlaSyBP',
-            'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
-            'sCorpID': 'wx36c67dd53366b6f0',
-        },
-        'address_book': {
-            'sToken': '8sCAJ3YuU6EfYWxI',
-            'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
-            'sCorpID': 'wx1cbe3089128fda03',
-        },
-    }
+    # application_data = {
+    #     'leida': {
+    #         'sToken': '5lokfwWTqHXnb58VCV',
+    #         'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
+    #         'sCorpID': 'wx5d26a7a856b22bec',
+    #     },
+    #     'boss': {
+    #         'sToken': '22LlaSyBP',
+    #         'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
+    #         'sCorpID': 'wx36c67dd53366b6f0',
+    #     },
+    #     'address_book': {
+    #         'sToken': '8sCAJ3YuU6EfYWxI',
+    #         'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
+    #         'sCorpID': 'wx1cbe3089128fda03',
+    #     }
+    # }
     if request.method == "POST":
 
         # 企业微信服务器会定时（每十分钟）推送ticket。https://work.weixin.qq.com/api/doc#10982/推送suite_ticket
@@ -75,153 +75,167 @@ def open_qiyeweixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            sToken = application_data[ticket_type]['sToken']
-            sEncodingAESKey = application_data[ticket_type]['sEncodingAESKey']
-            sCorpID = application_data[ticket_type]['sCorpID']
+            three_service_objs = models.zgld_three_service_setting.objects.all()
 
-            print('sToken -->', sToken)
-            print('sEncodingAESKey -->', sEncodingAESKey)
-            print('sCorpID -->', sCorpID)
-            decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            # xml_tree = ET.fromstring(postdata)
-            # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
-            # timestamp = "1538228121"
-            # nonce = "1537294388"
-            # sReqData = '<xml><ToUserName><![CDATA[wx5d26a7a856b22bec]]></ToUserName><Encrypt><![CDATA[uh2c6Yqs5f8nPcXQmTtxifpYEIX0Y5FV/nrsbAo4FGKdCPCLVA1p7XSDnC6XN5/1YiFE4ywFs2CvT0n1xHbJ4vSksICKqkPr0z9PtxhJDcbuhz7wgsUSLmEMeXWR1f6YVaOGkFKqa6YJ0lalvpGcS03RRwTuqb49VccfuV5KO4y3eabi6qQRh5QG6SHYKGPZmTfD32Q5GGgGhm4QH3ne/hUTLtMdk3CONblGcodRs5/iAArxfGCFxYADT9d/9Q6ZoNoLruYD66RPrX8AghjKE6KoCqNomsgLHbINJEBxkyEaTBd9qqJe+zoXJMXhyFJ6CsmfKRITwC/Lz32wZF0bF44fzhybguIyMOohxZEhyl1pJpwpgX5DjpjKs47jKf76]]></Encrypt><AgentID><![CDATA[]]></AgentID></xml>'
+                sToken = qywx_config_dict[ticket_type]['sToken']
+                sEncodingAESKey = qywx_config_dict[ticket_type]['sEncodingAESKey']
+                sCorpID = qywx_config_dict[ticket_type]['sCorpID']
 
-            ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
-            print(ret, sMsg)
-            if (ret != 0):
-                print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
-                sys.exit(1)
+                print('sToken -->', sToken)
+                print('sEncodingAESKey -->', sEncodingAESKey)
+                print('sCorpID -->', sCorpID)
+                decrypt_obj = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
-            DOMTree = xmldom.parseString(sMsg)
-            collection = DOMTree.documentElement
-            ChangeType = collection.getElementsByTagName("ChangeType")  # update_user
+                # xml_tree = ET.fromstring(postdata)
+                # msg_signature = "2b29a5534ed8b50981ae0069c1f4c48127789cec"
+                # timestamp = "1538228121"
+                # nonce = "1537294388"
+                # sReqData = '<xml><ToUserName><![CDATA[wx5d26a7a856b22bec]]></ToUserName><Encrypt><![CDATA[uh2c6Yqs5f8nPcXQmTtxifpYEIX0Y5FV/nrsbAo4FGKdCPCLVA1p7XSDnC6XN5/1YiFE4ywFs2CvT0n1xHbJ4vSksICKqkPr0z9PtxhJDcbuhz7wgsUSLmEMeXWR1f6YVaOGkFKqa6YJ0lalvpGcS03RRwTuqb49VccfuV5KO4y3eabi6qQRh5QG6SHYKGPZmTfD32Q5GGgGhm4QH3ne/hUTLtMdk3CONblGcodRs5/iAArxfGCFxYADT9d/9Q6ZoNoLruYD66RPrX8AghjKE6KoCqNomsgLHbINJEBxkyEaTBd9qqJe+zoXJMXhyFJ6CsmfKRITwC/Lz32wZF0bF44fzhybguIyMOohxZEhyl1pJpwpgX5DjpjKs47jKf76]]></Encrypt><AgentID><![CDATA[]]></AgentID></xml>'
 
-            if ChangeType:  # 通讯录的触发事件，增删改查用户 和关注微工作台的事件提示。
-                InfoType = collection.getElementsByTagName("InfoType")[0].childNodes[
-                    0].data  # <InfoType><![CDATA[change_contact]]></InfoType>
-                ChangeType = collection.getElementsByTagName("ChangeType")[0].childNodes[
-                    0].data  # <ChangeType><![CDATA[update_user]]></ChangeType>
-                UserID = collection.getElementsByTagName("UserID")[0].childNodes[0].data
-                AuthCorpId = collection.getElementsByTagName("AuthCorpId")[0].childNodes[0].data
+                ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+                print(ret, sMsg)
+                if (ret != 0):
+                    print("--- 企业微信解密 ERR: DecryptMsg ret --->: " + str(ret))
+                    sys.exit(1)
 
-                company_objs = models.zgld_company.objects.filter(corp_id=AuthCorpId)
-                company_id = ''
-                if company_objs:
-                    company_obj = company_objs[0]
-                    company_id = company_obj.id
+                DOMTree = xmldom.parseString(sMsg)
+                collection = DOMTree.documentElement
+                ChangeType = collection.getElementsByTagName("ChangeType")  # update_user
 
-                _Status = collection.getElementsByTagName(
-                    "Status")  # <Status>1</Status></xml> #激活状态: 1=已激活，2=已禁用，4=未激活。
-                if _Status:  # 代表既未激活企业微信又未关注微工作台（原企业号）。
-                    Status = collection.getElementsByTagName("Status")[0].childNodes[0].data
-                    if int(Status) == 1:  # 1=已激活
-                        _data = {
-                            'company_id': company_id,
-                            'userid': UserID,
-                        }
-                        tasks.qiyeweixin_user_get_userinfo.delay(_data)  # 异步获取用户的头像
-                    return HttpResponse("success")
+                if ChangeType:  # 通讯录的触发事件，增删改查用户 和关注微工作台的事件提示。
+                    InfoType = collection.getElementsByTagName("InfoType")[0].childNodes[
+                        0].data  # <InfoType><![CDATA[change_contact]]></InfoType>
+                    ChangeType = collection.getElementsByTagName("ChangeType")[0].childNodes[
+                        0].data  # <ChangeType><![CDATA[update_user]]></ChangeType>
+                    UserID = collection.getElementsByTagName("UserID")[0].childNodes[0].data
+                    AuthCorpId = collection.getElementsByTagName("AuthCorpId")[0].childNodes[0].data
 
-                elif not _Status:  # 没有status ，说明 是用户的增删改查。
+                    company_objs = models.zgld_company.objects.filter(corp_id=AuthCorpId)
+                    company_id = ''
+                    if company_objs:
+                        company_obj = company_objs[0]
+                        company_id = company_obj.id
 
-                    return HttpResponse("success")
-            xml_tree = ET.fromstring(sMsg)
-            xml_tree.find("SuiteTicket")
+                    _Status = collection.getElementsByTagName(
+                        "Status")  # <Status>1</Status></xml> #激活状态: 1=已激活，2=已禁用，4=未激活。
+                    if _Status:  # 代表既未激活企业微信又未关注微工作台（原企业号）。
+                        Status = collection.getElementsByTagName("Status")[0].childNodes[0].data
+                        if int(Status) == 1:  # 1=已激活
+                            _data = {
+                                'company_id': company_id,
+                                'userid': UserID,
+                            }
+                            tasks.qiyeweixin_user_get_userinfo.delay(_data)  # 异步获取用户的头像
+                        return HttpResponse("success")
 
-            # 解密成功，sMsg即为xml格式的明文
-            try:
-                SuiteTicket = xml_tree.find("SuiteTicket").text
-                SuiteId = xml_tree.find("SuiteId").text
+                    elif not _Status:  # 没有status ，说明 是用户的增删改查。
 
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                        return HttpResponse("success")
+                xml_tree = ET.fromstring(sMsg)
+                xml_tree.find("SuiteTicket")
 
-                key_name = 'SuiteTicket_%s' % (SuiteId)
-                rc.set(key_name, SuiteTicket, 3000)
-                print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
+                # 解密成功，sMsg即为xml格式的明文
+                try:
+                    SuiteTicket = xml_tree.find("SuiteTicket").text
+                    SuiteId = xml_tree.find("SuiteId").text
 
-            except  Exception as e:
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-                SuiteId = xml_tree.find("SuiteId").text
-                AuthCode = xml_tree.find("AuthCode").text
+                    key_name = 'SuiteTicket_%s' % (SuiteId)
+                    rc.set(key_name, SuiteTicket, 3000)
+                    print('--------企业微信服务器 SuiteId | suite_ticket--------->>', SuiteId, '|', SuiteTicket)
 
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                key_name = 'AuthCode_%s' % (SuiteId)
+                except  Exception as e:
 
-                rc.set(key_name, AuthCode, 1000)  # 授权的auth_code。用于获取企业的永久授权码。5分钟内有效
-                print('--------【通讯录】企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
+                    SuiteId = xml_tree.find("SuiteId").text
+                    AuthCode = xml_tree.find("AuthCode").text
 
-                get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    key_name = 'AuthCode_%s' % (SuiteId)
 
-                _app_type = ''
+                    rc.set(key_name, AuthCode, 1000)  # 授权的auth_code。用于获取企业的永久授权码。5分钟内有效
+                    print('--------【通讯录】企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
-                name = '通讯录应用'
-                if SuiteId == 'wx1cbe3089128fda03':
-                    name = '通讯录'
-                    _app_type = 3
+                    get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
 
-                _data = {
-                    'SuiteId': SuiteId
-                }
-                create_pre_auth_code_ret = common.create_pre_auth_code(_data)
-                suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
+                    _app_type = ''
+                    name = '通讯录应用'
+                    if SuiteId == 'wx1cbe3089128fda03':
+                        name = '通讯录'
+                        _app_type = 3
 
-                get_permanent_code_url_data = {
-                    'suite_access_token': suite_access_token
-                }
-                post_permanent_code_url_data = {
-                    'auth_code': AuthCode
-                }
+                    _data = {
+                        'SuiteId': SuiteId
+                    }
+                    create_pre_auth_code_ret = common.create_pre_auth_code(_data)
+                    suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
 
-                get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data,
-                                                            data=json.dumps(post_permanent_code_url_data))
+                    get_permanent_code_url_data = {
+                        'suite_access_token': suite_access_token
+                    }
+                    post_permanent_code_url_data = {
+                        'auth_code': AuthCode
+                    }
 
-                get_permanent_code_info = get_permanent_code_info_ret.json()
-                print('-------[企业微信-通讯录] 获取企业永久授权码 返回------->>', get_permanent_code_info)
+                    get_permanent_code_info_ret = requests.post(get_permanent_code_url,
+                                                                params=get_permanent_code_url_data,
+                                                                data=json.dumps(post_permanent_code_url_data))
 
-                corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
-                corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
-                # agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
+                    get_permanent_code_info = get_permanent_code_info_ret.json()
+                    print('-------[企业微信-通讯录] 获取企业永久授权码 返回------->>', get_permanent_code_info)
 
-                access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
-                permanent_code = get_permanent_code_info.get(
-                    'permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
+                    corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
+                    corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
+                    # agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
 
-                if permanent_code:
-                    key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
-                    rc.set(key_name, access_token, 7000)
-                    objs = models.zgld_company.objects.filter(corp_id=corpid)
-                    if objs:
-                        company_id = objs[0].id
-                        app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
-                        if app_objs:
-                            print('----- [企业微信-通讯录] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code,
-                                  corp_name)
+                    access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
+                    permanent_code = get_permanent_code_info.get(
+                        'permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
 
-                            app_objs.update(
-                                name=name,
-                                app_type=_app_type,
-                                is_validate=True,
-                                # agent_id=agentid,
-                                permanent_code=permanent_code
-                            )
+                    if permanent_code:
+                        key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
+                        rc.set(key_name, access_token, 7000)
+                        objs = models.zgld_company.objects.filter(corp_id=corpid)
+                        if objs:
+                            company_id = objs[0].id
+                            app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
+                            if app_objs:
+                                print('----- [企业微信-通讯录] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code,
+                                      corp_name)
 
-                        else:
-                            print('----- [企业微信-通讯录] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code,
-                                  corp_name)
-                            models.zgld_app.objects.create(
-                                is_validate=True,
-                                name=name,
-                                app_type=_app_type,
-                                # agent_id=agentid,
-                                company_id=company_id,
-                                permanent_code=permanent_code
-                            )
-                else:
-                    print('-------[企业微信] 获取企业永久授权码 报错：------->>')
+                                app_objs.update(
+                                    name=name,
+                                    app_type=_app_type,
+                                    is_validate=True,
+                                    # agent_id=agentid,
+                                    permanent_code=permanent_code
+                                )
+
+                            else:
+                                print('----- [企业微信-通讯录] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code,
+                                      corp_name)
+                                models.zgld_app.objects.create(
+                                    is_validate=True,
+                                    name=name,
+                                    app_type=_app_type,
+                                    # agent_id=agentid,
+                                    company_id=company_id,
+                                    permanent_code=permanent_code
+                                )
+                    else:
+                        print('-------[企业微信] 获取企业永久授权码 报错：------->>')
+
+
+            else:
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 get_ticket ------>>')
 
             return HttpResponse("success")
 
@@ -229,39 +243,58 @@ def open_qiyeweixin(request, oper_type):
         elif oper_type == "create_grant_url":
 
             app_type = int(request.POST.get('app_type')) if request.POST.get('app_type') else ''
+            three_service_objs = models.zgld_three_service_setting.objects.all()
 
-            suite_id = ''
-            if app_type == 1:  # 雷达AI
-                suite_id = 'wx5d26a7a856b22bec'
-                app_type = 'leida'
-            elif app_type == 2:  # 雷达Boss
-                suite_id = 'wx36c67dd53366b6f0'
-                app_type = 'boss'
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            elif app_type == 3:  # 通讯录
-                suite_id = 'wx1cbe3089128fda03'
-                app_type = 'address_book'
+                suite_id = ''
+                if app_type == 1:  # 雷达AI
+                    # suite_id = 'wx5d26a7a856b22bec'
+                    app_type = 'leida'
+                    suite_id = qywx_config_dict['leida']['sCorpID']
 
-            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
+                elif app_type == 2:  # 雷达Boss
+                    # suite_id = 'wx36c67dd53366b6f0'
+                    suite_id = qywx_config_dict['boss']['sCorpID']
+                    app_type = 'boss'
 
-            _data = {
-                'SuiteId': suite_id
-            }
-            create_pre_auth_code_ret = common.create_pre_auth_code(_data)
+                elif app_type == 3:  # 通讯录
+                    # suite_id = 'wx1cbe3089128fda03'
+                    suite_id = qywx_config_dict['address_book']['sCorpID']
+                    app_type = 'address_book'
 
-            pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
+                redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
 
-            get_bind_auth_data = 'suite_id={}&pre_auth_code={}&redirect_uri={}&state={}'.format(suite_id, pre_auth_code,
-                                                                                                redirect_uri, suite_id)
+                _data = {
+                    'SuiteId': suite_id
+                }
+                create_pre_auth_code_ret = common.create_pre_auth_code(_data)
 
-            pre_auth_code_url = 'https://open.work.weixin.qq.com/3rdapp/install?' + get_bind_auth_data
+                pre_auth_code = create_pre_auth_code_ret.data.get('pre_auth_code')
 
-            response.code = 200
-            response.msg = '生成【授权链接】成功'
-            response.data = {
-                'pre_auth_code_url': pre_auth_code_url
-            }
-            # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
+                get_bind_auth_data = 'suite_id={}&pre_auth_code={}&redirect_uri={}&state={}'.format(suite_id,
+                                                                                                    pre_auth_code,
+                                                                                                    redirect_uri,
+                                                                                                    suite_id)
+
+                pre_auth_code_url = 'https://open.work.weixin.qq.com/3rdapp/install?' + get_bind_auth_data
+
+                response.code = 200
+                response.msg = '生成【授权链接】成功'
+                response.data = {
+                    'pre_auth_code_url': pre_auth_code_url
+                }
+                # 授权成功，返回临时授权码;第三方服务商需尽快使用临时授权码换取永久授权码及授权信息
+
+            else:
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 create_grant_url ------>>')
+
 
         # 设置授权配置 /zhugeleida/admin/open_qiyeweixin/set_session_info
         elif oper_type == 'set_session_info':
@@ -339,31 +372,36 @@ def open_qiyeweixin(request, oper_type):
             echostr = request.GET.get('echostr')
             ticket_type = request.GET.get('type')
 
-            sToken = application_data[ticket_type]['sToken']
-            sEncodingAESKey = application_data[ticket_type]['sEncodingAESKey']
-            # sCorpID = application_data[ticket_type]['sCorpID']
-            # sToken = ''
-            # sEncodingAESKey = ''
-            # if type == 'leida':
-            #     sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
-            #     sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
-            #
-            # elif type == 'boss':
-            #     sToken = "22LlaSyBP"  # 回调配置
-            #     sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+            three_service_objs = models.zgld_three_service_setting.objects.all()
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            sCorpID = "wx81159f52aff62388"
-            wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+                sToken = qywx_config_dict[ticket_type]['sToken']
+                sEncodingAESKey = qywx_config_dict[ticket_type]['sEncodingAESKey']
 
-            # ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
-            ret, sEchoStr = wxcpt.VerifyURL(msg_signature, timestamp, nonce, echostr)
-            if (ret != 0):
-                print("---- 验证回调URL: VerifyURL ret: ----> " + str(ret))
-                sys.exit(1)
-            print('----- [get_ticket]解密echostr参数得到消息内容 -------->>', sEchoStr)
+                # sCorpID = "wx81159f52aff62388"
+                sCorpID = qywx_config_dict['general_parm'].get('sCorpID')  # 三方通用参数
+                wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
 
-            # 验证URL成功，将sEchoStr返回给企业号
-            return HttpResponse(sEchoStr)
+                # ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+                ret, sEchoStr = wxcpt.VerifyURL(msg_signature, timestamp, nonce, echostr)
+                if (ret != 0):
+                    print("---- 验证回调URL: VerifyURL ret: ----> " + str(ret))
+                    sys.exit(1)
+                print('----- [get_ticket]解密echostr参数得到消息内容 -------->>', sEchoStr)
+
+                # 验证URL成功，将sEchoStr返回给企业号
+                return HttpResponse(sEchoStr)
+
+            else:
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 get_ticket ------>>')
+
+
 
         # 获取微信回调数据
         elif oper_type == 'callback_data':
@@ -374,158 +412,194 @@ def open_qiyeweixin(request, oper_type):
 
             type = request.GET.get('type')
 
-            sToken = ''
-            sEncodingAESKey = ''
-            if type == 'leida':
-                sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
-                sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
-            elif type == 'boss':
-                sToken = "22LlaSyBP"  # 回调配置
-                sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+            three_service_objs = models.zgld_three_service_setting.objects.all()
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            sCorpID = "wx81159f52aff62388"  # 通用开发参数 CorpID
-            wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+                sToken = ''
+                sEncodingAESKey = ''
+                if type == 'leida':
+                    # sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
+                    sToken = qywx_config_dict['leida']['sToken']
+                    sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
 
-            # ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
-            ret, sEchoStr = wxcpt.VerifyURL(msg_signature, timestamp, nonce, echostr)
-            if (ret != 0):
-                print("---- 验证回调URL: VerifyURL ret: ----> " + str(ret))
-                sys.exit(1)
-            print('----- [callback_data]解密echostr参数得到消息内容 -------->>', sEchoStr)
+                elif type == 'boss':
+                    # sToken = "22LlaSyBP"  # 回调配置
+                    sToken = qywx_config_dict['boss']['sToken']
+                    sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
 
-            # 验证URL成功，将sEchoStr返回给企业号
-            return HttpResponse(sEchoStr)
+                # sCorpID = "wx81159f52aff62388"  # 通用开发参数 CorpID
+                sCorpID = qywx_config_dict['general_parm']['sCorpID']  # 通用开发参数 CorpID
+                wxcpt = WXBizMsgCrypt_qiyeweixin.WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID)
+
+                # ret, sMsg = decrypt_obj.DecryptMsg(postdata, msg_signature, timestamp, nonce)
+                ret, sEchoStr = wxcpt.VerifyURL(msg_signature, timestamp, nonce, echostr)
+                if (ret != 0):
+                    print("---- 验证回调URL: VerifyURL ret: ----> " + str(ret))
+                    sys.exit(1)
+                print('----- [callback_data]解密echostr参数得到消息内容 -------->>', sEchoStr)
+
+                # 验证URL成功，将sEchoStr返回给企业号
+                return HttpResponse(sEchoStr)
+
+
+            else:
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 callback_data ------>>')
 
         #  网页授权登录第三方-登陆
         elif oper_type == 'work_weixin_auth':
             code = request.GET.get('code')
             app_type = request.GET.get('state')
 
-            SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
-            url = ''
-            auth_code = ''
-            _app_type = ''
-            if app_type == 'leida':
-                SuiteId = 'wx5d26a7a856b22bec'
-                url = 'http://zhugeleida.zhugeyingxiao.com/'
+            three_service_objs = models.zgld_three_service_setting.objects.all()
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            elif app_type == 'boss':
-                SuiteId = 'wx36c67dd53366b6f0'
-                url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
+                # SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
+                # SuiteId = qywx_config_dict['address_book'].get('sCorpID') # 通讯录三方应用
+                SuiteId = ''
+                auth_code = ''
+                _app_type = ''
 
+                url = qywx_config_dict['domain_urls'].get('leida_http_url')
+                if app_type == 'leida':
+                    # SuiteId = 'wx5d26a7a856b22bec'
+                    SuiteId = qywx_config_dict['leida'].get('sCorpID')
 
-            elif 'scan_code_web_login' in app_type:
-                _app_type = app_type.split('|')[0]
-                auth_code = app_type.split('|')[1]
+                elif app_type == 'boss':
+                    # SuiteId = 'wx36c67dd53366b6f0'
+                    # url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
+                    SuiteId = qywx_config_dict['boss'].get('sCorpID')
+                    url = url + '/#/bossLeida'
 
-                SuiteId = 'wx5d26a7a856b22bec'
-                url = 'http://zhugeleida.zhugeyingxiao.com/'
+                elif 'scan_code_web_login' in app_type:
+                    _app_type = app_type.split('|')[0]
+                    auth_code = app_type.split('|')[1]
 
-            _data = {
-                'SuiteId': SuiteId,  # 通讯录三方应用
-            }
-
-            suite_access_token_ret = common.create_suite_access_token(_data)
-            suite_access_token = suite_access_token_ret.data.get('suite_access_token')
-
-            get_code_data = {
-                'code': code,
-                'access_token': suite_access_token
-            }
-            code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserinfo3rd'
-            code_ret = requests.get(code_url, params=get_code_data)
-
-            code_ret_json = code_ret.json()
-            print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
-
-            user_ticket = code_ret_json.get('user_ticket')
-            errcode = code_ret_json.get('errcode')
-            userid = code_ret_json.get('UserId')
-            corpid = code_ret_json.get('CorpId')
-
-            # print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(code_ret_json), "|", userid)
-            company_objs = models.zgld_company.objects.filter(corp_id=corpid)
-
-            if company_objs:
-                company_id = company_objs[0].id
-                # is_show_technical_support = company_objs[0].is_show_jszc
+                    # SuiteId = 'wx5d26a7a856b22bec'
+                    # url = 'http://zhugeleida.zhugeyingxiao.com/'
+                    SuiteId = qywx_config_dict['leida'].get('sCorpID')
 
                 _data = {
-                    'company_id': company_id,
-                    'userid': userid,
+                    'SuiteId': SuiteId,  # 通讯录三方应用
                 }
-                tasks.qiyeweixin_user_get_userinfo.delay(_data)
 
-                user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
-                    userid=userid,
-                    company_id=company_id
-                )
+                suite_access_token_ret = common.create_suite_access_token(_data)
+                suite_access_token = suite_access_token_ret.data.get('suite_access_token')
 
-                # 如果用户存在
-                if user_profile_objs:
-                    user_profile_obj = user_profile_objs[0]
-                    status = user_profile_obj.status
-                    boss_status = user_profile_obj.boss_status
+                get_code_data = {
+                    'code': code,
+                    'access_token': suite_access_token
+                }
+                code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/getuserinfo3rd'
+                code_ret = requests.get(code_url, params=get_code_data)
 
-                    account_expired_time = company_objs[0].account_expired_time
-                    if datetime.datetime.now() > account_expired_time:
-                        response.code = 403
-                        response.msg = '账户过期'
-                        print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
-                        return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
+                code_ret_json = code_ret.json()
+                print('===========【企业微信】 获取 user_ticket 返回:==========>', json.dumps(code_ret_json))
 
-                    avatar = user_profile_obj.avatar
-                    user_id = user_profile_obj.id
-                    token = user_profile_obj.token
-                    if status == 1 and app_type == 'leida':  #
+                user_ticket = code_ret_json.get('user_ticket')
+                errcode = code_ret_json.get('errcode')
+                userid = code_ret_json.get('UserId')
+                corpid = code_ret_json.get('CorpId')
 
-                        last_login_date = user_profile_obj.last_login_date
-                        if not last_login_date:  # 为空说明第一次登陆
-                            is_first_login = 'Yes'
-                            user_profile_obj.last_login_date = datetime.datetime.now()
+                # print('----------【企业微信】获取 《用户基本信息》 返回 | userid---->', json.dumps(code_ret_json), "|", userid)
+                company_objs = models.zgld_company.objects.filter(corp_id=corpid)
+
+                if company_objs:
+                    company_id = company_objs[0].id
+                    # is_show_technical_support = company_objs[0].is_show_jszc
+
+                    _data = {
+                        'company_id': company_id,
+                        'userid': userid,
+                    }
+                    tasks.qiyeweixin_user_get_userinfo.delay(_data)
+
+                    user_profile_objs = models.zgld_userprofile.objects.select_related('company').filter(
+                        userid=userid,
+                        company_id=company_id
+                    )
+
+                    # 如果用户存在
+                    if user_profile_objs:
+                        user_profile_obj = user_profile_objs[0]
+                        status = user_profile_obj.status
+                        boss_status = user_profile_obj.boss_status
+
+                        account_expired_time = company_objs[0].account_expired_time
+                        if datetime.datetime.now() > account_expired_time:
+                            response.code = 403
+                            response.msg = '账户过期'
+                            print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
+                            return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
+
+                        avatar = user_profile_obj.avatar
+                        user_id = user_profile_obj.id
+                        token = user_profile_obj.token
+                        if status == 1 and app_type == 'leida':  #
+
+                            last_login_date = user_profile_obj.last_login_date
+                            if not last_login_date:  # 为空说明第一次登陆
+                                is_first_login = 'Yes'
+                                user_profile_obj.last_login_date = datetime.datetime.now()
+                            else:
+                                is_first_login = 'No'
+                            user_profile_obj.save()
+
+                            redirect_url = url + '?token=' + token + '&id=' + str(
+                                user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
+
+                            print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_id, "|",
+                                  userid,
+                                  "\n", redirect_url)
+
+                            return redirect(redirect_url)
+
+                        elif boss_status == 1 and app_type == 'boss':  #
+                            redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar
+
+                            print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
+                                  userid, "\n", redirect_url)
+
+                            return redirect(redirect_url)
+
+                        elif status == 1 and _app_type == 'scan_code_web_login':
+                            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                            rc.set(auth_code, True, 120)
+                            user_profile_obj.password = auth_code
+                            user_profile_obj.save()
+
+                            print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
+                            return redirect('%s/#/login_success/index?code=200' % (url))
+
+                        elif status != 1 and _app_type == 'scan_code_web_login':
+                            print('----------【雷达用户】《扫码登录失败》没权限，user_id | userid  ---->', user_id, "|", userid)
+                            return redirect('%s/#/login_success/index?code=403' % (url))
+
                         else:
-                            is_first_login = 'No'
-                        user_profile_obj.save()
-
-                        redirect_url = url + '?token=' + token + '&id=' + str(
-                            user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login
-
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_id, "|", userid,
-                              "\n", redirect_url)
-
-                        return redirect(redirect_url)
-
-                    elif boss_status == 1 and app_type == 'boss':  #
-                        redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar
-
-                        print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
-                              userid, "\n", redirect_url)
-
-                        return redirect(redirect_url)
-
-                    elif status == 1 and _app_type == 'scan_code_web_login':
-                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                        rc.set(auth_code,True,120)
-                        user_profile_obj.password = auth_code
-                        user_profile_obj.save()
-
-                        print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
-                        return redirect('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=200')
-
-                    elif status != 1 and _app_type == 'scan_code_web_login':
-                        print('----------【雷达用户】《扫码登录失败》没权限，user_id | userid  ---->', user_id, "|", userid)
-                        return redirect('http://zhugeleida.zhugeyingxiao.com/#/login_success/index?code=403')
+                            print('----------【雷达权限】未开通 ,未登录成功 user_id | corpid ------>', user_id, corpid)
+                            return redirect('%s/err_page' % (url))
 
                     else:
-                        print('----------【雷达权限】未开通 ,未登录成功 user_id | corpid ------>', user_id, corpid)
-                        return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
-
+                        print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid, "|", corpid)
+                        return redirect('%s/err_page' % (url))
                 else:
-                    print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid, "|", corpid)
-                    return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+                    print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid, "|", corpid)
+                    return redirect('%s/err_page' % (url))
+
             else:
-                print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid, "|", corpid)
-                return redirect('http://zhugeleida.zhugeyingxiao.com/err_page')
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 work_weixin_auth ------>>')
+
 
 
         #  用户确认授权后，会进入回调URI(即redirect_uri)，并在URI参数中带上临时授权码
@@ -542,89 +616,105 @@ def open_qiyeweixin(request, oper_type):
             rc.set(key_name, AuthCode, 1000)  # 授权的auth_code。用于获取企业的永久授权码。5分钟内有效
             print('--------企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
-            get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
-            _app_type = ''
-            name = ''
-            if SuiteId == 'wx5d26a7a856b22bec':
-                name = '雷达AI'
-                _app_type = 1
-            elif SuiteId == 'wx36c67dd53366b6f0':
-                name = '雷达Boss'
-                _app_type = 2
+            three_service_objs = models.zgld_three_service_setting.objects.all()
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            elif SuiteId == 'wx1cbe3089128fda03':
-                name = '诸葛通讯录'
-                _app_type = 3
+                url = qywx_config_dict['domain_urls'].get('leida_http_url')
+                get_permanent_code_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_permanent_code'
+                _app_type = ''
+                name = ''
+                if SuiteId == qywx_config_dict['leida'].get('sCorpID'):  # 'wx5d26a7a856b22bec'
+                    name = '雷达AI'
+                    _app_type = 1
 
-            _data = {
-                'SuiteId': SuiteId
-            }
-            create_pre_auth_code_ret = common.create_pre_auth_code(_data)
+                elif SuiteId == qywx_config_dict['boss'].get('sCorpID'):  # 'wx36c67dd53366b6f0':
+                    name = '雷达Boss'
+                    _app_type = 2
 
-            suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
+                elif SuiteId == qywx_config_dict['address_book'].get('sCorpID'):  # 'wx1cbe3089128fda03':
+                    name = '诸葛通讯录'
+                    _app_type = 3
 
-            get_permanent_code_url_data = {
-                'suite_access_token': suite_access_token
-            }
-            post_permanent_code_url_data = {
-                'auth_code': AuthCode
-            }
+                _data = {
+                    'SuiteId': SuiteId
+                }
+                create_pre_auth_code_ret = common.create_pre_auth_code(_data)
 
-            get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data,
-                                                        data=json.dumps(post_permanent_code_url_data))
+                suite_access_token = create_pre_auth_code_ret.data.get('suite_access_token')
 
-            get_permanent_code_info = get_permanent_code_info_ret.json()
-            print('-------[企业微信] 获取企业永久授权码 返回------->>', json.dumps(get_permanent_code_info))
+                get_permanent_code_url_data = {
+                    'suite_access_token': suite_access_token
+                }
+                post_permanent_code_url_data = {
+                    'auth_code': AuthCode
+                }
 
-            corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
-            corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
-            agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
-            agentid = ''
-            for _agent_dict in agent_list:
-                _name = _agent_dict.get('name')
-                if _name == name:
-                    agentid = _agent_dict.get('agentid')
+                get_permanent_code_info_ret = requests.post(get_permanent_code_url, params=get_permanent_code_url_data,
+                                                            data=json.dumps(post_permanent_code_url_data))
 
-            access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
-            permanent_code = get_permanent_code_info.get('permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
+                get_permanent_code_info = get_permanent_code_info_ret.json()
+                print('-------[企业微信] 获取企业永久授权码 返回------->>', json.dumps(get_permanent_code_info))
 
-            if permanent_code:
-                key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
-                rc.set(key_name, access_token, 7000)
-                objs = models.zgld_company.objects.filter(corp_id=corpid)
-                if objs:
-                    company_id = objs[0].id
-                    app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
-                    if app_objs:
-                        print('----- [企业微信] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+                corpid = get_permanent_code_info['auth_corp_info'].get('corpid')  # 授权方企业微信id
+                corp_name = get_permanent_code_info['auth_corp_info'].get('corp_name')  # 授权方企业微信名称
+                agent_list = get_permanent_code_info['auth_info'].get('agent')  # 授权方企业微信名称
+                agentid = ''
+                for _agent_dict in agent_list:
+                    _name = _agent_dict.get('name')
+                    if _name == name:
+                        agentid = _agent_dict.get('agentid')
 
-                        app_objs.update(
-                            name=name,
-                            app_type=_app_type,
-                            is_validate=True,
-                            agent_id=agentid,
-                            permanent_code=permanent_code
+                access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
+                permanent_code = get_permanent_code_info.get(
+                    'permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
 
-                        )
+                if permanent_code:
+                    key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)
+                    rc.set(key_name, access_token, 7000)
+                    objs = models.zgld_company.objects.filter(corp_id=corpid)
+                    if objs:
+                        company_id = objs[0].id
+                        app_objs = models.zgld_app.objects.filter(app_type=_app_type, company_id=company_id)
+                        if app_objs:
+                            print('----- [企业微信] 授权方-企业微信【修改了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+
+                            app_objs.update(
+                                name=name,
+                                app_type=_app_type,
+                                is_validate=True,
+                                agent_id=agentid,
+                                permanent_code=permanent_code
+
+                            )
+
+                        else:
+                            print('----- [企业微信] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
+                            models.zgld_app.objects.create(
+                                is_validate=True,
+                                name=name,
+                                app_type=_app_type,
+                                agent_id=agentid,
+                                company_id=company_id,
+                                permanent_code=permanent_code
+                            )
 
                     else:
-                        print('----- [企业微信] 授权方-企业微信【创建了】数据库 corpid: --->', corpid, '|', permanent_code, corp_name)
-                        models.zgld_app.objects.create(
-                            is_validate=True,
-                            name=name,
-                            app_type=_app_type,
-                            agent_id=agentid,
-                            company_id=company_id,
-                            permanent_code=permanent_code
-                        )
+                        print('-------[企业微信] 企业不存在：------->>', corpid)
 
+                    return redirect('%s/admin/#/empower/empower_company' % (url))
 
                 else:
-                    print('-------[企业微信] 企业不存在：------->>', corpid)
+                    print('-------[企业微信] 获取企业永久授权码 报错：------->>')
 
-                return redirect('http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_company')
+
             else:
-                print('-------[企业微信] 获取企业永久授权码 报错：------->>')
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 work_weixin_auth ------>>')
 
         # 用户使用企业微信管理员或成员帐号登录第三方网站，该登录授权基于OAuth2.0协议标准构建。
         elif oper_type == 'third_fang_single_login':
@@ -744,32 +834,44 @@ def open_qiyeweixin(request, oper_type):
         elif oper_type == 'web_scan_authorize_qrcode':
             import uuid
             uuid = str(uuid.uuid1())
+            three_service_objs = models.zgld_three_service_setting.objects.all()
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.qywx_config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
 
-            authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5d26a7a856b22bec&redirect_uri=http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/work_weixin_auth&response_type=code&scope=snsapi_userinfo&state=scan_code_web_login|%s#wechat_redirect' % (
-                uuid)
+                url = qywx_config_dict['domain_urls'].get('leida_http_url') #http://zhugeleida.zhugeyingxiao.com
+                sCorpID =  qywx_config_dict['leida'].get('sCorpID')
+                authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s/open_qiyeweixin/work_weixin_auth&response_type=code&scope=snsapi_userinfo&state=scan_code_web_login|%s#wechat_redirect' % (
+                    sCorpID,url,uuid)
 
-            qrcode_data = {
-                'url': authorize_url,
-                'type': 'web_scan_authorize_qrcode'
-            }
-            response_ret = create_qrcode(qrcode_data)
-            pre_qrcode_url = response_ret.get('pre_qrcode_url')
-
-            if pre_qrcode_url:
-                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-                response.data = {
-                    'auth_qrcode_url': pre_qrcode_url,
-                    'auth_code' : uuid
+                qrcode_data = {
+                    'url': authorize_url,
+                    'type': 'web_scan_authorize_qrcode'
                 }
-                rc.set(uuid,False,120)
+                response_ret = create_qrcode(qrcode_data)
+                pre_qrcode_url = response_ret.get('pre_qrcode_url')
 
-                response.code = 200
-                response.msg = '生成二维码成功'
+                if pre_qrcode_url:
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    response.data = {
+                        'auth_qrcode_url': pre_qrcode_url,
+                        'auth_code': uuid
+                    }
+                    rc.set(uuid, False, 120)
+
+                    response.code = 200
+                    response.msg = '生成二维码成功'
+
+                else:
+                    response.code = 401
+                    response.msg = '生成二维码失败'
 
             else:
-                response.code = 401
-                response.msg = '生成二维码失败'
-
+                response.code = 301
+                response.msg = '企业微信第三方-无配置信息'
+                print('------ 【企业微信第三方-无配置信息】 web_scan_authorize_qrcode ------>>')
 
 
     else:

@@ -22,7 +22,7 @@ import requests,json
 import datetime
 import os
 
-
+## 下载图片链接
 qrcode_url = 'http://wx.qlogo.cn/mmopen/Oic0uTcibguuSMlpaHLGsQbFib0DAUicZBIpibFVIEBBRRgWphYGeWibQaAF1jkgtBYAgcgsNibaU4olEQddHMr5ibZv5gjEibib9EWWah/0'
 
 
@@ -37,3 +37,5 @@ filename = "/%s_%s.jpg" % ('YYYYY', now_time)
 file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
 with open(file_dir, 'wb') as file:
     file.write(html.content)
+
+

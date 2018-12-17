@@ -342,11 +342,14 @@ def article_oper(request, oper_type, o_id):
                     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
                     now_date_time = datetime.datetime.now()
                     is_limit_area = ''
+                    reach_stay_time = ''
                     if activity_objs:
                         activity_obj = activity_objs[0]
                         start_time = activity_obj.start_time
                         end_time = activity_obj.end_time
                         is_limit_area = activity_obj.is_limit_area
+                        reach_stay_time = activity_obj.reach_stay_time
+
 
                         if now_date_time >= start_time and now_date_time <= end_time: # 活动开启并活动在进行中
                             _start_time = start_time.strftime('%Y-%m-%d %H:%M')
@@ -436,6 +439,7 @@ def article_oper(request, oper_type, o_id):
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
+                        'activity_id' : activity_id,
                         'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否开启。 'true' 或   'false'
                         'focus_get_money': focus_get_money,                # 关注领取红包金额
                         'is_subscribe': is_subscribe,  # 是否关注了公众号。0 为没有关注 1为关注了。
@@ -443,6 +447,7 @@ def article_oper(request, oper_type, o_id):
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         'qrcode_url': qrcode_url,
                         'is_limit_area' : is_limit_area,
+                        'reach_stay_time' : reach_stay_time,
                         'reach_forward_num': reach_forward_num,  #达到多少次发红包
                         'activity_single_money': activity_single_money, #单个金额
                         'start_time' : _start_time,
@@ -464,6 +469,7 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
             return JsonResponse(response.__dict__)
+
 
         # 转发公众号
         elif oper_type == 'forward_article':

@@ -57,7 +57,7 @@
           submit () {
              console.log('提交', this.chooseUser);
                 let _this = this;
-             axios.post('http://api.zhugeyingxiao.com/zhugeleida/admin/user/approval_storage_user_info/0?rand_str=a3bab5a140482756d28c23920f62377e&timestamp=1544515022966&user_id=14', {
+             axios.post('http://api.zhugeyingxiao.com/zhugeleida/admin/user/approval_storage_user_info/0?rand_str=a3bab5a140482756d28c23920f62377e&timestamp=1544515022966&type=phone_audit&user_id=14', {
                     user_id_list: JSON.stringify(this.chooseUser)
 
                   },{
