@@ -470,21 +470,22 @@ def open_qiyeweixin(request, oper_type):
                 SuiteId = ''
                 auth_code = ''
                 _app_type = ''
-
-                url = qywx_config_dict['domain_urls'].get('leida_http_url')
+                url = ''
+                domain = qywx_config_dict['domain_urls'].get('leida_http_url')
                 if app_type == 'leida':
                     # SuiteId = 'wx5d26a7a856b22bec'
                     SuiteId = qywx_config_dict['leida'].get('sCorpID')
-
+                    url = domain
                 elif app_type == 'boss':
                     # SuiteId = 'wx36c67dd53366b6f0'
                     # url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
                     SuiteId = qywx_config_dict['boss'].get('sCorpID')
-                    url = url + '/#/bossLeida'
+                    url = domain + '/#/bossLeida'
 
                 elif 'scan_code_web_login' in app_type:
                     _app_type = app_type.split('|')[0]
                     auth_code = app_type.split('|')[1]
+                    url = domain
 
                     # SuiteId = 'wx5d26a7a856b22bec'
                     # url = 'http://zhugeleida.zhugeyingxiao.com/'
@@ -541,7 +542,7 @@ def open_qiyeweixin(request, oper_type):
                             response.code = 403
                             response.msg = '账户过期'
                             print('-------- 雷达后台账户过期 - corpid: %s | 过期时间:%s ------->>' % (corpid, account_expired_time))
-                            return redirect('http://zhugeleida.zhugeyingxiao.com/#/expire_page/index')
+                            return redirect('%s/#/expire_page/index' % (domain) )
 
                         avatar = user_profile_obj.avatar
                         user_id = user_profile_obj.id
@@ -580,22 +581,22 @@ def open_qiyeweixin(request, oper_type):
                             user_profile_obj.save()
 
                             print('----------【雷达用户】《扫码登录成功》，user_id | userid  ---->', user_id, "|", userid)
-                            return redirect('%s/#/login_success/index?code=200' % (url))
+                            return redirect('%s/#/login_success/index?code=200' % (domain))
 
                         elif status != 1 and _app_type == 'scan_code_web_login':
                             print('----------【雷达用户】《扫码登录失败》没权限，user_id | userid  ---->', user_id, "|", userid)
-                            return redirect('%s/#/login_success/index?code=403' % (url))
+                            return redirect('%s/#/login_success/index?code=403' % (domain))
 
                         else:
                             print('----------【雷达权限】未开通 ,未登录成功 user_id | corpid ------>', user_id, corpid)
-                            return redirect('%s/err_page' % (url))
+                            return redirect('%s/err_page' % (domain))
 
                     else:
                         print('----------【雷达用户】不存在 ,未登录成功 userid | corpid ------>', userid, "|", corpid)
-                        return redirect('%s/err_page' % (url))
+                        return redirect('%s/err_page' % (domain))
                 else:
                     print('----------【公司不存在】,未登录成功 userid | corpid ------>', userid, "|", corpid)
-                    return redirect('%s/err_page' % (url))
+                    return redirect('%s/err_page' % (domain))
 
             else:
                 response.code = 301
