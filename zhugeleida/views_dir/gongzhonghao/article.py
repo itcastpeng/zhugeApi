@@ -542,6 +542,7 @@ def article_oper(request, oper_type, o_id):
             customer_id = request.GET.get('user_id')
             parent_id = request.GET.get('pid')
             article_access_log_id = request.GET.get('article_access_log_id')
+            reach_stay_time = request.GET.get('reach_stay_time')
 
             activity_id = request.GET.get('activity_id')
             is_have_activity = request.GET.get('is_have_activity')
@@ -583,8 +584,9 @@ def article_oper(request, oper_type, o_id):
                         )
                         # 'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         is_have_activity = int(is_have_activity) if is_have_activity else ''
+                        reach_stay_time = int(reach_stay_time) if reach_stay_time else ''
 
-                        if activity_id and is_have_activity == 1:
+                        if activity_id and is_have_activity == 1 and reach_stay_time != 0:
 
                             activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
                             now_date_time = datetime.datetime.now()
