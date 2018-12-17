@@ -75,11 +75,11 @@ def open_qiyeweixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
 
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
@@ -243,11 +243,11 @@ def open_qiyeweixin(request, oper_type):
         elif oper_type == "create_grant_url":
 
             app_type = int(request.POST.get('app_type')) if request.POST.get('app_type') else ''
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
 
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
@@ -372,10 +372,10 @@ def open_qiyeweixin(request, oper_type):
             echostr = request.GET.get('echostr')
             ticket_type = request.GET.get('type')
 
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
@@ -412,10 +412,10 @@ def open_qiyeweixin(request, oper_type):
 
             type = request.GET.get('type')
 
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
@@ -456,10 +456,10 @@ def open_qiyeweixin(request, oper_type):
             code = request.GET.get('code')
             app_type = request.GET.get('state')
 
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
@@ -616,10 +616,10 @@ def open_qiyeweixin(request, oper_type):
             rc.set(key_name, AuthCode, 1000)  # 授权的auth_code。用于获取企业的永久授权码。5分钟内有效
             print('--------企业微信服务器 SuiteId | AuthCode--------->>', SuiteId, '|', AuthCode)
 
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
@@ -834,10 +834,10 @@ def open_qiyeweixin(request, oper_type):
         elif oper_type == 'web_scan_authorize_qrcode':
             import uuid
             uuid = str(uuid.uuid1())
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 

@@ -207,9 +207,11 @@ def article_oper(request, oper_type, o_id):
 
         # 经纬度转换成 地理位置
         elif oper_type == 'location_convert':
+            x_num = request.POST.get('x_num')
+            y_num = request.POST.get('y_num')
 
-            x_num = '34.264642646862'
-            y_num = '108.95108518068'
+            # x_num = '34.264642646862'
+            # y_num = '108.95108518068'
             request_data_dict = {
                 'x_num' :   x_num,
                 'y_num' : y_num
@@ -587,7 +589,7 @@ def article_oper(request, oper_type, o_id):
                         reach_stay_time = int(reach_stay_time) if reach_stay_time else ''
 
                         if activity_id and is_have_activity == 1 and reach_stay_time != 0:
-
+                            print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
                             activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
                             now_date_time = datetime.datetime.now()
                             is_limit_area = ''

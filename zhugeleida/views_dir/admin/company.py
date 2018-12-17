@@ -6,7 +6,8 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.company_verify import CompanyAddForm, CompanyUpdateForm, \
-    CompanySelectForm,AgentAddForm,TongxunluAddForm
+    CompanySelectForm,AgentAddForm,TongxunluAddForm,ThreeServiceAddForm
+
 import datetime
 import json
 from publicFunc.condition_com import conditionCom
@@ -156,6 +157,37 @@ def author_status(request,oper_type):
             else:
                 response.code = 400
                 response.msg = "公司不存在"
+
+    elif request.method == "POST":
+
+        if oper_type == "three_service_setting":
+
+            config = request.POST.get('config')
+            type =  request.POST.get('type')
+
+            _data = {
+                'config': config,
+
+            }
+
+            forms_obj = ThreeServiceAddForm(_data)
+            if forms_obj.is_valid():
+                objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
+
+                if objs:
+                    objs.update(
+                        qywx_config=qywx_config,
+                        gzh_config=gzh_config,
+                        xcx_config=xcx_config
+                    )
+                else:
+                    models.zgld_three_service_setting.objects.create(
+                        qywx_config=qywx_config,
+                        gzh_config=gzh_config,
+                        xcx_config=xcx_config
+                    )
+
+
 
     return JsonResponse(response.__dict__)
 

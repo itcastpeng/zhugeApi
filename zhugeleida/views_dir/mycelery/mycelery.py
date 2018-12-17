@@ -221,10 +221,10 @@ def user_send_action_log(request):
 
         else:
 
-            three_service_objs = models.zgld_three_service_setting.objects.all()
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.qywx_config
+                qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 

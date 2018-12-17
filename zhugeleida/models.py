@@ -40,8 +40,19 @@ class zgld_company(models.Model):
         app_label = "zhugeleida"
 
 
+# 公司管理
+class zgld_three_service_setting(models.Model):
+    # company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    type_choice = (
+        (1, '企业微信第三方'),
+        (2, '公众号第三方配'),
+        (3, '小程序第三方')
+    )
+    three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice,null=True)
+    config = models.CharField(max_length=2048,verbose_name="企业微信第三方配置", null=True)
 
-# 官网模板
+
+
 class zgld_website_template(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
     template_content = models.TextField(verbose_name='官网内容',default='[]')
@@ -50,6 +61,7 @@ class zgld_website_template(models.Model):
     class Meta:
         verbose_name_plural = "公司官网模板"
         app_label = "zhugeleida"
+
 
 
 

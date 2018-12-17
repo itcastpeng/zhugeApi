@@ -49,6 +49,28 @@ class CompanyAddForm(forms.Form):
         else:
             return name
 
+
+
+# 添加公司信息
+class ThreeServiceAddForm(forms.Form):
+    # print('添加公司')
+    config = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "第三方配置不能为空"
+        }
+    )
+
+    type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "类型不能为空"
+        }
+    )
+
+
+
+
 # 更新用户信息
 class CompanyUpdateForm(forms.Form):
     company_id = forms.IntegerField(
