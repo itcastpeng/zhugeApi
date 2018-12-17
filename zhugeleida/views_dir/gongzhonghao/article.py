@@ -259,7 +259,7 @@ def article_oper(request, oper_type, o_id):
             uid = request.GET.get('uid')
             parent_id = request.GET.get('pid')
             company_id = request.GET.get('company_id')
-            activity_id = request.GET.get('activity_id')
+            # activity_id = request.GET.get('activity_id')
 
             request_data_dict = {
                 'article_id': o_id,
@@ -343,6 +343,7 @@ def article_oper(request, oper_type, o_id):
                     now_date_time = datetime.datetime.now()
                     is_limit_area = ''
                     reach_stay_time = ''
+                    activity_id = ''
                     if activity_objs:
                         activity_obj = activity_objs[0]
                         start_time = activity_obj.start_time
