@@ -4,17 +4,18 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm,LoginBindingForm,CreateShareUrl
+from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm, LoginBindingForm, CreateShareUrl
 from zhugeapi_celery_project import tasks
-from  publicFunc.account import str_sha_encrypt
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token,create_component_access_token
+from publicFunc.account import str_sha_encrypt
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token, \
+    create_component_access_token
 from urllib.parse import unquote
 from urllib.parse import quote
 import base64, random, json, string, redis, requests, time
 
+
 # 从微信公众号接口中获取openid等信息
 def get_openid_info(get_token_data):
-
     oauth_url = 'https://api.weixin.qq.com/sns/oauth2/component/access_token'
 
     s = requests.session()
@@ -26,7 +27,7 @@ def get_openid_info(get_token_data):
 
     print('-------- 通过code换取 access_token、openid信息等  返回 ------->>', ret_json)
 
-    openid = ret_json['openid']              # 授权用户唯一标识
+    openid = ret_json['openid']  # 授权用户唯一标识
     access_token = ret_json['access_token']  # 接口调用凭证
 
     ret_data = {
@@ -56,11 +57,22 @@ def user_gongzhonghao_auth(request):
         uid = relate.split('|')[3].split('_')[1]
         company_id = relate.split('|')[4].split('_')[2]
 
-        component_appid = 'wx6ba07e6ddcdc69b3'
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        component_appid = qywx_config_dict.get('app_id')
+        app_secret = qywx_config_dict.get('app_secret')
+
+        # component_appid = 'wx6ba07e6ddcdc69b3'
 
         data_dict = {
-            'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-            'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+            'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
+            'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
         }
 
         component_access_token_ret = create_component_access_token(data_dict)
@@ -79,10 +91,21 @@ def user_gongzhonghao_auth(request):
         access_token = ret_data['access_token']
         redirect_url = ''
 
-
         # 判断静默和非静默方式
         # 静默方式
         client_id = ''
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        url = qywx_config_dict.get('authorization_url')
+        api_url = qywx_config_dict.get('api_url')
+
+
         if state == 'snsapi_base':
 
             customer_objs = models.zgld_customer.objects.filter(
@@ -95,12 +118,14 @@ def user_gongzhonghao_auth(request):
             if customer_objs:
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
-                if not uid: # 代表预览的后台分享出去的链接
+                if not uid:  # 代表预览的后台分享出去的链接
                     article_url = '/gongzhonghao/yulanneirong/'
-                else:     #代表是雷达用户分享出去的。
+                else:  # 代表是雷达用户分享出去的。
                     article_url = '/gongzhonghao/leidawenzhang/'
 
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+
+                redirect_url = '{url}/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                    url=url,
                     article_url=article_url,
                     article_id=article_id,
                     token=token,
@@ -124,16 +149,20 @@ def user_gongzhonghao_auth(request):
                 customer_id = int(client_id)
 
                 if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。
-                    customer_username =  customer_objs[0].username
+                    customer_username = customer_objs[0].username
                     if customer_username:
                         customer_username = base64.b64decode(customer_username)
                         customer_username = str(customer_username, 'utf-8')
 
-                    print('--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (uid,client_id,customer_username), '|', json.dumps(data))
+                    print(
+                        '--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (
+                        uid, client_id, customer_username), '|', json.dumps(data))
                     tasks.binding_article_customer_relate.delay(data)
 
             else:
-                redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id, pid,level,uid,company_id)
+
+                redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+                api_url, article_id, pid, level, uid, company_id)
                 redirect_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={scope}&component_appid={component_appid}#wechat_redirect'.format(
                     appid=appid,
                     redirect_uri=redirect_uri,
@@ -173,7 +202,7 @@ def user_gongzhonghao_auth(request):
                 sex = ret_json['sex']  #
                 province = ret_json['province']  #
                 city = ret_json['city']  #
-                country = ret_json['country']    #
+                country = ret_json['country']  #
                 headimgurl = ret_json['headimgurl']  #
                 token = account.get_token(account.str_encrypt(openid))
                 obj = models.zgld_customer.objects.create(
@@ -195,29 +224,33 @@ def user_gongzhonghao_auth(request):
                 else:  # 代表是雷达用户分享出去的。
                     article_url = '/gongzhonghao/leidawenzhang/'
                 client_id = obj.id
-                redirect_url = 'http://zhugeleida.zhugeyingxiao.com/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+
+                redirect_url = '{url}/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                    url=url,
                     article_url=article_url,
                     article_id=article_id,
                     token=token,
                     client_id=client_id,
 
-                    uid = uid,  # 文章作者-ID
-                    level = level,  # 所在层级
-                    pid = pid ,      # 目前所在的父级ID
-                    company_id = company_id,
+                    uid=uid,  # 文章作者-ID
+                    level=level,  # 所在层级
+                    pid=pid,  # 目前所在的父级ID
+                    company_id=company_id,
                 )
                 data = {
-                    'article_id' : article_id,
-                    'user_id' : uid,       # 文章作者-ID
-                    'customer_id' : obj.id,
-                    'level' : level,
-                    'pid' : pid,
-                    'company_id' : company_id,
+                    'article_id': article_id,
+                    'user_id': uid,  # 文章作者-ID
+                    'customer_id': obj.id,
+                    'level': level,
+                    'pid': pid,
+                    'company_id': company_id,
                 }
-                pid =  int(pid) if pid else ''
+                pid = int(pid) if pid else ''
                 customer_id = int(obj.id)
-                if uid and pid != customer_id: # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
-                    print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (uid,obj.id,customer_name), '|', json.dumps(data))
+                if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
+                    print(
+                        '--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
+                        uid, obj.id, customer_name), '|', json.dumps(data))
                     tasks.binding_article_customer_relate.delay(data)
 
             else:
@@ -225,10 +258,10 @@ def user_gongzhonghao_auth(request):
                 errmsg = ret_json.get('errmsg')
                 print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
 
-        print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>',redirect_url)
+        print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
 
         _data = {
-            'openid' : openid,
+            'openid': openid,
             'authorizer_appid': appid,
         }
         # 获取 公众号的用户信息
@@ -258,22 +291,38 @@ def create_gongzhonghao_yulan_auth_url(data):
     authorization_appid = gongzhonghao_app_obj.authorization_appid
 
     appid = authorization_appid
-    redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id,pid,level,uid,company_id)
+
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    api_url = qywx_config_dict.get('api_url')
+
+    component_appid = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+        api_url,article_id, pid, level, uid, company_id)
+
 
     print('-------- 静默方式下跳转的 需拼接的 redirect_uri ------->', redirect_uri)
-    scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
-    component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+    # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
-    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
-    print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>',authorize_url)
-    response.data = {'authorize_url': authorize_url }
+    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+    appid, redirect_uri, scope, state, component_appid)
+    print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>', authorize_url)
+    response.data = {'authorize_url': authorize_url}
     response.code = 200
     response.msg = "返回成功"
 
-
     return response
-
 
 
 # def binding_article_customer_relate(data):
@@ -343,56 +392,81 @@ def create_gongzhonghao_yulan_auth_url(data):
 #     return response
 
 
-
-#公众号文章生成分享的url
+# 公众号文章生成分享的url
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def user_gongzhonghao_auth_oper(request,oper_type):
+def user_gongzhonghao_auth_oper(request, oper_type):
     response = Response.ResponseObj()
     if request.method == "GET":
 
-        #
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        url = qywx_config_dict.get('authorization_url')
+        api_url = qywx_config_dict.get('api_url')
+
+
+
         if oper_type == 'create_gongzhonghao_share_auth_url':
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
                 customer_id = request.GET.get('user_id')
-                uid = forms_obj.cleaned_data.get('uid') # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
+                uid = forms_obj.cleaned_data.get('uid')  # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
                 # pid = forms_obj.cleaned_data.get('pid')
                 level = forms_obj.cleaned_data.get('level')
                 article_id = forms_obj.cleaned_data.get('article_id')
-                company_id =  forms_obj.cleaned_data.get('company_id')
+                company_id = forms_obj.cleaned_data.get('company_id')
 
                 gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
                 if level:
                     level = int(level) + 1
-                pid =  customer_id
+                pid = customer_id
                 appid = authorization_appid
-                redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id,pid,level,uid,company_id)
+                redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+                    api_url,article_id, pid, level, uid, company_id)
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                component_appid = qywx_config_dict.get('app_id')
+                # token = qywx_config_dict.get('token')
+                # encodingAESKey = qywx_config_dict.get('encodingAESKey')
 
                 print('--------  嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
-                scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+                scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                 state = 'snsapi_base'
-                component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+                # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
-                share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
+                share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+                appid, redirect_uri, scope, state, component_appid)
 
                 bianma_share_url = quote(share_url, 'utf-8')
 
-                share_url = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
-                print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
+                share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (api_url,bianma_share_url)
+                print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>', share_url)
 
                 response.data = {'share_url': share_url}
                 response.code = 200
                 response.msg = "返回成功"
 
             else:
-                print('---------- 生成 分享的公众号文章链接 未通过验证 --------->>',forms_obj.errors)
+                print('---------- 生成 分享的公众号文章链接 未通过验证 --------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
         ##生成公众号JS-SDK使用权限签名算法
-        elif  oper_type == 'gongzhonghao_share_sign':
+        elif oper_type == 'gongzhonghao_share_sign':
             '''
             生成签名之前必须先了解一下jsapi_ticket，jsapi_ticket是H5应用调用企业微信JS接口的临时票据。
             正常情况下，jsapi_ticket的有效期为7200秒，通过 access_token 来获取
@@ -403,10 +477,9 @@ def user_gongzhonghao_auth_oper(request,oper_type):
 
             if '#' in location_href:
                 location_href = location_href.split('#')[0]
-                print('--------- location_href --------->>',location_href)
+                print('--------- location_href --------->>', location_href)
 
-
-            print('------- 公众号 签名算法 request.GET --------->',request.GET)
+            print('------- 公众号 签名算法 request.GET --------->', request.GET)
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
             objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
@@ -415,15 +488,27 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 authorizer_appid = objs[0].authorization_appid
                 authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
 
-                authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+                authorizer_access_token = rc.get(
+                    authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id = qywx_config_dict.get('app_id')
+                app_secret = qywx_config_dict.get('app_secret')
 
                 if not authorizer_access_token:
                     data = {
                         'key_name': authorizer_access_token_key_name,
                         'authorizer_refresh_token': authorizer_refresh_token,
                         'authorizer_appid': authorizer_appid,
-                        'app_id': 'wx6ba07e6ddcdc69b3',
-                        'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                        'app_id': app_id,
+                        'app_secret': app_secret
                     }
 
                     authorizer_access_token_result = create_authorizer_access_token(data)
@@ -441,7 +526,7 @@ def user_gongzhonghao_auth_oper(request,oper_type):
 
                     get_ticket_data = {
                         'access_token': authorizer_access_token,
-                        'type' : 'jsapi'
+                        'type': 'jsapi'
                     }
 
                     s = requests.session()
@@ -466,7 +551,8 @@ def user_gongzhonghao_auth_oper(request,oper_type):
                 timestamp = int(time.time())
                 # url = 'http://zhugeleida.zhugeyingxiao.com/'
                 url = location_href
-                sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket, noncestr, timestamp, url)
+                sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (
+                jsapi_ticket, noncestr, timestamp, url)
                 signature = str_sha_encrypt(sha_string.encode('utf-8'))
 
                 response.code = 200
@@ -482,7 +568,6 @@ def user_gongzhonghao_auth_oper(request,oper_type):
             else:
                 response.code = 301
                 response.msg = "没有请求数据"
-
 
         return JsonResponse(response.__dict__)
 
@@ -503,7 +588,4 @@ def user_gongzhonghao_redirect_share_url(request):
         response.code = 401
         response.msg = "请求方式异常"
 
-
     return JsonResponse(response.__dict__)
-
-

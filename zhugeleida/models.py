@@ -45,7 +45,7 @@ class zgld_three_service_setting(models.Model):
     # company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     type_choice = (
         (1, '企业微信第三方'),
-        (2, '公众号第三方配'),
+        (2, '公众号第三方'),
         (3, '小程序第三方')
     )
     three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice,null=True)

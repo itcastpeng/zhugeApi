@@ -644,12 +644,23 @@ def article_oper(request, oper_type, o_id):
             #
             # tasks.user_forward_send_activity_redPacket.delay(_data)
 
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            app_id = qywx_config_dict.get('app_id')
+            app_secret = qywx_config_dict.get('app_secret')
+
             _data = {
                 'authorizer_appid': 'wxa77213c591897a13',
                 'authorizer_refresh_token': 'refreshtoken@@@RAVUheyR510HyjAYrDxgSrX8MHDkbbb5ysHgGRWHeUc',
                 'key_name': 'authorizer_access_token_wxa77213c591897a13',
-                'app_id': 'wx6ba07e6ddcdc69b3',                     # 查看诸葛雷达_公众号的 appid
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'    # 查看诸葛雷达_公众号的AppSecret
+                'app_id': app_id, #'wx6ba07e6ddcdc69b3',                     # 查看诸葛雷达_公众号的 appid
+                'app_secret': app_secret # '0bbed534062ceca2ec25133abe1eecba'    # 查看诸葛雷达_公众号的AppSecret
             }
 
             authorizer_access_token_ret = create_authorizer_access_token(_data)

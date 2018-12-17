@@ -267,7 +267,9 @@ def open_qiyeweixin(request, oper_type):
                     suite_id = qywx_config_dict['address_book']['sCorpID']
                     app_type = 'address_book'
 
-                redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/get_auth_code'  # 安装完成回调域名
+
+                leida_http_url = qywx_config_dict.get('domain_urls').get('leida_http_url')
+                redirect_uri = '%s/open_qiyeweixin/get_auth_code' % (leida_http_url)  # 安装完成回调域名
 
                 _data = {
                     'SuiteId': suite_id

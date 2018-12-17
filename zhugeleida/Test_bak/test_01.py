@@ -92,6 +92,31 @@ application_data = {
     }
 }
 
+application_data1 = {
+    'app_id' : 'wx67e2fde0f694111c',  # 小程序
+    'app_secret' : '4a9690b43178a1287b2ef845158555ed',
+    'token' :  'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg',
+    'encodingAESKey' : 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143',
+    'authorization_url': 'http://zhugeleida.zhugeyingxiao.com',
+}
+
+application_data2 = {
+    'app_id' : 'wx6ba07e6ddcdc69b3',  # 公众号
+    'app_secret' : '0bbed534062ceca2ec25133abe1eecba',
+    'token' :'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg',
+    'encodingAESKey' : 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143',
+    'authorization_url' : 'http://zhugeleida.zhugeyingxiao.com',
+    'api_url' : 'http://api.zhugeyingxiao.com'
+
+}
+
+token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+appid = 'wx6ba07e6ddcdc69b3'
+
+
+
+
 print(json.dumps(application_data))
 
 

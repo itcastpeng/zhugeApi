@@ -201,6 +201,12 @@ def  create_suite_access_token(data):
         }
         response.code = 200
 
+    else:
+
+        response.code = 301
+        response.msg = '企业微信第三方-无配置信息'
+        print('------ 【企业微信第三方-无配置信息】 create_suite_access_token ------>>')
+
     return response
 
 ## 企业微信 生成 预授权码 + suite_access_token

@@ -950,8 +950,19 @@ def user_oper(request, oper_type, o_id):
             rand_str = account.str_encrypt(timestamp + token)
             timestamp = timestamp
 
-            url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/zhuceyonghu?rand_str=%s&timestamp=%s&user_id=%d' % (
-            rand_str, timestamp, int(user_id))
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            leida_http_url = qywx_config_dict.get('domain_urls').get('leida_http_url')
+
+
+            url = '%s/#/gongzhonghao/zhuceyonghu?rand_str=%s&timestamp=%s&user_id=%d' % (
+                leida_http_url,rand_str, timestamp, int(user_id))
             data = {
                 'url': url,
                 'admin_uid': user_id

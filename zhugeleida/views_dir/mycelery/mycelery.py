@@ -240,6 +240,11 @@ def user_send_action_log(request):
                 access_token = access_token_ret.data.get('access_token')
                 send_token_data['access_token'] = access_token
 
+            else:
+                response.code = 301
+                response.msg = '公众号第三方-无配置信息'
+                print('------ 【公众号第三方-无配置信息】 user_send_action_log ------>>')
+
         userid = user_obj.userid
         post_send_data = {
             "touser": userid,
@@ -322,7 +327,7 @@ def create_user_or_customer_qr_code(request):
     authorizer_refresh_token = obj.authorizer_refresh_token
     authorizer_appid = obj.authorization_appid
 
-    component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
+    # component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
     key_name = '%s_authorizer_access_token' % (authorizer_appid)
 
     authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
@@ -811,12 +816,24 @@ def user_send_gongzhonghao_template_msg(request):
             authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
         if not authorizer_access_token:
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            app_id = qywx_config_dict.get('app_id')
+            app_secret = qywx_config_dict.get('app_secret')
+
             data = {
                 'key_name': authorizer_access_token_key_name,
                 'authorizer_refresh_token': authorizer_refresh_token,
                 'authorizer_appid': authorizer_appid,
-                'app_id': 'wx6ba07e6ddcdc69b3',
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                'app_id': app_id, #'wx6ba07e6ddcdc69b3',
+                'app_secret': app_secret ,# '0bbed534062ceca2ec25133abe1eecba'
             }
 
             authorizer_access_token_result = create_gongzhonghao_authorizer_access_token(data)
@@ -1641,12 +1658,25 @@ def get_customer_gongzhonghao_userinfo(request):
         authorizer_refresh_token = objs[0].authorizer_refresh_token
 
     key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    app_id = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('token')
+
+
     _data = {
         'authorizer_appid': authorizer_appid,
         'authorizer_refresh_token': authorizer_refresh_token,
         'key_name': key_name,
-        'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-        'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+        'app_id':  app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+        'app_secret': app_secret # '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
     }
 
     authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)

@@ -70,10 +70,22 @@ def login(request):
                 is_release_version_num = False
                 print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
 
+            component_appid = ''
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+                component_appid = qywx_config_dict.get('app_id')
+
+            else:
+                print('------ 【公众号第三方-无配置信息】component_appid ------>>')
 
             obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             authorizer_appid = obj.authorization_appid
-            component_appid = 'wx67e2fde0f694111c'
+            # component_appid = 'wx67e2fde0f694111c'
 
             # if  version_num: # 有版本号(从ext 里读取的)
             online_version_num = obj.version_num
