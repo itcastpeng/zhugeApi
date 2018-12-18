@@ -1606,45 +1606,80 @@ def binding_article_customer_relate(request):
     data = request.GET.copy()
     print('------ 绑定文章客户关系 json.dumps(data) ------>>', json.dumps(data))
 
-    article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(
-        article_id=article_id,
-        customer_id=customer_id
-    )
+    company_objs = models.zgld_company.objects.filter(id=company_id)
+    if company_objs:
+        company_obj = company_objs[0]
+        is_customer_unique = company_obj.is_customer_unique
 
-    if article_to_customer_belonger_objs:
-
-        # article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
-        # if article_to_customer_belonger_obj:
-        print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>')
-        # response.code = 302
-        # response.msg = "文章和客户\雷达用户-关系存在"
-
-        article_to_customer_belonger_obj =article_to_customer_belonger_objs[0]
-        e_level = article_to_customer_belonger_obj.level
-        e_user_id = article_to_customer_belonger_obj.user_id
-
-        if e_user_id == user_id and int(level) != e_level: #当用户user_id 是同一个用户的时候,并且 层级不同的时候
-            print('------ [创建]文章和客户\雷达用户关系 ------>')
-            models.zgld_article_to_customer_belonger.objects.create(
+        if is_customer_unique: ## 唯一性
+            article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(
                 article_id=article_id,
-                customer_id=customer_id,
-                user_id=user_id,
-                customer_parent_id=parent_id,
-                level=level,
+                customer_id=customer_id
             )
 
-    else:
+            if article_to_customer_belonger_objs:
 
-        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(customer_id=customer_id,
-                                                                                       user__company_id=company_id)
-        if user_customer_belonger_objs: #如果关系存在的话，说明已经看过文章并建立关系。
-            print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
+                # article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
+                # if article_to_customer_belonger_obj:
+                print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>')
+                # response.code = 302
+                # response.msg = "文章和客户\雷达用户-关系存在"
 
-            customer_belonger_obj = user_customer_belonger_objs[0]
-            e_user_id = customer_belonger_obj.user_id  # 找到那个建立关系的人。
-            print('------ [创建]文章和客户\雷达用户关系 ------>')
+                article_to_customer_belonger_obj =article_to_customer_belonger_objs[0]
+                e_level = article_to_customer_belonger_obj.level
+                e_user_id = article_to_customer_belonger_obj.user_id
 
-            if e_user_id == user_id:  # 如果是同一个雷达用户才能够建立关系
+                if e_user_id == user_id and int(level) != e_level: #当用户user_id 是同一个用户的时候,并且 层级不同的时候
+                    print('------ [创建]文章和客户\雷达用户关系 ------>')
+                    models.zgld_article_to_customer_belonger.objects.create(
+                        article_id=article_id,
+                        customer_id=customer_id,
+                        user_id=user_id,
+                        customer_parent_id=parent_id,
+                        level=level,
+                    )
+
+            else:
+
+                user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(customer_id=customer_id,
+                                                                                               user__company_id=company_id)
+                if user_customer_belonger_objs: #如果关系存在的话，说明已经看过文章并建立关系。
+                    print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
+
+                    customer_belonger_obj = user_customer_belonger_objs[0]
+                    e_user_id = customer_belonger_obj.user_id  # 找到那个建立关系的人。
+                    print('------ [创建]文章和客户\雷达用户关系 ------>')
+
+                    if e_user_id == user_id:  # 如果是同一个雷达用户才能够建立关系
+                        models.zgld_article_to_customer_belonger.objects.create(
+                            article_id=article_id,
+                            customer_id=customer_id,
+                            user_id=user_id,
+                            customer_parent_id=parent_id,
+                            level=level,
+                        )
+
+                else:
+                    print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
+                    models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
+                    models.zgld_article_to_customer_belonger.objects.create(
+                        article_id=article_id,
+                        customer_id=customer_id,
+                        user_id=user_id,
+                        customer_parent_id=parent_id,
+                        level=level,
+                    )
+
+        else: # 非唯一性的
+            article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
+
+            if article_to_customer_belonger_obj:
+                print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>')
+                # response.code = 302
+                # response.msg = "文章和客户\雷达用户-关系存在"
+
+            else:
+                print('------ [创建]文章和客户\雷达用户关系 ------>')
                 models.zgld_article_to_customer_belonger.objects.create(
                     article_id=article_id,
                     customer_id=customer_id,
@@ -1653,19 +1688,23 @@ def binding_article_customer_relate(request):
                     level=level,
                 )
 
-        else:
-            print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
-            models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
-            models.zgld_article_to_customer_belonger.objects.create(
-                article_id=article_id,
-                customer_id=customer_id,
-                user_id=user_id,
-                customer_parent_id=parent_id,
-                level=level,
-            )
+            user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
+                                                                                           user_id=user_id)
+            if user_customer_belonger_obj:
+                print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
+                      user_id)
+                # response.code = 302
+                # response.msg = "关系存在"
+
+            else:
+                print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
+                      user_id)
+                models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
+
+
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4])
-    # 活动并且
+    # # 活动并且活动开通中
     if activity_objs:
         activity_id = activity_objs[0].id
         print('------ 此文章有活动 article_id：----->', article_id)

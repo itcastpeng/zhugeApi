@@ -87,8 +87,7 @@ application_data = {
         'sCorpID': 'wx81159f52aff62388',
     },
     'domain_urls': {
-        'leida_http_url': 'http://zhugeleida.zhugeyingxiao.com',
-
+        'leida_http_url': 'http://zhugeleida.zhugeyingxiao.com'
     }
 }
 
@@ -107,7 +106,6 @@ application_data2 = {
     'encodingAESKey' : 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143',
     'authorization_url' : 'http://zhugeleida.zhugeyingxiao.com',
     'api_url' : 'http://api.zhugeyingxiao.com'
-
 }
 
 token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'

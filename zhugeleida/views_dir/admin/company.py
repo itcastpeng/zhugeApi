@@ -13,7 +13,7 @@ import json
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
 
-
+from django.db.models import Q, F
 # 查询公司
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -158,9 +158,55 @@ def author_status(request,oper_type):
                 response.code = 400
                 response.msg = "公司不存在"
 
+
+        elif oper_type == "query_service_settings":
+            type = request.GET.get('type')
+            # q = Q()
+            #
+            # if type:
+            #     q.add(Q(**{'three_services_type': type}), Q.AND)
+
+
+            # 获取所有数据
+            ret_data = []
+
+            for type in [1,2,3]:
+                name = ''
+                if type == 1:
+                    name = '第三方企业微信'
+                elif type == 2:
+                    name = '第三方企业微信'
+                elif type == 3:
+                    name = '第三方企业微信'
+
+                objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
+
+                status = 0
+                status_text = '未通过'
+                if objs:
+                    status_text = objs[0].get_status_display()
+                    status =  objs[0].status
+
+                ret_data.append({
+                    'type' : type, # 类型
+                    'name': name,  #
+                    'status' : status,           # 状态为1,代表通过。0 代表 未1通过
+                    'status_text' : status_text   # 状态为1,代表通过。0 代表 未1通过
+                })
+
+            response.code = 200
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': 3
+            }
+
+        return JsonResponse(response.__dict__)
+
+
     elif request.method == "POST":
 
-        if oper_type == "three_service_setting":
+
+        if oper_type == "edit_service_setting":
 
             config = request.POST.get('config')
             type =  request.POST.get('type')
@@ -176,15 +222,21 @@ def author_status(request,oper_type):
 
                 if objs:
                     objs.update(
-                        type=type,
-                        config=config
+                        config=config,
+                        status=1
                     )
                 else:
                     models.zgld_three_service_setting.objects.create(
-                        type=type,
-                        config=config
+                        three_services_type=type,
+                        config=config,
+                        status=1
                     )
+                response.code = 200
+                response.msg = '添加成功'
 
+            else:
+                response.code = 303
+                response.msg = json.loads(forms_obj.errors.as_json())
 
 
     return JsonResponse(response.__dict__)

@@ -248,8 +248,7 @@ def user_gongzhonghao_auth(request):
                 pid = int(pid) if pid else ''
                 customer_id = int(obj.id)
                 if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
-                    print(
-                        '--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
+                    print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
                         uid, obj.id, customer_name), '|', json.dumps(data))
                     tasks.binding_article_customer_relate.delay(data)
 

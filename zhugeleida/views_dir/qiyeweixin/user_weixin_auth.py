@@ -168,8 +168,6 @@ def work_weixin_auth(request, company_id):
         response.code = 402
         response.msg = "请求方式异常"
     return JsonResponse(response.__dict__)
-
-
     # 从微信小程序接口中获取openid等信息
 
 

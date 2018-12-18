@@ -374,10 +374,10 @@ def open_weixin_gongzhonghao(request, oper_type):
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
-            leida_http_url = qywx_config_dict.get('authorization_url')
+            url = qywx_config_dict.get('authorization_url')
 
             # 生成授权链接
-            redirect_uri = '%s/admin/#/empower/empower_xcx/' % (leida_http_url)
+            redirect_uri = '%s/admin/#/empower/empower_xcx/' % (url)
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (
                 app_id, pre_auth_code, redirect_uri)  # auth_type=3 表示公众号和小程序都展示
