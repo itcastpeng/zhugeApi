@@ -44,9 +44,9 @@ class zgld_company(models.Model):
 class zgld_three_service_setting(models.Model):
     # company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     type_choice = (
-        (1, '第三方企业微信'),
-        (2, '第三方公众号'),
-        (3, '第三方小程序')
+        (1, '企业微信第三方服务商'),
+        (2, '公众号第三方平台'),
+        (3, '小程序第三方平台')
     )
     three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice,null=True)
     config = models.CharField(max_length=2048,verbose_name="企业微信第三方配置", null=True)

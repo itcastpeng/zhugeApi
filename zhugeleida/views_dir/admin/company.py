@@ -161,44 +161,71 @@ def author_status(request,oper_type):
 
         elif oper_type == "query_service_settings":
             type = request.GET.get('type')
-            # q = Q()
-            #
-            # if type:
-            #     q.add(Q(**{'three_services_type': type}), Q.AND)
 
-
-            # 获取所有数据
-            ret_data = []
-
-            for type in [1,2,3]:
-                name = ''
-                if type == 1:
-                    name = '企业微信第三方服务商'
-                elif type == 2:
-                    name = '公众号第三方平台'
-                elif type == 3:
-                    name = '小程序第三方平台'
+            q = Q()
+            if type: # 查询单个详情
+                type = int(type)
+                q.add(Q(**{'three_services_type': type}), Q.AND)
 
                 objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
 
-                status = 0
-                status_text = '未通过'
                 if objs:
-                    status_text = objs[0].get_status_display()
-                    status =  objs[0].status
 
-                ret_data.append({
-                    'type' : type, # 类型
-                    'name': name,  #
-                    'status' : status,           # 状态为1,代表通过。0 代表 未1通过
-                    'status_text' : status_text   # 状态为1,代表通过。0 代表 未1通过
-                })
+                    ret_data = []
+                    obj = objs[0]
+                    status_text = obj.get_status_display()
+                    status = obj.status
+                    config = obj.config
 
-            response.code = 200
-            response.data = {
-                'ret_data': ret_data,
-                'data_count': 3
-            }
+                    ret_data.append({
+                        'type': type,  # 类型
+                        'name': obj.three_services_type() ,  #
+                        'status': status,  # 状态为1,代表通过。0 代表 未1通过
+                        'status_text': status_text,  # 状态为1,代表通过。0 代表 未1通过
+                        'config' : config
+
+                    })
+
+
+                else:
+                    response.code = 301
+                    response.data = '无数据'
+
+
+            else:
+
+                # 获取所有数据
+                ret_data = []
+
+                for type in [1,2,3]:
+                    name = ''
+                    if type == 1:
+                        name = '企业微信第三方服务商'
+                    elif type == 2:
+                        name = '公众号第三方平台'
+                    elif type == 3:
+                        name = '小程序第三方平台'
+
+                    objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
+
+                    status = 0
+                    status_text = '未通过'
+                    if objs:
+                        status_text = objs[0].get_status_display()
+                        status =  objs[0].status
+
+                    ret_data.append({
+                        'type' : type, # 类型
+                        'name': name,  #
+                        'status' : status,           # 状态为1,代表通过。0 代表 未1通过
+                        'status_text' : status_text   # 状态为1,代表通过。0 代表 未1通过
+                    })
+
+                response.code = 200
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': 3
+                }
 
         return JsonResponse(response.__dict__)
 
@@ -210,6 +237,7 @@ def author_status(request,oper_type):
 
             config = request.POST.get('config')
             type =  request.POST.get('type')
+
 
             _data = {
                 'config': config,

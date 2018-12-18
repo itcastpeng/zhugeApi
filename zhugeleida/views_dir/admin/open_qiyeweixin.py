@@ -166,7 +166,7 @@ def open_qiyeweixin(request, oper_type):
 
                     _app_type = ''
                     name = '通讯录应用'
-                    if SuiteId == 'wx1cbe3089128fda03':
+                    if SuiteId == qywx_config_dict['address_book']['sCorpID']:
                         name = '通讯录'
                         _app_type = 3
 
@@ -425,13 +425,16 @@ def open_qiyeweixin(request, oper_type):
                 sEncodingAESKey = ''
                 if type == 'leida':
                     # sToken = "5lokfwWTqHXnb58VCV"  # 回调配置
+                    # sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
                     sToken = qywx_config_dict['leida']['sToken']
-                    sEncodingAESKey = "ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"  # 回调配置
+                    sEncodingAESKey = qywx_config_dict['leida']['sEncodingAESKey']
+
 
                 elif type == 'boss':
                     # sToken = "22LlaSyBP"  # 回调配置
+                    # sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
                     sToken = qywx_config_dict['boss']['sToken']
-                    sEncodingAESKey = "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"  # 回调配置
+                    sEncodingAESKey = qywx_config_dict['boss']['sEncodingAESKey']
 
                 # sCorpID = "wx81159f52aff62388"  # 通用开发参数 CorpID
                 sCorpID = qywx_config_dict['general_parm']['sCorpID']  # 通用开发参数 CorpID
