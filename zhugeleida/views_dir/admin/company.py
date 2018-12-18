@@ -179,7 +179,7 @@ def author_status(request,oper_type):
 
                     ret_data.append({
                         'type': type,  # 类型
-                        'name': obj.three_services_type() ,  #
+                        'name': obj.three_services_type ,  #
                         'status': status,  # 状态为1,代表通过。0 代表 未1通过
                         'status_text': status_text,  # 状态为1,代表通过。0 代表 未1通过
                         'config' : json.loads(config)
