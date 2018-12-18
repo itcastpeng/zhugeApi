@@ -1606,8 +1606,10 @@ def binding_article_customer_relate(request):
     data = request.GET.copy()
     print('------ 绑定文章客户关系 json.dumps(data) ------>>', json.dumps(data))
 
-    article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id,
-                                                                   customer_id=customer_id)
+    article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(
+        article_id=article_id,
+        customer_id=customer_id
+    )
 
     if article_to_customer_belonger_objs:
 
@@ -1654,6 +1656,13 @@ def binding_article_customer_relate(request):
         else:
             print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
             models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
+            models.zgld_article_to_customer_belonger.objects.create(
+                article_id=article_id,
+                customer_id=customer_id,
+                user_id=user_id,
+                customer_parent_id=parent_id,
+                level=level,
+            )
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4])
     # 活动并且
