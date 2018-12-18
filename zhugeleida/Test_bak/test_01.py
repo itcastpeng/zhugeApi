@@ -96,7 +96,7 @@ application_data1 = {
     'app_secret' : '4a9690b43178a1287b2ef845158555ed',
     'token' :  'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg',
     'encodingAESKey' : 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143',
-    'authorization_url': 'http://zhugeleida.zhugeyingxiao.com',
+    # 'authorization_url': 'http://zhugeleida.zhugeyingxiao.com',
 }
 
 application_data2 = {
