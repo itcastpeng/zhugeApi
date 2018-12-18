@@ -162,10 +162,10 @@ def author_status(request,oper_type):
         elif oper_type == "query_service_settings":
             type = request.GET.get('type')
 
-            q = Q()
+            # q = Q()
             if type: # 查询单个详情
                 type = int(type)
-                q.add(Q(**{'three_services_type': type}), Q.AND)
+                # q.add(Q(**{'three_services_type': type}), Q.AND)
 
                 objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
 
@@ -184,7 +184,12 @@ def author_status(request,oper_type):
                         'status_text': status_text,  # 状态为1,代表通过。0 代表 未1通过
                         'config' : json.loads(config)
                     })
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
 
+                    }
 
                 else:
                     response.code = 301
