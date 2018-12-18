@@ -175,7 +175,7 @@ def focusOnIssuedRedEnvelope(resultDict):
         )
         SHANGHUKEY = objsForm.get('SHANGHUKEY')
         result_data = {
-            'scene_id' : 'PRODUCT_1',               # 发放红包使用场景，红包金额大于200或者小于1元时必传 PRODUCT_1:商品促销
+            # 'scene_id' : 'PRODUCT_1',               # 发放红包使用场景，红包金额大于200或者小于1元时必传 PRODUCT_1:商品促销
             'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
             'wxappid': objsForm.get('appid'),                           # appid
             'mch_id':objsForm.get('mch_id'),                            # 商户号

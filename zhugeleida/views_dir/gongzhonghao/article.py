@@ -5,7 +5,8 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, \
-    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm
+    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm,LocationForm
+
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
 
@@ -204,6 +205,51 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 经纬度转换成 地理位置
+        elif oper_type == 'location_convert':
+            x_num = request.POST.get('x_num')
+            y_num = request.POST.get('y_num')
+
+            # x_num = '34.264642646862'
+            # y_num = '108.95108518068'
+            request_data_dict = {
+                'x_num' :   x_num,
+                'y_num' : y_num
+            }
+            customer_id = request.GET.get('user_id')
+            forms_obj = LocationForm(request_data_dict)
+            if forms_obj.is_valid():
+                location = x_num +',' + y_num
+
+                url = 'http://api.map.baidu.com/geocoder/v2'
+                ak = 'NLVvUqThVdf38Gkyb1kizrqRC2yxa7t7'
+                real_url = url + '/?callback=renderReverse&location=' + location + '&output=json&pois=1&ak=' + ak
+                req = requests.get(real_url)
+                print('------ 【百度接口返回】---->>', req.text)
+                ret = req.text[29:-1]
+                print('-------【百度接口返回json.dump】--------->>', ret)
+
+                data = json.loads(ret)
+                formatted_address = data.get('result').get('formatted_address')
+                country = data.get('result').get('addressComponent').get('country')
+                province = data.get('result').get('addressComponent').get('province')
+                city = data.get('result').get('addressComponent').get('city')
+                print('---- 解析出的具体位置 formatted_address ----->>',formatted_address)  # 输出具体位置
+                objs = models.zgld_customer.objects.filter(id=customer_id)
+                if objs:
+                    objs.update(
+                        country=country,
+                        province=province,
+                        city=city,
+                        formatted_address=formatted_address
+                    )
+                response.code = 200
+                response.msg = '解析成功'
+
+            else:
+                print('------- 验证未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     else:
 
@@ -215,7 +261,7 @@ def article_oper(request, oper_type, o_id):
             uid = request.GET.get('uid')
             parent_id = request.GET.get('pid')
             company_id = request.GET.get('company_id')
-            activity_id = request.GET.get('activity_id')
+            # activity_id = request.GET.get('activity_id')
 
             request_data_dict = {
                 'article_id': o_id,
@@ -234,11 +280,17 @@ def article_oper(request, oper_type, o_id):
                 insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
                 if insert_ads and insert_ads.get('mingpian'):
 
-                    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-                        customer_id=customer_id,
-                        user__company_id=company_id)
+                    company_objs = models.zgld_company.objects.filter(id=company_id)
+                    if  company_objs:
+                        company_obj = company_objs[0]
+                        is_customer_unique = company_obj.is_customer_unique
 
-                    uid = objs[0].user_id  # 找到那个建立关系的人。
+                        if is_customer_unique: # 唯一性
+                            objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                                customer_id=customer_id,
+                                user__company_id=company_id)
+                            uid = objs[0].user_id  # 找到那个建立关系的人。
+
 
                     mingpian_avatar_objs = models.zgld_user_photo.objects.select_related('user').filter(user_id=uid, photo_type=2).order_by('-create_date')
                     mingpian_avatar = ''
@@ -291,10 +343,16 @@ def article_oper(request, oper_type, o_id):
 
                     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
                     now_date_time = datetime.datetime.now()
+                    is_limit_area = ''
+                    reach_stay_time = ''
+                    activity_id = ''
                     if activity_objs:
                         activity_obj = activity_objs[0]
                         start_time = activity_obj.start_time
                         end_time = activity_obj.end_time
+                        is_limit_area = activity_obj.is_limit_area
+                        reach_stay_time = activity_obj.reach_stay_time
+
 
                         if now_date_time >= start_time and now_date_time <= end_time: # 活动开启并活动在进行中
                             _start_time = start_time.strftime('%Y-%m-%d %H:%M')
@@ -302,6 +360,7 @@ def article_oper(request, oper_type, o_id):
                             activity_id = activity_obj.id
                             reach_forward_num = activity_obj.reach_forward_num
                             activity_single_money = activity_obj.activity_single_money
+
                             is_have_activity = 1  # 活动已经开启
 
                             if parent_id:
@@ -383,12 +442,15 @@ def article_oper(request, oper_type, o_id):
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
+                        'activity_id' : activity_id,
                         'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否开启。 'true' 或   'false'
-                        'focus_get_money': focus_get_money, #关注领取红包金额
+                        'focus_get_money': focus_get_money,                # 关注领取红包金额
                         'is_subscribe': is_subscribe,  # 是否关注了公众号。0 为没有关注 1为关注了。
                         'is_subscribe_text': is_subscribe_text,
                         'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
                         'qrcode_url': qrcode_url,
+                        'is_limit_area' : is_limit_area,
+                        'reach_stay_time' : reach_stay_time,
                         'reach_forward_num': reach_forward_num,  #达到多少次发红包
                         'activity_single_money': activity_single_money, #单个金额
                         'start_time' : _start_time,
@@ -410,6 +472,7 @@ def article_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
             return JsonResponse(response.__dict__)
+
 
         # 转发公众号
         elif oper_type == 'forward_article':
@@ -481,6 +544,10 @@ def article_oper(request, oper_type, o_id):
             customer_id = request.GET.get('user_id')
             parent_id = request.GET.get('pid')
             article_access_log_id = request.GET.get('article_access_log_id')
+            reach_stay_time = request.GET.get('reach_stay_time')
+
+            activity_id = request.GET.get('activity_id')
+            is_have_activity = request.GET.get('is_have_activity')
 
             request_data_dict = {
                 'article_id': o_id,
@@ -507,24 +574,54 @@ def article_oper(request, oper_type, o_id):
                     objs = models.zgld_article_to_customer_belonger.objects.filter(q)
                     if objs:
                         objs.update(stay_time=F('stay_time') + 5)  #
-                    # else:
-                    #     models.zgld_article_to_customer_belonger.objects.create(
-                    #         article_id=article_id,
-                    #         customer_id=customer_id,
-                    #         user_id=uid,
-                    #         customer_parent_id=parent_id
-                    #         # stay_time=0
-                    #     )
 
-                    article_access_log_obj = models.zgld_article_access_log.objects.filter(
+                    article_access_log_objs = models.zgld_article_access_log.objects.filter(
                         id=article_access_log_id,
                     )
                     now_date_time = datetime.datetime.now()
-                    if article_access_log_obj:
-                        article_access_log_obj.update(
+                    if article_access_log_objs:
+                        article_access_log_objs.update(
                             stay_time=F('stay_time') + 5,
                             last_access_date=now_date_time
-                        )  #
+                        )
+                        # 'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
+                        is_have_activity = int(is_have_activity) if is_have_activity else ''
+                        reach_stay_time = int(reach_stay_time) if reach_stay_time else ''
+
+                        if activity_id and is_have_activity == 1 and reach_stay_time != 0:
+                            print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
+                            activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(status=3).order_by('-create_date')
+                            now_date_time = datetime.datetime.now()
+                            is_limit_area = ''
+                            if activity_objs:
+                                activity_obj = activity_objs[0]
+                                start_time = activity_obj.start_time
+                                end_time = activity_obj.end_time
+                                reach_stay_time = activity_obj.reach_stay_time
+
+                                if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                                    article_access_log_obj = article_access_log_objs[0]
+                                    if reach_stay_time != 0: # 0 代表 没有时间限制
+                                        stay_time = article_access_log_obj.stay_time
+                                        if stay_time >= reach_stay_time:
+
+                                            if parent_id:
+                                                company_id = ''
+                                                userprofile_objs = models.zgld_userprofile.objects.filter(id=uid)
+                                                if userprofile_objs:
+                                                    company_id = userprofile_objs[0].company_id
+
+                                                _data = {
+                                                    'article_access_log_id' : article_access_log_id,
+                                                    'customer_id': customer_id,
+                                                    'user_id': uid,
+                                                    'parent_id': parent_id,
+                                                    'article_id': article_id,
+                                                    'activity_id': activity_id,
+                                                    'company_id': company_id,
+                                                }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
+                                                tasks.user_forward_send_activity_redPacket.delay(_data)
+
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
@@ -547,12 +644,23 @@ def article_oper(request, oper_type, o_id):
             #
             # tasks.user_forward_send_activity_redPacket.delay(_data)
 
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            app_id = qywx_config_dict.get('app_id')
+            app_secret = qywx_config_dict.get('app_secret')
+
             _data = {
                 'authorizer_appid': 'wxa77213c591897a13',
                 'authorizer_refresh_token': 'refreshtoken@@@RAVUheyR510HyjAYrDxgSrX8MHDkbbb5ysHgGRWHeUc',
                 'key_name': 'authorizer_access_token_wxa77213c591897a13',
-                'app_id': 'wx6ba07e6ddcdc69b3',                     # 查看诸葛雷达_公众号的 appid
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'    # 查看诸葛雷达_公众号的AppSecret
+                'app_id': app_id, #'wx6ba07e6ddcdc69b3',                     # 查看诸葛雷达_公众号的 appid
+                'app_secret': app_secret # '0bbed534062ceca2ec25133abe1eecba'    # 查看诸葛雷达_公众号的AppSecret
             }
 
             authorizer_access_token_ret = create_authorizer_access_token(_data)

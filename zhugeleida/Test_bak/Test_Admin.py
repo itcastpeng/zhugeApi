@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -173,16 +173,16 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.post(url, params=get_data,data=post_data)
 
 
-url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
-get_data['signature']= '9a64a9cd8a7536527510549854e3ee4c1c75a9c5'
-get_data['timestamp']= '1544619076'
-get_data['nonce']= '1405106190'
-get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
-get_data['encrypt_type']= 'aes'
-get_data['msg_signature']= '32f6cccbb7d8492daa391d17ad44f3ba30ccad8b'
-
-post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[DipveleotuXQdp9szWd+6SJJT4LRbZllFQOToPWdfWuRlyEaKob5tGHof2dl62eeR3+wphtqHISNp8w8oJfgq7CfYPZJDIp9jU+hdkqgnHLictXPUxWj1cOY78hkq/fCIsUy5y/TgOO9B7YIRrK937hSzvpPmnTSWAFWAkX8xlRwEon17vB3t1fR612+3rixxLFoV4FBrTg09Z/d86Tr039RqaEZN10hlyLTegvjhLpEktWq16eALqYxpq6TNIzxDd7JGB1Sq+Tv147fcfPnGBgrtlYGYynHNxa8kbjX3GK3ggG6fo5kCs3gFLg/XpHphV8J2FeQKnmPi/RqEFRtym9yHWCPQh6aw6IO3q31NCDnUvOv6/rP9O7445rRpLM0fH0v4LtSCust9h9iXIHHrrXZGDVPg6DtLd8tPrLj1tzBF7/O2E8qztPhwjLJ4oURl4XAfnMhQqGT7SpwVhD+f0JeL9/7g4qiwEiC7ZohiRGU6iIIqytzIsmCN8JHba3nWEYYn9vGjeTn71rQy2XZVu7uAC421uA6dic7z6KFqLVkil6SZCwQzIdZSzeM12dnOifrfJrYykPXrmDKakfLzdk4RzKkg5lQ5xBwFp7UOrGLHJ+FA1ZmZOuwcUttHlS/krHkxvE3fSkHoqrSEOqYl+Z5SblqEIaU61OftSke0Ryy6fumVchIuYykDZDcJY7Q4wmpX3zK4biVKyGU1ZVz8A==]]></Encrypt>\x0A</xml>'
-ret = requests.post(url, params=get_data,data=post_data)
+# url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
+# get_data['signature']= '9a64a9cd8a7536527510549854e3ee4c1c75a9c5'
+# get_data['timestamp']= '1544619076'
+# get_data['nonce']= '1405106190'
+# get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
+# get_data['encrypt_type']= 'aes'
+# get_data['msg_signature']= '32f6cccbb7d8492daa391d17ad44f3ba30ccad8b'
+#
+# post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[DipveleotuXQdp9szWd+6SJJT4LRbZllFQOToPWdfWuRlyEaKob5tGHof2dl62eeR3+wphtqHISNp8w8oJfgq7CfYPZJDIp9jU+hdkqgnHLictXPUxWj1cOY78hkq/fCIsUy5y/TgOO9B7YIRrK937hSzvpPmnTSWAFWAkX8xlRwEon17vB3t1fR612+3rixxLFoV4FBrTg09Z/d86Tr039RqaEZN10hlyLTegvjhLpEktWq16eALqYxpq6TNIzxDd7JGB1Sq+Tv147fcfPnGBgrtlYGYynHNxa8kbjX3GK3ggG6fo5kCs3gFLg/XpHphV8J2FeQKnmPi/RqEFRtym9yHWCPQh6aw6IO3q31NCDnUvOv6/rP9O7445rRpLM0fH0v4LtSCust9h9iXIHHrrXZGDVPg6DtLd8tPrLj1tzBF7/O2E8qztPhwjLJ4oURl4XAfnMhQqGT7SpwVhD+f0JeL9/7g4qiwEiC7ZohiRGU6iIIqytzIsmCN8JHba3nWEYYn9vGjeTn71rQy2XZVu7uAC421uA6dic7z6KFqLVkil6SZCwQzIdZSzeM12dnOifrfJrYykPXrmDKakfLzdk4RzKkg5lQ5xBwFp7UOrGLHJ+FA1ZmZOuwcUttHlS/krHkxvE3fSkHoqrSEOqYl+Z5SblqEIaU61OftSke0Ryy6fumVchIuYykDZDcJY7Q4wmpX3zK4biVKyGU1ZVz8A==]]></Encrypt>\x0A</xml>'
+# ret = requests.post(url, params=get_data,data=post_data)
 
 
 
@@ -662,6 +662,79 @@ ret = requests.post(url, params=get_data,data=post_data)
 # post_data['corp_id'] = 'wx81159f52aff62388'
 # post_data['tongxunlu_secret'] = '-pkF6u6vdXRbapZNb-fdQc16DXBhGCgDmyfa0OUuOgk'
 # ret = requests.post(url, data=post_data,params=get_data)
+
+
+# url = ip +  '/zhugeleida/admin/company/edit_service_setting'   # 验证通过
+# post_data['type'] = 1  #  (1, '第三方企业微信'), (2, '第三方公众号'), (3, '第三方小程序')
+#
+# post_data['config'] = json.dumps({
+#     'leida': {
+#         'sToken': '5lokfwWTqHXnb58VCV',
+#         'sEncodingAESKey': 'ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt',
+#         'sCorpID': 'wx5d26a7a856b22bec', #SuiteID
+#     },
+#     'boss': {
+#         'sToken': '22LlaSyBP',
+#         'sEncodingAESKey': 'NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be',
+#         'sCorpID': 'wx36c67dd53366b6f0',
+#     },
+#     'address_book': {
+#         'sToken': '8sCAJ3YuU6EfYWxI',
+#         'sEncodingAESKey': '3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj',
+#         'sCorpID': 'wx1cbe3089128fda03',
+#     },
+#     'general_parm': {
+#         'sEncodingAESKey': 'HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt',
+#         'sCorpID': 'wx81159f52aff62388',
+#     },
+#     'domain_urls': {
+#         'leida_http_url': 'http://zhugeleida.zhugeyingxiao.com'  #可信域名
+#     }
+# })
+
+# post_data['type'] = 2  #  (1, '第三方企业微信'), (2, '第三方公众号'), (3, '第三方小程序')
+# post_data['config'] = json.dumps( {
+#     'app_id' : 'wx6ba07e6ddcdc69b3',  # 公众号 AppID
+#     'app_secret' : '0bbed534062ceca2ec25133abe1eecba',   # 公众号 AppSecret
+#     'token' :'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg',         # 消息校验Token
+#     'encodingAESKey' : 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143',  #消息加解密Key
+#     'authorization_url' : 'http://zhugeleida.zhugeyingxiao.com',       #登录授权的发起页域名
+#     'api_url' : 'http://api.zhugeyingxiao.com'                         # 接口域名
+# })
+
+
+# post_data['type'] = 3  #  (1, '第三方企业微信'), (2, '第三方公众号'), (3, '第三方小程序')
+# post_data['config'] = json.dumps( {
+#     'app_id' : 'wx6ba07e6ddcdc69b3',  # 公众号 AppID
+#     'app_secret' : '0bbed534062ceca2ec25133abe1eecba',   # 公众号 AppSecret
+#     'token' :'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg',         # 消息校验Token
+#     'encodingAESKey' : 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143',  #消息加解密Key
+#     'authorization_url' : 'http://zhugeleida.zhugeyingxiao.com',       #登录授权的发起页域名
+#     'api_url' : 'http://api.zhugeyingxiao.com'                         # 接口域名
+# })
+# ret = requests.post(url, data=post_data,params=get_data)
+
+
+
+url = ip +  '/zhugeleida/admin/company/query_service_settings'   # 验证通过
+# get_data['type'] = 1
+
+ret = requests.get(url, data=post_data,params=get_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

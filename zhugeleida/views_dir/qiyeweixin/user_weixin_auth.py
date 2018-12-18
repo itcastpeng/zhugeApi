@@ -168,8 +168,6 @@ def work_weixin_auth(request, company_id):
         response.code = 402
         response.msg = "请求方式异常"
     return JsonResponse(response.__dict__)
-
-
     # 从微信小程序接口中获取openid等信息
 
 
@@ -198,22 +196,51 @@ def work_weixin_auth_oper(request,oper_type):
                 uid = user_id  # 文章所属用户ID，在这里指的是雷达用户 转发的这个文章，他就是这个所属的用户。
                 pid =  ''      # 文章所属父级ID。为空代表是雷达用户分享出去的。
 
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                api_url = qywx_config_dict.get('api_url')
 
                 appid = authorization_appid
-                redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (article_id,pid,level,uid,company_id)
+                redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (api_url,article_id,pid,level,uid,company_id)
 
                 print('--------  【雷达企业用户】嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
                 scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                 state = 'snsapi_base'
-                component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                component_appid = qywx_config_dict.get('app_id')
+
+                # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
                 share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
 
                 from urllib.parse import quote
                 bianma_share_url = quote(share_url, 'utf-8')
 
-                share_url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(bianma_share_url)
-                # share_url = 'http://zhugeleida.zhugeyingxiao.com/YYYYY/'
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                leida_http_url = qywx_config_dict.get('authorization_url')
+                share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (leida_http_url,bianma_share_url)
+
                 print('------ 【雷达企业用户】正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>',share_url)
 
                 response.data = {'share_url': share_url}
@@ -251,13 +278,25 @@ def work_weixin_auth_oper(request,oper_type):
 
                 authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id = qywx_config_dict.get('app_id')
+                app_secret = qywx_config_dict.get('app_secret')
+
                 if not authorizer_access_token:
                     data = {
                         'key_name': authorizer_access_token_key_name,
                         'authorizer_refresh_token': authorizer_refresh_token,
                         'authorizer_appid': authorizer_appid,
-                        'app_id': 'wx6ba07e6ddcdc69b3',
-                        'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                        'app_id': app_id,   #'wx6ba07e6ddcdc69b3',
+                        'app_secret':  app_secret,#'0bbed534062ceca2ec25133abe1eecba'
                     }
 
                     authorizer_access_token_result = create_authorizer_access_token(data)
@@ -297,8 +336,21 @@ def work_weixin_auth_oper(request,oper_type):
                         jsapi_ticket = ticket
 
                 noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
+
                 timestamp = int(time.time())
-                url = 'http://zhugeleida.zhugeyingxiao.com/'
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                url = qywx_config_dict.get('authorization_url') + '/'
+
+
+                # url = 'http://zhugeleida.zhugeyingxiao.com/'
                 sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket, noncestr, timestamp, url)
                 signature = str_sha_encrypt(sha_string.encode('utf-8'))
 
@@ -381,7 +433,18 @@ def enterprise_weixin_sign(request):
 
         noncestr = ''.join(random.sample(string.ascii_letters + string.digits, 16))
         timestamp = int(time.time())
-        url = 'http://zhugeleida.zhugeyingxiao.com/'
+
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        url = qywx_config_dict.get('authorization_url') + '/'
+        # url = 'http://zhugeleida.zhugeyingxiao.com/'
+
         sha_string = "jsapi_ticket=%s&noncestr=%s&timestamp=%s&url=%s" % (jsapi_ticket,noncestr,timestamp,url)
         signature = str_sha_encrypt(sha_string.encode('utf-8'))
 

@@ -61,9 +61,21 @@ def open_weixin(request, oper_type):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                appid = 'wx67e2fde0f694111c'
+                qywx_config_dict = ''
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                appid = qywx_config_dict.get('appid')
+                token = qywx_config_dict.get('token')
+                encodingAESKey = qywx_config_dict.get('encodingAESKey')
+
+                # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+                # encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+                # appid = 'wx67e2fde0f694111c'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
@@ -93,7 +105,16 @@ def open_weixin(request, oper_type):
                 userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
                 company_id   =  userprofile_obj.company_id
 
-                app_id = 'wx67e2fde0f694111c'
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id =  qywx_config_dict.get('app_id')
+                # app_id = 'wx67e2fde0f694111c'
                 if auth_code:
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                     # exist_auth_code = rc.get('auth_code')
@@ -304,7 +325,18 @@ def open_weixin(request, oper_type):
             request.session['user_id'] = user_id
             print('----request.session userId--->', request.session.get('user_id'))
 
-            app_id = 'wx67e2fde0f694111c'
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            app_id = qywx_config_dict.get('app_id')
+            # app_id = 'wx67e2fde0f694111c'
+
+
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
             response_ret =  create_component_access_token()
@@ -334,8 +366,18 @@ def open_weixin(request, oper_type):
             else:
                 pre_auth_code = exist_pre_auth_code
 
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            leida_http_url = qywx_config_dict.get('domain_urls').get('leida_http_url')
+
             #生成授权链接
-            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
+            redirect_uri = '%s/admin/#/empower/empower_xcx/' % (leida_http_url)
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (app_id, pre_auth_code, redirect_uri)   #auth_type=3 表示公众号和小程序都展示
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
@@ -535,7 +577,17 @@ def xcx_auth_process_oper(request, oper_type):
                 authorizer_appid = app_obj[0].authorization_appid
                 get_wx_info_data = {}
                 post_wx_info_data = {}
-                app_id = 'wx67e2fde0f694111c' # 三方平台的appid
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id = qywx_config_dict.get('app_id')
+                # app_id = 'wx67e2fde0f694111c' # 三方平台的appid
 
                 component_access_token_ret = create_component_access_token()
                 component_access_token = component_access_token_ret.data.get('component_access_token')
@@ -551,8 +603,7 @@ def xcx_auth_process_oper(request, oper_type):
                 print('---------- 小程序帐号基本信息authorizer_info 返回 ----------------->',json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
-                                               'id'] == 0 else False
+                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
                 # ---->预留代码
                 principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                 qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
@@ -604,8 +655,20 @@ def create_component_access_token():
     response = Response.ResponseObj()
 
     component_verify_ticket = rc.get('ComponentVerifyTicket')
-    app_id = 'wx67e2fde0f694111c'
-    app_secret = '4a9690b43178a1287b2ef845158555ed'
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    app_id = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+    # app_id = 'wx67e2fde0f694111c'
+    # app_secret = '4a9690b43178a1287b2ef845158555ed'
     post_component_data = {
         'component_appid': app_id,
         'component_appsecret' : app_secret,

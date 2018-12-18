@@ -337,7 +337,7 @@ if __name__ == '__main__':
 
     decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
 
-
+    print('---- decrypt_obj --->>')
 
     # res_msg = '<xml><ToUserName><![CDATA[ob5mL1ZLRFlsArXPwOZVYOqacdCI]]></ToUserName><FromUserName><![CDATA[wxa77213c591897a13]]></FromUserName><CreateTime>1539934580</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[YYYY]]></Content></xml>'
     # nonce = '1481412419'

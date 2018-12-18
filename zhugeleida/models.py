@@ -31,6 +31,8 @@ class zgld_company(models.Model):
 
     open_length_time = models.SmallIntegerField(verbose_name="开通时长(按月份)",null=True)
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
+    is_customer_unique = models.BooleanField(verbose_name="客户(通讯录)唯一性", default=False)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -38,8 +40,23 @@ class zgld_company(models.Model):
         app_label = "zhugeleida"
 
 
+# 公司管理
+class zgld_three_service_setting(models.Model):
+    # company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    type_choice = (
+        (1, '企业微信第三方服务商'),
+        (2, '公众号第三方平台'),
+        (3, '小程序第三方平台')
+    )
+    three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice,null=True)
+    config = models.CharField(max_length=2048,verbose_name="企业微信第三方配置", null=True)
+    status_choices = (
+        (0, "未通过"),
+        (1, "通过"),
+    )
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=0)
 
-# 官网模板
+
 class zgld_website_template(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
     template_content = models.TextField(verbose_name='官网内容',default='[]')
@@ -48,6 +65,7 @@ class zgld_website_template(models.Model):
     class Meta:
         verbose_name_plural = "公司官网模板"
         app_label = "zhugeleida"
+
 
 
 
@@ -563,7 +581,8 @@ class zgld_customer(models.Model):
     city = models.CharField(max_length=32, verbose_name='客户所在城市', blank=True, null=True)
     province = models.CharField(max_length=32, verbose_name='所在省份', blank=True, null=True)
     language = models.CharField(max_length=32, verbose_name='语言', blank=True, null=True)
-    # expedted_pr = models.IntegerField(verbose_name='预计成交概率',default=0, null=True)
+    formatted_address = models.CharField(verbose_name='具体位置', max_length=2048, null=True)
+
     subscribe_choices = (
         (0, '取消订阅该公众号'),
         (1, '已经订阅该公众号')
@@ -854,9 +873,14 @@ class zgld_article_activity(models.Model):
     redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True,default=0)
     activity_single_money= models.SmallIntegerField(verbose_name='单个金额(元)',default=0,null=True)
 
+    is_limit_area = models.BooleanField(verbose_name='是否地区限制', default=False)  # 默认不限制
+    limit_area = models.TextField(verbose_name='限制的区域', null=True,default="[]")
+
+    reach_stay_time = models.SmallIntegerField(verbose_name='达到多少秒发红包', default=0) # 0 代表 没有限制
     reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]', default=0)
     already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额', default=0)
+
 
     start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
     end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
@@ -894,6 +918,7 @@ class zgld_activity_redPacket(models.Model):
     forward_stay_time = models.IntegerField(verbose_name='转发后阅读的时长', default=0)
 
     send_log = models.TextField(verbose_name='红包发放日志记录', null=True,default="[]")
+    access_log = models.TextField(verbose_name='客户红包访问日志', null=True,default="[]")
     already_send_redPacket_money = models.SmallIntegerField(verbose_name='已发红包金额',default=0, null=True)
     already_send_redPacket_num = models.SmallIntegerField(verbose_name='已经发放次数(实发)[个人]',default=0 ,null=True)
     should_send_redPacket_num = models.SmallIntegerField(verbose_name='应该发放的次数(应发)',default=0 ,null=True)

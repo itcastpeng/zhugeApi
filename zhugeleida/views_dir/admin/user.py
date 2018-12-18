@@ -813,6 +813,8 @@ def user_oper(request, oper_type, o_id):
         elif oper_type == 'approval_storage_user_info':
             print('---- 审核de 批量 ----->>')
             user_id_list = request.POST.get('user_id_list')
+            type = request.GET.get('type')
+
             print('---- 审核de user_id_list 1  ----->>', user_id_list)
 
             if user_id_list:
@@ -903,6 +905,9 @@ def user_oper(request, oper_type, o_id):
                                     department_id_list = []
 
                                 obj.department = department_id_list
+                                if type == 'phone_audit':
+                                    obj.status = 1
+
                                 obj.save()
                                 models.zgld_temp_userprofile.objects.filter(id=temp_obj.id).delete() # 删除已经通过审核的员工。
 
@@ -945,8 +950,19 @@ def user_oper(request, oper_type, o_id):
             rand_str = account.str_encrypt(timestamp + token)
             timestamp = timestamp
 
-            url = 'http://zhugeleida.zhugeyingxiao.com/#/gongzhonghao/zhuceyonghu?rand_str=%s&timestamp=%s&user_id=%d' % (
-            rand_str, timestamp, int(user_id))
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            leida_http_url = qywx_config_dict.get('domain_urls').get('leida_http_url')
+
+
+            url = '%s/#/gongzhonghao/zhuceyonghu?rand_str=%s&timestamp=%s&user_id=%d' % (
+                leida_http_url,rand_str, timestamp, int(user_id))
             data = {
                 'url': url,
                 'admin_uid': user_id
@@ -970,6 +986,7 @@ def user_oper(request, oper_type, o_id):
         else:
             response.code = 402
             response.msg = "请求异常"
+
     return JsonResponse(response.__dict__)
 
 

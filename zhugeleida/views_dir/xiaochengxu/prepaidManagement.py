@@ -174,10 +174,10 @@ def yuZhiFu(request):
                 appid = obj.xiaochengxuApp.authorization_appid
                 mch_id =obj.shangHuHao
                 SHANGHUKEY = obj.shangHuMiYao
-            print('mch_id===============> ',mch_id)
+            print('mch_id===============> ',mch_id) # https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_sl_api.php?chapter=7_7&index=5
             result_data = {
                 # 'appid': 'wx1add8692a23b5976',              # appid
-                'appid': appid,                               # 真实数据appid 商户号
+                'appid': appid,                               # 真实数据appid 商户号 # 服务商模式下应为当前调起支付小程序的appid
                 # 'mch_id': '1513325051',                     # 商户号
                 'mch_id': mch_id,                             # 商户号真实数据
                 'nonce_str': generateRandomStamping(),        # 32位随机值a

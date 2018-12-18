@@ -3,7 +3,7 @@ from django.db.models import Q
 from zhugeleida import models
 import datetime
 from publicFunc import Response
-import os,json
+import os, json
 import requests
 from zhugeleida.views_dir.conf import *
 from django.views.decorators.csrf import csrf_exempt
@@ -28,27 +28,27 @@ def conditionCom(data, field_dict):
 
     return q
 
+
 ## 按月增加datetime月份
 def datetime_offset_by_month(datetime1, n=1):
-        # create a shortcut object for one day
-        one_day = datetime.timedelta(days=1)
+    # create a shortcut object for one day
+    one_day = datetime.timedelta(days=1)
 
-        # first use div and mod to determine year cycle
-        q, r = divmod(datetime1.month + n, 12)
+    # first use div and mod to determine year cycle
+    q, r = divmod(datetime1.month + n, 12)
 
-        # create a datetime2
-        # to be the last day of the target month
-        datetime2 = datetime.datetime(
-            datetime1.year + q, r + 1, 1) - one_day
+    # create a datetime2
+    # to be the last day of the target month
+    datetime2 = datetime.datetime(
+        datetime1.year + q, r + 1, 1) - one_day
 
-        if datetime1.month != (datetime1 + one_day).month:
-            return datetime2
+    if datetime1.month != (datetime1 + one_day).month:
+        return datetime2
 
-        if datetime1.day >= datetime2.day:
-            return datetime2
+    if datetime1.day >= datetime2.day:
+        return datetime2
 
-        return datetime2.replace(day=datetime1.day)
-
+    return datetime2.replace(day=datetime1.day)
 
 
 @csrf_exempt
@@ -60,7 +60,6 @@ def validate_agent(data):
     app_secret = data.get('app_secret')
     agent_id = data.get('agent_id')
     get_token_data = {}
-    send_token_data = {}
 
     get_token_data['corpid'] = corp_id
     # app_secret = models.zgld_app.objects.get(company_id=company_id, name='AI雷达').app_secret
@@ -77,79 +76,79 @@ def validate_agent(data):
     access_token = weixin_ret_data.get('access_token')
 
     if weixin_ret_data['errcode'] == 0:
-        agent_list_url = 'https://qyapi.weixin.qq.com/cgi-bin/agent/list'
-        get_token_data = {
-            'access_token' : access_token
-        }
-
-        s = requests.session()
-        s.keep_alive = False  # 关闭多余连接
-        agent_list_ret = s.get(agent_list_url, params=get_token_data)
-
-        # agent_list_ret = requests.get(agent_list_url, params=get_token_data)
-        agent_list_ret = agent_list_ret.json()
-        print('------- Agent_list_ret ----------->>',agent_list_ret)
-
-        agentlist = agent_list_ret.get('agentlist')
-        # {'agentlist': [{'square_logo_url': 'http://p.qlogo.cn/bizmail/VJkoqXfNQ0SPj0HLc6qyiabnOibyOcBX208OTW7pB26LGvYW3nfmPDOw/0', 'name': '医美咨询雷达', 'agentid': 1000002}], 'errcode': 0, 'errmsg': 'ok'}
-
-        for agent_dict in agentlist:
-            agentid = agent_dict.get('agentid')
-            name = agent_dict.get('name')
-            square_logo_url = agent_dict.get('square_logo_url')
-
-            if int(agentid) == int(agent_id):
-                response.data = {
-                    'agentid' : agentid,
-                    'name' :    name,
-                    'square_logo_url' : square_logo_url
-                }
-
-                #设置应用
-                set_agent_url = 'https://qyapi.weixin.qq.com/cgi-bin/agent/set'
-                home_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?redirect_uri=http://zhugeleida.zhugeyingxiao.com/zhugeleida/qiyeweixin/work_weixin_auth/%s&appid=%s&agentid=%s&scope=snsapi_userinfo&response_type=code#wechat_redirect' % (company_id,corp_id,agentid)
-
-                get_agent_data = {
-                    'access_token': access_token
-                }
-                post_agent_data = {
-                    "agentid": agentid,
-                    # "name": "NAME",
-                    # "description": "DESC",  #企业应用详情
-                    "redirect_domain": "zhugeleida.zhugeyingxiao.com",
-                    "home_url": home_url
-
-                }
-                print('---------- 修改home_url get_agent_data + post_agent_data ------------------>>',json.dumps(get_agent_data),'|',json.dumps(post_agent_data))
-
-                s = requests.session()
-                s.keep_alive = False  # 关闭多余连接
-                set_agent_ret = s.post(set_agent_url, params=get_agent_data,data=json.dumps(post_agent_data))
-
-                # set_agent_ret = requests.post(set_agent_url, params=get_agent_data,data=json.dumps(post_agent_data))
-
-                set_agent_ret = set_agent_ret.json()
-                print('--------- 设置应用 set_agent_ret 返回 ----------->>', set_agent_ret)
-                errmsg = set_agent_ret.get('errmsg')
-                if errmsg == 'ok':
-                    print('--------- 设置应用 set_agent_ret 成功 ----------->>')
-                else:
-                    response.code = weixin_ret_data['errcode']
-                    response.msg = "设置应用报错:%s" % (errmsg)
-                    print('--------- 设置应用 set_agent_ret 失败 ----------->>')
-                    return response
-
-
+        # agent_list_url = 'https://qyapi.weixin.qq.com/cgi-bin/agent/list'
+        # get_token_data = {
+        #     'access_token': access_token
+        # }
+        #
+        # s = requests.session()
+        # s.keep_alive = False  # 关闭多余连接
+        # agent_list_ret = s.get(agent_list_url, params=get_token_data)
+        #
+        # # agent_list_ret = requests.get(agent_list_url, params=get_token_data)
+        # agent_list_ret = agent_list_ret.json()
+        # print('------- Agent_list_ret ----------->>', agent_list_ret)
+        #
+        # agentlist = agent_list_ret.get('agentlist')
+        # # {'agentlist': [{'square_logo_url': 'http://p.qlogo.cn/bizmail/VJkoqXfNQ0SPj0HLc6qyiabnOibyOcBX208OTW7pB26LGvYW3nfmPDOw/0', 'name': '医美咨询雷达', 'agentid': 1000002}], 'errcode': 0, 'errmsg': 'ok'}
+        #
+        #
+        # for agent_dict in agentlist:
+        #     agentid = agent_dict.get('agentid')
+        #     name = agent_dict.get('name')
+        #     square_logo_url = agent_dict.get('square_logo_url')
+        #
+        #     if int(agentid) == int(agent_id):
+        #         response.data = {
+        #             'agentid': agentid,
+        #             'name': name,
+        #             'square_logo_url': square_logo_url
+        #         }
+        #
+        #         # 设置应用
+        #         set_agent_url = 'https://qyapi.weixin.qq.com/cgi-bin/agent/set'
+        #         home_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?redirect_uri=http://zhugeleida.zhugeyingxiao.com/zhugeleida/qiyeweixin/work_weixin_auth/%s&appid=%s&agentid=%s&scope=snsapi_userinfo&response_type=code#wechat_redirect' % (
+        #         company_id, corp_id, agentid)
+        #
+        #         get_agent_data = {
+        #             'access_token': access_token
+        #         }
+        #         post_agent_data = {
+        #             "agentid": agentid,
+        #             # "name": "NAME",
+        #             # "description": "DESC",  #企业应用详情
+        #             "redirect_domain": "zhugeleida.zhugeyingxiao.com",
+        #             "home_url": home_url
+        #
+        #         }
+        #         print('---------- 修改home_url get_agent_data + post_agent_data ------------------>>',
+        #               json.dumps(get_agent_data), '|', json.dumps(post_agent_data))
+        #
+        #         s = requests.session()
+        #         s.keep_alive = False  # 关闭多余连接
+        #         set_agent_ret = s.post(set_agent_url, params=get_agent_data, data=json.dumps(post_agent_data))
+        #
+        #         # set_agent_ret = requests.post(set_agent_url, params=get_agent_data,data=json.dumps(post_agent_data))
+        #
+        #         set_agent_ret = set_agent_ret.json()
+        #         print('--------- 设置应用 set_agent_ret 返回 ----------->>', set_agent_ret)
+        #         errmsg = set_agent_ret.get('errmsg')
+        #         if errmsg == 'ok':
+        #             print('--------- 设置应用 set_agent_ret 成功 ----------->>')
+        #         else:
+        #             response.code = weixin_ret_data['errcode']
+        #             response.msg = "设置应用报错:%s" % (errmsg)
+        #             print('--------- 设置应用 set_agent_ret 失败 ----------->>')
+        #             return response
 
         response.code = 0
         response.msg = '企业微信验证'
-        print("=========企业微信agent secret验证-通过======>",corp_id,'|',app_secret)
+        print("=========企业微信agent secret验证-通过======>", corp_id, '|', app_secret)
 
     else:
         response.code = weixin_ret_data['errcode']
         response.msg = "企业微信验证未能通过"
-        print("=========企业微信agent secret验证未能通过======>",corp_id,'|',app_secret)
-
+        print("=========企业微信agent secret验证未能通过======>", corp_id, '|', app_secret)
 
     return response
 
@@ -179,7 +178,6 @@ def validate_tongxunlu(data):
         company_obj = models.zgld_company.objects.filter(id=company_id)
         if company_obj:
             get_token_data = {}
-            post_user_data = {}
             get_user_data = {}
             get_token_data['corpid'] = corp_id
             get_token_data['corpsecret'] = tongxunlu_secret
@@ -196,7 +194,7 @@ def validate_tongxunlu(data):
                 # ret_json = ret.json()
 
                 s.keep_alive = False  # 关闭多余连接
-                ret = s.get(Conf['tongxunlu_token_url'], params=get_token_data) # 你需要的网址
+                ret = s.get(Conf['tongxunlu_token_url'], params=get_token_data)  # 你需要的网址
                 ret_json = ret.json()
 
                 print('--------ret_json-->>', ret_json)
@@ -220,7 +218,6 @@ def validate_tongxunlu(data):
             errcode = department_list_ret.get('errcode')
             errmsg = department_list_ret.get('errmsg')
             department_list = department_list_ret.get('department')
-
 
             print('-------- 获取部门列表 接口返回----------->>', json.dumps(department_list_ret))
 
@@ -288,21 +285,19 @@ def validate_tongxunlu(data):
 
                     else:
                         response.code = errcode
-                        response.msg =  errmsg
+                        response.msg = errmsg
 
                         print('---- 获取部门成员 [报错]：------>', errcode, "|", errmsg)
 
             else:
-                response.code =  errcode
+                response.code = errcode
                 response.msg = errmsg
 
-        print("=========企业微信验证 通讯录同步应用的secret-通过======>",corp_id,'|',tongxunlu_secret)
+        print("=========企业微信验证 通讯录同步应用的secret-通过======>", corp_id, '|', tongxunlu_secret)
 
     else:
         response.code = ret_json['errcode']
         response.msg = "企业微信验证未能通过"
-        print("=========企业微信验证 通讯录同步应用的secret -未能通过======>",corp_id,'|',tongxunlu_secret)
-
+        print("=========企业微信验证 通讯录同步应用的secret -未能通过======>", corp_id, '|', tongxunlu_secret)
 
     return response
-

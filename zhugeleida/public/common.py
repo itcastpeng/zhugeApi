@@ -142,57 +142,70 @@ def  create_suite_access_token(data):
     post_component_data = ''
     suite_secret = ''
     SuiteTicket = ''
-    if SuiteId == 'wx5d26a7a856b22bec':
-        key_name = 'SuiteTicket_%s' % (SuiteId)
-        SuiteTicket = rc.get(key_name)
-        suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
 
-    elif SuiteId == 'wx36c67dd53366b6f0':
+        if SuiteId ==  qywx_config_dict['leida'].get('sCorpID'): #'wx5d26a7a856b22bec':
+            key_name = 'SuiteTicket_%s' % (SuiteId)
+            SuiteTicket = rc.get(key_name)
+            suite_secret = 'vHBmQNLTkm2FF61pj7gqoQVNFP5fr5J0avEzYRdzr2k'
 
-        key_name = 'SuiteTicket_%s' % (SuiteId)
-        SuiteTicket = rc.get(key_name)
-        suite_secret = 'dr7UT0zmMW1Dh7XABacmGieqLefoAhyrabAy74yI8rM'
+        elif SuiteId == qywx_config_dict['boss'].get('sCorpID'): # 'wx36c67dd53366b6f0':
 
-    elif SuiteId == 'wx1cbe3089128fda03':
-        key_name = 'SuiteTicket_%s' % (SuiteId)
-        SuiteTicket = rc.get(key_name)
-        suite_secret = 'xA9Z8lcsTCc7eW8vaKQD0hTmamfjKn1Dnph3TcfdY-8'
+            key_name = 'SuiteTicket_%s' % (SuiteId)
+            SuiteTicket = rc.get(key_name)
+            suite_secret = 'dr7UT0zmMW1Dh7XABacmGieqLefoAhyrabAy74yI8rM'
+
+        elif SuiteId == qywx_config_dict['address_book'].get('sCorpID'): #'wx1cbe3089128fda03':
+            key_name = 'SuiteTicket_%s' % (SuiteId)
+            SuiteTicket = rc.get(key_name)
+            suite_secret = 'xA9Z8lcsTCc7eW8vaKQD0hTmamfjKn1Dnph3TcfdY-8'
 
 
-    post_component_data = {
-        "suite_id": SuiteId,
-        "suite_secret": suite_secret,
-        "suite_ticket": SuiteTicket
-    }
+        post_component_data = {
+            "suite_id": SuiteId,
+            "suite_secret": suite_secret,
+            "suite_ticket": SuiteTicket
+        }
 
-    suite_access_token_key_name = 'suite_access_token_%s' % (SuiteId)
-    token_ret = rc.get(suite_access_token_key_name)
-    print('--- Redis里存储的 suite_access_token---->>', token_ret)
+        suite_access_token_key_name = 'suite_access_token_%s' % (SuiteId)
+        token_ret = rc.get(suite_access_token_key_name)
+        print('--- Redis里存储的 suite_access_token---->>', token_ret)
 
-    if not token_ret:
-        post_component_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_suite_token'
+        if not token_ret:
+            post_component_url = 'https://qyapi.weixin.qq.com/cgi-bin/service/get_suite_token'
 
-        s = requests.session()
-        s.keep_alive = False  # 关闭多余连接
-        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
-        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+            # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
 
-        print('--------- [企业微信]获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
-        component_token_ret = component_token_ret.json()
-        access_token = component_token_ret.get('suite_access_token')
+            print('--------- [企业微信]获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
+            component_token_ret = component_token_ret.json()
+            access_token = component_token_ret.get('suite_access_token')
 
-        if access_token:
-            token_ret = access_token
-            rc.set(suite_access_token_key_name, access_token, 7000)
-        else:
-            response.code = 400
-            response.msg = "-------- [企业微信] 获取第三方平台 component_token_ret 返回错误 ------->"
-            return JsonResponse(response.__dict__)
+            if access_token:
+                token_ret = access_token
+                rc.set(suite_access_token_key_name, access_token, 7000)
+            else:
+                response.code = 400
+                response.msg = "-------- [企业微信] 获取第三方平台 component_token_ret 返回错误 ------->"
+                return JsonResponse(response.__dict__)
 
-    response.data = {
-        'suite_access_token': token_ret
-    }
-    response.code = 200
+        response.data = {
+            'suite_access_token': token_ret
+        }
+        response.code = 200
+
+    else:
+
+        response.code = 301
+        response.msg = '企业微信第三方-无配置信息'
+        print('------ 【企业微信第三方-无配置信息】 create_suite_access_token ------>>')
 
     return response
 

@@ -138,16 +138,22 @@ def user_send_action_log(request):
     action = request.GET.get('action')
     remark = request.GET.get('remark')
 
-    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-        customer_id=customer_id).order_by('create_date')
-
-    user_id = objs[0].user_id  # 找到那个建立唯一关系的人。
-
     send_token_data = {}
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
 
     corp_id = user_obj.company.corp_id
     company_id = user_obj.company_id
+
+    company_objs = models.zgld_company.objects.filter(id=company_id)
+    if company_objs:
+        company_obj = company_objs[0]
+        is_customer_unique = company_obj.is_customer_unique
+
+        if is_customer_unique:  # True 后台控制是否为唯一性。
+            objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                customer_id=customer_id)
+            user_id = objs[0].user_id  # 找到那个建立关系的人。
+
 
     print('------ 企业通讯录corp_id | 通讯录秘钥  ---->>>', corp_id)
 
@@ -215,15 +221,24 @@ def user_send_action_log(request):
 
         else:
 
-            SuiteId = 'wx5d26a7a856b22bec'  # '雷达AI | 三方应用id'
-            _data = {
-                'SuiteId': SuiteId,  # 三方应用IP 。
-                'corp_id': corp_id,  # 授权方企业corpid
-                'permanent_code': permanent_code
-            }
-            access_token_ret = common.create_qiyeweixin_access_token(_data)
-            access_token = access_token_ret.data.get('access_token')
-            send_token_data['access_token'] = access_token
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+
+                # SuiteId = 'wx5d26a7a856b22bec'  # '雷达AI | 三方应用id'
+                SuiteId =  qywx_config_dict['leida'].get('sCorpID')
+                _data = {
+                    'SuiteId': SuiteId,  # 三方应用IP 。
+                    'corp_id': corp_id,  # 授权方企业corpid
+                    'permanent_code': permanent_code
+                }
+                access_token_ret = common.create_qiyeweixin_access_token(_data)
+                access_token = access_token_ret.data.get('access_token')
+                send_token_data['access_token'] = access_token
 
         userid = user_obj.userid
         post_send_data = {
@@ -752,26 +767,37 @@ def user_send_gongzhonghao_template_msg(request):
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    # objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
-    #     customer_id=customer_id,
-    #     user_id=user_id
-    # )
 
-    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-        customer_id=customer_id,
-        user__company_id=company_id)
 
-    user_id = objs[0].user_id # 找到那个建立关系的人。
+    company_objs = models.zgld_company.objects.filter(id=company_id)
+    objs = ''
+    if company_objs:
+        company_obj = company_objs[0]
+        is_customer_unique = company_obj.is_customer_unique
 
+        if is_customer_unique:  # 唯一性
+            objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                customer_id=customer_id,
+                user__company_id=company_id)
+            user_id = objs[0].user_id # 找到那个建立关系的人。
+
+        else:
+            objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+                customer_id=customer_id,
+                user_id=user_id
+            )
 
     customer_name = ''
     if parent_id:
-        customer_obj = models.zgld_customer.objects.filter(id=parent_id)
-        customer_name = objs[0].customer.username
-        customer_name = common.conversion_base64_customer_username_base64(customer_name, customer_id)
+        customer_objs = models.zgld_customer.objects.filter(id=parent_id)
+        customer_username = customer_objs[0].username
+        customer_name = common.conversion_base64_customer_username_base64(customer_username, customer_id)
+
 
     else:
-        customer_obj = models.zgld_customer.objects.filter(id=customer_id)
+        customer_objs = models.zgld_customer.objects.filter(id=customer_id)
+        customer_username = customer_objs[0].username
+        customer_name = common.conversion_base64_customer_username_base64(customer_username, customer_id)
 
     user_name = objs[0].user.username
     position = objs[0].user.position
@@ -801,8 +827,8 @@ def user_send_gongzhonghao_template_msg(request):
         'access_token': authorizer_access_token  # 授权方接口调用凭据（在授权的公众号或小程序具备API权限时，才有此返回值），也简称为令牌
     }
 
-    if customer_obj and objs:
-        openid = customer_obj[0].openid
+    if customer_objs and objs:
+        openid = customer_objs[0].openid
 
         # 发送公众号模板消息聊天消息 or  公众号客户查看文章后的红包活动提示
         if _type == 'gongzhonghao_template_tishi' or _type == 'forward_look_article_tishi':
@@ -1059,6 +1085,7 @@ def user_forward_send_activity_redPacket(request):
         parent_id = request.GET.get('parent_id')
         article_id = request.GET.get('article_id')
         activity_id = request.GET.get('activity_id')
+        article_access_log_id = request.GET.get('article_access_log_id')
 
         activity_redPacket_objs = models.zgld_activity_redPacket.objects.filter(customer_id=parent_id,
                                                                                 article_id=article_id,
@@ -1089,6 +1116,10 @@ def user_forward_send_activity_redPacket(request):
                 forward_stay_time=forward_stay_time
             )
 
+            reach_stay_time = activity_obj.reach_stay_time  # 达到多少时间才能发放
+            is_limit_area = activity_obj.is_limit_area      # 是否开启了限制
+            limit_area = activity_obj.limit_area            # 限制的区域
+
             reach_forward_num = activity_obj.reach_forward_num  # 达到多少次发红包(转发阅读后次数))
             already_send_redPacket_num = activity_redPacket_obj.already_send_redPacket_num  # 已发放次数
             # already_send_redPacket_money = activity_redPacket_obj.already_send_redPacket_money        #已发红包金额
@@ -1101,118 +1132,101 @@ def user_forward_send_activity_redPacket(request):
 
                     shoudle_send_num = divmod_ret[0]
                     yushu = divmod_ret[1]
-
-                    if shoudle_send_num > already_send_redPacket_num:
-
-                        print('---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
-                              forward_read_num, "|", reach_forward_num)
-                        print('---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
-                              shoudle_send_num, "|", already_send_redPacket_num)
-                        app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
-                            company_id=company_id)
-                        activity_single_money = activity_obj.activity_single_money
-                        activity_name = activity_obj.activity_name
+                    _send_log_dict = {}
+                    if shoudle_send_num > already_send_redPacket_num: # 应发数量 > 已发放的数量（数据库中记录值）
 
                         customer_obj = models.zgld_customer.objects.get(id=parent_id)
-                        openid = customer_obj.openid
+                        openid = customer_obj.openid # 对应的发放用户openid
+                        formatted_address = customer_obj.formatted_address # 客户具体地址
+                        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        area_Flag = False
+                        if is_limit_area: # True 地域限制条件开启了 并且 获取到了用户的具体位置
 
-                        authorization_appid = ''
-                        gongzhonghao_name = ''
-                        if app_objs:
-                            # company_name = '%s' % (app_objs[0].company.name)
-                            gongzhonghao_name = '%s' % (app_objs[0].name)
-                            authorization_appid = app_objs[0].authorization_appid
+                            limit_area = json.loads(limit_area)
+                            for area in limit_area:
+                                if area in formatted_address: # 如果本区域满足发放
+                                    area_Flag = True
+                                    _send_log_dict = {
+                                        'type': '有地域限制【在发放范围内】',
+                                        'activity_single_money': '发送的地域area: %s | 客户具体地址: formatted_address: %s' % (area,formatted_address),
+                                        'send_time': now_time,
+                                    }
 
-                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
-                            xiaochengxucompany_id=company_id)
+                            if not area_Flag:
+                                _send_log_dict = {
+                                    'type': '有地域限制【没有在发放范围内】',
+                                    'activity_single_money': '客户具体地址: formatted_address: %s' % (formatted_address),
+                                    'send_time': now_time,
+                                }
 
-                        shangHuHao = ''
-                        shangHuMiYao = ''
-                        if shangcheng_objs:
-                            shangcheng_obj = shangcheng_objs[0]
-                            shangHuHao = shangcheng_obj.shangHuHao
-                            # send_name = shangcheng_obj.shangChengName
-                            shangHuMiYao = shangcheng_obj.shangHuMiYao
 
-                        _data = {
-                            'client_ip': client_ip,
-                            'shanghukey': shangHuMiYao,  # 支付钱数
-                            'total_fee': activity_single_money,  # 支付钱数
-                            'appid': authorization_appid,  # 小程序ID
-                            'mch_id': shangHuHao,  # 商户号
-                            'openid': openid,
-                            'send_name': gongzhonghao_name,  # 商户名称
-                            'act_name': activity_name,  # 活动名称
-                            'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
-                            'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
-                        }
-                        print('------[调用转发后满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
+                        else: # 没有开启限制
+                            area_Flag = True
 
-                        response_ret = focusOnIssuedRedEnvelope(_data)
-                        if response_ret.code == 200:
-                            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            print('---- 调用发红包成功[转发得现金] 状态值:200  parent_id | openid --->>', parent_id, '|', openid)
+                        time_Flag = ''
+                        if reach_stay_time == 0: # 代表没有时间秒数的限制,立即发放这个用户的红包
+                            time_Flag = True
 
-                            _send_log_dict = {
-                                'type': '自动发送',
-                                'activity_single_money': activity_single_money,
-                                'send_time': now_time,
+                        else:
+                            time_Flag = False
+                            if article_access_log_id:
+                                 objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
+                                 stay_time = ''
+                                 if objs:
+                                     obj = objs[0]
+                                     stay_time =  obj.stay_time
+                                     if stay_time >= reach_stay_time: # 单次查看时间大于 时间限制
+                                        time_Flag = True
+
+                                 _send_log_dict = {
+                                    'type': '有时间限制|Time_Flag: %s' % (time_Flag),
+                                    'activity_single_money': 'Log_id:%s | 单次查看时间:%s | 时间限制: %s' % (article_access_log_id,stay_time,reach_stay_time),
+                                    'send_time': now_time,
+                                 }
+
+                            else:
+                                _send_log_dict = {
+                                    'type': '有时间限制|Time_Flag: %s' % (time_Flag),
+                                    'activity_single_money': '无log_id | 无统计单次阅读时间 | 时间限制: %s' % (reach_stay_time),
+                                    'send_time': now_time,
+                                }
+
+                        send_log_list = activity_redPacket_obj.access_log
+                        _send_log_list = json.loads(send_log_list)
+                        _send_log_list.append(_send_log_dict)
+                        send_log_list = json.dumps(_send_log_list)
+
+                        activity_redPacket_objs.update(access_log=send_log_list)
+
+                        if area_Flag and time_Flag: # 满足发送的时间和地区限制
+
+                            print(
+                                 '---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
+                                 forward_read_num, "|", reach_forward_num)
+                            print(
+                                 '---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
+                                 shoudle_send_num, "|",
+                                 already_send_redPacket_num)
+
+                            _data = {
+                                 'company_id' : company_id,
+                                 'openid' :  openid,
+                                 'user_id' :    user_id,
+                                 'parent_id' :  parent_id,
+                                 'shoudle_send_num' :  shoudle_send_num,
+                                 'already_send_redPacket_num' : already_send_redPacket_num
                             }
-                            activity_redPacket_obj = activity_redPacket_objs[0]
-                            send_log_list = activity_redPacket_obj.send_log
-                            _send_log_list = json.loads(send_log_list)
-                            _send_log_list.append(_send_log_dict)
-                            send_log_list = json.dumps(_send_log_list)
+                            Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, _data)
 
-                            bufa_send_activity_redPacket = shoudle_send_num - already_send_redPacket_num
 
-                            status = 1
-                            if bufa_send_activity_redPacket > 1:
-                                status = 4  # 补发状态
 
-                            activity_redPacket_objs.update(
-                                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
-                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
-                                # 已发红包金额 [累加发送金额]
-                                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=status,  # (1,'已发成功'),
-                                send_log=send_log_list  #
-                            )
-                            activity_objs.update(
-                                reason='发放成功',
-                                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
-                                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
-                            )
 
-                        else:  # 余额不足后者其他原因,记录下日志
-                            activity_redPacket_objs.update(
-                                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-                                status=3  # (2,'未发'),  改为未发状态
-                            )
-                            activity_objs.update(
-                                reason=response_ret.msg
-                            )
-
-                            if response_ret.code == 199:
-
-                                a_data = {}
-                                a_data['customer_id'] = parent_id
-                                a_data['user_id'] = user_id
-                                a_data['type'] = 'gongzhonghao_template_tishi'
-                                a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值', 'info_type': 1})
-
-                                print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
-                                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
-
-                            response.code = response_ret.code
-                            response.msg = response_ret.msg
 
 
                     else:
                         response.code = 301
                         response.msg = '应发数<=已发数'
-                        print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|reach_forward_num ----->>', shoudle_send_num,
-                              '|', reach_forward_num)
+                        print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|reach_forward_num ----->>', shoudle_send_num,'|', reach_forward_num)
 
                 else:
 
@@ -1228,6 +1242,117 @@ def user_forward_send_activity_redPacket(request):
                   activity_id)
 
     return JsonResponse(response.__dict__)
+
+
+def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
+    response = Response.ResponseObj()
+    company_id =  data.get('company_id')
+    openid = data.get('openid')
+    user_id =  data.get('user_id')
+    parent_id =  data.get('parent_id')
+    shoudle_send_num = data.get('shoudle_send_num')
+    already_send_redPacket_num = data.get('already_send_redPacket_num')
+
+    activity_obj = activity_objs[0]
+
+    app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
+        company_id=company_id)
+
+    activity_single_money = activity_obj.activity_single_money
+    activity_name = activity_obj.activity_name
+
+    authorization_appid = ''
+    gongzhonghao_name = ''
+    if app_objs:
+        # company_name = '%s' % (app_objs[0].company.name)
+        gongzhonghao_name = '%s' % (app_objs[0].name)
+        authorization_appid = app_objs[0].authorization_appid
+
+    shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
+        xiaochengxucompany_id=company_id)
+
+    shangHuHao = ''
+    shangHuMiYao = ''
+    if shangcheng_objs:
+        shangcheng_obj = shangcheng_objs[0]
+        shangHuHao = shangcheng_obj.shangHuHao
+        # send_name = shangcheng_obj.shangChengName
+        shangHuMiYao = shangcheng_obj.shangHuMiYao
+
+    _data = {
+        'client_ip': '192.168.1.10',
+        'shanghukey': shangHuMiYao,  # 支付钱数
+        'total_fee': activity_single_money,  # 支付钱数
+        'appid': authorization_appid,  # 小程序ID
+        'mch_id': shangHuHao,  # 商户号
+        'openid': openid,
+        'send_name': gongzhonghao_name,  # 商户名称
+        'act_name': activity_name,  # 活动名称
+        'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
+        'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
+    }
+    print('------[调用转发后满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
+
+    response_ret = focusOnIssuedRedEnvelope(_data)
+    if response_ret.code == 200:
+
+        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print('---- 调用发红包成功[转发得现金] 状态值:200  parent_id | openid --->>', parent_id, '|', openid)
+
+        _send_log_dict = {
+            'type': '自动发送',
+            'activity_single_money': activity_single_money,
+            'send_time': now_time,
+        }
+        activity_redPacket_obj = activity_redPacket_objs[0]
+        send_log_list = activity_redPacket_obj.send_log
+        _send_log_list = json.loads(send_log_list)
+        _send_log_list.append(_send_log_dict)
+        send_log_list = json.dumps(_send_log_list)
+
+        bufa_send_activity_redPacket = shoudle_send_num - already_send_redPacket_num
+
+        status = 1
+        if bufa_send_activity_redPacket > 1:  # 判断该用户是不是发布状态.应发数量减去已发数量时大于1,说明此用户已经有补发的红包
+            status = 4  # 补发状态
+
+        activity_redPacket_objs.update(
+            already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+            already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+            # 已发红包金额 [累加发送金额]
+            should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+            status=status,  # (1,'已发成功'),
+            send_log=send_log_list  #
+        )
+        activity_objs.update(
+            reason='发放成功',
+            already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+            already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+        )
+
+    else:  # 余额不足后者其他原因,记录下日志
+        activity_redPacket_objs.update(
+            should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+            status=3  # (2,'未发'),  改为未发状态
+        )
+        activity_objs.update(
+            reason=response_ret.msg
+        )
+
+        if response_ret.code == 199:
+            a_data = {}
+            a_data['customer_id'] = parent_id
+            a_data['user_id'] = user_id
+            a_data['type'] = 'gongzhonghao_template_tishi'
+            a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值', 'info_type': 1})
+
+            print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+        response.code = response_ret.code
+        response.msg = response_ret.msg
+
+    return  response
 
 
 # [定时器] - 补发红包红包
@@ -1414,7 +1539,7 @@ def user_focus_send_activity_redPacket(request):
                     if is_subscribe == 1 and is_receive_redPacket == 0:
 
                         focus_get_money = gongzhonghao_app_obj.focus_get_money  # 关注领取的红包金额
-                        focus_total_money = gongzhonghao_app_obj.focus_total_money
+                        # focus_total_money = gongzhonghao_app_obj.focus_total_money
 
                         app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
                             company_id=company_id)
@@ -1447,7 +1572,7 @@ def user_focus_send_activity_redPacket(request):
                             'send_name': gongzhonghao_name,  # 商户名称
                             'act_name': '关注领现金红包',  # 活动名称
                             'remark': '动动手指,轻松拿现金!',  # 备注信息
-                            'wishing': '感谢您的关注我！',  # 祝福语
+                            'wishing': '感谢您的关注！',  # 祝福语
                         }
 
                         print('------[调发红包的接口 data 数据]------>>', json.dumps(_data))
@@ -1611,11 +1736,8 @@ def binding_article_customer_relate(request):
         company_obj = company_objs[0]
         is_customer_unique = company_obj.is_customer_unique
 
-        if is_customer_unique: ## 唯一性
-            article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(
-                article_id=article_id,
-                customer_id=customer_id
-            )
+        if is_customer_unique:  # 唯一性
+            article_to_customer_belonger_objs = models.zgld_article_to_customer_belonger.objects.filter(article_id=article_id,customer_id=customer_id)
 
             if article_to_customer_belonger_objs:
 
@@ -1662,13 +1784,6 @@ def binding_article_customer_relate(request):
                 else:
                     print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
                     models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
-                    models.zgld_article_to_customer_belonger.objects.create(
-                        article_id=article_id,
-                        customer_id=customer_id,
-                        user_id=user_id,
-                        customer_parent_id=parent_id,
-                        level=level,
-                    )
 
         else: # 非唯一性的
             article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
@@ -1704,7 +1819,7 @@ def binding_article_customer_relate(request):
 
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4])
-    # # 活动并且活动开通中
+    # 活动并且活动开通中
     if activity_objs:
         activity_id = activity_objs[0].id
         print('------ 此文章有活动 article_id：----->', article_id)

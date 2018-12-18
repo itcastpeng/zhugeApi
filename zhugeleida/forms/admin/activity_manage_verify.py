@@ -90,6 +90,20 @@ class ActivityAddForm(forms.Form):
         }
     )
 
+    reach_stay_time = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': " reach_stay_time 不能为空"
+        }
+    )
+
+    is_limit_area = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "是否限制区域"
+        }
+    )
+
 
 
 
@@ -190,6 +204,20 @@ class ActivityUpdateForm(forms.Form):
         required=True,
         error_messages={
             'required': "设置转发次数不能为空"
+        }
+    )
+
+    reach_stay_time = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': " 限制时间秒数 不能为空"
+        }
+    )
+
+    is_limit_area = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "是否限制区域 不能为空"
         }
     )
 

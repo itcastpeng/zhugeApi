@@ -12,7 +12,7 @@ from zhugeapi_celery_project import tasks
 from django.db.models import F
 import json
 from django.db.models import Q
-
+import  redis
 import json
 from zhugeleida import models
 import base64
@@ -145,9 +145,8 @@ def chat_oper(request, oper_type, o_id):
 
                 _content = json.loads(Content)
                 info_type = _content.get('info_type')
-                content = ''
-                if info_type:
 
+                if info_type:
                     info_type = int(info_type)
 
                     if info_type == 1:
@@ -155,12 +154,12 @@ def chat_oper(request, oper_type, o_id):
                         encodestr = base64.b64encode(msg.encode('utf-8'))
                         msg = str(encodestr, 'utf-8')
                         _content['msg'] = msg
-                        content = json.dumps(_content)
+                        Content = json.dumps(_content)
 
                     elif info_type == 3:
                         msg = '您好,请问能否告诉我您的手机号?'
                         _content['msg'] = msg
-                        content = json.dumps(_content)
+                        Content = json.dumps(_content)
 
                 '''
                 content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。
@@ -198,10 +197,10 @@ def chat_oper(request, oper_type, o_id):
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
                 obj = models.zgld_chatinfo.objects.create(
-                        content=content,
+                        content=Content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
-                        send_type=send_type
+                        send_type=1
                 )
 
                 user_type = obj.customer.user_type
@@ -220,8 +219,14 @@ def chat_oper(request, oper_type, o_id):
                     data['content'] = Content
                     tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
 
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                rc.set(redis_user_id_key, True)
+                rc.set(redis_customer_id_key, True)
+
                 response.code = 200
-                response.msg = 'send msg successful'
+                response.msg = '发送成功'
 
     else:
 

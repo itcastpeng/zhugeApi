@@ -6,13 +6,15 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.company_verify import CompanyAddForm, CompanyUpdateForm, \
-    CompanySelectForm,AgentAddForm,TongxunluAddForm
+    CompanySelectForm,AgentAddForm,TongxunluAddForm,ThreeServiceAddForm
+
 import datetime
 import json
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import  create_component_access_token
 
-
+from django.db.models import Q, F
 # 查询公司
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -156,6 +158,139 @@ def author_status(request,oper_type):
             else:
                 response.code = 400
                 response.msg = "公司不存在"
+
+
+        elif oper_type == "query_service_settings":
+            type = request.GET.get('type')
+
+            # q = Q()
+            if type: # 查询单个详情
+                type = int(type)
+                # q.add(Q(**{'three_services_type': type}), Q.AND)
+
+                objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
+
+                if objs:
+
+                    ret_data = []
+                    obj = objs[0]
+                    status_text = obj.get_status_display()
+                    status = obj.status
+                    config = obj.config
+
+                    ret_data.append({
+                        'type': type,  # 类型
+                        'name': obj.three_services_type ,  #
+                        'status': status,  # 状态为1,代表通过。0 代表 未1通过
+                        'status_text': status_text,  # 状态为1,代表通过。0 代表 未1通过
+                        'config' : json.loads(config)
+                    })
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+
+                    }
+
+                else:
+                    response.code = 301
+                    response.data = '无数据'
+
+
+            else:
+
+                # 获取所有数据
+                ret_data = []
+
+                for type in [1,2,3]:
+                    name = ''
+                    if type == 1:
+                        name = '企业微信第三方服务商'
+                    elif type == 2:
+                        name = '公众号第三方平台'
+                    elif type == 3:
+                        name = '小程序第三方平台'
+
+                    objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
+
+                    status = 0
+                    status_text = '未通过'
+                    if objs:
+                        status_text = objs[0].get_status_display()
+                        status =  objs[0].status
+
+                    ret_data.append({
+                        'type' : type, # 类型
+                        'name': name,  #
+                        'status' : status,           # 状态为1,代表通过。0 代表 未1通过
+                        'status_text' : status_text   # 状态为1,代表通过。0 代表 未1通过
+                    })
+
+                response.code = 200
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': 3
+                }
+
+        return JsonResponse(response.__dict__)
+
+
+    elif request.method == "POST":
+
+
+        if oper_type == "edit_service_setting":
+
+            config = request.POST.get('config')
+            type =  request.POST.get('type')
+
+
+            _data = {
+                'config': config,
+                'type' : type
+            }
+
+            forms_obj = ThreeServiceAddForm(_data)
+            if forms_obj.is_valid():
+
+                type = int(type)
+                # _config = json.loads(config)
+                # component_appid = _config.get('app_id')
+                # app_secret = _config.get('app_secret')
+                #
+                # data_dict = {
+                #     'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
+                #     'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
+                # }
+                #
+                # component_access_token_ret = create_component_access_token(data_dict)
+                # code = component_access_token_ret.code
+                # if code != 200:
+                #     response.code = 401
+                #     response.msg = '公众号验证未通过'
+                #     return JsonResponse(response.__dict__)
+
+
+
+                objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
+
+                if objs:
+                    objs.update(
+                        config=config,
+                        status=1
+                    )
+                else:
+                    models.zgld_three_service_setting.objects.create(
+                        three_services_type=type,
+                        config=config,
+                        status=1
+                    )
+                response.code = 200
+                response.msg = '添加成功'
+
+            else:
+                response.code = 303
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
     return JsonResponse(response.__dict__)
 
@@ -321,6 +456,7 @@ def company_oper(request, oper_type, o_id):
                 is_validate = False
                 if result_validate.code != 0:
                     return JsonResponse(result_validate.__dict__)
+
                 else:
                     print('-----result_validate.data--------->>',result_validate.data)
                     is_validate = True

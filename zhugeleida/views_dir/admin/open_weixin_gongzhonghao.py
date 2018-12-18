@@ -13,6 +13,7 @@ from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
 import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
+import subprocess,os
 
 # 第三方平台接入
 @csrf_exempt
@@ -62,9 +63,21 @@ def open_weixin_gongzhonghao(request, oper_type):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                appid = 'wx6ba07e6ddcdc69b3'
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                appid = qywx_config_dict.get('app_id')
+                token = qywx_config_dict.get('token')
+                encodingAESKey = qywx_config_dict.get('encodingAESKey')
+
+                # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+                # encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+                # appid = 'wx6ba07e6ddcdc69b3'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
@@ -91,7 +104,17 @@ def open_weixin_gongzhonghao(request, oper_type):
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
 
-                app_id = 'wx6ba07e6ddcdc69b3'
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id = qywx_config_dict.get('app_id')
+
+                # app_id = 'wx6ba07e6ddcdc69b3'
                 if auth_code:
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                     # exist_auth_code = rc.get('auth_code')
@@ -290,12 +313,24 @@ def open_weixin_gongzhonghao(request, oper_type):
         # 生成接入的二维码
         elif oper_type == "create_grant_url":
             user_id = request.GET.get('user_id')
-            app_id = 'wx6ba07e6ddcdc69b3'  # 诸葛雷达_公众号 appid
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            app_id = qywx_config_dict.get('app_id')
+            app_secret = qywx_config_dict.get('app_secret')
+
+            # app_id = 'wx6ba07e6ddcdc69b3'  # 诸葛雷达_公众号 appid
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
             data_dict = {
-                'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+                'app_id': app_id,  # 查看诸葛雷达_公众号的 appid
+                'app_secret': app_secret # 查看诸葛雷达_公众号的AppSecret
             }
 
             response_ret = create_component_access_token(data_dict)
@@ -331,8 +366,18 @@ def open_weixin_gongzhonghao(request, oper_type):
             else:
                 pre_auth_code = exist_pre_auth_code
 
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            url = qywx_config_dict.get('authorization_url')
+
             # 生成授权链接
-            redirect_uri = 'http://zhugeleida.zhugeyingxiao.com/admin/#/empower/empower_xcx/'
+            redirect_uri = '%s/admin/#/empower/empower_xcx/' % (url)
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (
                 app_id, pre_auth_code, redirect_uri)  # auth_type=3 表示公众号和小程序都展示
@@ -392,9 +437,22 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-                encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-                appid = 'wx6ba07e6ddcdc69b3'
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                appid = qywx_config_dict.get('app_id')
+                token = qywx_config_dict.get('token')
+                encodingAESKey = qywx_config_dict.get('encodingAESKey')
+
+                # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+                # encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+                # appid = 'wx6ba07e6ddcdc69b3'
 
                 decrypt_obj = WXBizMsgCrypt(token, encodingAESKey, appid)
                 ret, decryp_xml = decrypt_obj.DecryptMsg(encrypt, msg_signature, timestamp, nonce)
@@ -421,7 +479,17 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
 
-                app_id = 'wx6ba07e6ddcdc69b3'
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id = qywx_config_dict.get('app_id')
+
+                # app_id = 'wx6ba07e6ddcdc69b3'
                 if auth_code:
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                     # exist_auth_code = rc.get('auth_code')
@@ -615,9 +683,22 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
-            token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
-            encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
-            appid = 'wx6ba07e6ddcdc69b3'
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            appid = qywx_config_dict.get('app_id')
+            token = qywx_config_dict.get('token')
+            encodingAESKey = qywx_config_dict.get('encodingAESKey')
+
+            # token = 'R8Iqi0yMamrgO5BYwsODpgSYjsbseoXg'
+            # encodingAESKey = 'iBCKEEYaVCsY5bSkksxiV5hZtBrFNPTQ2e3efsDC143'
+            # appid = 'wx6ba07e6ddcdc69b3'
 
             crypto = WeChatCrypto(token, encodingAESKey, appid)
             decrypted_xml = crypto.decrypt_message(
@@ -870,13 +951,26 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                         authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
+                                        three_service_objs = models.zgld_three_service_setting.objects.filter(
+                                            three_services_type=2)  # 公众号
+                                        qywx_config_dict = ''
+                                        if three_service_objs:
+                                            three_service_obj = three_service_objs[0]
+                                            qywx_config_dict = three_service_obj.config
+                                            if qywx_config_dict:
+                                                qywx_config_dict = json.loads(qywx_config_dict)
+
+                                        app_id = qywx_config_dict.get('app_id')
+                                        app_secret = qywx_config_dict.get('app_secret')
+
+
                                         if not authorizer_access_token:
                                             data = {
                                                 'key_name': authorizer_access_token_key_name,
                                                 'authorizer_refresh_token': authorizer_refresh_token,
                                                 'authorizer_appid': authorizer_appid,
-                                                'app_id': 'wx6ba07e6ddcdc69b3',
-                                                'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                                                'app_id': app_id,
+                                                'app_secret': app_secret
                                             }
 
                                             authorizer_access_token_result = create_authorizer_access_token(data)
@@ -893,18 +987,25 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         res = requests.get(url,params=get_data,stream=True)
 
                                         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-                                        filename = "/customer_%s_user_%s_%s.mp3" % (customer_id, user_id, now_time) #amr
+                                        filename = "/customer_%s_user_%s_%s.amr" % (customer_id, user_id, now_time) #amr
                                         file_dir = os.path.join('statics', 'zhugeleida', 'voice','gongzhonghao') + filename
 
-                                        # 写入收到的视频数据
-                                        with open(file_dir, 'ab') as file:
-                                            file.write(res.content)
-                                            file.flush()
-
-                                        _content = {
-                                            'url': file_dir,
-                                            'info_type': 5  #
-                                        }
+                                        ###amr2转mp3
+                                        print('----- 语音amr 地址 --->>',file_dir)
+                                        mp3_file_dir = amr2mp3(file_dir)
+                                        if mp3_file_dir == 1:
+                                            Content = '【收到不支持的消息类型，暂无法显示】'
+                                            encodestr = base64.b64encode(Content.encode('utf-8'))
+                                            msg = str(encodestr, 'utf-8')
+                                            _content = {
+                                                'msg': msg,
+                                                'info_type': 1
+                                            }
+                                        else:
+                                            _content = {
+                                                'url': mp3_file_dir,
+                                                'info_type': 5  #
+                                            }
 
                                 content = json.dumps(_content)
                                 models.zgld_chatinfo.objects.create(
@@ -1116,11 +1217,24 @@ def gzh_auth_process_oper(request, oper_type):
                 authorizer_appid = app_obj[0].authorization_appid
                 get_wx_info_data = {}
                 post_wx_info_data = {}
-                app_id = 'wx6ba07e6ddcdc69b3'  # 查看诸葛雷达_公众号的 appid
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
+
+                app_id = qywx_config_dict.get('app_id')
+                app_secret = qywx_config_dict.get('app_secret')
+
+
+                # app_id = 'wx6ba07e6ddcdc69b3'  # 查看诸葛雷达_公众号的 appid
 
                 data_dict = {
-                    'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-                    'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+                    'app_id': app_id,                     # 查看诸葛雷达_公众号的 appid
+                    'app_secret':app_secret  # 查看诸葛雷达_公众号的AppSecret
                 }
 
                 component_access_token_ret = create_component_access_token(data_dict)
@@ -1307,3 +1421,20 @@ def create_authorizer_access_token(data):
 
     return response
 
+
+## 把amr2转成mp3
+def amr2mp3(amr_path, mp3_path=None):
+    path, name = os.path.split(amr_path)
+    if name.split('.')[-1] != 'amr':
+        print(' ----- amr file ----->')
+        return 1
+    if mp3_path is None or mp3_path.split('.')[-1] != 'mp3':
+        mp3_path = os.path.join(path, name.split('.')[0] + '.mp3')
+    error = subprocess.call(['/usr/bin/ffmpeg', '-i', amr_path, mp3_path])
+    print('------ subprocess 返回码 -------->>', error)
+    if error:
+        return 1
+
+    print(' ---- 转码成功 mp3地址 success ----->>',mp3_path)
+
+    return mp3_path

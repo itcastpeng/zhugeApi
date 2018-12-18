@@ -129,127 +129,157 @@ def create_authorizer_access_token(data):
     # app_id = data.get('app_id')
     # app_secret = data.get('app_secret')
 
-    app_id = 'wx67e2fde0f694111c'
-    app_secret = '4a9690b43178a1287b2ef845158555ed'
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3) # 小程序
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
 
-    component_access_token = rc.get('component_access_token')
-    if not component_access_token:
+        app_id =  qywx_config_dict.get('app_id')
+        app_secret = qywx_config_dict.get('app_secret')
 
-        get_pre_auth_data = {}
-        post_component_data = {}
-        post_component_data['component_appid'] = app_id
-        post_component_data['component_appsecret'] = app_secret
-        component_verify_ticket = rc.get('ComponentVerifyTicket')
-        post_component_data['component_verify_ticket'] = component_verify_ticket
 
-        post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
+        # app_id = 'wx67e2fde0f694111c' # 小程序
+        # app_secret = '4a9690b43178a1287b2ef845158555ed'
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
+        component_access_token = rc.get('component_access_token')
+        if not component_access_token:
+
+            get_pre_auth_data = {}
+            post_component_data = {}
+            post_component_data['component_appid'] = app_id
+            post_component_data['component_appsecret'] = app_secret
+            component_verify_ticket = rc.get('ComponentVerifyTicket')
+            post_component_data['component_verify_ticket'] = component_verify_ticket
+
+            post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+
+            # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+
+            print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
+            component_token_ret = component_token_ret.json()
+            access_token = component_token_ret.get('component_access_token')
+            if access_token:
+                get_pre_auth_data['component_access_token'] = access_token
+                rc.set('component_access_token', access_token, 7000)
+                component_access_token = access_token
+
+            else:
+                response.code = 400
+                response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
+                return JsonResponse(response.__dict__)
+
+
+        get_auth_token_data = {
+            'component_access_token': component_access_token
+        }
+
+        post_auth_token_data = {
+            'component_appid': app_id,
+            'authorizer_appid': authorizer_appid,
+            'authorizer_refresh_token': authorizer_refresh_token
+        }
+
+        authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
+        print('---- 接口调用凭据 post_auth_token_data : --->',post_auth_token_data)
         s = requests.session()
         s.keep_alive = False  # 关闭多余连接
-        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+        authorizer_info_ret = s.post(authorizer_token_url, params=get_auth_token_data,data=json.dumps(post_auth_token_data))
 
-        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+        # authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,data=json.dumps(post_auth_token_data))
 
-        print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
-        component_token_ret = component_token_ret.json()
-        access_token = component_token_ret.get('component_access_token')
-        if access_token:
-            get_pre_auth_data['component_access_token'] = access_token
-            rc.set('component_access_token', access_token, 7000)
-            component_access_token = access_token
+        authorizer_info_ret = authorizer_info_ret.json()
+
+        print('-------获取（刷新）授权小程序的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)
+
+        authorizer_access_token = authorizer_info_ret.get('authorizer_access_token')
+        authorizer_refresh_token = authorizer_info_ret.get('authorizer_refresh_token')
+
+        if authorizer_access_token and authorizer_refresh_token:
+            rc.set(key_name, authorizer_access_token, 7000)
+            response.code = 200
+            response.msg = "获取令牌成功"
+            response.data = authorizer_access_token
+
+            # response.data = {
+            #     'authorizer_access_token' : authorizer_access_token
+            # }
+            print('------ 获取令牌（authorizer_access_token）成功------>>',authorizer_access_token)
 
         else:
+            print('------ 获取令牌（authorizer_access_token）为空------>>')
             response.code = 400
-            response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
+            response.msg = "获取令牌authorizer_access_token为空"
             return JsonResponse(response.__dict__)
 
-
-    get_auth_token_data = {
-        'component_access_token': component_access_token
-    }
-
-    post_auth_token_data = {
-        'component_appid': app_id,
-        'authorizer_appid': authorizer_appid,
-        'authorizer_refresh_token': authorizer_refresh_token
-    }
-
-    authorizer_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_authorizer_token'
-    print('---- 接口调用凭据 post_auth_token_data : --->',post_auth_token_data)
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    authorizer_info_ret = s.post(authorizer_token_url, params=get_auth_token_data,data=json.dumps(post_auth_token_data))
-
-    # authorizer_info_ret = requests.post(authorizer_token_url, params=get_auth_token_data,data=json.dumps(post_auth_token_data))
-
-    authorizer_info_ret = authorizer_info_ret.json()
-
-    print('-------获取（刷新）授权小程序的接口调用凭据 authorizer_token 返回--------->>', authorizer_info_ret)
-
-    authorizer_access_token = authorizer_info_ret.get('authorizer_access_token')
-    authorizer_refresh_token = authorizer_info_ret.get('authorizer_refresh_token')
-
-    if authorizer_access_token and authorizer_refresh_token:
-        rc.set(key_name, authorizer_access_token, 7000)
-        response.code = 200
-        response.msg = "获取令牌成功"
-        response.data = authorizer_access_token
-
-        # response.data = {
-        #     'authorizer_access_token' : authorizer_access_token
-        # }
-        print('------ 获取令牌（authorizer_access_token）成功------>>',authorizer_access_token)
+        return  response
 
     else:
-        print('------ 获取令牌（authorizer_access_token）为空------>>')
-        response.code = 400
-        response.msg = "获取令牌authorizer_access_token为空"
-        return JsonResponse(response.__dict__)
-
-    return  response
+        response.code = 301
+        response.msg = '公众号第三方-无配置信息'
+        print('------ 【公众号第三方-无配置信息】 create_authorizer_access_token ------>>')
 
 # 获取第三方平台 component_token_ret.json
 def create_component_access_token():
     response = Response.ResponseObj()
 
-    app_id = 'wx67e2fde0f694111c'
-    app_secret = '4a9690b43178a1287b2ef845158555ed'
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3) # 小程序
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
 
-    component_access_token = rc.get('component_access_token')
-    if not component_access_token:
+        app_id =  qywx_config_dict.get('app_id')
+        app_secret = qywx_config_dict.get('app_secret')
 
-        get_pre_auth_data = {}
-        post_component_data = {}
-        post_component_data['component_appid'] = app_id
-        post_component_data['component_appsecret'] = app_secret
-        component_verify_ticket = rc.get('ComponentVerifyTicket')
-        post_component_data['component_verify_ticket'] = component_verify_ticket
+        # app_id = 'wx67e2fde0f694111c'
+        # app_secret = '4a9690b43178a1287b2ef845158555ed'
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-        post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
+        component_access_token = rc.get('component_access_token')
+        if not component_access_token:
 
-        s = requests.session()
-        s.keep_alive = False  # 关闭多余连接
-        component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
+            get_pre_auth_data = {}
+            post_component_data = {}
+            post_component_data['component_appid'] = app_id
+            post_component_data['component_appsecret'] = app_secret
+            component_verify_ticket = rc.get('ComponentVerifyTicket')
+            post_component_data['component_verify_ticket'] = component_verify_ticket
 
-        # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
+            post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
 
-        print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
-        component_token_ret = component_token_ret.json()
-        access_token = component_token_ret.get('component_access_token')
-        if access_token:
-            get_pre_auth_data['component_access_token'] = access_token
-            rc.set('component_access_token', access_token, 7000)
-            component_access_token = access_token
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            component_token_ret = s.post(post_component_url, data=json.dumps(post_component_data))
 
-        else:
-            response.code = 400
-            response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
-            return JsonResponse(response.__dict__)
+            # component_token_ret = requests.post(post_component_url, data=json.dumps(post_component_data))
 
-    return    component_access_token
+            print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
+            component_token_ret = component_token_ret.json()
+            access_token = component_token_ret.get('component_access_token')
+            if access_token:
+                get_pre_auth_data['component_access_token'] = access_token
+                rc.set('component_access_token', access_token, 7000)
+                component_access_token = access_token
 
+            else:
+                response.code = 400
+                response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
+                return JsonResponse(response.__dict__)
+
+        return    component_access_token
+
+    else:
+        response.code = 301
+        response.msg = '公众号第三方-无配置信息'
+        print('------ 【公众号第三方-无配置信息】create_component_access_token ------>>')
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)

@@ -437,7 +437,7 @@ def article_oper(request, oper_type, o_id):
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'content': obj.content,  # 文章内容
                         'tag_list': tag_list,
-                        'insert_ads': insert_ads  # 插入的广告语
+                        'insert_ads': insert_ads,  # 插入的广告语
 
                     })
                 response.code = 200
