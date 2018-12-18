@@ -984,11 +984,16 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                               'access_token' : authorizer_access_token,
                                               'media_id' : MediaId
                                         }
-                                        res = requests.get(url,params=get_data,stream=True)
+                                        res = s.get(url,params=get_data,stream=True)
 
                                         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
                                         filename = "/customer_%s_user_%s_%s.amr" % (customer_id, user_id, now_time) #amr
                                         file_dir = os.path.join('statics', 'zhugeleida', 'voice','gongzhonghao') + filename
+
+                                        # 写入收到的视频数据
+                                        with open(file_dir, 'ab') as file:
+                                            file.write(res.content)
+                                            file.flush()
 
                                         ###amr2转mp3
                                         print('----- 语音amr 地址 --->>',file_dir)
