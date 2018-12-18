@@ -30,6 +30,15 @@ def open_weixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+
             global decryp_xml_tree
             xml_tree = ET.fromstring(postdata)
             try:
@@ -61,15 +70,8 @@ def open_weixin(request, oper_type):
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
-                qywx_config_dict = ''
-                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
-                if three_service_objs:
-                    three_service_obj = three_service_objs[0]
-                    qywx_config_dict = three_service_obj.config
-                    if qywx_config_dict:
-                        qywx_config_dict = json.loads(qywx_config_dict)
 
-                appid = qywx_config_dict.get('appid')
+                appid = qywx_config_dict.get('app_id')
                 token = qywx_config_dict.get('token')
                 encodingAESKey = qywx_config_dict.get('encodingAESKey')
 
@@ -104,14 +106,6 @@ def open_weixin(request, oper_type):
 
                 userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
                 company_id   =  userprofile_obj.company_id
-
-                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
-                qywx_config_dict = ''
-                if three_service_objs:
-                    three_service_obj = three_service_objs[0]
-                    qywx_config_dict = three_service_obj.config
-                    if qywx_config_dict:
-                        qywx_config_dict = json.loads(qywx_config_dict)
 
                 app_id =  qywx_config_dict.get('app_id')
                 # app_id = 'wx67e2fde0f694111c'
