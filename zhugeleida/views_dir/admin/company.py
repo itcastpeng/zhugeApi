@@ -173,11 +173,11 @@ def author_status(request,oper_type):
             for type in [1,2,3]:
                 name = ''
                 if type == 1:
-                    name = '第三方企业微信'
+                    name = '企业微信第三方服务商'
                 elif type == 2:
-                    name = '第三方企业微信'
+                    name = '公众号第三方平台'
                 elif type == 3:
-                    name = '第三方企业微信'
+                    name = '小程序第三方平台'
 
                 objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
 
