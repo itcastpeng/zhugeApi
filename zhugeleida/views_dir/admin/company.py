@@ -12,6 +12,7 @@ import datetime
 import json
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import  create_component_access_token
 
 from django.db.models import Q, F
 # 查询公司
@@ -250,6 +251,26 @@ def author_status(request,oper_type):
 
             forms_obj = ThreeServiceAddForm(_data)
             if forms_obj.is_valid():
+
+                type = int(type)
+                # _config = json.loads(config)
+                # component_appid = _config.get('app_id')
+                # app_secret = _config.get('app_secret')
+                #
+                # data_dict = {
+                #     'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
+                #     'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
+                # }
+                #
+                # component_access_token_ret = create_component_access_token(data_dict)
+                # code = component_access_token_ret.code
+                # if code != 200:
+                #     response.code = 401
+                #     response.msg = '公众号验证未通过'
+                #     return JsonResponse(response.__dict__)
+
+
+
                 objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
 
                 if objs:
