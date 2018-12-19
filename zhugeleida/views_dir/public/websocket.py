@@ -725,7 +725,7 @@ def xiaochengxu_websocket(request, oper_type):
                             elif type == 'lived':
                                 response_data = {
                                     'code': 270,
-                                    'msg': '像我开炮',
+                                    'msg': '为了新中国的胜利向我开炮',
                                 }
                                 print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
