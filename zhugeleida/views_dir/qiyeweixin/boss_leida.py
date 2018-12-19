@@ -663,6 +663,7 @@ def home_page_oper(request, oper_type):
 
 
                 data['company_id'] = company_id
+                data['type'] = type
 
                 ret_data = {}
                 for index in ['index_type_1', 'index_type_2', 'index_type_3', 'index_type_4']:
