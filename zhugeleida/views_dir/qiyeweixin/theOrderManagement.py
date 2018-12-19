@@ -26,7 +26,6 @@ def theOrder(request):
         detailId = request.GET.get('detailId')
         time_section = request.GET.get('time_section')
         # orderStatus = request.GET.get('orderStatus')
-
         # if orderStatus:
         #     if int(orderStatus) == 1:
         #         q.add(Q(theOrderStatus=1), Q.AND)
@@ -45,7 +44,7 @@ def theOrder(request):
                 month = '01'
                 year = year + 1
 
-            end_time = str(year) + "-"+ month + '-' + '01'
+            end_time = str(year) + "-"+ str(month) + '-' + '01'
             print('------ 开始时间 | 结束时间 ---->>',start_time,end_time)
 
             q.add(Q(**{'createDate__gte': start_time}), Q.AND)

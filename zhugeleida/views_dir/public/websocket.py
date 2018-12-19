@@ -724,7 +724,7 @@ def xiaochengxu_websocket(request, oper_type):
 
                             elif type == 'lived':
                                 response_data = {
-                                    'code': 250,
+                                    'code': 270,
                                     'msg': '像我开炮',
                                 }
                                 print('------ 注册成功返回【消息数量】成功---->', response_data)

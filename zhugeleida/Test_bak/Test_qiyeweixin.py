@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -520,12 +520,14 @@ import json
 
 
 
-url =  ip + '/zhugeleida/admin/tongxunlu/myself_delete_binding_relate'  # 公众号文章基础信息
+# url =  ip + '/zhugeleida/admin/tongxunlu/myself_delete_binding_relate'  # 公众号文章基础信息
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+
+
+url =  ip + '/zhugeleida/qiyeweixin/theOrder'  # 公众号文章基础信息
+get_data['time_section'] = '2018-11'
 ret = requests.get(url, data = post_data ,params=get_data)
-
-
-
-
 
 # get_data['uid'] = 18
 # get_data['pid'] = 852
