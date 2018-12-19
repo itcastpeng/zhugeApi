@@ -203,7 +203,7 @@ def login_oper(request, oper_type):
                         response.code = 302
                         response.msg = "关系存在"
 
-                    elif company_id and user_customer_belonger_obj:
+                    else:
 
                         obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,
                                                                                 source=source)
