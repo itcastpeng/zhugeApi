@@ -58,12 +58,13 @@ import json
 
 from urllib.parse import unquote
 
-## 解析URl
-# share_url = '/zhugeleida/mycelery/user_send_action_log?action=2&remark=%E6%AD%A3%E5%9C%A8%E6%9F%A5%E7%9C%8B%E7%A5%9B%E7%97%98%E5%A5%97%E9%A4%90A%2C%E5%B0%BD%E5%BF%AB%E6%8A%8A%E6%8F%A1%E5%95%86%E6%9C%BA&user_id=1230&timestamp=1543309333073&product_id=60&uid=60&rand_str=b530e68f2d0e4919f8b6fb2aab8ecad7'
-#
-# ## 解码URl
-# redirect_url = unquote(share_url, 'utf-8')
-# print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
+# 解析URl
+share_url = '/zhugeleida/mycelery/user_send_action_log?timestamp=1545201763871&user_id=854&company_id=2&uid=135&action=14&rand_str=1c7c0939afe9ac1227aa03e160c9aa60&pid=1022&remark=%E6%AD%A3%E5%9C%A8%E6%9F%A5%E7%9C%8B%E6%96%87%E7%AB%A0%E3%80%8A%E6%B2%A1%E3%80%90%E7%95%99%E9%87%8F%E3%80%91%E6%AF%94%E6%B2%A1%E6%B5%81%E9%87%8F%E6%9B%B4%E5%8F%AF%E6%80%95%E2%80%94%E5%90%88%E4%BC%97%E5%BA%B7%E6%A1%A5%E3%80%8B%2C%E7%9C%8B%E6%9D%A5%E5%AF%B9%E6%82%A8%E7%9A%84%E6%96%87%E7%AB%A0%E6%84%9F%E5%85%B4%E8%B6%A3'
+
+
+## 解码URl
+redirect_url = unquote(share_url, 'utf-8')
+print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
 
 
 application_data = {
@@ -115,6 +116,6 @@ appid = 'wx6ba07e6ddcdc69b3'
 
 
 
-print(json.dumps(application_data))
+# print(json.dumps(application_data))
 
 

@@ -294,12 +294,15 @@ def article_oper(request, oper_type, o_id):
 
                     mingpian_avatar_objs = models.zgld_user_photo.objects.select_related('user').filter(user_id=uid, photo_type=2).order_by('-create_date')
                     mingpian_avatar = ''
+                    zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
+
                     if mingpian_avatar_objs:
                         mingpian_avatar = mingpian_avatar_objs[0].photo_url
-                    else:
-                        mingpian_avatar =  obj.user.avatar
 
-                    zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
+                    else:
+                        mingpian_avatar =  zgld_userprofile_obj.avatar
+
+
                     insert_ads['username'] = zgld_userprofile_obj.username
                     insert_ads['avatar'] = mingpian_avatar
                     insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone

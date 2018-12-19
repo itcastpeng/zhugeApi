@@ -58,6 +58,7 @@ urlpatterns = [
 
     url(r'^websocket/(?P<oper_type>\w+)$', websocket.leida_websocket),
 
+
     # 获取访问日志动作。
     url(r'^action/(?P<oper_type>\w+)$', action.action),
 
