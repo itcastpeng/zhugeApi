@@ -10,17 +10,16 @@ from django.db.models import Q
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_userprofile)
 def theOrder(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     user_id = request.GET.get('user_id')
-    u_id = request.GET.get('u_id')
+    # u_id = request.GET.get('u_id')
     # company_id = request.GET.get('company_id')
 
     if forms_obj.is_valid():
         q = Q()
-
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
 
@@ -39,7 +38,7 @@ def theOrder(request):
             q.add(Q(id=detailId), Q.AND)
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(
-            shouHuoRen_id=user_id,yewuUser_id=u_id, logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
+            yewuUser_id=user_id, logicDelete=0).order_by('-createDate')  #
 
         if objs:
 
@@ -118,24 +117,9 @@ def theOrder(request):
     return JsonResponse(response.__dict__)
 
 
-@csrf_exempt
-def timeToRefresh(request):  # 定时刷新 订单超过十分钟 不付款 更改为取消订单
-    response = Response.ResponseObj()
-    nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    # nowDate = (datetime.datetime.now() - datetime.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S')
-    objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(theOrderStatus=1)
-    for obj in objs:
-        objCreate = (obj.createDate + datetime.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S')
-        if nowDate > objCreate:
-            print('=========')
-            models.zgld_shangcheng_dingdan_guanli.objects.filter(id=obj.id).update(theOrderStatus=10)
-    response.code = 200
-    response.msg = '更新成功'
-    return JsonResponse(response.__dict__)
-
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+@account.is_token(models.zgld_userprofile)
 def theOrderOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':
@@ -169,6 +153,7 @@ def theOrderOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '订单无法取消'
 
+
         elif oper_type == 'deleteOrder':
 
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
@@ -197,6 +182,7 @@ def theOrderOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = '无此订单'
+
     else:
         response.code = 402
         response.msg = "请求异常"

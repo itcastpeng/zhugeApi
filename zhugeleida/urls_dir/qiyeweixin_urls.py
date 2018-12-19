@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
     qr_code_auth, follow_language, follow_info,tag_list,article, talkGroupManagement, speechDetailsManagement
-from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product
+from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product,theOrderManagement
 from zhugeleida.views_dir.public import  websocket
 
 urlpatterns = [
@@ -57,6 +57,9 @@ urlpatterns = [
     url(r'^contact$', contact.contact),
 
     url(r'^websocket/(?P<oper_type>\w+)$', websocket.leida_websocket),
+
+    #我的订单管理查询
+    url(r'theOrder$', theOrderManagement.theOrder),
 
 
     # 获取访问日志动作。
