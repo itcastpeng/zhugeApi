@@ -20,7 +20,13 @@ def deal_search_time(data, q):
 
     user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = user_obj.company_id
-    customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
+
+    if type == 'personal':
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
+
+    else:
+        customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
+
 
     customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(browse_num=Sum('popularity'))
     browse_num = 0
