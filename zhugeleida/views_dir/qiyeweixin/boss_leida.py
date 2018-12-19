@@ -15,8 +15,10 @@ def deal_search_time(data, q):
     user_id = data.get('user_id')
     type = data.get('type')
 
+    q1 = Q()
     if type == 'personal': # 个人数据
         q.add(Q(**{'user_id': user_id}), Q.AND)  # 搜索个人数据
+        q1.add(Q(**{'id': user_id}), Q.AND)
 
     user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = user_obj.company_id
@@ -28,7 +30,7 @@ def deal_search_time(data, q):
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
 
 
-    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(browse_num=Sum('popularity'))
+    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(browse_num=Sum('popularity'))
     browse_num = 0
     if len(list(customer_num_dict)) != 0:
         print('---- 受欢迎 数量 --->>',q, customer_num_dict[0])
@@ -36,7 +38,7 @@ def deal_search_time(data, q):
 
     follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q).count()
 
-    user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
+    user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
     praise_num = 0
     if len(list(user_pop_queryset)) != 0:
         praise_num = user_pop_queryset[0].get('praise_num')
@@ -45,7 +47,7 @@ def deal_search_time(data, q):
                                                                              is_customer_msg_num__gte=1,
                                                                              is_user_msg_num__gte=1).count()
 
-    user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
+    user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
 
     forward_num = 0
     if len(list(user_forward_queryset)) != 0:
