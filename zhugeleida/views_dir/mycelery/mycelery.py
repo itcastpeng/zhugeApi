@@ -140,8 +140,7 @@ def user_send_action_log(request):
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
         customer_id=customer_id,user_id=user_id).order_by('create_date')
-    user_id = objs[0].user_id
-
+    # user_id = objs[0].user_id
     # objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
     #     customer_id=customer_id).order_by('create_date')
     #
@@ -740,8 +739,7 @@ def user_send_gongzhonghao_template_msg(request):
                                                                                 customer_parent_id=parent_id,
                                                                                 activity_id=activity_id)
         if not activity_redPacket_objs:
-            print('------ 【转发后查看 * 不发消息公众号模板消息提示】customer_id | parent_id | activity_id-------->>', customer_id, "|",
-                  parent_id, "|", activity_id)
+            print('------ 【转发后查看 * 不发消息公众号模板消息提示】customer_id | parent_id | activity_id-------->>', customer_id, "|",parent_id, "|", activity_id)
 
             return HttpResponse('Dont send message')
 
@@ -763,9 +761,10 @@ def user_send_gongzhonghao_template_msg(request):
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
         customer_id=customer_id,
+        user_id=user_id,
         user__company_id=company_id)
 
-    user_id = objs[0].user_id # 找到那个建立关系的人。
+    # user_id = objs[0].user_id # 找到那个建立关系的人。
 
 
     customer_name = ''
@@ -828,6 +827,10 @@ def user_send_gongzhonghao_template_msg(request):
                     info_type = int(info_type)
                     if info_type == 1:
                         msg = _content.get('msg')
+
+                    elif info_type == 4:  # 图片
+                        msg = '您的小可爱发来一张图片,回复【520】限时口令查看哦'
+
 
                 _content = '%s' % (msg)
 
@@ -963,6 +966,47 @@ def user_send_gongzhonghao_template_msg(request):
                 info_type = int(info_type)
                 if info_type == 1:
                     msg = _content.get('msg')
+
+                elif info_type == 4:
+                    url = _content.get('url')
+                    img_url =  'http://api.zhugeyingxiao.com/' + url
+
+                    add_news_url = 'https://api.weixin.qq.com/cgi-bin/media/upload'
+                    add_new_data = {
+                        'access_token': authorizer_access_token,
+                        'type' : 'image'
+                    }
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+
+                    files = {"media": open(url, "rb")}
+                    add_news_ret = s.post(add_news_url, params=add_new_data,files=files)
+                    add_news_ret = add_news_ret.json()
+
+                    print('--------企业用户 公众号客服接口 微信公众号上临时素 返回数据--------->', add_news_ret)
+                    media_id = add_news_ret.get('media_id')
+                    if media_id:
+                        print('-----企业用户 公众号客服接口 微信公众号上临时素材 media_id ---->>', media_id)
+                        '''
+                          https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421140547
+                           {
+                            "touser": "OPENID",
+                            "msgtype": "image",
+                            "image":
+                                {
+                                    "media_id": "MEDIA_ID"
+                                }
+                        }
+
+   
+                        '''
+
+
+
+
+
+
 
             _content = '%s' % (msg)
             kefu_msg_post_data = {
