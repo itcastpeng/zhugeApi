@@ -100,8 +100,7 @@ def deal_line_info(data):
 
     if index_type == 1:  # 客户总数
         if type == 'personal':
-            customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(
-                q1).values_list('customer_id').distinct().count()  # 已获取客户数
+            customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q1).count()  # 已获取客户数
 
         else:
             customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q1).count()
@@ -119,13 +118,11 @@ def deal_line_info(data):
                                                                        is_user_msg_num__gte=1).filter(q1).count()
         return follow_num
 
-        # follow_num = models.zgld_follow_info.objects.filter(
-        #     user_customer_flowup__customer__company_id=company_id).filter(q1).count()
-        # return follow_num
 
     elif index_type == 4:  # 浏览总数 [客户活跃度]
         browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
             'customer_id').distinct().count()  # 浏览名片的总数(包含着保存名片)
+
         return browse_num
 
 
