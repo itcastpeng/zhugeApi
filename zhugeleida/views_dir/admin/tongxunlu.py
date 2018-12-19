@@ -387,15 +387,15 @@ def tongxunlu_oper(request, oper_type):
                         for obj in customer_objs:
 
                             _customer_id = obj.customer_id
-                            validate_customer_objs = models.zgld_user_customer_belonger.objects.filter(user_id=new_uid,
+                            validate_customer_objs = models.zgld_user_customer_belonger.objects.filter(userprofile_id=new_uid,
                                                                                                        customer_id=_customer_id) ##
 
-                            chat_objs = models.zgld_chatinfo.objects.filter(customer_id=_customer_id, user_id=old_uid) #
+                            chat_objs = models.zgld_chatinfo.objects.filter(customer_id=_customer_id, userprofile_id=old_uid) #
 
                             if validate_customer_objs:  # 此用户的新对接人已经有绑定关系
                                 obj.delete()            # 删除旧用户的绑定数据
                                 chat_objs.update(
-                                    user_id=new_uid,
+                                    userprofile_id=new_uid,
                                     is_last_msg=False
                                 )
                                 response.code = 200
@@ -403,11 +403,11 @@ def tongxunlu_oper(request, oper_type):
 
                             else:
 
-                                obj.user_id = new_uid
+                                obj.userprofile_id = new_uid
                                 obj.save()
                                 # 返回的数据
                                 chat_objs.update(
-                                    user_id=new_uid
+                                    userprofile_id=new_uid
                                 )
                     else:
                         response.code = 301
