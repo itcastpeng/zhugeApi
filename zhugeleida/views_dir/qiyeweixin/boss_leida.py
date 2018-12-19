@@ -40,11 +40,8 @@ def deal_search_time(data, q):
         print('---- 受欢迎 数量 --->>',q, customer_num_dict[0])
         browse_num = customer_num_dict[0].get('browse_num')
 
-    if type == 'personal': # 个人数据
-        q1.add(Q(**{'id': user_id}), Q.AND)
 
-
-    follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q2).count() #
+    follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q3).count() #
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
     praise_num = 0
