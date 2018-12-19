@@ -368,7 +368,7 @@ def tongxunlu_oper(request, oper_type):
                                 userprofile_id=new_uid
                             )
 
-                            obj.userprofile_id=new_uid
+                            obj.user_id=new_uid
                             obj.save()
 
 
@@ -404,7 +404,7 @@ def tongxunlu_oper(request, oper_type):
 
                             else:
 
-                                obj.userprofile_id = new_uid
+                                obj.user_id = new_uid
                                 obj.save()
                                 # 返回的数据
                                 chat_objs.update(
