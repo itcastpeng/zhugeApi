@@ -348,27 +348,27 @@ def tongxunlu_oper(request, oper_type):
                 ## 工作交接
                 if type == 'all_customer':
                     customer_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-                        user_id=old_uid,user__company_id=company_id)
+                        userprofile_id=old_uid,user__company_id=company_id)
 
                     for obj in customer_objs:
 
                         _customer_id =obj.customer_id
-                        validate_customer_objs = models.zgld_user_customer_belonger.objects.filter(user_id=new_uid,customer_id=_customer_id)
-                        chat_objs = models.zgld_chatinfo.objects.filter(customer_id=_customer_id, user_id=old_uid)  #
+                        validate_customer_objs = models.zgld_user_customer_belonger.objects.filter(userprofile_id=new_uid,customer_id=_customer_id)
+                        chat_objs = models.zgld_chatinfo.objects.filter(customer_id=_customer_id, userprofile_id=old_uid)  #
 
                         if validate_customer_objs:
                             obj.delete() # 删除旧数据
                             chat_objs.update(
-                                user_id=new_uid,
+                                userprofile_id=new_uid,
                                 is_last_msg=False
                             )
 
                         else:
                             chat_objs.update(
-                                user_id=new_uid
+                                userprofile_id=new_uid
                             )
 
-                            obj.user_id=new_uid
+                            obj.userprofile_id=new_uid
                             obj.save()
 
 
