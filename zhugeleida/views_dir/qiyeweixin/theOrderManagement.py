@@ -24,21 +24,40 @@ def theOrder(request):
         length = forms_obj.cleaned_data['length']
 
         detailId = request.GET.get('detailId')
-        orderStatus = request.GET.get('orderStatus')
-        if orderStatus:
-            if int(orderStatus) == 1:
-                q.add(Q(theOrderStatus=1), Q.AND)
-            elif int(orderStatus) == 2:
-                q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
-            else:
-                q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
+        time_section = request.GET.get('time_section')
+        # orderStatus = request.GET.get('orderStatus')
+
+        # if orderStatus:
+        #     if int(orderStatus) == 1:
+        #         q.add(Q(theOrderStatus=1), Q.AND)
+        #
+        #     elif int(orderStatus) == 2:
+        #         q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
+        #
+        #     else:
+        #         q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
+
+        if time_section: # 2018-12
+            year = int(time_section.split('-')[0])
+            month = int(time_section.split('-')[1]) + 1
+            start_time = time_section + '-01'
+            if month == 13:
+                month = '01'
+                year = year + 1
+
+            end_time = str(year) + "-"+ month + '-' + '01'
+            print('------ 开始时间 | 结束时间 ---->>',start_time,end_time)
+
+            q.add(Q(**{'createDate__gte': start_time}), Q.AND)
+            q.add(Q(**{'createDate__lt': end_time}), Q.AND)
+
 
         print('q=============> ', q)
         if detailId:
             q.add(Q(id=detailId), Q.AND)
 
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(
-            yewuUser_id=user_id, logicDelete=0).order_by('-createDate')  #
+            yewuUser_id=user_id, logicDelete=0).filter(q).order_by('-createDate')  #
 
         if objs:
 
