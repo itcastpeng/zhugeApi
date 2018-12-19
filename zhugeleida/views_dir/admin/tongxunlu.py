@@ -266,7 +266,11 @@ def tongxunlu_oper(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data_list = []
-
+                avatar = ''
+                username = ''
+                if objs:
+                    avatar = objs[0].userprofile.avatar
+                    username = objs[0].userprofile.username
                 for obj in objs:
 
                     customer_name = base64.b64decode(obj.customer.username)
@@ -318,9 +322,9 @@ def tongxunlu_oper(request, oper_type):
                 response.data = {
                     'ret_data': ret_data_list,
                     'data_count': count,
-                    'uid' : objs[0].userprofile_id,
-                    'avatar' : objs[0].userprofile.avatar,
-                    'username' : objs[0].userprofile.username
+                    'uid' : user_id,
+                    'avatar' : avatar,
+                    'username' : username
 
                 }
 
