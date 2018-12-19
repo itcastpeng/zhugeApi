@@ -378,6 +378,7 @@ def tongxunlu_oper(request, oper_type):
                     else:
                         response.code = 301
                         response.msg = '没有数据'
+
                 else:
 
                     customer_id_list = forms_obj.cleaned_data.get('customer_id_list')
@@ -409,6 +410,10 @@ def tongxunlu_oper(request, oper_type):
                                 chat_objs.update(
                                     userprofile_id=new_uid
                                 )
+
+                            response.code = 200
+                            response.msg = '切换成功'
+
                     else:
                         response.code = 301
                         response.msg = '没有数据'
