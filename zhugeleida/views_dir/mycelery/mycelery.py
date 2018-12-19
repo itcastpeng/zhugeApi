@@ -139,9 +139,13 @@ def user_send_action_log(request):
     remark = request.GET.get('remark')
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-        customer_id=customer_id).order_by('create_date')
+        customer_id=customer_id,user_id=user_id).order_by('create_date')
+    user_id = objs[0].user_id
 
-    user_id = objs[0].user_id  # 找到那个建立唯一关系的人。
+    # objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+    #     customer_id=customer_id).order_by('create_date')
+    #
+    # user_id = objs[0].user_id  # 找到那个建立唯一关系的人。
 
     send_token_data = {}
     user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]

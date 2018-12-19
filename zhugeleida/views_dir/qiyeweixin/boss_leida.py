@@ -16,15 +16,19 @@ def deal_search_time(data, q):
     type = data.get('type')
 
     q1 = Q()
+    q2 = Q()
+    q3 = Q()
+
     if type == 'personal': # 个人数据
-        q.add(Q(**{'user_id': user_id}), Q.AND)  # 搜索个人数据
         q1.add(Q(**{'id': user_id}), Q.AND)
+        q2.add(Q(**{'user_id': user_id}), Q.AND)
+        q3.add(Q(**{'user_customer_flowup__user_id': user_id}), Q.AND)
 
     user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = user_obj.company_id
 
     if type == 'personal':
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).values_list('customer_id').distinct().count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).values_list('customer_id').distinct().count()  # 已获取客户数
 
     else:
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
@@ -36,7 +40,11 @@ def deal_search_time(data, q):
         print('---- 受欢迎 数量 --->>',q, customer_num_dict[0])
         browse_num = customer_num_dict[0].get('browse_num')
 
-    follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q).count()
+    if type == 'personal': # 个人数据
+        q1.add(Q(**{'id': user_id}), Q.AND)
+
+
+    follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q2).count() #
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
     praise_num = 0
@@ -45,7 +53,7 @@ def deal_search_time(data, q):
 
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                              is_customer_msg_num__gte=1,
-                                                                             is_user_msg_num__gte=1).count()
+                                                                             is_user_msg_num__gte=1).filter(q).filter(q2).count()
 
     user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
 
@@ -53,9 +61,9 @@ def deal_search_time(data, q):
     if len(list(user_forward_queryset)) != 0:
         forward_num = user_forward_queryset[0].get('forward_num')
 
-    saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).count()  # 保存
-    query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(q).count()  # 咨询产品
-    view_website_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=4).filter(q).count()
+    saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).filter(q2).count()  # 保存
+    query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(q).filter(q2).count()  # 咨询产品
+    view_website_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=4).filter(q).filter(q2).count()
 
     ret = {
         'customer_num': customer_num,  # 客户总数
