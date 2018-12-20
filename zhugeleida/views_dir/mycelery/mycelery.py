@@ -1058,7 +1058,7 @@ def user_send_gongzhonghao_template_msg(request):
                 }
 
                 models.zgld_chatinfo.objects.create(
-                    msg=msg,
+                    msg=json.dumps(msg),
                     userprofile_id=user_id,
                     customer_id=customer_id,
                     send_type=4,
