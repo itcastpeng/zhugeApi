@@ -890,7 +890,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                     return HttpResponse(encrypted_xml, content_type="application/xml")
 
-                            elif Content.startswith('A') or Content.startswith('a'):
+                            # elif Content.startswith('A') or Content.startswith('a'):
+                            else:
 
                                 objs =  models.zgld_chatinfo.objects.filter(customer_id=customer_id,send_type=4).order_by('-create_date')
                                 media_id = ''
