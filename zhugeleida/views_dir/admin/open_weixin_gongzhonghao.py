@@ -1300,8 +1300,8 @@ def gzh_auth_process_oper(request, oper_type):
                 }
                 post_wx_info_data = {
                     "appid": app_id, # 小程序appID
-                    "notify_users": "1",
-                    "show_profile": "1",
+                    "notify_users": 1,
+                    "show_profile": 1,
                 }
 
                 s = requests.session()

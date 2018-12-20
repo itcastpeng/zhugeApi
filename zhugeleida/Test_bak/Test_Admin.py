@@ -156,9 +156,9 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, params=get_data,data=post_data)
 
 
-url = ip + '/zhugeleida/admin/gzh_auth_process/gzh_authorization_binding_xcx'
-post_data['company_id'] = 1
-post_data['appid'] = 'wxd306d71b02c5075e'
+url = ip + '/zhugeleida/admin/gzh_auth_process/update/gzh_authorization_binding_xcx'
+get_data['company_id'] = 1
+get_data['appid'] = 'wxd306d71b02c5075e'
 
 
 ret = requests.post(url, params=get_data,data=post_data)
