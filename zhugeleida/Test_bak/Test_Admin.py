@@ -156,21 +156,26 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, params=get_data,data=post_data)
 
 
+url = ip + '/zhugeleida/admin/gzh_auth_process/gzh_authorization_binding_xcx'
+post_data['company_id'] = 1
+post_data['appid'] = 'wxd306d71b02c5075e'
 
+
+ret = requests.post(url, params=get_data,data=post_data)
 
 
 ############################## 公众号授权 #######################################
 
-url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
-get_data['signature']= '2ae38daf2e5660d7fb24caed6264a9f2489cede3'
-get_data['timestamp']= '1544248336'
-get_data['nonce']= '790838192'
-get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
-get_data['encrypt_type']= 'aes'
-get_data['msg_signature']= '32d3d8385bccdb9bfe9e05cc306162a96158234d'
-post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[4y3yzJB/v7v1aw/VhxruDUIo0s0cYlbBzovtqmDkNsWE44nPN7u/Mwy1dZgYSNs7iTMFpf2RlLulc2BNl16S8Jc10Rl8hsLalSIYRjB2DY+PIy6dyI15kXdKzQz6W7/mRqU0BxFPfcO2NnCmuePiyYScPCMC1XWHO0YmYO1nGZqdByH8i9bH26t+6px6ipwMyyWsh2zwBJnFzCGFSB5uyLdMV2ZssbVZvdVdcC/45IUIGbol8n99G0M7JVzPkdHWaq1WMU8jOJWe3VBrlWrn5VpHCqxbVy8aAwBiL1yKkut+xJuGkZDtWNHG80uEXGE1Fx6ukwxBUjgARwBkTG3vu2we3jTuAkuqKO0cNln+PVaOqQblyWXM4JV2BL8BFUrXu9ob3DngrxFl0MV97Tu4NA7cGdhgJtsLgelYo2ei3JXd3TgTne9Qimr5SX9rCKh2PFbQbohuIM8i/gfgrbnRBA==]]></Encrypt>\x0A</xml>\x0A'
-
-ret = requests.post(url, params=get_data,data=post_data)
+# url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
+# get_data['signature']= '2ae38daf2e5660d7fb24caed6264a9f2489cede3'
+# get_data['timestamp']= '1544248336'
+# get_data['nonce']= '790838192'
+# get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
+# get_data['encrypt_type']= 'aes'
+# get_data['msg_signature']= '32d3d8385bccdb9bfe9e05cc306162a96158234d'
+# post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[4y3yzJB/v7v1aw/VhxruDUIo0s0cYlbBzovtqmDkNsWE44nPN7u/Mwy1dZgYSNs7iTMFpf2RlLulc2BNl16S8Jc10Rl8hsLalSIYRjB2DY+PIy6dyI15kXdKzQz6W7/mRqU0BxFPfcO2NnCmuePiyYScPCMC1XWHO0YmYO1nGZqdByH8i9bH26t+6px6ipwMyyWsh2zwBJnFzCGFSB5uyLdMV2ZssbVZvdVdcC/45IUIGbol8n99G0M7JVzPkdHWaq1WMU8jOJWe3VBrlWrn5VpHCqxbVy8aAwBiL1yKkut+xJuGkZDtWNHG80uEXGE1Fx6ukwxBUjgARwBkTG3vu2we3jTuAkuqKO0cNln+PVaOqQblyWXM4JV2BL8BFUrXu9ob3DngrxFl0MV97Tu4NA7cGdhgJtsLgelYo2ei3JXd3TgTne9Qimr5SX9rCKh2PFbQbohuIM8i/gfgrbnRBA==]]></Encrypt>\x0A</xml>\x0A'
+#
+# ret = requests.post(url, params=get_data,data=post_data)
 
 
 # url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13?signature=29972dfe20da067eeaac10d6f46c5cf4f5e63608&timestamp=1545287108&nonce=11638010&openid=ob5mL1XQABqWWzvk308yArZVdB4M&encrypt_type=aes&msg_signature=acb092883c8a145f4d4fd3fb8305188407954e92'  # 获取 关联第三方的二维码
