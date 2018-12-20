@@ -30,14 +30,12 @@ def theOrder(request):
             time_section = request.GET.get('time_section')
             orderStatus = request.GET.get('orderStatus')
             if orderStatus:
-                if int(orderStatus) == 1:
-                    q.add(Q(theOrderStatus=1), Q.AND)
+                if int(orderStatus) == 0:
+                    q.add(Q(theOrderStatus__in=[1,3,4,5,9,10]), Q.AND)
 
-                elif int(orderStatus) == 2:
-                    q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
+                elif int(orderStatus) == 1:
+                    q.add(Q(theOrderStatus__in=[2,8]), Q.AND)
 
-                else:
-                    q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
 
             if time_section: # 2018-12
                 year = int(time_section.split('-')[0])
