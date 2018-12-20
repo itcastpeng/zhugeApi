@@ -829,7 +829,7 @@ def user_send_gongzhonghao_template_msg(request):
                         msg = _content.get('msg')
 
                     elif info_type == 4:  # 图片
-                        msg = '您的小可爱发来一张图片,回复【520】限时口令查看哦'
+                        msg = '您的专属客服发来一张图片,回复【A】查看哦'
 
 
                 _content = '%s' % (msg)
@@ -962,6 +962,8 @@ def user_send_gongzhonghao_template_msg(request):
             _content = json.loads(content)
             info_type = _content.get('info_type')
             msg = ''
+            media_id = ''
+
             if info_type:
                 info_type = int(info_type)
                 if info_type == 1:
@@ -987,36 +989,38 @@ def user_send_gongzhonghao_template_msg(request):
                     print('--------企业用户 公众号客服接口 微信公众号上临时素 返回数据--------->', add_news_ret)
                     media_id = add_news_ret.get('media_id')
                     if media_id:
-                        print('-----企业用户 公众号客服接口 微信公众号上临时素材 media_id ---->>', media_id)
-                        '''
-                          https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421140547
-                           {
-                            "touser": "OPENID",
-                            "msgtype": "image",
-                            "image":
-                                {
-                                    "media_id": "MEDIA_ID"
-                                }
-                        }
+                        print('-----  企业用户 公众号客服接口 微信公众号上临时素材 media_id ---->>', media_id)
 
-   
-                        '''
-
-
-
-
-
+                    else:
+                        print('----   企业用户 公众号客服接口 微信公众号上临时素材 media_id[获取失败] -------->>')
 
 
             _content = '%s' % (msg)
-            kefu_msg_post_data = {
-                "touser": openid,
-                "msgtype": "text",
-                "text":
-                    {
-                        "content": _content
-                    }
-            }
+
+            kefu_msg_post_data = {}
+            if info_type == 1:
+
+                kefu_msg_post_data = {
+                    "touser": openid,
+                    "msgtype": "text",
+                    "text":
+                        {
+                            "content": _content
+                        }
+                }
+
+
+
+            elif info_type == 4:
+
+                kefu_msg_post_data = {
+                    "touser": openid,
+                    "msgtype": "image",
+                    "image":
+                        {
+                            "media_id": media_id
+                        }
+                }
 
             objs.update(
                 last_follow_time=datetime.datetime.now()
