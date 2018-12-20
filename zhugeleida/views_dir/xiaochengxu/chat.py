@@ -44,7 +44,7 @@ def chat(request):
             objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            )
+            ).exclude(send_type=4)
 
             # 第一条数据
             first_info = list(objs[:1].values('id'))
