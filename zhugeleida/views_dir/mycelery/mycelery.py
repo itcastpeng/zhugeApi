@@ -1027,6 +1027,7 @@ def user_send_gongzhonghao_template_msg(request):
             )
 
             kefu_msg_post_data = json.dumps(kefu_msg_post_data, ensure_ascii=False)
+            print('--- 数据 kefu_msg_post_data --->>',kefu_msg_post_data)
 
             s = requests.session()
             s.keep_alive = False  # 关闭多余连接

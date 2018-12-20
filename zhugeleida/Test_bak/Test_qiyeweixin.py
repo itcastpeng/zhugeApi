@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -525,9 +525,9 @@ import json
 
 
 
-url =  ip + '/zhugeleida/qiyeweixin/theOrder'  # 公众号文章基础信息
-get_data['time_section'] = '2018-11'
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/qiyeweixin/theOrder'  # 公众号文章基础信息
+# get_data['time_section'] = '2018-11'
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 # get_data['uid'] = 18
 # get_data['pid'] = 852
@@ -751,16 +751,15 @@ ret = requests.get(url, data = post_data ,params=get_data)
 # ret = requests.post(url, params=get_data, data=post_data)
 #
 
+url = ip +   '/zhugeleida/mycelery/user_send_gongzhonghao_template_msg' # 分页 聊天信息记录
+# get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
+get_data['user_id'] = 1
+get_data['customer_id'] = 854
+# get_data['type'] = 'gongzhonghao_template_chat'
 
-# url = ip +   '/zhugeleida/mycelery/user_send_gongzhonghao_template_msg' # 分页 聊天信息记录
-# # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-# get_data['user_id'] = 60
-# get_data['customer_id'] = 852
-# # get_data['type'] = 'gongzhonghao_template_chat'
-#
-# get_data['type'] = 'gongzhonghao_send_kefu_msg'
-# get_data['content'] = '您好🌷,请问您有什么需要吗？需要做什么报批手术吗？'
-# ret = requests.get(url, params=get_data)
+get_data['type'] = 'gongzhonghao_send_kefu_msg'
+get_data['content'] = json.dumps({"url":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":4})
+ret = requests.get(url, params=get_data)
 
 
 # url = ip +   '/zhugeleida/mycelery/user_send_template_msg' # 分页 聊天信息记录

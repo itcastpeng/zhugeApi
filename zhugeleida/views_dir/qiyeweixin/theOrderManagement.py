@@ -13,124 +13,124 @@ from django.db.models import Q
 @account.is_token(models.zgld_userprofile)
 def theOrder(request):
     response = Response.ResponseObj()
-    forms_obj = SelectForm(request.GET)
-    user_id = request.GET.get('user_id')
-    # u_id = request.GET.get('u_id')
-    # company_id = request.GET.get('company_id')
 
-    if forms_obj.is_valid():
-        q = Q()
-        current_page = forms_obj.cleaned_data['current_page']
-        length = forms_obj.cleaned_data['length']
+    if request.method == 'GET':
 
-        detailId = request.GET.get('detailId')
-        time_section = request.GET.get('time_section')
-        # orderStatus = request.GET.get('orderStatus')
-        # if orderStatus:
-        #     if int(orderStatus) == 1:
-        #         q.add(Q(theOrderStatus=1), Q.AND)
-        #
-        #     elif int(orderStatus) == 2:
-        #         q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
-        #
-        #     else:
-        #         q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
+        user_id = request.GET.get('user_id')
+        # u_id = request.GET.get('u_id')
+        # company_id = request.GET.get('company_id')
+        forms_obj = SelectForm(request.GET)
 
-        if time_section: # 2018-12
-            year = int(time_section.split('-')[0])
-            month = int(time_section.split('-')[1]) + 1
-            start_time = time_section + '-01'
-            if month == 13:
-                month = '01'
-                year = year + 1
+        if forms_obj.is_valid():
+            q = Q()
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
 
-            end_time = str(year) + "-"+ str(month) + '-' + '01'
-            print('------ 开始时间 | 结束时间 ---->>',start_time,end_time)
+            # detailId = request.GET.get('detailId')
+            time_section = request.GET.get('time_section')
+            orderStatus = request.GET.get('orderStatus')
+            if orderStatus:
+                if int(orderStatus) == 1:
+                    q.add(Q(theOrderStatus=1), Q.AND)
 
-            q.add(Q(**{'createDate__gte': start_time}), Q.AND)
-            q.add(Q(**{'createDate__lt': end_time}), Q.AND)
+                elif int(orderStatus) == 2:
+                    q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
+
+                else:
+                    q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
+
+            if time_section: # 2018-12
+                year = int(time_section.split('-')[0])
+                month = int(time_section.split('-')[1]) + 1
+                start_time = time_section + '-01'
+                if month == 13:
+                    month = '01'
+                    year = year + 1
+
+                end_time = str(year) + "-"+ str(month) + '-' + '01'
+                print('------ 开始时间 | 结束时间 ---->>',start_time,end_time)
+
+                q.add(Q(**{'createDate__gte': start_time}), Q.AND)
+                q.add(Q(**{'createDate__lt': end_time}), Q.AND)
 
 
-        print('q=============> ', q)
-        if detailId:
-            q.add(Q(id=detailId), Q.AND)
+            print('q=============> ', q)
 
-        objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(
-            yewuUser_id=user_id, logicDelete=0).filter(q).order_by('-createDate')  #
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(q).filter(
+                yewuUser_id=user_id, logicDelete=0).filter(q).order_by('-createDate')  #
 
-        if objs:
+            if objs:
 
-            objsCount = objs.count()
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
+                objsCount = objs.count()
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
 
-            otherData = []
-            for obj in objs:
-                # tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id, logicDelete=0)
-                username = ''
-                yewu = ''
-                if obj.yewuUser:
-                    username = obj.yewuUser.username
-                    yewu = obj.yewuUser_id
+                otherData = []
+                for obj in objs:
+                    # tuikuanObj = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=obj.id, logicDelete=0)
+                    username = ''
+                    yewu = ''
+                    if obj.yewuUser:
+                        username = obj.yewuUser.username
+                        yewu = obj.yewuUser_id
 
-                # 轮播图
-                topLunBoTu = ''
-                if obj.shangpinguanli.topLunBoTu:
-                    topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
-                shouhuoren = ''  # 收货人
-                shouHuoRen_id = ''  # 收货人ID
-                if obj.shouHuoRen_id:
-                    shouHuoRen_id = obj.shouHuoRen_id
-                    decode_username = base64.b64decode(obj.shouHuoRen.username)
-                    shouhuoren = str(decode_username, 'utf-8')
-                countPrice = 0
-                if obj.goodsPrice:
-                    countPrice = obj.goodsPrice * obj.unitRiceNum
-                detailePicture = ''
-                if objs[0].detailePicture:
-                    detailePicture = json.loads(objs[0].detailePicture)
-                otherData.append({
-                    'goodsPicture': topLunBoTu,
-                    'id': obj.id,
-                    # 'unitRiceNum':obj.unitRiceNum,
-                    'goodsId': obj.shangpinguanli.id,
-                    'goodsName': obj.goodsName,
-                    'goodsPrice': obj.goodsPrice,
-                    'countPrice': countPrice,
-                    'yingFuKuan': obj.yingFuKuan,
-                    'youhui': obj.yongJin,
-                    'yewuyuan_id': yewu,
-                    'yewuyuan': username,
-                    'yongjin': obj.yongJin,
-                    # 'peiSong':obj.peiSong,
-                    'shouHuoRen_id': shouHuoRen_id,
-                    'shouHuoRen': shouhuoren,
-                    'status': obj.get_theOrderStatus_display(),
-                    'statusId': obj.theOrderStatus,
-                    'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
-                    # 'tuikuan':tuikuan,         # 0为无退款   1为退款
-                    # 'tuikuan_status':tuiKuanStatus,
-                    'detailePicture': detailePicture,
-                })
+                    # 轮播图
+                    topLunBoTu = ''
+                    if obj.shangpinguanli.topLunBoTu:
+                        topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+                    shouhuoren = ''  # 收货人
+                    shouHuoRen_id = ''  # 收货人ID
+                    if obj.shouHuoRen_id:
+                        shouHuoRen_id = obj.shouHuoRen_id
+                        decode_username = base64.b64decode(obj.shouHuoRen.username)
+                        shouhuoren = str(decode_username, 'utf-8')
+                    countPrice = 0
+                    if obj.goodsPrice:
+                        countPrice = obj.goodsPrice * obj.unitRiceNum
+                    detailePicture = ''
+                    if objs[0].detailePicture:
+                        detailePicture = json.loads(objs[0].detailePicture)
+                    otherData.append({
+                        'goodsPicture': topLunBoTu,
+                        'id': obj.id,
+                        # 'unitRiceNum':obj.unitRiceNum,
+                        'goodsId': obj.shangpinguanli.id,
+                        'goodsName': obj.goodsName,
+                        'goodsPrice': obj.goodsPrice,
+                        'countPrice': countPrice,
+                        'yingFuKuan': obj.yingFuKuan,
+                        'youhui': obj.yongJin,
+                        'yewuyuan_id': yewu,
+                        'yewuyuan': username,
+                        'yongjin': obj.yongJin,
+                        # 'peiSong':obj.peiSong,
+                        'shouHuoRen_id': shouHuoRen_id,
+                        'shouHuoRen': shouhuoren,
+                        'status': obj.get_theOrderStatus_display(),
+                        'statusId': obj.theOrderStatus,
+                        'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
+                        # 'tuikuan':tuikuan,         # 0为无退款   1为退款
+                        # 'tuikuan_status':tuiKuanStatus,
+                        'detailePicture': detailePicture,
+                    })
 
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {
-                'otherData': otherData,
-                'objsCount': objsCount,
-            }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'otherData': otherData,
+                    'objsCount': objsCount,
+                }
+
+            else:
+                response.code = 302
+                response.msg = '无数据'
+
 
         else:
-            response.code = 302
-            response.msg = '无数据'
-
-
-
-    else:
-        response.code = 301
-        response.msg = json.loads(forms_obj.errors.as_json())
+            response.code = 301
+            response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 
