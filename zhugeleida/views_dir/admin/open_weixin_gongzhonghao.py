@@ -678,8 +678,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            postdata = request.body.decode(encoding='UTF-8')
-            # postdata = request.POST.get('xml')
+            # postdata = request.body.decode(encoding='UTF-8')
+            postdata = request.POST.get('xml')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -892,7 +892,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                             elif Content.startswith('A') or Content.startswith('a'):
 
-                                objs =  models.zgld_chatinfo.objects.filter(id=customer_id,send_type=4).order_by('-create_date')
+                                objs =  models.zgld_chatinfo.objects.filter(customer_id=customer_id,send_type=4).order_by('-create_date')
                                 media_id = ''
                                 if objs:
                                     obj = objs[0]
@@ -941,9 +941,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                 ) # 把客户标记为自己已经读取了。
 
                                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                    is_last_msg=True).update(
-                                    is_last_msg=False)  # 把所有的重置为不是最后一条
-
+                                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
                                 if  MsgType == 'text':
                                     encodestr = base64.b64encode(Content.encode('utf-8'))
