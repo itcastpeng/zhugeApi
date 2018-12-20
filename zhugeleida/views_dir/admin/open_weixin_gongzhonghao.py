@@ -900,22 +900,24 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                     msg_dict = obj.msg
                                     print('--- 1 msg_dict ----->', msg_dict)
 
-                                    if msg_dict:
-                                        msg_dict =  json.loads(msg_dict)
+                                    # if msg_dict:
+                                    #     msg_dict =  json.loads(msg_dict)
+                                    #
+                                    # '''
+                                    #     {
+                                    #        "msgtype": "image",
+                                    #         "image":
+                                    #             {
+                                    #                 "media_id": media_id
+                                    #             }
+                                    #     }
+                                    # '''
+                                    # print('--- 2  msg_dict ----->',msg_dict)
+                                    # msgtype = msg_dict.get('msgtype')
+                                    # if msgtype == 'image':
+                                    #     media_id = msg_dict.get('image').get('media_id')
 
-                                    '''
-                                        {
-                                           "msgtype": "image",
-                                            "image":
-                                                {
-                                                    "media_id": media_id
-                                                }
-                                        }  
-                                    '''
-                                    print('--- 2  msg_dict ----->',msg_dict)
-                                    msgtype = msg_dict.get('msgtype')
-                                    if msgtype == 'image':
-                                        media_id = msg_dict.get('image').get('media_id')
+                                    media_id = 'qTvPOX-uZE4xw3RCCC9SsDs3w10jirOb60aSTeX8kfmy2FfM-jKg5INF7bznrdor'
 
                                 reply = ImageReply(media_id=media_id)
                                 reply._data['ToUserName'] = openid
