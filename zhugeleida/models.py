@@ -111,7 +111,7 @@ class zgld_gongzhonghao_app(models.Model):
     template_id = models.CharField(verbose_name="消息模板ID", max_length=128, null=True)
     authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)  # -1代表未认证，0代表微信认证
-    introduce = models.CharField(verbose_name="公众号介绍", max_length=1024, null=True)
+    introduce = models.CharField(verbose_name="公众号介绍", max_length=2048, default='[]')
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True ,default="IT科技>硬件与设备")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -160,7 +160,7 @@ class zgld_xiaochengxu_app(models.Model):
     version_num = models.CharField(verbose_name="[已经上线]版本号", null=True, max_length=32)
     authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)    #-1代表未认证，0代表微信认证
-    introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,default='[]')
+    introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True, default="IT科技>硬件与设备")
     ext_json = models.TextField(verbose_name="第三方自定义的配置", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)

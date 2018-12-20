@@ -690,6 +690,8 @@ def article_oper(request, oper_type, o_id):
                 else:
                     q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
+                print('---- 获取文章访问日志 q------>>',q)
+
                 objs = models.zgld_article_access_log.objects.filter(q).order_by('-last_access_date')
                 count = objs.count()
                 if objs:
