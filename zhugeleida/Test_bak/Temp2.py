@@ -39,9 +39,11 @@ import os
 #     file.write(html.content)
 
 
-authorizer_access_token = '16_sROo5f00GWhzT0_4tEuJTYM2YuTwXCpsB1b3WTgNiEXeeLs-QBne7L0QVZm14FDYIDKiX_CdJ5s-u8rfCiEDytAok2uk2K4u0GPOYMcN0CNemn1SfX2douBuN6gKZZvPlOwe4wCBQt9JlVG_PQPbAHDZAZ'
+authorizer_access_token = '16_PHFsVinzJ1NVG2yeM0hip06CMU-D6-ezg9NfLlt5TyoA-Wtp1dIrnMSGQHjSxXBacE0rM3Ahi5JckZy00A2gX3KAL4SnRgOL0Sdi56pDhIgy4sjTFCvkdzzEamVzviIfiyzcMSlO9wWHjc7tOHJeALDDWY'
 
-url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplink'
+
+# url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplink'
+url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplinkget'
 get_wx_info_data = {
     'access_token': authorizer_access_token
 }
@@ -53,7 +55,8 @@ post_wx_info_data = {
 
 s = requests.session()
 s.keep_alive = False  # 关闭多余连接
-authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+# authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+authorizer_info_ret = s.post(url, params=get_wx_info_data)
 
 authorizer_info_ret = authorizer_info_ret.json()
 print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
