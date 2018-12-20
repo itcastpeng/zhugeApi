@@ -1038,7 +1038,7 @@ def user_send_gongzhonghao_template_msg(request):
 
             print('--------企业用户 send to 公众号 kefu_客服接口 - 返回数据--------->', kefu_ret)
 
-            if kefu_ret.get('errmsg') == "ok":
+            if  not kefu_ret.get('errmsg') == "ok":
                 print('-----企业用户 send to 公众号 kefu_客服消息 Successful---->>', )
                 response.code = 200
                 response.msg = "企业用户发送客服消息成功"
@@ -1049,7 +1049,17 @@ def user_send_gongzhonghao_template_msg(request):
 
             else:
                 print('-----企业用户 发送【小程序_客服消息】失败 json.dumps(kefu_msg_post_data)---->>', kefu_msg_post_data)
+                msg = {
+                    "msgtype": "image",
+                    "image":
+                        {
+                            "media_id": media_id
+                        }
+                }
+                models.zgld_chatinfo.objects.create(msg=msg)
+
                 a_data = {}
+
                 a_data['customer_id'] = customer_id
                 a_data['user_id'] = user_id
                 a_data['type'] = 'gongzhonghao_template_tishi'

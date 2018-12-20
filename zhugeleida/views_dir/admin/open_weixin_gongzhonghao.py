@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
 from zhugeapi_celery_project import tasks
-from wechatpy.replies import TextReply
+from wechatpy.replies import TextReply,ImageReply
 from wechatpy.crypto import WeChatCrypto
 from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
@@ -889,6 +889,41 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                     print('------ 被动回复消息【加密后】xml------>', encrypted_xml)  ## 加密后的xml 数据
 
                                     return HttpResponse(encrypted_xml, content_type="application/xml")
+
+                            elif Content.startswith('A') or Content.startswith('a'):
+
+                                objs =  models.zgld_chatinfo.objects.filter(id=customer_id,send_type=4).order_by('-create_date')
+                                media_id = ''
+                                if objs:
+                                    obj = objs[0]
+                                    msg_dict = obj.msg
+                                    '''
+                                        {
+                                           "msgtype": "image",
+                                            "image":
+                                                {
+                                                    "media_id": media_id
+                                                }
+                                        }  
+                                    '''
+                                    msgtype = msg_dict.get('msgtype')
+                                    if msgtype == 'image':
+                                        media_id = msg_dict.get('image').get('media_id')
+
+                                reply = ImageReply(media_id=media_id)
+                                reply._data['ToUserName'] = openid
+                                reply._data['FromUserName'] = original_id
+                                xml = reply.render()
+
+                                print('------ 被动回复消息【加密前】xml -->', xml)
+
+                                timestamp = str(int(time.time()))
+                                crypto = WeChatCrypto(token, encodingAESKey, appid)
+                                encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                                print('------ 被动回复消息【加密后】xml------>', encrypted_xml)  ## 加密后的xml 数据
+
+                                return HttpResponse(encrypted_xml, content_type="application/xml")
+
 
 
                         if MsgType == 'text' or MsgType == 'voice' or  MsgType == 'image':
