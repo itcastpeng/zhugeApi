@@ -898,6 +898,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                 if objs:
                                     obj = objs[0]
                                     msg_dict = obj.msg
+                                    print('--- 1 msg_dict ----->', msg_dict)
+
                                     if msg_dict:
                                         msg_dict =  json.loads(msg_dict)
 
@@ -910,7 +912,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                                 }
                                         }  
                                     '''
-                                    print('--- msg_dict ----->',msg_dict)
+                                    print('--- 2  msg_dict ----->',msg_dict)
                                     msgtype = msg_dict.get('msgtype')
                                     if msgtype == 'image':
                                         media_id = msg_dict.get('image').get('media_id')
