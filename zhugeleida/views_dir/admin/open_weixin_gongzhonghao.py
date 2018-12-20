@@ -6,7 +6,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
 from zhugeapi_celery_project import tasks
-from wechatpy.replies import TextReply
+from wechatpy.replies import TextReply,ImageReply
 from wechatpy.crypto import WeChatCrypto
 from zhugeleida.public.common import action_record
 from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
@@ -890,6 +890,48 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                     return HttpResponse(encrypted_xml, content_type="application/xml")
 
+                            elif Content.startswith('A') or Content.startswith('a'):
+
+                                objs =  models.zgld_chatinfo.objects.filter(customer_id=854,send_type=4).order_by('-create_date')
+                                media_id = ''
+                                if objs:
+                                    obj = objs[0]
+                                    msg_dict = obj.msg
+                                    print('--- 1 msg_dict ----->', msg_dict)
+                                    # msg_dict = '{"msgtype": "image", "image": {"media_id": "qTvPOX-uZE4xw3RCCC9SsDs3w10jirOb60aSTeX8kfmy2FfM-jKg5INF7bznrdor"}}'
+
+                                    msg_dict =  json.loads(str(msg_dict))
+
+                                    '''
+                                        {
+                                           "msgtype": "image",
+                                            "image":
+                                                {
+                                                    "media_id": media_id
+                                                }
+                                        }
+                                    '''
+                                    print('--- 2  msg_dict ----->',msg_dict)
+                                    msgtype = msg_dict.get('msgtype')
+                                    if msgtype == 'image':
+                                        media_id = msg_dict.get('image').get('media_id')
+
+
+                                reply = ImageReply(media_id=media_id)
+                                reply._data['ToUserName'] = openid
+                                reply._data['FromUserName'] = original_id
+                                xml = reply.render()
+
+                                print('------ 被动回复消息【加密前】xml -->', xml)
+
+                                timestamp = str(int(time.time()))
+                                crypto = WeChatCrypto(token, encodingAESKey, appid)
+                                encrypted_xml = crypto.encrypt_message(xml, nonce, timestamp)
+                                print('------ 被动回复消息【加密后】xml------>', encrypted_xml)  ## 加密后的xml 数据
+
+                                return HttpResponse(encrypted_xml, content_type="application/xml")
+
+
 
                         if MsgType == 'text' or MsgType == 'voice' or  MsgType == 'image':
 
@@ -906,9 +948,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                 ) # 把客户标记为自己已经读取了。
 
                                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                                    is_last_msg=True).update(
-                                    is_last_msg=False)  # 把所有的重置为不是最后一条
-
+                                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
                                 if  MsgType == 'text':
                                     encodestr = base64.b64encode(Content.encode('utf-8'))
@@ -1055,8 +1095,6 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                 else:
                     print('------ [公众号]不存在: authorization_appid: %s ----->>', app_id)
-
-
 
 
         return HttpResponse("success")
@@ -1211,6 +1249,185 @@ def gzh_auth_process_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        ## 公众号绑定微信
+        elif oper_type == 'gzh_authorization_binding_xcx':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+            appid = request.GET.get('appid')             #小程序appid
+
+            gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+            xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=appid)
+
+            if gongzhonghao_app_objs:
+
+                if xiaochengxu_app_objs:
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    gongzhonghao_app_obj = gongzhonghao_app_objs[0]
+                    xiaochengxu_app_obj = xiaochengxu_app_objs[0]
+                    authorizer_appid = gongzhonghao_app_obj.authorization_appid
+                    authorizer_refresh_token = gongzhonghao_app_obj.authorizer_refresh_token
+
+                    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                    qywx_config_dict = ''
+                    if three_service_objs:
+                        three_service_obj = three_service_objs[0]
+                        qywx_config_dict = three_service_obj.config
+                        if qywx_config_dict:
+                            qywx_config_dict = json.loads(qywx_config_dict)
+
+
+                    app_id = qywx_config_dict.get('app_id')
+                    app_secret = qywx_config_dict.get('app_secret')
+
+                    authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
+                    authorizer_access_token = rc.get(authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                    data = {
+                        'key_name': authorizer_access_token_key_name,
+                        'authorizer_refresh_token': authorizer_refresh_token,
+                        'authorizer_appid': authorizer_appid,
+                        'app_id': app_id,          # 查看诸葛雷达_公众号的 appid
+                        'app_secret': app_secret   # 查看诸葛雷达_公众号的AppSecret
+                    }
+
+                    authorizer_access_token_result = create_authorizer_access_token(data)
+                    if authorizer_access_token_result.code == 200:
+                        authorizer_access_token = authorizer_access_token_result.data
+
+
+                    url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplink'
+                    get_wx_info_data = {
+                        'access_token' : authorizer_access_token
+                    }
+                    post_wx_info_data = {
+                        "appid": appid, # 小程序appID
+                        "notify_users": 1,
+                        "show_profile": 1,
+                    }
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+
+                    authorizer_info_ret = authorizer_info_ret.json()
+                    print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
+
+                    errmsg = authorizer_info_ret.get('errmsg')
+
+                    if errmsg == 'ok':
+                        introduce_list = xiaochengxu_app_obj.introduce
+                        introduce_list =  json.loads(introduce_list)
+                        introduce_list.append(appid)
+
+                        xiaochengxu_app_objs.update(
+                            introduce=json.dumps(introduce_list),  # 服务类目
+                        )
+                        print('--------- 公众号 【成功】关联小程序---------->>')
+                        response.code = 200
+                        response.msg = "成功关联公众号"
+
+                    else:
+                        print('--------- 公众号 【失败】关联小程序---------->>')
+
+
+                else:
+                    response.msg = '小程序不存在'
+                    response.code = 302
+            else:
+                response.msg = '公众号不存在'
+                response.code = 302
+
+
+        ## 解除已关联的小程序
+        elif oper_type == 'gzh_authorization_unlock_xcx':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+            appid = request.GET.get('appid')  # 小程序appid
+
+            gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+            xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=appid)
+
+            if gongzhonghao_app_objs:
+
+                if  xiaochengxu_app_objs:
+
+                    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                    gongzhonghao_app_obj = gongzhonghao_app_objs[0]
+                    xiaochengxu_app_obj = xiaochengxu_app_objs[0]
+                    authorizer_appid = gongzhonghao_app_obj.authorization_appid
+                    authorizer_refresh_token = gongzhonghao_app_obj.authorizer_refresh_token
+
+                    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                    qywx_config_dict = ''
+                    if three_service_objs:
+                        three_service_obj = three_service_objs[0]
+                        qywx_config_dict = three_service_obj.config
+                        if qywx_config_dict:
+                            qywx_config_dict = json.loads(qywx_config_dict)
+
+                    app_id = qywx_config_dict.get('app_id')
+                    app_secret = qywx_config_dict.get('app_secret')
+
+                    authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
+                    authorizer_access_token = rc.get(
+                        authorizer_access_token_key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+
+                    data = {
+                        'key_name': authorizer_access_token_key_name,
+                        'authorizer_refresh_token': authorizer_refresh_token,
+                        'authorizer_appid': authorizer_appid,
+                        'app_id': app_id,  # 查看诸葛雷达_公众号的 appid
+                        'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
+                    }
+
+                    authorizer_access_token_result = create_authorizer_access_token(data)
+                    if authorizer_access_token_result.code == 200:
+                        authorizer_access_token = authorizer_access_token_result.data
+
+                    url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxampunlink'
+                    get_wx_info_data = {
+                        'access_token': authorizer_access_token
+                    }
+                    post_wx_info_data = {
+                        "appid": appid,  # 小程序appID
+
+                    }
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+
+                    authorizer_info_ret = authorizer_info_ret.json()
+                    print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
+
+                    errmsg = authorizer_info_ret.get('errmsg')
+
+                    if errmsg == 'ok':
+                        introduce_list = xiaochengxu_app_obj.introduce
+                        introduce_list = json.loads(introduce_list)
+                        introduce_list.remove(appid)
+
+                        xiaochengxu_app_objs.update(
+                            introduce=json.dumps(introduce_list),  # 服务类目
+                        )
+                        print('--------- 公众号 【成功】关联小程序---------->>')
+                        response.code = 200
+                        response.msg = "成功关联公众号"
+
+                    else:
+                        print('--------- 公众号 【失败】关联小程序---------->>')
+
+                else:
+                    response.msg = '小程序不存在'
+                    response.code = 302
+            else:
+                response.msg = '公众号不存在'
+                response.code = 302
+
+
+
     else :
 
         #获取公众号基本信息
@@ -1298,6 +1515,9 @@ def gzh_auth_process_oper(request, oper_type):
             else:
                 response.msg = '公众号不存在'
                 response.code = 302
+
+
+
 
         else:
             response.code = 402

@@ -722,6 +722,7 @@ def open_qiyeweixin(request, oper_type):
                 response.msg = '企业微信第三方-无配置信息'
                 print('------ 【企业微信第三方-无配置信息】 work_weixin_auth ------>>')
 
+
         # 用户使用企业微信管理员或成员帐号登录第三方网站，该登录授权基于OAuth2.0协议标准构建。
         elif oper_type == 'third_fang_single_login':
 

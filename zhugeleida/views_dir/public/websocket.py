@@ -704,7 +704,7 @@ def xiaochengxu_websocket(request, oper_type):
                             redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id) # 小程序发过去消息,雷达用户的key 消息数量发生变化
                             redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
 
-                            if type == 'query_num':
+                            if  type == 'query_num':
                                 rc.set(customer_id_position_key, 'output')
 
                                 chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
@@ -722,8 +722,24 @@ def xiaochengxu_websocket(request, oper_type):
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 continue
 
+                            elif type == 'lived':
+                                response_data = {
+                                    'code': 270,
+                                    'msg': '为了新中国的胜利向我开炮',
+                                }
+                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                uwsgi.websocket_send(json.dumps(response_data))
+                                continue
+
+
                             elif  type == 'register': # 当进入聊天页面时
                                 rc.set(customer_id_position_key, 'input')
+                                response_data = {
+                                    'code': 200,
+                                    'msg': '注册成功',
+                                }
+                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                uwsgi.websocket_send(json.dumps(response_data))
                                 continue
 
                             elif type == 'closed':

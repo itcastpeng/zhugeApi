@@ -170,7 +170,7 @@ def author_status(request,oper_type):
 
                 objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
 
-                if objs:
+                if not objs:
 
                     ret_data = []
                     obj = objs[0]
@@ -188,7 +188,7 @@ def author_status(request,oper_type):
                     response.code = 200
                     response.msg = '查询成功'
                     response.data = {
-                        'ret_data': ret_data,
+                        # 'ret_data': ret_data,
 
                     }
 

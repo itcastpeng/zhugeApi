@@ -42,7 +42,7 @@ def chat(request):
             objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
-            ).order_by('-create_date')
+            ).exclude(send_type=4).order_by('-create_date')
 
             count = objs.count()
 

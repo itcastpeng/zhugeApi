@@ -33,6 +33,7 @@ def theOrder(request):
                 q.add(Q(theOrderStatus=9) | Q(theOrderStatus=10), Q.AND)
             else:
                 q.add(Q(theOrderStatus__in=[8, 2, 3, 4, 5]), Q.AND)
+
         print('q=============> ', q)
         if detailId:
             q.add(Q(id=detailId), Q.AND)

@@ -140,8 +140,7 @@ def user_send_action_log(request):
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
         customer_id=customer_id,user_id=user_id).order_by('create_date')
-    user_id = objs[0].user_id
-
+    # user_id = objs[0].user_id
     # objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
     #     customer_id=customer_id).order_by('create_date')
     #
@@ -740,8 +739,7 @@ def user_send_gongzhonghao_template_msg(request):
                                                                                 customer_parent_id=parent_id,
                                                                                 activity_id=activity_id)
         if not activity_redPacket_objs:
-            print('------ 【转发后查看 * 不发消息公众号模板消息提示】customer_id | parent_id | activity_id-------->>', customer_id, "|",
-                  parent_id, "|", activity_id)
+            print('------ 【转发后查看 * 不发消息公众号模板消息提示】customer_id | parent_id | activity_id-------->>', customer_id, "|",parent_id, "|", activity_id)
 
             return HttpResponse('Dont send message')
 
@@ -763,9 +761,10 @@ def user_send_gongzhonghao_template_msg(request):
 
     objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
         customer_id=customer_id,
+        user_id=user_id,
         user__company_id=company_id)
 
-    user_id = objs[0].user_id # 找到那个建立关系的人。
+    # user_id = objs[0].user_id # 找到那个建立关系的人。
 
 
     customer_name = ''
@@ -828,6 +827,10 @@ def user_send_gongzhonghao_template_msg(request):
                     info_type = int(info_type)
                     if info_type == 1:
                         msg = _content.get('msg')
+
+                    elif info_type == 4:  # 图片
+                        msg = '您的专属客服发来一张图片,回复【A】查看哦'
+
 
                 _content = '%s' % (msg)
 
@@ -959,26 +962,69 @@ def user_send_gongzhonghao_template_msg(request):
             _content = json.loads(content)
             info_type = _content.get('info_type')
             msg = ''
+            media_id = ''
+
             if info_type:
                 info_type = int(info_type)
                 if info_type == 1:
                     msg = _content.get('msg')
 
-            _content = '%s' % (msg)
-            kefu_msg_post_data = {
-                "touser": openid,
-                "msgtype": "text",
-                "text":
-                    {
-                        "content": _content
+                elif info_type == 4:
+                    url = _content.get('url')
+
+                    add_news_url = 'https://api.weixin.qq.com/cgi-bin/media/upload'
+                    add_new_data = {
+                        'access_token': authorizer_access_token,
+                        'type' : 'image'
                     }
-            }
+
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+
+                    files = {"media": open(url, "rb")}
+                    add_news_ret = s.post(add_news_url, params=add_new_data,files=files)
+                    add_news_ret = add_news_ret.json()
+
+                    print('--------企业用户 公众号客服接口 微信公众号上临时素 返回数据--------->', add_news_ret)
+                    media_id = add_news_ret.get('media_id')
+                    if media_id:
+                        print('-----  企业用户 公众号客服接口 微信公众号上临时素材 media_id ---->>', media_id)
+
+                    else:
+                        print('----   企业用户 公众号客服接口 微信公众号上临时素材 media_id[获取失败] -------->>')
+
+
+            _content = '%s' % (msg)
+
+            kefu_msg_post_data = {}
+            if info_type == 1:
+
+                kefu_msg_post_data = {
+                    "touser": openid,
+                    "msgtype": "text",
+                    "text":
+                        {
+                            "content": _content
+                        }
+                }
+
+            elif info_type == 4:
+
+                kefu_msg_post_data = {
+                    "touser": openid,
+                    "msgtype": "image",
+                    "image":
+                        {
+                            "media_id": media_id
+                        }
+                }
 
             objs.update(
                 last_follow_time=datetime.datetime.now()
             )
 
             kefu_msg_post_data = json.dumps(kefu_msg_post_data, ensure_ascii=False)
+            print('--- 数据 kefu_msg_post_data --->>',kefu_msg_post_data)
 
             s = requests.session()
             s.keep_alive = False  # 关闭多余连接
@@ -989,7 +1035,7 @@ def user_send_gongzhonghao_template_msg(request):
 
             print('--------企业用户 send to 公众号 kefu_客服接口 - 返回数据--------->', kefu_ret)
 
-            if kefu_ret.get('errmsg') == "ok":
+            if  kefu_ret.get('errmsg') == "ok":
                 print('-----企业用户 send to 公众号 kefu_客服消息 Successful---->>', )
                 response.code = 200
                 response.msg = "企业用户发送客服消息成功"
@@ -1000,7 +1046,27 @@ def user_send_gongzhonghao_template_msg(request):
 
             else:
                 print('-----企业用户 发送【小程序_客服消息】失败 json.dumps(kefu_msg_post_data)---->>', kefu_msg_post_data)
+                msg = {
+                    "msgtype": "image",
+                    "image":
+                        {
+                            "media_id": media_id
+                        }
+                }
+
+                models.zgld_chatinfo.objects.create(
+                    msg=json.dumps(msg),
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    send_type=4,
+                    is_customer_new_msg=False,  # 公众号客户不需要获取此提示消息
+                    is_user_new_msg=False,
+                    is_last_msg=False
+                )
+
+
                 a_data = {}
+
                 a_data['customer_id'] = customer_id
                 a_data['user_id'] = user_id
                 a_data['type'] = 'gongzhonghao_template_tishi'

@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -156,7 +156,12 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, params=get_data,data=post_data)
 
 
+url = ip + '/zhugeleida/admin/gzh_auth_process/update/gzh_authorization_binding_xcx'
+get_data['company_id'] = 1
+get_data['appid'] = 'wxd306d71b02c5075e'
 
+
+ret = requests.post(url, params=get_data,data=post_data)
 
 
 ############################## 公众号授权 #######################################
@@ -169,19 +174,16 @@ ip = 'http://127.0.0.1:8001'
 # get_data['encrypt_type']= 'aes'
 # get_data['msg_signature']= '32d3d8385bccdb9bfe9e05cc306162a96158234d'
 # post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[4y3yzJB/v7v1aw/VhxruDUIo0s0cYlbBzovtqmDkNsWE44nPN7u/Mwy1dZgYSNs7iTMFpf2RlLulc2BNl16S8Jc10Rl8hsLalSIYRjB2DY+PIy6dyI15kXdKzQz6W7/mRqU0BxFPfcO2NnCmuePiyYScPCMC1XWHO0YmYO1nGZqdByH8i9bH26t+6px6ipwMyyWsh2zwBJnFzCGFSB5uyLdMV2ZssbVZvdVdcC/45IUIGbol8n99G0M7JVzPkdHWaq1WMU8jOJWe3VBrlWrn5VpHCqxbVy8aAwBiL1yKkut+xJuGkZDtWNHG80uEXGE1Fx6ukwxBUjgARwBkTG3vu2we3jTuAkuqKO0cNln+PVaOqQblyWXM4JV2BL8BFUrXu9ob3DngrxFl0MV97Tu4NA7cGdhgJtsLgelYo2ei3JXd3TgTne9Qimr5SX9rCKh2PFbQbohuIM8i/gfgrbnRBA==]]></Encrypt>\x0A</xml>\x0A'
-
+#
 # ret = requests.post(url, params=get_data,data=post_data)
 
 
-# url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13'  # 获取 关联第三方的二维码
-# get_data['signature']= '9a64a9cd8a7536527510549854e3ee4c1c75a9c5'
-# get_data['timestamp']= '1544619076'
-# get_data['nonce']= '1405106190'
-# get_data['openid']= 'ob5mL1XQABqWWzvk308yArZVdB4M'
-# get_data['encrypt_type']= 'aes'
-# get_data['msg_signature']= '32f6cccbb7d8492daa391d17ad44f3ba30ccad8b'
+# url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wxa77213c591897a13?signature=29972dfe20da067eeaac10d6f46c5cf4f5e63608&timestamp=1545287108&nonce=11638010&openid=ob5mL1XQABqWWzvk308yArZVdB4M&encrypt_type=aes&msg_signature=acb092883c8a145f4d4fd3fb8305188407954e92'  # 获取 关联第三方的二维码
 #
-# post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[DipveleotuXQdp9szWd+6SJJT4LRbZllFQOToPWdfWuRlyEaKob5tGHof2dl62eeR3+wphtqHISNp8w8oJfgq7CfYPZJDIp9jU+hdkqgnHLictXPUxWj1cOY78hkq/fCIsUy5y/TgOO9B7YIRrK937hSzvpPmnTSWAFWAkX8xlRwEon17vB3t1fR612+3rixxLFoV4FBrTg09Z/d86Tr039RqaEZN10hlyLTegvjhLpEktWq16eALqYxpq6TNIzxDd7JGB1Sq+Tv147fcfPnGBgrtlYGYynHNxa8kbjX3GK3ggG6fo5kCs3gFLg/XpHphV8J2FeQKnmPi/RqEFRtym9yHWCPQh6aw6IO3q31NCDnUvOv6/rP9O7445rRpLM0fH0v4LtSCust9h9iXIHHrrXZGDVPg6DtLd8tPrLj1tzBF7/O2E8qztPhwjLJ4oURl4XAfnMhQqGT7SpwVhD+f0JeL9/7g4qiwEiC7ZohiRGU6iIIqytzIsmCN8JHba3nWEYYn9vGjeTn71rQy2XZVu7uAC421uA6dic7z6KFqLVkil6SZCwQzIdZSzeM12dnOifrfJrYykPXrmDKakfLzdk4RzKkg5lQ5xBwFp7UOrGLHJ+FA1ZmZOuwcUttHlS/krHkxvE3fSkHoqrSEOqYl+Z5SblqEIaU61OftSke0Ryy6fumVchIuYykDZDcJY7Q4wmpX3zK4biVKyGU1ZVz8A==]]></Encrypt>\x0A</xml>'
+#
+# post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_21c48bcaa193]]></ToUserName>\x0A    <Encrypt><![CDATA[1ISm89mMWffsJ8GXTpl4rtU7nYAT35L2+WofctxAiIH/9ximcXTaEBC4wVtQmljZVFQvePx/4GhDCa+Z6UAgocafmEVHF7VHyHGOVywAzLHci2Pu0zcHlsP23ZpaQyp10phxKbFIk7gTJJqtem3IhUmxw2D+4sbjYSFw1rgbS1wDt/3NHKanxUVubnz0TrA5ihEHv10MB9Ew0fR4xMP4L4mjtLYMReJeZ1fh8+3/ggSo0vN5jp4M9LqLESfzYW4xHBReUZt24xkyQ1JIxYRfobN/veWZhRALRUpQazoxmGhTbLbdGQRrrSmYCbsAtim7Eb7qbqAQMG1073sv6zhNaqe4kosWNlfzSSjzhAFb2qBxqSeNqERVw1g48fMf0lUkjSJ05+ObA5cr/RyXetQF2V05cQ4V0PQB8m6y3JThP4A=]]></Encrypt>\x0A</xml>'
+#
+#
 # ret = requests.post(url, params=get_data,data=post_data)
 
 
@@ -716,10 +718,10 @@ ip = 'http://127.0.0.1:8001'
 
 
 
-url = ip +  '/zhugeleida/admin/company/query_service_settings'   # 验证通过
-# get_data['type'] = 1
-
-ret = requests.get(url, data=post_data,params=get_data)
+# url = ip +  '/zhugeleida/admin/company/query_service_settings'   # 验证通过
+# # get_data['type'] = 1
+#
+# ret = requests.get(url, data=post_data,params=get_data)
 
 
 

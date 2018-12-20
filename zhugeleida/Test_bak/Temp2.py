@@ -38,16 +38,28 @@ import os
 # with open(file_dir, 'wb') as file:
 #     file.write(html.content)
 
-mima = '8sCAJ3YuU6EfYWxI'
 
-len_num =  len(mima)
+authorizer_access_token = '16_PHFsVinzJ1NVG2yeM0hip06CMU-D6-ezg9NfLlt5TyoA-Wtp1dIrnMSGQHjSxXBacE0rM3Ahi5JckZy00A2gX3KAL4SnRgOL0Sdi56pDhIgy4sjTFCvkdzzEamVzviIfiyzcMSlO9wWHjc7tOHJeALDDWY'
 
 
-zhongjian_num =  divmod(len_num, 2)[0]
+# url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplink'
+url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplinkget'
+get_wx_info_data = {
+    'access_token': authorizer_access_token
+}
+post_wx_info_data = {
+    "appid": 'wxd306d71b02c5075e',  # 小程序appID
+    "notify_users": 1,
+    "show_profile": 1,
+}
 
-start_num = zhongjian_num - 3
-end_num = zhongjian_num + 3
+s = requests.session()
+s.keep_alive = False  # 关闭多余连接
+# authorizer_info_ret = s.post(url, params=get_wx_info_data, data=json.dumps(post_wx_info_data))
+authorizer_info_ret = s.post(url, params=get_wx_info_data)
 
+authorizer_info_ret = authorizer_info_ret.json()
+print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
 
 
 
