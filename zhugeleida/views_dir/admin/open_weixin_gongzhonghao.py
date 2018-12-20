@@ -678,8 +678,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            # postdata = request.body.decode(encoding='UTF-8')
-            postdata = request.POST.get('xml')
+            postdata = request.body.decode(encoding='UTF-8')
+            # postdata = request.POST.get('xml')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -890,8 +890,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                     return HttpResponse(encrypted_xml, content_type="application/xml")
 
-                            # elif Content.startswith('A') or Content.startswith('a'):
-                            else:
+                            elif Content.startswith('A') or Content.startswith('a'):
 
                                 objs =  models.zgld_chatinfo.objects.filter(customer_id=854,send_type=4).order_by('-create_date')
                                 media_id = ''
@@ -899,25 +898,24 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                     obj = objs[0]
                                     msg_dict = obj.msg
                                     print('--- 1 msg_dict ----->', msg_dict)
+                                    # msg_dict = '{"msgtype": "image", "image": {"media_id": "qTvPOX-uZE4xw3RCCC9SsDs3w10jirOb60aSTeX8kfmy2FfM-jKg5INF7bznrdor"}}'
 
-                                    # if msg_dict:
-                                    #     msg_dict =  json.loads(msg_dict)
-                                    #
-                                    # '''
-                                    #     {
-                                    #        "msgtype": "image",
-                                    #         "image":
-                                    #             {
-                                    #                 "media_id": media_id
-                                    #             }
-                                    #     }
-                                    # '''
-                                    # print('--- 2  msg_dict ----->',msg_dict)
-                                    # msgtype = msg_dict.get('msgtype')
-                                    # if msgtype == 'image':
-                                    #     media_id = msg_dict.get('image').get('media_id')
+                                    msg_dict =  json.loads(str(msg_dict))
 
-                                    media_id = 'qTvPOX-uZE4xw3RCCC9SsDs3w10jirOb60aSTeX8kfmy2FfM-jKg5INF7bznrdor'
+                                    '''
+                                        {
+                                           "msgtype": "image",
+                                            "image":
+                                                {
+                                                    "media_id": media_id
+                                                }
+                                        }
+                                    '''
+                                    print('--- 2  msg_dict ----->',msg_dict)
+                                    msgtype = msg_dict.get('msgtype')
+                                    if msgtype == 'image':
+                                        media_id = msg_dict.get('image').get('media_id')
+
 
                                 reply = ImageReply(media_id=media_id)
                                 reply._data['ToUserName'] = openid
