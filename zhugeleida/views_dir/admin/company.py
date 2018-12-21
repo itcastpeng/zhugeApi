@@ -170,7 +170,7 @@ def author_status(request,oper_type):
 
                 objs = models.zgld_three_service_setting.objects.filter(three_services_type=type)
 
-                if not objs:
+                if objs:
 
                     ret_data = []
                     obj = objs[0]
@@ -188,7 +188,7 @@ def author_status(request,oper_type):
                     response.code = 200
                     response.msg = '查询成功'
                     response.data = {
-                        # 'ret_data': ret_data,
+                        'ret_data': ret_data,
 
                     }
 
@@ -585,6 +585,7 @@ def company_oper(request, oper_type, o_id):
                 response.code = 303
                 response.msg = '购物类型不能为空'
 
+        ## 是否技术支持
         elif oper_type == "is_show_technical_support":
 
             status = request.POST.get('status')  # (1, "启用"),  (2, "未启用"),

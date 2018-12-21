@@ -892,7 +892,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                             elif Content.startswith('A') or Content.startswith('a'):
 
-                                objs =  models.zgld_chatinfo.objects.filter(customer_id=854,send_type=4).order_by('-create_date')
+                                objs =  models.zgld_chatinfo.objects.filter(customer_id=customer_id,send_type=4).order_by('-create_date')
                                 media_id = ''
                                 if objs:
                                     obj = objs[0]
@@ -1252,6 +1252,7 @@ def gzh_auth_process_oper(request, oper_type):
         ## 公众号绑定微信
         elif oper_type == 'gzh_authorization_binding_xcx':
             user_id = request.GET.get('user_id')
+
             company_id = request.GET.get('company_id')
             appid = request.GET.get('appid')             #小程序appid
 
@@ -1263,7 +1264,7 @@ def gzh_auth_process_oper(request, oper_type):
                 if xiaochengxu_app_objs:
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                     gongzhonghao_app_obj = gongzhonghao_app_objs[0]
-                    xiaochengxu_app_obj = xiaochengxu_app_objs[0]
+
                     authorizer_appid = gongzhonghao_app_obj.authorization_appid
                     authorizer_refresh_token = gongzhonghao_app_obj.authorizer_refresh_token
 
@@ -1316,7 +1317,7 @@ def gzh_auth_process_oper(request, oper_type):
                     errmsg = authorizer_info_ret.get('errmsg')
 
                     if errmsg == 'ok':
-                        introduce_list = xiaochengxu_app_obj.introduce
+                        introduce_list = gongzhonghao_app_obj.introduce
                         introduce_list =  json.loads(introduce_list)
                         introduce_list.append(appid)
 
@@ -1405,7 +1406,7 @@ def gzh_auth_process_oper(request, oper_type):
                     errmsg = authorizer_info_ret.get('errmsg')
 
                     if errmsg == 'ok':
-                        introduce_list = xiaochengxu_app_obj.introduce
+                        introduce_list = gongzhonghao_app_obj.introduce
                         introduce_list = json.loads(introduce_list)
                         introduce_list.remove(appid)
 
@@ -1422,6 +1423,7 @@ def gzh_auth_process_oper(request, oper_type):
                 else:
                     response.msg = '小程序不存在'
                     response.code = 302
+
             else:
                 response.msg = '公众号不存在'
                 response.code = 302
@@ -1510,6 +1512,43 @@ def gzh_auth_process_oper(request, oper_type):
                     print('----------成功获取公众号帐号基本信息authorizer_info---------->>')
                     response.code = 200
                     response.msg = "成功获取公众号帐号基本信息authorizer_info"
+
+
+            else:
+                response.msg = '公众号不存在'
+                response.code = 302
+
+
+        elif oper_type == 'query_already_bind_xcx':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+            gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+
+            if gongzhonghao_app_objs:
+
+                gongzhonghao_app_obj =gongzhonghao_app_objs[0]
+                introduce_list = gongzhonghao_app_obj.introduce
+                introduce_list =  json.loads(introduce_list)
+
+                objs =   models.zgld_xiaochengxu_app.objects.filter(authorization_appid__in=introduce_list)
+
+                ret_data = []
+                for obj in objs:
+
+                    dict = {
+                        'id' : obj.id,
+                        'name' : obj.name,
+                        'appid' : obj.authorization_appid,
+                        'principal_name' : obj.principal_name,
+                        'status' : '已授权'
+                    }
+                    ret_data.append(dict)
+
+                response.data = ret_data
+                response.code = 200
+                response.msg = "获取成功"
+
 
 
             else:

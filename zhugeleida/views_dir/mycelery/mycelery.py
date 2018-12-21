@@ -442,6 +442,7 @@ def qiyeweixin_user_get_userinfo(request):
 def crontab_create_user_to_customer_qrCode_poster(request):
     if request.method == "GET":
         objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
+
         if objs:
             for obj in objs:
                 qr_code = obj.qr_code

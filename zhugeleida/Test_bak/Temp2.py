@@ -39,7 +39,7 @@ import os
 #     file.write(html.content)
 
 
-authorizer_access_token = '16_PHFsVinzJ1NVG2yeM0hip06CMU-D6-ezg9NfLlt5TyoA-Wtp1dIrnMSGQHjSxXBacE0rM3Ahi5JckZy00A2gX3KAL4SnRgOL0Sdi56pDhIgy4sjTFCvkdzzEamVzviIfiyzcMSlO9wWHjc7tOHJeALDDWY'
+authorizer_access_token = ''
 
 
 # url = 'https://api.weixin.qq.com/cgi-bin/wxopen/wxamplink'
