@@ -944,8 +944,9 @@ def user_send_gongzhonghao_template_msg(request):
             消息回复：您有未读消息哦
             点击进入咨询页面
             '''
-            data = ''
+            info_type = ''
             post_template_data = {}
+
             ## 言简意赅的模板消息提示消息
             if _type == 'gongzhonghao_template_tishi':
                 _content = json.loads(content)
@@ -1083,7 +1084,7 @@ def user_send_gongzhonghao_template_msg(request):
                     'touser': openid,
                     'template_id': template_id,
                     "miniprogram": {
-                        "appid": 'wx6554cb4db8efafc9',
+                        "appid": authorization_appid,
                         "pagepath": path,
                     },
                     'data': data
@@ -1099,6 +1100,7 @@ def user_send_gongzhonghao_template_msg(request):
             s.keep_alive = False  # 关闭多余连接
             template_ret = s.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
             template_ret = template_ret.json()
+            errcode = template_ret.get('errcode')
 
             print('--------企业用户 send to 公众号 Template 接口返回数据--------->', template_ret)
 
@@ -1108,10 +1110,11 @@ def user_send_gongzhonghao_template_msg(request):
                 response.msg = "企业用户发送模板消息成功"
 
 
-            elif template_ret.get('errcode') == 40001:
+            elif errcode == 40001:
                 rc.delete(key_name)
 
-            elif template_ret.get('errcode') == 43004:
+            elif errcode == 43004 or errcode == 40013: #{'errcode': 40013, 'errmsg': 'invalid appid hint: [Vc1zrA00434123]'}
+
                 # {'errcode': 43004, 'errmsg': 'require subscribe hint: [_z5Nwa00958672]'}
                 # {'errcode': 40003, 'errmsg': 'invalid openid hint: [JUmuwa08163951]'}
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
@@ -1120,6 +1123,10 @@ def user_send_gongzhonghao_template_msg(request):
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
                 _msg = '此客户【未关注】公众号,模板消息未送达'
+                if info_type == 6 and errcode == 40013:
+                    _msg = '此公众号未绑定小程序,【名片商城】未送达,请联系管理员'
+
+
                 encodestr = base64.b64encode(_msg.encode('utf-8'))
                 msg = str(encodestr, 'utf-8')
                 _content = {

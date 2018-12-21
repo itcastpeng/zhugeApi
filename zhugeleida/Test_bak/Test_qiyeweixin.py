@@ -753,14 +753,14 @@ import json
 
 url = ip +   '/zhugeleida/mycelery/user_send_gongzhonghao_template_msg' # 分页 聊天信息记录
 # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-get_data['user_id'] = 2
-get_data['customer_id'] = 854
+get_data['user_id'] = 55
+get_data['customer_id'] = 852
 # get_data['type'] = 'gongzhonghao_template_tishi'
 
 get_data['type'] = 'gongzhonghao_template_shopping_mall'
 
 # get_data['content'] = json.dumps({"url":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":4})
-get_data['content'] = json.dumps({"url":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":6})
+get_data['content'] = json.dumps({"msg":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":6})
 ret = requests.get(url, params=get_data)
 
 
