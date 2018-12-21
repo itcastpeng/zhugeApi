@@ -28,7 +28,7 @@ def deal_search_time(data, q):
     company_id = user_obj.company_id
 
     if type == 'personal':
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).values_list('customer_id').distinct().count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).count()  # 已获取客户数
 
     else:
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
@@ -97,6 +97,7 @@ def deal_line_info(data):
         q1.add(Q(**{'user_id': user_id}), Q.AND)
 
 
+    print('---- 【测试】deal_line_info q1 ----->>',q1)
 
     if index_type == 1:  # 客户总数
         if type == 'personal':
