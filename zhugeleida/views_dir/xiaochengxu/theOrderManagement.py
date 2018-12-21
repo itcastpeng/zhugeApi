@@ -28,9 +28,9 @@ def theOrder(request):
         orderStatus = request.GET.get('orderStatus')
         if orderStatus:
             if int(orderStatus) == 1:  #orderStatus=1        未完成
-                q.add(Q(theOrderStatus=[1,9,10]), Q.AND)
+                q.add(Q(theOrderStatus__in=[1,9,10]), Q.AND)
             elif int(orderStatus) == 2:  #orderStatus=2        已完成
-                q.add(Q(theOrderStatus=[8]), Q.AND)
+                q.add(Q(theOrderStatus__in=[8]), Q.AND)
 
             elif int(orderStatus) == 3: #orderStatus=3        退款售后
                 q.add(Q(theOrderStatus__in=[2,3,4,5]), Q.AND)
