@@ -13,8 +13,7 @@ import json, base64, time, random
 def tuiKuanDingDan(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
-    user_id = request.GET.get('user_id')
-    u_id = request.GET.get('u_id')
+
     orderNumber_id = request.GET.get('orderNumber'),
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
@@ -45,6 +44,7 @@ def tuiKuanDingDan(request):
                 'tuiKuanStatus': obj.orderNumber.get_theOrderStatus_display(),
                 'tuiKuanStatusId': obj.orderNumber.theOrderStatus,
                 'goodsName':obj.orderNumber.goodsName,
+                'remark':obj.remark or '',
                 'tuiKuanPrice':obj.orderNumber.yingFuKuan,
                 'detailePicture':detailePicture,
                 'goodsNum':obj.orderNumber.unitRiceNum,
@@ -68,6 +68,7 @@ def tuiKuanDingDan(request):
 def tuiKuanDingDanOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':
+
         if oper_type == 'add':
             otherData = {
                 'orderNumber':request.POST.get('orderNumber'),
@@ -97,6 +98,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
     else:
         if oper_type == 'selectYuanYin':
             objs = models.zgld_shangcheng_tuikuan_dingdan_management
@@ -109,6 +111,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = otherData
+
         else:
             response.code = 402
             response.msg = "请求异常"

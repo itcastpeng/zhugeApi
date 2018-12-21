@@ -168,33 +168,37 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         print(ret.text)
                         DOMTree = xmldom.parseString(ret.text)
                         collection = DOMTree.documentElement
+
                         return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
+                        #  通用的<xml><return_code><![CDATA[SUCCESS]]></return_code>
 
-                        # 记录返回的xml日志
-                        objs.update(
-                            remark=ret.text
-                        )
-                        if return_code == 'SUCCESS':
-                            if collection.getElementsByTagName("err_code_des"):
-                                err_code_des = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
-                                response.msg = err_code_des
-                                return JsonResponse(response.__dict__)
-                            else:
-                                nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                objs.update(
-                                    tuiKuanDateTime=nowTime
+                        result_code = collection.getElementsByTagName("result_code")[0].childNodes[0].data
+                        #  <result_code><![CDATA[SUCCESS]]></result_code> 或 <result_code><![CDATA[FAIL]]></result_code>
 
-                                )
 
-                                dingdan_guanli_objs.update(
-                                    theOrderStatus=2,
-                                )
-                                response.code = 200
-                                response.msg = '退款成功'
+                        if return_code == 'SUCCESS' and result_code == 'SUCCESS':
+                            nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            objs.update(
+                                tuiKuanDateTime=nowTime
+                            )
+                            dingdan_guanli_objs.update(
+                                theOrderStatus=2, # (2, '退款完成'),
+                            )
+                            response.code = 200
+                            response.msg = '退款成功'
 
-                        else:
+                        elif  return_code == 'SUCCESS' and result_code == 'FAIL':
+
+                            err_msg = collection.getElementsByTagName("err_code_des")[0].childNodes[0].data
+                            # <err_code_des><![CDATA[基本账户余额不足，请充值后重新发起]]></err_code_des>
+                            # 记录返回的xml日志
+                            objs.update(
+                                remark=err_msg
+                            )
+
                             dingdan_guanli_objs.update(         # (3, '退款失败'),
-                                theOrderStatus=3
+                                theOrderStatus=3,
+
                             )
                             response.code = 301
                             response.msg = '退款失败'
@@ -204,6 +208,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         response.msg = '无退款单号'
 
                 elif int(status) == 5:
+
                     dingdan_guanli_objs.update( # (5, '拒绝退款'),
                         theOrderStatus=5,
                     )
