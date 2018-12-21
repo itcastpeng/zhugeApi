@@ -959,6 +959,8 @@ class zgld_article_to_customer_belonger(models.Model):
     forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
     is_have_child =  models.BooleanField(verbose_name='这个客户是否有子级',default=False)
+    last_access_date = models.DateTimeField(verbose_name="最后访问时间", null=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:

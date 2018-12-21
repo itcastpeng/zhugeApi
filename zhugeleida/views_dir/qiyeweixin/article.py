@@ -573,6 +573,8 @@ def article_oper(request, oper_type, o_id):
             user_id = request.GET.get('user_id')
             current_page = request.GET.get('current_page')
             length = request.GET.get('length')
+            order = request.GET.get('order','-last_access_date')   # 排序 -stay_time停留时长  -read_count 被阅读数量
+
             # uid = request.GET.get('uid')
             request_data_dict = {
                 'article_id': o_id,
@@ -589,7 +591,7 @@ def article_oper(request, oper_type, o_id):
                 # level = forms_obj.cleaned_data.get('level')
                 objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
                                                                                        'customer').filter(
-                    article_id=article_id, user_id=user_id).order_by('-stay_time')
+                    article_id=article_id, user_id=user_id).order_by(order)
 
                 # total_customer_num = objs.values_list('customer_id').distinct().count()
                 # total_read_num = objs.aggregate(total_read_num=Sum('read_count'))

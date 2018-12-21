@@ -161,6 +161,11 @@ def chat_oper(request, oper_type, o_id):
                         _content['msg'] = msg
                         Content = json.dumps(_content)
 
+                    elif info_type == 6:
+                        msg = '官方商城，可点击进去购买'
+                        _content['msg'] = msg
+                        Content = json.dumps(_content)
+
                 '''
                 content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。
                 
@@ -190,8 +195,14 @@ def chat_oper(request, oper_type, o_id):
                      'info_type' : 5  ,   # 4代表发送的 视频
                      'url': 'statics/zhugeleida/imgs/chat/YYYY.mp4'
                      ......
-                }                
-                         
+                } 
+                
+                content = {
+                     'info_type' : 6  ,   # 4代表发送的商城
+                     'msg': '请点击进去购买'
+                     ......
+                }  
+        
                 '''
 
 
@@ -203,12 +214,20 @@ def chat_oper(request, oper_type, o_id):
                         send_type=1
                 )
 
-                user_type = obj.customer.user_type
+                user_type = obj.customer.user_type # 客户类型
 
                 if customer_id and user_id and user_type == 2:
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
                     tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
+
+                elif  user_type == 1 and info_type ==  6 and customer_id and user_id: # 发送商城 的模板消息,可以点击进去
+                    print('--- 【公众号发送（商城）模板消息】 user_send_gongzhonghao_template_msg --->')
+                    data['customer_id'] = customer_id
+                    data['user_id'] = user_id
+                    data['type'] = 'gongzhonghao_template_shopping_mall'
+                    data['content'] = Content
+                    tasks.user_send_gongzhonghao_template_msg.delay(data)  # 发送【公众号发送模板消息】
 
                 elif  user_type == 1 and customer_id and user_id:
                     print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->')
