@@ -89,7 +89,7 @@ def deal_line_info(data):
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)  # 小于
+    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
     #print('---->start_time', start_time)
 
 
@@ -610,21 +610,21 @@ def home_page_oper(request, oper_type):
             start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+            q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['yesterday_data'] = deal_search_time(data, q2)
 
             q3 = Q()
             start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+            q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_seven_days'] = deal_search_time(data, q3)
 
             q4 = Q()
             start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+            q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
             # 今日新增
