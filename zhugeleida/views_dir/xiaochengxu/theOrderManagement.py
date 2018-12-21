@@ -27,8 +27,8 @@ def theOrder(request):
         detailId = request.GET.get('detailId')
         orderStatus = request.GET.get('orderStatus')
         if orderStatus:
-            if int(orderStatus) == 1:  #orderStatus=1        未完成
-                q.add(Q(theOrderStatus__in=[1,9,10]), Q.AND)
+            if int(orderStatus) == 1:    # orderStatus=1        未完成
+                q.add(Q(theOrderStatus__in=[1,9]), Q.AND)
             elif int(orderStatus) == 2:  #orderStatus=2        已完成
                 q.add(Q(theOrderStatus__in=[8]), Q.AND)
 

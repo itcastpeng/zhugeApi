@@ -55,6 +55,7 @@ def tuiKuanDingDan(request):
                 'tuiKuanDateTime':tuikuan,
                 'tuiKuanStatus':obj.orderNumber.theOrderStatus,
                 'tuikuanzhanghao':'123456',
+                'remark': obj.remark or '',
                 'tuikuanjine': obj.orderNumber.yingFuKuan,
                 'statusNameId':obj.orderNumber.theOrderStatus,
                 'statusName':obj.orderNumber.get_theOrderStatus_display(),

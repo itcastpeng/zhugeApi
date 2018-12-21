@@ -44,7 +44,7 @@ def tuiKuanDingDan(request):
                 'tuiKuanStatus': obj.orderNumber.get_theOrderStatus_display(),
                 'tuiKuanStatusId': obj.orderNumber.theOrderStatus,
                 'goodsName':obj.orderNumber.goodsName,
-                'remark':obj.remark or '',
+
                 'tuiKuanPrice':obj.orderNumber.yingFuKuan,
                 'detailePicture':detailePicture,
                 'goodsNum':obj.orderNumber.unitRiceNum,
