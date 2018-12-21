@@ -664,6 +664,7 @@ def home_page_oper(request, oper_type):
 
 
                 data['company_id'] = company_id
+                data['user_id'] = user_id
                 data['type'] = type
 
                 ret_data = {}
