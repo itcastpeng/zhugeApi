@@ -757,8 +757,10 @@ get_data['user_id'] = 2
 get_data['customer_id'] = 854
 # get_data['type'] = 'gongzhonghao_template_tishi'
 
-get_data['type'] = 'gongzhonghao_send_kefu_msg'
-get_data['content'] = json.dumps({"url":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":4})
+get_data['type'] = 'gongzhonghao_template_shopping_mall'
+
+# get_data['content'] = json.dumps({"url":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":4})
+get_data['content'] = json.dumps({"url":"statics/zhugeleida/imgs/qiyeweixin/chat/1545274366449.jpg","info_type":6})
 ret = requests.get(url, params=get_data)
 
 

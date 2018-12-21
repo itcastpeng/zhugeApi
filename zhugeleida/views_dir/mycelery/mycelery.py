@@ -984,6 +984,16 @@ def user_send_gongzhonghao_template_msg(request):
                     }
                 }
 
+                post_template_data = {
+                    'touser': openid,
+                    'template_id': template_id,
+                    # "miniprogram": {
+                    #     "appid": appid,
+                    #     "pagepath": path,
+                    # },
+                    'data': data
+                }
+
             ## 参加活动后模板消息提示[活动规则]
             elif _type == 'forward_look_article_tishi':
                 activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
@@ -1028,6 +1038,39 @@ def user_send_gongzhonghao_template_msg(request):
 
             # 发送商城的消息
             elif _type == 'gongzhonghao_template_shopping_mall':
+
+
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+
+                if info_type:
+                    info_type = int(info_type)
+                    if info_type == 6:
+                        _content = '点击进去官方商城'
+
+
+                if position:
+                    consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                else:
+                    consult_info = ('%s - %s') % (company_name, user_name)
+
+                data = {
+                    'first': {
+                        'value': ''  # 回复者
+                    },
+                    'keyword1': {
+                        'value': consult_info + '\n',
+                        "color": "#0000EE"
+                    },
+                    'keyword2': {
+                        'value': _content + '\n',
+                        "color": "#FF0000"
+                    },
+                    'remark': {
+                        'value': '如需沟通,可在此公众号或小程序内进行回复！玩转名片电商从这里开始 go ~'  # 回复内容
+                    }
+                }
+
 
                 xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
 
