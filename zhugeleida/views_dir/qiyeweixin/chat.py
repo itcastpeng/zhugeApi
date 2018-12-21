@@ -129,6 +129,8 @@ def chat_oper(request, oper_type, o_id):
             print('----send_msg--->>',request.POST)
             forms_obj = ChatPostForm(request.POST)
             if forms_obj.is_valid():
+                company_id =  request.GET.get('company_id')
+
                 data = request.POST.copy()
                 user_id = int(data.get('user_id'))
                 customer_id = int(data.get('customer_id'))
@@ -165,6 +167,19 @@ def chat_oper(request, oper_type, o_id):
                         msg = '官方商城，可点击进去购买'
                         _content['msg'] = msg
                         Content = json.dumps(_content)
+
+                        objs = models.zgld_company.objects.filter(id=company_id)
+                        if objs:
+                            shopping_type =  objs[0].shopping_type
+                            if shopping_type == 1: # 开启产品
+                                response.code = 303
+                                response.msg = '此小程序没有开启商城'
+
+                                return JsonResponse(response.__dict__)
+
+
+
+
 
                 '''
                 content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。

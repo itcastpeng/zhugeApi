@@ -1047,7 +1047,7 @@ def user_send_gongzhonghao_template_msg(request):
                 if info_type:
                     info_type = int(info_type)
                     if info_type == 6:
-                        _content = '点击进去官方商城'
+                        _content = '点击进入官方商城'
 
 
                 if position:
