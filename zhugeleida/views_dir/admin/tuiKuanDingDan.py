@@ -193,7 +193,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 response.msg = '退款成功'
 
                         else:
-                            dingdan_guanli_objs.update( # (3, '退款失败'),
+                            dingdan_guanli_objs.update(         # (3, '退款失败'),
                                 theOrderStatus=3
                             )
                             response.code = 301
