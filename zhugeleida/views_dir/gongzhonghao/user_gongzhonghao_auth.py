@@ -105,7 +105,7 @@ def user_gongzhonghao_auth(request):
         url = qywx_config_dict.get('authorization_url')
         api_url = qywx_config_dict.get('api_url')
 
-
+        headimgurl = ''
         if state == 'snsapi_base':
 
             customer_objs = models.zgld_customer.objects.filter(
@@ -172,6 +172,7 @@ def user_gongzhonghao_auth(request):
                 print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', redirect_url)
 
         # 非静默
+
         else:
             print('ret_data -->', ret_data)
             get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
@@ -262,6 +263,7 @@ def user_gongzhonghao_auth(request):
         _data = {
             'openid': openid,
             'authorizer_appid': appid,
+            'headimgurl': headimgurl,
         }
         # 获取 公众号的用户信息
         tasks.get_customer_gongzhonghao_userinfo.delay(_data)

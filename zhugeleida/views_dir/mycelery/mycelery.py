@@ -783,6 +783,19 @@ def user_send_gongzhonghao_template_msg(request):
     key_name = 'authorizer_access_token_%s' % (authorizer_appid)
     authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    app_id = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+
+
     if not authorizer_access_token:
         authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
         authorizer_access_token = rc.get(
@@ -793,8 +806,8 @@ def user_send_gongzhonghao_template_msg(request):
                 'key_name': authorizer_access_token_key_name,
                 'authorizer_refresh_token': authorizer_refresh_token,
                 'authorizer_appid': authorizer_appid,
-                'app_id': 'wx6ba07e6ddcdc69b3',
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                'app_id': app_id ,  #'wx6ba07e6ddcdc69b3',
+                'app_secret': app_secret  ,# '0bbed534062ceca2ec25133abe1eecba'
             }
 
             authorizer_access_token_result = create_gongzhonghao_authorizer_access_token(data)
@@ -1653,9 +1666,25 @@ def user_focus_send_activity_redPacket(request):
 ## 异步获取公众号用户信息[用三方平台token]
 @csrf_exempt
 def get_customer_gongzhonghao_userinfo(request):
+
     response = Response.ResponseObj()
     authorizer_appid = request.GET.get('authorizer_appid')
     openid = request.GET.get('openid')
+    headimgurl = request.GET.get('headimgurl')
+
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    app_id = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+
 
     objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorizer_appid)
     authorizer_refresh_token = ''
@@ -1667,8 +1696,8 @@ def get_customer_gongzhonghao_userinfo(request):
         'authorizer_appid': authorizer_appid,
         'authorizer_refresh_token': authorizer_refresh_token,
         'key_name': key_name,
-        'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-        'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+        'app_id':  app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+        'app_secret': app_secret ,#'0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
     }
 
     authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
@@ -1693,17 +1722,35 @@ def get_customer_gongzhonghao_userinfo(request):
     ret_json = ret.json()
     print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
 
+    customer_objs = models.zgld_customer.objects.filter(openid=openid)
+    customer_id = ''
+    if customer_objs:
+        customer_id = customer_objs[0].id
+
     if 'errcode' not in ret_json:
         openid = ret_json['openid']        # 用户唯一标
         subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
 
-        objs = models.zgld_customer.objects.filter(openid=openid)
-        if objs:
-            customer_id = objs[0].id
-            objs.update(
-                is_subscribe=subscribe
-            )
-            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+        customer_objs.update(
+            is_subscribe=subscribe
+        )
+        print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+
+    #保存头像到本地的数据库
+    if headimgurl:
+        html = s.get(headimgurl)
+
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+        filename = "/gzh_cid_%s_%s.jpg" % (customer_id, now_time)
+        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'headimgurl') + filename
+        with open(file_dir, 'wb') as file:
+            file.write(html.content)
+        print('----- 生成 到本地头像 file_dir ---->>', file_dir)
+        customer_objs.update(
+            headimgurl=file_dir
+        )
+
+
 
     return JsonResponse(response.__dict__)
 

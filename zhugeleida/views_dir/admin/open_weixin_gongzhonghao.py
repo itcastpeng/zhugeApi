@@ -209,17 +209,18 @@ def open_weixin_gongzhonghao(request, oper_type):
                                 service_category=categories,  # 服务类目
                             )
 
-                            s = requests.session()
-                            s.keep_alive = False  # 关闭多余连接
-                            html = s.get(qrcode_url)
 
-                            # html = requests.get(qrcode_url)
+
+                            html = s.get(qrcode_url)
 
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                             filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
                             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
                             with open(file_dir, 'wb') as file:
                                 file.write(html.content)
+                            print('----- 生成 本地二维码 file_dir ---->>',file_dir)
+                            objs.update(qrcode_url=file_dir)  # 二维码
+
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200

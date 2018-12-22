@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.smallprogram_verify import SmallProgramAddForm, LoginBindingForm
 
-import time
+import time,os
 import datetime
 
 import requests
@@ -324,6 +324,25 @@ def login_oper(request, oper_type):
                 action_record(data, remark)
 
                 response.data = {'ret_data': username + ' 已向您授权登录页面'}
+
+                if headimgurl:
+                    s = requests.session()
+                    s.keep_alive = False  # 关闭多余连接
+                    html = s.get(headimgurl)
+
+                    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+                    filename = "/xcx_cid_%s_%s.jpg" % (customer_id, now_time)
+                    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_photo') + filename
+                    with open(file_dir, 'wb') as file:
+                        file.write(html.content)
+
+                    print('----- 生成 到本地头像 file_dir ---->>', file_dir)
+                    objs.update(
+                        headimgurl=file_dir
+                    )
+
+
+
                 response.code = 200
                 response.msg = "保存成功"
             else:
