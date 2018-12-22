@@ -472,6 +472,22 @@ def crontab_create_user_to_customer_qrCode_poster(request):
         else:
             print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
 
+        u_objs = models.zgld_userprofile.objects.filter(status=1,qr_code__isnull=True)
+        if u_objs:
+            user_id = u_objs[0].id
+            data_dict = {'user_id': user_id, 'customer_id': ''}
+
+            # 生成小程序和企业用户对应的小程序二维码
+            url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+            get_data = {
+                'data': json.dumps(data_dict)
+            }
+            print('---【定时器生成】 小程序二维码: data_dict-->', data_dict)
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            s.get(url, params=get_data)
+
     return HttpResponse('执行_定时器生成海报')
 
 
