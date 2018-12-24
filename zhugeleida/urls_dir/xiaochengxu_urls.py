@@ -65,4 +65,5 @@ urlpatterns = [
     # 查询商品
     url(r'mallManage$', mallManagementShow.mallManage),  # 订单管理查询
 
+
 ]

@@ -56,39 +56,43 @@ def goodsClass(request):
         q = Q()
         if singleUser:
             q.add(Q(parentClassification_id=singleUser), Q.AND)
+
         objs = groupObjs.filter(company_id=company_id).filter(q).order_by('-createDate')
 
         objsCount = objs.count()
         otherData = []
-        for obj in objs:
-            countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
-            classificationName = ''
-            parentClassification_id = ''
-            if obj.parentClassification_id:
-                parentClassification_id = obj.parentClassification_id
-                classificationName = obj.parentClassification.classificationName
+        if objs:
 
-            otherData.append({
-                'groupId':obj.id,
-                'groupName':obj.classificationName,
-                'groupParentId':parentClassification_id,
-                'groupParent':classificationName,
-                'countNum':countNum
-            })
-        response.code = 200
-        response.msg = '查询成功'
-        response.data = {
-            'parentData':parentData,
-            'otherData':otherData,
-            'objsCount':objsCount
-        }
-    else:
-        response.msg = '商城基础未配置'
-        response.code = 302
+            for obj in objs:
+                countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+                classificationName = ''
+                parentClassification_id = ''
+                if obj.parentClassification_id:
+                    parentClassification_id = obj.parentClassification_id
+                    classificationName = obj.parentClassification.classificationName
 
-    # else:
-    #     response.code = 402
-    #     response.msg = '请求异常'
+                otherData.append({
+                    'groupId':obj.id,
+                    'groupName':obj.classificationName,
+                    'groupParentId':parentClassification_id,
+                    'groupParent':classificationName,
+                    'countNum':countNum
+                })
+
+            response.data = {
+                'parentData':parentData,
+                'otherData':otherData,
+                'objsCount':objsCount
+            }
+            response.code = 200
+            response.msg = '查询成功'
+
+        else:
+            response.code = 302
+            response.msg = '无数据'
+
+
+
     return JsonResponse(response.__dict__)
 
 
