@@ -399,11 +399,15 @@ def product_oper(request, oper_type, o_id):
 
         ## 修改推荐指数-影响产品展示排序。
         elif oper_type == 'recommend_index':
+            type = request.POST.get('type')
+
             form_data = {
                 'user_id': request.GET.get('user_id'),
                 'product_id': o_id,  # 产品ID
                 'recommend_index' : request.POST.get('recommend_index') # 排序优先级。
             }
+
+
 
             forms_obj = RecommendIndexForm(form_data)
             if forms_obj.is_valid():
@@ -411,10 +415,17 @@ def product_oper(request, oper_type, o_id):
                 product_id = forms_obj.cleaned_data.get('product_id')
                 recommend_index = forms_obj.cleaned_data.get('recommend_index')
 
-                product_obj = models.zgld_product.objects.filter(id=product_id)
-                product_obj.update(
-                    recommend_index=recommend_index
-                )
+                if type == 'goods':
+                    goods_obj = models.zgld_goods_management.objects.filter(id=product_id)
+                    goods_obj.update(
+                        recommend_index=recommend_index
+                    )
+
+                else:
+                    product_obj = models.zgld_product.objects.filter(id=product_id)
+                    product_obj.update(
+                        recommend_index=recommend_index
+                    )
 
                 response.code = 200
                 response.msg = "修改成功"

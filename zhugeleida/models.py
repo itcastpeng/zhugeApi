@@ -1122,6 +1122,7 @@ class zgld_goods_classification_management(models.Model):
     # mallSetting = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)
     level = models.IntegerField(verbose_name='分类等级', default=1)
 
+
 # 小程序 - 商品管理
 class zgld_goods_management(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
@@ -1131,7 +1132,7 @@ class zgld_goods_management(models.Model):
     salesNum = models.IntegerField(verbose_name='销量', default=0)
     # inventoryNum = models.IntegerField(verbose_name='库存', default=0)
     commissionFee = models.IntegerField(verbose_name='佣金提成', default=0)
-    recommend_index = models.SmallIntegerField(verbose_name='产品排序优先级', default=0)  # 从0 - 10 ,0 代表不推荐。
+    recommend_index = models.SmallIntegerField(verbose_name='产品排序优先级', default=1)  # 从0 - 10 ,0 代表不推荐。
     status_choices = (
         (1, '已上架'),
         (2, '未上架'),

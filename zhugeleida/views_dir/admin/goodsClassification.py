@@ -56,7 +56,7 @@ def goodsClass(request):
         q = Q()
         if singleUser:
             q.add(Q(parentClassification_id=singleUser), Q.AND)
-        objs = groupObjs.filter(company_id=company_id).filter(q)
+        objs = groupObjs.filter(company_id=company_id).filter(q).order_by('-createDate')
 
         objsCount = objs.count()
         otherData = []
