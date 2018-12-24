@@ -1333,6 +1333,9 @@ def gzh_auth_process_oper(request, oper_type):
                         response.msg = "成功关联公众号"
 
                     else:
+                        if errcode == 89015:
+                            errmsg = '公众号已经绑定小程序'
+
                         print('--------- 公众号 【失败】关联小程序---------->>')
                         response.code = errcode
                         response.msg = errmsg
