@@ -166,7 +166,7 @@ def jiChuSheZhiOper(request, oper_type):
                         re_openid = customer_obj.openid
 
                     result_data = {
-                        'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
+                        'scene_id' : 'PRODUCT_5', #   发放红包使用场景，红包金额大于200或者小于1元时必传
                         'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
                         'mch_id': shangHuHao,      # 商户号
