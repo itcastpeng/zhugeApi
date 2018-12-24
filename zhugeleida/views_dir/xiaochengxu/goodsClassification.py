@@ -35,7 +35,7 @@ def init_data(company_id, pid=None, level=1):
 
 # 商城商品查询
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def goodsClass(request):
     response = Response.ResponseObj()
     if request.method == "GET":
@@ -51,17 +51,21 @@ def goodsClass(request):
 
         # jichushezhi_id = Objs[0].id
         parentData = init_data(company_id)
-        groupObjs = models.zgld_goods_classification_management.objects
+        # groupObjs = models.zgld_goods_classification_management.objects
 
-        q = Q()
-        if singleUser:
-            q.add(Q(parentClassification_id=singleUser), Q.AND)
+        _objs  =  models.zgld_shangcheng_jichushezhi.objects.get(xiaochengxucompany_id=company_id)
+        if _objs:
+            classify_position = _objs[0].classify_position
 
-        objs = groupObjs.filter(company_id=company_id).filter(q).order_by('-createDate')
+            q = Q()
+            if singleUser:
+                q.add(Q(parentClassification_id=singleUser), Q.AND)
 
-        objsCount = objs.count()
-        otherData = []
-        if objs:
+        # objs = groupObjs.filter(company_id=company_id).filter(q).order_by('-createDate')
+        #
+        # objsCount = objs.count()
+        # otherData = []
+        # if objs:
 
             # for obj in objs:
             #     countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
@@ -81,8 +85,9 @@ def goodsClass(request):
 
             response.data = {
                 'parentData':parentData,
+                'classify_position' : classify_position
                 # 'otherData':otherData,
-                'objsCount':objsCount
+                # 'objsCount':objsCount
             }
             response.code = 200
             response.msg = '查询成功'
