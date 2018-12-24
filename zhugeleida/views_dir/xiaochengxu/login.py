@@ -315,6 +315,7 @@ def login_oper(request, oper_type):
 
                 elif page_info == 3:
                     remark = '已向您授权访问【产品详情】页面'
+
                 elif page_info == 4:
                     remark = '已向您授权访问【公司官网】页面'
 

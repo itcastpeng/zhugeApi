@@ -10,7 +10,7 @@ import json, base64
 
 
 @csrf_exempt
-@account.is_token(models.zgld_customer)
+# @account.is_token(models.zgld_customer)
 def mallManage(request):
 
 
