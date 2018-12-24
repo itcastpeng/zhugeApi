@@ -1119,7 +1119,7 @@ class zgld_goods_classification_management(models.Model):
     # goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
     parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    mallSetting = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)
+    # mallSetting = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)
     level = models.IntegerField(verbose_name='分类等级', default=1)
 
 # 小程序 - 商品管理
