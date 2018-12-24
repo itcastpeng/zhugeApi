@@ -407,8 +407,6 @@ def product_oper(request, oper_type, o_id):
                 'recommend_index' : request.POST.get('recommend_index') # 排序优先级。
             }
 
-
-
             forms_obj = RecommendIndexForm(form_data)
             if forms_obj.is_valid():
                 user_id = request.GET.get('user_id')

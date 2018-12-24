@@ -464,7 +464,9 @@ class zgld_product(models.Model):
     price = models.CharField(verbose_name='价格', max_length=64, null=True)
     reason = models.CharField(verbose_name='推荐理由', max_length=1024, null=True)
     content = models.TextField(verbose_name='内容', null=True)
+
     recommend_index =  models.SmallIntegerField(verbose_name='产品推荐指数',default=0) # 从0 - 10 ,0 代表不推荐。
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -1148,6 +1150,7 @@ class zgld_goods_management(models.Model):
     zhengshu = models.CharField(verbose_name='证书', max_length=256, null=True, blank=True)
     topLunBoTu = models.TextField(verbose_name='顶部轮播图', null=True, blank=True)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
+    content = models.TextField(verbose_name='内容', null=True)
     DetailsDescription = models.TextField(verbose_name='详情描述', null=True, blank=True)
 
 # 小程序 - 订单管理
