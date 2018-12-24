@@ -210,6 +210,21 @@ def mingpian_oper(request, oper_type):
             response.code = 200
             response.msg = '保存成功'
 
+
+    else:
+
+        # 查看用户照片和头像
+        if oper_type == 'show_photo':
+            user_id = request.GET.get('user_id')
+            photo_query_list = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url')
+            models.zgld_user_photo.objects.filter(user_id=1)
+            response.code = 200
+            response.msg = '获取成功'
+            response.data = {
+                'ret_data': list(photo_query_list),
+                'user_id': user_id,
+            }
+
         # 生成用户二维码成功
         elif oper_type == 'create_small_program_qr_code':
 
@@ -249,19 +264,6 @@ def mingpian_oper(request, oper_type):
                 response.code = 301
                 response.msg = "用户不存在"
 
-    else:
-
-        # 查看用户照片和头像
-        if oper_type == 'show_photo':
-            user_id = request.GET.get('user_id')
-            photo_query_list = models.zgld_user_photo.objects.filter(user_id=user_id).values('id', 'photo_url')
-            models.zgld_user_photo.objects.filter(user_id=1)
-            response.code = 200
-            response.msg = '获取成功'
-            response.data = {
-                'ret_data': list(photo_query_list),
-                'user_id': user_id,
-            }
 
         # 添加用户照片和头像
         elif oper_type == "upload_complete":

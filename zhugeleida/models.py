@@ -111,7 +111,7 @@ class zgld_gongzhonghao_app(models.Model):
     template_id = models.CharField(verbose_name="消息模板ID", max_length=128, null=True)
     authorizer_refresh_token = models.CharField(verbose_name='第三方平台接口调用凭据-刷新令牌', max_length=64, null=True)
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)  # -1代表未认证，0代表微信认证
-    introduce = models.CharField(verbose_name="公众号介绍", max_length=2048, default='[]')
+    introduce = models.CharField(verbose_name="公众号绑定的小程序", max_length=2048, default='[]')
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True ,default="IT科技>硬件与设备")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -464,7 +464,9 @@ class zgld_product(models.Model):
     price = models.CharField(verbose_name='价格', max_length=64, null=True)
     reason = models.CharField(verbose_name='推荐理由', max_length=1024, null=True)
     content = models.TextField(verbose_name='内容', null=True)
+
     recommend_index =  models.SmallIntegerField(verbose_name='产品推荐指数',default=0) # 从0 - 10 ,0 代表不推荐。
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -959,6 +961,8 @@ class zgld_article_to_customer_belonger(models.Model):
     forward_friend_count = models.IntegerField(verbose_name="转发给朋友的个数", default=0)
     forward_friend_circle_count = models.IntegerField(verbose_name="转发给朋友圈的个数", default=0)
     is_have_child =  models.BooleanField(verbose_name='这个客户是否有子级',default=False)
+    last_access_date = models.DateTimeField(verbose_name="最后访问时间", null=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -1103,6 +1107,13 @@ class zgld_shangcheng_jichushezhi(models.Model):
     # userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
     shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
     shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
+
+    position_choices = (
+        (1, '横向展示分类'),
+        (2, '纵向展示分类')
+    )
+    classify_position = models.SmallIntegerField(verbose_name='商品分类展示位置', choices=position_choices, default=1)
+
     lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
     yongjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
     xiaochengxuApp = models.ForeignKey(to='zgld_xiaochengxu_app', verbose_name='小程序APP', null=True, blank=True)
@@ -1112,21 +1123,25 @@ class zgld_shangcheng_jichushezhi(models.Model):
 
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     classificationName = models.CharField(verbose_name='分类名称', max_length=128)
     # goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
     parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    mallSetting = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)
+    # mallSetting = models.ForeignKey(to='zgld_shangcheng_jichushezhi', verbose_name='商城', null=True, blank=True)
     level = models.IntegerField(verbose_name='分类等级', default=1)
+
 
 # 小程序 - 商品管理
 class zgld_goods_management(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     goodsName = models.CharField(verbose_name='商品名称', max_length=128)
     parentName = models.ForeignKey(to='zgld_goods_classification_management', verbose_name='归属分类', null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价',max_length=64, default=0)
     salesNum = models.IntegerField(verbose_name='销量', default=0)
     # inventoryNum = models.IntegerField(verbose_name='库存', default=0)
     commissionFee = models.IntegerField(verbose_name='佣金提成', default=0)
+    recommend_index = models.SmallIntegerField(verbose_name='产品排序优先级', default=0)  # 从0 - 10 ,0 代表不推荐。
     status_choices = (
         (1, '已上架'),
         (2, '未上架'),
@@ -1142,6 +1157,7 @@ class zgld_goods_management(models.Model):
     zhengshu = models.CharField(verbose_name='证书', max_length=256, null=True, blank=True)
     topLunBoTu = models.TextField(verbose_name='顶部轮播图', null=True, blank=True)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
+    content = models.TextField(verbose_name='内容', null=True)
     DetailsDescription = models.TextField(verbose_name='详情描述', null=True, blank=True)
 
 # 小程序 - 订单管理

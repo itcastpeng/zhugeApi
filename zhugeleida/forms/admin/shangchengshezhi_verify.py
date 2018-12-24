@@ -21,6 +21,14 @@ class jichushezhi(forms.Form):
 
     )
 
+    classify_position =  forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "商品分类展示位置"
+        }
+
+    )
+
 class zhifupeizhi(forms.Form):
     shangHuHao = forms.CharField(
         required=True,

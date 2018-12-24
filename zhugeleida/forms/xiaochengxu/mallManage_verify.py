@@ -14,6 +14,13 @@ class AddForm(forms.Form):
         }
     )
 
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
     parentName = forms.IntegerField(
         required=True,
         error_messages={
@@ -82,6 +89,14 @@ class UpdateForm(forms.Form):
             'required': "修改ID不能为空"
         }
     )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
     DetailsDescription = forms.CharField(
         required=False,
         error_messages={

@@ -137,7 +137,7 @@ class RecommendIndexForm(forms.Form):
         }
     )
     product_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "产品ID不能为空"
         }
@@ -150,21 +150,17 @@ class RecommendIndexForm(forms.Form):
         }
     )
 
-
-
-
-    # 判断企业产品名称是否存在
-    def clean_product_id(self):
-        product_id = self.data['product_id']
-        objs = models.zgld_product.objects.filter(id = product_id)
-
-        if  not objs:
-            print('-----产品不存在----->>')
-            self.add_error('product_id', '产品不存在')
-
-        else:
-            return product_id
-
+    # # 判断企业产品名称是否存在
+    # def clean_product_id(self):
+    #     product_id = self.data['product_id']
+    #     objs = models.zgld_product.objects.filter(id = product_id)
+    #
+    #     if  not objs:
+    #         print('-----产品不存在----->>')
+    #         self.add_error('product_id', '产品不存在')
+    #
+    #     else:
+    #         return product_id
 
 
 class ProductSelectForm(forms.Form):

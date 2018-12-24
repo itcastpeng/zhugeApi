@@ -28,7 +28,7 @@ def deal_search_time(data, q):
     company_id = user_obj.company_id
 
     if type == 'personal':
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).values_list('customer_id').distinct().count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).count()  # 已获取客户数
 
     else:
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
@@ -89,7 +89,7 @@ def deal_line_info(data):
 
     q1 = Q()
     q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lte': stop_time}), Q.AND)  # 小于
+    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
     #print('---->start_time', start_time)
 
 
@@ -97,6 +97,7 @@ def deal_line_info(data):
         q1.add(Q(**{'user_id': user_id}), Q.AND)
 
 
+    print('---- 【测试】deal_line_info q1 ----->>',q1)
 
     if index_type == 1:  # 客户总数
         if type == 'personal':
@@ -609,21 +610,21 @@ def home_page_oper(request, oper_type):
             start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+            q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['yesterday_data'] = deal_search_time(data, q2)
 
             q3 = Q()
             start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+            q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_seven_days'] = deal_search_time(data, q3)
 
             q4 = Q()
             start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+            q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
             # 今日新增
@@ -663,6 +664,7 @@ def home_page_oper(request, oper_type):
 
 
                 data['company_id'] = company_id
+                data['user_id'] = user_id
                 data['type'] = type
 
                 ret_data = {}

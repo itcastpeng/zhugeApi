@@ -35,13 +35,15 @@ def init_data(company_id, pid=None, level=1):
 
 # 商城商品查询
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+# @account.is_token(models.zgld_customer)
 def goodsClass(request):
     response = Response.ResponseObj()
     if request.method == "GET":
+        uid = request.GET.get('uid')
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
-        company_id = request.GET.get('company_id')   #
+        u_idObjs = models.zgld_userprofile.objects.get(id=uid)
+        company_id = u_idObjs.company_id
 
         # Objs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         #     'xiaochengxuApp__company'
@@ -51,38 +53,43 @@ def goodsClass(request):
 
         # jichushezhi_id = Objs[0].id
         parentData = init_data(company_id)
-        groupObjs = models.zgld_goods_classification_management.objects
+        # groupObjs = models.zgld_goods_classification_management.objects
 
-        q = Q()
-        if singleUser:
-            q.add(Q(parentClassification_id=singleUser), Q.AND)
+        _objs  =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
+        if _objs:
+            classify_position = _objs[0].classify_position
 
-        objs = groupObjs.filter(company_id=company_id).filter(q).order_by('-createDate')
+            q = Q()
+            if singleUser:
+                q.add(Q(parentClassification_id=singleUser), Q.AND)
 
-        objsCount = objs.count()
-        otherData = []
-        if objs:
+        # objs = groupObjs.filter(company_id=company_id).filter(q).order_by('-createDate')
+        #
+        # objsCount = objs.count()
+        # otherData = []
+        # if objs:
 
-            for obj in objs:
-                countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
-                classificationName = ''
-                parentClassification_id = ''
-                if obj.parentClassification_id:
-                    parentClassification_id = obj.parentClassification_id
-                    classificationName = obj.parentClassification.classificationName
-
-                otherData.append({
-                    'groupId':obj.id,
-                    'groupName':obj.classificationName,
-                    'groupParentId':parentClassification_id,
-                    'groupParent':classificationName,
-                    'countNum':countNum
-                })
+            # for obj in objs:
+            #     countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+            #     classificationName = ''
+            #     parentClassification_id = ''
+            #     if obj.parentClassification_id:
+            #         parentClassification_id = obj.parentClassification_id
+            #         classificationName = obj.parentClassification.classificationName
+            #
+            #     otherData.append({
+            #         'groupId':obj.id,
+            #         'groupName':obj.classificationName,
+            #         'groupParentId':parentClassification_id,
+            #         'groupParent':classificationName,
+            #         'countNum':countNum
+            #     })
 
             response.data = {
                 'parentData':parentData,
-                'otherData':otherData,
-                'objsCount':objsCount
+                'classify_position' : classify_position
+                # 'otherData':otherData,
+                # 'objsCount':objsCount
             }
             response.code = 200
             response.msg = '查询成功'

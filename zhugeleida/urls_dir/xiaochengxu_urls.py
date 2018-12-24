@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, customer
 from zhugeleida.views_dir.xiaochengxu import login, mingpian, product, prepaidManagement, theOrderManagement, \
-    tuiKuanDingDan, mallManagementShow,test_login
+    tuiKuanDingDan, mallManagementShow,test_login,goodsClassification
 from zhugeleida.views_dir.xiaochengxu import chat, website
 from zhugeleida.views_dir.public import  websocket
 
@@ -64,5 +64,8 @@ urlpatterns = [
 
     # 查询商品
     url(r'mallManage$', mallManagementShow.mallManage),  # 订单管理查询
+
+    # 查询分类
+    url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
 ]

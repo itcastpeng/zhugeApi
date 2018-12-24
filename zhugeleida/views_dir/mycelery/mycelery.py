@@ -442,6 +442,7 @@ def qiyeweixin_user_get_userinfo(request):
 def crontab_create_user_to_customer_qrCode_poster(request):
     if request.method == "GET":
         objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
+
         if objs:
             for obj in objs:
                 qr_code = obj.qr_code
@@ -470,6 +471,22 @@ def crontab_create_user_to_customer_qrCode_poster(request):
 
         else:
             print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
+
+        u_objs = models.zgld_userprofile.objects.filter(status=1,qr_code__isnull=True)
+        if u_objs:
+            user_id = u_objs[0].id
+            data_dict = {'user_id': user_id, 'customer_id': ''}
+
+            # 生成小程序和企业用户对应的小程序二维码
+            url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
+            get_data = {
+                'data': json.dumps(data_dict)
+            }
+            print('---【定时器生成】 小程序二维码: data_dict-->', data_dict)
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            s.get(url, params=get_data)
 
     return HttpResponse('执行_定时器生成海报')
 
@@ -782,6 +799,19 @@ def user_send_gongzhonghao_template_msg(request):
     key_name = 'authorizer_access_token_%s' % (authorizer_appid)
     authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    app_id = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+
+
     if not authorizer_access_token:
         authorizer_access_token_key_name = 'authorizer_access_token_%s' % (authorizer_appid)
         authorizer_access_token = rc.get(
@@ -792,8 +822,8 @@ def user_send_gongzhonghao_template_msg(request):
                 'key_name': authorizer_access_token_key_name,
                 'authorizer_refresh_token': authorizer_refresh_token,
                 'authorizer_appid': authorizer_appid,
-                'app_id': 'wx6ba07e6ddcdc69b3',
-                'app_secret': '0bbed534062ceca2ec25133abe1eecba'
+                'app_id': app_id ,  #'wx6ba07e6ddcdc69b3',
+                'app_secret': app_secret  ,# '0bbed534062ceca2ec25133abe1eecba'
             }
 
             authorizer_access_token_result = create_gongzhonghao_authorizer_access_token(data)
@@ -807,153 +837,9 @@ def user_send_gongzhonghao_template_msg(request):
     if customer_obj and objs:
         openid = customer_obj[0].openid
 
-        # 发送公众号模板消息聊天消息 or  公众号客户查看文章后的红包活动提示
-        if _type == 'gongzhonghao_template_tishi' or _type == 'forward_look_article_tishi':
-
-            # 留言回复通知
-            '''
-            您好，您咨询商家的问题已回复
-            咨询名称：孕儿美摄影工作室-张炬
-            消息回复：您有未读消息哦
-            点击进入咨询页面
-            '''
-            data = ''
-            ## 言简意赅的模板消息提示消息
-            if _type == 'gongzhonghao_template_tishi':
-                _content = json.loads(content)
-                info_type = _content.get('info_type')
-                msg = ''
-                if info_type:
-                    info_type = int(info_type)
-                    if info_type == 1:
-                        msg = _content.get('msg')
-
-                    elif info_type == 4:  # 图片
-                        msg = '您的专属客服发来一张图片,回复【A】查看哦'
-
-
-                _content = '%s' % (msg)
-
-                if position:
-                    consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
-                else:
-                    consult_info = ('%s - %s') % (company_name, user_name)
-
-                data = {
-                    'first': {
-                        'value': ''  # 回复者
-                    },
-                    'keyword1': {
-                        'value': consult_info + '\n',
-                        "color": "#0000EE"
-                    },
-                    'keyword2': {
-                        'value': _content + '\n',
-                        "color": "#FF0000"
-                    },
-                    'remark': {
-                        'value': '如需沟通,可在此公众号进行回复'  # 回复内容
-                    }
-                }
-
-            ## 参加活动后模板消息提示[活动规则]
-            elif _type == 'forward_look_article_tishi':
-                activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
-
-                activity_name = activity_obj.activity_name
-                reach_forward_num = activity_obj.reach_forward_num
-                activity_single_money = activity_obj.activity_single_money
-                start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
-                end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
-                if not position:
-                    position = ''
-                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。 分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
-                    reach_forward_num, activity_single_money, start_time, end_time)
-                data = {
-                    'first': {
-                        'value': ('        您好,我是%s的%s%s,很高兴为您服务, 欢迎您参加【分享文章 赚现金活动】\n' % (
-                            company_name, position, user_name))  # 回复者
-                    },
-                    'keyword1': {
-                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (customer_name, activity_name),
-                        "color": "#0000EE"
-                    },
-                    'keyword2': {
-                        'value': '【回复 T%s】查看红包活动进度、具体人员详情\n' % (activity_id),
-                        "color": "#FF0000"
-
-                    },
-                    'remark': {
-                        'value': remark  # 回复内容
-                    }
-                }
-
-            post_template_data = {
-                'touser': openid,
-                'template_id': template_id,
-                # "miniprogram": {
-                #     "appid": appid,
-                #     "pagepath": path,
-                # },
-                'data': data
-            }
-
-            print('=========== 发送出去的【模板消息】请求数据 =======>>', json.dumps(post_template_data))
-
-            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
-            template_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/template/send'
-
-            s = requests.session()
-            s.keep_alive = False  # 关闭多余连接
-            template_ret = s.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
-            template_ret = template_ret.json()
-
-            print('--------企业用户 send to 公众号 Template 接口返回数据--------->', template_ret)
-
-            if template_ret.get('errmsg') == "ok":
-                print('-----企业用户 send to 公众号 Template 消息 Successful---->>', )
-                response.code = 200
-                response.msg = "企业用户发送模板消息成功"
-
-
-            elif template_ret.get('errcode') == 40001:
-                rc.delete(key_name)
-
-            elif template_ret.get('errcode') == 43004:
-                # {'errcode': 43004, 'errmsg': 'require subscribe hint: [_z5Nwa00958672]'}
-                # {'errcode': 40003, 'errmsg': 'invalid openid hint: [JUmuwa08163951]'}
-                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-
-                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
-
-                _msg = '此客户【未关注】公众号,模板消息未送达'
-                encodestr = base64.b64encode(_msg.encode('utf-8'))
-                msg = str(encodestr, 'utf-8')
-                _content = {
-                    'msg': msg,
-                    'info_type': 1
-                }
-                content = json.dumps(_content)
-
-                models.zgld_chatinfo.objects.create(
-                    content=content,
-                    userprofile_id=user_id,
-                    customer_id=customer_id,
-                    send_type=3,
-                    is_customer_new_msg=False  # 公众号客户不需要获取此提示消息
-                )
-                rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。
-
-
-            else:
-                print('-----企业用户 send to 公众号 Template 消息 Failed---->>', )
-                response.code = 301
-                response.msg = "企业用户发送模板消息失败"
-
 
         # 企业微信-发送公众号的客服聊天消息
-        elif _type == 'gongzhonghao_send_kefu_msg':
+        if _type == 'gongzhonghao_send_kefu_msg':
 
             kefu_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send'
             kefu_msg_get_data = {
@@ -1075,6 +961,226 @@ def user_send_gongzhonghao_template_msg(request):
                 print('-----企业用户 再次发送【公众号_模板消息】 json.dumps(a_data)---->>', json.dumps(a_data))
                 response.code = 301
                 response.msg = "企业用户发送客服消息成功失败"
+
+
+        # 发送公众号模板消息聊天消息 or  公众号客户查看文章后的红包活动提示
+        else:
+
+            # 留言回复通知
+            '''
+            您好，您咨询商家的问题已回复
+            咨询名称：孕儿美摄影工作室-张炬
+            消息回复：您有未读消息哦
+            点击进入咨询页面
+            '''
+            info_type = ''
+            post_template_data = {}
+
+            ## 言简意赅的模板消息提示消息
+            if _type == 'gongzhonghao_template_tishi':
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+                msg = ''
+                if info_type:
+                    info_type = int(info_type)
+                    if info_type == 1:
+                        msg = _content.get('msg')
+
+                    elif info_type == 4:  # 图片
+                        msg = '您的专属客服发来一张图片,回复【A】查看哦'
+
+
+                _content = '%s' % (msg)
+
+                if position:
+                    consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                else:
+                    consult_info = ('%s - %s') % (company_name, user_name)
+
+                data = {
+                    'first': {
+                        'value': ''  # 回复者
+                    },
+                    'keyword1': {
+                        'value': consult_info + '\n',
+                        "color": "#0000EE"
+                    },
+                    'keyword2': {
+                        'value': _content + '\n',
+                        "color": "#FF0000"
+                    },
+                    'remark': {
+                        'value': '如需沟通,可在此公众号进行回复'  # 回复内容
+                    }
+                }
+
+                post_template_data = {
+                    'touser': openid,
+                    'template_id': template_id,
+                    # "miniprogram": {
+                    #     "appid": appid,
+                    #     "pagepath": path,
+                    # },
+                    'data': data
+                }
+
+            ## 参加活动后模板消息提示[活动规则]
+            elif _type == 'forward_look_article_tishi':
+                activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
+
+                activity_name = activity_obj.activity_name
+                reach_forward_num = activity_obj.reach_forward_num
+                activity_single_money = activity_obj.activity_single_money
+                start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
+                end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
+                if not position:
+                    position = ''
+                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。 分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
+                    reach_forward_num, activity_single_money, start_time, end_time)
+                data = {
+                    'first': {
+                        'value': ('        您好,我是%s的%s%s,很高兴为您服务, 欢迎您参加【分享文章 赚现金活动】\n' % (
+                            company_name, position, user_name))  # 回复者
+                    },
+                    'keyword1': {
+                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (customer_name, activity_name),
+                        "color": "#0000EE"
+                    },
+                    'keyword2': {
+                        'value': '【回复 T%s】查看红包活动进度、具体人员详情\n' % (activity_id),
+                        "color": "#FF0000"
+
+                    },
+                    'remark': {
+                        'value': remark  # 回复内容
+                    }
+                }
+
+                post_template_data = {
+                    'touser': openid,
+                    'template_id': template_id,
+                    # "miniprogram": {
+                    #     "appid": appid,
+                    #     "pagepath": path,
+                    # },
+                    'data': data
+                }
+
+            # 发送商城的消息
+            elif _type == 'gongzhonghao_template_shopping_mall':
+
+
+                _content = json.loads(content)
+                info_type = _content.get('info_type')
+
+                if info_type:
+                    info_type = int(info_type)
+                    if info_type == 6:
+                        _content = '点击进入官方商城'
+
+
+                if position:
+                    consult_info = ('%s - %s【%s】') % (company_name, user_name, position)
+                else:
+                    consult_info = ('%s - %s') % (company_name, user_name)
+
+                data = {
+                    'first': {
+                        'value': ''  # 回复者
+                    },
+                    'keyword1': {
+                        'value': consult_info + '\n',
+                        "color": "#0000EE"
+                    },
+                    'keyword2': {
+                        'value': _content + '\n',
+                        "color": "#FF0000"
+                    },
+                    'remark': {
+                        'value': '如需沟通,可在此公众号或小程序内进行回复！玩转名片电商从这里开始 go ~'  # 回复内容
+                    }
+                }
+
+
+                xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+
+                authorization_appid = ''
+                if xiaochengxu_app_objs:
+                    authorization_appid = xiaochengxu_app_objs[0].authorization_appid
+
+                path = 'pages/store/store?uid=%s' % (user_id)
+                post_template_data = {
+                    'touser': openid,
+                    'template_id': template_id,
+                    "miniprogram": {
+                        "appid": authorization_appid,
+                        "pagepath": path,
+                    },
+                    'data': data
+                }
+
+
+            print('=========== 发送出去的【模板消息】请求数据 =======>>', json.dumps(post_template_data))
+
+            # https://developers.weixin.qq.com/miniprogram/dev/api/notice.html  #发送模板消息-参考
+            template_msg_url = 'https://api.weixin.qq.com/cgi-bin/message/template/send'
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            template_ret = s.post(template_msg_url, params=get_template_data, data=json.dumps(post_template_data))
+            template_ret = template_ret.json()
+            errcode = template_ret.get('errcode')
+
+            print('--------企业用户 send to 公众号 Template 接口返回数据--------->', template_ret)
+
+            if template_ret.get('errmsg') == "ok":
+                print('-----企业用户 send to 公众号 Template 消息 Successful---->>', )
+                response.code = 200
+                response.msg = "企业用户发送模板消息成功"
+
+
+            elif errcode == 40001:
+                rc.delete(key_name)
+
+            elif errcode == 43004 or errcode == 40013: #{'errcode': 40013, 'errmsg': 'invalid appid hint: [Vc1zrA00434123]'}
+
+                # {'errcode': 43004, 'errmsg': 'require subscribe hint: [_z5Nwa00958672]'}
+                # {'errcode': 40003, 'errmsg': 'invalid openid hint: [JUmuwa08163951]'}
+                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+
+                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
+                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
+
+                _msg = '此客户【未关注】公众号,模板消息未送达'
+                if info_type == 6 and errcode == 40013:
+                    _msg = '此公众号未绑定小程序,【名片商城】未送达,请联系管理员'
+
+
+                encodestr = base64.b64encode(_msg.encode('utf-8'))
+                msg = str(encodestr, 'utf-8')
+                _content = {
+                    'msg': msg,
+                    'info_type': 1
+                }
+                content = json.dumps(_content)
+
+                models.zgld_chatinfo.objects.create(
+                    content=content,
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    send_type=3,
+                    is_customer_new_msg=False  # 公众号客户不需要获取此提示消息
+                )
+                rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。
+
+
+            else:
+                print('-----企业用户 send to 公众号 Template 消息 Failed---->>', )
+                response.code = 301
+                response.msg = "企业用户发送模板消息失败"
+
+
+
 
 
     else:
@@ -1576,9 +1682,25 @@ def user_focus_send_activity_redPacket(request):
 ## 异步获取公众号用户信息[用三方平台token]
 @csrf_exempt
 def get_customer_gongzhonghao_userinfo(request):
+
     response = Response.ResponseObj()
     authorizer_appid = request.GET.get('authorizer_appid')
     openid = request.GET.get('openid')
+    headimgurl = request.GET.get('headimgurl')
+
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    app_id = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+
 
     objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorizer_appid)
     authorizer_refresh_token = ''
@@ -1590,8 +1712,8 @@ def get_customer_gongzhonghao_userinfo(request):
         'authorizer_appid': authorizer_appid,
         'authorizer_refresh_token': authorizer_refresh_token,
         'key_name': key_name,
-        'app_id': 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-        'app_secret': '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+        'app_id':  app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+        'app_secret': app_secret ,#'0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
     }
 
     authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
@@ -1616,17 +1738,35 @@ def get_customer_gongzhonghao_userinfo(request):
     ret_json = ret.json()
     print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
 
+    customer_objs = models.zgld_customer.objects.filter(openid=openid)
+    customer_id = ''
+    if customer_objs:
+        customer_id = customer_objs[0].id
+
     if 'errcode' not in ret_json:
         openid = ret_json['openid']        # 用户唯一标
         subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
 
-        objs = models.zgld_customer.objects.filter(openid=openid)
-        if objs:
-            customer_id = objs[0].id
-            objs.update(
-                is_subscribe=subscribe
-            )
-            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+        customer_objs.update(
+            is_subscribe=subscribe
+        )
+        print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+
+    #保存头像到本地的数据库
+    if headimgurl:
+        html = s.get(headimgurl)
+
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+        filename = "/gzh_cid_%s_%s.jpg" % (customer_id, now_time)
+        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'headimgurl') + filename
+        with open(file_dir, 'wb') as file:
+            file.write(html.content)
+        print('----- 生成 到本地头像 file_dir ---->>', file_dir)
+        customer_objs.update(
+            headimgurl=file_dir
+        )
+
+
 
     return JsonResponse(response.__dict__)
 

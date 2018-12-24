@@ -58,7 +58,7 @@ urlpatterns = [
 
     url(r'^websocket/(?P<oper_type>\w+)$', websocket.leida_websocket),
 
-    #我的订单管理查询
+    # 我的订单管理查询
     url(r'theOrder$', theOrderManagement.theOrder),
 
 

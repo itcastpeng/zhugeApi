@@ -41,8 +41,11 @@ def jiChuSheZhi(request):
             'xiaochengxucompany': xiaoChengXuCompanyName,
             'zhengshu': obj.zhengshu,
             'mallStatus':mallStatus,
-            'mallStatusID':mallStatusID
+            'mallStatusID':mallStatusID,
+            'classify_position':obj.classify_position,
+            'classify_position_text':obj.get_classify_position_display(),
         })
+
     response.msg = '查询成功'
     response.data = {'otherData':otherData}
     response.code = 200
@@ -59,14 +62,18 @@ def jiChuSheZhiOper(request, oper_type):
     company_id = u_idObjs.company_id
     userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         'xiaochengxuApp__company'
-    ).filter(xiaochengxuApp__company_id=company_id)
+    ).filter(xiaochengxucompany_id=company_id)
+
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     if request.method == "POST":
 
         # 商城基础设置 第一页基础设置
         if oper_type == 'jichushezhi':
+            classify_position = request.POST.get('classify_position')
+
             resultData = {
+                'classify_position': classify_position,
                 'mallStatus' : request.POST.get('mallStatus'),          # 是否打开 商城 1为产品 2为商城
                 'shangChengName' : request.POST.get('shangChengName'),
                 'lunbotu' : request.POST.get('lunbotu'),
@@ -78,11 +85,13 @@ def jiChuSheZhiOper(request, oper_type):
                 if userObjs:
                     # 判断
                     if int(resultData.get('mallStatus')) == 2:
-                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
+                        models.zgld_company.objects.filter(id=company_id).update(shopping_type=2)
                     else:
-                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=1)
+                        models.zgld_company.objects.filter(id=company_id).update(shopping_type=1)
+
                     # 更新基础设置 轮播图和商城名称
                     userObjs.update(
+                        classify_position=classify_position,
                         shangChengName=formObjs.get('shangChengName'),
                         lunbotu=formObjs.get('lunbotu')
                     )
@@ -157,13 +166,13 @@ def jiChuSheZhiOper(request, oper_type):
                         re_openid = customer_obj.openid
 
                     result_data = {
-                        # 'scene_id' : 'PRODUCT_1', #   发放红包使用场景，红包金额大于200或者小于1元时必传
+                        'scene_id' : 'PRODUCT_5', #   发放红包使用场景，红包金额大于200或者小于1元时必传
                         'nonce_str': yuzhifu.generateRandomStamping(),  # 32位随机值a
                         'mch_billno': dingdanhao,  # 订单号
                         'mch_id': shangHuHao,      # 商户号
                         'wxappid': appid,  # 真实数据appid
                         're_openid': re_openid,  # 用户唯一标识
-                        'total_amount': 100,  # 付款金额 1:100 | 发送一分钱
+                        'total_amount': 30,  # 付款金额 1:100 | 发送一分钱
                         'client_ip': '192.168.1.1',  # 终端IP
                         'total_num': 1,  # 红包发放总人数
                         'send_name': '诸葛雷达_测试发红包',  # 商户名称 中文
@@ -202,6 +211,7 @@ def jiChuSheZhiOper(request, oper_type):
                         return_code = collection.getElementsByTagName("return_msg")[0].childNodes[0].data
                         response.code = '%s' % (return_code)
                         response.msg = '微信接口返回错误: {return_msg}'.format(return_msg=return_msg)
+
                         return JsonResponse(response.__dict__)
                 else:
                     response.code = 301

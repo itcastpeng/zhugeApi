@@ -49,7 +49,9 @@ def chat(request):
             objs.update(
                 is_user_new_msg=False
             )
-
+            company_id = ''
+            if objs:
+                company_id = objs[0].userprofile.company_id
 
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -109,6 +111,7 @@ def chat(request):
             response.data = {
                 'ret_data':  ret_data_list,
                 'data_count': count,
+                'company_id' : company_id
             }
 
             if not ret_data_list:
@@ -129,6 +132,8 @@ def chat_oper(request, oper_type, o_id):
             print('----send_msg--->>',request.POST)
             forms_obj = ChatPostForm(request.POST)
             if forms_obj.is_valid():
+                company_id =  request.GET.get('company_id')
+
                 data = request.POST.copy()
                 user_id = int(data.get('user_id'))
                 customer_id = int(data.get('customer_id'))
@@ -161,6 +166,25 @@ def chat_oper(request, oper_type, o_id):
                         _content['msg'] = msg
                         Content = json.dumps(_content)
 
+                    elif info_type == 6:
+                        msg = '官方商城，可点击进入购买'
+                        _content['msg'] = msg
+                        Content = json.dumps(_content)
+                        if not  company_id:
+                            company_id =  flow_up_obj[0].user.company_id
+                        objs = models.zgld_company.objects.filter(id=company_id)
+                        if objs:
+                            shopping_type =  objs[0].shopping_type
+                            print('---- 购物类型 ---->>',shopping_type)
+
+                            if shopping_type == 1: # 开启产品
+                                response.code = 303
+                                response.msg = '此小程序没有开启商城'
+
+                                return JsonResponse(response.__dict__)
+
+
+
                 '''
                 content 里的字段可以自定义增加, 本着对后端的尊重请和我商量下。
                 
@@ -190,8 +214,14 @@ def chat_oper(request, oper_type, o_id):
                      'info_type' : 5  ,   # 4代表发送的 视频
                      'url': 'statics/zhugeleida/imgs/chat/YYYY.mp4'
                      ......
-                }                
-                         
+                } 
+                
+                content = {
+                     'info_type' : 6  ,   # 4代表发送的商城
+                     'msg': '请点击进去购买'
+                     ......
+                }  
+        
                 '''
 
 
@@ -203,12 +233,20 @@ def chat_oper(request, oper_type, o_id):
                         send_type=1
                 )
 
-                user_type = obj.customer.user_type
+                user_type = obj.customer.user_type # 客户类型
 
                 if customer_id and user_id and user_type == 2:
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
                     tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
+
+                elif  user_type == 1 and info_type ==  6 and customer_id and user_id: # 发送商城 的模板消息,可以点击进去
+                    print('--- 【公众号发送（商城）模板消息】 user_send_gongzhonghao_template_msg --->')
+                    data['customer_id'] = customer_id
+                    data['user_id'] = user_id
+                    data['type'] = 'gongzhonghao_template_shopping_mall'
+                    data['content'] = Content
+                    tasks.user_send_gongzhonghao_template_msg.delay(data)  # 发送【公众号发送模板消息】
 
                 elif  user_type == 1 and customer_id and user_id:
                     print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg --->')

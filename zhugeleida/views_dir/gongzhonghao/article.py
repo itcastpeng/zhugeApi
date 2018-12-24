@@ -302,7 +302,6 @@ def article_oper(request, oper_type, o_id):
                     else:
                         mingpian_avatar =  zgld_userprofile_obj.avatar
 
-
                     insert_ads['username'] = zgld_userprofile_obj.username
                     insert_ads['avatar'] = mingpian_avatar
                     insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
@@ -396,10 +395,14 @@ def article_oper(request, oper_type, o_id):
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
+                    now_date_time = datetime.datetime.now()
                     customer_objs = models.zgld_customer.objects.filter(id=customer_id, user_type=1)
                     zgld_article_objs.update(status=1)  # 改为已发状态
                     zgld_article_objs.update(read_count=F('read_count') + 1)  # 文章阅读数量+1，针对所有的雷达用户来说
-                    models.zgld_article_to_customer_belonger.objects.filter(q).update(read_count=F('read_count') + 1)
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(
+                        read_count=F('read_count') + 1,
+                        last_access_date=now_date_time
+                    )
 
                     is_subscribe = ''
                     is_subscribe_text = ''

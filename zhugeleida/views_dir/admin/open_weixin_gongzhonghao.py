@@ -209,17 +209,18 @@ def open_weixin_gongzhonghao(request, oper_type):
                                 service_category=categories,  # 服务类目
                             )
 
-                            s = requests.session()
-                            s.keep_alive = False  # 关闭多余连接
-                            html = s.get(qrcode_url)
 
-                            # html = requests.get(qrcode_url)
+
+                            html = s.get(qrcode_url)
 
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                             filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
                             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
                             with open(file_dir, 'wb') as file:
                                 file.write(html.content)
+                            print('----- 生成 本地二维码 file_dir ---->>',file_dir)
+                            objs.update(qrcode_url=file_dir)  # 二维码
+
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
@@ -892,7 +893,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                             elif Content.startswith('A') or Content.startswith('a'):
 
-                                objs =  models.zgld_chatinfo.objects.filter(customer_id=854,send_type=4).order_by('-create_date')
+                                objs =  models.zgld_chatinfo.objects.filter(customer_id=customer_id,send_type=4).order_by('-create_date')
                                 media_id = ''
                                 if objs:
                                     obj = objs[0]
@@ -1252,18 +1253,20 @@ def gzh_auth_process_oper(request, oper_type):
         ## 公众号绑定微信
         elif oper_type == 'gzh_authorization_binding_xcx':
             user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
-            appid = request.GET.get('appid')             #小程序appid
+
+            company_id = request.POST.get('company_id')
+            appid = request.POST.get('appid')             #小程序appid
 
             gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
             xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=appid)
+            print('------ POST ---->>',request.POST)
 
             if gongzhonghao_app_objs:
 
                 if xiaochengxu_app_objs:
                     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                     gongzhonghao_app_obj = gongzhonghao_app_objs[0]
-                    xiaochengxu_app_obj = xiaochengxu_app_objs[0]
+
                     authorizer_appid = gongzhonghao_app_obj.authorization_appid
                     authorizer_refresh_token = gongzhonghao_app_obj.authorizer_refresh_token
 
@@ -1312,23 +1315,33 @@ def gzh_auth_process_oper(request, oper_type):
 
                     authorizer_info_ret = authorizer_info_ret.json()
                     print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
+                    # {"errcode": 89015, "errmsg": "has linked wxa hint: [Bhrtpa00391975]"}
 
                     errmsg = authorizer_info_ret.get('errmsg')
+                    errcode = authorizer_info_ret.get('errcode')
 
-                    if errmsg == 'ok':
-                        introduce_list = xiaochengxu_app_obj.introduce
+                    if errmsg == 'ok' or errcode == 89015:
+                        introduce_list = gongzhonghao_app_obj.introduce
                         introduce_list =  json.loads(introduce_list)
                         introduce_list.append(appid)
 
-                        xiaochengxu_app_objs.update(
+                        gongzhonghao_app_objs.update(
                             introduce=json.dumps(introduce_list),  # 服务类目
                         )
                         print('--------- 公众号 【成功】关联小程序---------->>')
+
+                        msg = "成功关联"
+                        if errcode == 89015:
+                            msg = '公众号已经绑定过小程序'
+
                         response.code = 200
-                        response.msg = "成功关联公众号"
+                        response.msg = msg
 
                     else:
-                        print('--------- 公众号 【失败】关联小程序---------->>')
+
+                        print('--------- 公众号 【失败】关联小程序---------->>',company_id,"|",errmsg)
+                        response.code = errcode
+                        response.msg = errmsg
 
 
                 else:
@@ -1342,8 +1355,8 @@ def gzh_auth_process_oper(request, oper_type):
         ## 解除已关联的小程序
         elif oper_type == 'gzh_authorization_unlock_xcx':
             user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
-            appid = request.GET.get('appid')  # 小程序appid
+            company_id = request.POST.get('company_id')
+            appid = request.POST.get('appid')  # 小程序appid
 
             gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
             xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=appid)
@@ -1403,32 +1416,36 @@ def gzh_auth_process_oper(request, oper_type):
                     print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
 
                     errmsg = authorizer_info_ret.get('errmsg')
+                    errcode = authorizer_info_ret.get('errcode')
 
                     if errmsg == 'ok':
-                        introduce_list = xiaochengxu_app_obj.introduce
+                        introduce_list = gongzhonghao_app_obj.introduce
                         introduce_list = json.loads(introduce_list)
                         introduce_list.remove(appid)
 
-                        xiaochengxu_app_objs.update(
+                        gongzhonghao_app_objs.update(
                             introduce=json.dumps(introduce_list),  # 服务类目
                         )
-                        print('--------- 公众号 【成功】关联小程序---------->>')
+                        print('--------- 公众号 【解绑】关联小程序---------->>')
                         response.code = 200
-                        response.msg = "成功关联公众号"
+                        response.msg = "成功解绑关联小程序"
 
                     else:
-                        print('--------- 公众号 【失败】关联小程序---------->>')
+                        response.code = errcode
+                        response.msg = '解绑失败'
+                        print('--------- 公众号 【失败】解绑小程序---------->>',company_id,errcode)
 
                 else:
                     response.msg = '小程序不存在'
                     response.code = 302
+
             else:
                 response.msg = '公众号不存在'
                 response.code = 302
 
 
 
-    else :
+    elif request.method == "GET":
 
         #获取公众号基本信息
         if oper_type == 'gzh_get_authorizer_info':
@@ -1517,11 +1534,54 @@ def gzh_auth_process_oper(request, oper_type):
                 response.code = 302
 
 
+        elif oper_type == 'query_already_bind_xcx':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+
+            gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
 
-        else:
-            response.code = 402
-            response.msg = '请求异常'
+            if gongzhonghao_app_objs:
+
+                gongzhonghao_app_obj =gongzhonghao_app_objs[0]
+                introduce_list = gongzhonghao_app_obj.introduce
+                introduce_list =  json.loads(introduce_list)
+
+                objs =   models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+
+                ret_data = []
+                status = '未授权'
+                for obj in objs:
+                    authorization_appid = obj.authorization_appid
+                    print('--- authorization_appid ---->>',authorization_appid,introduce_list)
+                    if authorization_appid in introduce_list:
+                        status =  '已授权'
+
+                    dict = {
+                        'id' : obj.id,
+                        'name' : obj.name,
+                        'appid' : obj.authorization_appid,
+                        'principal_name' : obj.principal_name,
+                        'status' : status
+                    }
+                    ret_data.append(dict)
+
+                response.data = {
+                    'ret_data' : ret_data
+                }
+                response.code = 200
+                response.msg = "获取成功"
+
+
+
+            else:
+                response.msg = '公众号不存在'
+                response.code = 302
+
+    else:
+
+        response.code = 402
+        response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
 
