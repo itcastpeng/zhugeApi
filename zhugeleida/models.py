@@ -1130,6 +1130,7 @@ class zgld_goods_management(models.Model):
     salesNum = models.IntegerField(verbose_name='销量', default=0)
     # inventoryNum = models.IntegerField(verbose_name='库存', default=0)
     commissionFee = models.IntegerField(verbose_name='佣金提成', default=0)
+    recommend_index = models.SmallIntegerField(verbose_name='产品排序优先级', default=0)  # 从0 - 10 ,0 代表不推荐。
     status_choices = (
         (1, '已上架'),
         (2, '未上架'),

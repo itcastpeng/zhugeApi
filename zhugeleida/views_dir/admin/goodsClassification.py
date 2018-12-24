@@ -79,8 +79,8 @@ def goodsClass(request):
                 'objsCount':objsCount
             }
         else:
-            response.msg = '请完善商城配置信息'
-            response.code = 301
+            response.msg = '无分类信息'
+            response.code = 302
     else:
         response.code = 402
         response.msg = '请求异常'

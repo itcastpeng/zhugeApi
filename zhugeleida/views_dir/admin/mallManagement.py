@@ -15,6 +15,8 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
+            company_id = request.GET.get('company_id')
+            order = request.GET.get('order','-recommend_index')
 
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
@@ -25,11 +27,12 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
 
-            if flag == 'admin':
-                u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
-            else:
+            if flag != 'admin':
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
-            objs = models.zgld_goods_management.objects.filter(q).filter(parentName__mallSetting__xiaochengxucompany_id=u_idObjs.company_id,goodsStatus__in=[1,2,3])
+                company_id  = u_idObjs.company_id
+
+            objs = models.zgld_goods_management.objects.filter(q).filter(company_id=company_id,goodsStatus__in=[1,2,3]).order_by(order)
+
             objsCount = objs.count()
             otherData = []
             if length != 0:
@@ -51,9 +54,11 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 topLunBoTu = ''
                 if obj.topLunBoTu:
                     topLunBoTu = json.loads(obj.topLunBoTu)
+
                 detailePicture = ''
                 if obj.detailePicture:
                     detailePicture = json.loads(obj.detailePicture)
+
                 shelvesCreateDate = ''
                 if obj.shelvesCreateDate:
                     shelvesCreateDate = obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S')

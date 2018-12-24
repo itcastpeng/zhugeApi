@@ -167,7 +167,7 @@ def chat_oper(request, oper_type, o_id):
                         Content = json.dumps(_content)
 
                     elif info_type == 6:
-                        msg = '官方商城，可点击进去购买'
+                        msg = '官方商城，可点击进入购买'
                         _content['msg'] = msg
                         Content = json.dumps(_content)
                         if not  company_id:
@@ -176,14 +176,12 @@ def chat_oper(request, oper_type, o_id):
                         if objs:
                             shopping_type =  objs[0].shopping_type
                             print('---- 购物类型 ---->>',shopping_type)
-                            
+
                             if shopping_type == 1: # 开启产品
                                 response.code = 303
                                 response.msg = '此小程序没有开启商城'
 
                                 return JsonResponse(response.__dict__)
-
-
 
 
 
