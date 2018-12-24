@@ -29,7 +29,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 q.add(Q(goodsStatus=status), Q.AND)
             if id:
                 q.add(Q(id=id), Q.AND)
-                
+
             if flag != 'admin':
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
                 company_id  = u_idObjs.company_id
@@ -80,16 +80,19 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                     'topLunBoTu': topLunBoTu,  # 顶部轮播图
                     # 'detailePicture' : detailePicture,  # 详情图片
                     'content' : content,  # 详情图片
+                    'recommend_index' : obj.recommend_index,  # 详情图片
                     'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                     'shelvesCreateDate':shelvesCreateDate,
                     'DetailsDescription': obj.DetailsDescription # 描述详情
                 })
+
             response.code = 200
             response.msg = '查询成功'
             response.data = {
                 'otherData':otherData,
                 'objsCount':objsCount
             }
+
     return response
 
 # 查询该商品 所有父级分组
@@ -101,6 +104,7 @@ def updateInitData(result_data,xiaochengxu_id, pid=None):   # 更新查询 分�
     for obj in objs:
         parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id)
         result_data.append(obj.id)
+
     return result_data
 
 
