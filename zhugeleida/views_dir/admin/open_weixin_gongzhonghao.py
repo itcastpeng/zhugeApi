@@ -1431,7 +1431,7 @@ def gzh_auth_process_oper(request, oper_type):
 
 
 
-    else :
+    elif request.method == "GET":
 
         #获取公众号基本信息
         if oper_type == 'gzh_get_authorizer_info':
@@ -1523,6 +1523,7 @@ def gzh_auth_process_oper(request, oper_type):
         elif oper_type == 'query_already_bind_xcx':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
+
             gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
 
@@ -1550,7 +1551,9 @@ def gzh_auth_process_oper(request, oper_type):
                     }
                     ret_data.append(dict)
 
-                response.data = ret_data
+                response.data = {
+                    'ret_data' : ret_data
+                }
                 response.code = 200
                 response.msg = "获取成功"
 
@@ -1560,12 +1563,10 @@ def gzh_auth_process_oper(request, oper_type):
                 response.msg = '公众号不存在'
                 response.code = 302
 
+    else:
 
-
-
-        else:
-            response.code = 402
-            response.msg = '请求异常'
+        response.code = 402
+        response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
 
