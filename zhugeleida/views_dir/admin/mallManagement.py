@@ -193,6 +193,7 @@ def mallManagementOper(request, oper_type, o_id):
                     objs.update(shelvesCreateDate = nowDate)
                 print("formObjs.get('DetailsDescription')============> ",formObjs.get('DetailsDescription'))
                 objs.update(
+
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),

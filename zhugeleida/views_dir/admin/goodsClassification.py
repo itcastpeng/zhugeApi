@@ -10,11 +10,11 @@ from django.db.models import Q
 
 
 # 商品分级 查询
-def init_data(xiaochengxu_id, pid=None, level=1):
+def init_data(company_id, pid=None, level=1):
     result_data = []
     print('level------> ',level)
     objs = models.zgld_goods_classification_management.objects.filter(
-        mallSetting_id=xiaochengxu_id,
+        company_id=company_id,
         # userProfile_id=user_id,
         parentClassification_id=pid,
         level=level
@@ -25,10 +25,12 @@ def init_data(xiaochengxu_id, pid=None, level=1):
             'value': obj.id,
         }
         # print('obj.id---------> ',obj.id)
-        children_data = init_data(xiaochengxu_id, pid=obj.id, level=2)
+        children_data = init_data(company_id, pid=obj.id, level=2)
         if children_data:
             current_data['children'] = children_data
+
         result_data.append(current_data)
+
     return result_data
 
 # 商城商品查询
@@ -48,7 +50,7 @@ def goodsClass(request):
         # if Objs:
 
         # jichushezhi_id = Objs[0].id
-        # parentData = init_data(jichushezhi_id)
+        parentData = init_data(company_id)
         groupObjs = models.zgld_goods_classification_management.objects
 
         q = Q()
@@ -76,7 +78,7 @@ def goodsClass(request):
         response.code = 200
         response.msg = '查询成功'
         response.data = {
-            # 'parentData':parentData,
+            'parentData':parentData,
             'otherData':otherData,
             'objsCount':objsCount
         }
