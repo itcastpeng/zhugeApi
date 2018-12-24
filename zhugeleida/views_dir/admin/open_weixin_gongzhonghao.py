@@ -1416,6 +1416,7 @@ def gzh_auth_process_oper(request, oper_type):
                     print('---------- 公众号 关联小程序 接口返回 ----------------->', json.dumps(authorizer_info_ret))
 
                     errmsg = authorizer_info_ret.get('errmsg')
+                    errcode = authorizer_info_ret.get('errcode')
 
                     if errmsg == 'ok':
                         introduce_list = gongzhonghao_app_obj.introduce
@@ -1425,12 +1426,14 @@ def gzh_auth_process_oper(request, oper_type):
                         gongzhonghao_app_objs.update(
                             introduce=json.dumps(introduce_list),  # 服务类目
                         )
-                        print('--------- 公众号 【成功】关联小程序---------->>')
+                        print('--------- 公众号 【解绑】关联小程序---------->>')
                         response.code = 200
-                        response.msg = "成功关联公众号"
+                        response.msg = "成功解绑关联小程序"
 
                     else:
-                        print('--------- 公众号 【失败】关联小程序---------->>')
+                        response.code = errcode
+                        response.msg = '解绑失败'
+                        print('--------- 公众号 【失败】解绑小程序---------->>',company_id,errcode)
 
                 else:
                     response.msg = '小程序不存在'
