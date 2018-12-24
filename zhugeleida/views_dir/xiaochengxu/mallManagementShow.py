@@ -18,7 +18,8 @@ def mallManage(request):
     detaileId = request.GET.get('detaileId')    # 查询详情
     u_idObjs = models.zgld_userprofile.objects.get(id=uid)
     company_id = u_idObjs.company_id
-    xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp__company_id=company_id)
+
+    xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
     indexLunBoTu = ''
     xiaoChengXuId = ''
     if xiaoChengXuObjs:
@@ -33,7 +34,7 @@ def mallManage(request):
 
         if detaileId:
             print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
-            objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).filter(id=detaileId,goodsStatus__in=[1,3])
+            objs = models.zgld_goods_management.objects.filter(company_id=company_id).filter(id=detaileId,goodsStatus__in=[1,3])
             count = objs.count()
             if objs:
 
@@ -48,6 +49,7 @@ def mallManage(request):
                     xianshangjiaoyi = '否'
                     if obj.xianshangjiaoyi:
                         xianshangjiaoyi = '是'
+
                     topLunBoTu = ''
                     if obj.topLunBoTu:
                         topLunBoTu = json.loads(obj.topLunBoTu)
@@ -87,7 +89,7 @@ def mallManage(request):
                 response.msg = '无数据'
 
         else:
-            objs = models.zgld_goods_management.objects.filter(parentName__mallSetting_id=xiaoChengXuId).exclude(goodsStatus=2)
+            objs = models.zgld_goods_management.objects.filter(company_id=company_id).exclude(goodsStatus__in=[2,4])
             count = objs.count()
 
             if objs:
