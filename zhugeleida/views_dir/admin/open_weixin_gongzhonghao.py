@@ -1254,8 +1254,8 @@ def gzh_auth_process_oper(request, oper_type):
         elif oper_type == 'gzh_authorization_binding_xcx':
             user_id = request.GET.get('user_id')
 
-            company_id = request.GET.get('company_id')
-            appid = request.GET.get('appid')             #小程序appid
+            company_id = request.POST.get('company_id')
+            appid = request.POST.get('appid')             #小程序appid
 
             gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
             xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=appid)
