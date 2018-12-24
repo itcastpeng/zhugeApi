@@ -1107,6 +1107,13 @@ class zgld_shangcheng_jichushezhi(models.Model):
     # userProfile = models.ForeignKey(to='zgld_customer', verbose_name='用户名称', null=True, blank=True)
     shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
     shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
+
+    status_choices = (
+        (1, '横向展示分类'),
+        (2, '纵向展示分类')
+    )
+    classify_position = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
+
     lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
     yongjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
     xiaochengxuApp = models.ForeignKey(to='zgld_xiaochengxu_app', verbose_name='小程序APP', null=True, blank=True)

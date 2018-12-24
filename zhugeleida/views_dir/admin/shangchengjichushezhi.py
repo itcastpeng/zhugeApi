@@ -59,7 +59,8 @@ def jiChuSheZhiOper(request, oper_type):
     company_id = u_idObjs.company_id
     userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         'xiaochengxuApp__company'
-    ).filter(xiaochengxuApp__company_id=company_id)
+    ).filter(xiaochengxucompany_id=company_id)
+
     base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     if request.method == "POST":
@@ -78,11 +79,13 @@ def jiChuSheZhiOper(request, oper_type):
                 if userObjs:
                     # 判断
                     if int(resultData.get('mallStatus')) == 2:
-                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=2)
+                        models.zgld_company.objects.filter(id=company_id).update(shopping_type=2)
                     else:
-                        models.zgld_company.objects.filter(id=u_idObjs.company_id).update(shopping_type=1)
+                        models.zgld_company.objects.filter(id=company_id).update(shopping_type=1)
+
                     # 更新基础设置 轮播图和商城名称
                     userObjs.update(
+
                         shangChengName=formObjs.get('shangChengName'),
                         lunbotu=formObjs.get('lunbotu')
                     )
