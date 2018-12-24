@@ -39,9 +39,11 @@ def init_data(company_id, pid=None, level=1):
 def goodsClass(request):
     response = Response.ResponseObj()
     if request.method == "GET":
+        uid = request.GET.get('uid')
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
-        company_id = request.GET.get('company_id')   #
+        u_idObjs = models.zgld_userprofile.objects.get(id=uid)
+        company_id = u_idObjs.company_id
 
         # Objs = models.zgld_shangcheng_jichushezhi.objects.select_related(
         #     'xiaochengxuApp__company'
