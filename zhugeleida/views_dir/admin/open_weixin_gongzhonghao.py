@@ -1259,6 +1259,7 @@ def gzh_auth_process_oper(request, oper_type):
 
             gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
             xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=appid)
+            print('------ POST ---->>',request.POST)
 
             if gongzhonghao_app_objs:
 
