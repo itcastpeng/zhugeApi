@@ -77,6 +77,7 @@ def mallManage(request):
                             'xianshangjiaoyi':xianshangjiaoyi,
                             'shichangjiage':obj.shichangjiage,
                             'topLunBoTu': topLunBoTu,                       # 顶部轮播图
+                            'content': obj.content,
                             'detailePicture' : detailePicture,              # 详情图片
                             'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                             'shelvesCreateDate':obj.shelvesCreateDate.strftime('%Y-%m-%d %H:%M:%S'),
@@ -113,6 +114,7 @@ def mallManage(request):
                             'goodsName': obj.goodsName,
                             'goodsPrice': obj.goodsPrice,
                             'topLunBoTu': topLunBoTu,
+                            'content': obj.content,
                             'shichangjiage': obj.shichangjiage,
                         })
 
