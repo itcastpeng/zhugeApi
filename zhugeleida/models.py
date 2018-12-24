@@ -1108,11 +1108,11 @@ class zgld_shangcheng_jichushezhi(models.Model):
     shangHuHao = models.CharField(verbose_name='商户号', max_length=128, null=True, blank=True)
     shangHuMiYao = models.CharField(verbose_name='商户秘钥', max_length=128, null=True, blank=True)
 
-    status_choices = (
+    position_choices = (
         (1, '横向展示分类'),
         (2, '纵向展示分类')
     )
-    classify_position = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
+    classify_position = models.SmallIntegerField(verbose_name='商品分类展示位置', choices=position_choices, default=1)
 
     lunbotu = models.TextField(verbose_name='轮播图', null=True, blank=True)
     yongjin = models.CharField(verbose_name='佣金', max_length=64, null=True, blank=True)
