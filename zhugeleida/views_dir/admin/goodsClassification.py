@@ -41,17 +41,20 @@ def goodsClass(request):
         singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
         user_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
         print('user_idObjs------->',user_idObjs.company_id)
-        userObjs = models.zgld_shangcheng_jichushezhi.objects.select_related(
+        company_id = user_idObjs.company_id
+        Objs = models.zgld_shangcheng_jichushezhi.objects.select_related(
             'xiaochengxuApp__company'
-        ).filter(xiaochengxuApp__company_id=user_idObjs.company_id)
-        if userObjs:
-            jichushezhi_id = userObjs[0].id
+        ).filter(xiaochengxucompany_id=company_id)
+
+        if Objs:
+            jichushezhi_id = Objs[0].id
             groupObjs = models.zgld_goods_classification_management.objects
             parentData = init_data(jichushezhi_id)
             q = Q()
             if singleUser:
                 q.add(Q(parentClassification_id=singleUser), Q.AND)
             objs = groupObjs.filter(mallSetting_id=jichushezhi_id).filter(q)
+
             objsCount = objs.count()
             otherData = []
             for obj in objs:

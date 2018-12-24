@@ -1123,6 +1123,7 @@ class zgld_goods_classification_management(models.Model):
 
 # 小程序 - 商品管理
 class zgld_goods_management(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     goodsName = models.CharField(verbose_name='商品名称', max_length=128)
     parentName = models.ForeignKey(to='zgld_goods_classification_management', verbose_name='归属分类', null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价',max_length=64, default=0)

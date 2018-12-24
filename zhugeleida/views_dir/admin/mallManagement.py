@@ -133,11 +133,14 @@ def mallManagementOper(request, oper_type, o_id):
         # 添加商品
         if oper_type == 'add':
             forms_obj = AddForm(resultData)
+            company_id = request.GET.get('company_id')
+
             if forms_obj.is_valid():
                 formObjs = forms_obj.cleaned_data
                 print('验证通过')
                 print('nowDate-------------> ',nowDate)
                 objs = models.zgld_goods_management.objects.create(
+                    company_id = company_id,
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
@@ -156,7 +159,7 @@ def mallManagementOper(request, oper_type, o_id):
                     )
                 response.code = 200
                 response.msg = '添加成功'
-                response.data = {}
+
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
@@ -233,6 +236,8 @@ def mallManagementOper(request, oper_type, o_id):
         else:
             response.code = 402
             response.msg = "请求异常"
+
+
     return JsonResponse(response.__dict__)
 
 

@@ -634,7 +634,8 @@ def article_oper(request, oper_type, o_id):
                             'forward_count': obj.forward_count,  # 转发次数
                             'stay_time': stay_time,  # 停留时间
                             'level': obj.level,  # 所在层级
-                            'pid': obj.customer_parent_id
+                            'pid': obj.customer_parent_id,
+                            'last_access_date': obj.last_access_date or ''
                         }
 
                         # level_ret_data.append(data_dict)
