@@ -172,7 +172,7 @@ def jiChuSheZhiOper(request, oper_type):
                         'mch_id': shangHuHao,      # 商户号
                         'wxappid': appid,  # 真实数据appid
                         're_openid': re_openid,  # 用户唯一标识
-                        'total_amount': 1,  # 付款金额 1:100 | 发送一分钱
+                        'total_amount': 30,  # 付款金额 1:100 | 发送一分钱
                         'client_ip': '192.168.1.1',  # 终端IP
                         'total_num': 1,  # 红包发放总人数
                         'send_name': '诸葛雷达_测试发红包',  # 商户名称 中文
