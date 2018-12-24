@@ -1320,7 +1320,7 @@ def gzh_auth_process_oper(request, oper_type):
                     errmsg = authorizer_info_ret.get('errmsg')
                     errcode = authorizer_info_ret.get('errcode')
 
-                    if errmsg == 'ok':
+                    if errmsg == 'ok' or errcode == 89015:
                         introduce_list = gongzhonghao_app_obj.introduce
                         introduce_list =  json.loads(introduce_list)
                         introduce_list.append(appid)
@@ -1329,14 +1329,17 @@ def gzh_auth_process_oper(request, oper_type):
                             introduce=json.dumps(introduce_list),  # 服务类目
                         )
                         print('--------- 公众号 【成功】关联小程序---------->>')
+
+                        msg = "成功关联"
+                        if errcode == 89015:
+                            msg = '公众号已经绑定过小程序'
+
                         response.code = 200
-                        response.msg = "成功关联公众号"
+                        response.msg = msg
 
                     else:
-                        if errcode == 89015:
-                            errmsg = '公众号已经绑定小程序'
 
-                        print('--------- 公众号 【失败】关联小程序---------->>')
+                        print('--------- 公众号 【失败】关联小程序---------->>',company_id,"|",errmsg)
                         response.code = errcode
                         response.msg = errmsg
 
