@@ -1325,7 +1325,7 @@ def gzh_auth_process_oper(request, oper_type):
                         introduce_list =  json.loads(introduce_list)
                         introduce_list.append(appid)
 
-                        xiaochengxu_app_objs.update(
+                        gongzhonghao_app_objs.update(
                             introduce=json.dumps(introduce_list),  # 服务类目
                         )
                         print('--------- 公众号 【成功】关联小程序---------->>')
@@ -1422,7 +1422,7 @@ def gzh_auth_process_oper(request, oper_type):
                         introduce_list = json.loads(introduce_list)
                         introduce_list.remove(appid)
 
-                        xiaochengxu_app_objs.update(
+                        gongzhonghao_app_objs.update(
                             introduce=json.dumps(introduce_list),  # 服务类目
                         )
                         print('--------- 公众号 【成功】关联小程序---------->>')
@@ -1550,6 +1550,7 @@ def gzh_auth_process_oper(request, oper_type):
                 status = '未授权'
                 for obj in objs:
                     authorization_appid = obj.authorization_appid
+                    print('--- authorization_appid ---->>',authorization_appid,introduce_list)
                     if authorization_appid in introduce_list:
                         status =  '已授权'
 
