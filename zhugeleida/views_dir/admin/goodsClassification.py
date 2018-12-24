@@ -39,9 +39,8 @@ def goodsClass(request):
     if request.method == "GET":
         user_id = request.GET.get('user_id')
         singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
-        user_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)
-        print('user_idObjs------->',user_idObjs.company_id)
-        company_id = user_idObjs.company_id
+        company_id = request.GET.get('company_id')   #
+
         Objs = models.zgld_shangcheng_jichushezhi.objects.select_related(
             'xiaochengxuApp__company'
         ).filter(xiaochengxucompany_id=company_id)

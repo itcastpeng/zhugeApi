@@ -170,10 +170,13 @@ def chat_oper(request, oper_type, o_id):
                         msg = '官方商城，可点击进去购买'
                         _content['msg'] = msg
                         Content = json.dumps(_content)
-
+                        if not  company_id:
+                            company_id =  flow_up_obj[0].user.company_id
                         objs = models.zgld_company.objects.filter(id=company_id)
                         if objs:
                             shopping_type =  objs[0].shopping_type
+                            print('---- 购物类型 ---->>',shopping_type)
+                            
                             if shopping_type == 1: # 开启产品
                                 response.code = 303
                                 response.msg = '此小程序没有开启商城'
