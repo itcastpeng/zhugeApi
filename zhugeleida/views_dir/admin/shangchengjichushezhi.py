@@ -43,6 +43,7 @@ def jiChuSheZhi(request):
             'mallStatus':mallStatus,
             'mallStatusID':mallStatusID
         })
+
     response.msg = '查询成功'
     response.data = {'otherData':otherData}
     response.code = 200
@@ -67,7 +68,10 @@ def jiChuSheZhiOper(request, oper_type):
 
         # 商城基础设置 第一页基础设置
         if oper_type == 'jichushezhi':
+            classify_position = request.POST.get('classify_position')
+
             resultData = {
+                'classify_position': classify_position,
                 'mallStatus' : request.POST.get('mallStatus'),          # 是否打开 商城 1为产品 2为商城
                 'shangChengName' : request.POST.get('shangChengName'),
                 'lunbotu' : request.POST.get('lunbotu'),
@@ -85,7 +89,7 @@ def jiChuSheZhiOper(request, oper_type):
 
                     # 更新基础设置 轮播图和商城名称
                     userObjs.update(
-
+                        classify_position=classify_position,
                         shangChengName=formObjs.get('shangChengName'),
                         lunbotu=formObjs.get('lunbotu')
                     )
