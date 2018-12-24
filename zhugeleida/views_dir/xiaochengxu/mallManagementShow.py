@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.theOrder_verify import GoodsManagementSelectForm
 import json, base64
 # from zhugeleida.views_dir.admin import mallManagement
-
+from django.db.models import Q
 
 @csrf_exempt
 # @account.is_token(models.zgld_customer)
@@ -20,6 +20,7 @@ def mallManage(request):
         # response = mallManagement.mallManagement(request, uid, goodsGroup, status, flag)
 
         uid = request.GET.get('uid')
+        parentName_id = request.GET.get('parentName_id')
         detaileId = request.GET.get('detaileId')    # 查询详情
         u_idObjs = models.zgld_userprofile.objects.get(id=uid)
         company_id = u_idObjs.company_id
@@ -30,6 +31,7 @@ def mallManage(request):
         if xiaoChengXuObjs:
             indexLunBoTu = xiaoChengXuObjs[0].lunbotu  # 查询首页 轮播图
             xiaoChengXuId = xiaoChengXuObjs[0].id
+
         otherData = []
 
         forms_obj = GoodsManagementSelectForm(request.GET)
@@ -39,6 +41,7 @@ def mallManage(request):
 
             if detaileId:
                 print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
+
                 objs = models.zgld_goods_management.objects.filter(company_id=company_id).filter(id=detaileId,goodsStatus__in=[1,3])
                 count = objs.count()
                 if objs:
@@ -100,7 +103,14 @@ def mallManage(request):
                     response.msg = '无数据'
 
             else:
-                objs = models.zgld_goods_management.objects.filter(company_id=company_id).exclude(goodsStatus__in=[2,4])
+
+                q1 = Q()
+                q1.add(Q(**{'company_id': company_id}), Q.AND)
+
+                if parentName_id:
+                    q1.add(Q(**{'parentName_id': parentName_id}), Q.AND)
+
+                objs = models.zgld_goods_management.objects.filter(q1).exclude(goodsStatus__in=[2,4]).order_by('-recommend_index')
                 count = objs.count()
 
                 if objs:
@@ -114,6 +124,7 @@ def mallManage(request):
                         topLunBoTu = ''
                         if obj.topLunBoTu:
                             topLunBoTu = json.loads(obj.topLunBoTu)
+
                         otherData.append({
                             'id':obj.id,
                             'goodsName': obj.goodsName,

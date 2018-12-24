@@ -53,7 +53,7 @@ def goodsClass(request):
         parentData = init_data(company_id)
         # groupObjs = models.zgld_goods_classification_management.objects
 
-        _objs  =  models.zgld_shangcheng_jichushezhi.objects.get(xiaochengxucompany_id=company_id)
+        _objs  =  models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
         if _objs:
             classify_position = _objs[0].classify_position
 
