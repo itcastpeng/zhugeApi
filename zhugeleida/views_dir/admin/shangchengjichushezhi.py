@@ -41,7 +41,9 @@ def jiChuSheZhi(request):
             'xiaochengxucompany': xiaoChengXuCompanyName,
             'zhengshu': obj.zhengshu,
             'mallStatus':mallStatus,
-            'mallStatusID':mallStatusID
+            'mallStatusID':mallStatusID,
+            'classify_position':obj.classify_position,
+            'classify_position_text':obj.get_classify_position_display(),
         })
 
     response.msg = '查询成功'
