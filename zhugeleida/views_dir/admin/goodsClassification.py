@@ -41,56 +41,59 @@ def goodsClass(request):
         singleUser = request.GET.get('singleUser')   # 单独查询父级 参数
         company_id = request.GET.get('company_id')   #
 
-        Objs = models.zgld_shangcheng_jichushezhi.objects.select_related(
-            'xiaochengxuApp__company'
-        ).filter(xiaochengxucompany_id=company_id)
+        # Objs = models.zgld_shangcheng_jichushezhi.objects.select_related(
+        #     'xiaochengxuApp__company'
+        # ).filter(xiaochengxucompany_id=company_id)
+        #
+        # if Objs:
 
-        if Objs:
-            jichushezhi_id = Objs[0].id
-            groupObjs = models.zgld_goods_classification_management.objects
-            parentData = init_data(jichushezhi_id)
-            q = Q()
-            if singleUser:
-                q.add(Q(parentClassification_id=singleUser), Q.AND)
-            objs = groupObjs.filter(mallSetting_id=jichushezhi_id).filter(q)
+        # jichushezhi_id = Objs[0].id
+        # parentData = init_data(jichushezhi_id)
+        groupObjs = models.zgld_goods_classification_management.objects
 
-            objsCount = objs.count()
-            otherData = []
-            for obj in objs:
-                countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
-                classificationName = ''
-                parentClassification_id = ''
-                if obj.parentClassification_id:
-                    parentClassification_id = obj.parentClassification_id
-                    classificationName = obj.parentClassification.classificationName
+        q = Q()
+        if singleUser:
+            q.add(Q(parentClassification_id=singleUser), Q.AND)
+        objs = groupObjs.filter(company_id=company_id).filter(q)
 
-                otherData.append({
-                    'groupId':obj.id,
-                    'groupName':obj.classificationName,
-                    'groupParentId':parentClassification_id,
-                    'groupParent':classificationName,
-                    'countNum':countNum
-                })
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {
-                'parentData':parentData,
-                'otherData':otherData,
-                'objsCount':objsCount
-            }
-        else:
-            response.msg = '无分类信息'
-            response.code = 302
+        objsCount = objs.count()
+        otherData = []
+        for obj in objs:
+            countNum = models.zgld_goods_management.objects.filter(parentName_id=obj.id).count()
+            classificationName = ''
+            parentClassification_id = ''
+            if obj.parentClassification_id:
+                parentClassification_id = obj.parentClassification_id
+                classificationName = obj.parentClassification.classificationName
+
+            otherData.append({
+                'groupId':obj.id,
+                'groupName':obj.classificationName,
+                'groupParentId':parentClassification_id,
+                'groupParent':classificationName,
+                'countNum':countNum
+            })
+        response.code = 200
+        response.msg = '查询成功'
+        response.data = {
+            # 'parentData':parentData,
+            'otherData':otherData,
+            'objsCount':objsCount
+        }
     else:
-        response.code = 402
-        response.msg = '请求异常'
+        response.msg = '商城基础未配置'
+        response.code = 302
+
+    # else:
+    #     response.code = 402
+    #     response.msg = '请求异常'
     return JsonResponse(response.__dict__)
 
 
 # 判断分组是否会死关联
-def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id 判断是否会关联自己 如果o_id 在 result_data里会return
+def updateInitData(result_data,company_id, pid=None, o_id=None):   # o_id 判断是否会关联自己 如果o_id 在 result_data里会return
     objs = models.zgld_goods_classification_management.objects.filter(
-        mallSetting_id=xiaochengxu_id,
+        company_id =company_id,
         id=pid,
     )
     for obj in objs:
@@ -98,7 +101,9 @@ def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id �
         if o_id:
             if int(o_id) == int(obj.id):
                 return result_data
-        parent = updateInitData(result_data, xiaochengxu_id, pid=obj.parentClassification_id, o_id=o_id)
+
+        parent = updateInitData(result_data, company_id, pid=obj.parentClassification_id, o_id=o_id)
+
     return result_data
 
 # 商城商品操作
@@ -107,9 +112,11 @@ def updateInitData(result_data,xiaochengxu_id, pid=None, o_id=None):   # o_id �
 def goodsClassOper(request, oper_type, o_id):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
-    u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)                            # 查询 admin用户
-    xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs.company_id) # 查询小程序ID
-    userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)  #商城基础设置
+    company_id = request.GET.get('company_id')
+
+    # u_idObjs = models.zgld_admin_userprofile.objects.get(id=user_id)                            # 查询 admin用户
+    # xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs.company_id) # 查询小程序ID
+    # userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_id)  #商城基础设置
 
     if request.method == "POST":
         dataDict = {
@@ -138,9 +145,10 @@ def goodsClassOper(request, oper_type, o_id):
                 # objsId = objs.create(**forms_obj.cleaned_data)
                 objForm = forms_obj.cleaned_data
                 objsId = objs.create(
+                    company_id=company_id,
                     classificationName=objForm.get('classificationName'),
                     parentClassification_id=objForm.get('parentClassification_id'),
-                    mallSetting_id=userObjs[0].id,
+                    # mallSetting_id=userObjs[0].id,
                 )
                 objs.filter(id=objsId.id).update(level=level)
                 response.code = 200
@@ -155,7 +163,7 @@ def goodsClassOper(request, oper_type, o_id):
             result_data = []
             objs = models.zgld_goods_classification_management.objects.filter(id=o_id)
             if objs:
-                parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id)
+                parentData = updateInitData(result_data, company_id , objs[0].parentClassification_id)
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = parentData
@@ -173,11 +181,12 @@ def goodsClassOper(request, oper_type, o_id):
                     response.msg = '不可关联自己'
                     return JsonResponse(response.__dict__)
                 objs = models.zgld_goods_classification_management.objects.filter(id=dataDict.get('parentClassification_id'))
-                parentData = updateInitData(result_data, userObjs[0].id, objs[0].parentClassification_id, o_id)
+                parentData = updateInitData(result_data, company_id, objs[0].parentClassification_id, o_id)
                 if int(o_id) in parentData:
                     response.code = 301
                     response.msg = '不可关联自己'
                     return JsonResponse(response.__dict__)
+
             forms_obj = UpdateForm(dataDict)
             if forms_obj.is_valid():
                 print('==验证成功==')
@@ -194,10 +203,9 @@ def goodsClassOper(request, oper_type, o_id):
                 level = 1
                 if parentClassification_id:
                     level = 2
-                models.zgld_goods_classification_management.objects.filter(id=formObj.get('o_id')).update(
+                models.zgld_goods_classification_management.objects.filter(id=o_id).update(
                     classificationName=formObj.get('classificationName'),
                     parentClassification_id=parentClassification_id,
-                    mallSetting_id=userObjs[0].id,
                     level=level,
                 )
                 response.code = 200

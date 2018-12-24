@@ -1114,6 +1114,7 @@ class zgld_shangcheng_jichushezhi(models.Model):
 
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     classificationName = models.CharField(verbose_name='分类名称', max_length=128)
     # goodsNum = models.IntegerField(verbose_name='商品数量', default=0)
     parentClassification = models.ForeignKey(to='self', verbose_name='父级分类', null=True, blank=True)
