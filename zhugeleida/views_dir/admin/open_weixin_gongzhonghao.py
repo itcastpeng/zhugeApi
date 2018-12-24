@@ -1532,17 +1532,21 @@ def gzh_auth_process_oper(request, oper_type):
                 introduce_list = gongzhonghao_app_obj.introduce
                 introduce_list =  json.loads(introduce_list)
 
-                objs =   models.zgld_xiaochengxu_app.objects.filter(authorization_appid__in=introduce_list)
+                objs =   models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
 
                 ret_data = []
+                status = '未授权'
                 for obj in objs:
+                    authorization_appid = obj.authorization_appid
+                    if authorization_appid in introduce_list:
+                        status =  '已授权'
 
                     dict = {
                         'id' : obj.id,
                         'name' : obj.name,
                         'appid' : obj.authorization_appid,
                         'principal_name' : obj.principal_name,
-                        'status' : '已授权'
+                        'status' : status
                     }
                     ret_data.append(dict)
 
