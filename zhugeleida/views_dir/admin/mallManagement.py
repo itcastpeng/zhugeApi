@@ -15,6 +15,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
     if request.method == "GET":
         forms_obj = SelectForm(request.GET)
         if forms_obj.is_valid():
+            id = request.GET.get('id')
             company_id = request.GET.get('company_id')
             order = request.GET.get('order','-recommend_index')
 
@@ -26,7 +27,9 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 q.add(Q(parentName_id=goodsGroup), Q.AND)
             if status:
                 q.add(Q(goodsStatus=status), Q.AND)
-
+            if id:
+                q.add(Q(id=id), Q.AND)
+                
             if flag != 'admin':
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
                 company_id  = u_idObjs.company_id
