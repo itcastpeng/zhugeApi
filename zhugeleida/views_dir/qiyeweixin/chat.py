@@ -49,7 +49,9 @@ def chat(request):
             objs.update(
                 is_user_new_msg=False
             )
-
+            company_id = ''
+            if objs:
+                company_id = objs[0].userprofile.company_id
 
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -109,6 +111,7 @@ def chat(request):
             response.data = {
                 'ret_data':  ret_data_list,
                 'data_count': count,
+                'company_id' : company_id
             }
 
             if not ret_data_list:

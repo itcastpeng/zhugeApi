@@ -64,6 +64,7 @@ def goodsClass(request):
                 if obj.parentClassification_id:
                     parentClassification_id = obj.parentClassification_id
                     classificationName = obj.parentClassification.classificationName
+
                 otherData.append({
                     'groupId':obj.id,
                     'groupName':obj.classificationName,

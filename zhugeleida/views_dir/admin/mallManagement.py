@@ -36,6 +36,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
                 objs = objs[start_line: stop_line]
+
             for obj in objs:
                 groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)
                 parentGroup_id = obj.parentName_id
