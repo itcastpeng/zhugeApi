@@ -55,9 +55,9 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 if obj.topLunBoTu:
                     topLunBoTu = json.loads(obj.topLunBoTu)
 
-                detailePicture = ''
-                if obj.detailePicture:
-                    detailePicture = json.loads(obj.detailePicture)
+                content = ''
+                if obj.content:
+                    content = json.loads(obj.content)
 
                 shelvesCreateDate = ''
                 if obj.shelvesCreateDate:
@@ -75,7 +75,8 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                     'shichangjiage':obj.shichangjiage,
                     # 'kucunbianhao':obj.kucunbianhao,
                     'topLunBoTu': topLunBoTu,  # 顶部轮播图
-                    'detailePicture' : detailePicture,  # 详情图片
+                    # 'detailePicture' : detailePicture,  # 详情图片
+                    'content' : content,  # 详情图片
                     'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                     'shelvesCreateDate':shelvesCreateDate,
                     'DetailsDescription': obj.DetailsDescription # 描述详情
@@ -129,7 +130,7 @@ def mallManagementOper(request, oper_type, o_id):
         'shichangjiage':request.POST.get('shichangjiage'),            # 市场价格
         # 'kucunbianhao':request.POST.get('kucunbianhao'),            # 库存编号
         'topLunBoTu':request.POST.get('topLunBoTu'),                  # 顶部轮播图
-        'detailePicture':request.POST.get('detailePicture'),          # 详情图片
+        # 'detailePicture':request.POST.get('detailePicture'),          # 详情图片
         'DetailsDescription': request.POST.get('DetailsDescription'),  # 描述详情
         'content': request.POST.get('content')  # 描述详情
     }
@@ -160,7 +161,7 @@ def mallManagementOper(request, oper_type, o_id):
                     goodsStatus=formObjs.get('goodsStatus'),
                     topLunBoTu=resultData.get('topLunBoTu'),  # 顶部轮播图
 
-                    detailePicture=resultData.get('detailePicture'),  # 详情图片
+                    # detailePicture=resultData.get('detailePicture'),  # 详情图片
                     content=content,
                     DetailsDescription=formObjs.get('DetailsDescription') # 描述详情
                 )
@@ -208,7 +209,7 @@ def mallManagementOper(request, oper_type, o_id):
                     # kucunbianhao=formObjs.get('kucunbianhao'),
                     goodsStatus=formObjs.get('goodsStatus'),
                     topLunBoTu=resultData.get('topLunBoTu'),            # 顶部轮播图
-                    detailePicture=resultData.get('detailePicture'),    # 详情图片
+                    # detailePicture=resultData.get('detailePicture'),    # 详情图片
                     xianshangjiaoyi=formObjs.get('xianshangjiaoyi'),
                     DetailsDescription=formObjs.get('DetailsDescription'),
                     content=content,                  # 描述详情
