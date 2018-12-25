@@ -130,26 +130,43 @@ def yuZhiFu(request):
         forms_obj = yuzhifu_verify.yuZhiFu(request.POST)
         if forms_obj.is_valid():
             print('=======================================userid================userid-------------------> ', user_id, u_id)
+
+            company_id = ''
+            u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
+            if not u_idObjs:
+
+                response.code = 301
+                response.msg = '该用户没有公司!'
+
+                return JsonResponse(response.__dict__)
+
+            else:
+                company_id = not u_idObjs[0].company_id
+
+
+            goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
+            xiaochengxu_apps = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)  # 真实数据appid
+
+
             userObjs = models.zgld_customer.objects.filter(id=user_id)  # 客户
             openid = userObjs[0].openid                                 # openid  用户标识
             if not fukuan:
-                u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
-                if not u_idObjs[0].company_id:
-                    response.code = 301
-                    response.msg = '该用户没有公司!'
-                    return JsonResponse(response.__dict__)
-                xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)  # 真实数据appid
-                if not xiaochengxu_app:
+                xiaochengxuApp_id = ''
+                if not xiaochengxu_apps:
                     response.code = 301
                     response.msg = '该用户没有小程序app'
                     return JsonResponse(response.__dict__)
-                goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
+
+                else:
+                    xiaochengxuApp_id = xiaochengxu_apps[0].id
+                    appid = xiaochengxu_apps[0].authorization_appid  # 预支付 appid
+
                 if not goodsObjs:
                     response.code = 301
                     response.msg = '该商品不存在'
                     return JsonResponse(response.__dict__)
-                print(xiaochengxu_app)
-                jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxu_app[0].id)
+
+                jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuApp_id)
                 print('jiChuSheZhiObjs=========================> ',jiChuSheZhiObjs)
                 SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao                    # 商户秘钥真实数据KEY dNe089PsAVjQZPEL7ciETtj0DNX5W2RA
 
@@ -160,8 +177,9 @@ def yuZhiFu(request):
                 shijianchuoafter5 = str(int(time.time() * 1000))[8:]            # 时间戳 后五位
                 dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
                 getWxPayOrderId =  dingdanhao                               # 订单号
-                appid = xiaochengxu_app[0].authorization_appid              # 预支付 appid
+
                 mch_id = jiChuSheZhiObjs[0].shangHuHao
+
             else:# 存在订单的
                 orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=fukuan)
                 getWxPayOrderId = orderObjs[0].orderNumber  #订单号
@@ -174,7 +192,9 @@ def yuZhiFu(request):
                 appid = obj.xiaochengxuApp.authorization_appid
                 mch_id =obj.shangHuHao
                 SHANGHUKEY = obj.shangHuMiYao
+
             print('mch_id===============> ',mch_id) # https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_sl_api.php?chapter=7_7&index=5
+
             result_data = {
                 # 'appid': 'wx1add8692a23b5976',              # appid
                 'appid': appid,                               # 真实数据appid 商户号 # 服务商模式下应为当前调起支付小程序的appid
@@ -213,7 +233,7 @@ def yuZhiFu(request):
                     commissionFee = 0
                     if goodsObjs[0].commissionFee:
                         commissionFee = goodsObjs[0].commissionFee
-                    company_id = xiaochengxu_app[0].company_id
+
                     dingDanObjs.create(
                         shangpinguanli_id = goodsId,            # 商品ID
                         orderNumber = int(getWxPayOrderId),     # 订单号
