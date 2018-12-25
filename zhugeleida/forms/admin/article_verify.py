@@ -13,6 +13,12 @@ class ArticleAddForm(forms.Form):
             'required': '用户ID不存在'
         }
     )
+    status = forms.CharField(
+        required=True,
+        error_messages={
+            'required': 'status不能为空'
+        }
+    )
 
     title = forms.CharField(
         required=True,
@@ -62,6 +68,13 @@ class ArticleUpdateForm(forms.Form):
         required=True,
         error_messages={
             'required': '用户ID不存在'
+        }
+    )
+
+    status = forms.CharField(
+        required=True,
+        error_messages={
+            'required': 'status不能为空'
         }
     )
 
