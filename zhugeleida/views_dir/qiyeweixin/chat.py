@@ -53,6 +53,7 @@ def chat(request):
             if objs:
                 company_id = objs[0].userprofile.company_id
 
+
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length

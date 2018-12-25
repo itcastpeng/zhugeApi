@@ -64,6 +64,7 @@ def chat(request):
             company_id = ''
             company_name = ''
             user_name = ''
+            qrcode_url = ''
             ret_data_list = []
             user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
             if user_objs:
@@ -73,6 +74,9 @@ def chat(request):
                 user_name = user_obj.username
                 phone = user_obj.mingpian_phone if user_obj.mingpian_phone else user_obj.wechat_phone
                 wechat = user_obj.wechat  if user_obj.wechat else user_obj.wechat_phone
+                gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                if gzh_objs:
+                    qrcode_url = gzh_objs[0].qrcode_url
 
             if objs:
                 for obj in objs:
@@ -137,6 +141,7 @@ def chat(request):
                 'company_name': company_name,
                 'user_name': user_name,
                 'data_count': count,
+                'qrcode_url' : qrcode_url
             }
 
         else:
