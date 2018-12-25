@@ -921,16 +921,7 @@ def user_send_gongzhonghao_template_msg(request):
 
             print('--------企业用户 send to 公众号 kefu_客服接口 - 返回数据--------->', kefu_ret)
 
-            if  kefu_ret.get('errmsg') == "ok":
-                print('-----企业用户 send to 公众号 kefu_客服消息 Successful---->>', )
-                response.code = 200
-                response.msg = "企业用户发送客服消息成功"
-
-
-            elif kefu_ret.get('errcode') == 40001:
-                rc.delete(key_name)
-
-            else:
+            if  info_type == 4 and kefu_ret.get('errmsg') != "ok":# 满足 发送图片并且发送失败,记录下日志的素材ID
                 print('-----企业用户 发送【小程序_客服消息】失败 json.dumps(kefu_msg_post_data)---->>', kefu_msg_post_data)
                 msg = {
                     "msgtype": "image",
@@ -950,9 +941,16 @@ def user_send_gongzhonghao_template_msg(request):
                     is_last_msg=False
                 )
 
+            if kefu_ret.get('errcode') == 40001:
+                rc.delete(key_name)
 
+            if  kefu_ret.get('errmsg') == "ok": # 发送成功
+                print('-----企业用户 send to 公众号 kefu_客服消息 Successful---->>', )
+                response.code = 200
+                response.msg = "企业用户发送客服消息成功"
+
+            else: #发送失败发送模板消息
                 a_data = {}
-
                 a_data['customer_id'] = customer_id
                 a_data['user_id'] = user_id
                 a_data['type'] = 'gongzhonghao_template_tishi'
@@ -961,6 +959,8 @@ def user_send_gongzhonghao_template_msg(request):
                 print('-----企业用户 再次发送【公众号_模板消息】 json.dumps(a_data)---->>', json.dumps(a_data))
                 response.code = 301
                 response.msg = "企业用户发送客服消息成功失败"
+
+
 
 
         # 发送公众号模板消息聊天消息 or  公众号客户查看文章后的红包活动提示
@@ -1133,14 +1133,14 @@ def user_send_gongzhonghao_template_msg(request):
 
             print('--------企业用户 send to 公众号 Template 接口返回数据--------->', template_ret)
 
+
+            if errcode == 40001:
+                rc.delete(key_name)
+
             if template_ret.get('errmsg') == "ok":
                 print('-----企业用户 send to 公众号 Template 消息 Successful---->>', )
                 response.code = 200
                 response.msg = "企业用户发送模板消息成功"
-
-
-            elif errcode == 40001:
-                rc.delete(key_name)
 
             elif errcode == 43004 or errcode == 40013: #{'errcode': 40013, 'errmsg': 'invalid appid hint: [Vc1zrA00434123]'}
 
