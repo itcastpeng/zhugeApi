@@ -9,9 +9,8 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
 import base64
-from django.db.models import F
-import json
-from django.db.models import Q
+from django.db.models import F,Q
+
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
 
 import json
@@ -271,6 +270,7 @@ def chat_oper(request, oper_type, o_id):
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+
         elif oper_type == 'history_chatinfo_store_content':
 
 
@@ -316,7 +316,6 @@ def chat_oper(request, oper_type, o_id):
 
             response.code = 200
             response.msg = '成功'
-
 
         return JsonResponse(response.__dict__)
 
