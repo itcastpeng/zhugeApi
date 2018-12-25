@@ -250,6 +250,7 @@ def jiChuSheZhiOper(request, oper_type):
 
 
     elif request.method == 'GET':
+
         # 添加小程序ID
         if oper_type == 'addSmallProgram':
             xiaochengxuid = request.GET.get('xiaochengxuid')

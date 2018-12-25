@@ -50,11 +50,21 @@ def create_qrcode(data):
         return qr_url_dict
 
     else:
-        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
-        qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
-        path_qr_code_name = BASE_DIR + qr_code_name
-        qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
-        img.save(path_qr_code_name)
+        article_objs = models.zgld_article.objects.filter(id=article_id)
+        qr_url = ''
+        if article_objs:
+            qr_url = article_objs[0].qrcode_url
+
+        if not qr_url:
+
+            BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
+            qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
+            path_qr_code_name = BASE_DIR + qr_code_name
+            qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
+            img.save(path_qr_code_name)
+            article_objs.update(
+                qrcode_url=qr_url
+            )
 
     response.data = {'pre_qrcode_url': qr_url}
     response.code = 200

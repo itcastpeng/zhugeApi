@@ -204,12 +204,15 @@ def article_oper(request, oper_type, o_id):
 
         # 添加文章
         if oper_type == "add":
+
+            status = request.POST.get('status')
             article_data = {
                 'user_id': request.GET.get('user_id'),
                 'title': request.POST.get('title'),
                 'summary': request.POST.get('summary'),
                 'content': request.POST.get('content'),
                 'cover_picture': request.POST.get('cover_picture'),
+                'status': status
 
             }
 
@@ -220,7 +223,9 @@ def article_oper(request, oper_type, o_id):
                 user_id = request.GET.get('user_id')
                 company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
+
                 dict_data = {
+                    'status' : status, #
                     'user_id': user_id,
                     'company_id': company_id,
                     'title': forms_obj.cleaned_data['title'],
@@ -300,7 +305,10 @@ def article_oper(request, oper_type, o_id):
 
         # 修改文章
         elif oper_type == "update":
+            status = request.POST.get('status')
+
             article_data = {
+                'status' : status,
                 'article_id': o_id,
                 'user_id': request.GET.get('user_id'),
                 'title': request.POST.get('title'),
@@ -313,6 +321,7 @@ def article_oper(request, oper_type, o_id):
             forms_obj = ArticleUpdateForm(article_data)
             if forms_obj.is_valid():
                 dict_data = {
+                    'status' : status,
                     'title': forms_obj.cleaned_data['title'],
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
