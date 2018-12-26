@@ -12,8 +12,6 @@ import redis
 import requests
 from django.http import JsonResponse, HttpResponse
 
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import  create_component_access_token
-
 from publicFunc import account
 
 def action_record(data,remark):
@@ -436,7 +434,8 @@ class get_customer_gongzhonghao_userinfo(object):
             'app_secret': self.app_secret  # 查看诸葛雷达_公众号的AppSecret
         }
 
-
+        from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_component_access_token
+        
         component_access_token_ret = create_component_access_token(data_dict)
         component_access_token = component_access_token_ret.data.get('component_access_token')
 
