@@ -795,7 +795,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         )
 
                         user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-                            customer_id=customer_id, user__company_id=company_id)
+                            customer_id=customer_id, user__company_id=company_id).order_by('-last_follow_time')
                         user_id = ''
                         customer_username = ''
 
@@ -803,6 +803,31 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             user_id = user_objs[0].user_id
                             customer_username = user_objs[0].customer.username
                             customer_username = conversion_base64_customer_username_base64(customer_username,customer_id)
+                        else:
+                            userprofile_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1).order_by('?')
+                            user_id =   userprofile_objs[0].id
+                            obj_ = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+
+                            customer_username = obj_.customer.username
+                            customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
+
+                        ## 发提示给用户
+                        if user_id:
+                            gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+                            gongzhonghao_name = ''
+                            if gongzhonghao_app_objs:
+                                gongzhonghao_name = gongzhonghao_app_objs[0].name
+
+                            data = {}
+                            remark = ' 关注了您的公众号【%s】,您可以在通讯录里和Ta沟通' % (gongzhonghao_name)
+
+                            print('---- 关注公众号提示 [消息提醒]--->>', remark)
+                            data['user_id'] = customer_id
+                            data['uid'] = user_id
+                            data['action'] = 14
+                            action_record(data, remark)  # 此步骤封装到 异步中。
+
 
                         a_data = {}
                         a_data['customer_id'] = customer_id
@@ -817,6 +842,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                         if is_focus_get_redpacket:  # 开启了发红包的活动
                             _data = {
+                                'user_id' : user_id,
                                 'company_id': company_id,
                                 'customer_id': customer_id,
                             }
