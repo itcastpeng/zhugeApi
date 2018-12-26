@@ -442,30 +442,34 @@ class get_customer_gongzhonghao_userinfo(object):
         return component_access_token
 
 
-    def get_gzh_user_whole_info(self):
+    def get_weixin_api(self):
+
         response = Response.ResponseObj()
-        a = self.create_token()
+        authorizer_access_token = self.create_token()
 
-        component_access_token = self.create_component_access_token()
-
-        get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
-        # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
+        get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
         get_user_info_data = {
-            'access_token': component_access_token,
+            'access_token': authorizer_access_token,
             'openid': self.openid,
             'lang': 'zh_CN',
         }
-        print('数据get_user_info_data --->>',json.dumps(get_user_info_data))
-
 
         s = requests.session()
         s.keep_alive = False  # 关闭多余连接
         ret = s.get(get_user_info_url, params=get_user_info_data)
-
         # ret = requests.get(get_user_info_url, params=get_user_info_data)
 
         ret.encoding = 'utf-8'
         ret_json = ret.json()
+        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+
+        return ret_json
+
+    def get_gzh_user_whole_info(self):
+        response = Response.ResponseObj()
+
+        ret_json = self.get_weixin_api()
+
         print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
 
         if 'errcode' not in ret_json:
@@ -506,24 +510,8 @@ class get_customer_gongzhonghao_userinfo(object):
         return response
 
     def get_gzh_customer_is_focus_info(self):
-        response = Response.ResponseObj()
-        authorizer_access_token = self.create_token()
 
-        get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
-        get_user_info_data = {
-            'access_token': authorizer_access_token,
-            'openid': self.openid,
-            'lang': 'zh_CN',
-        }
-
-        s = requests.session()
-        s.keep_alive = False  # 关闭多余连接
-        ret = s.get(get_user_info_url, params=get_user_info_data)
-        # ret = requests.get(get_user_info_url, params=get_user_info_data)
-
-        ret.encoding = 'utf-8'
-        ret_json = ret.json()
-        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+        ret_json = self.get_weixin_api()
 
         customer_objs = models.zgld_customer.objects.filter(openid=self.openid)
 
