@@ -680,8 +680,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            postdata = request.body.decode(encoding='UTF-8')
-            # postdata = request.POST.get('xml')
+            # postdata = request.body.decode(encoding='UTF-8')
+            postdata = request.POST.get('xml')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
