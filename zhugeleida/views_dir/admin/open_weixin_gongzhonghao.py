@@ -772,7 +772,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             'company_id' : company_id
                         }
                         user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-                        user_obj_cla.get_gzh_user_whole_info()
+                        ret = user_obj_cla.get_gzh_user_whole_info()
+                        customer_id =  ret.data.get('customer_id')
 
                         print('------ [公众号]客户不存在: openid: %s |公司ID: %s 然后去创建 ----->>', openid, company_id,user_obj_cla)
 

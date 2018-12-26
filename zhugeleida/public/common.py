@@ -486,7 +486,7 @@ class get_customer_gongzhonghao_userinfo(object):
             headimgurl = ret_json['headimgurl']  #
             token = account.get_token(account.str_encrypt(openid))
 
-            models.zgld_customer.objects.create(
+            obj = models.zgld_customer.objects.create(
                 company_id=self.company_id,
                 token=token,
                 openid=openid,
@@ -500,6 +500,9 @@ class get_customer_gongzhonghao_userinfo(object):
             )
             print('---------- 公众号-新用户创建成功 crete successful ---->')
             response.code = 200
+            response.data = {
+                'customer_id' : obj.id
+            }
 
         else:
             errcode = ret_json.get('errcode')
@@ -510,9 +513,8 @@ class get_customer_gongzhonghao_userinfo(object):
         return response
 
     def get_gzh_customer_is_focus_info(self):
-
+        response = Response.ResponseObj()
         ret_json = self.get_weixin_api()
-
         customer_objs = models.zgld_customer.objects.filter(openid=self.openid)
 
         customer_id = ''
