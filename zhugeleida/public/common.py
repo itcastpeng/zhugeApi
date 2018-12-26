@@ -12,6 +12,7 @@ import redis
 import requests
 from django.http import JsonResponse, HttpResponse
 
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import  create_component_access_token
 
 from publicFunc import account
 
@@ -391,9 +392,6 @@ class get_customer_gongzhonghao_userinfo(object):
         print('----->> authorizer_appid',self.authorizer_appid)
         print('----->> openid',self.openid)
         print('----->> company_id',self.company_id)
-
-    def create_token(self):
-
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
         if three_service_objs:
@@ -402,9 +400,11 @@ class get_customer_gongzhonghao_userinfo(object):
             if qywx_config_dict:
                 qywx_config_dict = json.loads(qywx_config_dict)
 
-        app_id = qywx_config_dict.get('app_id')
-        app_secret = qywx_config_dict.get('app_secret')
+        self.app_id = qywx_config_dict.get('app_id')
+        self.app_secret = qywx_config_dict.get('app_secret')
 
+
+    def create_token(self):
 
         objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=self.authorizer_appid)
         authorizer_refresh_token = ''
@@ -417,8 +417,8 @@ class get_customer_gongzhonghao_userinfo(object):
             'authorizer_appid': self.authorizer_appid,
             'authorizer_refresh_token': authorizer_refresh_token,
             'key_name': key_name,
-            'app_id':  app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-            'app_secret': app_secret ,#'0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+            'app_id':  self.app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+            'app_secret': self.app_secret ,#'0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
         }
         from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
             create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
@@ -429,9 +429,24 @@ class get_customer_gongzhonghao_userinfo(object):
         return  authorizer_access_token
 
 
+    def create_component_access_token(self):
+
+        data_dict = {
+            'app_id': self.app_id,  # 查看诸葛雷达_公众号的 appid
+            'app_secret': self.app_secret  # 查看诸葛雷达_公众号的AppSecret
+        }
+
+
+        component_access_token_ret = create_component_access_token(data_dict)
+        component_access_token = component_access_token_ret.data.get('component_access_token')
+
+        return component_access_token
+
+
     def get_gzh_user_whole_info(self):
         response = Response.ResponseObj()
         authorizer_access_token = self.create_token()
+
         get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
         # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
         get_user_info_data = {
