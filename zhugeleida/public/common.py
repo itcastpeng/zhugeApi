@@ -12,6 +12,7 @@ import redis
 import requests
 from django.http import JsonResponse, HttpResponse
 
+from publicFunc import account
 
 def action_record(data,remark):
     #response = Response.ResponseObj()
@@ -325,7 +326,6 @@ def create_qiyeweixin_access_token(data):
     return response
 
 
-
 ## 兼容创建企业微信的token
 def  jianrong_create_qiyeweixin_access_token(company_id):
 
@@ -376,3 +376,174 @@ def  jianrong_create_qiyeweixin_access_token(company_id):
         access_token = access_token_ret.data.get('access_token')
 
     return  access_token
+
+
+
+## 生成公众号token 并获取公众号用户的信息
+class get_customer_gongzhonghao_userinfo(object):
+
+    def __init__(self,data):
+
+        self.authorizer_appid = data.get('authorizer_appid')
+        self.openid = data.get('openid')
+        self.company_id = data.get('company_id')
+        print('----->> authorizer_appid',self.authorizer_appid)
+        print('----->> openid',self.openid)
+        print('----->> company_id',self.company_id)
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        self.app_id = qywx_config_dict.get('app_id')
+        self.app_secret = qywx_config_dict.get('app_secret')
+
+
+    def create_token(self):
+
+        objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=self.authorizer_appid)
+        authorizer_refresh_token = ''
+        if objs:
+            authorizer_refresh_token = objs[0].authorizer_refresh_token
+
+        key_name = 'authorizer_access_token_%s' % (self.authorizer_appid)
+
+        _data = {
+            'authorizer_appid': self.authorizer_appid,
+            'authorizer_refresh_token': authorizer_refresh_token,
+            'key_name': key_name,
+            'app_id':  self.app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+            'app_secret': self.app_secret ,#'0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+        }
+        from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
+            create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
+
+        authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
+        authorizer_access_token = authorizer_access_token_ret.data
+
+        return  authorizer_access_token
+
+
+    def create_component_access_token(self):
+
+        data_dict = {
+            'app_id': self.app_id,  # 查看诸葛雷达_公众号的 appid
+            'app_secret': self.app_secret  # 查看诸葛雷达_公众号的AppSecret
+        }
+
+        from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_component_access_token
+
+        component_access_token_ret = create_component_access_token(data_dict)
+        component_access_token = component_access_token_ret.data.get('component_access_token')
+
+        return component_access_token
+
+
+    def get_weixin_api(self):
+
+        response = Response.ResponseObj()
+        authorizer_access_token = self.create_token()
+
+        get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
+        get_user_info_data = {
+            'access_token': authorizer_access_token,
+            'openid': self.openid,
+            'lang': 'zh_CN',
+        }
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        ret = s.get(get_user_info_url, params=get_user_info_data)
+        # ret = requests.get(get_user_info_url, params=get_user_info_data)
+
+        ret.encoding = 'utf-8'
+        ret_json = ret.json()
+        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+
+        return ret_json
+
+    def get_gzh_user_whole_info(self):
+        response = Response.ResponseObj()
+
+        ret_json = self.get_weixin_api()
+
+        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
+
+        if 'errcode' not in ret_json:
+            openid = ret_json['openid']  # 用户唯一标识
+            nickname = ret_json['nickname']  # 会话密钥
+
+            encodestr = base64.b64encode(nickname.encode('utf-8'))
+            customer_name = str(encodestr, 'utf-8')
+
+            sex = ret_json['sex']  #
+            province = ret_json['province']  #
+            city = ret_json['city']  #
+            country = ret_json['country']  #
+            headimgurl = ret_json['headimgurl']  #
+            token = account.get_token(account.str_encrypt(openid))
+
+            obj = models.zgld_customer.objects.create(
+                company_id=self.company_id,
+                token=token,
+                openid=openid,
+                user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                username=customer_name,
+                sex=sex,
+                province=province,
+                city=city,
+                country=country,
+                headimgurl=headimgurl,
+            )
+            print('---------- 公众号-新用户创建成功 crete successful ---->')
+            response.code = 200
+            response.data = {
+                'customer_id' : obj.id
+            }
+
+        else:
+            errcode = ret_json.get('errcode')
+            errmsg = ret_json.get('errmsg')
+            response.code = errcode
+            print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+        return response
+
+    def get_gzh_customer_is_focus_info(self):
+        response = Response.ResponseObj()
+        ret_json = self.get_weixin_api()
+        customer_objs = models.zgld_customer.objects.filter(openid=self.openid)
+
+        customer_id = ''
+        if customer_objs:
+            customer_id = customer_objs[0].id
+
+        if 'errcode' not in ret_json:
+            openid = ret_json['openid']        # 用户唯一标
+            subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
+
+            customer_objs.update(
+                is_subscribe=subscribe
+            )
+            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+            response.code = 200
+
+        else:
+            errcode = ret_json.get('errcode')
+            errmsg = ret_json.get('errmsg')
+            response.code = errcode
+
+            print('---------【公众号】拉取用户 关注的信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+
+        return response
+
+
+
+
+
+
+

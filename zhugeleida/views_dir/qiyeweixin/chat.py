@@ -129,6 +129,7 @@ def chat_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == 'POST':
         # 用户推送消息到server端,然后入库
+
         if  oper_type == 'send_msg':
             print('----send_msg--->>',request.POST)
             forms_obj = ChatPostForm(request.POST)

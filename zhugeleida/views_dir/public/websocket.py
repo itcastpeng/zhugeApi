@@ -571,7 +571,7 @@ def xiaochengxu_websocket(request, oper_type):
         customer_id_position_key = ''
         user_id = ''
         customer_id = ''
-
+        phone_flag = 0
         uwsgi.websocket_handshake()
         while True:
 
@@ -707,14 +707,23 @@ def xiaochengxu_websocket(request, oper_type):
                             if  type == 'query_num':
                                 rc.set(customer_id_position_key, 'output')
 
+                                phone = ''
+                                if phone_flag < 3:
+                                    _customer_objs = models.zgld_customer.objects.filter(id=customer_id)
+                                    if _customer_objs:
+                                        phone =  _customer_objs[0].phone
+                                        phone_flag = phone_flag + 1
+
                                 chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
                                                                                      customer_id=customer_id, send_type=1,
                                                                                      is_customer_new_msg=True).count()
 
                                 response_data = {
+
                                     'data': {
                                         'unread_msg_num': chatinfo_count  # 未读消息
                                     },
+                                    'phone': phone,
                                     'code': 200,
                                     'msg': '查询成功-获取聊天数量',
                                 }

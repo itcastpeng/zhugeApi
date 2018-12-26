@@ -14,6 +14,8 @@ import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 import subprocess,os
+from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
+
 
 # 第三方平台接入
 @csrf_exempt
@@ -360,6 +362,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                 print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
                 if pre_auth_code:
                     rc.set(pre_auth_code_key_name, pre_auth_code, 1600)
+
                 else:
                     response.code = 400
                     response.msg = "--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->"
@@ -679,8 +682,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
             timestamp = request.GET.get('timestamp')
             nonce = request.GET.get('nonce')
             msg_signature = request.GET.get('msg_signature')
-            postdata = request.body.decode(encoding='UTF-8')
-            # postdata = request.POST.get('xml')
+            # postdata = request.body.decode(encoding='UTF-8')
+            postdata = request.POST.get('xml')
 
             xml_tree = ET.fromstring(postdata)
             encrypt = xml_tree.find("Encrypt").text
@@ -753,56 +756,99 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                     name = gongzhonghao_app_obj.name
                     is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket  # 是否开启了 关注领红包的活动
 
+                    customer_id = ''
                     objs = models.zgld_customer.objects.filter(openid=openid, company_id=company_id, user_type=1)
                     if objs:
                         customer_id = objs[0].id
 
-                        if Event == 'unsubscribe':  # 取消关注
-                            print('----- 公众号【取消关注】,看看是谁: 客户：%s | 公众号: %s | 公司ID: %s---->>', objs[0].id, name,
-                                  company_id)
-                            objs.update(
-                                is_subscribe=0  # 改为取消
-                            )
-
-                        elif Event == 'subscribe':  # 关注公众号
-
-                            print('----- 公众号【点击关注】啦, 客户是: %s 【点击关注】公众号: %s | 公司ID: %s---->>', customer_id, name,
-                                  company_id)
-                            objs.update(
-                                is_subscribe=1,  # 改为关注状态
-                                subscribe_time=datetime.datetime.now()
-                            )
-
-                            user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-                                customer_id=customer_id, user__company_id=company_id)
-                            user_id = ''
-                            customer_username = ''
-                            if user_objs:
-                                user_id = user_objs[0].user_id
-                                customer_username = user_objs[0].customer.username
-                                customer_username = conversion_base64_customer_username_base64(customer_username,
-                                                                                               customer_id)
-
-                            a_data = {}
-                            a_data['customer_id'] = customer_id
-                            a_data['user_id'] = user_id
-                            a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
-                            a_data['content'] = json.dumps({'msg': '%s ~ 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username), 'info_type': 1})
-
-                            print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
-                            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
-
-
-                            if is_focus_get_redpacket:  # 开启了发红包的活动
-                                _data = {
-                                    'company_id': company_id,
-                                    'customer_id': customer_id,
-                                }
-                                tasks.user_focus_send_activity_redPacket.delay(_data)  # 异步判断是否下发红包。
-
                     else:
+                        # _obj = models.zgld_customer.objects.create(openid=openid, company_id=company_id, user_type=1)
+                        # customer_id  = _obj.id
 
-                        print('------ [公众号]客户不存在: openid: %s |公司ID: %s----->>', openid, company_id)
+
+                        _data = {
+                            'openid' : openid,
+                            'authorizer_appid' : app_id,
+                            'company_id' : company_id
+                        }
+                        user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+                        ret = user_obj_cla.get_gzh_user_whole_info()
+                        customer_id =  ret.data.get('customer_id')
+
+                        print('------ [公众号]客户不存在: openid: %s |公司ID: %s 然后去创建 ----->>', openid, company_id,user_obj_cla)
+
+
+                    if Event == 'unsubscribe':  # 取消关注
+                        print('----- 公众号【取消关注】,看看是谁: 客户：%s | 公众号: %s | 公司ID: %s---->>', objs[0].id, name,
+                              company_id)
+                        objs.update(
+                            is_subscribe=0  # 改为取消
+                        )
+
+                    elif Event == 'subscribe':  # 关注公众号
+
+                        print('----- 公众号【点击关注】啦, 客户是: %s 【点击关注】公众号: %s | 公司ID: %s---->>', customer_id, name,
+                              company_id)
+                        objs.update(
+                            is_subscribe=1,  # 改为关注状态
+                            subscribe_time=datetime.datetime.now()
+                        )
+
+                        user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                            customer_id=customer_id, user__company_id=company_id).order_by('-last_follow_time')
+                        user_id = ''
+                        customer_username = ''
+
+                        if user_objs:
+                            user_id = user_objs[0].user_id
+                            customer_username = user_objs[0].customer.username
+                            customer_username = conversion_base64_customer_username_base64(customer_username,customer_id)
+                        else:
+                            userprofile_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1).order_by('?')
+                            user_id =   userprofile_objs[0].id
+                            obj_ = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
+
+                            customer_username = obj_.customer.username
+                            customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
+
+                        ## 发提示给用户
+                        if user_id:
+                            gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+                            gongzhonghao_name = ''
+                            if gongzhonghao_app_objs:
+                                gongzhonghao_name = gongzhonghao_app_objs[0].name
+
+                            data = {}
+                            remark = ' 关注了您的公众号【%s】,您可以在通讯录里和Ta沟通' % (gongzhonghao_name)
+
+                            print('---- 关注公众号提示 [消息提醒]--->>', remark)
+                            data['user_id'] = customer_id
+                            data['uid'] = user_id
+                            data['action'] = 14
+                            action_record(data, remark)  # 此步骤封装到 异步中。
+
+
+                        a_data = {}
+                        a_data['customer_id'] = customer_id
+                        a_data['user_id'] = user_id
+                        a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
+                        a_data['content'] = json.dumps(
+                            {'msg': '%s ~ 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username),
+                             'info_type': 1})
+
+                        print('-----企业用户 公众号_模板消息 订阅公众号 json.dumps(a_data)---->>', json.dumps(a_data))
+                        tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+                        if is_focus_get_redpacket:  # 开启了发红包的活动
+                            _data = {
+                                'user_id' : user_id,
+                                'company_id': company_id,
+                                'customer_id': customer_id,
+                            }
+                            tasks.user_focus_send_activity_redPacket.delay(_data)  # 异步判断是否下发红包。
+
+
 
                 else:
 
@@ -1715,6 +1761,7 @@ def amr2mp3(amr_path, mp3_path=None):
         return 1
     if mp3_path is None or mp3_path.split('.')[-1] != 'mp3':
         mp3_path = os.path.join(path, name.split('.')[0] + '.mp3')
+
     error = subprocess.call(['/usr/bin/ffmpeg', '-i', amr_path, mp3_path])
     print('------ subprocess 返回码 -------->>', error)
     if error:

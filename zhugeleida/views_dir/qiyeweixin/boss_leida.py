@@ -15,14 +15,23 @@ def deal_search_time(data, q):
     user_id = data.get('user_id')
     type = data.get('type')
 
+    start_time = data.get('start_time')
+    stop_time = data.get('stop_time')
+
+    if start_time and stop_time:
+        q.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+        q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+
+
+
     q1 = Q()
     q2 = Q()
-    q3 = Q()
+    # q3 = Q()
 
     if type == 'personal': # 个人数据
         q1.add(Q(**{'id': user_id}), Q.AND)
         q2.add(Q(**{'user_id': user_id}), Q.AND)
-        q3.add(Q(**{'user_customer_flowup__user_id': user_id}), Q.AND)
+        # q3.add(Q(**{'user_customer_flowup__user_id': user_id}), Q.AND)
 
     user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = user_obj.company_id
@@ -41,7 +50,19 @@ def deal_search_time(data, q):
         browse_num = customer_num_dict[0].get('browse_num')
 
 
-    follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q3).count() #
+    # follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q3).count() # 跟进数量
+
+    _q1 = Q()
+    if start_time and stop_time:
+        _q1.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
+        _q1.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
+        # print('---->start_time', start_time)
+
+    if type == 'personal':  # 个人数据
+        _q1.add(Q(**{'user_id': user_id}), Q.AND)
+    follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+                                                                   is_user_msg_num__gte=1).filter(_q1).count()
+
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
     praise_num = 0
@@ -50,7 +71,7 @@ def deal_search_time(data, q):
 
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                              is_customer_msg_num__gte=1,
-                                                                             is_user_msg_num__gte=1).filter(q).filter(q2).count()
+                                                                             ).filter(q).filter(q2).count()
 
     user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
 
@@ -109,14 +130,30 @@ def deal_line_info(data):
         return customer_num
 
     elif index_type == 2:  # 咨询客户数
+
+        q2 = Q()
+        q2.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
+        q2.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
+        # print('---->start_time', start_time)
+
+        if type == 'personal':  # 个人数据
+            q2.add(Q(**{'user_id': user_id}), Q.AND)
+
         comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                                 is_customer_msg_num__gte=1).filter(q1).count()
+                                                                                 is_customer_msg_num__gte=1).filter(q2).count()
         return comm_num_of_customer
 
 
     elif index_type == 3:  # 跟进客户数  # 近15日客户活跃度
+        q3 = Q()
+        q3.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
+        q3.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
+        # print('---->start_time', start_time)
+
+        if type == 'personal':  # 个人数据
+            q3.add(Q(**{'user_id': user_id}), Q.AND)
         follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                       is_user_msg_num__gte=1).filter(q1).count()
+                                                                       is_user_msg_num__gte=1).filter(q3).count()
         return follow_num
 
 
@@ -136,8 +173,7 @@ def deal_sale_ranking_data(data, q):
     if type == 'customer_data':  # 按客户人数
 
         user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer','user__gender',
-                                                                                                'customer_parent').filter(
-            q)
+                                                                                                'customer_parent').filter(q)
 
         user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
                                                                               'user__avatar','user__gender').annotate(
@@ -602,6 +638,8 @@ def home_page_oper(request, oper_type):
             data = request.GET.copy()
             # 汇总数据
             q1 = Q()
+            data['start_time'] = ''
+            data['stop_time'] = ''
             ret_data['count_data'] = deal_search_time(data, q1)
 
             # 昨天数据
@@ -609,22 +647,28 @@ def home_page_oper(request, oper_type):
             now_time = datetime.now()
             start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
-            q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            # q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+            # q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            data['start_time'] = start_time
+            data['stop_time'] = stop_time
             ret_data['yesterday_data'] = deal_search_time(data, q2)
 
             q3 = Q()
             start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
-            q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            # q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+            # q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            data['start_time'] = start_time
+            data['stop_time'] = stop_time
             ret_data['nearly_seven_days'] = deal_search_time(data, q3)
 
             q4 = Q()
             start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
-            q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-            q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
+            data['start_time'] = start_time
+            data['stop_time'] = stop_time
+            # q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+            # q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
             # 今日新增

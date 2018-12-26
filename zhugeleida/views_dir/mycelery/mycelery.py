@@ -921,16 +921,7 @@ def user_send_gongzhonghao_template_msg(request):
 
             print('--------企业用户 send to 公众号 kefu_客服接口 - 返回数据--------->', kefu_ret)
 
-            if  kefu_ret.get('errmsg') == "ok":
-                print('-----企业用户 send to 公众号 kefu_客服消息 Successful---->>', )
-                response.code = 200
-                response.msg = "企业用户发送客服消息成功"
-
-
-            elif kefu_ret.get('errcode') == 40001:
-                rc.delete(key_name)
-
-            else:
+            if  info_type == 4 and kefu_ret.get('errmsg') != "ok":# 满足 发送图片并且发送失败,记录下日志的素材ID
                 print('-----企业用户 发送【小程序_客服消息】失败 json.dumps(kefu_msg_post_data)---->>', kefu_msg_post_data)
                 msg = {
                     "msgtype": "image",
@@ -950,9 +941,16 @@ def user_send_gongzhonghao_template_msg(request):
                     is_last_msg=False
                 )
 
+            if kefu_ret.get('errcode') == 40001:
+                rc.delete(key_name)
 
+            if  kefu_ret.get('errmsg') == "ok": # 发送成功
+                print('-----企业用户 send to 公众号 kefu_客服消息 Successful---->>', )
+                response.code = 200
+                response.msg = "企业用户发送客服消息成功"
+
+            else: #发送失败发送模板消息
                 a_data = {}
-
                 a_data['customer_id'] = customer_id
                 a_data['user_id'] = user_id
                 a_data['type'] = 'gongzhonghao_template_tishi'
@@ -961,6 +959,8 @@ def user_send_gongzhonghao_template_msg(request):
                 print('-----企业用户 再次发送【公众号_模板消息】 json.dumps(a_data)---->>', json.dumps(a_data))
                 response.code = 301
                 response.msg = "企业用户发送客服消息成功失败"
+
+
 
 
         # 发送公众号模板消息聊天消息 or  公众号客户查看文章后的红包活动提示
@@ -1133,14 +1133,14 @@ def user_send_gongzhonghao_template_msg(request):
 
             print('--------企业用户 send to 公众号 Template 接口返回数据--------->', template_ret)
 
+
+            if errcode == 40001:
+                rc.delete(key_name)
+
             if template_ret.get('errmsg') == "ok":
                 print('-----企业用户 send to 公众号 Template 消息 Successful---->>', )
                 response.code = 200
                 response.msg = "企业用户发送模板消息成功"
-
-
-            elif errcode == 40001:
-                rc.delete(key_name)
 
             elif errcode == 43004 or errcode == 40013: #{'errcode': 40013, 'errmsg': 'invalid appid hint: [Vc1zrA00434123]'}
 
@@ -1151,9 +1151,10 @@ def user_send_gongzhonghao_template_msg(request):
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
-                _msg = '此客户【未关注】公众号,模板消息未送达'
+
+                _msg = '此客户【未关注】公众号'
                 if info_type == 6 and errcode == 40013:
-                    _msg = '此公众号未绑定小程序,【名片商城】未送达,请联系管理员'
+                    _msg = '此公众号未绑定小程序,请联系管理员' # 【名片商城】未送达
 
 
                 encodestr = base64.b64encode(_msg.encode('utf-8'))
@@ -1164,14 +1165,21 @@ def user_send_gongzhonghao_template_msg(request):
                 }
                 content = json.dumps(_content)
 
-                models.zgld_chatinfo.objects.create(
-                    content=content,
+                _objs = models.zgld_chatinfo.objects.filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=3,
-                    is_customer_new_msg=False  # 公众号客户不需要获取此提示消息
+                    send_type=3
                 )
-                rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。
+                if not _objs:
+
+                    models.zgld_chatinfo.objects.create(
+                        content=content,
+                        userprofile_id=user_id,
+                        customer_id=customer_id,
+                        send_type=3,
+                    )
+
+                    rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。
 
 
             else:
@@ -1708,6 +1716,7 @@ def get_customer_gongzhonghao_userinfo(request):
         authorizer_refresh_token = objs[0].authorizer_refresh_token
 
     key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
     _data = {
         'authorizer_appid': authorizer_appid,
         'authorizer_refresh_token': authorizer_refresh_token,
@@ -1762,6 +1771,7 @@ def get_customer_gongzhonghao_userinfo(request):
         with open(file_dir, 'wb') as file:
             file.write(html.content)
         print('----- 生成 到本地头像 file_dir ---->>', file_dir)
+
         customer_objs.update(
             headimgurl=file_dir
         )
@@ -1790,13 +1800,13 @@ def binding_article_customer_relate(request):
 
     if parent_id:
         # 找到这个用户的父级并给它打上一个有[孩子的]的标签
-        if level:
-            level = int(level) - 1
+
+        _level = int(level) - 1
         q1 = Q()
         q1.add(Q(**{'article_id': article_id}), Q.AND)
         q1.add(Q(**{'customer_id': parent_id}), Q.AND)
         q1.add(Q(**{'user_id': user_id}), Q.AND)
-        q1.add(Q(**{'level': level}), Q.AND)
+        q1.add(Q(**{'level': _level}), Q.AND)
         _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
         if _objs:
             print('----- 给父级的客户,打上一个有[孩子的]的标签【成功】 |  搜索条件 q1:----->>', q1)
@@ -1884,7 +1894,7 @@ def binding_article_customer_relate(request):
             article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
 
             if article_to_customer_belonger_obj:
-                print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>')
+                print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>',q)
                 # response.code = 302
                 # response.msg = "文章和客户\雷达用户-关系存在"
 
@@ -1901,19 +1911,17 @@ def binding_article_customer_relate(request):
             user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                            user_id=user_id)
             if user_customer_belonger_obj:
-                print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
-                      user_id)
+                print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
                 # response.code = 302
                 # response.msg = "关系存在"
 
             else:
-                print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
-                      user_id)
+                print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
                 models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
 
 
-    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4])
+    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4]).order_by('-create_date')
     # # 活动并且活动开通中
     if activity_objs:
         activity_id = activity_objs[0].id
@@ -1922,10 +1930,8 @@ def binding_article_customer_relate(request):
                                                                        customer_id=customer_id)
 
         if redPacket_objs:
-            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (
-                article_id, activity_id, customer_id))
-            # response.code = 302
-            # response.msg = "关系存在"
+            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (article_id, activity_id, customer_id))
+
 
         else:
             print('----- 活动发红包表数据【不存在并创建】 article_id:%s | activity_id:%s | customer_id: %s | company_id: %s ----->>' % (
