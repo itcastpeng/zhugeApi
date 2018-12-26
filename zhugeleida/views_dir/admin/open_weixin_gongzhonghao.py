@@ -14,6 +14,8 @@ import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 import subprocess,os
+from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
+
 
 # 第三方平台接入
 @csrf_exempt
@@ -760,10 +762,10 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         customer_id = objs[0].id
 
                     else:
-                        _obj = models.zgld_customer.objects.create(openid=openid, company_id=company_id, user_type=1)
-                        customer_id  = _obj.id
+                        # _obj = models.zgld_customer.objects.create(openid=openid, company_id=company_id, user_type=1)
+                        # customer_id  = _obj.id
 
-                        from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
+
                         _data = {
                             'openid' : openid,
                             'authorizer_appid' : app_id,

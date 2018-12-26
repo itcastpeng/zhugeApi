@@ -463,7 +463,8 @@ class get_customer_gongzhonghao_userinfo(object):
             country = ret_json['country']  #
             headimgurl = ret_json['headimgurl']  #
             token = account.get_token(account.str_encrypt(openid))
-            obj = models.zgld_customer.objects.create(
+
+            models.zgld_customer.objects.create(
                 company_id=self.company_id,
                 token=token,
                 openid=openid,
@@ -477,6 +478,7 @@ class get_customer_gongzhonghao_userinfo(object):
             )
             print('---------- 公众号-新用户创建成功 crete successful ---->')
             response.code = 200
+
         else:
             errcode = ret_json.get('errcode')
             errmsg = ret_json.get('errmsg')
