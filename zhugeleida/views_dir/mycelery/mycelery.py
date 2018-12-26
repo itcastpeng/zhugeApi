@@ -1151,9 +1151,10 @@ def user_send_gongzhonghao_template_msg(request):
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
-                _msg = '此客户【未关注】公众号,模板消息未送达'
+
+                _msg = '此客户【未关注】公众号'
                 if info_type == 6 and errcode == 40013:
-                    _msg = '此公众号未绑定小程序,【名片商城】未送达,请联系管理员'
+                    _msg = '此公众号未绑定小程序,请联系管理员' # 【名片商城】未送达
 
 
                 encodestr = base64.b64encode(_msg.encode('utf-8'))
@@ -1164,14 +1165,21 @@ def user_send_gongzhonghao_template_msg(request):
                 }
                 content = json.dumps(_content)
 
-                models.zgld_chatinfo.objects.create(
-                    content=content,
+                _objs = models.zgld_chatinfo.objects.filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=3,
-                    is_customer_new_msg=False  # 公众号客户不需要获取此提示消息
+                    send_type=3
                 )
-                rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。
+                if not _objs:
+
+                    models.zgld_chatinfo.objects.create(
+                        content=content,
+                        userprofile_id=user_id,
+                        customer_id=customer_id,
+                        send_type=3,
+                    )
+
+                    rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。
 
 
             else:
@@ -1763,6 +1771,7 @@ def get_customer_gongzhonghao_userinfo(request):
         with open(file_dir, 'wb') as file:
             file.write(html.content)
         print('----- 生成 到本地头像 file_dir ---->>', file_dir)
+
         customer_objs.update(
             headimgurl=file_dir
         )
@@ -1791,13 +1800,13 @@ def binding_article_customer_relate(request):
 
     if parent_id:
         # 找到这个用户的父级并给它打上一个有[孩子的]的标签
-        if level:
-            level = int(level) - 1
+
+        _level = int(level) - 1
         q1 = Q()
         q1.add(Q(**{'article_id': article_id}), Q.AND)
         q1.add(Q(**{'customer_id': parent_id}), Q.AND)
         q1.add(Q(**{'user_id': user_id}), Q.AND)
-        q1.add(Q(**{'level': level}), Q.AND)
+        q1.add(Q(**{'level': _level}), Q.AND)
         _objs = models.zgld_article_to_customer_belonger.objects.filter(q1)
         if _objs:
             print('----- 给父级的客户,打上一个有[孩子的]的标签【成功】 |  搜索条件 q1:----->>', q1)
@@ -1885,7 +1894,7 @@ def binding_article_customer_relate(request):
             article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
 
             if article_to_customer_belonger_obj:
-                print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>')
+                print('------ 文章和客户\雷达用户-关系存在 [zgld_article_to_customer_belonger] ------>>',q)
                 # response.code = 302
                 # response.msg = "文章和客户\雷达用户-关系存在"
 
@@ -1902,14 +1911,12 @@ def binding_article_customer_relate(request):
             user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                            user_id=user_id)
             if user_customer_belonger_obj:
-                print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
-                      user_id)
+                print('------- [通讯录]关系存在 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
                 # response.code = 302
                 # response.msg = "关系存在"
 
             else:
-                print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",
-                      user_id)
+                print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
                 models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
 
