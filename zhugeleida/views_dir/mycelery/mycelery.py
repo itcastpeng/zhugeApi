@@ -1914,7 +1914,7 @@ def binding_article_customer_relate(request):
 
 
 
-    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4])
+    activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4]).order_by('-create_date')
     # # 活动并且活动开通中
     if activity_objs:
         activity_id = activity_objs[0].id
@@ -1923,10 +1923,8 @@ def binding_article_customer_relate(request):
                                                                        customer_id=customer_id)
 
         if redPacket_objs:
-            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (
-                article_id, activity_id, customer_id))
-            # response.code = 302
-            # response.msg = "关系存在"
+            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (article_id, activity_id, customer_id))
+
 
         else:
             print('----- 活动发红包表数据【不存在并创建】 article_id:%s | activity_id:%s | customer_id: %s | company_id: %s ----->>' % (

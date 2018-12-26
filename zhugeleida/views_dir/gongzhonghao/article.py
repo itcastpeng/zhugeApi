@@ -605,10 +605,20 @@ def article_oper(request, oper_type, o_id):
                                 end_time = activity_obj.end_time
                                 reach_stay_time = activity_obj.reach_stay_time
 
-                                if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+                                print('库值 start_time------>>',start_time)
+                                print('库值 end_time------>>',end_time)
+                                print('库值 reach_stay_time------>>',reach_stay_time)
+
+                                if now_date_time >= start_time and now_date_time <= end_time:
+                                    print('活动开启并活动在进行中 -------->>')
+
                                     article_access_log_obj = article_access_log_objs[0]
+
                                     if reach_stay_time != 0: # 0 代表 没有时间限制
                                         stay_time = article_access_log_obj.stay_time
+                                        print('库值 stay_time-------->', stay_time)
+                                        print('库值 reach_stay_time-------->', reach_stay_time)
+
                                         if stay_time >= reach_stay_time:
 
                                             if parent_id:
@@ -626,6 +636,8 @@ def article_oper(request, oper_type, o_id):
                                                     'activity_id': activity_id,
                                                     'company_id': company_id,
                                                 }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
+                                                print('传输异步数据 tasks json.dumps(_data) --------->>',json.dumps(_data))
+
                                                 tasks.user_forward_send_activity_redPacket.delay(_data)
 
 
