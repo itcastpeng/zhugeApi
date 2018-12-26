@@ -1708,6 +1708,7 @@ def get_customer_gongzhonghao_userinfo(request):
         authorizer_refresh_token = objs[0].authorizer_refresh_token
 
     key_name = 'authorizer_access_token_%s' % (authorizer_appid)
+
     _data = {
         'authorizer_appid': authorizer_appid,
         'authorizer_refresh_token': authorizer_refresh_token,
