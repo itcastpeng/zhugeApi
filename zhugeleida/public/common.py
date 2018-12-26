@@ -445,12 +445,12 @@ class get_customer_gongzhonghao_userinfo(object):
 
     def get_gzh_user_whole_info(self):
         response = Response.ResponseObj()
-        authorizer_access_token = self.create_token()
+        component_access_token = self.create_component_access_token()
 
         get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
         # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
         get_user_info_data = {
-            'access_token': authorizer_access_token,
+            'access_token': component_access_token,
             'openid': self.openid,
             'lang': 'zh_CN',
         }
