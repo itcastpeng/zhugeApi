@@ -11,8 +11,8 @@ import os,datetime
 import redis
 import requests
 from django.http import JsonResponse, HttpResponse
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
-    create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
+
 from publicFunc import account
 
 def action_record(data,remark):
@@ -390,7 +390,7 @@ class get_customer_gongzhonghao_userinfo(object):
         self.company_id = data.get('company_id')
 
     def create_token(self):
-        response = Response.ResponseObj()
+
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
         if three_service_objs:
