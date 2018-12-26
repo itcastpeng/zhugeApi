@@ -837,7 +837,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             {'msg': '%s ~ 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' % (customer_username),
                              'info_type': 1})
 
-                        print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
+                        print('-----企业用户 公众号_模板消息 订阅公众号 json.dumps(a_data)---->>', json.dumps(a_data))
                         tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
                         if is_focus_get_redpacket:  # 开启了发红包的活动
