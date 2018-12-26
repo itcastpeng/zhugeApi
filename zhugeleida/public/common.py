@@ -388,6 +388,9 @@ class get_customer_gongzhonghao_userinfo(object):
         self.authorizer_appid = data.get('authorizer_appid')
         self.openid = data.get('openid')
         self.company_id = data.get('company_id')
+        print('----->> authorizer_appid',self.authorizer_appid)
+        print('----->> openid',self.openid)
+        print('----->> company_id',self.company_id)
 
     def create_token(self):
 
@@ -419,7 +422,7 @@ class get_customer_gongzhonghao_userinfo(object):
         }
         from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
             create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
-        
+
         authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
         authorizer_access_token = authorizer_access_token_ret.data
 
