@@ -152,6 +152,7 @@ def deal_line_info(data):
 
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id,send_type=2).filter(q2).values_list('customer_id',flat=True).distinct()
+        print('数据 comm_num_of_customer --------->', list(comm_num_of_customer))
         if comm_num_of_customer:
             comm_num_of_customer =  list(comm_num_of_customer)
 
