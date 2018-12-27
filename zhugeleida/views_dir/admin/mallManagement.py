@@ -240,7 +240,6 @@ def mallManagementOper(request, oper_type, o_id):
                         goods_id=o_id
                     )
 
-
                 objs.delete()
 
                 response.code = 200
