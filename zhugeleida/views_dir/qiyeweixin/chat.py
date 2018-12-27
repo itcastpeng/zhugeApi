@@ -38,26 +38,25 @@ def chat(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
 
-
-            objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+            objs = []
+            _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                 userprofile_id=user_id,
                 customer_id=customer_id,
             ).exclude(send_type=4).order_by('-create_date')
 
-            count = objs.count()
+            count = _objs.count()
 
-            objs.update(
-                is_user_new_msg=False
-            )
+
             company_id = ''
-            if objs:
-                company_id = objs[0].userprofile.company_id
+            if _objs:
+
+                company_id = _objs[0].userprofile.company_id
 
 
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                objs = objs[start_line: stop_line]
+                objs = _objs[start_line: stop_line]
 
 
             ret_data_list = []
@@ -114,6 +113,10 @@ def chat(request):
                 'data_count': count,
                 'company_id' : company_id
             }
+
+            objs.update(
+                is_user_new_msg=False
+            )
 
             if not ret_data_list:
                 # 没有新消息
