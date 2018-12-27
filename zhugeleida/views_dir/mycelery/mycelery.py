@@ -41,6 +41,18 @@ def action_record(data):
     remark = data.get('remark')
     agent_id = data.get('agent_id')
 
+
+    if action in [666]: # 只做消息【温馨提示】。
+
+        response.data = {
+            'content': remark,
+            'agentid': agent_id
+        }
+        response.code = 200
+        response.msg = '发送消息提示成功'
+
+        return response
+
     customer_name = models.zgld_customer.objects.get(id=customer_id).username
     customer_name = base64.b64decode(customer_name)
     customer_name = str(customer_name, 'utf-8')
@@ -63,8 +75,6 @@ def action_record(data):
                 is_customer_msg_num=F('is_customer_msg_num') + 1, # 说明用户发过消息给雷达用户。
                 last_activity_time=datetime.datetime.now()        # 用户的最后活动时间。
             )
-
-
         response.code = 200
         response.msg = '发送消息提示成功'
 
@@ -138,8 +148,8 @@ def user_send_action_log(request):
     action = request.GET.get('action')
     remark = request.GET.get('remark')
 
-    objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-        customer_id=customer_id,user_id=user_id).order_by('create_date')
+    # objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+    #     customer_id=customer_id,user_id=user_id).order_by('create_date')
     # user_id = objs[0].user_id
     # objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
     #     customer_id=customer_id).order_by('create_date')
@@ -1148,9 +1158,6 @@ def user_send_gongzhonghao_template_msg(request):
                 # {'errcode': 40003, 'errmsg': 'invalid openid hint: [JUmuwa08163951]'}
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
 
-                models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
-
 
                 _msg = '此客户【未关注】公众号'
                 if info_type == 6 and errcode == 40013:
@@ -1168,7 +1175,8 @@ def user_send_gongzhonghao_template_msg(request):
                 _objs = models.zgld_chatinfo.objects.filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=3
+                    send_type=3,
+
                 )
                 if not _objs:
 
@@ -1177,6 +1185,7 @@ def user_send_gongzhonghao_template_msg(request):
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=3,
+                        is_last_msg=False
                     )
 
                     rc.set(redis_user_id_key, True)  # 代表雷达用户有新消息 要推送了。

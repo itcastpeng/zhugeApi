@@ -62,10 +62,10 @@ def theOrder(request):
                 # 轮播图
                 topLunBoTu = ''
                 if obj.shangpinguanli.topLunBoTu:
+
                     topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
                     url = topLunBoTu[0].get('data')[0]
                     topLunBoTu = [{"url": url}]
-
                     # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
 
                 shouhuoren = ''  # 收货人
@@ -74,12 +74,13 @@ def theOrder(request):
                     shouHuoRen_id = obj.shouHuoRen_id
                     decode_username = base64.b64decode(obj.shouHuoRen.username)
                     shouhuoren = str(decode_username, 'utf-8')
+
                 countPrice = 0
                 if obj.goodsPrice:
                     countPrice = obj.goodsPrice * obj.unitRiceNum
-                detailePicture = ''
-                if objs[0].detailePicture:
-                    detailePicture = json.loads(objs[0].detailePicture)
+                # detailePicture = ''
+                # if objs[0].detailePicture:
+                #     detailePicture = json.loads(objs[0].detailePicture)
 
                 otherData.append({
                     'goodsPicture': topLunBoTu,
@@ -103,7 +104,7 @@ def theOrder(request):
                     'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                     # 'tuikuan':tuikuan,         # 0为无退款   1为退款
                     # 'tuikuan_status':tuiKuanStatus,
-                    'detailePicture': detailePicture,
+                    # 'detailePicture': detailePicture,
                 })
 
             response.code = 200

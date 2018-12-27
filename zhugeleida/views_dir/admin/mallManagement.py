@@ -34,7 +34,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
                 company_id  = u_idObjs.company_id
 
-            objs = models.zgld_goods_management.objects.filter(q).filter(company_id=company_id,goodsStatus__in=[1,2,3]).order_by(order)
+            objs = models.zgld_goods_management.objects.filter(q).filter(company_id=company_id).order_by(order)
 
             objsCount = objs.count()
             otherData = []
@@ -205,10 +205,10 @@ def mallManagementOper(request, oper_type, o_id):
 
                 objs = models.zgld_goods_management.objects.filter(id=o_id)
                 if not objs[0].shelvesCreateDate and formObjs.get('goodsStatus') == 1:# 判断如果原本上架时间为空 且当前传上架时间 则更改
-                    objs.update(shelvesCreateDate = nowDate)
+                    objs.update(shelvesCreateDate=nowDate)
+
                 print("formObjs.get('DetailsDescription')============> ",formObjs.get('DetailsDescription'))
                 objs.update(
-
                     goodsName=formObjs.get('goodsName'),
                     parentName_id=formObjs.get('parentName'),
                     goodsPrice=formObjs.get('goodsPrice'),
@@ -232,8 +232,15 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'delete':
             objs = models.zgld_goods_management.objects.filter(id=o_id)
             if objs:
-                # objs.delete()
-                objs.update(goodsStatus=4)
+
+                dingdan_objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(shangpinguanli_id=o_id)
+                if dingdan_objs:
+                    dingdan_objs.update(
+                        shangpinguanli_id=None,
+                        goods_id=o_id
+                    )
+
+                objs.delete()
 
                 response.code = 200
                 response.msg = '删除成功'

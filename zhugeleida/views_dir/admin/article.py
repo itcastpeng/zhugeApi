@@ -15,6 +15,7 @@ from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
+from zhugeleida.public.common import action_record
 
 
 # 文章管理查询
@@ -222,13 +223,13 @@ def article_oper(request, oper_type, o_id):
 
                 user_id = request.GET.get('user_id')
                 company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-
+                title = forms_obj.cleaned_data['title']
 
                 dict_data = {
                     'status' : status, #
                     'user_id': user_id,
                     'company_id': company_id,
-                    'title': forms_obj.cleaned_data['title'],
+                    'title': title,
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
                     'cover_picture': forms_obj.cleaned_data['cover_picture'].strip(),
@@ -250,10 +251,29 @@ def article_oper(request, oper_type, o_id):
                 if tags_id_list:
                     obj.tags = tags_id_list
 
-                # url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/myarticle/%s' % (obj[0].id)
 
-                # token = obj.user.token
-                # rand_str = account.str_encrypt(timestamp + token)
+                status = int(status)
+                # 消息提示给雷达用户
+                if status == 1:
+                    user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
+                    data = {}
+                    for obj in user_objs:
+                        _user_id  = obj.id
+
+                        remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (title)
+                        print('---- 关注公众号提示 [消息提醒]--->>', remark)
+                        data['user_id'] = ''
+                        data['uid'] = _user_id
+                        data['action'] = 666
+                        action_record(data, remark)  # 此步骤封装到 异步中。
+
+
+
+
+
+
+
+
 
                 data = {
                     'company_id': company_id,

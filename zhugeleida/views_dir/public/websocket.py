@@ -111,15 +111,15 @@ def leida_websocket(request, oper_type):
                         'msg': '实时推送雷达-最新聊天信息成功',
                         'code': 200
                     }
-                    objs.update(
-                        is_user_new_msg=False
-                    )
-
-
-                    rc.set(redis_user_id_key, False)
 
                     print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
+
+                    ## 发送成功 修改 数据库状态值
+                    objs.update(
+                        is_user_new_msg=False
+                    )
+                    rc.set(redis_user_id_key, False)
 
             if redis_customer_id_flag == 'False' and user_id and customer_id:
 
@@ -130,12 +130,10 @@ def leida_websocket(request, oper_type):
                     'msg': '实时通知小程序新消息-已读通知',
                     'code': 202
                 }
-
-                rc.set(redis_customer_id_key, 'Stop')
-
                 print('------ 小程序新消息-已读, 实时推送给【雷达用户】 flag：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
 
+                rc.set(redis_customer_id_key, 'Stop')
 
 
             else:
@@ -180,12 +178,6 @@ def leida_websocket(request, oper_type):
                         forms_obj = leida_ChatPostForm(_data)
 
                         if forms_obj.is_valid():
-
-                            # data = request.POST.copy()
-                            # user_id = int(data.get('user_id'))
-                            # customer_id = int(data.get('customer_id'))
-                            # Content = data.get('content')
-                            # send_type = int(data.get('send_type'))
 
                             flow_up_obj = models.zgld_user_customer_belonger.objects.select_related('user',
                                                                                                     'customer').filter(
@@ -308,10 +300,9 @@ def leida_websocket(request, oper_type):
                     'msg': '实时获取雷达【消息数量】成功',
                 }
 
-                rc.set(redis_user_query_info_key, False)
-
                 print('------ 有新消息, 实时推送给【雷达】 的数据：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
+                rc.set(redis_user_query_info_key, False)
 
             else:
                 try:
@@ -357,8 +348,6 @@ def leida_websocket(request, oper_type):
 
 
                             elif  type == 'query_num':
-                                current_page = forms_obj.cleaned_data['current_page']
-                                length = forms_obj.cleaned_data['length']
 
                                 contact_data = {
                                     'user_id': user_id
@@ -443,10 +432,10 @@ def leida_websocket(request, oper_type):
                     'msg': '实时获取雷达【消息数量】成功',
                 }
 
-                rc.set(redis_user_query_contact_key, False)
 
                 print('------ 有新消息, 实时推送给【雷达 消息列表】 的数据：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
+                rc.set(redis_user_query_contact_key, False)
 
             else:
                 try:
@@ -645,11 +634,6 @@ def xiaochengxu_websocket(request, oper_type):
 
                     customer_id_position_key_flag = rc.get(customer_id_position_key)
 
-                    print('--- list(msg_obj) -->>', ret_data_list)
-                    if customer_id_position_key_flag == 'input':
-                        objs.update(
-                            is_customer_new_msg=False
-                        )
 
                     chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
                                                                          customer_id=customer_id, send_type=1,
@@ -666,10 +650,16 @@ def xiaochengxu_websocket(request, oper_type):
                         'msg': '实时推送小程序-最新聊天信息成功',
                     }
 
-                    rc.set(redis_customer_id_key, False)
 
                     print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
+
+                    print('--- list(msg_obj) -->>', ret_data_list)
+                    if customer_id_position_key_flag == 'input':
+                        objs.update(
+                            is_customer_new_msg=False
+                        )
+                    rc.set(redis_customer_id_key, False)
 
             else:
                 try:
@@ -705,7 +695,6 @@ def xiaochengxu_websocket(request, oper_type):
                             redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
 
                             if  type == 'query_num':
-                                rc.set(customer_id_position_key, 'output')
 
                                 phone = ''
                                 if phone_flag < 3:
@@ -729,6 +718,7 @@ def xiaochengxu_websocket(request, oper_type):
                                 }
 
                                 uwsgi.websocket_send(json.dumps(response_data))
+                                rc.set(customer_id_position_key, 'output')
                                 continue
 
                             elif type == 'lived':
@@ -742,13 +732,14 @@ def xiaochengxu_websocket(request, oper_type):
 
 
                             elif  type == 'register': # 当进入聊天页面时
-                                rc.set(customer_id_position_key, 'input')
+
                                 response_data = {
                                     'code': 200,
                                     'msg': '注册成功',
                                 }
                                 print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
+                                rc.set(customer_id_position_key, 'input')
                                 continue
 
                             elif type == 'closed':
@@ -760,6 +751,7 @@ def xiaochengxu_websocket(request, oper_type):
                                 # uwsgi.websocket_send(json.dumps(ret_data))
                                 return JsonResponse(ret_data)
 
+                            uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
 
                             models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                                 is_last_msg=True).update(
@@ -806,7 +798,7 @@ def xiaochengxu_websocket(request, oper_type):
                             rc.set(redis_user_query_info_key, True)     # 代表 雷达用户 消息数量发生了变化
                             rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
 
-                            uwsgi.websocket_send(json.dumps({'code': 200, 'msg': "小程序消息-发送成功"}))
+
 
 
                         else:
@@ -867,10 +859,10 @@ def xiaochengxu_websocket(request, oper_type):
                         'msg': '实时获取小程序【消息数量】成功',
                     }
 
-                    rc.set(redis_customer_query_info_key, False)
-
                     print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
+                    rc.set(redis_customer_query_info_key, False)
+
 
                 else:
                     try:

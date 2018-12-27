@@ -228,6 +228,7 @@ def chat_oper(request, oper_type, o_id):
 
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
+
                 obj = models.zgld_chatinfo.objects.create(
                         content=Content,
                         userprofile_id=user_id,
@@ -260,8 +261,10 @@ def chat_oper(request, oper_type, o_id):
                     tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+
                 rc.set(redis_user_id_key, True)
                 rc.set(redis_customer_id_key, True)
 
