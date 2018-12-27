@@ -150,11 +150,11 @@ def deal_line_info(data):
         #                                                                          is_customer_msg_num__gte=1).filter(q2).count()
         # return comm_num_of_customer
 
-        comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id,send_type=2).filter(q2).values_list('customer_id',flat=True).distinct()
+        comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(userprofile__company_id=company_id,send_type=2).filter(q2).values_list('customer_id',flat=True).distinct()
+
         print('数据 comm_num_of_customer --------->', list(comm_num_of_customer))
-        if comm_num_of_customer:
-            comm_num_of_customer =  list(comm_num_of_customer)
+
+        comm_num_of_customer =  list(comm_num_of_customer)
 
         return  comm_num_of_customer
 
@@ -173,8 +173,8 @@ def deal_line_info(data):
         # return follow_num
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id,send_type=1).filter(q2).values_list('customer_id',flat=True).distinct()
-        if comm_num_of_customer:
-            comm_num_of_customer =  list(comm_num_of_customer)
+
+        comm_num_of_customer =  list(comm_num_of_customer)
 
         return comm_num_of_customer
 
