@@ -34,7 +34,7 @@ def mallManagementshow(request, user_id, goodsGroup, status, flag):
                 u_idObjs = models.zgld_customer.objects.get(id=user_id)
                 company_id  = u_idObjs.company_id
 
-            objs = models.zgld_goods_management.objects.filter(q).filter(company_id=company_id,goodsStatus__in=[1,2,3]).order_by(order)
+            objs = models.zgld_goods_management.objects.filter(q).filter(company_id=company_id).order_by(order)
 
             objsCount = objs.count()
             otherData = []
@@ -241,7 +241,7 @@ def mallManagementOper(request, oper_type, o_id):
                     )
 
 
-                objs.update(goodsStatus=4)
+                objs.delete()
 
                 response.code = 200
                 response.msg = '删除成功'

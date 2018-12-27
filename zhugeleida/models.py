@@ -1137,6 +1137,7 @@ class zgld_goods_management(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     goodsName = models.CharField(verbose_name='商品名称', max_length=128)
     parentName = models.ForeignKey(to='zgld_goods_classification_management', verbose_name='归属分类', null=True, blank=True)
+
     goodsPrice = models.FloatField(verbose_name='商品单价',max_length=64, default=0)
     salesNum = models.IntegerField(verbose_name='销量', default=0)
     # inventoryNum = models.IntegerField(verbose_name='库存', default=0)
@@ -1149,7 +1150,6 @@ class zgld_goods_management(models.Model):
         (4, '下架')
     )
     goodsStatus = models.SmallIntegerField(verbose_name='商品状态', choices=status_choices, default=1)
-    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     shelvesCreateDate = models.DateTimeField(verbose_name="上架时间", null=True, blank=True)
     xianshangjiaoyi = models.BooleanField(verbose_name='是否线上交易', default=False)
     shichangjiage = models.IntegerField(verbose_name='市场价格', default=0)
@@ -1159,6 +1159,10 @@ class zgld_goods_management(models.Model):
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
     content = models.TextField(verbose_name='内容', null=True)
     DetailsDescription = models.TextField(verbose_name='详情描述', null=True, blank=True)
+
+    createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+
 
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):

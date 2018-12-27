@@ -227,9 +227,12 @@ def goodsClassOper(request, oper_type, o_id):
             groupObjs = models.zgld_goods_classification_management.objects
             objs = groupObjs.filter(id=o_id)
             if objs:
-                if groupObjs.filter(parentClassification_id=o_id):
+
+                goods_objs = models.zgld_goods_management.objects.filter(parentName_id=o_id)
+
+                if goods_objs:
                     response.code = 301
-                    response.msg = '含有子级,请先移除'
+                    response.msg = '分类里含有商品,请先移除!'
 
                 else:
                     objs.delete()
