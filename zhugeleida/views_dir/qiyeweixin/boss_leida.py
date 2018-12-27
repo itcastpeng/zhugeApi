@@ -152,8 +152,10 @@ def deal_line_info(data):
 
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id,send_type=2).filter(q2).values_list('customer_id',flat=True).distinct()
+        if comm_num_of_customer:
+            comm_num_of_customer =  list(comm_num_of_customer)
 
-        return comm_num_of_customer
+        return  comm_num_of_customer
 
 
     elif index_type == 3:  # 跟进客户数  # 近15日客户活跃度
@@ -170,6 +172,8 @@ def deal_line_info(data):
         # return follow_num
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id,send_type=1).filter(q2).values_list('customer_id',flat=True).distinct()
+        if comm_num_of_customer:
+            comm_num_of_customer =  list(comm_num_of_customer)
 
         return comm_num_of_customer
 
