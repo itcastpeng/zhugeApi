@@ -7,9 +7,11 @@ from django.utils.timezone import now, timedelta, datetime
 from publicFunc.condition_com import conditionCom
 from django.db.models import Count
 from django.db.models import Q
-from zhugeleida.forms.boosleida.boos_leida_verify import QueryHaveCustomerDetailForm, QueryHudongHaveCustomerDetailPeopleForm, LineInfoForm
+from zhugeleida.forms.boosleida.boos_leida_verify import QueryHaveCustomerDetailForm, \
+    QueryHudongHaveCustomerDetailPeopleForm, LineInfoForm
 import base64, json
 from django.db.models import Q, Sum
+
 
 def deal_search_time(data, q):
     user_id = data.get('user_id')
@@ -22,13 +24,11 @@ def deal_search_time(data, q):
         q.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
         q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
-
-
     q1 = Q()
     q2 = Q()
     q3 = Q()
 
-    if type == 'personal': # 个人数据
+    if type == 'personal':  # 个人数据
         q1.add(Q(**{'id': user_id}), Q.AND)
         q2.add(Q(**{'user_id': user_id}), Q.AND)
         q3.add(Q(**{'user_id': user_id}), Q.AND)
@@ -37,18 +37,18 @@ def deal_search_time(data, q):
     company_id = user_obj.company_id
 
     if type == 'personal':
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(
+            q2).count()  # 已获取客户数
 
     else:
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
 
-
-    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(browse_num=Sum('popularity'))
+    customer_num_dict = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values(
+        'company_id').annotate(browse_num=Sum('popularity'))
     browse_num = 0
     if len(list(customer_num_dict)) != 0:
-        print('---- 受欢迎 数量 --->>',q, customer_num_dict[0])
+        print('---- 受欢迎 数量 --->>', q, customer_num_dict[0])
         browse_num = customer_num_dict[0].get('browse_num')
-
 
     # follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q3).count() # 跟进数量
 
@@ -60,32 +60,36 @@ def deal_search_time(data, q):
 
     if type == 'personal':  # 个人数据
         _q1.add(Q(**{'user_id': user_id}), Q.AND)
-    follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,is_user_msg_num__gte=1).filter(_q1).count()
+    follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+                                                                   is_user_msg_num__gte=1).filter(_q1).count()
 
-
-    user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
+    user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values(
+        'company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
     praise_num = 0
     if len(list(user_pop_queryset)) != 0:
         praise_num = user_pop_queryset[0].get('praise_num')
 
-
     if start_time and stop_time:
-        q3.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
-        q3.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
+        q3.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
+        q3.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
 
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                              is_customer_msg_num__gte=1,
-                                                                             ).filter(q3).count()
+                                                                             ).filter(q3).count()  # 客户咨询沟通数量
 
-    user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
+    user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values(
+        'company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
 
     forward_num = 0
     if len(list(user_forward_queryset)) != 0:
         forward_num = user_forward_queryset[0].get('forward_num')
 
-    saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).filter(q2).count()  # 保存
-    query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(q).filter(q2).count()  # 咨询产品
-    view_website_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=4).filter(q).filter(q2).count()
+    saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(q).filter(
+        q2).count()  # 保存
+    query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(q).filter(
+        q2).count()  # 咨询产品
+    view_website_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=4).filter(q).filter(
+        q2).count()
 
     ret = {
         'customer_num': customer_num,  # 客户总数
@@ -113,20 +117,23 @@ def deal_line_info(data):
     type = data.get('type')
 
     q1 = Q()
-    q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
-    #print('---->start_time', start_time)
-
+    q2 = Q()
+    if start_time and start_time:
+        q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+        q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
+        q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+        q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
 
     if type == 'personal':  # 个人数据
         q1.add(Q(**{'user_id': user_id}), Q.AND)
+        q2.add(Q(**{'userprofile_id': user_id}), Q.AND)
 
-
-    print('---- 【测试】deal_line_info q1 ----->>',q1)
+    print('---- 【测试】deal_line_info q1 ----->>', q1)
 
     if index_type == 1:  # 客户总数
         if type == 'personal':
-            customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q1).count()  # 已获取客户数
+            customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(
+                q1).count()  # 已获取客户数
 
         else:
             customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q1).count()
@@ -135,47 +142,58 @@ def deal_line_info(data):
 
     elif index_type == 2:  # 咨询客户数
 
-        q2 = Q()
-        q2.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
-        q2.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
-        # print('---->start_time', start_time)
+        # q2 = Q()
+        # q2.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
+        # q2.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
+        # # print('---->start_time', start_time)
+        #
+        # if type == 'personal':  # 个人数据
+        #     q2.add(Q(**{'user_id': user_id}), Q.AND)
+        #
+        # comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+        #                                                                          is_customer_msg_num__gte=1).filter(q2).count()
+        # return comm_num_of_customer
 
-        if type == 'personal':  # 个人数据
-            q2.add(Q(**{'user_id': user_id}), Q.AND)
+        comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+            userprofile__company_id=company_id, send_type=2).filter(q2).values_list('customer_id', flat=True).distinct().count()
 
-        comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                                 is_customer_msg_num__gte=1).filter(q2).count()
         return comm_num_of_customer
 
 
     elif index_type == 3:  # 跟进客户数  # 近15日客户活跃度
-        q3 = Q()
-        q3.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
-        q3.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
-        # print('---->start_time', start_time)
+        # q3 = Q()
+        # q3.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
+        # q3.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
+        # # print('---->start_time', start_time)
+        #
+        # if type == 'personal':  # 个人数据
+        #     q3.add(Q(**{'user_id': user_id}), Q.AND)
+        #
+        # follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+        #                                                                is_user_msg_num__gte=1).filter(q3).count()
+        # return follow_num
+        comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+            userprofile__company_id=company_id, send_type=1).filter(q2).values_list('customer_id',
+                                                                                    flat=True).distinct().count()
 
-        if type == 'personal':  # 个人数据
-            q3.add(Q(**{'user_id': user_id}), Q.AND)
-        follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                       is_user_msg_num__gte=1).filter(q3).count()
-        return follow_num
+        return comm_num_of_customer
 
 
     elif index_type == 4:  # 浏览总数 [客户活跃度]
-        # browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
-        #     'customer_id').distinct().count()  # 浏览名片的总数(包含着保存名片)
 
-        q4 = Q()
-        q4.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
-        q4.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
-        # print('---->start_time', start_time)
+        browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
+            'customer_id').distinct().count()  # 浏览名片的总数(包含着保存名片)
 
-        if type == 'personal':  # 个人数据
-            q4.add(Q(**{'user_id': user_id}), Q.AND)
-
-        activity_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q4).count()
-
-        return activity_num_of_customer
+        return browse_num
+        # q4 = Q()
+        # q4.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
+        # q4.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
+        # if type == 'personal':  # 个人数据
+        #     q4.add(Q(**{'user_id': user_id}), Q.AND)
+        #
+        # activity_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q4).count()
+        #
+        # return activity_num_of_customer
 
 
 def deal_sale_ranking_data(data, q):
@@ -186,13 +204,14 @@ def deal_sale_ranking_data(data, q):
 
     if type == 'customer_data':  # 按客户人数
 
-        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer','user__gender',
-                                                                                                'customer_parent').filter(q)
+        user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer',
+                                                                                                'user__gender',
+                                                                                                'customer_parent').filter(
+            q)
 
         user_have_customer_num_list_objs = user_customer_belonger_objs.values('user_id', 'user__username',
-                                                                              'user__avatar','user__gender').annotate(
+                                                                              'user__avatar', 'user__gender').annotate(
             have_customer_num=Count('customer')).distinct()
-
 
         objs = list(user_have_customer_num_list_objs)
 
@@ -238,7 +257,6 @@ def deal_sale_ranking_data(data, q):
             'user_customer_flowup__user__username'
         ).annotate(have_customer_num=Count('user_customer_flowup__customer_id', 'user_customer_flowup__user_id'))
 
-
         objs = list(follow_info_list_objs)
 
         for i in range(1, len(objs)):
@@ -253,9 +271,12 @@ def deal_sale_ranking_data(data, q):
                     if objs[j]['have_customer_num'] < temp:
                         objs[j + 1]['have_customer_num'] = objs[j]['have_customer_num']
                         objs[j + 1]['user_customer_flowup__user_id'] = objs[j]['user_customer_flowup__user_id']
-                        objs[j + 1]['user_customer_flowup__user__avatar'] = objs[j]['user_customer_flowup__user__avatar']
-                        objs[j + 1]['user_customer_flowup__user__gender'] = objs[j]['user_customer_flowup__user__gender']
-                        objs[j + 1]['user_customer_flowup__user__username'] = objs[j]['user_customer_flowup__user__username']
+                        objs[j + 1]['user_customer_flowup__user__avatar'] = objs[j][
+                            'user_customer_flowup__user__avatar']
+                        objs[j + 1]['user_customer_flowup__user__gender'] = objs[j][
+                            'user_customer_flowup__user__gender']
+                        objs[j + 1]['user_customer_flowup__user__username'] = objs[j][
+                            'user_customer_flowup__user__username']
 
                         index = j  # 记下应该插入的位置
                     else:
@@ -271,7 +292,6 @@ def deal_sale_ranking_data(data, q):
 
 
     elif type == 'consult_num':  # 按咨询人数
-
 
         chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
             userprofile__company_id=company_id).filter(q).filter(send_type=2)
@@ -311,7 +331,6 @@ def deal_sale_ranking_data(data, q):
                     objs[index]['userprofile__username'] = userprofile__username
                     objs[index]['userprofile__gender'] = userprofile__gender
 
-
         ranking_data = objs
 
 
@@ -321,10 +340,9 @@ def deal_sale_ranking_data(data, q):
                                                                                                 'customer_parent').filter(
             user__company_id=company_id).filter(q)
 
-        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username','user__gender' ,'user__avatar').annotate(
+        customer_list_objs = user_customer_belonger_objs.values('user_id', 'user__username', 'user__gender',
+                                                                'user__avatar').annotate(
             have_customer_num=Count('customer'))
-
-
 
         objs = list(customer_list_objs)
 
@@ -355,7 +373,6 @@ def deal_sale_ranking_data(data, q):
                     objs[index]['user__gender'] = user__gender
 
             ranking_data = objs
-
 
     return ranking_data
 
@@ -493,9 +510,9 @@ def home_page_oper(request, oper_type):
                         try:
                             username = base64.b64decode(obj.customer.username)
                             customer_name = str(username, 'utf-8')
-                            #print('----- 解密b64decode username----->', username)
+                            # print('----- 解密b64decode username----->', username)
                         except Exception as e:
-                            #print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
+                            # print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                             customer_name = '客户ID%s' % (obj.customer_id)
 
                         ret_data.append({
@@ -529,7 +546,7 @@ def home_page_oper(request, oper_type):
             length = request.GET.get('length')
 
             request_data_dict = {
-                'type' : type,
+                'type': type,
                 'days': days,
                 'query_user_id': query_user_id,
                 'current_page': current_page,  # 文章所属用户的ID
@@ -545,8 +562,7 @@ def home_page_oper(request, oper_type):
                 now_time = datetime.now()
                 q1 = Q()
 
-
-                if  days:  # 为0是查询所有的用户。
+                if days:  # 为0是查询所有的用户。
 
                     days = int(days)
                     start_time = (now_time - timedelta(days=days)).strftime("%Y-%m-%d")
@@ -559,34 +575,35 @@ def home_page_oper(request, oper_type):
                     q1.add(Q(**{'userprofile_id': query_user_id}), Q.AND)  # 大于等于
                     q1.add(Q(**{'send_type': 2}), Q.AND)  # 大于等于
 
-                    customer_id_list_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(q1).values_list(
+                    customer_id_list_objs = models.zgld_chatinfo.objects.select_related('userprofile',
+                                                                                        'customer').filter(
+                        q1).values_list(
                         'customer_id').distinct()
 
                 elif type == 'follow':
                     q1.add(Q(**{'user_customer_flowup__user_id': query_user_id}), Q.AND)  # 大于等于
-                    customer_id_list_objs = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(q1).values_list('user_customer_flowup__customer_id').distinct()
-                #print('---- customer_id_list_objs --->>',customer_id_list_objs)
+                    customer_id_list_objs = models.zgld_follow_info.objects.select_related(
+                        'user_customer_flowup').filter(q1).values_list('user_customer_flowup__customer_id').distinct()
+                # print('---- customer_id_list_objs --->>',customer_id_list_objs)
 
-
-                customer_id_list = [ c[0] for c  in list(customer_id_list_objs) ]
-                #print('----customer_id_list----->>',customer_id_list)
+                customer_id_list = [c[0] for c in list(customer_id_list_objs)]
+                # print('----customer_id_list----->>',customer_id_list)
 
                 q2 = Q()
                 q2.add(Q(**{'customer_id__in': customer_id_list}), Q.AND)
                 q2.add(Q(**{'user_id': query_user_id}), Q.AND)
                 objs = models.zgld_user_customer_belonger.objects.filter(q2)
-                print('--- [query_hudong_have_customer_detail_people] customer_id_list ---->',customer_id_list)
+                print('--- [query_hudong_have_customer_detail_people] customer_id_list ---->', customer_id_list)
 
                 count = objs.count()
 
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
-                    #print('--- start_line ------>',start_line,stop_line)
+                    # print('--- start_line ------>',start_line,stop_line)
                     objs = objs[start_line: stop_line]
 
                 if objs:
-
 
                     ret_data = []
 
@@ -614,9 +631,9 @@ def home_page_oper(request, oper_type):
                         try:
                             username = base64.b64decode(obj.customer.username)
                             customer_name = str(username, 'utf-8')
-                            #print('----- 解密b64decode username----->', username)
+                            # print('----- 解密b64decode username----->', username)
                         except Exception as e:
-                            #print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
+                            # print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
                             customer_name = '客户ID%s' % (obj.customer_id)
 
                         ret_data.append({
@@ -718,8 +735,7 @@ def home_page_oper(request, oper_type):
                 q2 = Q()
                 if type == 'personal':  # 个人数据
                     q1.add(Q(**{'user_id': user_id}), Q.AND)  # 搜索个人数据
-                    q2.add(Q(**{'id': user_id}), Q.AND)       # 搜索个人数据
-
+                    q2.add(Q(**{'id': user_id}), Q.AND)  # 搜索个人数据
 
                 data['company_id'] = company_id
                 data['user_id'] = user_id
@@ -749,9 +765,10 @@ def home_page_oper(request, oper_type):
                             now_time = datetime.now()
                             start_time = (now_time - timedelta(days=_day)).strftime("%Y-%m-%d")
                             stop_time = (now_time - timedelta(days=_day - 1)).strftime("%Y-%m-%d")
-                            # stop_time = now_time.strftime("%Y-%m-%d")
+
                             data['start_time'] = start_time
                             data['stop_time'] = stop_time
+
                             ret_list.append({'statics_date': start_time, 'value': deal_line_info(data)})
 
                         # print('------- ret_list ------->>', ret_list)
@@ -764,21 +781,25 @@ def home_page_oper(request, oper_type):
 
                     ret_data[index] = ret_dict
 
-
-                user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q2).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
+                user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q2).values(
+                    'company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
                 praise_num = 0
                 if len(list(user_pop_queryset)) != 0:
                     praise_num = user_pop_queryset[0].get('praise_num')
 
-                saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,action=5).filter(q1).count()  # 保存微信
-                query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,action=7).filter(q1).count()  # 咨询产品
-                user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q2).values('company_id').annotate(forward_num=Sum('forward'))  # 转发名片
+                saved_total_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=5).filter(
+                    q1).count()  # 保存微信
+                query_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=7).filter(
+                    q1).count()  # 咨询产品
+                user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q2).values(
+                    'company_id').annotate(forward_num=Sum('forward'))  # 转发名片
 
                 forward_num = 0
-                if len(list(user_forward_queryset)) !=0:
+                if len(list(user_forward_queryset)) != 0:
                     forward_num = user_forward_queryset[0].get('forward_num')
 
-                call_phone_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,action=10).filter(q1).count()  # 拨打电话
+                call_phone_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=10).filter(
+                    q1).count()  # 拨打电话
 
                 _ret_dict = {
                     'praise_num': praise_num,  # 被点赞总数
@@ -791,13 +812,13 @@ def home_page_oper(request, oper_type):
                 ret_data['index_type_5'] = _ret_dict
 
                 view_mingpian = models.zgld_accesslog.objects.filter(user__company_id=company_id,
-                    action=1).filter(q1).count()  # 保存电话
+                                                                     action=1).filter(q1).count()  # 保存电话
 
                 view_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
-                    action=2).filter(q1).count()  # 咨询产品
+                                                                        action=2).filter(q1).count()  # 咨询产品
 
                 view_website_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,  # 拨打电话
-                    action=4).filter(q1).count()
+                                                                        action=4).filter(q1).count()
 
                 view_mingpian = int(view_mingpian)
                 view_product_num = int(view_product_num)
@@ -977,4 +998,3 @@ def home_page_oper(request, oper_type):
             response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
-

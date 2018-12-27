@@ -141,7 +141,7 @@ def yuZhiFu(request):
                 return JsonResponse(response.__dict__)
 
             else:
-                company_id = not u_idObjs[0].company_id
+                company_id =  u_idObjs[0].company_id
 
 
             goodsObjs = models.zgld_goods_management.objects.filter(id=goodsId)  # 真实单价
@@ -155,6 +155,7 @@ def yuZhiFu(request):
                 if not xiaochengxu_apps:
                     response.code = 301
                     response.msg = '该用户没有小程序app'
+
                     return JsonResponse(response.__dict__)
 
                 else:
