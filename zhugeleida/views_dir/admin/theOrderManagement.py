@@ -58,7 +58,7 @@ def theOrder(request):
 
         otherData = []
         for obj in objs:
-            print('obj.shangpinguanli.goodsName----------> ',obj.shangpinguanli.goodsName)
+            
             yewuUser = ''
             yewu = ''
             if obj.yewuUser:
