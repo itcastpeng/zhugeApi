@@ -78,15 +78,14 @@ def theOrder(request):
 
                 # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
             else:
-                goods_id = obj.goods_id
-                goods_objs = models.zgld_goods_management.objects.filter(id=goods_id)
-                topLunBoTu = goods_objs[0].topLunBoTu
+                topLunBoTu = obj.topLunBoTu
 
-            topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+            topLunBoTu = json.loads(topLunBoTu)
 
             detailePicture = ''
             if objs[0].detailePicture:
                 detailePicture = json.loads(objs[0].detailePicture)
+
             countPrice = 0
             if obj.goodsPrice:
                 countPrice = obj.goodsPrice * obj.unitRiceNum
