@@ -230,6 +230,7 @@ def goodsClassOper(request, oper_type, o_id):
                 if groupObjs.filter(parentClassification_id=o_id):
                     response.code = 301
                     response.msg = '含有子级,请先移除'
+
                 else:
                     objs.delete()
                     response.code = 200

@@ -765,9 +765,10 @@ def home_page_oper(request, oper_type):
                             now_time = datetime.now()
                             start_time = (now_time - timedelta(days=_day)).strftime("%Y-%m-%d")
                             stop_time = (now_time - timedelta(days=_day - 1)).strftime("%Y-%m-%d")
-                            # stop_time = now_time.strftime("%Y-%m-%d")
+
                             data['start_time'] = start_time
                             data['stop_time'] = stop_time
+
                             ret_list.append({'statics_date': start_time, 'value': deal_line_info(data)})
 
                         # print('------- ret_list ------->>', ret_list)
