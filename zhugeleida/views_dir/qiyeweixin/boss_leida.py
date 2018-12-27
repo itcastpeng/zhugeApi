@@ -31,14 +31,13 @@ def deal_search_time(data, q):
     if type == 'personal':  # 个人数据
         q1.add(Q(**{'id': user_id}), Q.AND)
         q2.add(Q(**{'user_id': user_id}), Q.AND)
-        q3.add(Q(**{'user_id': user_id}), Q.AND)
+        q3.add(Q(**{'userprofile_id': user_id}), Q.AND)
 
     user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = user_obj.company_id
 
     if type == 'personal':
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(
-            q2).count()  # 已获取客户数
+        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).count()  # 已获取客户数
 
     else:
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).filter(q).count()
@@ -50,32 +49,42 @@ def deal_search_time(data, q):
         print('---- 受欢迎 数量 --->>', q, customer_num_dict[0])
         browse_num = customer_num_dict[0].get('browse_num')
 
-    # follow_num = models.zgld_follow_info.objects.filter(user_customer_flowup__user__company=company_id).filter(q3).count() # 跟进数量
 
-    _q1 = Q()
+    # _q1 = Q()
+    # if start_time and stop_time:
+    #     _q1.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
+    #     _q1.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
+    #     # print('---->start_time', start_time)
+    #
+    # if type == 'personal':  # 个人数据
+    #     _q1.add(Q(**{'user_id': user_id}), Q.AND)
+    # follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+    #                                                                is_user_msg_num__gte=1).filter(_q1).count()
     if start_time and stop_time:
-        _q1.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
-        _q1.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
-        # print('---->start_time', start_time)
+        q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+        q3.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
 
-    if type == 'personal':  # 个人数据
-        _q1.add(Q(**{'user_id': user_id}), Q.AND)
-    follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                   is_user_msg_num__gte=1).filter(_q1).count()
+    follow_num = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+        userprofile__company_id=company_id, send_type=1).filter(q3).values_list('customer_id',
+                                                                                flat=True).distinct().count()
+
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values(
         'company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
+
     praise_num = 0
     if len(list(user_pop_queryset)) != 0:
         praise_num = user_pop_queryset[0].get('praise_num')
 
-    if start_time and stop_time:
-        q3.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
-        q3.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
 
-    comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                             is_customer_msg_num__gte=1,
-                                                                             ).filter(q3).count()  # 客户咨询沟通数量
+    # comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
+    #                                                                          is_customer_msg_num__gte=1,
+    #                                                                          ).filter(q3).count()  # 客户咨询沟通数量
+
+
+    comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+        userprofile__company_id=company_id, send_type=2).filter(q3).values_list('customer_id',flat=True).distinct().count()
+
 
     user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values(
         'company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
@@ -172,11 +181,10 @@ def deal_line_info(data):
         # follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
         #                                                                is_user_msg_num__gte=1).filter(q3).count()
         # return follow_num
-        comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id, send_type=1).filter(q2).values_list('customer_id',
-                                                                                    flat=True).distinct().count()
+        follow_num = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+            userprofile__company_id=company_id, send_type=1).filter(q2).values_list('customer_id',flat=True).distinct().count()
 
-        return comm_num_of_customer
+        return follow_num
 
 
     elif index_type == 4:  # 浏览总数 [客户活跃度]
