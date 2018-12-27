@@ -63,6 +63,11 @@ def theOrder(request):
                 topLunBoTu = ''
                 if obj.shangpinguanli.topLunBoTu:
                     topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+                    url = topLunBoTu[0].get('data')[0]
+                    topLunBoTu = [{"url": url}]
+
+                    # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
+
                 shouhuoren = ''  # 收货人
                 shouHuoRen_id = ''  # 收货人ID
                 if obj.shouHuoRen_id:
@@ -75,8 +80,10 @@ def theOrder(request):
                 detailePicture = ''
                 if objs[0].detailePicture:
                     detailePicture = json.loads(objs[0].detailePicture)
+
                 otherData.append({
                     'goodsPicture': topLunBoTu,
+
                     'id': obj.id,
                     # 'unitRiceNum':obj.unitRiceNum,
                     'goodsId': obj.shangpinguanli.id,
