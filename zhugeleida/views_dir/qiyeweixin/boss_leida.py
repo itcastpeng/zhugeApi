@@ -113,14 +113,17 @@ def deal_line_info(data):
     type = data.get('type')
 
     q1 = Q()
-    q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
-    #print('---->start_time', start_time)
+    q2 = Q()
+    if start_time and start_time:
+        q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+        q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
+        q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+        q2.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
 
 
     if type == 'personal':  # 个人数据
         q1.add(Q(**{'user_id': user_id}), Q.AND)
-
+        q2.add(Q(**{'userprofile_id': user_id}), Q.AND)
 
     print('---- 【测试】deal_line_info q1 ----->>',q1)
 
@@ -148,7 +151,7 @@ def deal_line_info(data):
         # return comm_num_of_customer
 
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id).filter(q1).filter(send_type=2).values_list('customer_id',flat=True).distinct()
+            userprofile__company_id=company_id,send_type=2).filter(q2).values_list('customer_id',flat=True).distinct()
 
         return comm_num_of_customer
 
@@ -166,8 +169,7 @@ def deal_line_info(data):
         #                                                                is_user_msg_num__gte=1).filter(q3).count()
         # return follow_num
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id).filter(q1).filter(send_type=1).values_list('customer_id',
-                                                                                           flat=True).distinct()
+            userprofile__company_id=company_id,send_type=1).filter(q1).values_list('customer_id',flat=True).distinct()
 
         return comm_num_of_customer
 
