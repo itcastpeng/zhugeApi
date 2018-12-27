@@ -26,12 +26,12 @@ def deal_search_time(data, q):
 
     q1 = Q()
     q2 = Q()
-    # q3 = Q()
+    q3 = Q()
 
     if type == 'personal': # 个人数据
         q1.add(Q(**{'id': user_id}), Q.AND)
         q2.add(Q(**{'user_id': user_id}), Q.AND)
-        # q3.add(Q(**{'user_customer_flowup__user_id': user_id}), Q.AND)
+        q3.add(Q(**{'user_id': user_id}), Q.AND)
 
     user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
     company_id = user_obj.company_id
@@ -60,8 +60,7 @@ def deal_search_time(data, q):
 
     if type == 'personal':  # 个人数据
         _q1.add(Q(**{'user_id': user_id}), Q.AND)
-    follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
-                                                                   is_user_msg_num__gte=1).filter(_q1).count()
+    follow_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,is_user_msg_num__gte=1).filter(_q1).count()
 
 
     user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
@@ -69,9 +68,14 @@ def deal_search_time(data, q):
     if len(list(user_pop_queryset)) != 0:
         praise_num = user_pop_queryset[0].get('praise_num')
 
+
+    if start_time and stop_time:
+        q3.add(Q(**{'last_follow_time__gte': start_time}), Q.AND)  # 大于等于
+        q3.add(Q(**{'last_follow_time__lt': stop_time}), Q.AND)  # 小于
+
     comm_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id,
                                                                              is_customer_msg_num__gte=1,
-                                                                             ).filter(q).filter(q2).count()
+                                                                             ).filter(q3).count()
 
     user_forward_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).filter(q1).values('company_id').annotate(forward_num=Sum('forward'))  # 被点赞总数
 
@@ -158,10 +162,20 @@ def deal_line_info(data):
 
 
     elif index_type == 4:  # 浏览总数 [客户活跃度]
-        browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
-            'customer_id').distinct().count()  # 浏览名片的总数(包含着保存名片)
+        # browse_num = models.zgld_accesslog.objects.filter(user__company_id=company_id, action=1).filter(q1).values(
+        #     'customer_id').distinct().count()  # 浏览名片的总数(包含着保存名片)
 
-        return browse_num
+        q4 = Q()
+        q4.add(Q(**{'last_activity_time__gte': start_time}), Q.AND)  # 大于等于
+        q4.add(Q(**{'last_activity_time__lt': stop_time}), Q.AND)  # 小于
+        # print('---->start_time', start_time)
+
+        if type == 'personal':  # 个人数据
+            q4.add(Q(**{'user_id': user_id}), Q.AND)
+
+        activity_num_of_customer = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q4).count()
+
+        return activity_num_of_customer
 
 
 def deal_sale_ranking_data(data, q):
