@@ -169,7 +169,7 @@ def deal_line_info(data):
         #                                                                is_user_msg_num__gte=1).filter(q3).count()
         # return follow_num
         comm_num_of_customer = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile__company_id=company_id,send_type=1).filter(q1).values_list('customer_id',flat=True).distinct()
+            userprofile__company_id=company_id,send_type=1).filter(q2).values_list('customer_id',flat=True).distinct()
 
         return comm_num_of_customer
 
