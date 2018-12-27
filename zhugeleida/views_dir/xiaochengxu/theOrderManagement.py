@@ -62,6 +62,7 @@ def theOrder(request):
                 # 轮播图
                 topLunBoTu = ''
                 if obj.shangpinguanli.topLunBoTu:
+
                     topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
                     url = topLunBoTu[0].get('data')[0]
                     topLunBoTu = [{"url": url}]
@@ -73,6 +74,7 @@ def theOrder(request):
                     shouHuoRen_id = obj.shouHuoRen_id
                     decode_username = base64.b64decode(obj.shouHuoRen.username)
                     shouhuoren = str(decode_username, 'utf-8')
+
                 countPrice = 0
                 if obj.goodsPrice:
                     countPrice = obj.goodsPrice * obj.unitRiceNum

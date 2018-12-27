@@ -1163,6 +1163,8 @@ class zgld_goods_management(models.Model):
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):
     shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
+    goods_id = models.IntegerField(verbose_name='商品ID', null=True, blank=True)
+
     phone = models.CharField(verbose_name='手机号码', max_length=32, null=True, blank=True)
     orderNumber = models.CharField(verbose_name='订单号', max_length=128, null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价', max_length=64, default=0)
