@@ -60,13 +60,23 @@ def theOrder(request):
                     yewu = obj.yewuUser_id
 
                 # 轮播图
-                topLunBoTu = ''
-                if obj.shangpinguanli.topLunBoTu:
+                topLunBoTu = []
+                if obj.shangpinguanli_id:
+                    topLunBoTu = obj.shangpinguanli.topLunBoTu
 
-                    topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
-                    url = topLunBoTu[0].get('data')[0]
-                    topLunBoTu = [{"url": url}]
                     # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
+                else:
+                    goods_id = obj.goods_id
+                    goods_objs =  models.zgld_goods_management.objects.filter(id=goods_id)
+                    topLunBoTu = goods_objs[0].topLunBoTu
+
+                topLunBoTu = json.loads(topLunBoTu)
+                url = topLunBoTu[0].get('data')
+                if url:
+                    url =  url[0]
+
+                topLunBoTu = [{"url": url}]
+
 
                 shouhuoren = ''  # 收货人
                 shouHuoRen_id = ''  # 收货人ID

@@ -58,7 +58,7 @@ def theOrder(request):
 
         otherData = []
         for obj in objs:
-            
+
             yewuUser = ''
             yewu = ''
             if obj.yewuUser:
@@ -68,9 +68,21 @@ def theOrder(request):
             if obj.shouHuoRen:
                 decode_username = base64.b64decode(obj.shouHuoRen.username)
                 shouhuoren = str(decode_username, 'utf-8')
-            topLunBoTu = ''
-            if obj.shangpinguanli.topLunBoTu:
-                topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+            # topLunBoTu = ''
+            # if obj.shangpinguanli.topLunBoTu:
+            #     topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+
+            topLunBoTu = []
+            if obj.shangpinguanli_id:
+                topLunBoTu = obj.shangpinguanli.topLunBoTu
+
+                # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
+            else:
+                goods_id = obj.goods_id
+                goods_objs = models.zgld_goods_management.objects.filter(id=goods_id)
+                topLunBoTu = goods_objs[0].topLunBoTu
+
+            topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
 
             detailePicture = ''
             if objs[0].detailePicture:
