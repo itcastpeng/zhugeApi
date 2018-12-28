@@ -147,7 +147,7 @@ def leida_websocket(request, oper_type):
                     # print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
 
                     if not data:
-                        time.sleep(0.2)
+                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode('utf-8'))
@@ -622,7 +622,7 @@ def xiaochengxu_websocket(request, oper_type):
 
                     print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(0.5)
+                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
@@ -1022,7 +1022,7 @@ def gongzhonghao_websocket(request, oper_type):
 
                     print('------[公众号-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(0.5)
+                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
@@ -1197,7 +1197,7 @@ def public_websocket(request, oper_type):
                 # data = uwsgi.websocket_recv_nb()
                 print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
-                    time.sleep(30)
+                    time.sleep(1)
                     response_data = {
                         'code': 504,
                         'msg': '链接超时,关闭长连接',
