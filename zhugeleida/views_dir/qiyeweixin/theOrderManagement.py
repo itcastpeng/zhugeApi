@@ -98,17 +98,25 @@ def theOrder(request):
                         shouHuoRen_id = obj.shouHuoRen_id
                         decode_username = base64.b64decode(obj.shouHuoRen.username)
                         shouhuoren = str(decode_username, 'utf-8')
+
                     countPrice = 0
                     if obj.goodsPrice:
                         countPrice = obj.goodsPrice * obj.unitRiceNum
-                    detailePicture = ''
-                    if objs[0].detailePicture:
-                        detailePicture = json.loads(objs[0].detailePicture)
+
+                    # detailePicture = ''
+                    # if objs[0].detailePicture:
+                    #     detailePicture = json.loads(objs[0].detailePicture)
+
+                    goodsId = obj.shangpinguanli_id
+                    if not goodsId:
+                        goodsId = obj.goods_id
+
+
                     otherData.append({
                         'goodsPicture': topLunBoTu,
                         'id': obj.id,
                         # 'unitRiceNum':obj.unitRiceNum,
-                        'goodsId': obj.shangpinguanli.id,
+                        'goodsId': goodsId,
                         'goodsName': obj.goodsName,
                         'goodsPrice': obj.goodsPrice,
                         'countPrice': countPrice,
@@ -125,7 +133,7 @@ def theOrder(request):
                         'createDate': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
                         # 'tuikuan':tuikuan,         # 0为无退款   1为退款
                         # 'tuikuan_status':tuiKuanStatus,
-                        'detailePicture': detailePicture,
+                        'detailePicture': topLunBoTu,
                     })
 
                 response.code = 200

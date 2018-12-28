@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article,chat,plugin_report
 
-
+from zhugeleida.views_dir.public import  websocket
 urlpatterns = [
     # url(r'^login$', login.login),
 
@@ -18,6 +18,9 @@ urlpatterns = [
     # 实时聊天
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)$', chat.chat_oper),
     url(r'^chat$', chat.chat),
+
+    # 实时聊天
+    url(r'^websocket/(?P<oper_type>\w+)$', websocket.gongzhonghao_websocket),
 
     # 公众号文章管理
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
