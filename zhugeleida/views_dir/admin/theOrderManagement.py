@@ -81,6 +81,14 @@ def theOrder(request):
                 topLunBoTu = obj.topLunBoTu
 
             topLunBoTu = json.loads(topLunBoTu)
+            url = topLunBoTu[0].get('data')
+            if url:
+                url = url[0]
+
+            topLunBoTu = [{"url": url}]
+
+
+            # topLunBoTu = json.loads(topLunBoTu)
 
             detailePicture = ''
             if objs[0].detailePicture:
