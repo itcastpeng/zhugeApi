@@ -915,7 +915,7 @@ def gongzhonghao_websocket(request, oper_type):
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
             print('---- 公众号 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
             if redis_customer_id_key_flag == 'True' and user_id and customer_id:
-                print('---- 公众号 Flag 为 True  --->>', redis_customer_id_key_flag)
+                print('---- 公众号 修改 Flag 为 True  --->>', redis_customer_id_key_flag)
                 print('---- 【公众号】 user_id | customer_id ------>>',customer_id,user_id)
 
 
