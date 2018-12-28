@@ -114,7 +114,7 @@ def chat(request):
                 'company_id' : company_id
             }
 
-            objs.update(
+            _objs.update(
                 is_user_new_msg=False
             )
 
