@@ -60,6 +60,7 @@ def chat(request):
 
 
             ret_data_list = []
+            update_id_list = [] # 修改当前分页下的雷达用户已读的消息列表ID
             for obj in objs:
 
                 customer_name = base64.b64decode(obj.customer.username)
@@ -70,6 +71,8 @@ def chat(request):
                     continue
 
                 is_customer_new_msg = obj.is_customer_new_msg
+                id = obj.id
+                update_id_list.append(id)
 
                 if is_customer_new_msg: # 为True时
                     is_customer_already_read = 0 # 未读
@@ -90,6 +93,7 @@ def chat(request):
                         _content['msg'] = msg
 
                 base_info_dict = {
+                    'id': id,
                     'customer_id': obj.customer_id,
                     'customer_avatar': obj.customer.headimgurl,
                     'user_id': obj.userprofile_id,
@@ -114,9 +118,10 @@ def chat(request):
                 'company_id' : company_id
             }
 
-            _objs.update(
+            _objs.filter(id__in=update_id_list).update(
                 is_user_new_msg=False
             )
+
 
             if not ret_data_list:
                 # 没有新消息
