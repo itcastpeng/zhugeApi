@@ -118,7 +118,10 @@ def chat(request):
                 'company_id' : company_id
             }
 
-            _objs.filter(id__in=update_id_list).update(
+            # _objs.filter(id__in=update_id_list).update(
+            #     is_user_new_msg=False
+            # )
+            _objs.update(
                 is_user_new_msg=False
             )
 
