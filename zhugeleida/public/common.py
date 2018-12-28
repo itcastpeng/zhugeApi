@@ -470,7 +470,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         ret_json = self.get_weixin_api()
 
-        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
+        print('----------- whole_info【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
 
         if 'errcode' not in ret_json:
             openid = ret_json['openid']  # 用户唯一标识
@@ -486,22 +486,66 @@ class get_customer_gongzhonghao_userinfo(object):
             headimgurl = ret_json['headimgurl']  #
             token = account.get_token(account.str_encrypt(openid))
 
-            obj = models.zgld_customer.objects.create(
-                company_id=self.company_id,
-                token=token,
-                openid=openid,
-                user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                username=customer_name,
-                sex=sex,
-                province=province,
-                city=city,
-                country=country,
-                headimgurl=headimgurl,
-            )
-            print('---------- 公众号-新用户创建成功 crete successful ---->')
+            customer_objs = models.zgld_customer.objects.filter(openid=openid)
+
+            obj = ''
+            if customer_objs:
+                customer_objs.update(
+                    company_id=self.company_id,
+                    token=token,
+                    openid=openid,
+                    user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    username=customer_name,
+                    sex=sex,
+                    province=province,
+                    city=city,
+                    country=country,
+                    headimgurl=headimgurl,
+                )
+                customer_id = customer_objs[0].id
+                print('---------- 公众号-新用户修改成功 get_gzh_user_whole_info ---->')
+
+            else:
+                obj = models.zgld_customer.objects.create(
+                    company_id=self.company_id,
+                    token=token,
+                    openid=openid,
+                    user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    username=customer_name,
+                    sex=sex,
+                    province=province,
+                    city=city,
+                    country=country,
+                    headimgurl=headimgurl,
+                )
+                customer_id = obj.id
+                print('---------- 公众号-新用户创建成功 get_gzh_user_whole_info ---->')
+
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            # 保存头像到本地的数据库
+            if headimgurl:
+                html = s.get(headimgurl)
+
+                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+                filename = "/gzh_cid_%s_%s.jpg" % (customer_id, now_time)
+                file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'headimgurl') + filename
+                with open(file_dir, 'wb') as file:
+                    file.write(html.content)
+                print('----- 生成 到本地头像 file_dir ---->>', file_dir)
+                if customer_objs:
+                    customer_objs.update(
+                        headimgurl=file_dir
+                    )
+                else:
+                    obj.headimgurl = file_dir
+                    obj.save()
+
+
             response.code = 200
             response.data = {
-                'customer_id' : obj.id
+                'customer_id' :customer_id
             }
 
         else:

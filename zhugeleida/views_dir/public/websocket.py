@@ -1051,7 +1051,7 @@ def gongzhonghao_websocket(request, oper_type):
                                 rc.set(customer_id_position_key, 'output')
                                 continue
 
-                            elif type == 'lived':
+                            elif type == 'lived': # 验证链接是否存活
                                 response_data = {
                                     'code': 270,
                                     'msg': '为了新中国的胜利向我开炮',
