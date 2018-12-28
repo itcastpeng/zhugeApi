@@ -90,12 +90,16 @@ def theOrder(request):
                 # if objs[0].detailePicture:
                 #     detailePicture = json.loads(objs[0].detailePicture)
 
+                goodsId = obj.shangpinguanli_id
+                if not goodsId:
+                    goodsId = obj.goods_id
+
                 otherData.append({
                     'goodsPicture': topLunBoTu,
 
                     'id': obj.id,
                     # 'unitRiceNum':obj.unitRiceNum,
-                    'goodsId': obj.shangpinguanli.id,
+                    'goodsId': goodsId,
                     'goodsName': obj.goodsName,
                     'goodsPrice': obj.goodsPrice,
                     'countPrice': countPrice,

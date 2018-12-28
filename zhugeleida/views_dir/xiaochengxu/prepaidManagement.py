@@ -155,23 +155,12 @@ def yuZhiFu(request):
                 if not xiaochengxu_apps:
                     response.code = 301
                     response.msg = '该用户没有小程序app'
-
                     return JsonResponse(response.__dict__)
-
-                else:
-                    xiaochengxuApp_id = xiaochengxu_apps[0].id
-                    appid = xiaochengxu_apps[0].authorization_appid  # 预支付 appid
 
                 if not goodsObjs:
                     response.code = 301
                     response.msg = '该商品不存在'
                     return JsonResponse(response.__dict__)
-
-                jiChuSheZhiObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuApp_id)
-                print('jiChuSheZhiObjs=========================> ',jiChuSheZhiObjs)
-                SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao                    # 商户秘钥真实数据KEY dNe089PsAVjQZPEL7ciETtj0DNX5W2RA
-
-                print('SHANGHUKEY==============> ',goodsObjs)
 
                 total_fee = int(goodsObjs[0].goodsPrice * 100) * int(goodsNum)  # 1:100 0.1*100
                 ymdhms = time.strftime("%Y%m%d%H%M%S", time.localtime())        # 年月日时分秒
@@ -179,7 +168,7 @@ def yuZhiFu(request):
                 dingdanhao = str(ymdhms) + shijianchuoafter5 + str(random.randint(10, 99)) + str(goodsId)
                 getWxPayOrderId =  dingdanhao                               # 订单号
 
-                mch_id = jiChuSheZhiObjs[0].shangHuHao
+
 
             else:# 存在订单的
                 orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=fukuan)
@@ -189,10 +178,12 @@ def yuZhiFu(request):
                     goodNum = orderObjs[0].unitRiceNum
                     phoneNumber = orderObjs[0].phone
                 total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
-                obj = orderObjs[0].shangpinguanli.parentName.mallSetting
-                appid = obj.xiaochengxuApp.authorization_appid
-                mch_id =obj.shangHuHao
-                SHANGHUKEY = obj.shangHuMiYao
+
+            shengcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxuApp').filter(
+                company_id=company_id)
+            appid = shengcheng_objs[0].xiaochengxuApp.authorization_appid
+            mch_id = shengcheng_objs[0].shangHuHao
+            SHANGHUKEY = shengcheng_objs[0].shangHuMiYao
 
             print('mch_id===============> ',mch_id) # https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_sl_api.php?chapter=7_7&index=5
 
