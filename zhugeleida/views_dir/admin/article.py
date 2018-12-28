@@ -269,12 +269,6 @@ def article_oper(request, oper_type, o_id):
 
 
 
-
-
-
-
-
-
                 data = {
                     'company_id': company_id,
                     'article_id': obj.id,
@@ -340,6 +334,7 @@ def article_oper(request, oper_type, o_id):
 
             forms_obj = ArticleUpdateForm(article_data)
             if forms_obj.is_valid():
+                title  = forms_obj.cleaned_data['title']
                 dict_data = {
                     'status' : status,
                     'title': forms_obj.cleaned_data['title'],
@@ -370,8 +365,22 @@ def article_oper(request, oper_type, o_id):
                     objs[0].tags = tags_id_list
 
                 company_id = objs[0].company_id
-                # token = obj.user.token
-                # rand_str = account.str_encrypt(timestamp + token)
+
+
+                status = int(status)
+                # 消息提示给雷达用户
+                if status == 1:
+                    user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
+                    data = {}
+                    for obj in user_objs:
+                        _user_id  = obj.id
+
+                        remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (title)
+                        print('---- 关注公众号提示 [消息提醒]--->>', remark)
+                        data['user_id'] = ''
+                        data['uid'] = _user_id
+                        data['action'] = 666
+                        action_record(data, remark)  # 此步骤封装到 异步中。
 
                 data = {
                     'company_id': company_id,

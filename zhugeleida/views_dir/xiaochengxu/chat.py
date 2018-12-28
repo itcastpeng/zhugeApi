@@ -186,8 +186,8 @@ def chat_oper(request, oper_type, o_id):
                     mingpian_avatar = ''
                     if mingpian_avatar_obj:
                         mingpian_avatar = mingpian_avatar_obj[0].photo_url
-                    else:
 
+                    else:
                         mingpian_avatar =  obj.userprofile.avatar
 
                     customer_name = base64.b64decode(obj.customer.username)
