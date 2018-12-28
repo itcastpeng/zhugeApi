@@ -256,14 +256,17 @@ def yuZhiFu(request):
                     stringSignTemp = shengchengsign(data_dict, SHANGHUKEY)
                     data_dict['paySign'] = md5(stringSignTemp).upper() # upper转换为大写
                     response.data = data_dict
+
                 return JsonResponse(response.__dict__)
             else:
                 if not fukuan:
                     response.msg = '预支付失败, 原因:{}'.format(resultData['return_msg'])
                 else:
                     response.msg = '支付失败, 原因:{}'.format(resultData['return_msg'])
+
                 response.code = 301
                 response.data = ''
+
                 return JsonResponse(response.__dict__)
         else:
             response.code = 301

@@ -103,9 +103,9 @@ def theOrder(request):
                     if obj.goodsPrice:
                         countPrice = obj.goodsPrice * obj.unitRiceNum
 
-                    detailePicture = ''
-                    if objs[0].detailePicture:
-                        detailePicture = json.loads(objs[0].detailePicture)
+                    # detailePicture = ''
+                    # if objs[0].detailePicture:
+                    #     detailePicture = json.loads(objs[0].detailePicture)
 
                     goodsId = obj.shangpinguanli_id
                     if not goodsId:

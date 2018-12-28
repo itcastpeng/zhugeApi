@@ -163,12 +163,30 @@ def leida_websocket(request, oper_type):
                         redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)
 
                         if type == 'register':
+
+                            response_data = {
+                                'code': 199,
+                                'msg': '注册成功',
+                            }
+                            print('------ 注册成功-返回数据---->', response_data)
+                            uwsgi.websocket_send(json.dumps(response_data))
+
+                            continue
+
+
+                        elif type == 'lived':
+                            response_data = {
+                                'code': 270,
+                                'msg': '为了新中国的胜利向我开炮',
+                            }
+                            print('------ 成功返回---->', response_data)
+                            uwsgi.websocket_send(json.dumps(response_data))
                             continue
 
                         elif type == 'closed':
 
                             ret_data = {
-                                'code': 200,
+                                'code': 300,
                                 'msg': '确认关闭 uid:%s | customer_id: %s' %(user_id,customer_id)
                             }
                             # uwsgi.websocket_send(json.dumps(ret_data))
@@ -887,7 +905,6 @@ def gongzhonghao_websocket(request, oper_type):
         customer_id_position_key = ''
         user_id = ''
         customer_id = ''
-        phone_flag = 0
         uwsgi.websocket_handshake()
         while True:
 
@@ -1044,9 +1061,8 @@ def gongzhonghao_websocket(request, oper_type):
                                 continue
 
                             elif  type == 'register': # 当进入聊天页面时
-
                                 response_data = {
-                                    'code': 200,
+                                    'code': 199,
                                     'msg': '注册成功',
                                 }
                                 print('------ 注册成功返回【消息数量】成功---->', response_data)
@@ -1057,7 +1073,7 @@ def gongzhonghao_websocket(request, oper_type):
                             elif type == 'closed':
                                 msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
                                 ret_data = {
-                                    'code': 200,
+                                    'code': 300,
                                     'msg': msg
                                 }
                                 rc.set(customer_id_position_key, 'output')
@@ -1131,7 +1147,6 @@ def gongzhonghao_websocket(request, oper_type):
                             'code': 400,
                             'msg': '公众号token验证未通过'
                         }
-
                         print('----  【公众号验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id, _data)
                         uwsgi.websocket_send(json.dumps(ret_data))
 
