@@ -998,14 +998,17 @@ def gongzhonghao_websocket(request, oper_type):
                     }
 
 
-                    print('------ 有新消息, 实时推送给【公众号】 的数据：---->', response_data)
+                    print('------A 监测 有新消息, 修改 实时推送给【公众号】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
+                    print('------B 监测 有新消息, 修改 实时推送给【公众号】 的数据：---->', response_data)
 
                     print('--- list(msg_obj) -->>', ret_data_list)
                     if customer_id_position_key_flag == 'input':
                         objs.update(
                             is_customer_new_msg=False
                         )
+                        print('------ C 监测 有新消息, 修改 实时推送给【公众号】 的数据：---->', response_data)
+
                     print('---- 公众号[修改前] 值------->>',rc.get(redis_customer_id_key))
 
                     rc.set(redis_customer_id_key, False)
