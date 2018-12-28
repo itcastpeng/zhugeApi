@@ -49,6 +49,7 @@ def theOrder(request):
         objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(
             gongsimingcheng_id=company_id
         ).filter(q).order_by('-createDate')
+
         objsCount = objs.count()
 
         if length != 0:
@@ -194,7 +195,7 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
 
         # 修改时查询所有 订单业务员
         elif oper_type == 'selectYeWu':
-            user_id = request.GET('user_id')
+            user_id = request.GET.get('user_id')
             company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
             # companyObjs = models.zgld_company.objects.filter(id=company_id)
             yewuObjs = models.zgld_admin_userprofile.objects.filter(company_id=company_id)
