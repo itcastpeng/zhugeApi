@@ -1172,6 +1172,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     phone = models.CharField(verbose_name='手机号码', max_length=32, null=True, blank=True)
     orderNumber = models.CharField(verbose_name='订单号', max_length=128, null=True, blank=True)
     goodsPrice = models.FloatField(verbose_name='商品单价', max_length=64, default=0)
+    topLunBoTu = models.TextField(verbose_name='顶部轮播图', null=True, blank=True)
     detailePicture = models.TextField(verbose_name='详情图片', null=True, blank=True)
     goodsName = models.CharField(verbose_name='商品名字', max_length=64, null=True, blank=True)
     unitRiceNum = models.IntegerField(verbose_name='数量', default=0)

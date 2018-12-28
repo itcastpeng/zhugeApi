@@ -30,9 +30,31 @@ def tuiKuanDingDan(request):
             tuikuan = ''
             if obj.tuiKuanDateTime:
                 tuikuan = obj.tuiKuanDateTime.strftime('%Y-%m-%d %H:%M:%S')
-            detailePicture = ''
-            if obj.orderNumber.detailePicture:
-                detailePicture = json.loads(obj.orderNumber.detailePicture)
+
+            # detailePicture = ''
+            # if obj.orderNumber.detailePicture:
+            #     detailePicture = json.loads(obj.orderNumber.detailePicture)
+
+            # 轮播图
+            topLunBoTu = []
+            if obj.shangpinguanli_id:
+                topLunBoTu = obj.shangpinguanli.topLunBoTu
+
+                # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
+            else:
+                topLunBoTu = obj.topLunBoTu
+
+
+            topLunBoTu = json.loads(topLunBoTu)
+            url = topLunBoTu[0].get('data')
+            if url:
+                url = url[0]
+
+            topLunBoTu = [{"url": url}]
+
+
+
+
             otherData.append({
                 'id': obj.id,
                 'orderNumber_id': obj.orderNumber_id,
@@ -46,7 +68,7 @@ def tuiKuanDingDan(request):
                 'goodsName':obj.orderNumber.goodsName,
 
                 'tuiKuanPrice':obj.orderNumber.yingFuKuan,
-                'detailePicture':detailePicture,
+                'detailePicture':topLunBoTu,
                 'goodsNum':obj.orderNumber.unitRiceNum,
                 'goodsPrice':obj.orderNumber.goodsPrice
 

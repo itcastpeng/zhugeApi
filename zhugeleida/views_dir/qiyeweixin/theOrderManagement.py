@@ -75,9 +75,23 @@ def theOrder(request):
                         yewu = obj.yewuUser_id
 
                     # 轮播图
-                    topLunBoTu = ''
-                    if obj.shangpinguanli.topLunBoTu:
-                        topLunBoTu = json.loads(obj.shangpinguanli.topLunBoTu)
+                    # 轮播图
+                    topLunBoTu = []
+                    if obj.shangpinguanli_id:
+                        topLunBoTu = obj.shangpinguanli.topLunBoTu
+
+                        # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
+                    else:
+                        topLunBoTu = obj.topLunBoTu
+
+                    topLunBoTu = json.loads(topLunBoTu)
+                    url = topLunBoTu[0].get('data')
+                    if url:
+                        url = url[0]
+
+                    topLunBoTu = [{"url": url}]
+
+
                     shouhuoren = ''  # 收货人
                     shouHuoRen_id = ''  # 收货人ID
                     if obj.shouHuoRen_id:

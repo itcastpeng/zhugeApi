@@ -232,12 +232,13 @@ def mallManagementOper(request, oper_type, o_id):
         elif oper_type == 'delete':
             objs = models.zgld_goods_management.objects.filter(id=o_id)
             if objs:
-
+                topLunBoTu = objs[0].topLunBoTu
                 dingdan_objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(shangpinguanli_id=o_id)
                 if dingdan_objs:
                     dingdan_objs.update(
                         shangpinguanli_id=None,
-                        goods_id=o_id
+                        goods_id=o_id,
+                        topLunBoTu=topLunBoTu
                     )
 
                 objs.delete()
