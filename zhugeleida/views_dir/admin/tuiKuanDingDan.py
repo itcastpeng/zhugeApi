@@ -22,17 +22,17 @@ def tuiKuanDingDan(request):
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
         status = request.GET.get('status')
+
         u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
-        xiaochengxu_id = models.zgld_xiaochengxu_app.objects.filter(company_id=u_idObjs[0].company_id)
+        company_id =  u_idObjs[0].company_id
+
         q = Q()
         if status:
             q.add(Q(orderNumber__theOrderStatus=status), Q.AND)
 
         objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related(
             'orderNumber'
-        ).filter(
-            orderNumber__shangpinguanli__parentName__mallSetting__xiaochengxuApp_id=xiaochengxu_id
-        ).filter(q).order_by('-shengChengDateTime')
+        ).filter(orderNumber__gongsimingcheng_id=company_id).filter(q).order_by('-shengChengDateTime')
 
         objsCount = objs.count()
         if length != 0:
