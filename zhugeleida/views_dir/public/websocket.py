@@ -121,6 +121,10 @@ def leida_websocket(request, oper_type):
                     )
                     rc.set(redis_user_id_key, False)
 
+
+            print('---- 雷达判断公众号[修改] 的值1------->>', rc.get(redis_customer_id_key))
+            print('---- 雷达判断公众号[修改] 的值2------->>', redis_customer_id_flag)
+
             if redis_customer_id_flag == 'False' and user_id and customer_id:
 
                 response_data = {
@@ -990,11 +994,11 @@ def gongzhonghao_websocket(request, oper_type):
                             'unread_msg_num': chatinfo_count # 未读消息
                         },
                         'code': 200,
-                        'msg': '实时推送小程序-最新聊天信息成功',
+                        'msg': '实时推送公众号-最新聊天信息成功',
                     }
 
 
-                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                    print('------ 有新消息, 实时推送给【公众号】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
                     print('--- list(msg_obj) -->>', ret_data_list)
@@ -1002,7 +1006,11 @@ def gongzhonghao_websocket(request, oper_type):
                         objs.update(
                             is_customer_new_msg=False
                         )
+                    print('---- 公众号[修改前] 值------->>',rc.get(redis_customer_id_key))
+
                     rc.set(redis_customer_id_key, False)
+
+                    print('---- 公众号[修改后] 值------->>', rc.get(redis_customer_id_key))
 
             else:
                 try:
