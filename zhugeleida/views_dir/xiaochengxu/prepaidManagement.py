@@ -180,7 +180,7 @@ def yuZhiFu(request):
                 total_fee = int(orderObjs[0].yingFuKuan * 100) * int(goodNum)
 
             shengcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxuApp').filter(
-                company_id=company_id)
+                xiaochengxucompany_id=company_id)
             appid = shengcheng_objs[0].xiaochengxuApp.authorization_appid
             mch_id = shengcheng_objs[0].shangHuHao
             SHANGHUKEY = shengcheng_objs[0].shangHuMiYao
