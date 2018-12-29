@@ -39,7 +39,7 @@ import os
 
 
 authorizer_access_token = ''
-
+from  django.conf import settings
 from selenium import webdriver
 import time
 import json
@@ -64,16 +64,16 @@ def weChat_login():
     print("启动浏览器，打开微信公众号登录界面")
 
     BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster',)
-    # print('---->',BASE_DIR)
-    #
-    #
-    # option = webdriver.ChromeOptions()
+
+    print('---->',BASE_DIR)
+
+    option = webdriver.ChromeOptions()
     # mobileEmulation = {'deviceName': 'iPhone 6'}
     # option.add_experimental_option('mobileEmulation', mobileEmulation)
     # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
 
 
-    driver = webdriver.Chrome(executable_path='C:\Users\EDZ\PycharmProjects\Api\zhugeApi\statics\zhugeleida\imgs\xiaochengxu\user_poster\chromedriver_2.36.exe')
+    driver = webdriver.Chrome(executable_path=BASE_DIR +'./chromedriver_2.36.exe', chrome_options=option)
 
     # 打开微信公众号登录页面
     driver.get('https://mp.weixin.qq.com/')
@@ -106,6 +106,7 @@ def weChat_login():
     # 获取到的cookies是列表形式，将cookies转成json形式并存入本地名为cookie的文本中
     for cookie_item in cookie_items:
         post[cookie_item['name']] = cookie_item['value']
+
     cookie_str = json.dumps(post)
     with open('cookie.txt', 'w+', encoding='utf-8') as f:
         f.write(cookie_str)
@@ -219,4 +220,5 @@ if __name__ == '__main__':
             get_content(query)
             print("爬取完成")
     except Exception as e:
+
         print(str(e))
