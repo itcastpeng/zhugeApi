@@ -19,7 +19,7 @@ class LoginForm(forms.Form):   # 重置密码
 
         if password1 == password2:
             if checkPassword(password1):
-                return account.str_encrypt(password1.stip())
+                return account.str_encrypt(password1.strip())
 
             self.add_error('password1', '密码复杂度检查未通过,请检查最小长度为八位,包含大小写字母和数字')
         else:
@@ -38,7 +38,7 @@ class ModifyPwdForm(forms.Form):   # 重置密码
 
         if password1 == password2:
             if checkPassword(password1):
-                return account.str_encrypt(password2)
+                return account.str_encrypt(password1)
 
             self.add_error('password2', '密码复杂度检查未通过,请检查最小长度为八位,包含大小写字母和数字')
         else:
