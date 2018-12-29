@@ -32,7 +32,7 @@ from zhugeleida.public.common import create_qiyeweixin_access_token
 def action_record(data):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
-    customer_id = data.get('customer_id')  # 客户 id
+    customer_id = data.get('customer_id','')  # 客户 id
     article_id = data.get('article_id')  # 客户 id
     action = data.get('action')
     if action:
@@ -48,6 +48,13 @@ def action_record(data):
             'content': remark,
             'agentid': agent_id
         }
+        models.zgld_accesslog.objects.create(
+            user_id=user_id,
+            article_id=article_id,
+            remark=remark,
+            action=action
+        )
+
         response.code = 200
         response.msg = '发送消息提示成功'
 
@@ -57,7 +64,7 @@ def action_record(data):
     customer_name = base64.b64decode(customer_name)
     customer_name = str(customer_name, 'utf-8')
 
-    if action in [0]:  # 只发消息，不用记录日志。
+    if action in [0]:  # 发消息记录客户 最后活动时间。
 
         # data['content'] = '%s%s' % (customer_name, remark)
         # data['agentid'] = agent_id
