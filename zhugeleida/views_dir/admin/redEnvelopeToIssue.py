@@ -77,23 +77,27 @@ class guanZhuForm(forms.Form):
     )
     def clean_total_fee(self):
         total_fee = self.data.get('total_fee')
-        if float(total_fee) >= 1:
+        if float(total_fee) >= 0.3:
             total_fee = int(float(total_fee) * 100)
             return total_fee
+
         else:
-            self.add_error('total_fee', '钱数不能小于1元！')
+            self.add_error('total_fee', '钱数不能小于0.3 元')
+
     def clean_mch_id(self):
         mch_id = self.data.get('mch_id')
         if len(mch_id) > 32:
             self.add_error('mch_id', '商户号不能超过32位！')
         else:
             return mch_id
+
     def clean_appid(self):
         appid = self.data.get('appid')
         if len(appid) > 32:
             self.add_error('appid', '公众号appid不能超过32位！')
         else:
             return appid
+
     def clean_send_name(self):
         send_name = self.data.get('send_name')
         if len(send_name) > 32:
@@ -163,9 +167,9 @@ def focusOnIssuedRedEnvelope(resultDict):
         models.zgld_red_envelope_to_issue.objects.create(
             wxappid = objsForm.get('appid'),                        # appid
             mch_id = objsForm.get('mch_id'),                        # 商户号
-            re_openid = objsForm.get('openid'),                 # 用户唯一标识
-            total_amount = int(objsForm.get('total_fee')) / 100,  # 付款金额 1:100
-            mch_billno = dingdanhaoshengcheng(),                  # 订单号
+            re_openid = objsForm.get('openid'),                     # 用户唯一标识
+            total_amount = objsForm.get('total_fee') / 100,         # 付款金额 1:100
+            mch_billno = dingdanhaoshengcheng(),                    # 订单号
             send_name = objsForm.get('send_name'),                  # 商户名称 中文
             act_name = objsForm.get('act_name'),                    # 活动名称 32长度
             remark = objsForm.get('remark'),                        # 备注信息 256长度
@@ -175,6 +179,7 @@ def focusOnIssuedRedEnvelope(resultDict):
         )
         SHANGHUKEY = objsForm.get('SHANGHUKEY')
         result_data = {
+            'scene_id': 'PRODUCT_5',                  # 发放红包使用场景，红包金额大于200或者小于1元时必传
             # 'scene_id' : 'PRODUCT_1',               # 发放红包使用场景，红包金额大于200或者小于1元时必传 PRODUCT_1:商品促销
             'nonce_str': yuzhifu.generateRandomStamping(),              # 32位随机值a
             'wxappid': objsForm.get('appid'),                           # appid

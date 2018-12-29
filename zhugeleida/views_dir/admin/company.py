@@ -127,6 +127,7 @@ def author_status(request,oper_type):
                 # app_objs = list(company_objs[0].zgld_app_set.filter(company_id=company_id).values('id','name','is_validate','app_type'))
                 app_objs = company_objs[0].zgld_app_set.filter(company_id=company_id,app_type=1)
 
+                is_validate = False
                 if app_objs: # AI雷达
                     name = app_objs[0].name
                     is_validate =  app_objs[0].is_validate
