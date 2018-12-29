@@ -126,7 +126,7 @@ class zgld_gongzhonghao_app(models.Model):
 #小程序App应用
 class zgld_xiaochengxu_app(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name="小程序授权的后台用户", null=True)
-    company = models.ForeignKey('zgld_company', verbose_name='所属公司')
+    company = models.ForeignKey('zgld_company', verbose_name='所属公司',null=True)
     original_id = models.CharField(verbose_name='小程序原始唯一ID',max_length=64,null=True)
 
     head_img = models.CharField(verbose_name="授权方头像", max_length=256,null=True)

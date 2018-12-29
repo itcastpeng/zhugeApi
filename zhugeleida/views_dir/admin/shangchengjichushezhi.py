@@ -259,6 +259,7 @@ def jiChuSheZhiOper(request, oper_type):
             if xiaochengxuObjs:
                 userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxuApp_id=xiaochengxuid)
                 nowdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
                 if not userObjs:
                     models.zgld_shangcheng_jichushezhi.objects.create(
                         xiaochengxuApp_id=xiaochengxuid,

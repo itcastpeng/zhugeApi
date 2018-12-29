@@ -104,9 +104,6 @@ def open_weixin(request, oper_type):
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
 
-                userprofile_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
-                company_id   =  userprofile_obj.company_id
-
                 app_id =  qywx_config_dict.get('app_id')
                 # app_id = 'wx67e2fde0f694111c'
                 if auth_code:
@@ -172,10 +169,13 @@ def open_weixin(request, oper_type):
                             categories = ''
 
                     if original_id:
-                        obj = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+                        objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
 
-                        if obj:
-                            obj.update(
+                        obj = ''
+                        xiaochengxuApp_id = ''
+                        company_id = None
+                        if objs:
+                            objs.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
                                 original_id=original_id,             # 小程序的原始ID
@@ -187,15 +187,34 @@ def open_weixin(request, oper_type):
                                 name=nick_name,          # 昵称
                                 service_category=categories,  # 服务类目
                             )
+                            xiaochengxuApp_id = objs[0].id
+                            company_id = objs[0].company_id
 
-                            ## 商城基础设置
-                            celery_addSmallProgram.delay(authorization_appid)
-                            # userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
-                            #     xiaochengxuApp_id=authorization_appid)
-                            # if not userObjs:
-                            #     models.zgld_shangcheng_jichushezhi.objects.create(
-                            #         xiaochengxuApp_id=authorization_appid
-                            #     )
+                        else:
+                            obj = models.zgld_xiaochengxu_app.objects.create(
+                                authorization_appid=authorization_appid,  # 授权方appid
+                                authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
+                                original_id=original_id,  # 小程序的原始ID
+                                verify_type_info=verify_type_info,  # 是否 微信认证
+                                principal_name=principal_name,  # 主体名称
+                                qrcode_url=qrcode_url,  # 二维码
+                                head_img=head_img,  # 头像
+                                name=nick_name,  # 昵称
+                                service_category=categories,  # 服务类目
+                            )
+
+                            xiaochengxuApp_id = obj.id
+
+
+                        ## 商城基础设置
+                        # celery_addSmallProgram.delay(authorization_appid)
+                        userObjs = models.zgld_shangcheng_jichushezhi.objects.filter(
+                            xiaochengxuApp_id=xiaochengxuApp_id)
+                        if not userObjs:
+                            models.zgld_shangcheng_jichushezhi.objects.create(
+                                xiaochengxuApp_id=xiaochengxuApp_id,
+                                xiaochengxucompany_id=company_id
+                            )
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
                         response.code = 200
@@ -273,9 +292,14 @@ def open_weixin(request, oper_type):
                             if list:
                                 list_ret = list[0]
                                 template_id = list_ret.get('template_id')
-                                obj.update(
-                                    template_id=template_id
-                                )
+                                if objs:
+                                    objs.update(
+                                        template_id=template_id
+                                    )
+                                else:
+                                    obj.template_id=template_id
+                                    obj.save()
+
 
                             print('---------授权appid: %s , 组合模板并添加 【成功】------------>>' % (authorization_appid))
                         else:
