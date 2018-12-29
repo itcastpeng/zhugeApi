@@ -257,14 +257,16 @@ def article_oper(request, oper_type, o_id):
                 if status == 1:
                     user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
                     data = {}
-                    for obj in user_objs:
-                        _user_id  = obj.id
+                    for _obj in user_objs:
+                        _user_id  = _obj.id
+                        article_id  = obj.id
 
                         remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (title)
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
                         data['user_id'] = ''
                         data['uid'] = _user_id
                         data['action'] = 666
+                        data['article_id'] = article_id
                         action_record(data, remark)  # 此步骤封装到 异步中。
 
 
@@ -372,14 +374,15 @@ def article_oper(request, oper_type, o_id):
                 if status == 1:
                     user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
                     data = {}
-                    for obj in user_objs:
-                        _user_id  = obj.id
+                    for _obj in user_objs:
+                        _user_id  = _obj.id
 
                         remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (title)
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
                         data['user_id'] = ''
                         data['uid'] = _user_id
                         data['action'] = 666
+                        data['article_id'] = article_id
                         action_record(data, remark)  # 此步骤封装到 异步中。
 
                 data = {
