@@ -347,30 +347,33 @@ def open_weixin_gongzhonghao(request, oper_type):
             }
             pre_auth_code_key_name = 'pre_auth_code_%s' % (app_id)
             exist_pre_auth_code = rc.get(pre_auth_code_key_name)
+            # if not exist_pre_auth_code:
 
-            if not exist_pre_auth_code:
-                pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
+            pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
 
-                s = requests.session()
-                s.keep_alive = False  # 关闭多余连接
-                pre_auth_code_ret = s.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            pre_auth_code_ret = s.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
 
-                # pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
-                pre_auth_code_ret = pre_auth_code_ret.json()
-                pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
+            # pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data, data=json.dumps(post_pre_auth_data))
+            pre_auth_code_ret = pre_auth_code_ret.json()
+            pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
 
-                print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
-                if pre_auth_code:
-                    rc.set(pre_auth_code_key_name, pre_auth_code, 1600)
+            print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
 
-                else:
-                    response.code = 400
-                    response.msg = "--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->"
-                    return JsonResponse(response.__dict__)
+            if pre_auth_code:
+                rc.set(pre_auth_code_key_name, pre_auth_code, 1600)
+
             else:
-                pre_auth_code = exist_pre_auth_code
+                response.code = 400
+                response.msg = "获取第三方平台预授权码返回错误"
+                print("--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->")
+                return JsonResponse(response.__dict__)
 
-            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            # else:
+            #     pre_auth_code = exist_pre_auth_code
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)  # 公众号
             qywx_config_dict = ''
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
@@ -378,14 +381,17 @@ def open_weixin_gongzhonghao(request, oper_type):
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
 
-            url = qywx_config_dict.get('authorization_url')
+            leida_http_url = qywx_config_dict.get('domain_urls').get('leida_http_url')
 
             # 生成授权链接
-            redirect_uri = '%s/admin/#/empower/empower_xcx/' % (url)
+            redirect_uri = '%s/admin/#/empower/empower_xcx/' % (leida_http_url)
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (
                 app_id, pre_auth_code, redirect_uri)  # auth_type=3 表示公众号和小程序都展示
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
+
+            print('------- [生成授权链接-公众号] pre_auth_code_url ---------->>', pre_auth_code_url)
+
             response.code = 200
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
@@ -870,6 +876,10 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                         activity_id = int(Content.split('t')[1])
                                     elif Content.startswith('T'):
                                         activity_id = int(Content.split('T')[1])
+
+                                    print('值 activity_id--->',activity_id)
+                                    print('值 customer_id--->',customer_id)
+                                    print('值 openid--->',openid)
 
                                     redPacket_objs = models.zgld_activity_redPacket.objects.select_related('article','activity').filter(customer_id=customer_id,activity_id=activity_id)
 
