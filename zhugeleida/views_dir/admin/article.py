@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
-    ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm
+    ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm,GzhArticleSelectForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 import datetime
@@ -16,6 +16,254 @@ from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.public.common import action_record
+from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
+
+from  django.conf import settings
+from selenium import webdriver
+import time
+import requests
+import re,os
+import random
+
+
+def init_data(article_id, user_id, pid=None, level=1):
+    """
+    获取权限数据
+    :param pid:  权限父级id
+    :return:
+    """
+    result_data = []
+    objs = models.zgld_article_to_customer_belonger.objects.select_related('user').filter(
+        article_id=article_id,
+        customer_parent_id=pid,
+        user_id=user_id,
+        level=level
+    )
+    for obj in objs:
+        print('pid------------> ', pid)
+        print('customer_parent_id------------> ', obj.customer_parent_id, obj.customer_id)
+        if obj.customer_parent_id == obj.customer_id:
+            continue
+
+        # decode_username = base64.b64decode(obj.customer.username)
+        # customer_username = str(decode_username, 'utf-8')
+        customer_id = obj.customer_id
+        customer_username = obj.customer.username
+        customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
+
+        current_data = {
+            'name': customer_username,
+            'id': obj.id,
+            # 'user_id': obj.customer_id
+        }
+        children_data = init_data(article_id, user_id, pid=obj.customer_id, level=level + 1)
+        if children_data:
+            current_data['children'] = children_data
+
+        result_data.append(current_data)
+
+    print('result_data -->', result_data)
+    return result_data
+
+
+# 脉络图查询 调用init_data
+def mailuotu(article_id, q):
+    # children_data = init_data(user_id)
+    # print('children_data--------> ',children_data)
+    # print('q------------------------------> ',q)
+
+    _objs = models.zgld_article_to_customer_belonger.objects.select_related('user', 'article').filter(q)
+
+    _objs_list = _objs.values_list('level').annotate(Count('level'))
+    level_list = []
+    for _obj in _objs_list:
+        level_count = _obj[1]
+        level_list.append(level_count)
+
+    if len(level_list) != 0:
+        max_person_num = max(level_list)
+    else:
+        max_person_num = 0
+
+    # < QuerySet[{'level': 1, 'level__count': 81}, {'level': 2, 'level__count': 49}, {'level': 3, 'level__count': 10}, {
+    #     'level': 4, 'level__count': 9}, {'level': 5, 'level__count': 8}]>
+
+    count_objs = _objs.values('user_id', 'user__username', 'article__title').annotate(Count('user'))
+
+    result_data = []
+    for obj in count_objs:
+        user_id = obj['user_id']
+        username = obj['user__username']
+        print('user_id -->', user_id)
+        print('username -->', username)
+
+        children_data = init_data(article_id, user_id)
+        print('children_data------> ', children_data)
+        tmp = {'name': username}
+        if children_data:
+            tmp['children'] = children_data
+        result_data.append(tmp)
+
+    print('result_data -->', result_data)
+
+    article_title = count_objs[0]['article__title']
+    return article_title, result_data, max_person_num
+
+
+
+# 登录微信公众号，获取登录之后的cookies信息，并保存到本地文本中
+def weChat_login(data):
+
+
+    # 定义一个空的字典，存放cookies内容
+    post = {}
+    # 用webdriver启动谷歌浏览器
+    print("启动浏览器，打开微信公众号登录界面")
+
+    BASE_DIR = os.path.join(settings.BASE_DIR, 'statics','zhugeleida','imgs','xiaochengxu','user_poster')
+
+    print('---->',BASE_DIR)
+
+    option = webdriver.ChromeOptions()
+    # mobileEmulation = {'deviceName': 'iPhone 6'}
+    # option.add_experimental_option('mobileEmulation', mobileEmulation)
+    # driver = webdriver.Chrome(BASE_DIR +'./chromedriver_2.36.exe',chrome_options=option)
+
+
+    driver = webdriver.Chrome(executable_path=BASE_DIR +'./chromedriver_2.36.exe', chrome_options=option)
+
+    # 打开微信公众号登录页面
+    driver.get('https://mp.weixin.qq.com/')
+    # 等待5秒钟
+    time.sleep(5)
+    print("正在输入微信公众号登录账号和密码......")
+    # 清空账号框中的内容
+    driver.find_element_by_xpath("./*//input[@id='account']").clear()
+    # 自动填入登录用户名
+    driver.find_element_by_xpath("./*//input[@id='account']").send_keys(user)
+    # 清空密码框中的内容
+    driver.find_element_by_xpath("./*//input[@id='pwd']").clear()
+    # 自动填入登录密码
+    driver.find_element_by_xpath("./*//input[@id='pwd']").send_keys(password)
+
+    # 在自动输完密码之后需要手动点一下记住我
+    print("请在登录界面点击:记住账号")
+    time.sleep(10)
+    # 自动点击登录按钮进行登录
+    driver.find_element_by_xpath("./*//a[@id='loginBt']").click()
+    # 拿手机扫二维码！
+    print("请拿手机扫码二维码登录公众号")
+    time.sleep(20)
+    print("登录成功")
+    # 重新载入公众号登录页，登录之后会显示公众号后台首页，从这个返回内容中获取cookies信息
+    driver.get('https://mp.weixin.qq.com/')
+    # 获取cookies
+    cookie_items = driver.get_cookies()
+
+    # 获取到的cookies是列表形式，将cookies转成json形式并存入本地名为cookie的文本中
+    for cookie_item in cookie_items:
+        post[cookie_item['name']] = cookie_item['value']
+
+    cookie_str = json.dumps(post)
+    with open('cookie.txt', 'w+', encoding='utf-8') as f:
+        f.write(cookie_str)
+    print("cookies信息已保存到本地")
+
+
+# 爬取微信公众号文章，并存在本地文本中
+def get_content(query):
+    # query为要爬取的公众号名称
+    # 公众号主页
+    url = 'https://mp.weixin.qq.com'
+    # 设置headers
+    header = {
+        "HOST": "mp.weixin.qq.com",
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0"
+    }
+
+    # 读取上一步获取到的cookies
+    with open('cookie.txt', 'r', encoding='utf-8') as f:
+        cookie = f.read()
+    cookies = json.loads(cookie)
+
+    # 登录之后的微信公众号首页url变化为：https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=1849751598，从这里获取token信息
+    response = requests.get(url=url, cookies=cookies)
+    token = re.findall(r'token=(\d+)', str(response.url))[0]
+
+    # 搜索微信公众号的接口地址
+    search_url = 'https://mp.weixin.qq.com/cgi-bin/searchbiz?'
+    # 搜索微信公众号接口需要传入的参数，有三个变量：微信公众号token、随机数random、搜索的微信公众号名字
+    query_id = {
+        'action': 'search_biz',
+        'token': token,
+        'lang': 'zh_CN',
+        'f': 'json',
+        'ajax': '1',
+        'random': random.random(),
+        'query': query,
+        'begin': '0',
+        'count': '5'
+    }
+    # 打开搜索微信公众号接口地址，需要传入相关参数信息如：cookies、params、headers
+    search_response = requests.get(search_url, cookies=cookies, headers=header, params=query_id)
+    # 取搜索结果中的第一个公众号
+    lists = search_response.json().get('list')[0]
+    # 获取这个公众号的fakeid，后面爬取公众号文章需要此字段
+    fakeid = lists.get('fakeid')
+
+    # 微信公众号文章接口地址
+    appmsg_url = 'https://mp.weixin.qq.com/cgi-bin/appmsg?'
+    # 搜索文章需要传入几个参数：登录的公众号token、要爬取文章的公众号fakeid、随机数random
+    query_id_data = {
+        'token': token,
+        'lang': 'zh_CN',
+        'f': 'json',
+        'ajax': '1',
+        'random': random.random(),
+        'action': 'list_ex',
+        'begin': '0',  # 不同页，此参数变化，变化规则为每页加5
+        'count': '5',
+        'query': '',
+        'fakeid': fakeid,
+        'type': '9'
+    }
+    # 打开搜索的微信公众号文章列表页
+    appmsg_response = requests.get(appmsg_url, cookies=cookies, headers=header, params=query_id_data)
+    # 获取文章总数
+    max_num = appmsg_response.json().get('app_msg_cnt')
+    # 每页至少有5条，获取文章总的页数，爬取时需要分页爬
+    num = int(int(max_num) / 5)
+    # 起始页begin参数，往后每页加5
+    begin = 0
+    while num + 1 > 0:
+        query_id_data = {
+            'token': token,
+            'lang': 'zh_CN',
+            'f': 'json',
+            'ajax': '1',
+            'random': random.random(),
+            'action': 'list_ex',
+            'begin': '{}'.format(str(begin)),
+            'count': '5',
+            'query': '',
+            'fakeid': fakeid,
+            'type': '9'
+        }
+        print('正在翻页：--------------', begin)
+
+        # 获取每一页文章的标题和链接地址，并写入本地文本中
+        query_fakeid_response = requests.get(appmsg_url, cookies=cookies, headers=header, params=query_id_data)
+        fakeid_list = query_fakeid_response.json().get('app_msg_list')
+        for item in fakeid_list:
+            content_link = item.get('link')
+            content_title = item.get('title')
+            fileName = query + '.txt'
+            with open(fileName, 'a', encoding='utf-8') as fh:
+                fh.write(content_title + ":\n" + content_link + "\n")
+        num -= 1
+        begin = int(begin)
+        begin += 5
+        time.sleep(2)
 
 
 # 文章管理查询
@@ -107,93 +355,42 @@ def article(request, oper_type):
                     'ret_data': ret_data,
                     'data_count': count,
                 }
+
             return JsonResponse(response.__dict__)
 
+        elif oper_type == 'climb_gzh_article':
+
+            forms_obj = GzhArticleSelectForm(request.GET)
+            if forms_obj.is_valid():
+                company_id = forms_obj.cleaned_data.get('company_id')
+
+                objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+                if objs:
+
+                    authorization_appid = objs[0].authorization_appid
+                    _data = {
+                        'authorizer_appid': authorization_appid,
+                        'company_id': company_id
+                    }
+                    user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+                    ret = user_obj_cla.batchget_article_material()
+
+                    response.code = 301
+                    response.msg = '公众号不存在'
+
+
+
+                else:
+                    response.code = 301
+                    response.msg = '公众号不存在'
+
+
+
+
+
+
     return JsonResponse(response.__dict__)
-
-
-def init_data(article_id, user_id, pid=None, level=1):
-    """
-    获取权限数据
-    :param pid:  权限父级id
-    :return:
-    """
-    result_data = []
-    objs = models.zgld_article_to_customer_belonger.objects.select_related('user').filter(
-        article_id=article_id,
-        customer_parent_id=pid,
-        user_id=user_id,
-        level=level
-    )
-    for obj in objs:
-        print('pid------------> ', pid)
-        print('customer_parent_id------------> ', obj.customer_parent_id, obj.customer_id)
-        if obj.customer_parent_id == obj.customer_id:
-            continue
-
-        # decode_username = base64.b64decode(obj.customer.username)
-        # customer_username = str(decode_username, 'utf-8')
-        customer_id = obj.customer_id
-        customer_username = obj.customer.username
-        customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
-
-        current_data = {
-            'name': customer_username,
-            'id': obj.id,
-            # 'user_id': obj.customer_id
-        }
-        children_data = init_data(article_id, user_id, pid=obj.customer_id, level=level + 1)
-        if children_data:
-            current_data['children'] = children_data
-
-        result_data.append(current_data)
-
-    print('result_data -->', result_data)
-    return result_data
-
-
-# 脉络图查询 调用init_data
-def mailuotu(article_id, q):
-    # children_data = init_data(user_id)
-    # print('children_data--------> ',children_data)
-    # print('q------------------------------> ',q)
-
-    _objs = models.zgld_article_to_customer_belonger.objects.select_related('user', 'article').filter(q)
-
-    _objs_list = _objs.values_list('level').annotate(Count('level'))
-    level_list = []
-    for _obj in _objs_list:
-        level_count = _obj[1]
-        level_list.append(level_count)
-
-    if len(level_list) != 0:
-        max_person_num = max(level_list)
-    else:
-        max_person_num = 0
-
-    # < QuerySet[{'level': 1, 'level__count': 81}, {'level': 2, 'level__count': 49}, {'level': 3, 'level__count': 10}, {
-    #     'level': 4, 'level__count': 9}, {'level': 5, 'level__count': 8}]>
-
-    count_objs = _objs.values('user_id', 'user__username', 'article__title').annotate(Count('user'))
-
-    result_data = []
-    for obj in count_objs:
-        user_id = obj['user_id']
-        username = obj['user__username']
-        print('user_id -->', user_id)
-        print('username -->', username)
-
-        children_data = init_data(article_id, user_id)
-        print('children_data------> ', children_data)
-        tmp = {'name': username}
-        if children_data:
-            tmp['children'] = children_data
-        result_data.append(tmp)
-
-    print('result_data -->', result_data)
-
-    article_title = count_objs[0]['article__title']
-    return article_title, result_data, max_person_num
 
 
 @csrf_exempt

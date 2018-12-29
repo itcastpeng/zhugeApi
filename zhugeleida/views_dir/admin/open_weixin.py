@@ -316,8 +316,6 @@ def open_weixin(request, oper_type):
         # 生成接入的二维码
         elif oper_type == "create_grant_url":
             user_id = request.GET.get('user_id')
-            request.session['user_id'] = user_id
-            print('----request.session userId--->', request.session.get('user_id'))
 
             three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
             qywx_config_dict = ''
@@ -342,23 +340,25 @@ def open_weixin(request, oper_type):
             post_pre_auth_data = {
                 'component_appid' :  app_id
             }
-            exist_pre_auth_code = rc.get('pre_auth_code')
 
-            if not exist_pre_auth_code:
-                pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
-                pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data,
-                                                  data=json.dumps(post_pre_auth_data))
-                pre_auth_code_ret = pre_auth_code_ret.json()
-                pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
-                print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
-                if pre_auth_code:
-                    rc.set('pre_auth_code', pre_auth_code, 1600)
-                else:
-                    response.code = 400
-                    response.msg = "--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->"
-                    return JsonResponse(response.__dict__)
+            # exist_pre_auth_code = rc.get('pre_auth_code')
+            # if not exist_pre_auth_code:
+            pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
+            pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data,
+                                              data=json.dumps(post_pre_auth_data))
+            pre_auth_code_ret = pre_auth_code_ret.json()
+            pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
+            print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
+            if pre_auth_code:
+                rc.set('pre_auth_code', pre_auth_code, 1600)
+
             else:
-                pre_auth_code = exist_pre_auth_code
+                response.code = 400
+                response.msg = "获取第三方平台预授权码返回错误"
+                print("--------- 获取第三方平台 pre_auth_code预授权码 返回错误 ------->")
+                return JsonResponse(response.__dict__)
+            # else:
+            #     pre_auth_code = exist_pre_auth_code
 
             three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)  # 公众号
             qywx_config_dict = ''
@@ -375,6 +375,8 @@ def open_weixin(request, oper_type):
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
             get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=3' % (app_id, pre_auth_code, redirect_uri)   #auth_type=3 表示公众号和小程序都展示
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
+            print('------- [生成授权链接-小程序] pre_auth_code_url ---------->>',pre_auth_code_url)
+
             response.code = 200
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url

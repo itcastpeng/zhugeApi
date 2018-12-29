@@ -401,7 +401,7 @@ class get_customer_gongzhonghao_userinfo(object):
         self.app_id = qywx_config_dict.get('app_id')
         self.app_secret = qywx_config_dict.get('app_secret')
 
-
+    # 获取 authorizer_access_token
     def create_token(self):
 
         objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=self.authorizer_appid)
@@ -426,7 +426,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         return  authorizer_access_token
 
-
+    # 获取 component_access_token
     def create_component_access_token(self):
 
         data_dict = {
@@ -442,6 +442,7 @@ class get_customer_gongzhonghao_userinfo(object):
         return component_access_token
 
 
+    #拉取用户信息
     def get_weixin_api(self):
 
         response = Response.ResponseObj()
@@ -465,6 +466,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         return ret_json
 
+    #拉取用户信息并入库全部信息
     def get_gzh_user_whole_info(self):
         response = Response.ResponseObj()
 
@@ -556,6 +558,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         return response
 
+    #拉取用户信息并入库部分信息
     def get_gzh_customer_is_focus_info(self):
         response = Response.ResponseObj()
         ret_json = self.get_weixin_api()
@@ -584,6 +587,89 @@ class get_customer_gongzhonghao_userinfo(object):
 
 
         return response
+
+    ##获取公众号文章素材
+    def batchget_article_material(self):
+
+        response = Response.ResponseObj()
+        authorizer_access_token = self.create_token()
+
+        get_material_url = 'https://api.weixin.qq.com/cgi-bin/material/batchget_material'
+        # https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738734
+
+        get_material_data = {
+            'access_token': authorizer_access_token
+        }
+
+        post_material_data = {
+            "type": 'news', #图片（image）、视频（video）、语音 （voice）、图文（news）
+            "offset": 0,    #0表示从第一个素材 返回
+            "count": 10     #取值在1到20之间
+        }
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        ret = s.post(get_material_url, params=get_material_data,data=json.dumps(post_material_data))
+
+        ret.encoding = 'utf-8'
+        ret_json = ret.json()
+        print('----------- 【公众号】获取素材列表 接口返回 ---------->>', json.dumps(ret_json))
+
+
+        if 'errcode' not in ret_json:
+
+            # print('----------- 【公众号】获取素材列表 接口返回 ---------->>', json.dumps(ret_json))
+            # headimgurl = ret_json['headimgurl']  #
+            # token = account.get_token(account.str_encrypt(openid))
+            #
+            # customer_objs = models.zgld_customer.objects.filter(openid=openid)
+            #
+            # obj = ''
+            # if customer_objs:
+            #     customer_objs.update(
+            #         company_id=self.company_id,
+            #         token=token,
+            #         openid=openid,
+            #         user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+            #         username=customer_name,
+            #         sex=sex,
+            #         province=province,
+            #         city=city,
+            #         country=country,
+            #         headimgurl=headimgurl,
+            #     )
+            #     customer_id = customer_objs[0].id
+            #     print('---------- 公众号-新用户修改成功 get_gzh_user_whole_info ---->')
+            #
+            # else:
+            #     obj = models.zgld_customer.objects.create(
+            #         company_id=self.company_id,
+            #         token=token,
+            #         openid=openid,
+            #         user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+            #         username=customer_name,
+            #         sex=sex,
+            #         province=province,
+            #         city=city,
+            #         country=country,
+            #         headimgurl=headimgurl,
+            #     )
+            #     customer_id = obj.id
+            #     print('---------- 公众号-新用户创建成功 get_gzh_user_whole_info ---->')
+
+
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+
+
+        else:
+            errcode = ret_json.get('errcode')
+            errmsg = ret_json.get('errmsg')
+            response.code = errcode
+            print('---------【公众号】获取素材列表 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+        return response
+
 
 
 
