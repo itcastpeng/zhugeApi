@@ -1218,11 +1218,6 @@ def user_forward_send_activity_redPacket(request):
                             }
                             Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, _data)
 
-
-
-
-
-
                     else:
                         response.code = 301
                         response.msg = '应发数<=已发数'
