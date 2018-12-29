@@ -1415,8 +1415,7 @@ def user_forward_send_activity_redPacket(request):
 
                     response.code = 301
                     response.msg = '转发查看数未达到阈值'
-                    print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num,
-                          '|', already_send_redPacket_num)
+                    print('------ 活动发红包记录表 应发数<=已发数 shoudle_send_num|send_redPacket_num ----->>', reach_forward_num,'|', already_send_redPacket_num)
 
         else:
             response.code = 301

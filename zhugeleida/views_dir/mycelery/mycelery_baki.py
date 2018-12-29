@@ -1101,7 +1101,7 @@ def user_forward_send_activity_redPacket(request):
 
             forward_read_num = models.zgld_activity_redPacket.objects.filter(
                 customer_parent_id=parent_id, activity_id=activity_id, create_date__lte=end_time,
-                create_date__gte=start_time).values_list('customer_id').distinct().count()
+                create_date__gte=start_time).values_list('customer_id',flat=True).distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
                 customer_parent_id=parent_id, article_id=article_id, create_date__lte=end_time,
@@ -1143,18 +1143,18 @@ def user_forward_send_activity_redPacket(request):
                         if is_limit_area: # True 地域限制条件开启了 并且 获取到了用户的具体位置
 
                             limit_area = json.loads(limit_area)
-                            for area in limit_area:
+                            for area in limit_area.get('limit_area_list'):
                                 if area in formatted_address: # 如果本区域满足发放
                                     area_Flag = True
                                     _send_log_dict = {
-                                        'type': '有地域限制【在发放范围内】',
+                                        'type': '数量满足|有地域限制【在发放范围内】',
                                         'activity_single_money': '发送的地域area: %s | 客户具体地址: formatted_address: %s' % (area,formatted_address),
                                         'send_time': now_time,
                                     }
 
                             if not area_Flag:
                                 _send_log_dict = {
-                                    'type': '有地域限制【没有在发放范围内】',
+                                    'type': '数量满足|有地域限制【没有在发放范围内】',
                                     'activity_single_money': '客户具体地址: formatted_address: %s' % (formatted_address),
                                     'send_time': now_time,
                                 }
@@ -1163,7 +1163,7 @@ def user_forward_send_activity_redPacket(request):
                         else: # 没有开启限制
                             area_Flag = True
 
-                        time_Flag = ''
+                        time_Flag = False
                         if reach_stay_time == 0: # 代表没有时间秒数的限制,立即发放这个用户的红包
                             time_Flag = True
 
@@ -1171,7 +1171,7 @@ def user_forward_send_activity_redPacket(request):
                             time_Flag = False
                             if article_access_log_id:
                                  objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
-                                 stay_time = ''
+                                 stay_time = None
                                  if objs:
                                      obj = objs[0]
                                      stay_time =  obj.stay_time
@@ -1179,14 +1179,14 @@ def user_forward_send_activity_redPacket(request):
                                         time_Flag = True
 
                                  _send_log_dict = {
-                                    'type': '有时间限制|Time_Flag: %s' % (time_Flag),
+                                    'type': '数量满足|有时间限制|Time_Flag: %s' % (time_Flag),
                                     'activity_single_money': 'Log_id:%s | 单次查看时间:%s | 时间限制: %s' % (article_access_log_id,stay_time,reach_stay_time),
                                     'send_time': now_time,
                                  }
 
                             else:
                                 _send_log_dict = {
-                                    'type': '有时间限制|Time_Flag: %s' % (time_Flag),
+                                    'type': '数量满足|有时间限制|Time_Flag: %s' % (time_Flag),
                                     'activity_single_money': '无log_id | 无统计单次阅读时间 | 时间限制: %s' % (reach_stay_time),
                                     'send_time': now_time,
                                 }
@@ -1201,10 +1201,10 @@ def user_forward_send_activity_redPacket(request):
                         if area_Flag and time_Flag: # 满足发送的时间和地区限制
 
                             print(
-                                 '---- 【满足发红包条件】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
+                                 '---- 【满足发红包条件-时间和地区限制】forward_read_num[转发被查看数] | reach_forward_num[需满足的阈值] ----->>',
                                  forward_read_num, "|", reach_forward_num)
                             print(
-                                 '---- 【满足发红包条件】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
+                                 '---- 【满足发红包条件-时间和地区限制】shoudle_send_num[实发数] | already_send_redPacket_num[已发数] ----->>',
                                  shoudle_send_num, "|",
                                  already_send_redPacket_num)
 
