@@ -1204,9 +1204,6 @@ def user_send_gongzhonghao_template_msg(request):
                 response.msg = "企业用户发送模板消息失败"
 
 
-
-
-
     else:
         response.msg = "客户不存在"
         response.code = 301
@@ -1236,7 +1233,7 @@ def get_latest_audit_status_and_release_code(request):
     return JsonResponse(response.__dict__)
 
 
-# 关注发红包和转发文章满足就发红包
+# 转发文章满足就发红包
 @csrf_exempt
 def user_forward_send_activity_redPacket(request):
     response = Response.ResponseObj()
@@ -1274,7 +1271,7 @@ def user_forward_send_activity_redPacket(request):
 
             forward_read_num = models.zgld_activity_redPacket.objects.filter(
                 customer_parent_id=parent_id, activity_id=activity_id, create_date__lte=end_time,
-                create_date__gte=start_time).values_list('customer_id').distinct().count()
+                create_date__gte=start_time).values_list('customer_id',flat=True).distinct().count()
 
             forward_stay_time_dict = models.zgld_article_to_customer_belonger.objects.filter(
                 customer_parent_id=parent_id, article_id=article_id, create_date__lte=end_time,
@@ -1574,7 +1571,7 @@ def bufa_send_activity_redPacket(request):
     return JsonResponse(response.__dict__)
 
 
-# 关注发红包和转发文章满足就发红包
+# 关注发红包发红包
 @csrf_exempt
 def user_focus_send_activity_redPacket(request):
     response = Response.ResponseObj()
@@ -1940,27 +1937,35 @@ def binding_article_customer_relate(request):
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4]).order_by('-create_date')
     # # 活动并且活动开通中
     if activity_objs:
-        activity_id = activity_objs[0].id
-        print('------ 此文章有活动 article_id：----->', article_id)
-        redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id, activity_id=activity_id,
-                                                                       customer_id=customer_id)
+        activity_obj = activity_objs[0]
 
-        if redPacket_objs:
-            print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (article_id, activity_id, customer_id))
+        start_time = activity_obj.start_time
+        end_time = activity_obj.end_time
+        now_date_time = datetime.datetime.now()
+
+        if now_date_time >= start_time and now_date_time <= end_time:  # 活动开启并活动在进行中
+
+            activity_id = activity_objs[0].id
+            print('------ 此文章有活动 article_id：----->', article_id)
+            redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id,activity_id=activity_id,
+                                                                           customer_id=customer_id)
+
+            if redPacket_objs:
+                print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (article_id, activity_id, customer_id))
 
 
-        else:
-            print('----- 活动发红包表数据【不存在并创建】 article_id:%s | activity_id:%s | customer_id: %s | company_id: %s ----->>' % (
-                article_id, activity_id, customer_id, company_id))
+            else:
+                print('----- 活动发红包表数据【不存在并创建】 article_id:%s | activity_id:%s | customer_id: %s | company_id: %s ----->>' % (
+                    article_id, activity_id, customer_id, company_id))
 
-            models.zgld_activity_redPacket.objects.create(article_id=article_id,
-                                                          activity_id=activity_id,
-                                                          customer_id=customer_id,
-                                                          customer_parent_id=parent_id,
-                                                          company_id=company_id,
-                                                          )
-            response.code = 200
-            response.msg = "绑定成功"
+                models.zgld_activity_redPacket.objects.create(article_id=article_id,
+                                                              activity_id=activity_id,
+                                                              customer_id=customer_id,
+                                                              customer_parent_id=parent_id,
+                                                              company_id=company_id,
+                                                              )
+                response.code = 200
+                response.msg = "绑定成功"
 
 
 

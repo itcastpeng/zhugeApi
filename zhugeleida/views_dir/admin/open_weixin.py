@@ -104,7 +104,7 @@ def open_weixin(request, oper_type):
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
 
-                userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
+                userprofile_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
                 company_id   =  userprofile_obj.company_id
 
                 app_id =  qywx_config_dict.get('app_id')
@@ -209,7 +209,7 @@ def open_weixin(request, oper_type):
                             'action': 'add',
                             'requestdomain': ['https://api.zhugeyingxiao.com'],
                             'wsrequestdomain': ['wss://api.zhugeyingxiao.com'],
-                            'uploaddomain': ['https://statics.api.zhugeyingxiao.com','https://statics.api.zhugeyingxiao.com'],
+                            'uploaddomain': ['https://statics.api.zhugeyingxiao.com','https://api.zhugeyingxiao.com'],
                             'downloaddomain': ['https://api.zhugeyingxiao.com', 'https://statics.api.zhugeyingxiao.com']
                         }
                         post_domain_url = 'https://api.weixin.qq.com/wxa/modify_domain'

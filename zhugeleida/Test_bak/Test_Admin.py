@@ -177,17 +177,17 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 ############################## 公众号授权 #######################################
-
-url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wx84390d5be4304d80'  # 获取 关联第三方的二维码
-get_data['signature']= '4e59771150050f61a4830034fda6d9d1530128b4'
-get_data['timestamp']= '1545795939'
-get_data['nonce']= '1078398626'
-get_data['openid']= 'ob8Vy537Y0L0fHztITCKVjP9vf58'
-get_data['encrypt_type']= 'aes'
-get_data['msg_signature']= '18601dac3d3e69d6e7c47e70c8a7b6bcb134e029'
-post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_a8dc5e05049a]]></ToUserName>\x0A    <Encrypt><![CDATA[4YCLr9zMK2dB+kopMLXYojMBDrsEMKtqHY4ABT7p/Ffjea5+BamGG4upf4rfZZziyn3JSxVPpVroIYTNRdY0Yirk9j5fkHOJA3CWjjdk/ouVWSeI4hZhsHT0lLmORS/txiA6J2fmMxzx81CLnuEVC51eoU8eSi+XhshCzbzFOIYHf6YqpRjkb24xPLoKc696zvDdaYSytN/PUfEAeaR/Mk1uOyfuKhevxiH3uwj8qH2Caj9CTTSG8O0aebv6Dbao3Dcxx3/SO3j4a3IsF8735sM7KmopAwL/YnGxhwYAbxX8Kw3k2EnmBBHBFYYGGqaUTG/IreB9q42WxG4vtNskTxqX0yEnHpN8PtG+Yaa1otKq5YaO70dB1OhJ3cKivK0MpO36JGfT3QfYs6yFZYQymTEdfwIvJpwFUHeLCZQAhc0=]]></Encrypt>\x0A</xml>'
-
-ret = requests.post(url, params=get_data,data=post_data)
+#
+# url = ip + '/zhugeleida/admin/open_weixin_gongzhonghao/callback/wx84390d5be4304d80'  # 获取 关联第三方的二维码
+# get_data['signature']= '4e59771150050f61a4830034fda6d9d1530128b4'
+# get_data['timestamp']= '1545795939'
+# get_data['nonce']= '1078398626'
+# get_data['openid']= 'ob8Vy537Y0L0fHztITCKVjP9vf58'
+# get_data['encrypt_type']= 'aes'
+# get_data['msg_signature']= '18601dac3d3e69d6e7c47e70c8a7b6bcb134e029'
+# post_data['xml'] = '<xml>\x0A    <ToUserName><![CDATA[gh_a8dc5e05049a]]></ToUserName>\x0A    <Encrypt><![CDATA[4YCLr9zMK2dB+kopMLXYojMBDrsEMKtqHY4ABT7p/Ffjea5+BamGG4upf4rfZZziyn3JSxVPpVroIYTNRdY0Yirk9j5fkHOJA3CWjjdk/ouVWSeI4hZhsHT0lLmORS/txiA6J2fmMxzx81CLnuEVC51eoU8eSi+XhshCzbzFOIYHf6YqpRjkb24xPLoKc696zvDdaYSytN/PUfEAeaR/Mk1uOyfuKhevxiH3uwj8qH2Caj9CTTSG8O0aebv6Dbao3Dcxx3/SO3j4a3IsF8735sM7KmopAwL/YnGxhwYAbxX8Kw3k2EnmBBHBFYYGGqaUTG/IreB9q42WxG4vtNskTxqX0yEnHpN8PtG+Yaa1otKq5YaO70dB1OhJ3cKivK0MpO36JGfT3QfYs6yFZYQymTEdfwIvJpwFUHeLCZQAhc0=]]></Encrypt>\x0A</xml>'
+#
+# ret = requests.post(url, params=get_data,data=post_data)
 
 
 
@@ -492,7 +492,10 @@ ret = requests.post(url, params=get_data,data=post_data)
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
+url =  ip + '/zhugeleida/admin/article/climb_gzh_article'  # 获取产品的列表
+get_data['company_id'] = 2
 
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 

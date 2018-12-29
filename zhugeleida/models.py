@@ -906,9 +906,9 @@ class zgld_activity_redPacket(models.Model):
     company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
 
 
-    status_choices = ( (1,'已发(成功)'),
+    status_choices = ( (1,'已发(发送成功)'),
                        (2,'未发'),
-                       (3,'已发(失败)'),
+                       (3,'已发(发送失败)'),
                        (4,'补发)'),
                      )
     status = models.SmallIntegerField(verbose_name='[红包]发放状态',default=2,choices=status_choices,null=True)
@@ -930,7 +930,7 @@ class zgld_activity_redPacket(models.Model):
 
     class Meta:
         unique_together = [
-            ('article','customer'),
+            ('article','customer','activity')
         ]
         verbose_name_plural = "活动发红包记录表"
         app_label = "zhugeleida"
