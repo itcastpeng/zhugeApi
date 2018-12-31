@@ -333,7 +333,7 @@ def article(request, oper_type):
                     }
 
                     user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-                    _response = user_obj_cla.batchget_article_material()
+                    _response = user_obj_cla.get_material()
 
                 response.code = 200
                 response.msg = '获取成功'
