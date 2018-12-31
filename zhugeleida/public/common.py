@@ -391,6 +391,8 @@ class get_customer_gongzhonghao_userinfo(object):
         self.count = data.get('count')   # length
         self.offset = data.get('offset') # current_page
 
+        self.media_id = data.get('media_id')
+
 
         print('----->> authorizer_appid',self.authorizer_appid)
         print('----->> openid',self.openid)
@@ -593,7 +595,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         return response
 
-    ##获取公众号文章素材
+    ##获取公众号文章素材列表
     def batchget_article_material(self):
 
         response = Response.ResponseObj()
@@ -622,6 +624,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
 
         if 'errcode' not in ret_json:
+
             response.data = ret_json
             response.code = 200
             response.msg = '获取成功'
@@ -635,6 +638,45 @@ class get_customer_gongzhonghao_userinfo(object):
 
         return response
 
+    ## 获取永久素材
+    def  get_material(self):
+
+        response = Response.ResponseObj()
+        authorizer_access_token = self.create_token()
+
+        get_material_url = 'https://api.weixin.qq.com/cgi-bin/material/get_material'
+
+        get_material_data = {
+            'access_token': authorizer_access_token
+        }
+
+        post_material_data = {
+            "media_id": self.media_id
+        }
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        ret = s.post(get_material_url, params=get_material_data, data=json.dumps(post_material_data))
+
+        ret.encoding = 'utf-8'
+        ret_json = ret.json()
+        print('----------- 【公众号】获取永久素材 接口返回 ---------->>', json.dumps(ret_json))
+
+
+        if 'errcode' not in ret_json:
+
+            response.data = ret_json
+            response.code = 200
+            response.msg = '获取成功'
+
+        else:
+            errcode = ret_json.get('errcode')
+            errmsg = ret_json.get('errmsg')
+            response.code = errcode
+            response.msg = errmsg
+            print('---------【公众号】获取永久素材 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+        return response
 
 
 

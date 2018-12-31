@@ -847,6 +847,7 @@ class zgld_article(models.Model):
     insert_ads = models.TextField(verbose_name='插入广告语',null=True)
     plugin_report = models.ForeignKey('zgld_plugin_report', verbose_name="报名的插件", null=True)
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
+    media_id = models.CharField(verbose_name="素材ID", max_length=128, null=True)
 
 
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
