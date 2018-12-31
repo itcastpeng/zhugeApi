@@ -376,8 +376,8 @@ def article(request, oper_type):
                     _data = {
                         'authorizer_appid': authorization_appid,
                         'company_id': company_id,
-                        'count' : length - 1 ,
-                        'offset' : current_page,
+                        'count' : length,
+                        'offset' : current_page - 1,
                     }
                     user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
                     response = user_obj_cla.batchget_article_material()
