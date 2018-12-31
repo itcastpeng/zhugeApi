@@ -309,7 +309,7 @@ def article(request, oper_type):
         if oper_type == 'sync_gzh_article':
 
             company_id = request.GET.get('company_id')
-            media_id_list = request.GET.get('media_id_list')
+            media_id_list = request.POST.get('media_id_list')
             _form_data = {
                 'company_id' : company_id,
                 'media_id_list' : media_id_list
@@ -338,10 +338,9 @@ def article(request, oper_type):
                 response.code = 200
                 response.msg = '获取成功'
 
-
-
-
-
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 
