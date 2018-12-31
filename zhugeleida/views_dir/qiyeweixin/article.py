@@ -47,6 +47,7 @@ def article(request, oper_type):
 
             q = conditionCom(request_data, field_dict)
             q.add(Q(**{'company_id': company_id}), Q.AND)
+            q.add(Q(**{'status': 1 }), Q.AND)
 
             tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
             if tag_list:
