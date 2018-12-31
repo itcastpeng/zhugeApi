@@ -387,6 +387,11 @@ class get_customer_gongzhonghao_userinfo(object):
         self.authorizer_appid = data.get('authorizer_appid')
         self.openid = data.get('openid')
         self.company_id = data.get('company_id')
+
+        self.count = data.get('count')   # length
+        self.offset = data.get('offset') # current_page
+
+
         print('----->> authorizer_appid',self.authorizer_appid)
         print('----->> openid',self.openid)
         print('----->> company_id',self.company_id)
@@ -603,8 +608,8 @@ class get_customer_gongzhonghao_userinfo(object):
 
         post_material_data = {
             "type": 'news', #图片（image）、视频（video）、语音 （voice）、图文（news）
-            "offset": 0,    #0表示从第一个素材 返回
-            "count": 10     #取值在1到20之间
+            "offset": self.offset,    #0表示从第一个素材 返回
+            "count": self.count     #取值在1到20之间
         }
 
         s = requests.session()
@@ -617,55 +622,15 @@ class get_customer_gongzhonghao_userinfo(object):
 
 
         if 'errcode' not in ret_json:
-
-            # print('----------- 【公众号】获取素材列表 接口返回 ---------->>', json.dumps(ret_json))
-            # headimgurl = ret_json['headimgurl']  #
-            # token = account.get_token(account.str_encrypt(openid))
-            #
-            # customer_objs = models.zgld_customer.objects.filter(openid=openid)
-            #
-            # obj = ''
-            # if customer_objs:
-            #     customer_objs.update(
-            #         company_id=self.company_id,
-            #         token=token,
-            #         openid=openid,
-            #         user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-            #         username=customer_name,
-            #         sex=sex,
-            #         province=province,
-            #         city=city,
-            #         country=country,
-            #         headimgurl=headimgurl,
-            #     )
-            #     customer_id = customer_objs[0].id
-            #     print('---------- 公众号-新用户修改成功 get_gzh_user_whole_info ---->')
-            #
-            # else:
-            #     obj = models.zgld_customer.objects.create(
-            #         company_id=self.company_id,
-            #         token=token,
-            #         openid=openid,
-            #         user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-            #         username=customer_name,
-            #         sex=sex,
-            #         province=province,
-            #         city=city,
-            #         country=country,
-            #         headimgurl=headimgurl,
-            #     )
-            #     customer_id = obj.id
-            #     print('---------- 公众号-新用户创建成功 get_gzh_user_whole_info ---->')
-
-
-            s = requests.session()
-            s.keep_alive = False  # 关闭多余连接
-
+            response.data = ret_json
+            response.code = 200
+            response.msg = '获取成功'
 
         else:
             errcode = ret_json.get('errcode')
             errmsg = ret_json.get('errmsg')
             response.code = errcode
+            response.msg = errmsg
             print('---------【公众号】获取素材列表 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
 
         return response

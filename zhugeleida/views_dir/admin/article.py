@@ -356,14 +356,16 @@ def article(request, oper_type):
                     'data_count': count,
                 }
 
-            return JsonResponse(response.__dict__)
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
-        elif oper_type == 'climb_gzh_article':
+        elif oper_type == 'climb_gzh_article_list':
 
             forms_obj = GzhArticleSelectForm(request.GET)
             if forms_obj.is_valid():
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
+                current_page = forms_obj.cleaned_data.get('current_page')
+                length = forms_obj.cleaned_data.get('length')
                 company_id = forms_obj.cleaned_data.get('company_id')
 
                 objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
@@ -378,18 +380,15 @@ def article(request, oper_type):
                         'offset' : current_page,
                     }
                     user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-                    ret = user_obj_cla.batchget_article_material()
-
-                    response.code = 301
-                    response.msg = '公众号不存在'
-
-
+                    response = user_obj_cla.batchget_article_material()
 
                 else:
-                    response.code = 301
+                    response.code = 302
                     response.msg = '公众号不存在'
 
-
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 
