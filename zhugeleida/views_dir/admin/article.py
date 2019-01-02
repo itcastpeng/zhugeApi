@@ -735,8 +735,7 @@ def article_oper(request, oper_type, o_id):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                objs = models.zgld_article.objects.select_related('user', 'company', 'plugin_report').filter(
-                    id=article_id)
+                objs = models.zgld_article.objects.select_related('user', 'company', 'plugin_report').filter(id=article_id)
                 count = objs.count()
 
                 # 获取所有数据
@@ -784,6 +783,7 @@ def article_oper(request, oper_type, o_id):
                         'insert_ads': insert_ads,  # 插入的广告语
 
                     })
+
                 response.code = 200
                 response.data = {
                     'ret_data': ret_data,
