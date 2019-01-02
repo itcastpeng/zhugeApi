@@ -350,7 +350,8 @@ def article(request, oper_type):
                         content = news_item_dict.get('content')  # 封面图
                         cover_picture =  news_item_dict.get('thumb_url') #  封面图
                         if cover_picture:
-                            cover_picture = deal_gzh_picture_url(cover_picture)
+                            cover_picture = deal_gzh_picUrl_to_local(cover_picture)
+
 
                         if content:
                             content = deal_gzh_picture_url(content)
@@ -364,12 +365,13 @@ def article(request, oper_type):
                             'cover_picture': cover_picture
                         }
                         models.zgld_article.objects.create(**dict_data)
+                        response.code = 200
+                        response.msg = '同步成功'
 
                     else:
                         response = _response
 
-                response.code = 200
-                response.msg = '获取成功'
+
 
             else:
                 response.code = 301
@@ -1310,3 +1312,19 @@ def deal_gzh_picture_url(content):
 
     return  content
 
+def deal_gzh_picUrl_to_local(url):
+
+    print('-----【公众号】 发送的图片 PicUrl ---->>', url)
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    html = s.get(url)
+
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+    filename = "/article_%s.jpg" % (now_time)
+
+    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article')  + filename
+    with open(file_dir, 'wb') as file:
+        file.write(html.content)
+
+
+    return  file_dir

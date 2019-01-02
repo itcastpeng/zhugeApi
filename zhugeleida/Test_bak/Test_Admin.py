@@ -502,7 +502,7 @@ url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列�
 get_data['company_id'] = 2
 post_data['media_id_list'] = json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
 
-ret = requests.post(url, data = post_data ,params=get_data)
+ret = requests.post(url, data=post_data ,params=get_data)
 
 
 #############################################################################################
