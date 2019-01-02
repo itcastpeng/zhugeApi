@@ -829,7 +829,7 @@ class zgld_article(models.Model):
     status_choices = ( (1,'已发'),
                        (2,'未发'),
                      )
-    status = models.SmallIntegerField(default=2, verbose_name='文章状态', choices=status_choices)
+    status = models.SmallIntegerField(default=1, verbose_name='文章状态', choices=status_choices)
     source_choices = ( (1,'原创'),
                        (2,'转载'),
                      )

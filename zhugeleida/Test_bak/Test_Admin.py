@@ -492,17 +492,17 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-# url =  ip + '/zhugeleida/admin/article/climb_gzh_article_list'  # 获取产品的列表
-# get_data['company_id'] = 2
-#
-# ret = requests.get(url, data = post_data ,params=get_data)
-
-
-url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
+url =  ip + '/zhugeleida/admin/article/climb_gzh_article_list'  # 获取产品的列表
 get_data['company_id'] = 2
-post_data['media_id_list'] = json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
 
-ret = requests.post(url, data = post_data ,params=get_data)
+ret = requests.get(url, data = post_data ,params=get_data)
+
+
+# url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
+# get_data['company_id'] = 2
+# post_data['media_id_list'] = json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
 
 
 #############################################################################################
