@@ -275,9 +275,13 @@ def article(request, oper_type):
                             thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
                             thumb_url = deal_gzh_picture_url(thumb_url)
 
+                            update_time = item.get('update_time')
+                            ltime =  time.localtime(update_time)
+                            update_time = time.strftime('%Y-%m-%d %H:%M:%S',ltime)
+
                             data  = {
                                 'media_id' : media_id,
-                                'update_time' : item.get('update_time'),
+                                'update_time' : update_time,
                                 'title' :  item.get('content').get('news_item')[0].get('title'),
                                 'thumb_url' : thumb_url,
                                 'digest' :  item.get('content').get('news_item')[0].get('digest'),
