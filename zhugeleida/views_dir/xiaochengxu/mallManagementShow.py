@@ -264,6 +264,7 @@ def mallManage_oper(request, oper_type):
                 response.msg = "咨询商品返回成功"
 
 
+
         elif oper_type == 'forward_product':
 
             product_id = request.GET.get('product_id')

@@ -427,6 +427,9 @@ def activity_manage(request, oper_type):
                         customer_username = obj.username
                         customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
 
+                        province = obj.province if obj.province else ''
+                        city =  obj.city if obj.city else ''
+
                         ret_data.append({
                             'id': customer_id,
                             'customer_username': customer_username,
@@ -434,7 +437,7 @@ def activity_manage(request, oper_type):
                             'customer_sex_text': obj.get_sex_display() or '',  # 性别
                             'customer_sex': obj.sex or '',  # 客户的头像
 
-                            'area': obj.province + ' ' + obj.city,  # 地区
+                            'area': province + ' ' + city,  # 地区
                             'is_receive_redPacket': obj.is_receive_redPacket,  #   (0, '没有发送过关注红包'), (1, '发送了关注红包')
                             'is_receive_redPacket_text': obj.get_is_receive_redPacket_display(),  # (0, '取消订阅该公众号'), (1, '已经订阅该公众号')
 
