@@ -244,6 +244,22 @@ class MyarticleForm(forms.Form):
 
 
 
+class SyncMyarticleForm(forms.Form):
+    media_id_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '素材列表不能为空'
+        }
+    )
+
+    company_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '公司ID不存在'
+        }
+    )
+
+
 # 判断是否是数字
 class ThreadPictureForm(forms.Form):
     customer_id = forms.CharField(

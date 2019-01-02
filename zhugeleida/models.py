@@ -33,6 +33,12 @@ class zgld_company(models.Model):
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     is_customer_unique = models.BooleanField(verbose_name="客户(通讯录)唯一性", default=False)
 
+    account_balance = models.IntegerField(verbose_name='账户余额', null=True, default=0)
+    leiji_chongzhi = models.IntegerField(verbose_name='累计充值', null=True, default=0)
+    leiji_xiaofei = models.IntegerField(verbose_name='累计消费', null=True, default=0)
+    gzh_notice_qrcode = models.CharField(verbose_name="公众号二维码(绑定管理员)", max_length=128, null=True)
+
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -56,7 +62,7 @@ class zgld_three_service_setting(models.Model):
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=0)
 
-
+##公司官网模板
 class zgld_website_template(models.Model):
     name = models.CharField(verbose_name="公司名称", max_length=128)
     template_content = models.TextField(verbose_name='官网内容',default='[]')
@@ -65,8 +71,6 @@ class zgld_website_template(models.Model):
     class Meta:
         verbose_name_plural = "公司官网模板"
         app_label = "zhugeleida"
-
-
 
 
 #企业App应用
@@ -449,7 +453,6 @@ class zgld_user_feedback(models.Model):
         app_label = "zhugeleida"
 
 
-
 # #公司产品
 class zgld_product(models.Model):
     product_status_choices = (
@@ -651,8 +654,6 @@ class zgld_follow_info(models.Model):
         app_label = "zhugeleida"
 
 
-
-
 # 用户被赞【是否靠谱】
 class zgld_up_down(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='被赞的用户')
@@ -748,7 +749,9 @@ class zgld_accesslog(models.Model):
         (14,'查看文章'),
         (15,'转发文章到朋友'),
         (16,'转发文章到朋友圈'),
-        (17,'报名活动')
+        (17,'报名活动'),
+        (18,'下单成功\取消订单')
+
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
@@ -789,8 +792,6 @@ class zgld_chatinfo(models.Model):
         app_label = "zhugeleida"
 
 
-
-
 #公众号-模板文章详细表
 class zgld_template_article(models.Model):
 
@@ -828,8 +829,9 @@ class zgld_article(models.Model):
     summary = models.CharField(verbose_name='文章摘要', max_length=255)
     status_choices = ( (1,'已发'),
                        (2,'未发'),
+                       (3,'删除'), # 逻辑删除
                      )
-    status = models.SmallIntegerField(default=2, verbose_name='文章状态', choices=status_choices)
+    status = models.SmallIntegerField(default=1, verbose_name='文章状态', choices=status_choices)
     source_choices = ( (1,'原创'),
                        (2,'转载'),
                      )
@@ -847,8 +849,7 @@ class zgld_article(models.Model):
     insert_ads = models.TextField(verbose_name='插入广告语',null=True)
     plugin_report = models.ForeignKey('zgld_plugin_report', verbose_name="报名的插件", null=True)
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
-
-
+    media_id = models.CharField(verbose_name="素材ID", max_length=128, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
     class Meta:
@@ -896,9 +897,6 @@ class zgld_article_activity(models.Model):
         app_label = "zhugeleida"
 
 
-
-
-
 # 公众号-活动发红包记录表
 class zgld_activity_redPacket(models.Model):
     article = models.ForeignKey('zgld_article', verbose_name='文章',null=True)
@@ -936,7 +934,6 @@ class zgld_activity_redPacket(models.Model):
         app_label = "zhugeleida"
 
 
-
 #公众号-文章标签表
 class zgld_article_tag(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile',verbose_name="标签所属用户",null=True)
@@ -946,6 +943,7 @@ class zgld_article_tag(models.Model):
     class Meta:
         verbose_name_plural = "文章标签表"
         app_label = "zhugeleida"
+
 
 #公众号-文章和查看客户之间的绑定关系表
 class zgld_article_to_customer_belonger(models.Model):
@@ -1031,6 +1029,7 @@ class zgld_plugin_report(models.Model):
         verbose_name_plural = "插件-报名插件"
         app_label = "zhugeleida"
 
+
 # 公众号-报名的客户
 class zgld_report_to_customer(models.Model):
     # customer = models.ForeignKey('zgld_customer', verbose_name="报名的客户", null=True)
@@ -1101,6 +1100,7 @@ class zgld_speech_details_management(models.Model):
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     userProfile = models.ForeignKey(to='zgld_admin_userprofile', verbose_name='用户名称', null=True, blank=True)
 
+
 # 小程序 - 商城基础设置
 class zgld_shangcheng_jichushezhi(models.Model):
     shangChengName = models.CharField(verbose_name='商城名称', max_length=32, default='商城')
@@ -1120,6 +1120,7 @@ class zgld_shangcheng_jichushezhi(models.Model):
     xiaochengxucompany = models.ForeignKey(to='zgld_company', verbose_name='公司名称', null=True, blank=True)
     zhengshu = models.TextField(verbose_name='证书', null=True, blank=True)
     createDate = models.DateTimeField(verbose_name="创建时间", null=True, blank=True)
+
 
 # 小程序 - 商品分类管理
 class zgld_goods_classification_management(models.Model):
@@ -1217,7 +1218,7 @@ class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
     remark = models.TextField(verbose_name='备注', null=True)
 
 
-# 发放红包
+# 发放红包消费记录表
 class zgld_red_envelope_to_issue(models.Model):
     wxappid = models.CharField(verbose_name='公众号appid', max_length=32, null=True, blank=True)
     mch_id = models.CharField(verbose_name='商户号', max_length=32, null=True, blank=True)

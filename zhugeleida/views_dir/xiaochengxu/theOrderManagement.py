@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm
 import json, base64, datetime
 from django.db.models import Q
-
+from zhugeleida.public.common import action_record
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -180,10 +180,25 @@ def theOrderOper(request, oper_type, o_id):
 
         # 取消订单
         elif oper_type == 'CancelTheOrder':
+            user_id = request.GET.get('user_id')
+            u_id = request.GET.get('u_id')
             orderObjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=o_id)
             status = int(orderObjs[0].theOrderStatus)
             if status and (status == 1 or status == 11):
                 orderObjs.update(theOrderStatus=10)
+                goodsName = orderObjs[0].shangpinguanli.goodsName
+                remark = '取消了【%s】的订单' % (goodsName)
+                data = {}
+                data['uid'] = u_id
+                data['user_id'] = user_id
+                data['action'] = 18
+                action_record(data, remark)
+
+                response.code = 200
+                response.msg = "咨询产品返回成功"
+
+
+
                 response.code = 200
                 response.msg = '已取消订单'
             else:

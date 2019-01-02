@@ -34,7 +34,7 @@ urlpatterns = [
 
     # 查看产品 + 查看竞价产品 + 转发竞价产品 + 咨询产品。
     url(r'^product/(?P<oper_type>\w+)$', product.product),
-    # url(r'^product/(?P<oper_type>\w+)', product.product_oper),
+
 
     # 小程序登录认证 + 绑定关系 + 信息入库
     url(r'^login/control_mingan_info$', login.login_oper_control),
@@ -64,6 +64,7 @@ urlpatterns = [
 
     # 查询商品
     url(r'mallManage$', mallManagementShow.mallManage),  # 订单管理查询
+    url(r'mallManage/(?P<oper_type>\w+)$', mallManagementShow.mallManage_oper),  # 订单管理查询
 
     # 查询分类
     url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询

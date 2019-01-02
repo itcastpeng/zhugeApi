@@ -16,12 +16,13 @@ from django.db.models import Q, Sum, Count
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def activity_manage(request, oper_type):
+def money_manage(request, oper_type):
     response = Response.ResponseObj()
+
     if request.method == "POST":
 
-        # 设置关注领红包
-        if oper_type == 'set_focus_get_redPacket':
+        # 获取支付二维码
+        if oper_type == 'get_payment_qrcode':
 
             is_focus_get_redpacket = request.POST.get('is_focus_get_redpacket')
             focus_get_money = request.POST.get('focus_get_money')
@@ -31,8 +32,24 @@ def activity_manage(request, oper_type):
             form_data = {
                 'is_focus_get_redpacket': is_focus_get_redpacket,
                 'focus_get_money': focus_get_money,
-                'focus_total_money': focus_total_money,
+                'focus_total_money': focus_total_money
             }
+
+            """
+             生成扫码支付二维码
+             :param phone: 手机号
+             :param url: 支付路由
+             :return:
+             """
+            img = qrcode.make(url)  # 创建支付二维码片
+            # 你存放二维码的地址
+            img_url = r'media/QRcode' + '/' + phone + '.png'
+            img.save(img_url)
+            # return img_url
+
+
+
+
 
             forms_obj = SetFocusGetRedPacketForm(form_data)
             if forms_obj.is_valid():
@@ -427,9 +444,6 @@ def activity_manage(request, oper_type):
                         customer_username = obj.username
                         customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
 
-                        province = obj.province if obj.province else ''
-                        city =  obj.city if obj.city else ''
-
                         ret_data.append({
                             'id': customer_id,
                             'customer_username': customer_username,
@@ -437,7 +451,7 @@ def activity_manage(request, oper_type):
                             'customer_sex_text': obj.get_sex_display() or '',  # 性别
                             'customer_sex': obj.sex or '',  # 客户的头像
 
-                            'area': province + ' ' + city,  # 地区
+                            'area': obj.province + ' ' + obj.city,  # 地区
                             'is_receive_redPacket': obj.is_receive_redPacket,  #   (0, '没有发送过关注红包'), (1, '发送了关注红包')
                             'is_receive_redPacket_text': obj.get_is_receive_redPacket_display(),  # (0, '取消订阅该公众号'), (1, '已经订阅该公众号')
 
