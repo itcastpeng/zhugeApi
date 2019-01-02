@@ -343,7 +343,7 @@ def article(request, oper_type):
 
                     if _response.code == 200:
                         article_data_dict = _response.data
-                        news_item_dict = article_data_dict.get('news_item')
+                        news_item_dict = article_data_dict.get('news_item')[0]
 
                         title =  news_item_dict.get('title')
                         summary =  news_item_dict.get('digest')  # 摘要
@@ -1306,7 +1306,7 @@ def deal_gzh_picture_url(content):
         content = content.replace(key, value)
         # print(url)
 
-    print(content)
+    print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
     return  content
 
