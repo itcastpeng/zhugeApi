@@ -96,6 +96,46 @@ class ProductGetForm(forms.Form):
             return product_id
 
 
+# 修改企业的产品
+class GoodGetForm(forms.Form):
+    uid = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "用户ID不能为空"
+        }
+    )
+    product_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "产品ID不能为空"
+        }
+    )
+
+
+    # def clean_uid(self):
+    #
+    #     user_id = self.data['uid']
+    #     objs = models.zgld_userprofile.objects.filter(
+    #         id=user_id,
+    #     )
+    #     if not objs:
+    #         self.add_error('uid', '用户名不存在')
+    #     else:
+    #         return user_id
+
+    # 判断企业产品名称是否存在
+    def clean_product_id(self):
+        product_id = self.data['product_id']
+        objs = models.zgld_product.objects.filter(id = product_id)
+
+        if  not objs:
+            self.add_error('product_id', '产品不存在')
+
+        else:
+            return product_id
+
+
+
 class ProductSelectForm(forms.Form):
 
     user_id = forms.IntegerField(

@@ -353,6 +353,7 @@ def article(request, oper_type):
                         summary =  news_item_dict.get('digest')  # 摘要
                         content = news_item_dict.get('content')  # 封面图
                         cover_picture =  news_item_dict.get('thumb_url') #  封面图
+                        url =  news_item_dict.get('url') #  原文链接
                         if cover_picture:
                             cover_picture = deal_gzh_picUrl_to_local(cover_picture)
 
@@ -366,7 +367,8 @@ def article(request, oper_type):
                             'title': title,
                             'summary': summary,
                             'content': content,
-                            'cover_picture': cover_picture
+                            'cover_picture': cover_picture,
+                            'media_id': media_id
                         }
                         models.zgld_article.objects.create(**dict_data)
                         response.code = 200
@@ -498,7 +500,10 @@ def article_oper(request, oper_type, o_id):
             article_objs = models.zgld_article.objects.filter(id=o_id)
 
             if article_objs:
-                article_objs.delete()
+                # article_objs.delete()
+                article_objs.update(
+                    status=3
+                )
                 response.code = 200
                 response.msg = "删除成功"
 

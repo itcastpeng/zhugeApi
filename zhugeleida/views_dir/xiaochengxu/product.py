@@ -10,8 +10,8 @@ from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import action_record
 from zhugeleida.forms.xiaochengxu.product_verify  import ProductSelectForm,ProductGetForm
 import json
-from django.db.models import Q
-from django.db.models import F
+from django.db.models import Q,F
+
 import uuid
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
