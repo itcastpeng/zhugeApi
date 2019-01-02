@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu import yuzhifu_verify
+from zhugeleida.public.common import action_record
 
 
 
@@ -69,7 +70,7 @@ def payback(request):
     # out_trade_no = collection.getElementsByTagName("out_trade_no")[0].childNodes[0].data# 订单号
 
 
-    dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.filter(orderNumber=resultData['out_trade_no'],theOrderStatus=1)
+    dingDanobjs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli',).filter(orderNumber=resultData['out_trade_no'],theOrderStatus=1)
     print('=========================回调订单号===============================> ', resultData['out_trade_no'])
     nowDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print('=-------------------------当前时间---------------------->', nowDate, type(nowDate))
@@ -101,6 +102,16 @@ def payback(request):
                             theOrderStatus=8,   # 支付成功 改订单状态成功
                             stopDateTime=nowDate
                         )
+
+                    u_id =  dingDanobjs[0].yewuUser
+                    user_id =  dingDanobjs[0].shouHuoRen
+                    goodsName =  dingDanobjs[0].shangpinguanli.goodsName
+                    remark = '成功下单,购买商品【%s】' % (goodsName)
+                    data = {}
+                    data['uid'] = u_id
+                    data['user_id'] = user_id
+                    data['action'] = 18
+                    action_record(data, remark)
 
         else:
             dingDanobjs.update(

@@ -126,7 +126,7 @@ class GoodGetForm(forms.Form):
     # 判断企业产品名称是否存在
     def clean_product_id(self):
         product_id = self.data['product_id']
-        objs = models.zgld_goods_management.objects.filter(id = product_id)
+        objs = models.zgld_goods_management.objects.filter(id=product_id)
 
         if  not objs:
             self.add_error('product_id', '商品不存在')

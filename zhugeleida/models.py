@@ -749,7 +749,9 @@ class zgld_accesslog(models.Model):
         (14,'查看文章'),
         (15,'转发文章到朋友'),
         (16,'转发文章到朋友圈'),
-        (17,'报名活动')
+        (17,'报名活动'),
+        (18,'下单成功\取消订单')
+
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
