@@ -186,8 +186,8 @@ def theOrderOper(request, oper_type, o_id):
             status = int(orderObjs[0].theOrderStatus)
             if status and (status == 1 or status == 11):
                 orderObjs.update(theOrderStatus=10)
-
-                remark = '取消了订单'
+                goodsName = orderObjs[0].shangpinguanli.goodsName
+                remark = '取消了【%s】的订单' % (goodsName)
                 data = {}
                 data['uid'] = u_id
                 data['user_id'] = user_id
