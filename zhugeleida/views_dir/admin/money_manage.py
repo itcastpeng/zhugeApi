@@ -4,8 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
+import time,datetime
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm, \
     ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
@@ -14,8 +13,46 @@ from django.http import HttpResponse
 from zhugeleida.public.common import create_qrcode
 import qrcode, re, requests, hashlib, random, uuid, time, json, xml.dom.minidom as xmldom, base64
 
-import json
+import json,os
+from random import Random
 from django.db.models import Q, Sum, Count
+import subprocess
+
+APP_ID = "wx84390d5be4304d80"  # 你公众账号上的appid
+MCH_ID = "1520981531"  # 你的商户号
+API_KEY = "HEzhongkangqiaokejiyouxian201812"  # 微信商户平台(pay.weixin.qq.com) -->账户设置 -->API安全 -->密钥设置，设置完成后把密钥复制到这里
+UFDODER_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder"  # 该url是微信下单api
+
+NOTIFY_URL = 'http://api.zhugeyingxiao.com/zhugeleida/admin/wx_pay/native_pay_callback'
+from bs4 import BeautifulSoup
+
+
+def get_public_ip():
+    file_exit = os.path.exists('get_ip38.text')
+
+    if not file_exit: #
+        os.mknod('get_ip38.text')
+
+    with open('get_ip38.text','r') as r_f,open('get_ip38.text', 'w') as w_f:
+        ip_content = r_f.readline()
+
+        if ip_content:
+            return  ip_content
+
+        else:
+            for ip in ['icanhazip.com','ifconfig.me','curl icanhazip.com']:
+
+                ret = subprocess.call('/usr/bin/curl  %s' % (ip))
+                print('------ subprocess 返回码 -------->>', ret)
+                if ret: # 0
+                    continue
+
+                w_f.write(ret)
+                print(' ---- 获取公网IP成功 success ----->>', ret)
+                return ret
+
+
+
 
 
 @csrf_exempt
@@ -40,9 +77,7 @@ def money_manage(request, oper_type):
                  :return:
             """
 
-            APP_ID = "wx84390d5be4304d80"                 # 你公众账号上的appid
-            MCH_ID = "1520981531"                         # 你的商户号
-            API_KEY = "HEzhongkangqiaokejiyouxian201812"  # 微信商户平台(pay.weixin.qq.com) -->账户设置 -->API安全 -->密钥设置，设置完成后把密钥复制到这里
+
 
             # shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
             #     xiaochengxucompany_id=company_id)
@@ -112,6 +147,7 @@ def money_manage(request, oper_type):
             #     response.code = 301
             #     response.msg = json.loads(forms_obj.errors.as_json())
 
+
     else:
        pass
 
@@ -119,6 +155,98 @@ def money_manage(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
+
+
+
+
+
+## 成功回调地址
+@csrf_exempt
+def wx_pay_option(request,oper_type):
+    response = Response.ResponseObj()
+
+    if request.method == "POST":
+
+        ## 支付成功后回调
+        if  oper_type == 'native_pay_callback':
+
+            resultBody = request.body
+            print('resultBody------------------> ',resultBody)
+
+            """
+              微信支付成功后会自动回调
+              返回参数为：
+              {'mch_id': '',
+              'time_end': '',
+              'nonce_str': '',
+              'out_trade_no': '',
+              'trade_type': '',
+              'openid': '',
+               'return_code': '',
+               'sign': '',
+               'bank_type': '',
+               'appid': '',
+               'transaction_id': '',
+                'cash_fee': '',
+                'total_fee': '',
+                'fee_type': '', '
+                is_subscribe': '',
+                'result_code': 'SUCCESS'}
+              """
+            data_dict = trans_xml_to_dict(request.body)  # 回调数据转字典
+            # print('支付回调结果', data_dict)
+            sign = data_dict.pop('sign')  # 取出签名
+            back_sign = get_sign(data_dict, API_KEY)  # 计算签名
+            # 验证签名是否与回调签名相同
+            if sign == back_sign and data_dict['return_code'] == 'SUCCESS':
+                '''
+                检查对应业务数据的状态，判断该通知是否已经处理过，如果没有处理过再进行处理，如果处理过直接返回结果成功。
+                '''
+                print('微信支付成功回调---------->>')
+                # 处理支付成功逻辑
+                # 返回接收结果给微信，否则微信会每隔8分钟发送post请求
+                return HttpResponse(trans_dict_to_xml({'return_code': 'SUCCESS', 'return_msg': 'OK'}))
+
+            return HttpResponse(trans_dict_to_xml({'return_code': 'FAIL', 'return_msg': 'SIGNERROR'}))
+
+        ## 统一下单
+        elif oper_type == 'unified_order':
+
+            nonce_str = random_str()  # 拼接出随机的字符串即可，我这里是用  时间+随机数字+5个随机字母
+            phone = '13020006631'
+
+            total_fee = 1  # 付款金额，单位是分，必须是整数
+
+            params = {
+                'appid': APP_ID,  # APPID
+                'mch_id': MCH_ID,  # 商户号
+                'nonce_str': nonce_str,  # 随机字符串
+                'out_trade_no': order_num(phone),  # 订单编号，可自定义
+                'total_fee': total_fee,  # 订单总金额
+                'spbill_create_ip': get_public_ip(),  # 自己服务器的IP地址
+                'notify_url': NOTIFY_URL,       # 回调地址，微信支付成功后会回调这个url，告知商户支付结果
+                'body': 'xxx公司',  # 商品描述
+                'detail': 'xxx商品',  # 商品描述
+                'trade_type': 'NATIVE',  # 扫码支付类型
+            }
+
+            sign = get_sign(params, API_KEY)  # 获取签名
+            params['sign'] = sign  # 添加签名到参数字典
+            print('下单参数 params --------------->',json.dumps(params))
+            xml = trans_dict_to_xml(params)  # 转换字典为XML
+            response = requests.request('post', UFDODER_URL, data=xml)  # 以POST方式向微信公众平台服务器发起请求
+            print('统一下单返回 -------------->>',json.dumps(response.json()))
+
+            data_dict = trans_xml_to_dict(response.content)  # 将请求返回的数据转为字典
+            print('请求返回的数据转为字典 --------------->>',json.dumps(data_dict))
+
+            return data_dict
+
+    if request.method == "GET":
+        pass
+
+
+    return JsonResponse(response.__dict__)
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -300,6 +428,7 @@ def order_num(phone):
     """
     local_time = time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))
     result = phone + 'T' + local_time + random_str(5)
+    print('付款订单号-------->>',result)
     return result
 
 

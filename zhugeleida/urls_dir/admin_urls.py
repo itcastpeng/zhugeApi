@@ -161,6 +161,7 @@ urlpatterns = [
 
     #资金管理
     url(r'^money_manage/(?P<oper_type>\w+)$', money_manage.money_manage),
+    url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option), # 微信支付回调地址
 
 
 ]
