@@ -186,7 +186,9 @@ def activity_manage(request, oper_type):
                             'activity_id': obj.id,  # 活动Id
                             'activity_name': obj.activity_name,  # 分享文章名称
                             'activity_total_money': obj.activity_total_money,  # 活动总金额
-                            'activity_single_money': obj.activity_single_money,  # 单个金额
+                            'activity_single_money': obj.activity_single_money or '',  # 单个金额
+                            'max_single_money': obj.max_single_money or '',  # 单个金额
+                            'min_single_money': obj.min_single_money or '',  # 单个金额
                             'reach_forward_num': obj.reach_forward_num,  # 达到多少次发红包
                             'already_send_redPacket_num': obj.already_send_redPacket_num or 0,  # 已发放发红包个数[领取条件]
                             'status': status,
