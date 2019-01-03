@@ -186,7 +186,9 @@ def activity_manage(request, oper_type):
                             'activity_id': obj.id,  # 活动Id
                             'activity_name': obj.activity_name,  # 分享文章名称
                             'activity_total_money': obj.activity_total_money,  # 活动总金额
-                            'activity_single_money': obj.activity_single_money,  # 单个金额
+                            'activity_single_money': obj.activity_single_money or '',  # 单个金额
+                            'max_single_money': obj.max_single_money or '',  # 单个金额
+                            'min_single_money': obj.min_single_money or '',  # 单个金额
                             'reach_forward_num': obj.reach_forward_num,  # 达到多少次发红包
                             'already_send_redPacket_num': obj.already_send_redPacket_num or 0,  # 已发放发红包个数[领取条件]
                             'status': status,
@@ -195,7 +197,7 @@ def activity_manage(request, oper_type):
                             'end_time': obj.end_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             'reason': reason,
-
+                            'mode' : obj.mode,
                             'reach_stay_time' : obj.reach_stay_time,   # 满足多少秒发红包；默认是0,代表不设限制。
                             'is_limit_area' : obj.is_limit_area,       # 是否地区限制
                             'limit_area' : json.loads(obj.limit_area), # 限制的地区列表 ['山西','广东','河北']
@@ -495,6 +497,10 @@ def activity_manage_oper(request, oper_type, o_id):
             limit_area = request.POST.get('limit_area')
             is_limit_area = request.POST.get('is_limit_area')
 
+            mode = request.POST.get('mode')
+            max_single_money = request.POST.get('max_single_money')
+            min_single_money = request.POST.get('min_single_money')
+
 
             form_data = {
 
@@ -509,6 +515,10 @@ def activity_manage_oper(request, oper_type, o_id):
                 'start_time': start_time,  # 达到多少次发红包(转发次数)
                 'end_time': end_time,  # 达到多少次发红包(转发次数)
 
+                'max_single_money' : max_single_money,
+                'min_single_money' : min_single_money,
+
+                'mode' : mode,  #红包发送方式
                 'reach_stay_time': reach_stay_time,  # 达到多少秒
                 'is_limit_area': is_limit_area       # 是否限制区域
             }
@@ -523,6 +533,12 @@ def activity_manage_oper(request, oper_type, o_id):
 
 
                 objs = models.zgld_article_activity.objects.filter(id=activity_id, company_id=company_id)
+                if not activity_single_money:
+                    activity_single_money = 0
+                if not min_single_money:
+                    min_single_money = 0
+                if not max_single_money:
+                    max_single_money = 0
 
                 if objs:
                     objs.update(
@@ -530,10 +546,12 @@ def activity_manage_oper(request, oper_type, o_id):
                         activity_name=activity_name.strip(),
                         activity_total_money=activity_total_money,
                         activity_single_money=activity_single_money,
+                        max_single_money=max_single_money,
+                        min_single_money=min_single_money,
                         reach_forward_num=reach_forward_num,
                         start_time=start_time,
                         end_time=end_time,
-
+                        mode=mode,
                         reach_stay_time=reach_stay_time,
                         is_limit_area=is_limit_area,
                         limit_area=limit_area,
@@ -562,7 +580,16 @@ def activity_manage_oper(request, oper_type, o_id):
             limit_area = request.POST.get('limit_area')
             is_limit_area = request.POST.get('is_limit_area')
 
+            mode = request.POST.get('mode')
+            max_single_money = request.POST.get('max_single_money')
+            min_single_money = request.POST.get('min_single_money')
 
+            if not activity_single_money:
+                activity_single_money = 0
+            if not min_single_money:
+                min_single_money = 0
+            if not max_single_money:
+                max_single_money = 0
 
             form_data = {
 
@@ -574,6 +601,10 @@ def activity_manage_oper(request, oper_type, o_id):
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
                 'start_time': start_time,  #
                 'end_time': end_time,  #
+                'mode' : mode,
+
+                'max_single_money' : max_single_money,
+                'min_single_money' : min_single_money,
 
                 'reach_stay_time' : reach_stay_time, #达到多少秒
                 'is_limit_area' : is_limit_area,     # 是否限制区域
@@ -597,6 +628,7 @@ def activity_manage_oper(request, oper_type, o_id):
                     reach_forward_num=reach_forward_num,
                     start_time=start_time,
                     end_time=end_time,
+                    mode=mode,
                     reach_stay_time=reach_stay_time,
                     is_limit_area=is_limit_area,
                     limit_area=limit_area,

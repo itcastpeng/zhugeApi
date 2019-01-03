@@ -124,7 +124,7 @@ def user_gongzhonghao_auth(request):
                     article_url = '/gongzhonghao/leidawenzhang/'
 
 
-                redirect_url = '{url}/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
                     url=url,
                     article_url=article_url,
                     article_id=article_id,
@@ -226,7 +226,7 @@ def user_gongzhonghao_auth(request):
                     article_url = '/gongzhonghao/leidawenzhang/'
                 client_id = obj.id
 
-                redirect_url = '{url}/#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
                     url=url,
                     article_url=article_url,
                     article_id=article_id,

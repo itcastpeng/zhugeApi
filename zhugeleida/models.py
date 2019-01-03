@@ -873,9 +873,17 @@ class zgld_article_activity(models.Model):
     status = models.SmallIntegerField(default=2, verbose_name='活动状态', choices=status_choices)
     activity_rules = models.CharField(verbose_name='活动规则', max_length=2048,null=True)
 
+    mode_choices =  ( (1, '随机红包'),
+                      (2, '固定红包')
+                      )
+    mode = models.SmallIntegerField(default=1, verbose_name='红包发送方式', choices=mode_choices)
+
+
     activity_total_money= models.SmallIntegerField(verbose_name='活动总金额', default=0,null=True)
     redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True,default=0)
     activity_single_money= models.FloatField(verbose_name='单个金额(元)',default=0,null=True)
+    max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
+    min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
 
     is_limit_area = models.BooleanField(verbose_name='是否地区限制', default=False)  # 默认不限制
     limit_area = models.TextField(verbose_name='限制的区域', null=True,default="[]")
