@@ -498,15 +498,32 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
-get_data['company_id'] = 2
-post_data['media_id_list'] = json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
-
-ret = requests.post(url, data=post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
+# get_data['company_id'] = 2
+# post_data['media_id_list'] = json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
+#
+# ret = requests.post(url, data=post_data ,params=get_data)
 
 
 #############################################################################################
 
+## z支付平台
+
+url =  ip + '/zhugeleida/admin/money_manage/get_payment_qrcode'  # 获取产品的列表
+get_data['company_id'] = 2
+
+
+
+ret = requests.post(url, data=post_data ,params=get_data)
+
+
+
+
+
+
+
+
+##########################################################################################
 
 
 

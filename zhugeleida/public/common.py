@@ -48,7 +48,22 @@ def create_qrcode(data):
         qr_url = 'statics/zhugeleida/imgs/qiyeweixin/webLogin%s' % (qr_code_name)
         img.save(path_qr_code_name)
         qr_url_dict = {'pre_qrcode_url': qr_url}
+
         return qr_url_dict
+
+    elif type == 'payment_qrcode_url':
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
+        qr_code_name = '/pay_%s_qrCode.jpg' % (now_time)
+        path_qr_code_name = BASE_DIR + qr_code_name
+        qr_url = 'statics/zhugeleida/imgs/admin/qr_code%s' % (qr_code_name)
+        img.save(path_qr_code_name)
+        qr_url_dict = {'pre_qrcode_url': qr_url}
+
+        return qr_url_dict
+
+
+
+
 
     else:
         article_objs = models.zgld_article.objects.filter(id=article_id)
