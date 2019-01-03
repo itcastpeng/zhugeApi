@@ -195,7 +195,7 @@ def activity_manage(request, oper_type):
                             'end_time': obj.end_time.strftime('%Y-%m-%d %H:%M:%S'),
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             'reason': reason,
-
+                            'mode' : obj.mode,
                             'reach_stay_time' : obj.reach_stay_time,   # 满足多少秒发红包；默认是0,代表不设限制。
                             'is_limit_area' : obj.is_limit_area,       # 是否地区限制
                             'limit_area' : json.loads(obj.limit_area), # 限制的地区列表 ['山西','广东','河北']
@@ -494,6 +494,7 @@ def activity_manage_oper(request, oper_type, o_id):
             reach_stay_time = request.POST.get('reach_stay_time')  # 达到多少秒发红包
             limit_area = request.POST.get('limit_area')
             is_limit_area = request.POST.get('is_limit_area')
+            mode = request.POST.get('mode')
 
 
             form_data = {
@@ -508,7 +509,7 @@ def activity_manage_oper(request, oper_type, o_id):
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
                 'start_time': start_time,  # 达到多少次发红包(转发次数)
                 'end_time': end_time,  # 达到多少次发红包(转发次数)
-
+                'mode' : mode,  #红包发送方式
                 'reach_stay_time': reach_stay_time,  # 达到多少秒
                 'is_limit_area': is_limit_area       # 是否限制区域
             }
@@ -533,7 +534,7 @@ def activity_manage_oper(request, oper_type, o_id):
                         reach_forward_num=reach_forward_num,
                         start_time=start_time,
                         end_time=end_time,
-
+                        mode=mode,
                         reach_stay_time=reach_stay_time,
                         is_limit_area=is_limit_area,
                         limit_area=limit_area,
@@ -561,7 +562,7 @@ def activity_manage_oper(request, oper_type, o_id):
             reach_stay_time = request.POST.get('reach_stay_time')  #达到多少秒发红包
             limit_area = request.POST.get('limit_area')
             is_limit_area = request.POST.get('is_limit_area')
-
+            mode = request.POST.get('mode')
 
 
             form_data = {
@@ -574,7 +575,7 @@ def activity_manage_oper(request, oper_type, o_id):
                 'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
                 'start_time': start_time,  #
                 'end_time': end_time,  #
-
+                'mode' : mode,
                 'reach_stay_time' : reach_stay_time, #达到多少秒
                 'is_limit_area' : is_limit_area,     # 是否限制区域
 
@@ -597,6 +598,7 @@ def activity_manage_oper(request, oper_type, o_id):
                     reach_forward_num=reach_forward_num,
                     start_time=start_time,
                     end_time=end_time,
+                    mode=mode,
                     reach_stay_time=reach_stay_time,
                     is_limit_area=is_limit_area,
                     limit_area=limit_area,

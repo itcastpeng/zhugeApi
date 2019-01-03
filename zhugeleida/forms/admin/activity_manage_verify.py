@@ -54,6 +54,13 @@ class ActivityAddForm(forms.Form):
         }
     )
 
+    mode  = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "红包发送方式不能为空"
+        }
+    )
+
 
     activity_total_money = forms.IntegerField(
         required=True,
@@ -62,7 +69,7 @@ class ActivityAddForm(forms.Form):
         }
     )
 
-    activity_single_money = forms.IntegerField(
+    activity_single_money = forms.FloatField(
         required=True,
         error_messages={
             'required': "单个金额(元)不能为空"
@@ -105,18 +112,37 @@ class ActivityAddForm(forms.Form):
     )
 
 
+    def clean_activity_single_money(self):
+        activity_single_money = self.data['activity_single_money']
 
+        if  activity_single_money:
+            activity_single_money = int(activity_single_money)
 
-    # 判断文章是否存在
-    def clean_product_id(self):
-        article_id = self.data['article_id']
-        objs = models.zgld_article.objects.filter(id = article_id)
+            _activity_single_money = str(activity_single_money)
+            if '-' in _activity_single_money:
 
-        if  not objs:
-            self.add_error('article_id', '文章ID不存在')
+                max_single_money =  _activity_single_money.split('-')[0]
+                min_single_money = _activity_single_money.split('-')[1]
 
-        else:
-            return article_id
+                max_single_money = int(max_single_money)
+                min_single_money = int(min_single_money)
+
+                if max_single_money >= 0.3 and max_single_money  <= 200:
+                    self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
+
+                elif min_single_money >= 0.3 and min_single_money  <= 200:
+                    self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
+
+                else:
+                    return activity_single_money
+
+            else:
+
+                if activity_single_money >= 0.3 and activity_single_money  <= 200:
+                    self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
+
+                else:
+                    return activity_single_money
 
 
     def clean_start_time(self):
@@ -149,6 +175,12 @@ class ActivityUpdateForm(forms.Form):
             'required': "文章ID不能为空"
         }
     )
+    mode  = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "红包发送方式不能为空"
+        }
+    )
 
     company_id = forms.IntegerField(
         required=True,
@@ -179,7 +211,7 @@ class ActivityUpdateForm(forms.Form):
         }
     )
 
-    activity_single_money = forms.IntegerField(
+    activity_single_money = forms.FloatField(
         required=True,
         error_messages={
             'required': "单个金额(元)不能为空"
@@ -222,8 +254,6 @@ class ActivityUpdateForm(forms.Form):
     )
 
 
-
-
     # 判断文章是否存在
     def clean_article_id(self):
         article_id = self.data['article_id']
@@ -244,6 +274,39 @@ class ActivityUpdateForm(forms.Form):
 
         else:
             return activity_id
+
+    def clean_activity_single_money(self):
+        activity_single_money = self.data['activity_single_money']
+
+        if  activity_single_money:
+            activity_single_money = int(activity_single_money)
+
+            _activity_single_money = str(activity_single_money)
+            if '-' in _activity_single_money:
+
+                max_single_money =  _activity_single_money.split('-')[0]
+                min_single_money = _activity_single_money.split('-')[1]
+
+                max_single_money = int(max_single_money)
+                min_single_money = int(min_single_money)
+
+                if max_single_money >= 0.3 and max_single_money  <= 200:
+                    self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
+
+                elif min_single_money >= 0.3 and min_single_money  <= 200:
+                    self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
+
+                else:
+                    return activity_single_money
+
+            else:
+
+                if activity_single_money >= 0.3 and activity_single_money  <= 200:
+                    self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
+
+                else:
+                    return activity_single_money
+
 
 
 class ActivitySelectForm(forms.Form):
