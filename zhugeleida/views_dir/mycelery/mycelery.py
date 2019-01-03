@@ -1046,6 +1046,7 @@ def user_send_gongzhonghao_template_msg(request):
                 activity_obj = models.zgld_article_activity.objects.get(id=activity_id)
 
                 activity_name = activity_obj.activity_name
+                title = activity_obj.article.title
                 reach_forward_num = activity_obj.reach_forward_num
                 activity_single_money = activity_obj.activity_single_money
                 start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
@@ -1060,7 +1061,7 @@ def user_send_gongzhonghao_template_msg(request):
                             company_name, position, user_name))  # 回复者
                     },
                     'keyword1': {
-                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (customer_name, activity_name),
+                        'value': '您的好友【%s】查看了您转发的活动文章《%s》\n' % (customer_name, title),
                         "color": "#0000EE"
                     },
                     'keyword2': {

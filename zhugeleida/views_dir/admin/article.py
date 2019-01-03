@@ -214,7 +214,7 @@ def article(request, oper_type):
                 current_page = forms_obj.cleaned_data.get('current_page')
                 length = forms_obj.cleaned_data.get('length')
                 company_id = forms_obj.cleaned_data.get('company_id')
-                
+
                 objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
                 if objs:
