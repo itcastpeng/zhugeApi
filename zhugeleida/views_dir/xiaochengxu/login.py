@@ -195,8 +195,7 @@ def login_oper(request, oper_type):
                                                                                                user__company_id=company_id)
                     else:
 
-                        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
-                                                                                               user_id=user_id)
+                        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
 
 
                     if user_customer_belonger_obj:
@@ -230,8 +229,7 @@ def login_oper(request, oper_type):
                         content = json.dumps(_content)
 
 
-                        models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
-                                                            content=content)
+                        models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,content=content)
 
                         print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
 
@@ -314,7 +312,7 @@ def login_oper(request, oper_type):
                     remark = '已向您授权访问【产品列表】页面'
 
                 elif page_info == 3:
-                    remark = '已向您授权访问【产品详情】页面'
+                    remark = '已向您授权访问【商品详情】页面'
 
                 elif page_info == 4:
                     remark = '已向您授权访问【公司官网】页面'

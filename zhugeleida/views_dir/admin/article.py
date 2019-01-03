@@ -144,6 +144,7 @@ def article(request, oper_type):
 
                 q = conditionCom(request_data, field_dict)
                 q.add(Q(**{'company_id': company_id}), Q.AND)
+                q.add(Q(**{'status__in': [1,2]}), Q.AND)
 
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
                 if tag_list:
@@ -382,6 +383,7 @@ def article(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
     return JsonResponse(response.__dict__)
 
 
@@ -449,7 +451,7 @@ def article_oper(request, oper_type, o_id):
                         _user_id  = _obj.id
                         article_id  = obj.id
 
-                        remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (title)
+                        remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (forms_obj.cleaned_data['title'])
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
                         data['user_id'] = ''
                         data['uid'] = _user_id
@@ -568,7 +570,7 @@ def article_oper(request, oper_type, o_id):
                     for _obj in user_objs:
                         _user_id  = _obj.id
 
-                        remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (title)
+                        remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (forms_obj.cleaned_data['title'])
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
                         data['user_id'] = ''
                         data['uid'] = _user_id

@@ -30,97 +30,117 @@ from zhugeleida.public.common import create_qiyeweixin_access_token
 
 
 def action_record(data):
-    response = Response.ResponseObj()
-    user_id = data.get('uid')  # 用户 id
-    customer_id = data.get('customer_id','')  # 客户 id
-    article_id = data.get('article_id')  # 客户 id
-    action = data.get('action')
-    if action:
-        action = int(action)
+        response = Response.ResponseObj()
+        user_id = data.get('uid')  # 用户 id
+        customer_id = data.get('customer_id','')  # 客户 id
+        article_id = data.get('article_id')  # 客户 id
+        action = data.get('action')
+        if action:
+            action = int(action)
 
-    remark = data.get('remark')
-    agent_id = data.get('agent_id')
+        remark = data.get('remark')
+        agent_id = data.get('agent_id')
+        content = ''
+
+        if action in [666]: # 只做消息【温馨提示】。
+
+            response.data = {
+                'content': remark,
+                'agentid': agent_id
+            }
 
 
-    if action in [666]: # 只做消息【温馨提示】。
+            _content = {'info_type': 1}
+            encodestr = base64.b64encode(remark.encode('utf-8'))
+            msg = str(encodestr, 'utf-8')
+            _content['msg'] = msg
+            content = json.dumps(_content)
 
-        response.data = {
-            'content': remark,
-            'agentid': agent_id
-        }
-        models.zgld_accesslog.objects.create(
-            user_id=user_id,
-            article_id=article_id,
-            remark=remark,
-            action=action
-        )
+            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
-        response.code = 200
-        response.msg = '发送消息提示成功'
+            customer_objs = models.zgld_customer.objects.filter(openid='leida_guanjia',company_id=company_id)
+            if customer_objs:
+                customer_id = customer_objs[0].id
+            else:
+                obj = models.zgld_customer.objects.create(openid='leida_guanjia', company_id=company_id)
+                customer_id = obj.id
 
-        return response
+            models.zgld_chatinfo.objects.create(send_type=2, userprofile_id=user_id, customer_id=customer_id,content=content)
 
-    customer_name = models.zgld_customer.objects.get(id=customer_id).username
-    customer_name = base64.b64decode(customer_name)
-    customer_name = str(customer_name, 'utf-8')
 
-    if action in [0]:  # 发消息记录客户 最后活动时间。
 
-        # data['content'] = '%s%s' % (customer_name, remark)
-        # data['agentid'] = agent_id
-        # tasks.user_send_action_log.delay(json.dumps(data))
-        _remark = ':发送给您一条新消息，请点击查看!'
-        content = '【%s】%s' % (customer_name, _remark)
-        response.data = {
-            'content': content,
-            'agentid': agent_id
-        }
-        flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,
-                                                                         customer_id=customer_id)
-        if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
-            flow_up_objs.update(
-                is_customer_msg_num=F('is_customer_msg_num') + 1, # 说明用户发过消息给雷达用户。
-                last_activity_time=datetime.datetime.now()        # 用户的最后活动时间。
+            response.code = 200
+            response.msg = '发送消息提示成功'
+
+            return response
+
+        customer_name = models.zgld_customer.objects.get(id=customer_id).username
+        customer_name = base64.b64decode(customer_name)
+        customer_name = str(customer_name, 'utf-8')
+
+        if action in [0]:  # 发消息记录客户 最后活动时间。
+
+            # data['content'] = '%s%s' % (customer_name, remark)
+            # data['agentid'] = agent_id
+            # tasks.user_send_action_log.delay(json.dumps(data))
+            _remark = ':发送给您一条新消息，请点击查看!'
+            content = '【%s】%s' % (customer_name, _remark)
+
+            flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id,
+                                                                             customer_id=customer_id)
+            if flow_up_objs:  # 用戶發消息給客戶，修改最後跟進-時間
+                flow_up_objs.update(
+                    is_customer_msg_num=F('is_customer_msg_num') + 1, # 说明用户发过消息给雷达用户。
+                    last_activity_time=datetime.datetime.now()        # 用户的最后活动时间。
+                )
+            response.data = {
+                'content': content,
+                'agentid': agent_id
+            }
+            response.code = 200
+            response.msg = '发送消息提示成功'
+
+            return response
+
+        elif action in [14, 15, 16, 17]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
+            # 创建访问日志
+            models.zgld_accesslog.objects.create(
+                user_id=user_id,
+                article_id=article_id,
+                customer_id=customer_id,
+                remark=remark,
+                action=action
             )
-        response.code = 200
-        response.msg = '发送消息提示成功'
+            # follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
+            #     user_id=user_id,
+            #     customer_id=customer_id
+            # )
+            # now_time = datetime.datetime.now()
+            # if follow_objs:  # 已经有关系了
+            #     follow_objs.update(
+            #         last_activity_time=now_time
+            #     )
+            #
+            # content = '%s%s' % (customer_name, remark)
+            # print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
+            # response.data = {
+            #     'content': content,
+            #     'agentid': agent_id
+            # }
+            # response.code = 200
+            # response.msg = '发送消息提示成功'
 
-    elif action in [14, 15, 16, 17]:  # (14,'查看文章'),  (15,'转发文章到朋友'), (16,'转发文章到朋友圈')
-        # 创建访问日志
-        models.zgld_accesslog.objects.create(
-            user_id=user_id,
-            article_id=article_id,
-            customer_id=customer_id,
-            remark=remark,
-            action=action
-        )
-        follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
-            user_id=user_id,
-            customer_id=customer_id
-        )
-        now_time = datetime.datetime.now()
-        if follow_objs:  # 已经有关系了
-            follow_objs.update(
-                last_activity_time=now_time
+        else:
+            # 创建访问日志
+            models.zgld_accesslog.objects.create(
+                user_id=user_id,
+                customer_id=customer_id,
+                remark=remark,
+                action=action
             )
+            content = '%s%s' % (customer_name, remark)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name, '+', 'action:', action, content)
 
-        content = '%s%s' % (customer_name, remark)
-        print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
-        response.data = {
-            'content': content,
-            'agentid': agent_id
-        }
-        response.code = 200
-        response.msg = '发送消息提示成功'
-
-    else:
-        # 创建访问日志
-        models.zgld_accesslog.objects.create(
-            user_id=user_id,
-            customer_id=customer_id,
-            remark=remark,
-            action=action
-        )
 
         # 查询客户与用户是否已经建立关系
         follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
@@ -132,17 +152,15 @@ def action_record(data):
             follow_objs.update(
                 last_activity_time=now_time
             )
-            content = '%s%s' % (customer_name, remark)
-            print('------ 客户姓名 + 访问日志信息------->>', customer_name, '+', 'action:', action, content)
 
-            response.data = {
-                'content': content,
-                'agentid': agent_id
-            }
-            response.code = 200
-            response.msg = '记录日志成功'
+        response.data = {
+            'content': content,
+            'agentid': agent_id
+        }
+        response.code = 200
+        response.msg = '记录日志成功'
 
-    return response
+        return response
 
 
 # 小程序访问动作日志的发送到企业微信
