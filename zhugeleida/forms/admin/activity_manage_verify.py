@@ -131,7 +131,7 @@ class ActivityAddForm(forms.Form):
         mode = self.data['mode']
 
         if  max_single_money:
-            max_single_money = int(max_single_money)
+            max_single_money = float(max_single_money)
 
             if max_single_money < 0.3 or max_single_money  > 200:
                 self.add_error('max_single_money', '红包金额不能小于0.3元或大于200元')
@@ -149,7 +149,7 @@ class ActivityAddForm(forms.Form):
         mode = self.data['mode']
 
         if  min_single_money:
-            min_single_money = int(min_single_money)
+            min_single_money = float(min_single_money)
 
             if min_single_money < 0.3 or min_single_money  > 200:
                 self.add_error('max_single_money', '红包金额不能小于0.3元或大于200元')
@@ -167,7 +167,7 @@ class ActivityAddForm(forms.Form):
         mode = self.data['mode']
 
         if activity_single_money:
-            activity_single_money = int(activity_single_money)
+            activity_single_money = float(activity_single_money)
 
             if activity_single_money < 0.3 or activity_single_money  > 200:
                 self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
@@ -330,7 +330,7 @@ class ActivityUpdateForm(forms.Form):
         mode = self.data['mode']
 
         if max_single_money:
-            max_single_money = int(max_single_money)
+            max_single_money = float(max_single_money)
 
             if max_single_money < 0.3 or max_single_money > 200:
                 self.add_error('max_single_money', '红包金额不能小于0.3元或大于200元')
@@ -348,7 +348,7 @@ class ActivityUpdateForm(forms.Form):
         mode = self.data['mode']
 
         if min_single_money:
-            min_single_money = int(min_single_money)
+            min_single_money = float(min_single_money)
 
             if min_single_money < 0.3 or min_single_money > 200:
                 self.add_error('max_single_money', '红包金额不能小于0.3元或大于200元')
@@ -366,7 +366,7 @@ class ActivityUpdateForm(forms.Form):
         mode = self.data['mode']
 
         if activity_single_money:
-            activity_single_money = int(activity_single_money)
+            activity_single_money = float(activity_single_money)
 
             if activity_single_money < 0.3 or activity_single_money > 200:
                 self.add_error('activity_single_money', '红包金额不能小于0.3元或大于200元')
