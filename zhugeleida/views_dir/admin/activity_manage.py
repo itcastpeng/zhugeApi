@@ -533,6 +533,12 @@ def activity_manage_oper(request, oper_type, o_id):
 
 
                 objs = models.zgld_article_activity.objects.filter(id=activity_id, company_id=company_id)
+                if not activity_single_money:
+                    activity_single_money = 0
+                if not min_single_money:
+                    min_single_money = 0
+                if not max_single_money:
+                    max_single_money = 0
 
                 if objs:
                     objs.update(
@@ -540,6 +546,8 @@ def activity_manage_oper(request, oper_type, o_id):
                         activity_name=activity_name.strip(),
                         activity_total_money=activity_total_money,
                         activity_single_money=activity_single_money,
+                        max_single_money=max_single_money,
+                        min_single_money=min_single_money,
                         reach_forward_num=reach_forward_num,
                         start_time=start_time,
                         end_time=end_time,
@@ -576,6 +584,12 @@ def activity_manage_oper(request, oper_type, o_id):
             max_single_money = request.POST.get('max_single_money')
             min_single_money = request.POST.get('min_single_money')
 
+            if not activity_single_money:
+                activity_single_money = 0
+            if not min_single_money:
+                min_single_money = 0
+            if not max_single_money:
+                max_single_money = 0
 
             form_data = {
 
