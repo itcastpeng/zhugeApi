@@ -469,7 +469,7 @@ def activity_manage(request, oper_type):
                             'area': province + ' ' + city,  # 地区
                             'is_receive_redPacket': obj.is_receive_redPacket,  #   (0, '没有发送过关注红包'), (1, '发送了关注红包')
                             'is_receive_redPacket_text': obj.get_is_receive_redPacket_display(),  # (0, '取消订阅该公众号'), (1, '已经订阅该公众号')
-
+                            'redPacket_money': obj.redPacket_money,
                             'subscribe_time': obj.subscribe_time.strftime('%Y-%m-%d %H:%M:%S') if obj.subscribe_time else '',  # 关注时间
 
                         })

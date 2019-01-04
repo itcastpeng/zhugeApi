@@ -610,8 +610,9 @@ class zgld_customer(models.Model):
         (0, '没有发送过关注红包'),
         (1, '发送了关注红包')
     )
-
     is_receive_redPacket =  models.SmallIntegerField(verbose_name='是否发送过关注红包', choices=receive_redPacket_choices,default=0)
+
+    redPacket_money = models.FloatField(verbose_name='发红包金额', default=0)
 
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)

@@ -1795,7 +1795,8 @@ def user_focus_send_activity_redPacket(request):
                         if response_ret.code == 200:
                             print('---- 调发红包成功 状态值:200 --->>')
                             objs.update(
-                                is_receive_redPacket=1
+                                is_receive_redPacket=1,
+                                redPacket_money=focus_get_money
                             )
                             app_objs.update(
                                 reason='发放成功'
