@@ -1743,8 +1743,18 @@ def user_focus_send_activity_redPacket(request):
 
                     if is_subscribe == 1 and is_receive_redPacket == 0:
 
-                        focus_get_money = gongzhonghao_app_obj.focus_get_money  # 关注领取的红包金额
-                        focus_total_money = gongzhonghao_app_obj.focus_total_money
+                        focus_get_money = ''
+                        # focus_total_money   =  gongzhonghao_app_obj.focus_get_money
+                        mode = gongzhonghao_app_obj.mode
+                        if mode == 1:  # 随机金额
+                            max_single_money = gongzhonghao_app_obj.max_single_money
+                            min_single_money = gongzhonghao_app_obj.min_single_money
+
+                            rand_num = random.uniform(max_single_money, min_single_money)
+                            focus_get_money = round(rand_num, 2)
+
+                        elif mode == 2:  # 固定金额
+                            focus_get_money = gongzhonghao_app_obj.focus_get_money
 
                         app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
                             company_id=company_id)

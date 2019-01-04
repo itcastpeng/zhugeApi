@@ -26,30 +26,76 @@ def tuiKuanDingDan(request):
             stop_line = start_line + length
             objs = objs[start_line: stop_line]
         otherData = []
-        for obj in objs:
-            tuikuan = ''
-            if obj.tuiKuanDateTime:
-                tuikuan = obj.tuiKuanDateTime.strftime('%Y-%m-%d %H:%M:%S')
+
+        if objs:
+            for obj in objs:
+                tuikuan = ''
+                if obj.tuiKuanDateTime:
+                    tuikuan = obj.tuiKuanDateTime.strftime('%Y-%m-%d %H:%M:%S')
+
+                orderNumber_id =  obj.orderNumber_id
+                topLunBoTu = ''
+                if orderNumber_id:
+                    _obj = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').get(id=orderNumber_id)
+
+                    topLunBoTu = []
+                    if _obj.shangpinguanli_id:
+                        topLunBoTu = _obj.shangpinguanli.topLunBoTu
+                        # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
+
+                    else:
+                        topLunBoTu = _obj.topLunBoTu
 
 
-            # detailePicture = ''
-            # if obj.orderNumber.detailePicture:
-            #     detailePicture = json.loads(obj.orderNumber.detailePicture)
-            # 轮播图
+                    topLunBoTu = json.loads(topLunBoTu)
+                    url = topLunBoTu[0].get('data')
+                    if url:
+                        url = url[0]
 
-            orderNumber_id =  obj.orderNumber_id
-            topLunBoTu = ''
-            if orderNumber_id:
-                _obj = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').get(id=orderNumber_id)
+                    topLunBoTu = [{"url": url}]
 
+
+                otherData.append({
+                    'id': obj.id,
+                    'orderNumber_id': orderNumber_id,
+                    'orderNumber': obj.orderNumber.orderNumber,
+                    'tuiKuanYuanYin': obj.get_tuiKuanYuanYin_display(),
+                    'tuiKuanYuanYinId': obj.tuiKuanYuanYin,
+                    'shengChengDateTime': obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
+                    'tuiKuanDateTime': tuikuan,
+                    'tuiKuanStatus': obj.orderNumber.get_theOrderStatus_display(),
+                    'tuiKuanStatusId': obj.orderNumber.theOrderStatus,
+                    'goodsName':obj.orderNumber.goodsName,
+
+                    'tuiKuanPrice':obj.orderNumber.yingFuKuan,
+                    'detailePicture':topLunBoTu,
+                    'goodsNum':obj.orderNumber.unitRiceNum,
+                    'goodsPrice':obj.orderNumber.goodsPrice
+
+                })
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'otherData':otherData,
+                    'objsCount':objsCount,
+                }
+
+        else:
+
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(
+                id=orderNumber_id,logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
+
+            if objs:
+                obj = objs[0]
+
+                # 轮播图
                 topLunBoTu = []
-                if _obj.shangpinguanli_id:
-                    topLunBoTu = _obj.shangpinguanli.topLunBoTu
+                if obj.shangpinguanli_id:
+                    topLunBoTu = obj.shangpinguanli.topLunBoTu
+
                     # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
-
                 else:
-                    topLunBoTu = _obj.topLunBoTu
-
+                    topLunBoTu = obj.topLunBoTu
 
                 topLunBoTu = json.loads(topLunBoTu)
                 url = topLunBoTu[0].get('data')
@@ -58,31 +104,32 @@ def tuiKuanDingDan(request):
 
                 topLunBoTu = [{"url": url}]
 
+                otherData.append({
 
-            otherData.append({
-                'id': obj.id,
-                'orderNumber_id': orderNumber_id,
-                'orderNumber': obj.orderNumber.orderNumber,
-                'tuiKuanYuanYin': obj.get_tuiKuanYuanYin_display(),
-                'tuiKuanYuanYinId': obj.tuiKuanYuanYin,
-                'shengChengDateTime': obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),
-                'tuiKuanDateTime': tuikuan,
-                'tuiKuanStatus': obj.orderNumber.get_theOrderStatus_display(),
-                'tuiKuanStatusId': obj.orderNumber.theOrderStatus,
-                'goodsName':obj.orderNumber.goodsName,
+                    'orderNumber_id': orderNumber_id,
+                    'orderNumber': obj.orderNumber,
+                    'tuiKuanYuanYin': '',
+                    'tuiKuanYuanYinId': '',
+                    'tuiKuanDateTime': '',
+                    'shengChengDateTime': obj.createDate.strftime('%Y-%m-%d %H:%M:%S'),
 
-                'tuiKuanPrice':obj.orderNumber.yingFuKuan,
-                'detailePicture':topLunBoTu,
-                'goodsNum':obj.orderNumber.unitRiceNum,
-                'goodsPrice':obj.orderNumber.goodsPrice
+                    'tuiKuanStatus': obj.get_theOrderStatus_display(),
+                    'tuiKuanStatusId': obj.theOrderStatus,
+                    'goodsName': obj.goodsName,
 
-            })
-            response.code = 200
-            response.msg = '查询成功'
-            response.data = {
-                'otherData':otherData,
-                'objsCount':objsCount,
-            }
+                    'tuiKuanPrice': obj.yingFuKuan,
+                    'detailePicture': topLunBoTu,
+                    'goodsNum': obj.unitRiceNum,
+                    'goodsPrice': obj.goodsPrice
+
+                })
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'otherData': otherData,
+                    'objsCount': objsCount,
+                }
+
 
     else:
         response.code = 301
