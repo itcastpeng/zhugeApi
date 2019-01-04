@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu import yuzhifu_verify
 from zhugeleida.public.common import action_record
-
+from zhugeleida.views_dir.mycelery.mycelery import record_money_process
 
 
 response = Response.ResponseObj()
@@ -88,6 +88,8 @@ def payback(request):
                 url = 'https://api.mch.weixin.qq.com/pay/orderquery'
                 objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxuApp').filter(xiaochengxuApp__authorization_appid=resultData['appid'])
                 SHANGHUKEY = objs[0].shangHuMiYao
+                company_id = objs[0].xiaochengxucompany_id
+
                 stringSignTemp = shengchengsign(result_data, SHANGHUKEY)
                 result_data['sign'] = md5(stringSignTemp).upper()
                 xml_data = toXml(result_data)
@@ -103,6 +105,8 @@ def payback(request):
                             stopDateTime=nowDate
                         )
 
+                    ### 发送提示给雷达用户
+                    yingFuKuan =  dingDanobjs[0].yingFuKuan
                     u_id =  dingDanobjs[0].yewuUser
                     user_id =  dingDanobjs[0].shouHuoRen
                     goodsName =  dingDanobjs[0].shangpinguanli.goodsName
@@ -112,6 +116,24 @@ def payback(request):
                     data['user_id'] = user_id
                     data['action'] = 18
                     action_record(data, remark)
+
+
+                    ### 商城付款后,记录流水
+                    record_data = {
+                        'admin_user_id': '',
+                        'user_id': u_id,
+                        'company_id': company_id,
+                        'customer_id': user_id ,
+                        'transaction_amount': yingFuKuan,
+                        'source': 3,  # (3,'小程序')
+                        'type': 5     # (5,'商城入账'),
+                    }
+
+                    record_money_process(record_data)
+
+
+
+
 
         else:
             dingDanobjs.update(

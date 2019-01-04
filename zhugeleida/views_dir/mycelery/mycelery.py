@@ -1432,9 +1432,7 @@ def user_forward_send_activity_redPacket(request):
     return JsonResponse(response.__dict__)
 
 
-
-
-
+## 红包发送裂变红包过程函数
 def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
     response = Response.ResponseObj()
     company_id =  data.get('company_id')
@@ -1446,8 +1444,7 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
 
     activity_obj = activity_objs[0]
 
-    app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
-        company_id=company_id)
+    app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(company_id=company_id)
 
     activity_single_money = ''
     mode = activity_obj.mode
@@ -1471,93 +1468,197 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
         gongzhonghao_name = '%s' % (app_objs[0].name)
         authorization_appid = app_objs[0].authorization_appid
 
-    shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
+
+    shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(
         xiaochengxucompany_id=company_id)
 
     shangHuHao = ''
     shangHuMiYao = ''
+    code = ''
+    msg = ''
     if shangcheng_objs:
         shangcheng_obj = shangcheng_objs[0]
         shangHuHao = shangcheng_obj.shangHuHao
-        # send_name = shangcheng_obj.shangChengName
         shangHuMiYao = shangcheng_obj.shangHuMiYao
 
-    _data = {
-        'client_ip': '192.168.1.10',
-        'shanghukey': shangHuMiYao,  # 支付钱数
-        'total_fee': activity_single_money,  # 支付钱数
-        'appid': authorization_appid,  # 小程序ID
-        'mch_id': shangHuHao,  # 商户号
-        'openid': openid,
-        'send_name': gongzhonghao_name,  # 商户名称
-        'act_name': activity_name,  # 活动名称
-        'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
-        'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
-    }
-    print('------[调用转发后满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
+        account_balance = shangcheng_objs[0].xiaochengxucompany.account_balance  #账户余额
 
-    response_ret = focusOnIssuedRedEnvelope(_data)
-    if response_ret.code == 200:
+        if activity_single_money > account_balance: #当 发送金额大于账户余额
+            code = 199 # 余额不足
+            msg = '平台账户余额不足'
+            activity_redPacket_objs.update(
+                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+                status=3  # (2,'未发'),  改为未发状态
+            )
+            activity_objs.update(
+                reason='平台账户余额不足,请充值'
+            )
 
-        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print('---- 调用发红包成功[转发得现金] 状态值:200  parent_id | openid --->>', parent_id, '|', openid)
 
-        _send_log_dict = {
-            'type': '自动发送',
-            'activity_single_money': activity_single_money,
-            'send_time': now_time,
+    if code != 199:
+
+        _data = {
+            'client_ip': '192.168.1.10',
+            'shanghukey': shangHuMiYao,  # 支付钱数
+            'total_fee': activity_single_money,  # 支付钱数
+            'appid': authorization_appid,  # 小程序ID
+            'mch_id': shangHuHao,  # 商户号
+            'openid': openid,
+            'send_name': gongzhonghao_name,  # 商户名称
+            'act_name': activity_name,  # 活动名称
+            'remark': '分享不停,红包不停,上不封顶!',  # 备注信息
+            'wishing': '感谢您参加【分享文章 赚现金活动】！',  # 祝福语
         }
-        activity_redPacket_obj = activity_redPacket_objs[0]
-        send_log_list = activity_redPacket_obj.send_log
-        _send_log_list = json.loads(send_log_list)
-        _send_log_list.append(_send_log_dict)
-        send_log_list = json.dumps(_send_log_list)
+        print('------[调用转发后满足条件,发红包的接口 data 数据]------>>', json.dumps(_data))
 
-        bufa_send_activity_redPacket = shoudle_send_num - already_send_redPacket_num
+        response_ret = focusOnIssuedRedEnvelope(_data)
+        code = response_ret.code
+        msg = response_ret.msg
+        if  code  == 200:
 
-        status = 1
-        if bufa_send_activity_redPacket > 1:  # 判断该用户是不是发布状态.应发数量减去已发数量时大于1,说明此用户已经有补发的红包
-            status = 4  # 补发状态
+            now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print('---- 调用发红包成功[转发得现金] 状态值:200  parent_id | openid --->>', parent_id, '|', openid)
 
-        activity_redPacket_objs.update(
-            already_send_redPacket_num=F('already_send_redPacket_num') + 1,
-            already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
-            # 已发红包金额 [累加发送金额]
-            should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-            status=status,  # (1,'已发成功'),
-            send_log=send_log_list  #
-        )
-        activity_objs.update(
-            reason='发放成功',
-            already_send_redPacket_num=F('already_send_redPacket_num') + 1,
-            already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
-        )
+            _send_log_dict = {
+                'type': '自动发送',
+                'activity_single_money': activity_single_money,
+                'send_time': now_time,
+            }
+            activity_redPacket_obj = activity_redPacket_objs[0]
+            send_log_list = activity_redPacket_obj.send_log
+            _send_log_list = json.loads(send_log_list)
+            _send_log_list.append(_send_log_dict)
+            send_log_list = json.dumps(_send_log_list)
 
-    else:  # 余额不足后者其他原因,记录下日志
-        activity_redPacket_objs.update(
-            should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
-            status=3  # (2,'未发'),  改为未发状态
-        )
-        activity_objs.update(
-            reason=response_ret.msg
-        )
+            bufa_send_activity_redPacket = shoudle_send_num - already_send_redPacket_num
 
-        if response_ret.code == 199:
-            a_data = {}
-            a_data['customer_id'] = parent_id
-            a_data['user_id'] = user_id
-            a_data['type'] = 'gongzhonghao_template_tishi'
-            a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值', 'info_type': 1})
+            status = 1
+            if bufa_send_activity_redPacket > 1:  # 判断该用户是不是发布状态.应发数量减去已发数量时大于1,说明此用户已经有补发的红包
+                status = 4  # 补发状态
 
-            print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
-            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+            activity_redPacket_objs.update(
+                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+                # 已发红包金额 [累加发送金额]
+                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+                status=status,  # (1,'已发成功'),
+                send_log=send_log_list  #
+            )
+            activity_objs.update(
+                reason='发放成功',
+                already_send_redPacket_num=F('already_send_redPacket_num') + 1,
+                already_send_redPacket_money=F('already_send_redPacket_money') + activity_single_money,
+            )
 
-        response.code = response_ret.code
-        response.msg = response_ret.msg
+            ### 红包发送之后,记录红包流水
+            record_data = {
+                'admin_user_id' : '',
+                'user_id' : user_id,
+                'company_id' :  company_id,
+                'customer_id' : parent_id,
+                'transaction_amount' : activity_single_money,
+                'source' : 2,
+                'type' :  4
+            }
+            record_money_process(record_data)
+
+
+
+
+        else:  # 余额不足后者其他原因,记录下日志
+            activity_redPacket_objs.update(
+                should_send_redPacket_num=shoudle_send_num,  # 应该发放的次数 [应发]
+                status=3                                     # (2,'未发'),  改为未发状态
+            )
+            activity_objs.update(
+                reason=response_ret.msg
+            )
+
+    if code == 199:
+        a_data = {}
+        a_data['customer_id'] = parent_id
+        a_data['user_id'] = user_id
+        a_data['type'] = 'gongzhonghao_template_tishi'
+        a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值，然后再补发哦', 'info_type': 1})
+
+        print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+        tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+        response.code = code
+        response.msg  = msg
+
 
     return  response
 
 
+## 资金流水记录过程函数
+def record_money_process(data):
+    response = Response.ResponseObj()
+    admin_user_id = data.get('admin_user_id')
+    user_id = data.get('user_id')
+    company_id = data.get('company_id')
+    customer_id = data.get('customer_id')
+    transaction_amount = data.get('transaction_amount')
+    source = data.get('source')
+    type = data.get('type')
+
+    ## 资金流水记录表
+    ''''
+       (1,'充值成功'),
+       (2,'提现成功'),
+       (3,'红包发放(关注公众号)'),
+       (4,'红包发放(文章裂变)'),
+       (5,'商城入账'),
+       (6,'商城退款')
+    '''
+    company_objs = models.zgld_company.objects.filter(id=company_id)
+
+    if int(type) == 1: #  (1,'充值成功'),
+        company_objs.update(
+            account_balance = F('account_balance') + transaction_amount, #账户余额
+            leiji_chongzhi = F('leiji_chongzhi') + transaction_amount,   #累计充值
+        )
+
+    elif int(type) == 2: #  (2,'提现成功'),
+        account_balance = company_objs[0].account_balance # 余额
+
+        if account_balance < int(transaction_amount):
+            response.code = 303
+            response.msg =  '账户余额不足'
+
+            return response
+
+        else:
+            company_objs.update(
+                account_balance = F('account_balance') - transaction_amount, #账户余额
+                leiji_zhichu=F('leiji_zhichu') + transaction_amount,         # 累计支出
+            )
+
+    elif int(type) in [3,4]: #  (3,'红包发放(关注公众号)'),  (4,'红包发放(文章裂变)'),
+
+        company_objs.update(
+            account_balance=F('account_balance') - transaction_amount,  # 账户余额
+            leiji_zhichu=F('leiji_zhichu') + transaction_amount,  # 累计支出
+        )
+
+
+    if not admin_user_id:
+        admin_user_id =None
+    if not user_id:
+        user_id = None
+
+    account_balance = company_objs[0].account_balance  # 余额
+
+    models.zgld_money_record.objects.create(
+        company_id=company_id,
+        source=source, #(1,'平台账号'),  (2,'公众号'),    (3,'小程序'),
+        type=type,
+        admin_user_id=admin_user_id,
+        user_id=user_id,
+        customer_id=customer_id,
+        transaction_amount=transaction_amount,      # 交易金额
+        account_balance=account_balance             # 余额
+    )
 
 
 # [定时器] - 补发红包红包
@@ -1724,6 +1825,7 @@ def user_focus_send_activity_redPacket(request):
         client_ip = ip
         company_id = request.GET.get('company_id')
         customer_id = request.GET.get('customer_id')
+        user_id = request.GET.get('user_id')
 
         gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
         if gongzhonghao_app_objs:
@@ -1761,50 +1863,91 @@ def user_focus_send_activity_redPacket(request):
 
                         authorization_appid = ''
                         gongzhonghao_name = ''
+
                         if app_objs:
                             authorization_appid = app_objs[0].authorization_appid
                             # company_name = '【%s】' % (app_objs[0].company.name)
                             gongzhonghao_name = app_objs[0].name
 
-                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
-                            xiaochengxucompany_id=company_id)
+                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(xiaochengxucompany_id=company_id)
+
                         send_name = ''
                         shangHuHao = ''
                         shangHuMiYao = ''
+                        code = ''
                         if shangcheng_objs:
                             shangcheng_obj = shangcheng_objs[0]
                             shangHuHao = shangcheng_obj.shangHuHao
-                            # send_name = shangcheng_obj.shangChengName
                             shangHuMiYao = shangcheng_obj.shangHuMiYao
 
-                        _data = {
-                            'client_ip': client_ip,
-                            'shanghukey': shangHuMiYao,  # 支付钱数
-                            'total_fee': focus_get_money,  # 支付钱数
-                            'appid': authorization_appid,  # 小程序ID
-                            'mch_id': shangHuHao,  # 商户号
-                            'openid': openid,
-                            'send_name': gongzhonghao_name,  # 商户名称
-                            'act_name': '关注领现金红包',  # 活动名称
-                            'remark': '动动手指,轻松拿现金!',  # 备注信息
-                            'wishing': '感谢您的关注我！',  # 祝福语
-                        }
+                            account_balance = shangcheng_objs[0].xiaochengxucompany.account_balance  # 账户余额
+                            if focus_get_money > account_balance:  # 当 发送金额大于账户余额
+                                code = 199  # 余额不足
+                                app_objs.update(
+                                    reason='平台账户余额不足,请联系管理员充值'
+                                )
 
-                        print('------[调发红包的接口 data 数据]------>>', json.dumps(_data))
-                        response_ret = focusOnIssuedRedEnvelope(_data)
-                        if response_ret.code == 200:
-                            print('---- 调发红包成功 状态值:200 --->>')
-                            objs.update(
-                                is_receive_redPacket=1,
-                                redPacket_money=focus_get_money
-                            )
-                            app_objs.update(
-                                reason='发放成功'
-                            )
-                        else:
-                            app_objs.update(
-                                reason=response_ret.msg
-                            )
+                        ## 说明平台余额充足
+                        if code != 199:
+
+                            _data = {
+                                'client_ip': client_ip,
+                                'shanghukey': shangHuMiYao,  # 支付钱数
+                                'total_fee': focus_get_money,  # 支付钱数
+                                'appid': authorization_appid,  # 小程序ID
+                                'mch_id': shangHuHao,  # 商户号
+                                'openid': openid,
+                                'send_name': gongzhonghao_name,  # 商户名称
+                                'act_name': '关注领现金红包',  # 活动名称
+                                'remark': '动动手指,轻松拿现金!',  # 备注信息
+                                'wishing': '感谢您的关注我！',  # 祝福语
+                            }
+
+                            print('------[调发红包的接口 data 数据]------>>', json.dumps(_data))
+                            response_ret = focusOnIssuedRedEnvelope(_data)
+                            code = response_ret.code
+                            if code == 200:
+                                print('---- 调发红包成功 状态值:200 --->>')
+                                objs.update(
+                                    is_receive_redPacket=1,
+                                    redPacket_money=focus_get_money
+                                )
+                                app_objs.update(
+                                    reason='发放成功'
+                                )
+
+                                ### 红包发送之后,记录红包流水
+                                record_data = {
+                                    'admin_user_id': '',
+                                    'user_id': user_id,
+                                    'company_id': company_id,
+                                    'customer_id': customer_id,
+                                    'transaction_amount': focus_get_money,
+                                    'source': 2,  #   (2,'公众号'),
+                                    'type': 3     #   (3,'红包发放(关注公众号)'),
+                                }
+                                record_money_process(record_data)
+
+
+
+                            else:
+                                app_objs.update(
+                                    reason=response_ret.msg
+                                )
+
+                        ## 无论哪个平台发送失败都要发送消息提醒
+                        if code == 199:
+
+                            a_data = {}
+                            a_data['customer_id'] = customer_id
+                            a_data['user_id'] = user_id
+                            a_data['type'] = 'gongzhonghao_template_tishi'
+                            a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值后再补发哦', 'info_type': 1})
+
+                            print('-----企业用户 公众号_模板消息【关注红包 | 余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
+                            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+
+
 
                     elif is_subscribe == 1 and is_receive_redPacket == 1:
 

@@ -33,9 +33,9 @@ class zgld_company(models.Model):
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     is_customer_unique = models.BooleanField(verbose_name="客户(通讯录)唯一性", default=False)
 
-    account_balance = models.IntegerField(verbose_name='账户余额', null=True, default=0)
-    leiji_chongzhi = models.IntegerField(verbose_name='累计充值', null=True, default=0)
-    leiji_xiaofei = models.IntegerField(verbose_name='累计消费', null=True, default=0)
+    account_balance = models.FloatField(verbose_name='账户余额', null=True, default=0)
+    leiji_chongzhi = models.FloatField(verbose_name='累计充值', null=True, default=0)
+    leiji_zhichu = models.FloatField(verbose_name='累计支出', null=True, default=0)
     gzh_notice_qrcode = models.CharField(verbose_name="公众号二维码(绑定管理员)", max_length=128, null=True)
 
 
@@ -1274,3 +1274,38 @@ class zgld_help_doc(models.Model):
     class Meta:
         verbose_name_plural = "帮助文档表"
         app_label = "zhugeleida"
+
+
+# 资金流水记录表
+class zgld_money_record(models.Model):
+    company = models.ForeignKey('zgld_company',verbose_name='所属公司',null=True)
+
+    source_choices = ( (1,'平台账号'),
+                       (2,'公众号'),
+                       (3,'小程序'),
+                     )
+    source = models.SmallIntegerField(verbose_name='来源',choices=source_choices,null=True)
+
+    admin_user = models.ForeignKey('zgld_admin_userprofile', verbose_name='后台管理员', null=True)
+
+    user = models.ForeignKey('zgld_userprofile', verbose_name='雷达企业用户', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name="交易客户", null=True) ## 关联的客户(小程序\公众号)
+    transaction_amount = models.FloatField(verbose_name='交易金额(元)', null=True)
+    account_balance =   models.FloatField(verbose_name='余额(元)', null=True)
+
+    type_choices = (   (1,'充值成功'),
+                       (2,'提现成功'),
+                       (3,'红包发放(关注公众号)'),
+                       (4,'红包发放(文章裂变)'),
+                       (5,'商城入账'),
+                       (6,'商城退款')
+                     )
+    type = models.SmallIntegerField(verbose_name='交易类型',choices=type_choices, null=True)
+    record_log = models.TextField(verbose_name='日志记录备注', null=True)
+    create_date = models.DateTimeField(verbose_name="记账时间", auto_now_add=True)
+
+    class Meta:
+
+        verbose_name_plural = "资金记录表"
+        app_label = "zhugeleida"
+
