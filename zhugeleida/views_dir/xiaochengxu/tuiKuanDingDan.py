@@ -31,33 +31,37 @@ def tuiKuanDingDan(request):
             if obj.tuiKuanDateTime:
                 tuikuan = obj.tuiKuanDateTime.strftime('%Y-%m-%d %H:%M:%S')
 
+
             # detailePicture = ''
             # if obj.orderNumber.detailePicture:
             #     detailePicture = json.loads(obj.orderNumber.detailePicture)
-
             # 轮播图
-            topLunBoTu = []
-            if obj.shangpinguanli_id:
-                topLunBoTu = obj.shangpinguanli.topLunBoTu
 
-                # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
-            else:
-                topLunBoTu = obj.topLunBoTu
+            orderNumber_id =  obj.orderNumber_id
+            topLunBoTu = ''
+            if orderNumber_id:
+                _obj = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').get(id=orderNumber_id)
 
+                topLunBoTu = []
+                if _obj.shangpinguanli_id:
+                    topLunBoTu = _obj.shangpinguanli.topLunBoTu
+                    # [{"url":"statics/zhugeleida/imgs/admin/goods/1545614722212.jpg"}]
 
-            topLunBoTu = json.loads(topLunBoTu)
-            url = topLunBoTu[0].get('data')
-            if url:
-                url = url[0]
-
-            topLunBoTu = [{"url": url}]
+                else:
+                    topLunBoTu = _obj.topLunBoTu
 
 
+                topLunBoTu = json.loads(topLunBoTu)
+                url = topLunBoTu[0].get('data')
+                if url:
+                    url = url[0]
+
+                topLunBoTu = [{"url": url}]
 
 
             otherData.append({
                 'id': obj.id,
-                'orderNumber_id': obj.orderNumber_id,
+                'orderNumber_id': orderNumber_id,
                 'orderNumber': obj.orderNumber.orderNumber,
                 'tuiKuanYuanYin': obj.get_tuiKuanYuanYin_display(),
                 'tuiKuanYuanYinId': obj.tuiKuanYuanYin,

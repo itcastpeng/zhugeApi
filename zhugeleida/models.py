@@ -577,7 +577,8 @@ class zgld_customer(models.Model):
 
     user_type_choices = (
         (1, '微信公众号'),
-        (2, '微信小程序')
+        (2, '微信小程序'),
+        (3, '雷达管家-消息推送'),
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     nickname = models.CharField(max_length=64, verbose_name='昵称', blank=True, null=True)

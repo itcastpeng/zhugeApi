@@ -58,11 +58,13 @@ def action_record(data):
 
             company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
-            customer_objs = models.zgld_customer.objects.filter(openid='leida_guanjia',company_id=company_id)
+            customer_objs = models.zgld_customer.objects.filter(user_type=3,company_id=company_id)
             if customer_objs:
                 customer_id = customer_objs[0].id
             else:
-                obj = models.zgld_customer.objects.create(openid='leida_guanjia', company_id=company_id)
+                encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
+                customer_name = str(encodestr, 'utf-8')
+                obj = models.zgld_customer.objects.create(user_type=3,username=customer_name, company_id=company_id)
                 customer_id = obj.id
 
             models.zgld_chatinfo.objects.create(send_type=2, userprofile_id=user_id, customer_id=customer_id,content=content)
@@ -1447,7 +1449,18 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
     app_objs = models.zgld_gongzhonghao_app.objects.select_related('company').filter(
         company_id=company_id)
 
-    activity_single_money = activity_obj.activity_single_money
+    activity_single_money = ''
+    mode = activity_obj.mode
+    if mode == 1: # 随机金额
+        max_single_money = activity_obj.max_single_money
+        min_single_money = activity_obj.min_single_money
+
+
+    elif mode == 2: # 固定金额
+        activity_single_money = activity_obj.activity_single_money
+
+
+
     activity_name = activity_obj.activity_name
 
     authorization_appid = ''
