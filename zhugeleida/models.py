@@ -108,6 +108,17 @@ class zgld_gongzhonghao_app(models.Model):
     is_focus_get_redpacket = models.BooleanField(verbose_name="关注领取红包是否开启", default=False)
     focus_get_money = models.SmallIntegerField(verbose_name='关注领取红包金额',null=True)
     focus_total_money = models.SmallIntegerField(verbose_name='红包总金额',null=True)
+
+
+    mode_choices =  ( (1, '随机红包'),
+                      (2, '固定红包')
+                      )
+    mode = models.SmallIntegerField(default=1, verbose_name='红包发送方式', choices=mode_choices)
+
+    max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
+    min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
+
+
     reason = models.CharField(verbose_name='发送红包失败原因',max_length=512,null=True)
 
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128, null=True)

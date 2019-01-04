@@ -27,7 +27,7 @@ from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelo
 from django.db.models import Q, F
 import base64
 from zhugeleida.public.common import create_qiyeweixin_access_token
-
+import random
 
 def action_record(data):
         response = Response.ResponseObj()
@@ -1455,10 +1455,11 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
         max_single_money = activity_obj.max_single_money
         min_single_money = activity_obj.min_single_money
 
+        rand_num = random.uniform(max_single_money, min_single_money)
+        activity_single_money = round(rand_num, 2)
 
     elif mode == 2: # 固定金额
         activity_single_money = activity_obj.activity_single_money
-
 
 
     activity_name = activity_obj.activity_name

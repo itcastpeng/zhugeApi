@@ -17,9 +17,23 @@ class SetFocusGetRedPacketForm(forms.Form):
     )
 
     focus_get_money = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "关注领取红包金额不能为空"
+        }
+    )
+
+    max_single_money = forms.FloatField(
+        required=False,
+        error_messages={
+            'required': "随机单个金额(元)不能为空"
+        }
+    )
+
+    min_single_money = forms.FloatField(
+        required=False,
+        error_messages={
+            'required': "随机单个金额(元)不能为空"
         }
     )
 
@@ -29,6 +43,62 @@ class SetFocusGetRedPacketForm(forms.Form):
             'required': "领取红包总金额不能为空"
         }
     )
+
+    def clean_max_single_money(self):
+        max_single_money = self.data['max_single_money']
+        mode = self.data['mode']
+
+        if  max_single_money:
+            max_single_money = float(max_single_money)
+
+            if max_single_money < 0.3 or max_single_money  > 200:
+                self.add_error('max_single_money', '红包金额不能小于0.3元或大于200元')
+
+            else:
+                return max_single_money
+
+        else:
+            mode = int(mode)
+            if mode == 1: #随机金额
+                self.add_error('max_single_money', '最大随机金额不能为空')
+
+    def clean_min_single_money(self):
+        min_single_money = self.data['min_single_money']
+        mode = self.data['mode']
+
+        if  min_single_money:
+            min_single_money = float(min_single_money)
+
+            if min_single_money < 0.3 or min_single_money  > 200:
+                self.add_error('max_single_money', '红包金额不能小于0.3元或大于200元')
+
+            else:
+                return min_single_money
+
+        else:
+            mode = int(mode)
+            if mode == 1: #随机金额
+                self.add_error('min_single_money', '最大随机金额不能为空')
+
+    def clean_focus_get_money(self):
+        focus_get_money = self.data['focus_get_money']
+        mode = self.data['mode']
+
+        if focus_get_money:
+            focus_get_money = float(focus_get_money)
+
+            if focus_get_money < 0.3 or focus_get_money  > 200:
+                self.add_error('focus_get_money', '红包金额不能小于0.3元或大于200元')
+
+            else:
+
+                return focus_get_money
+        else:
+            mode = int(mode)
+            if mode == 2:  # 固定金额
+                self.add_error('focus_get_money', '固定金额不能为空')
+
+
 
 
 #增加活动
