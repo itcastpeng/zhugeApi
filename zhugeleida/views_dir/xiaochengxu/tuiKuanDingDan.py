@@ -14,7 +14,8 @@ def tuiKuanDingDan(request):
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
 
-    orderNumber_id = request.GET.get('orderNumber'),
+    orderNumber_id = request.GET.get('orderNumber')
+
     if forms_obj.is_valid():
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
@@ -82,7 +83,7 @@ def tuiKuanDingDan(request):
 
         else:
             print('变量值 ------>',orderNumber_id)
-            
+
             objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(id=orderNumber_id,logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
 
             if objs:
