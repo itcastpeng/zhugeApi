@@ -208,9 +208,10 @@ def money_manage(request, oper_type):
                 response.msg = '返回成功'
 
 
+    else:
 
         ## 资金记录表
-        elif oper_type == 'money_record_list':
+        if  oper_type == 'money_record_list':
             print('request.GET----->', request.GET)
 
             forms_obj = MoneyListSelectForm(request.GET)
@@ -226,6 +227,7 @@ def money_manage(request, oper_type):
                 ## 搜索条件
                 start_time = request.GET.get('start_time')
                 end_time = request.GET.get('end_time')
+                type = request.GET.get('type')  #
 
                 q1 = Q()
                 q1.connector = 'and'
@@ -236,12 +238,12 @@ def money_manage(request, oper_type):
                 if end_time:
                     q1.add(Q(**{'create_date__lte': end_time}), Q.AND)
 
-                type = request.GET.get('type')  #
                 if type:
                     type = int(type)
-                    if type in [3,4]:
-                        q1.children.append(('type__in', [3,4]))
-                    q1.children.append(('type', type))
+                    if type in [3, 4]:
+                        q1.children.append(('type__in', [3, 4]))
+                    else:
+                        q1.children.append(('type', type))
 
                 print('-----q1---->>', q1)
                 objs = models.zgld_money_record.objects.select_related('company').filter(q1).order_by(order)
@@ -260,28 +262,29 @@ def money_manage(request, oper_type):
                 if objs:
                     for obj in objs:
 
-                        account_balance = obj.company.account_balance   #账户余额
-                        leiji_chongzhi = obj.company.leiji_chongzhi     #累计充值
-                        leiji_zhichu = obj.company.leiji_zhichu         #累计支出
-                        type = obj.type         #交易类型
-                        transaction_amount = obj.transaction_amount         #交易金额
+                        account_balance = obj.company.account_balance  # 账户余额
+                        leiji_chongzhi = obj.company.leiji_chongzhi  # 累计充值
+                        leiji_zhichu = obj.company.leiji_zhichu  # 累计支出
+                        type = obj.type  # 交易类型
+                        transaction_amount = obj.transaction_amount  # 交易金额
 
-                        if type in [1,5]: #  (1,'充值成功'),  (5,'商城入账'),
-                            transaction_amount = '+' + transaction_amount
-                        else:
-                            transaction_amount = '-' + transaction_amount
+                        if transaction_amount:
+                            transaction_amount = str(transaction_amount)  # 交易金额
+                            if type in [1, 5]:  # (1,'充值成功'),  (5,'商城入账'),
+                                transaction_amount = '+' + transaction_amount
+                            else:
+                                transaction_amount = '-' + transaction_amount
 
                         ret_data.append({
-                            'article_id': obj.article_id,
-                            'article_title': obj.article.title,
+                            'id': obj.id,
                             'company_id': obj.company_id,
-
-                            'record_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'), # 记账时间
-                            'trading_type_code' :  type,
-                            'trading_type' :  obj.get_type_display(),   # 交易类型
-                            'transaction_amount':  transaction_amount,  # 交易金额
-                            'account_balance':  obj.account_balance,  # 账户结余(元)
-                            'source': obj.source,   # 来源
+                            'record_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 记账时间
+                            'trading_type_code': type,
+                            'trading_type': obj.get_type_display(),  # 交易类型
+                            'transaction_amount': transaction_amount,  # 交易金额
+                            'account_balance': obj.account_balance,  # 账户结余(元)
+                            'source_code': obj.source,  # 来源
+                            'source': obj.get_source_display(),  # 来源
                         })
 
                 #  查询成功 返回200 状态码
@@ -301,11 +304,6 @@ def money_manage(request, oper_type):
                 response.code = 301
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
-
-
-    else:
-       pass
-
 
 
     return JsonResponse(response.__dict__)

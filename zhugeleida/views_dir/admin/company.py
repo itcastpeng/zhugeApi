@@ -606,8 +606,9 @@ def company_oper(request, oper_type, o_id):
         elif oper_type == "recharge_amount":
 
             user_id = request.GET.get('user_id')
+            company_id = o_id
             recharge_amount = request.POST.get('recharge_amount')
-            company_id = request.POST.get('company_id')
+
 
             if  recharge_amount: # 充值金额
                 company_objs = models.zgld_company.objects.filter(id=o_id)
@@ -641,7 +642,7 @@ def company_oper(request, oper_type, o_id):
         elif oper_type == 'revoke_amount':
             user_id = request.GET.get('user_id')
             revoke_amount = request.POST.get('revoke_amount')
-            company_id = request.GET.get('company_id')
+            company_id = o_id
 
             if revoke_amount:  # 充值金额
                 company_objs = models.zgld_company.objects.filter(id=o_id)
