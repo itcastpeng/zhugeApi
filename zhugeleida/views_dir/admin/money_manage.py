@@ -5,10 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time,datetime
-from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketForm, ActivityAddForm, ActivitySelectForm, \
-    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
-import qrcode,requests
+
 from django.http import HttpResponse
 from zhugeleida.public.common import create_qrcode
 import qrcode, re, requests, hashlib, random, uuid, time, json, xml.dom.minidom as xmldom, base64
@@ -17,6 +14,7 @@ import json,os
 from random import Random
 from django.db.models import Q, Sum, Count
 import subprocess
+from zhugeleida.forms.admin.money_manage_verify import MoneyListSelectForm
 
 APP_ID = "wx84390d5be4304d80"  # 你公众账号上的appid
 MCH_ID = "1520981531"  # 你的商户号
@@ -50,114 +48,6 @@ def get_public_ip():
                 w_f.write(ret)
                 print(' ---- 获取公网IP成功 success ----->>', ret)
                 return ret
-
-
-
-
-
-@csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
-def money_manage(request, oper_type):
-    response = Response.ResponseObj()
-
-    if request.method == "POST":
-
-        # 获取支付二维码
-        if oper_type == 'get_payment_qrcode':
-
-
-            user_id = request.GET.get('user_id')
-            phone = request.POST.get('phone', '')
-
-            """
-                 # 生成可扫码支付的二维码
-                 :param request:
-                 :param args:
-                 :param kwargs:
-                 :return:
-            """
-
-
-
-            # shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
-            #     xiaochengxucompany_id=company_id)
-            #
-            # shangHuHao = ''
-            # shangHuMiYao = ''
-            # if shangcheng_objs:
-            #     shangcheng_obj = shangcheng_objs[0]
-            #     shangHuHao = shangcheng_obj.shangHuHao
-            #     # send_name = shangcheng_obj.shangChengName
-            #     shangHuMiYao = shangcheng_obj.shangHuMiYao
-
-            paydict = {
-                'appid': APP_ID,
-                'mch_id': MCH_ID,
-                'nonce_str': str(uuid.uuid4()).replace('-', ''),
-                'product_id': 13020006631,  # 商品id，可自定义
-                'time_stamp': int(time.time()),
-            }
-            paydict['sign'] = get_sign(paydict, API_KEY)
-            url = "weixin://wxpay/bizpayurl?appid=%s&mch_id=%s&nonce_str=%s&product_id=%s&time_stamp=%s&sign=%s" \
-                  % (paydict['appid'], paydict['mch_id'], paydict['nonce_str'], paydict['product_id'],
-                     paydict['time_stamp'], paydict['sign'])
-
-            # 可以直接在微信中点击该url，如果有错误，微信会弹出提示框，如果是扫码，如果失败，什么提示都没有，不利于调试
-            print('支付该url-------------->>',url)
-
-            # 创建二维码
-            qrcode_data = {
-                'url': url,
-                'type': 'payment_qrcode_url'
-            }
-            response_ret = create_qrcode(qrcode_data)
-            pre_qrcode_url = response_ret.get('pre_qrcode_url')
-
-            if pre_qrcode_url:
-                print('预支付二维码pre_qrcode_url---------->>',pre_qrcode_url)
-                response.data = {
-                    'pay_qrcode_url' : pre_qrcode_url
-                }
-                response.code = 200
-                response.msg = '返回成功'
-
-
-
-            # forms_obj = SetFocusGetRedPacketForm(form_data)
-            # if forms_obj.is_valid():
-            #     company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            #     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
-            #
-            #     if gongzhonghao_app_objs:
-            #         gongzhonghao_app_objs.update(
-            #             is_focus_get_redpacket=is_focus_get_redpacket,
-            #             focus_get_money=focus_get_money,
-            #             focus_total_money=focus_total_money
-            #         )
-            #         #  查询成功 返回200 状态码
-            #         response.code = 200
-            #         response.msg = '设置成功'
-            #
-            #     else:
-            #         response.code = 301
-            #         response.msg = '公众号不存在'
-            #
-            #
-            # else:
-            #     response.code = 301
-            #     response.msg = json.loads(forms_obj.errors.as_json())
-
-
-    else:
-       pass
-
-
-
-    return JsonResponse(response.__dict__)
-
-
-
-
 
 
 ## 成功回调地址
@@ -247,6 +137,179 @@ def wx_pay_option(request,oper_type):
 
 
     return JsonResponse(response.__dict__)
+
+
+
+
+@csrf_exempt
+@account.is_token(models.zgld_admin_userprofile)
+def money_manage(request, oper_type):
+    response = Response.ResponseObj()
+
+    if request.method == "POST":
+
+        # 获取支付二维码
+        if oper_type == 'get_payment_qrcode':
+
+
+            user_id = request.GET.get('user_id')
+            phone = request.POST.get('phone', '')
+
+            """
+                 # 生成可扫码支付的二维码
+                 :param request:
+                 :param args:
+                 :param kwargs:
+                 :return:
+            """
+
+
+
+            # shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.filter(
+            #     xiaochengxucompany_id=company_id)
+            #
+            # shangHuHao = ''
+            # shangHuMiYao = ''
+            # if shangcheng_objs:
+            #     shangcheng_obj = shangcheng_objs[0]
+            #     shangHuHao = shangcheng_obj.shangHuHao
+            #     # send_name = shangcheng_obj.shangChengName
+            #     shangHuMiYao = shangcheng_obj.shangHuMiYao
+
+            paydict = {
+                'appid': APP_ID,
+                'mch_id': MCH_ID,
+                'nonce_str': str(uuid.uuid4()).replace('-', ''),
+                'product_id': 13020006631,  # 商品id，可自定义
+                'time_stamp': int(time.time()),
+            }
+            paydict['sign'] = get_sign(paydict, API_KEY)
+            url = "weixin://wxpay/bizpayurl?appid=%s&mch_id=%s&nonce_str=%s&product_id=%s&time_stamp=%s&sign=%s" \
+                  % (paydict['appid'], paydict['mch_id'], paydict['nonce_str'], paydict['product_id'],
+                     paydict['time_stamp'], paydict['sign'])
+
+            # 可以直接在微信中点击该url，如果有错误，微信会弹出提示框，如果是扫码，如果失败，什么提示都没有，不利于调试
+            print('支付该url-------------->>',url)
+
+            # 创建二维码
+            qrcode_data = {
+                'url': url,
+                'type': 'payment_qrcode_url'
+            }
+            response_ret = create_qrcode(qrcode_data)
+            pre_qrcode_url = response_ret.get('pre_qrcode_url')
+
+            if pre_qrcode_url:
+                print('预支付二维码pre_qrcode_url---------->>',pre_qrcode_url)
+                response.data = {
+                    'pay_qrcode_url' : pre_qrcode_url
+                }
+                response.code = 200
+                response.msg = '返回成功'
+
+
+
+        ## 资金记录表
+        elif oper_type == 'money_record_list':
+            print('request.GET----->', request.GET)
+
+            forms_obj = MoneyListSelectForm(request.GET)
+            if forms_obj.is_valid():
+                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+
+                user_id = request.GET.get('user_id')
+                company_id = forms_obj.cleaned_data.get('company_id')
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+
+                ## 搜索条件
+                start_time = request.GET.get('start_time')
+                end_time = request.GET.get('end_time')
+
+                q1 = Q()
+                q1.connector = 'and'
+                q1.children.append(('company_id', company_id))
+
+                if start_time:
+                    q1.add(Q(**{'create_date__gte': start_time}), Q.AND)
+                if end_time:
+                    q1.add(Q(**{'create_date__lte': end_time}), Q.AND)
+
+                type = request.GET.get('type')  #
+                if type:
+                    type = int(type)
+                    if type in [3,4]:
+                        q1.children.append(('type__in', [3,4]))
+                    q1.children.append(('type', type))
+
+                print('-----q1---->>', q1)
+                objs = models.zgld_money_record.objects.select_related('company').filter(q1).order_by(order)
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                ret_data = []
+                account_balance = ''
+                leiji_chongzhi = ''
+                leiji_zhichu = ''
+
+                if objs:
+                    for obj in objs:
+
+                        account_balance = obj.company.account_balance   #账户余额
+                        leiji_chongzhi = obj.company.leiji_chongzhi     #累计充值
+                        leiji_zhichu = obj.company.leiji_zhichu         #累计支出
+                        type = obj.type         #交易类型
+                        transaction_amount = obj.transaction_amount         #交易金额
+
+                        if type in [1,5]: #  (1,'充值成功'),  (5,'商城入账'),
+                            transaction_amount = '+' + transaction_amount
+                        else:
+                            transaction_amount = '-' + transaction_amount
+
+                        ret_data.append({
+                            'article_id': obj.article_id,
+                            'article_title': obj.article.title,
+                            'company_id': obj.company_id,
+
+                            'record_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'), # 记账时间
+                            'trading_type_code' :  type,
+                            'trading_type' :  obj.get_type_display(),   # 交易类型
+                            'transaction_amount':  transaction_amount,  # 交易金额
+                            'account_balance':  obj.account_balance,  # 账户结余(元)
+                            'source': obj.source,   # 来源
+                        })
+
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                    'account_balance': account_balance,
+                    'leiji_chongzhi': leiji_chongzhi,
+                    'leiji_zhichu': leiji_zhichu,
+                }
+
+
+            else:
+
+                response.code = 301
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
+
+
+    else:
+       pass
+
+
+
+    return JsonResponse(response.__dict__)
+
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)

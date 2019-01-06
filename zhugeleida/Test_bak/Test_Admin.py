@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -509,7 +509,7 @@ ip = 'http://api.zhugeyingxiao.com'
 
 ## z支付平台
 
-url =  ip + '/zhugeleida/admin/money_manage/get_payment_qrcode'  # 获取产品的列表
+url =  ip + '/zhugeleida/admin/money_manage/money_record_list'  # 获取产品的列表
 get_data['company_id'] = 2
 
 

@@ -12,8 +12,7 @@ import datetime
 import json
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import  create_component_access_token
-
+from zhugeleida.views_dir.mycelery.mycelery import record_money_process
 from django.db.models import Q, F
 # 查询公司
 @csrf_exempt
@@ -602,6 +601,79 @@ def company_oper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = "用户不存在"
+
+        ## 充值
+        elif oper_type == "recharge_amount":
+
+            user_id = request.GET.get('user_id')
+            recharge_amount = request.POST.get('recharge_amount')
+            company_id = request.POST.get('company_id')
+
+            if  recharge_amount: # 充值金额
+                company_objs = models.zgld_company.objects.filter(id=o_id)
+
+                if company_objs:
+
+                    ## 充值记录,记录流水
+                    record_data = {
+                        'admin_user_id': user_id,
+                        'user_id': '',
+                        'company_id': company_id,
+                        'customer_id': '' ,
+                        'transaction_amount': recharge_amount,
+                        'source': 1,  # (1,'平台账号')
+                        'type': 1     # (1,'充值成功'),
+                    }
+                    record_money_process(record_data)
+
+                    response.code = 200
+                    response.msg = "充值成功"
+
+                else:
+                    response.code = 302
+                    response.msg = '公司不存在'
+
+            else:
+                response.code = 303
+                response.msg = '充值金额不能为空'
+
+        ## 体现
+        elif oper_type == 'revoke_amount':
+            user_id = request.GET.get('user_id')
+            revoke_amount = request.POST.get('revoke_amount')
+            company_id = request.GET.get('company_id')
+
+            if revoke_amount:  # 充值金额
+                company_objs = models.zgld_company.objects.filter(id=o_id)
+
+                if company_objs:
+
+                    ## 充值记录,记录流水
+                    record_data = {
+                        'admin_user_id': user_id,
+                        'user_id': '',
+                        'company_id': company_id,
+                        'customer_id': '',
+                        'transaction_amount': revoke_amount,
+                        'source': 1,  # (1,'平台账号')
+                        'type': 2     # (2,'提现成功')
+                    }
+                    ret = record_money_process(record_data)
+                    if ret.code != 200:
+                        response =  ret
+
+                    else:
+                        response.code = 200
+                        response.msg = "提现成功"
+
+                else:
+                    response.code = 302
+                    response.msg = '公司不存在'
+
+            else:
+                response.code = 303
+                response.msg = '体现金额不能为空'
+
 
 
 

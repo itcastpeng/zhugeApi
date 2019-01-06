@@ -1644,6 +1644,10 @@ def record_money_process(data):
 
     if not admin_user_id:
         admin_user_id =None
+
+    if not customer_id:
+        customer_id = None
+
     if not user_id:
         user_id = None
 
@@ -1659,6 +1663,12 @@ def record_money_process(data):
         transaction_amount=transaction_amount,      # 交易金额
         account_balance=account_balance             # 余额
     )
+
+    response.code = 200
+    response.msg = '记录成功'
+
+
+    return response
 
 
 # [定时器] - 补发红包红包
