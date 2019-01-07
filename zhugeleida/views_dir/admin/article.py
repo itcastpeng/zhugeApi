@@ -443,17 +443,28 @@ def article_oper(request, oper_type, o_id):
 
 
                 status = int(status)
+
                 # 消息提示给雷达用户
                 if status == 1:
                     user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
                     data = {}
+                    customer_objs = models.zgld_customer.objects.filter(user_type=3, company_id=company_id)
+                    if customer_objs:
+                        customer_id = customer_objs[0].id
+                    else:
+                        encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
+                        customer_name = str(encodestr, 'utf-8')
+                        obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
+                                                                  company_id=company_id)
+                        customer_id = obj.id
+
                     for _obj in user_objs:
                         _user_id  = _obj.id
                         article_id  = obj.id
 
                         remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (forms_obj.cleaned_data['title'])
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
-                        data['user_id'] = ''
+                        data['user_id'] = customer_id
                         data['uid'] = _user_id
                         data['action'] = 666
                         data['article_id'] = article_id
@@ -567,12 +578,23 @@ def article_oper(request, oper_type, o_id):
                 if status == 1:
                     user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
                     data = {}
+
+                    customer_objs = models.zgld_customer.objects.filter(user_type=3, company_id=company_id)
+                    if customer_objs:
+                        customer_id = customer_objs[0].id
+                    else:
+                        encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
+                        customer_name = str(encodestr, 'utf-8')
+                        obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
+                                                                  company_id=company_id)
+                        customer_id = obj.id
+
                     for _obj in user_objs:
                         _user_id  = _obj.id
 
                         remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (forms_obj.cleaned_data['title'])
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
-                        data['user_id'] = ''
+                        data['user_id'] = customer_id
                         data['uid'] = _user_id
                         data['action'] = 666
                         data['article_id'] = article_id
