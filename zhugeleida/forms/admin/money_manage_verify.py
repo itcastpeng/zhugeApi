@@ -451,7 +451,7 @@ class ActivityUpdateForm(forms.Form):
 
 
 
-class ActivitySelectForm(forms.Form):
+class MoneyListSelectForm(forms.Form):
 
 
     current_page = forms.IntegerField(

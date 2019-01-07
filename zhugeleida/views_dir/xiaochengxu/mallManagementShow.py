@@ -23,7 +23,6 @@ def mallManage(request):
     response = Response.ResponseObj()
     if request.method == "GET":
 
-        # response = mallManagement.mallManagement(request, uid, goodsGroup, status, flag)
         customer_id = request.GET.get('user_id')
         uid = request.GET.get('uid')
         parentName_id = request.GET.get('parentName_id')
@@ -33,31 +32,21 @@ def mallManage(request):
 
         xiaoChengXuObjs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
         indexLunBoTu = ''
-        xiaoChengXuId = ''
         if xiaoChengXuObjs:
             indexLunBoTu = xiaoChengXuObjs[0].lunbotu  # 查询首页 轮播图
-            xiaoChengXuId = xiaoChengXuObjs[0].id
 
         otherData = []
-
         forms_obj = GoodsManagementSelectForm(request.GET)
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
 
             if detaileId:
-                print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
+                # print('=====================xiaoChengXuObjs[0].id.....> ',xiaoChengXuId)
 
-                objs = models.zgld_goods_management.objects.filter(company_id=company_id).filter(id=detaileId,goodsStatus__in=[1,3])
+                objs = models.zgld_goods_management.objects.filter(company_id=company_id,id=detaileId,goodsStatus__in=[1,3])
                 count = objs.count()
                 if objs:
-
-                    # if length != 0:
-                    #     start_line = (current_page - 1) * length
-                    #     stop_line = start_line + length
-                    #     objs = objs[start_line: stop_line]
-                    # print('objs=========>',objs)
-                    # for obj in objs:
 
                     obj = objs[0]
                     groupObjs = models.zgld_goods_classification_management.objects.filter(id=obj.parentName_id)

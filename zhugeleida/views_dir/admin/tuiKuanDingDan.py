@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 import xml.dom.minidom as xmldom
 import os, random, datetime
+from zhugeleida.views_dir.mycelery.mycelery import record_money_process
 
 # 退款单 查询
 @csrf_exempt
@@ -130,14 +131,22 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
 
                     # SHANGHUKEY = 'dNe089PsAVjQZPEL7ciETtj0DNX5W2RA'
                     SHANGHUKEY = jiChuSheZhiObjs[0].shangHuMiYao
+                    company_id = jiChuSheZhiObjs[0].xiaochengxucompany_id
                     url = 'https://api.mch.weixin.qq.com/secapi/pay/refund'
 
                     jine = 0
+                    yingFuKuan = ''
                     if objs[0].orderNumber.yingFuKuan:
+                        yingFuKuan = objs[0].orderNumber.yingFuKuan
                         jine = int((objs[0].orderNumber.yingFuKuan) *100)
+
                     dingdan = ''
+                    shouHuoRen = ''
+                    yewuUser = ''
                     if objs[0].orderNumber.orderNumber:
                         dingdan = objs[0].orderNumber.orderNumber
+                        yewuUser = objs[0].orderNumber.yewuUser
+                        shouHuoRen = objs[0].orderNumber.shouHuoRen
 
                     if objs[0].tuikuandanhao:
                         TUIKUANDANHAO = objs[0].tuikuandanhao
@@ -185,6 +194,19 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                             dingdan_guanli_objs.update(
                                 theOrderStatus=2, # (2, '退款完成'),
                             )
+
+                            ### 商城退款后,记录流水
+                            record_data = {
+                                'admin_user_id': user_id,
+                                'user_id': yewuUser, # 业务员
+                                'company_id': company_id,
+                                'customer_id': shouHuoRen,
+                                'transaction_amount': yingFuKuan,
+                                'source': 3,  #  (3,'小程序')
+                                'type': 6     #  (6,'商城退款')
+                            }
+                            record_money_process(record_data)
+
                             response.code = 200
                             response.msg = '退款成功'
 

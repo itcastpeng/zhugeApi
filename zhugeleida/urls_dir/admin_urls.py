@@ -153,7 +153,6 @@ urlpatterns = [
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
 
 
-
     # 活动管理
     url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),   # 关注领红包
     url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),                      # 关注领红包
@@ -161,7 +160,8 @@ urlpatterns = [
 
     #资金管理
     url(r'^money_manage/(?P<oper_type>\w+)$', money_manage.money_manage),
-    url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option), # 微信支付回调地址
+
+    url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option), # 微信支付回调地址[暂时搁置待删除]
 
 
 ]

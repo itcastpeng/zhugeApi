@@ -219,18 +219,97 @@ b  = {
 
 # print(b)
 
-content = b.get('news_item')[0].get('content')
+# content = b.get('news_item')[0].get('content')
+#
+#
+# dict = {'data-src' : 'src', '?wx_fmt=jpg' : '', '?wx_fmt=png' : ''}
+#
+# for key,value in dict.items():
+#
+#     content  = content.replace(key,value)
+#     # print(url)
+#
+# print(content)
 
 
-dict = {'data-src' : 'src', '?wx_fmt=jpg' : '', '?wx_fmt=png' : ''}
+# import random
+#
+# class CDispatch:
+#
+# 	def __init__(self, sum, count):
+# 		self.sum = sum
+# 		self.count = count
+#
+# 	# print 'init here sum =',sum,',count =',count
+# 	def __del__(self):
+# 		pass
+#
+# 	# print 'run del the class'
+# 	def getListInfo(self):
+# 		listInfo = []
+# 		sumMoney = self.sum * 100
+#
+# 		for num in range(0, self.count):
+# 			if (num == self.count - 1):
+# 				listInfo.append(float('%0.2f' % sumMoney) / 100)
+# 				break
+# 			bigRand = sumMoney + 1 + num - self.count
+# 			# print 'sumMoney=',sumMoney,'num=',num,'self.count=',self.count,'big=',bigRand
+# 			try:
+# 				a = random.randint(1, int(bigRand))
+# 			except:
+# 				for i in range(0, num):
+# 					print ('listInfo[%d]' % i, '=', listInfo[i])
+# 				if num > 0:
+# 					print ('sumMoney=', sumMoney, 'num=', num, 'listInfo[num-1]=', listInfo[
+# 						num - 1], 'self.count=', self.count, 'big=', bigRand)
+# 				break
+#
+# 			sumMoney -= a
+# 			listInfo.append(float(a) / 100)
+#
+# 		return listInfo
+#
+#
+# for i in range(0, 100000):
+# 	dispatch = CDispatch(10,2)
+# 	listGet = dispatch.getListInfo()
+# 	print ('-----listGet----->>',listGet)
+#
+# 	del dispatch
 
-for key,value in dict.items():
+import random
+import sys
 
-    content  = content.replace(key,value)
-    # print(url)
 
-print(content)
+def calRandomValue(total, num):
+	total = float(total)
+	num = int(num)
+	min = 0.01  # 基数
+	if (num < 1):
+		return
 
+	if num == 1:
+		print("第%d个人拿到红包数为：%.2f" % (num, total))
+		return
+
+	i = 1
+	while (i < num):
+		max = total - min * (num - i)
+		k = int((num - i) / 2)
+		if num - i <= 2:
+			k = num - i
+		max = max / k
+		monney = random.randint(int(min * 100), int(max * 100))
+		monney = float(monney) / 100
+		total = total - monney
+		print("第%d个人拿到红包数为：%.2f, 余额为: %.2f" % (i, monney, total))
+		i += 1
+
+	print ("第%d个人拿到红包数为：%.2f, 余额为: %.2f" % (i, total, 0.0))
+
+
+calRandomValue(200, 100)
 
 
 

@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -509,15 +509,26 @@ ip = 'http://api.zhugeyingxiao.com'
 
 ## z支付平台
 
-url =  ip + '/zhugeleida/admin/money_manage/get_payment_qrcode'  # 获取产品的列表
-get_data['company_id'] = 2
+# url =  ip + '/zhugeleida/admin/money_manage/money_record_list'  # 获取产品的列表
+# get_data['company_id'] = 1
+# # get_data['type'] = 3
+# ret = requests.get(url, data=post_data ,params=get_data)
+#
 
 
+# url =  ip + '/zhugeleida/admin/company/recharge_amount/1'  # 获取产品的列表
+#
+# post_data['recharge_amount'] = 100
+#
+# ret = requests.post(url, data=post_data ,params=get_data)
+
+
+
+url =  ip + '/zhugeleida/admin/company/revoke_amount/1'  # 获取产品的列表
+
+post_data['revoke_amount'] = 22
 
 ret = requests.post(url, data=post_data ,params=get_data)
-
-
-
 
 
 

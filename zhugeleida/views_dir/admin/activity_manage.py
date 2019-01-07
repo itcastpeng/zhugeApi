@@ -25,25 +25,45 @@ def activity_manage(request, oper_type):
 
             is_focus_get_redpacket = request.POST.get('is_focus_get_redpacket')
             focus_get_money = request.POST.get('focus_get_money')
+
             focus_total_money = request.POST.get('focus_total_money')
+            max_single_money = request.POST.get('max_single_money')
+            min_single_money = request.POST.get('min_single_money')
+            mode = request.POST.get('mode')
+
             user_id = request.GET.get('user_id')
 
             form_data = {
                 'is_focus_get_redpacket': is_focus_get_redpacket,
                 'focus_get_money': focus_get_money,
+                'mode' : mode,
                 'focus_total_money': focus_total_money,
+                'max_single_money' : max_single_money,
+                'min_single_money' : min_single_money
             }
 
             forms_obj = SetFocusGetRedPacketForm(form_data)
             if forms_obj.is_valid():
                 company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+
+                if not  focus_total_money:
+                    focus_total_money = 0
+                if not  max_single_money:
+                    max_single_money = 0
+
+                if not  min_single_money:
+                    min_single_money = 0
 
                 if gongzhonghao_app_objs:
                     gongzhonghao_app_objs.update(
                         is_focus_get_redpacket=is_focus_get_redpacket,
                         focus_get_money=focus_get_money,
-                        focus_total_money=focus_total_money
+                        mode = mode,
+                        focus_total_money=focus_total_money,
+                        max_single_money=max_single_money,
+                        min_single_money=min_single_money,
                     )
                     #  查询成功 返回200 状态码
                     response.code = 200
@@ -71,6 +91,9 @@ def activity_manage(request, oper_type):
                 is_focus_get_redpacket = obj.is_focus_get_redpacket
                 focus_get_money = obj.focus_get_money
                 focus_total_money = obj.focus_total_money
+                min_single_money = obj.min_single_money
+                max_single_money = obj.max_single_money
+                mode = obj.mode
                 reason = obj.reason
                 if reason == '发放成功':
                     reason = ''
@@ -80,7 +103,11 @@ def activity_manage(request, oper_type):
                     'is_focus_get_redpacket': is_focus_get_redpacket,  # 关注领取红包是否(开启)
                     'focus_get_money': focus_get_money,  # 关注领取红包金额
                     'focus_total_money': focus_total_money,  # 红包总金额
-                    'reason': reason  # 提示
+                    'reason': reason,  # 提示
+
+                    'mode' : mode,
+                    'max_single_money' : max_single_money,
+                    'min_single_money' : min_single_money,
                 }
                 response.code = 200
                 response.msg = '设置成功'
@@ -442,7 +469,7 @@ def activity_manage(request, oper_type):
                             'area': province + ' ' + city,  # 地区
                             'is_receive_redPacket': obj.is_receive_redPacket,  #   (0, '没有发送过关注红包'), (1, '发送了关注红包')
                             'is_receive_redPacket_text': obj.get_is_receive_redPacket_display(),  # (0, '取消订阅该公众号'), (1, '已经订阅该公众号')
-
+                            'redPacket_money': obj.redPacket_money,
                             'subscribe_time': obj.subscribe_time.strftime('%Y-%m-%d %H:%M:%S') if obj.subscribe_time else '',  # 关注时间
 
                         })

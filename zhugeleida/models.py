@@ -33,9 +33,9 @@ class zgld_company(models.Model):
     account_expired_time = models.DateTimeField(verbose_name="账户过期时间", null=True)
     is_customer_unique = models.BooleanField(verbose_name="客户(通讯录)唯一性", default=False)
 
-    account_balance = models.IntegerField(verbose_name='账户余额', null=True, default=0)
-    leiji_chongzhi = models.IntegerField(verbose_name='累计充值', null=True, default=0)
-    leiji_xiaofei = models.IntegerField(verbose_name='累计消费', null=True, default=0)
+    account_balance = models.FloatField(verbose_name='账户余额', null=True, default=0)
+    leiji_chongzhi = models.FloatField(verbose_name='累计充值', null=True, default=0)
+    leiji_zhichu = models.FloatField(verbose_name='累计支出', null=True, default=0)
     gzh_notice_qrcode = models.CharField(verbose_name="公众号二维码(绑定管理员)", max_length=128, null=True)
 
 
@@ -108,6 +108,17 @@ class zgld_gongzhonghao_app(models.Model):
     is_focus_get_redpacket = models.BooleanField(verbose_name="关注领取红包是否开启", default=False)
     focus_get_money = models.SmallIntegerField(verbose_name='关注领取红包金额',null=True)
     focus_total_money = models.SmallIntegerField(verbose_name='红包总金额',null=True)
+
+
+    mode_choices =  ( (1, '随机红包'),
+                      (2, '固定红包')
+                      )
+    mode = models.SmallIntegerField(default=1, verbose_name='红包发送方式', choices=mode_choices)
+
+    max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
+    min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
+
+
     reason = models.CharField(verbose_name='发送红包失败原因',max_length=512,null=True)
 
     authorization_appid = models.CharField(verbose_name="授权方appid", max_length=128, null=True)
@@ -577,7 +588,8 @@ class zgld_customer(models.Model):
 
     user_type_choices = (
         (1, '微信公众号'),
-        (2, '微信小程序')
+        (2, '微信小程序'),
+        (3, '雷达管家-消息推送'),
     )
     user_type = models.SmallIntegerField(u'客户访问类型', choices=user_type_choices)
     nickname = models.CharField(max_length=64, verbose_name='昵称', blank=True, null=True)
@@ -598,8 +610,9 @@ class zgld_customer(models.Model):
         (0, '没有发送过关注红包'),
         (1, '发送了关注红包')
     )
-
     is_receive_redPacket =  models.SmallIntegerField(verbose_name='是否发送过关注红包', choices=receive_redPacket_choices,default=0)
+
+    redPacket_money = models.FloatField(verbose_name='发红包金额', default=0)
 
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -1261,3 +1274,38 @@ class zgld_help_doc(models.Model):
     class Meta:
         verbose_name_plural = "帮助文档表"
         app_label = "zhugeleida"
+
+
+# 资金流水记录表
+class zgld_money_record(models.Model):
+    company = models.ForeignKey('zgld_company',verbose_name='所属公司',null=True)
+
+    source_choices = ( (1,'平台账号'),
+                       (2,'公众号'),
+                       (3,'小程序'),
+                     )
+    source = models.SmallIntegerField(verbose_name='来源',choices=source_choices,null=True)
+
+    admin_user = models.ForeignKey('zgld_admin_userprofile', verbose_name='后台管理员', null=True)
+
+    user = models.ForeignKey('zgld_userprofile', verbose_name='雷达企业用户', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name="交易客户", null=True) ## 关联的客户(小程序\公众号)
+    transaction_amount = models.FloatField(verbose_name='交易金额(元)', null=True)
+    account_balance =   models.FloatField(verbose_name='余额(元)', null=True)
+
+    type_choices = (   (1,'充值成功'),
+                       (2,'提现成功'),
+                       (3,'红包发放(关注公众号)'),
+                       (4,'红包发放(文章裂变)'),
+                       (5,'商城入账'),
+                       (6,'商城退款')
+                     )
+    type = models.SmallIntegerField(verbose_name='交易类型',choices=type_choices, null=True)
+    record_log = models.TextField(verbose_name='日志记录备注', null=True)
+    create_date = models.DateTimeField(verbose_name="记账时间", auto_now_add=True)
+
+    class Meta:
+
+        verbose_name_plural = "资金记录表"
+        app_label = "zhugeleida"
+
