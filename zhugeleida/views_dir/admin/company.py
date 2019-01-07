@@ -80,6 +80,9 @@ def company(request):
                     'used_days': used_days,
                     'account_expired_time': obj.account_expired_time.strftime('%Y-%m-%d'),
 
+                    'account_balance' : obj.account_balance,
+                    'leiji_chongzhi' : obj.leiji_chongzhi,
+                    'leiji_zhichu' : obj.leiji_zhichu,
 
                 })
             response.code = 200

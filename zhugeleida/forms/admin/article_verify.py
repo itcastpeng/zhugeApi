@@ -125,20 +125,6 @@ class ArticleUpdateForm(forms.Form):
         else:
             return article_id
 
-    # 判断公司名称是否存在
-    def clean_title(self):
-        article_id = self.data['article_id']
-        user_id = self.data['user_id']
-        title = self.data['title']
-        objs = models.zgld_article.objects.filter(
-            title=title,user_id=user_id
-        ).exclude(id=article_id,status__in=[3])
-
-        if objs:
-            self.add_error('title', '文章标题不能相同')
-        else:
-            return title
-
 
 class ArticleSelectForm(forms.Form):
     current_page = forms.IntegerField(

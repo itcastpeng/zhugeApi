@@ -215,7 +215,8 @@ def theOrderOper(request, oper_type, o_id):
                     orderObjs.update(logicDelete=1)
                     response.code = 200
                     response.msg = '删除成功'
-                elif status in [2, 3, 8, 9]:
+
+                elif status in [2, 3, 5,8, 9]:
                     tuiKuanObjs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.filter(orderNumber_id=o_id)
                     if tuiKuanObjs:
                         orderObjs.update(logicDelete=1)
@@ -228,8 +229,8 @@ def theOrderOper(request, oper_type, o_id):
                     response.msg = '删除成功'
 
                 else:
-                    response.code = 301
-                    response.msg = '删除失败,当前状态不可删除'
+                    response.code = 303
+                    response.msg = '退款中不可删除'
             else:
                 response.code = 301
                 response.msg = '无此订单'

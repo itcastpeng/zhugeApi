@@ -776,6 +776,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                         print('----- 公众号【取消关注】,看看是谁: 客户：%s | 公众号: %s | 公司ID: %s---->>',customer_id, name, company_id)
                         objs.update(
                             is_subscribe=0  # 改为取消
+
                         )
 
                     elif Event == 'subscribe':  # 关注公众号
@@ -1535,8 +1536,7 @@ def gzh_auth_process_oper(request, oper_type):
                 print('---------- 公众号帐号基本信息authorizer_info 返回 ----------------->', json.dumps(authorizer_info_ret))
                 original_id = authorizer_info_ret['authorizer_info'].get('user_name')
 
-                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info'][
-                                               'id'] == 0 else False
+                verify_type_info = True if authorizer_info_ret['authorizer_info']['verify_type_info']['id'] == 0 else False
                 # ---->预留代码
                 principal_name = authorizer_info_ret['authorizer_info'].get('principal_name')  # 主体名称
                 qrcode_url = authorizer_info_ret['authorizer_info'].get('qrcode_url')  # 二维码
@@ -1552,6 +1552,11 @@ def gzh_auth_process_oper(request, oper_type):
                         categories = json.dumps(categories)
                     else:
                         categories = ''
+                _qrcode_url = app_obj[0].qrcode_url
+
+                if  _qrcode_url: ## 有二维码
+                    qrcode_url = _qrcode_url
+
 
                 if original_id:
                     app_obj.update(

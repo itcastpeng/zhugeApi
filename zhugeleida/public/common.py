@@ -19,7 +19,7 @@ def action_record(data,remark):
     # user_id = data.get('uid')  # 用户 id
     # customer_id = data.get('user_id')  # 客户 id
     # article_id = data.get('article_id')  # 客户 id
-    # action = data.get('action')
+    action = data.get('action')
     data['remark'] = remark
     tasks.user_send_action_log.delay(data)
 
