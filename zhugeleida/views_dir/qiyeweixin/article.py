@@ -620,6 +620,7 @@ def article_oper(request, oper_type, o_id):
                         # print('------- jie -------->>', str(username, 'utf-8'))
                         username = str(username, 'utf-8')
                         area = obj.customer.province + obj.customer.city
+                        last_access_date = obj.last_access_date.strftime('%Y-%m-%d %H:%M:%S') if obj.last_access_date  else ''
 
                         data_dict = {
                             'article_id': obj.article_id,
@@ -636,7 +637,7 @@ def article_oper(request, oper_type, o_id):
                             'stay_time': stay_time,  # 停留时间
                             'level': obj.level,  # 所在层级
                             'pid': obj.customer_parent_id,
-                            'last_access_date': obj.last_access_date or ''
+                            'last_access_date': last_access_date
                         }
 
                         # level_ret_data.append(data_dict)
