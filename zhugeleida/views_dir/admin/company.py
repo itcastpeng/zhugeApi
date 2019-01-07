@@ -12,7 +12,7 @@ import datetime
 import json
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
-from zhugeleida.views_dir.mycelery.mycelery import record_money_process
+from zhugeleida.views_dir.mycelery_task.mycelery import record_money_process
 from django.db.models import Q, F
 # 查询公司
 @csrf_exempt

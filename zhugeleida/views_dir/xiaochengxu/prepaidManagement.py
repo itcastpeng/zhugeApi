@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu import yuzhifu_verify
 from zhugeleida.public.common import action_record
-from zhugeleida.views_dir.mycelery import  mycelery
+from zhugeleida.views_dir.mycelery_task import  mycelery
 
 
 response = Response.ResponseObj()

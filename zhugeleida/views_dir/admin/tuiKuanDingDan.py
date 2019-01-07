@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import requests
 import xml.dom.minidom as xmldom
 import os, random, datetime
-from zhugeleida.views_dir.mycelery.mycelery import record_money_process
+from zhugeleida.views_dir.mycelery_task.mycelery import record_money_process
 
 # 退款单 查询
 @csrf_exempt
