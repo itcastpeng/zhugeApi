@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu import yuzhifu_verify
 from zhugeleida.public.common import action_record
-# from zhugeleida.views_dir.mycelery_task.mycelery import  record_money_process
+
 
 
 response = Response.ResponseObj()
@@ -128,7 +128,7 @@ def payback(request):
                         'source': 3,  # (3,'小程序')
                         'type': 5     # (5,'商城入账'),
                     }
-
+                    from zhugeleida.views_dir.mycelery_task.mycelery import  record_money_process
                     record_money_process(record_data)
 
 
