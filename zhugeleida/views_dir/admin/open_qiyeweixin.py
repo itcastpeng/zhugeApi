@@ -561,7 +561,7 @@ def open_qiyeweixin(request, oper_type):
                             user_profile_obj.save()
 
                             redirect_url = url + '?token=' + token + '&id=' + str(
-                                user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login + '&company_id=' + company_id
+                                user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login + '&company_id=' + str(company_id)
 
                             print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_id, "|",
                                   userid,
@@ -570,7 +570,7 @@ def open_qiyeweixin(request, oper_type):
                             return redirect(redirect_url)
 
                         elif boss_status == 1 and app_type == 'boss':  #
-                            redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar + '&company_id=' + company_id
+                            redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar + '&company_id=' + str(company_id)
 
                             print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                                   userid, "\n", redirect_url)
