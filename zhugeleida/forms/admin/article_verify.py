@@ -55,7 +55,8 @@ class ArticleAddForm(forms.Form):
         print('----user_id ---title---->',user_id,title)
         objs = models.zgld_article.objects.filter(
             title=title,user_id=user_id
-        )
+        ).exclude(status__in=[3])
+
         if objs:
             self.add_error('title', '文章名已存在')
         else:
@@ -131,7 +132,7 @@ class ArticleUpdateForm(forms.Form):
         title = self.data['title']
         objs = models.zgld_article.objects.filter(
             title=title,user_id=user_id
-        ).exclude(id=article_id)
+        ).exclude(id=article_id,status__in=[3])
 
         if objs:
             self.add_error('title', '文章标题不能相同')
