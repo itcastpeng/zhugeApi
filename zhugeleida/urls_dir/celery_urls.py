@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.mycelery import mycelery
+from zhugeleida.views_dir.mycelery_task import mycelery
 
 
 urlpatterns = [
