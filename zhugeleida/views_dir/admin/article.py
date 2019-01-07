@@ -429,6 +429,7 @@ def article_oper(request, oper_type, o_id):
                 obj = models.zgld_article.objects.create(**dict_data)
 
                 insert_ads = request.POST.get('insert_ads')
+
                 if insert_ads:
                     insert_ads = json.loads(insert_ads)
                     title = insert_ads.get('title')
@@ -455,7 +456,7 @@ def article_oper(request, oper_type, o_id):
                         encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
                         customer_name = str(encodestr, 'utf-8')
                         obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
-                                                                  company_id=company_id)
+                                                                  company_id=company_id,headimgurl='statics/imgs/leidaguanjia.jpg')
                         customer_id = obj.id
 
                     for _obj in user_objs:
@@ -586,7 +587,7 @@ def article_oper(request, oper_type, o_id):
                         encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
                         customer_name = str(encodestr, 'utf-8')
                         obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
-                                                                  company_id=company_id)
+                                                                  company_id=company_id,headimgurl='statics/imgs/leidaguanjia.jpg')
                         customer_id = obj.id
 
                     for _obj in user_objs:

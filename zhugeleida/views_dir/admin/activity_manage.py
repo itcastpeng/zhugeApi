@@ -12,6 +12,7 @@ from zhugeleida.forms.admin.activity_manage_verify import SetFocusGetRedPacketFo
 
 import json
 from django.db.models import Q, Sum, Count
+import xlwt,os, random
 
 
 @csrf_exempt
@@ -421,6 +422,7 @@ def activity_manage(request, oper_type):
                 response.code = 200
                 response.msg = '活动不存在'
 
+        # 查询
         elif oper_type == 'query_focus_gongzhonghao_customer':
             company_id = request.GET.get('company_id')
             is_receive_redPacket = request.GET.get('is_receive_redPacket')
@@ -483,6 +485,71 @@ def activity_manage(request, oper_type):
                 else:
                     response.code = 301
                     response.msg = '数据为空'
+
+        # 生成关注领红包的Excel表格
+        elif oper_type == 'generate_focus_redPacket_excel':
+            company_id = request.GET.get('company_id')
+
+
+            data_list = [['编号','姓名','性别','地区','红包金额','是否关注','关注时间']]
+            book = xlwt.Workbook()  # 新建一个excel
+
+            q1 = Q()
+            q1.connector = 'and'
+            q1.children.append(('user_type', 1))
+            q1.children.append(('company_id', company_id))
+            # q1.children.append(('is_subscribe', 1))  # 已经关注
+            q1.children.append(('is_receive_redPacket', 1)) # (1, '发送了关注红包')
+
+            objs = models.zgld_customer.objects.filter(q1).order_by('-create_date')
+
+            if objs:  # 说明有人参加活动
+
+                index = 0
+                for obj in objs:
+                    customer_id = obj.id
+                    customer_username = obj.username
+                    customer_username = conversion_base64_customer_username_base64(customer_username, customer_id)
+
+                    province = obj.province if obj.province else ''
+                    city = obj.city if obj.city else ''
+                    area =  province + ' ' + city,  # 地区
+                    subscribe_time = obj.subscribe_time.strftime('%Y-%m-%d %H:%M:%S') if obj.subscribe_time else ''
+                    is_subscribe = obj.is_subscribe
+                    subscribe = ''
+                    if is_subscribe == 0:
+                        subscribe = '未关注'
+                    elif is_subscribe ==1:
+                        subscribe = '已关注'
+
+                    index = index + 1
+                    data_list.append([
+                        index,customer_username, obj.get_sex_display() or '', area,
+                        obj.redPacket_money,subscribe,
+                        subscribe_time,  # 关注时间
+                    ])
+
+            print('----data_list -->>',data_list)
+
+            sheet = book.add_sheet('sheet1')  # 添加一个sheet页
+            row = 0  # 控制行
+            for stu in data_list:
+                col = 0  # 控制列
+                for s in stu:  # 再循环里面list的值，每一列
+                    sheet.write(row, col, s)
+                    col += 1
+                row += 1
+
+
+            excel_name = '领取红包详情_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            download_excel_path = 'http://api.zhugeyingxiao.com/' + os.path.join('statics', 'zhugeleida', 'fild_upload',
+                                                                                 '{}.xlsx'.format(excel_name))
+            book.save(os.path.join(os.getcwd(), 'statics', 'zhugeleida', 'fild_upload', '{}.xlsx'.format(excel_name)))
+            response.data = {'download_excel_path': download_excel_path}
+            response.code = 200
+            response.msg = '生成生成'
+
+
 
     return JsonResponse(response.__dict__)
 
