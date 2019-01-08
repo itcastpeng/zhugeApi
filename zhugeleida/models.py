@@ -1186,55 +1186,6 @@ class zgld_goods_management(models.Model):
 
 
 
-
-# 公众号-文章-活动(任务)管理表
-class zgld_article_activity(models.Model):
-    article = models.ForeignKey('zgld_article',verbose_name='文章')
-    company = models.ForeignKey('zgld_company', verbose_name='所属企业',null=True)
-    # shanghu_name = models.CharField(verbose_name='商户名称', max_length=128,null=True)
-    activity_name = models.CharField(verbose_name='活动名称', max_length=256,null=True)
-    # wish_language = models.CharField(verbose_name='祝福语', max_length=256,null=True)
-    status_choices = ((1, '未启用'),
-                      (2, '进行中'),
-                      (3, '已暂停'),
-                      (4, '已结束')
-                      )
-    status = models.SmallIntegerField(default=2, verbose_name='活动状态', choices=status_choices)
-    activity_rules = models.CharField(verbose_name='活动规则', max_length=2048,null=True)
-
-    mode_choices =  ( (1, '随机红包'),
-                      (2, '固定红包')
-                      )
-    mode = models.SmallIntegerField(default=1, verbose_name='红包发送方式', choices=mode_choices)
-
-
-    activity_total_money= models.SmallIntegerField(verbose_name='活动总金额', default=0,null=True)
-    redPacket_num = models.SmallIntegerField(verbose_name='红包个数(个)',null=True,default=0)
-    activity_single_money= models.FloatField(verbose_name='单个金额(元)',default=0,null=True)
-    max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
-    min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
-
-    is_limit_area = models.BooleanField(verbose_name='是否地区限制', default=False)  # 默认不限制
-    limit_area = models.TextField(verbose_name='限制的区域', null=True,default="[]")
-
-    reach_stay_time = models.SmallIntegerField(verbose_name='达到多少秒发红包', default=0) # 0 代表 没有限制
-    reach_forward_num = models.SmallIntegerField(verbose_name='达到多少次发红包(转发阅读后次数))',null=True)
-    already_send_redPacket_num = models.SmallIntegerField(verbose_name='已发放红包数量[总共]', default=0)
-    already_send_redPacket_money = models.FloatField(verbose_name='已发红包金额', default=0)
-
-
-    start_time = models.DateTimeField(verbose_name='活动开始时间', null=True)
-    end_time   =   models.DateTimeField(verbose_name='活动结束时间', null=True)
-    reason = models.CharField(verbose_name='返回的发红包错误信息', max_length=512, null=True)
-    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True,null=True)
-
-    class Meta:
-
-        verbose_name_plural = "文章活动表"
-        app_label = "zhugeleida"
-
-
-
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):
     shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
