@@ -466,10 +466,9 @@ def article_oper(request, oper_type, o_id):
                         'activity_single_money': activity_single_money, #单个金额
                         'start_time' : _start_time,
                         'end_time' :   _end_time,
-                        
+
                         'gongzhonghao_mode' : gongzhonghao_mode,
                         'activity_mode' : activity_mode,
-
                     }
 
                 else:
