@@ -56,20 +56,18 @@ def action_record(data):
             _content['msg'] = msg
             content = json.dumps(_content)
 
-            # company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
-            # customer_objs = models.zgld_customer.objects.filter(user_type=3,company_id=company_id)
-            # if customer_objs:
-            #     customer_id = customer_objs[0].id
-            # else:
-            #     encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
-            #     customer_name = str(encodestr, 'utf-8')
-            #     obj = models.zgld_customer.objects.create(user_type=3,username=customer_name, company_id=company_id)
-            #     customer_id = obj.id
+            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
 
             models.zgld_chatinfo.objects.filter(send_type=2,userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
-
             models.zgld_chatinfo.objects.create(send_type=2, userprofile_id=user_id, customer_id=customer_id,content=content)
 
+            redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(
+                uid=user_id)  # 客户发过去消息,雷达用户的key 消息数量发生变化
+            redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(
+                uid=user_id)  # 客户发过去消息,雷达用户的key 消息列表发生变化
+            rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
+            rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
 
 
             response.code = 200
@@ -549,6 +547,7 @@ def create_user_or_customer_poster(request):
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
+
     else:
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
         print(' create_user_or_customer_poster ---->', BASE_DIR)
@@ -565,7 +564,7 @@ def create_user_or_customer_poster(request):
         print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-        # driver.implicitly_wait(10)
+        driver.implicitly_wait(5)
 
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
         customer_id, user_id)
@@ -607,6 +606,8 @@ def create_user_or_customer_poster(request):
             else:
                 im.save(BASE_DIR + user_poster_file)
 
+            print('page_source -->', driver.page_source)
+
             poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
             print('"create_user_or_customer_poster -->", --------- 生成海报URL -------->', poster_url)
@@ -627,6 +628,7 @@ def create_user_or_customer_poster(request):
             response.msg = "PhantomJS截图失败"
             response.code = 400
             driver.quit()
+
     return JsonResponse(response.__dict__)
 
 
@@ -1626,7 +1628,6 @@ def record_money_process(data):
         if account_balance < int(transaction_amount):
             response.code = 303
             response.msg =  '账户余额不足'
-
             return response
 
         else:

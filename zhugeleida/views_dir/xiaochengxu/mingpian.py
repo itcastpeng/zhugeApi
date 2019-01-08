@@ -383,16 +383,16 @@ def mingpian_oper(request, oper_type):
                 poster_url = qr_obj[0].poster_url
 
                 # if not poster_url:
-                data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-
-                print ("------ celery 去生成海报 ---->",data_dict)
 
                 ret_data = {
                         'uid': user_id,
                         'poster_url': poster_url,
                     }
                 print('-----save_poster ret_data --->>',ret_data)
+                data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                print("------ celery 去生成海报 ---->", data_dict)
+
                 response.data = ret_data
                 response.msg = "请求成功"
                 response.code = 200
@@ -550,12 +550,9 @@ def mingpian_oper(request, oper_type):
 @csrf_exempt
 def mingpian_poster_html_oper(request):
 
-
-
-    customer_id = request.GET.get('user_id')
-    user_id = request.GET.get('uid')  # 用户 id
-
     if request.method == 'GET':
+        customer_id = request.GET.get('user_id')
+        user_id = request.GET.get('uid')
 
         obj = models.zgld_userprofile.objects.get(id=user_id)
 
