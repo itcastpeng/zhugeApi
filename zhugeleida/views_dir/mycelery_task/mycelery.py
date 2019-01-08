@@ -606,6 +606,8 @@ def create_user_or_customer_poster(request):
             else:
                 im.save(BASE_DIR + user_poster_file)
 
+            print('page_source -->', driver.page_source)
+
             poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
             print('"create_user_or_customer_poster -->", --------- 生成海报URL -------->', poster_url)
