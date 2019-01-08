@@ -564,7 +564,7 @@ def create_user_or_customer_poster(request):
         print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-        driver.implicitly_wait(5)
+        # driver.implicitly_wait(5)
 
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
         customer_id, user_id)
