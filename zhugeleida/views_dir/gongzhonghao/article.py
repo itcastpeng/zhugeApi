@@ -348,12 +348,14 @@ def article_oper(request, oper_type, o_id):
                     is_limit_area = ''
                     reach_stay_time = ''
                     activity_id = ''
+                    activity_mode = ''
                     if activity_objs:
                         activity_obj = activity_objs[0]
                         start_time = activity_obj.start_time
                         end_time = activity_obj.end_time
                         is_limit_area = activity_obj.is_limit_area
                         reach_stay_time = activity_obj.reach_stay_time
+                        activity_mode = activity_obj.mode
 
 
                         if now_date_time >= start_time and now_date_time <= end_time: # 活动开启并活动在进行中
@@ -434,12 +436,12 @@ def article_oper(request, oper_type, o_id):
                     qrcode_url = ''
                     is_focus_get_redpacket = 2 # 默认是不开启关注领红包
                     focus_get_money = ''
-                    mode = ''
+                    gongzhonghao_mode = ''
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
                         gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                         qrcode_url = gongzhonghao_app_obj.qrcode_url
-                        mode = gongzhonghao_app_obj.mode
+                        gongzhonghao_mode = gongzhonghao_app_obj.mode
 
                         is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
                         if is_focus_get_redpacket:
@@ -464,7 +466,9 @@ def article_oper(request, oper_type, o_id):
                         'activity_single_money': activity_single_money, #单个金额
                         'start_time' : _start_time,
                         'end_time' :   _end_time,
-                        'mode' :mode,
+                        
+                        'gongzhonghao_mode' : gongzhonghao_mode,
+                        'activity_mode' : activity_mode,
 
                     }
 
