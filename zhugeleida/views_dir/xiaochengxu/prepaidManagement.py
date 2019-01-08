@@ -78,6 +78,7 @@ def payback(request):
     if dingDanobjs:
         if resultData['return_code'] == 'SUCCESS':
             if dingDanobjs:
+
                 # 二次 查询是否付款成功
                 result_data = {
                     'appid': resultData['appid'],                 # appid
@@ -106,6 +107,9 @@ def payback(request):
                         )
 
                     ### 发送提示给雷达用户
+
+                    print('值dingDanobjs------>>',dingDanobjs)
+
                     yingFuKuan =  dingDanobjs[0].yingFuKuan
                     u_id =  dingDanobjs[0].yewuUser_id
                     user_id =  dingDanobjs[0].shouHuoRen_id
