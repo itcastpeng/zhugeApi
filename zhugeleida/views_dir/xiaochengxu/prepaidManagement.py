@@ -101,10 +101,6 @@ def payback(request):
                 return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
                 print('===============================return_code======================> ', return_code)
                 if return_code == 'SUCCESS':
-                    dingDanobjs.update(
-                            theOrderStatus=8,   # 支付成功 改订单状态成功
-                            stopDateTime=nowDate
-                        )
 
                     ### 发送提示给雷达用户
 
@@ -114,6 +110,7 @@ def payback(request):
                     u_id =  dingDanobjs[0].yewuUser_id
                     user_id =  dingDanobjs[0].shouHuoRen_id
                     goodsName =  dingDanobjs[0].shangpinguanli.goodsName
+
                     remark = '成功下单,购买商品【%s】' % (goodsName)
                     data = {}
                     data['uid'] = u_id
@@ -121,7 +118,11 @@ def payback(request):
                     data['action'] = 18
                     action_record(data, remark)
 
-
+                    dingDanobjs.update(
+                        theOrderStatus=8,  # 支付成功 改订单状态成功
+                        stopDateTime=nowDate
+                    )
+                    
                     ### 商城付款后,记录流水
                     record_data = {
                         'admin_user_id': '',
@@ -134,6 +135,7 @@ def payback(request):
                     }
                     from zhugeleida.views_dir.mycelery_task.mycelery import  record_money_process
                     record_money_process(record_data)
+
 
 
 
