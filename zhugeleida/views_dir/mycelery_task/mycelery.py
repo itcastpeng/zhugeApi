@@ -547,6 +547,7 @@ def create_user_or_customer_poster(request):
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
+
     else:
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
         print(' create_user_or_customer_poster ---->', BASE_DIR)
@@ -563,7 +564,7 @@ def create_user_or_customer_poster(request):
         print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-        # driver.implicitly_wait(10)
+        driver.implicitly_wait(5)
 
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
         customer_id, user_id)
@@ -625,6 +626,7 @@ def create_user_or_customer_poster(request):
             response.msg = "PhantomJS截图失败"
             response.code = 400
             driver.quit()
+
     return JsonResponse(response.__dict__)
 
 

@@ -4,3 +4,4 @@ class ResponseObj(object):
         self.code = 0
         self.msg = ''
         self.data = {}
+        self.note = {}     # 备注信息
