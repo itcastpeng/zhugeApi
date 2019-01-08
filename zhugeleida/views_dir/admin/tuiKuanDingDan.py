@@ -120,8 +120,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 dingdan_guanli_objs = models.zgld_shangcheng_dingdan_guanli.objects.filter(id=orderNumber_id)
 
                 if int(status) == 2 and dingdan_guanli_objs:
-                    # objs.update(orderNumber__theOrderStatus=4) # 更新状态 退款中
-                    # 获取appid
+
                     u_idObjs = models.zgld_admin_userprofile.objects.filter(id=user_id)
                     xiaochengxu_app = models.zgld_xiaochengxu_app.objects.filter(
                         company_id=u_idObjs[0].company_id)
@@ -141,12 +140,12 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                         jine = int((objs[0].orderNumber.yingFuKuan) *100)
 
                     dingdan = ''
-                    shouHuoRen = ''
-                    yewuUser = ''
-                    if objs[0].orderNumber.orderNumber:
+                    shouHuoRen_id = ''
+                    yewuUser_id = ''
+                    if objs[0].orderNumber_id:
                         dingdan = objs[0].orderNumber.orderNumber
-                        yewuUser = objs[0].orderNumber.yewuUser
-                        shouHuoRen = objs[0].orderNumber.shouHuoRen
+                        yewuUser_id = objs[0].orderNumber.yewuUser_id
+                        shouHuoRen_id = objs[0].orderNumber.shouHuoRen_id
 
                     if objs[0].tuikuandanhao:
                         TUIKUANDANHAO = objs[0].tuikuandanhao
@@ -198,9 +197,9 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                             ### 商城退款后,记录流水
                             record_data = {
                                 'admin_user_id': user_id,
-                                'user_id': yewuUser, # 业务员
+                                'user_id': yewuUser_id, # 业务员
                                 'company_id': company_id,
-                                'customer_id': shouHuoRen,
+                                'customer_id': shouHuoRen_id,
                                 'transaction_amount': yingFuKuan,
                                 'source': 3,  #  (3,'小程序')
                                 'type': 6     #  (6,'商城退款')

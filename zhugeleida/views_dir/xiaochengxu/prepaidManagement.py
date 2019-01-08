@@ -107,8 +107,8 @@ def payback(request):
 
                     ### 发送提示给雷达用户
                     yingFuKuan =  dingDanobjs[0].yingFuKuan
-                    u_id =  dingDanobjs[0].yewuUser
-                    user_id =  dingDanobjs[0].shouHuoRen
+                    u_id =  dingDanobjs[0].yewuUser_id
+                    user_id =  dingDanobjs[0].shouHuoRen_id
                     goodsName =  dingDanobjs[0].shangpinguanli.goodsName
                     remark = '成功下单,购买商品【%s】' % (goodsName)
                     data = {}

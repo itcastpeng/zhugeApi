@@ -1624,7 +1624,6 @@ def record_money_process(data):
         if account_balance < int(transaction_amount):
             response.code = 303
             response.msg =  '账户余额不足'
-
             return response
 
         else:
