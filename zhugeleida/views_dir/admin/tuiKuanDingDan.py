@@ -204,6 +204,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                                 'source': 3,  #  (3,'小程序')
                                 'type': 6     #  (6,'商城退款')
                             }
+                            print('record_data----->>',record_data)
+                            
                             record_money_process(record_data)
 
                             response.code = 200

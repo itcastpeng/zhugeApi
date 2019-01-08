@@ -564,7 +564,7 @@ def create_user_or_customer_poster(request):
         print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-        # driver.implicitly_wait(5)
+        driver.implicitly_wait(10)
 
         url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
         customer_id, user_id)
@@ -1605,6 +1605,14 @@ def record_money_process(data):
     source = data.get('source')
     type = data.get('type')
 
+    print('admin_user_id----->>',admin_user_id)
+    print('user_id----->>',user_id)
+    print('company_id----->>',company_id)
+    print('customer_id----->>',customer_id)
+    print('transaction_amount----->>',transaction_amount)
+    print('source----->>',source)
+    print('type----->>',type)
+
     ## 资金流水记录表
     ''''
        (1,'充值成功'),
@@ -1654,6 +1662,11 @@ def record_money_process(data):
         user_id = None
 
     account_balance = company_objs[0].account_balance  # 余额
+    print('admin_user_id----->>',admin_user_id)
+    print('user_id----->>',user_id)
+    print('customer_id----->>',customer_id)
+    print('transaction_amount----->>',transaction_amount)
+    print('account_balance----->>',account_balance)
 
     models.zgld_money_record.objects.create(
         company_id=company_id,
