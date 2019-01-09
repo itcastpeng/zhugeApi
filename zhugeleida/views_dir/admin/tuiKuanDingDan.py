@@ -195,18 +195,17 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                             )
 
                             ### 商城退款后,记录流水
-                            record_data = {
-                                'admin_user_id': user_id,
-                                'user_id': yewuUser_id, # 业务员
-                                'company_id': company_id,
-                                'customer_id': shouHuoRen_id,
-                                'transaction_amount': yingFuKuan,
-                                'source': 3,  #  (3,'小程序')
-                                'type': 6     #  (6,'商城退款')
-                            }
-                            print('record_data----->>',record_data)
-
-                            record_money_process(record_data)
+                            # record_data = {
+                            #     'admin_user_id': user_id,
+                            #     'user_id': yewuUser_id, # 业务员
+                            #     'company_id': company_id,
+                            #     'customer_id': shouHuoRen_id,
+                            #     'transaction_amount': yingFuKuan,
+                            #     'source': 3,  #  (3,'小程序')
+                            #     'type': 6     #  (6,'商城退款')
+                            # }
+                            # print('record_data----->>',record_data)
+                            # record_money_process(record_data)
 
                             response.code = 200
                             response.msg = '退款成功'

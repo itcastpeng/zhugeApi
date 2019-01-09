@@ -40,7 +40,6 @@ def action_record(data):
 
         remark = data.get('remark')
         agent_id = data.get('agent_id')
-        content = ''
 
         if action in [666]: # 只做消息【温馨提示】。
 
@@ -72,7 +71,6 @@ def action_record(data):
 
             response.code = 200
             response.msg = '发送消息提示成功'
-
             return response
 
         customer_name = models.zgld_customer.objects.get(id=customer_id).username
@@ -112,6 +110,9 @@ def action_record(data):
                 remark=remark,
                 action=action
             )
+            content = '%s%s' % (customer_name, remark)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
+
             # follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
             #     user_id=user_id,
             #     customer_id=customer_id
@@ -1953,8 +1954,6 @@ def user_focus_send_activity_redPacket(request):
                                 }
                                 record_money_process(record_data)
 
-
-
                             else:
                                 app_objs.update(
                                     reason=response_ret.msg
@@ -1977,12 +1976,12 @@ def user_focus_send_activity_redPacket(request):
                     elif is_subscribe == 1 and is_receive_redPacket == 1:
 
                         a_data = {}
-                        user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-                            customer_id=customer_id,user__company_id=company_id)
-                        user_id = ''
-                        if user_objs:
-                            obj = user_objs[0]
-                            user_id = obj.user_id
+                        # user_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
+                        #     customer_id=customer_id,user__company_id=company_id)
+                        # user_id = ''
+                        # if user_objs:
+                        #     obj = user_objs[0]
+                        #     user_id = obj.user_id
 
                         a_data['customer_id'] = customer_id
                         a_data['user_id'] = user_id
@@ -2016,11 +2015,31 @@ def user_focus_send_activity_redPacket(request):
 @csrf_exempt
 def get_customer_gongzhonghao_userinfo(request):
 
+
+
     response = Response.ResponseObj()
     authorizer_appid = request.GET.get('authorizer_appid')
+    company_id = request.GET.get('company_id')
+    type = request.GET.get('type')
     openid = request.GET.get('openid')
+
     headimgurl = request.GET.get('headimgurl')
 
+    if type == 'get_gzh_user_whole_info': ## 获取全部的信息
+
+        __data = {
+            'openid': openid,
+            'authorizer_appid': authorizer_appid,
+            'company_id': company_id,
+        }
+        from zhugeleida.public.common import get_customer_gongzhonghao_userinfo as get_customer_gongzhonghao_userinfo_cla
+
+        user_obj_cla = get_customer_gongzhonghao_userinfo_cla(__data)
+        ret = user_obj_cla.get_gzh_user_whole_info()
+        response.code = 200
+        response.msg = '获取成功'
+
+        return JsonResponse(response.__dict__)
 
     three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
     qywx_config_dict = ''

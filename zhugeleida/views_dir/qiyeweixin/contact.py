@@ -36,8 +36,7 @@ def contact(request):
 
             count = chat_info_objs.count()
 
-            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,
-                                                                 is_user_new_msg=True).count()
+            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,is_user_new_msg=True).count()
 
 
             if length != 0:

@@ -69,12 +69,13 @@ def chat(request):
                     continue
 
                 is_customer_new_msg = obj.is_customer_new_msg
-                id = obj.id
-                update_id_list.append(id)
+                # id = obj.id
+                # update_id_list.append(id)
 
                 if is_customer_new_msg: # 为True时
                     is_customer_already_read = 0 # 未读
                     is_customer_already_read_text = '未读'
+
                 else:
                     is_customer_already_read = 1  # 已读
                     is_customer_already_read_text = '已读'
@@ -116,12 +117,12 @@ def chat(request):
                 'company_id' : company_id
             }
 
-            _objs.filter(id__in=update_id_list).update(
-                is_user_new_msg=False
-            )
-            # _objs.update(
+            # _objs.filter(id__in=update_id_list).update(
             #     is_user_new_msg=False
             # )
+            _objs.update(
+                is_user_new_msg=False
+            )
 
 
             if not ret_data_list:

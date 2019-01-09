@@ -82,7 +82,7 @@ def tuiKuanDingDan(request):
                 }
 
         else:
-            print('变量值 ------>',orderNumber_id)
+            print('变量值 orderNumber_id ------>',orderNumber_id)
 
             objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli').filter(id=orderNumber_id,logicDelete=0).order_by('-createDate')  # 小程序用户只能查看自己的订单
 
