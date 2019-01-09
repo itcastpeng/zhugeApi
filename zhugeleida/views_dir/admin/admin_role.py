@@ -71,6 +71,7 @@ def admin_role(request):
                                         {'children_rule_id': rule[0], 'selected': False, 'children_rule_name': rule[1]})
 
                                 # tag_dict[obj[0]].append({tag[0]})
+
                         else:
 
                             if obj[0] in rules_id_list:
