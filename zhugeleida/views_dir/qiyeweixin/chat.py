@@ -69,7 +69,7 @@ def chat(request):
                     continue
 
                 is_customer_new_msg = obj.is_customer_new_msg
-                # id = obj.id
+                id = obj.id
                 # update_id_list.append(id)
 
                 if is_customer_new_msg: # 为True时
@@ -116,6 +116,7 @@ def chat(request):
                 'data_count': count,
                 'company_id' : company_id
             }
+            print('response--------->',response.data)
 
             # _objs.filter(id__in=update_id_list).update(
             #     is_user_new_msg=False
