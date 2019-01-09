@@ -52,8 +52,17 @@ def user_focus_send_activity_redPacket(data):
     s.keep_alive = False  # 关闭多余连接
     s.get(url, params=get_data)
 
-    # requests.get(url, params=get_data)
 
+# 转发发送红包
+@app.task
+def user_focus_send_activity_redPacket(data):
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_focus_send_activity_redPacket'
+    get_data = data
+    print('----------[公众号]关注文章后得红包 -->requests调用 get_data数据 ------------>',get_data)
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.get(url, params=get_data)
 
 
 # 公众号第三方平台拉取用户的信息

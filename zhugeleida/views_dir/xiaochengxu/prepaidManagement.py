@@ -101,9 +101,7 @@ def payback(request):
                 return_code = collection.getElementsByTagName("return_code")[0].childNodes[0].data
                 print('===============================return_code======================> ', return_code)
                 if return_code == 'SUCCESS':
-
                     ### 发送提示给雷达用户
-
                     print('值dingDanobjs------>>',dingDanobjs)
 
                     yingFuKuan =  dingDanobjs[0].yingFuKuan
@@ -124,17 +122,17 @@ def payback(request):
                     )
                     
                     ### 商城付款后,记录流水
-                    record_data = {
-                        'admin_user_id': '',
-                        'user_id': u_id,
-                        'company_id': company_id,
-                        'customer_id': user_id ,
-                        'transaction_amount': yingFuKuan,
-                        'source': 3,  # (3,'小程序')
-                        'type': 5     # (5,'商城入账'),
-                    }
-                    from zhugeleida.views_dir.mycelery_task.mycelery import  record_money_process
-                    record_money_process(record_data)
+                    # record_data = {
+                    #     'admin_user_id': '',
+                    #     'user_id': u_id,
+                    #     'company_id': company_id,
+                    #     'customer_id': user_id ,
+                    #     'transaction_amount': yingFuKuan,
+                    #     'source': 3,  # (3,'小程序')
+                    #     'type': 5     # (5,'商城入账'),
+                    # }
+                    # from zhugeleida.views_dir.mycelery_task.mycelery import  record_money_process
+                    # record_money_process(record_data)
 
 
 
