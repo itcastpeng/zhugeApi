@@ -82,7 +82,7 @@ class guanZhuForm(forms.Form):
             return total_fee
 
         else:
-            self.add_error('total_fee', '钱数不能小于0.3 元')
+            self.add_error('total_fee', '发送红包钱数不能小于0.3元')
 
     def clean_mch_id(self):
         mch_id = self.data.get('mch_id')
@@ -116,12 +116,14 @@ class guanZhuForm(forms.Form):
             self.add_error('wishing', '红包祝福语不能超过128位！')
         else:
             return wishing
+
     def clean_act_name(self):
         act_name = self.data.get('act_name')
         if len(act_name) > 32:
             self.add_error('act_name', '活动名称不能超过32位！')
         else:
             return act_name
+
     def clean_remark(self):
         remark = self.data.get('remark')
         if len(remark) > 256:

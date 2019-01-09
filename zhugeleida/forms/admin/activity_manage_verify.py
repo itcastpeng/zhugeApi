@@ -16,7 +16,7 @@ class SetFocusGetRedPacketForm(forms.Form):
         }
     )
 
-    focus_get_money = forms.IntegerField(
+    focus_get_money = forms.FloatField(
         required=False,
         error_messages={
             'required': "关注领取红包金额不能为空"

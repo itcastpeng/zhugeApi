@@ -40,7 +40,6 @@ def action_record(data):
 
         remark = data.get('remark')
         agent_id = data.get('agent_id')
-        content = ''
 
         if action in [666]: # 只做消息【温馨提示】。
 
@@ -72,7 +71,6 @@ def action_record(data):
 
             response.code = 200
             response.msg = '发送消息提示成功'
-
             return response
 
         customer_name = models.zgld_customer.objects.get(id=customer_id).username
@@ -112,6 +110,9 @@ def action_record(data):
                 remark=remark,
                 action=action
             )
+            content = '%s%s' % (customer_name, remark)
+            print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
+
             # follow_objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(
             #     user_id=user_id,
             #     customer_id=customer_id
@@ -1952,8 +1953,6 @@ def user_focus_send_activity_redPacket(request):
                                     'type': 3     #   (3,'红包发放(关注公众号)'),
                                 }
                                 record_money_process(record_data)
-
-
 
                             else:
                                 app_objs.update(

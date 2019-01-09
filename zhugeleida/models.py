@@ -106,7 +106,7 @@ class zgld_gongzhonghao_app(models.Model):
     principal_name = models.CharField(verbose_name="公众号主体名称", max_length=128, null=True)
 
     is_focus_get_redpacket = models.BooleanField(verbose_name="关注领取红包是否开启", default=False)
-    focus_get_money = models.SmallIntegerField(verbose_name='关注领取红包金额',null=True)
+    focus_get_money = models.FloatField(verbose_name='关注领取红包金额',null=True)
     focus_total_money = models.SmallIntegerField(verbose_name='红包总金额',null=True)
 
 
