@@ -1457,7 +1457,7 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
         min_single_money = activity_obj.min_single_money
 
         rand_num = random.uniform(max_single_money, min_single_money)
-        activity_single_money = round(rand_num, 2)
+        activity_single_money = float(round(rand_num, 2))
 
     elif mode == 2: # 固定金额
         activity_single_money = activity_obj.activity_single_money
@@ -1596,8 +1596,10 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
 
 
 ## 资金流水记录过程函数
-def record_money_process(data):
+def record_money_process(request):
     response = Response.ResponseObj()
+    data =  request.GET.copy()
+
     admin_user_id = data.get('admin_user_id')
     user_id = data.get('user_id')
     company_id = data.get('company_id')
@@ -1684,7 +1686,7 @@ def record_money_process(data):
     response.msg = '记录成功'
 
 
-    return response
+    return JsonResponse(response.__dict__)
 
 
 # [定时器] - 补发红包红包
@@ -1879,7 +1881,7 @@ def user_focus_send_activity_redPacket(request):
                             min_single_money = gongzhonghao_app_obj.min_single_money
 
                             rand_num = random.uniform(max_single_money, min_single_money)
-                            focus_get_money = round(rand_num, 2)
+                            focus_get_money = float(round(rand_num, 2))
 
                         elif mode == 2:  # 固定金额
                             focus_get_money = gongzhonghao_app_obj.focus_get_money

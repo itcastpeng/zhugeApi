@@ -752,15 +752,11 @@ import json
 #
 
 
-data_dict = {'user_id': 55, 'customer_id': ''}
-
-# 生成小程序和企业用户对应的小程序二维码
-url = ip + '/zhugeleida/mycelery/create_user_or_customer_qr_code'
-
-get_data['data'] = json.dumps(data_dict)
-
-
-ret = requests.get(url, params=get_data)
+# data_dict = {'user_id': 55, 'customer_id': ''}
+# # 生成小程序和企业用户对应的小程序二维码
+# url = ip + '/zhugeleida/mycelery/create_user_or_customer_qr_code'
+# get_data['data'] = json.dumps(data_dict)
+# ret = requests.get(url, params=get_data)
 
 # url = ip +   '/zhugeleida/mycelery/user_send_gongzhonghao_template_msg' # 分页 聊天信息记录
 # # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})

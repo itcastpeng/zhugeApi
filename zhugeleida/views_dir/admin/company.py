@@ -61,6 +61,10 @@ def company(request):
                     user__company_id=obj.id).count()  # 已获取客户数
                 user_count = models.zgld_userprofile.objects.filter(company_id=obj.id).count()  # # 员工总数
 
+                account_balance = round(obj.account_balance,2)
+                leiji_chongzhi = round(obj.leiji_chongzhi,2)
+                leiji_zhichu = round(obj.leiji_zhichu,2)
+
                 ret_data.append({
                     'name': obj.name,
                     'company_id': obj.id,
@@ -80,9 +84,9 @@ def company(request):
                     'used_days': used_days,
                     'account_expired_time': obj.account_expired_time.strftime('%Y-%m-%d'),
 
-                    'account_balance' : obj.account_balance,
-                    'leiji_chongzhi' : obj.leiji_chongzhi,
-                    'leiji_zhichu' : obj.leiji_zhichu,
+                    'account_balance' : account_balance,
+                    'leiji_chongzhi' :  leiji_chongzhi,
+                    'leiji_zhichu' : leiji_zhichu,
 
                 })
             response.code = 200

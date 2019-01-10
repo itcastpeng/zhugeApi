@@ -262,9 +262,10 @@ def money_manage(request, oper_type):
                 if objs:
                     for obj in objs:
 
-                        account_balance = obj.company.account_balance  # 账户余额
-                        leiji_chongzhi = obj.company.leiji_chongzhi  # 累计充值
-                        leiji_zhichu = obj.company.leiji_zhichu  # 累计支出
+                        account_balance = round(obj.company.account_balance,2)  # 账户余额
+                        leiji_chongzhi =  round(obj.company.leiji_chongzhi,2)  # 累计充值
+                        leiji_zhichu = round(obj.company.leiji_zhichu,2)  # 累计支出
+
                         type = obj.type  # 交易类型
                         transaction_amount = obj.transaction_amount  # 交易金额
 
