@@ -8,12 +8,10 @@ import time,datetime
 
 from django.http import HttpResponse
 from zhugeleida.public.common import create_qrcode
-import qrcode, re, requests, hashlib, random, uuid, time, json, xml.dom.minidom as xmldom, base64
+import qrcode, re, requests, hashlib, random, uuid, time, json, xml.dom.minidom as xmldom, base64,subprocess,os
 
-import json,os
 from random import Random
 from django.db.models import Q, Sum, Count
-import subprocess
 from zhugeleida.forms.admin.money_manage_verify import MoneyListSelectForm
 
 APP_ID = "wx84390d5be4304d80"  # 你公众账号上的appid
@@ -309,160 +307,6 @@ def money_manage(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
-
-@csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
-def activity_manage_oper(request, oper_type, o_id):
-    response = Response.ResponseObj()
-
-    if request.method == "POST":
-        # 删除-个人产品
-        if oper_type == "delete":
-
-            objs = models.zgld_article_activity.objects.filter(id=o_id)
-
-            if objs:
-                objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
-
-            else:
-                response.code = 301
-                response.msg = '活动不存在或者正在进行中'
-
-        # 修改个人产品
-        elif oper_type == 'update':
-
-            user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
-            activity_id = o_id
-            activity_name = request.POST.get('activity_name')
-            article_id = request.POST.get('article_id')  # 文章ID
-            activity_total_money = request.POST.get('activity_total_money')
-            activity_single_money = request.POST.get('activity_single_money')
-            reach_forward_num = request.POST.get('reach_forward_num')
-            start_time = request.POST.get('start_time')
-            end_time = request.POST.get('end_time')
-            reach_stay_time = request.POST.get('reach_stay_time')  # 达到多少秒发红包
-            limit_area = request.POST.get('limit_area')
-            is_limit_area = request.POST.get('is_limit_area')
-
-
-            form_data = {
-
-                'company_id': company_id,
-                'activity_id': activity_id,  # 活动名称
-                'activity_name': activity_name,  # 活动名称
-
-                'article_id': article_id,  # 文章ID
-                'activity_total_money': activity_total_money,  # 活动总金额(元)
-                'activity_single_money': activity_single_money,  # 单个金额(元)
-                'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
-                'start_time': start_time,  # 达到多少次发红包(转发次数)
-                'end_time': end_time,  # 达到多少次发红包(转发次数)
-
-                'reach_stay_time': reach_stay_time,  # 达到多少秒
-                'is_limit_area': is_limit_area       # 是否限制区域
-            }
-
-            forms_obj = ActivityUpdateForm(form_data)
-            if forms_obj.is_valid():
-
-                reach_stay_time = forms_obj.cleaned_data.get('reach_stay_time')
-
-                if not  is_limit_area: # 没有限制
-                    limit_area = json.dumps('[]')
-
-
-                objs = models.zgld_article_activity.objects.filter(id=activity_id, company_id=company_id)
-
-                if objs:
-                    objs.update(
-                        article_id=article_id,
-                        activity_name=activity_name.strip(),
-                        activity_total_money=activity_total_money,
-                        activity_single_money=activity_single_money,
-                        reach_forward_num=reach_forward_num,
-                        start_time=start_time,
-                        end_time=end_time,
-
-                        reach_stay_time=reach_stay_time,
-                        is_limit_area=is_limit_area,
-                        limit_area=limit_area,
-                    )
-
-                response.code = 200
-                response.msg = "添加成功"
-
-            else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-        # 增加红包活动
-        elif oper_type == "add":
-
-            user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
-            activity_name = request.POST.get('activity_name')
-            article_id = request.POST.get('article_id')  # 文章ID
-            activity_total_money = request.POST.get('activity_total_money')
-            activity_single_money = request.POST.get('activity_single_money')
-            reach_forward_num = request.POST.get('reach_forward_num')
-            start_time = request.POST.get('start_time')
-            end_time = request.POST.get('end_time')
-            reach_stay_time = request.POST.get('reach_stay_time')  #达到多少秒发红包
-            limit_area = request.POST.get('limit_area')
-            is_limit_area = request.POST.get('is_limit_area')
-
-
-
-            form_data = {
-
-                'company_id': company_id,
-                'activity_name': activity_name,  # 活动名称
-                'article_id': article_id,  # 文章ID
-                'activity_total_money': activity_total_money,  # 活动总金额(元)
-                'activity_single_money': activity_single_money,  # 单个金额(元)
-                'reach_forward_num': reach_forward_num,  # 达到多少次发红包(转发次数)
-                'start_time': start_time,  #
-                'end_time': end_time,  #
-
-                'reach_stay_time' : reach_stay_time, #达到多少秒
-                'is_limit_area' : is_limit_area,     # 是否限制区域
-
-            }
-
-            forms_obj = ActivityAddForm(form_data)
-            if forms_obj.is_valid():
-                reach_stay_time = forms_obj.cleaned_data.get('reach_stay_time')
-
-                if not  is_limit_area: # 没有限制
-                    limit_area = json.dumps('[]')
-
-
-                models.zgld_article_activity.objects.create(
-                    article_id=article_id,
-                    company_id=company_id,
-                    activity_name=activity_name.strip(),
-                    activity_total_money=activity_total_money,
-                    activity_single_money=activity_single_money,
-                    reach_forward_num=reach_forward_num,
-                    start_time=start_time,
-                    end_time=end_time,
-                    reach_stay_time=reach_stay_time,
-                    is_limit_area=is_limit_area,
-                    limit_area=limit_area,
-                )
-
-                response.code = 200
-                response.msg = "添加成功"
-
-            else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-
-    return JsonResponse(response.__dict__)
 
 
 

@@ -1596,9 +1596,8 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
 
 
 ## 资金流水记录过程函数
-def record_money_process(request):
+def record_money_process(data):
     response = Response.ResponseObj()
-    data =  request.GET.copy()
 
     admin_user_id = data.get('admin_user_id')
     user_id = data.get('user_id')
@@ -1685,8 +1684,8 @@ def record_money_process(request):
     response.code = 200
     response.msg = '记录成功'
 
-
-    return JsonResponse(response.__dict__)
+    return response
+    # return JsonResponse(response.__dict__)
 
 
 # [定时器] - 补发红包红包

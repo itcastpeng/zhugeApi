@@ -519,30 +519,33 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, data=post_data ,params=get_data)
 
 
-# url = ip +   '/zhugeleida/mycelery/monitor_send_gzh_template_msg' # 分页 聊天信息记录
-# # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-# get_data['user_id'] = 55
-# get_data['customer_id'] = 852
-# # get_data['type'] = 'gongzhonghao_template_tishi'
-# get_data['type'] = 'gongzhonghao_template_shopping_mall'
-import random
-
-max_single_money = 1
-min_single_money = 0.3
-rand_num = random.uniform(max_single_money, min_single_money)
-
-focus_get_money = round(rand_num, 2)
-print('focus_get_money----->>',focus_get_money)
-
-url = ip +   '/zhugeleida/mycelery/record_money_process' # 分页 聊天信息记录
-get_data['type'] = 3
+url = ip +   '/zhugeleida/mycelery/monitor_send_gzh_template_msg' # 分页 聊天信息记录
+# get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
 get_data['user_id'] = 55
 get_data['customer_id'] = 852
-get_data['company_id'] = 1
-get_data['transaction_amount'] = float(focus_get_money) #int(float(0.4800))
-get_data['source'] = 2
+get_data['type'] = 'gongzhonghao_template_tishi'
 
-ret = requests.get(url, data=post_data ,params=get_data)
+
+ret = requests.post(url, data=post_data ,params=get_data)
+
+# import random
+#
+# max_single_money = 1
+# min_single_money = 0.3
+# rand_num = random.uniform(max_single_money, min_single_money)
+#
+# focus_get_money = round(rand_num, 2)
+# print('focus_get_money----->>',focus_get_money)
+#
+# url = ip +   '/zhugeleida/mycelery/record_money_process' # 分页 聊天信息记录
+# get_data['type'] = 3
+# get_data['user_id'] = 55
+# get_data['customer_id'] = 852
+# get_data['company_id'] = 1
+# get_data['transaction_amount'] = float(focus_get_money) #int(float(0.4800))
+# get_data['source'] = 2
+#
+# ret = requests.get(url, data=post_data ,params=get_data)
 
 
 

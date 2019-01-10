@@ -9,8 +9,8 @@ from zhugeapi_celery_project import tasks
 from publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token, \
     create_component_access_token
-from urllib.parse import unquote
-from urllib.parse import quote
+
+from urllib.parse import unquote,quote
 import base64, random, json, string, redis, requests, time
 
 

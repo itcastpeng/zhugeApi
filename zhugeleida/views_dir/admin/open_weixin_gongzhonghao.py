@@ -198,6 +198,8 @@ def open_weixin_gongzhonghao(request, oper_type):
                     if original_id:
                         objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorization_appid)
                         if objs:
+
+                        
                             objs.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
@@ -211,10 +213,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                                 service_category=categories,  # 服务类目
                             )
 
-
-
                             html = s.get(qrcode_url)
-
                             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
                             filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
                             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
