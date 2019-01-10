@@ -19,6 +19,7 @@ def monitor_send_gzh_template_msg(request):
     print('---发送公众号模板消息request.GET -->', request.GET)
     company_id = request.GET.get('company_id')
     customer_id = request.GET.get('customer_id')
+    type = request.GET.get('type')
     title = request.GET.get('title')
     content = request.GET.get('content')
     remark = request.GET.get('remark')
