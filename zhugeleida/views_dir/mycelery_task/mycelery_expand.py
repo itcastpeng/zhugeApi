@@ -17,12 +17,13 @@ def monitor_send_gzh_template_msg(request):
     response = ResponseObj()
 
     print('---发送公众号模板消息request.GET -->', request.GET)
-
     company_id = request.GET.get('company_id')
     customer_id = request.GET.get('customer_id')
     title = request.GET.get('title')
     content = request.GET.get('content')
     remark = request.GET.get('remark')
+
+
 
     obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
     authorizer_refresh_token = obj.authorizer_refresh_token

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,HttpResponse
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
@@ -51,6 +51,15 @@ def user_gongzhonghao_auth(request):
         state = request.GET.get('state')
         appid = request.GET.get('appid')
         relate = request.GET.get('relate')
+
+        _type = relate.split('|')[0].split('_')[1]
+        if _type == 'BindingUserNotify':
+            redirect_url = binding_gzh_user_notify(request)
+
+            # return redirect(redirect_url)
+            return HttpResponse(redirect_url)
+
+
         article_id = relate.split('|')[0].split('_')[2]
         pid = relate.split('|')[1].split('_')[1]
         level = relate.split('|')[2].split('_')[1]
@@ -290,7 +299,6 @@ def create_gongzhonghao_yulan_auth_url(data):
 
     gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
-
     appid = authorization_appid
 
 
@@ -326,71 +334,101 @@ def create_gongzhonghao_yulan_auth_url(data):
     return response
 
 
-# def binding_article_customer_relate(data):
-#
-#     response = Response.ResponseObj()
-#
-#     article_id = data.get('article_id')    # 公众号文章ID
-#     customer_id = data.get('customer_id')  # 公众号客户ID
-#     user_id = data.get('user_id')  # 由哪个雷达用户转发出来,Ta的用户的ID
-#     level = data.get('level')      # 公众号层级
-#     parent_id = data.get('pid')    # 所属的父级的客户ID。为空代表第一级。
-#     company_id = data.get('company_id')    # 所属的父级的客户ID。为空代表第一级。
-#
-#     q = Q()
-#     q.add(Q(**{'article_id': article_id}), Q.AND)
-#     q.add(Q(**{'customer_id': customer_id}), Q.AND)
-#     q.add(Q(**{'user_id': user_id}), Q.AND)
-#     q.add(Q(**{'level': level}), Q.AND)
-#
-#     if parent_id:
-#         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-#     else:
-#         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-#
-#     article_to_customer_belonger_obj = models.zgld_article_to_customer_belonger.objects.filter(q)
-#
-#     if article_to_customer_belonger_obj:
-#         response.code = 302
-#         response.msg = "文章和客户\雷达用户-关系存在"
-#
-#     else:
-#         models.zgld_article_to_customer_belonger.objects.create(
-#             article_id=article_id,
-#             customer_id=customer_id,
-#             user_id=user_id,
-#             customer_parent_id=parent_id,
-#             level=level,
-#         )
-#
-#     user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
-#     if user_customer_belonger_obj:
-#         response.code = 302
-#         response.msg = "关系存在"
-#
-#     else:
-#         models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,source=4)
-#
-#     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status=2)
-#     if activity_objs:
-#         activity_id = activity_objs[0].id
-#         redPacket_objs = models.zgld_activity_redPacket.objects.filter(article_id=article_id,activity_id=activity_id,customer_id=customer_id)
-#
-#         if redPacket_objs:
-#             response.code = 302
-#             response.msg = "关系存在"
-#
-#         else:
-#
-#             models.zgld_activity_redPacket.objects.create(article_id=article_id,
-#                                                           activity_id=activity_id,
-#                                                           customer_id=customer_id,
-#                                                           company_id=company_id,
-#                                                          )
-#             response.code = 200
-#             response.msg = "绑定成功"
-#
-#     return response
+## 绑定公众号通知消息的人
+def binding_gzh_user_notify(request):
+
+    # <QueryDict: {'code': ['071uPB5w1EudCa0g6b5w1ZAt5w1uPB5U'], 'state': ['snsapi_base'], 'relate': ['article_id_2|pid_|level_1'], 'appid': ['wxa77213c591897a13']}>
+
+    print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
+
+    js_code = request.GET.get('code')
+    state = request.GET.get('state')
+    appid = request.GET.get('appid')
+    relate = request.GET.get('relate')
+    company_id = relate.split('|')[1].split('_')[2]
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    component_appid = qywx_config_dict.get('app_id')
+    app_secret = qywx_config_dict.get('app_secret')
+
+    # component_appid = 'wx6ba07e6ddcdc69b3'
+
+    data_dict = {
+        'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
+        'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
+    }
+
+    component_access_token_ret = create_component_access_token(data_dict)
+    component_access_token = component_access_token_ret.data.get('component_access_token')
+
+    get_token_data = {
+        'appid': appid,
+        'code': js_code,
+        'grant_type': 'authorization_code',
+        'component_appid': component_appid,
+        'component_access_token': component_access_token
+    }
+
+    ret_data = get_openid_info(get_token_data)
+    openid = ret_data['openid']
+    access_token = ret_data['access_token']
+    redirect_url = ''
+
+    # 静默方式
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    url = qywx_config_dict.get('authorization_url')
+
+    if state == 'snsapi_base':
+
+        customer_objs = models.zgld_customer.objects.filter(openid=openid)
+        if customer_objs:
+            customer_objs.update(
+                session_key='notifier'  # 通知者
+            )
+            client_id = customer_objs[0].id
+
+        else:
+            obj = models.zgld_customer.objects.create(
+                company_id=company_id,
+                openid=openid,
+                user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序')
+                session_key='notifier'  # 通知者
+            )
+            print('---------- 公众号-新用户创建成功 crete successful ---->')
+            client_id = obj.id
+
+        fanhui_url = url + '/#/'  # '/gongzhonghao/yulanneirong/'
+        gzh_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=appid)
+        qrcode_url = ''
+        if gzh_objs:
+            qrcode_url = gzh_objs[0].qrcode_url
+
+        redirect_url = '{fanhui_url}?user_id={client_id}&qrcode_url={qrcode_url}&company_id={company_id}'.format(
+            fanhui_url=fanhui_url,
+            qrcode_url=qrcode_url,
+            client_id=client_id,
+            company_id=company_id,
+        )
+
+    print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
+
+
+
+    return redirect_url
 
 
 # 公众号文章生成分享的url

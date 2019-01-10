@@ -521,12 +521,12 @@ ip = 'http://127.0.0.1:8001'
 
 url = ip +   '/zhugeleida/mycelery/monitor_send_gzh_template_msg' # 分页 聊天信息记录
 # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-get_data['user_id'] = 55
+get_data['company_id'] = 1
 get_data['customer_id'] = 852
 get_data['type'] = 'gongzhonghao_template_tishi'
-
-
 ret = requests.post(url, data=post_data ,params=get_data)
+
+
 
 # import random
 #

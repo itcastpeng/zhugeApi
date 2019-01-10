@@ -61,7 +61,16 @@ def create_qrcode(data):
 
         return qr_url_dict
 
+    elif type == 'binding_gzh_user_notify':
 
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
+        qr_code_name = '/gzh_user_notify_%s_qrCode.jpg' % (now_time)
+        path_qr_code_name = BASE_DIR + qr_code_name
+        qr_url = 'statics/zhugeleida/imgs/admin/qr_code%s' % (qr_code_name)
+        img.save(path_qr_code_name)
+        qr_url_dict = {'pre_qrcode_url': qr_url}
+
+        return qr_url_dict
 
 
 

@@ -36,8 +36,6 @@ class zgld_company(models.Model):
     account_balance = models.FloatField(verbose_name='账户余额', null=True, default=0)
     leiji_chongzhi = models.FloatField(verbose_name='累计充值', null=True, default=0)
     leiji_zhichu = models.FloatField(verbose_name='累计支出', null=True, default=0)
-    gzh_notice_qrcode = models.CharField(verbose_name="公众号二维码(绑定管理员)", max_length=128, null=True)
-
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -128,6 +126,8 @@ class zgld_gongzhonghao_app(models.Model):
     verify_type_info = models.BooleanField(verbose_name="微信认证是否通过", default=False)  # -1代表未认证，0代表微信认证
     introduce = models.CharField(verbose_name="公众号绑定的小程序", max_length=2048, default='[]')
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True ,default="IT科技>硬件与设备")
+    gzh_notice_qrcode = models.CharField(verbose_name="公众号二维码(绑定管理员)", max_length=128, null=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):

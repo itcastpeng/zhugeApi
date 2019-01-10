@@ -13,8 +13,54 @@ from zhugeleida.forms.admin import open_weixin_gongzhonghao_verify
 import json, redis, base64, os, datetime, time, xml.etree.cElementTree as ET
 import xml.dom.minidom as xmldom, requests
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-import subprocess,os
+import subprocess,os,time,threading
 from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
+from zhugeleida.public.common import create_qrcode
+
+## 线程非阻塞执行
+def thread_func_grant_callback(objs,qrcode_url,authorizer_appid,component_appid,api_url):
+
+    ## 下载URL参数
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    html = s.get(qrcode_url)
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
+    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
+    with open(file_dir, 'wb') as file:
+        file.write(html.content)
+    print('----- 生成 本地二维码 file_dir ---->>', file_dir)
+    objs.update(qrcode_url=file_dir)  # 二维码
+
+    company_id = objs[0].company_id
+    # 创建二维码
+
+    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=type_BindingUserNotify|company_id_%s' % (api_url,company_id)
+
+    print('-------- 静默方式下跳转的 需拼接的 redirect_uri ------->', redirect_uri)
+    scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    state = 'snsapi_base'
+    # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+
+    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+        authorizer_appid, redirect_uri, scope, state, component_appid)
+
+    print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>', authorize_url)
+    qrcode_data = {
+        'url': authorize_url,
+        'type': 'binding_gzh_user_notify'
+    }
+
+    response_ret = create_qrcode(qrcode_data)
+    pre_qrcode_url = response_ret.get('pre_qrcode_url')
+
+    if pre_qrcode_url:
+        print('绑定公众号和客户通知者的二维码 pre_qrcode_url---------->>', pre_qrcode_url)
+        objs.update(
+            gzh_notice_qrcode=pre_qrcode_url
+        )
+
+
 
 
 # 第三方平台接入
@@ -115,6 +161,7 @@ def open_weixin_gongzhonghao(request, oper_type):
                         qywx_config_dict = json.loads(qywx_config_dict)
 
                 app_id = qywx_config_dict.get('app_id')
+                api_url = qywx_config_dict.get('api_url')
 
                 # app_id = 'wx6ba07e6ddcdc69b3'
                 if auth_code:
@@ -199,7 +246,9 @@ def open_weixin_gongzhonghao(request, oper_type):
                         objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorization_appid)
                         if objs:
 
-                        
+                            t1 = threading.Thread(target=thread_func_grant_callback,args=(objs,qrcode_url,authorization_appid,app_id,api_url))  # 创建一个线程对象t1 子线程
+                            t1.start()
+
                             objs.update(
                                 authorization_appid=authorization_appid,  # 授权方appid
                                 authorizer_refresh_token=authorizer_refresh_token,  # 刷新的 令牌
@@ -213,14 +262,14 @@ def open_weixin_gongzhonghao(request, oper_type):
                                 service_category=categories,  # 服务类目
                             )
 
-                            html = s.get(qrcode_url)
-                            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                            filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
-                            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
-                            with open(file_dir, 'wb') as file:
-                                file.write(html.content)
-                            print('----- 生成 本地二维码 file_dir ---->>',file_dir)
-                            objs.update(qrcode_url=file_dir)  # 二维码
+                            # html = s.get(qrcode_url)
+                            # now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                            # filename = "/%s_%s.jpg" % (authorizer_appid, now_time)
+                            # file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code') + filename
+                            # with open(file_dir, 'wb') as file:
+                            #     file.write(html.content)
+                            # print('----- 生成 本地二维码 file_dir ---->>',file_dir)
+                            # objs.update(qrcode_url=file_dir)  # 二维码
 
 
                         print('----------成功获取auth_code和帐号基本信息authorizer_info成功---------->>')
