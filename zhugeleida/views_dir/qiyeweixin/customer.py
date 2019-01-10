@@ -63,7 +63,7 @@ def customer(request):
 
                     info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
 
-                    phone = info_obj[0].phone if info_obj else ''
+                    phone = obj.phone
                     email = info_obj[0].email if info_obj else ''
                     company = info_obj[0].company if info_obj else ''
                     position = info_obj[0].position if info_obj else ''
