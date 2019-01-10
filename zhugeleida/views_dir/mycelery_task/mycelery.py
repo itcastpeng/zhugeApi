@@ -1072,13 +1072,13 @@ def user_send_gongzhonghao_template_msg(request):
                 activity_name = activity_obj.activity_name
                 title = activity_obj.article.title
                 reach_forward_num = activity_obj.reach_forward_num
-                activity_single_money = activity_obj.activity_single_money
+                # activity_single_money = activity_obj.activity_single_money
                 start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
                 end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
                 if not position:
                     position = ''
-                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。 分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
-                    reach_forward_num, activity_single_money, start_time, end_time)
+                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包。分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
+                    reach_forward_num, start_time, end_time)
                 data = {
                     'first': {
                         'value': ('        您好,我是%s的%s%s,很高兴为您服务, 欢迎您参加【分享文章 赚现金活动】\n' % (
@@ -1457,7 +1457,7 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
         min_single_money = activity_obj.min_single_money
 
         rand_num = random.uniform(max_single_money, min_single_money)
-        activity_single_money = round(rand_num, 2)
+        activity_single_money = float(round(rand_num, 2))
 
     elif mode == 2: # 固定金额
         activity_single_money = activity_obj.activity_single_money
@@ -1598,6 +1598,7 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
 ## 资金流水记录过程函数
 def record_money_process(data):
     response = Response.ResponseObj()
+
     admin_user_id = data.get('admin_user_id')
     user_id = data.get('user_id')
     company_id = data.get('company_id')
@@ -1683,8 +1684,8 @@ def record_money_process(data):
     response.code = 200
     response.msg = '记录成功'
 
-
     return response
+    # return JsonResponse(response.__dict__)
 
 
 # [定时器] - 补发红包红包
@@ -1879,7 +1880,7 @@ def user_focus_send_activity_redPacket(request):
                             min_single_money = gongzhonghao_app_obj.min_single_money
 
                             rand_num = random.uniform(max_single_money, min_single_money)
-                            focus_get_money = round(rand_num, 2)
+                            focus_get_money = float(round(rand_num, 2))
 
                         elif mode == 2:  # 固定金额
                             focus_get_money = gongzhonghao_app_obj.focus_get_money

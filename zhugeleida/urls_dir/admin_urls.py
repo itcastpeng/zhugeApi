@@ -29,6 +29,7 @@ urlpatterns = [
     # 后台-角色操作
     url(r'^admin_role/(?P<oper_type>\w+)/(?P<o_id>\d+)$', admin_role.admin_role_oper),
     url(r'^admin_role$', admin_role.admin_role),
+    url(r'^admin_role_init$', admin_role.admin_role_init),
 
     # 后台-权限管理
     url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)$', access_rules.access_rules_oper),

@@ -7,13 +7,16 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.company_verify import CompanyAddForm, CompanyUpdateForm, \
     CompanySelectForm,AgentAddForm,TongxunluAddForm,ThreeServiceAddForm
+from django.shortcuts import render, redirect,HttpResponse
 
-import datetime
-import json
+import datetime,requests,json,base64
+from zhugeapi_celery_project import tasks
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetime_offset_by_month,validate_tongxunlu
 from zhugeleida.views_dir.mycelery_task.mycelery import record_money_process
-from django.db.models import Q, F
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token, \
+    create_component_access_token
+
 # 查询公司
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -61,6 +64,10 @@ def company(request):
                     user__company_id=obj.id).count()  # 已获取客户数
                 user_count = models.zgld_userprofile.objects.filter(company_id=obj.id).count()  # # 员工总数
 
+                account_balance = round(obj.account_balance,2)
+                leiji_chongzhi = round(obj.leiji_chongzhi,2)
+                leiji_zhichu = round(obj.leiji_zhichu,2)
+
                 ret_data.append({
                     'name': obj.name,
                     'company_id': obj.id,
@@ -80,9 +87,9 @@ def company(request):
                     'used_days': used_days,
                     'account_expired_time': obj.account_expired_time.strftime('%Y-%m-%d'),
 
-                    'account_balance' : obj.account_balance,
-                    'leiji_chongzhi' : obj.leiji_chongzhi,
-                    'leiji_zhichu' : obj.leiji_zhichu,
+                    'account_balance' : account_balance,
+                    'leiji_chongzhi' :  leiji_chongzhi,
+                    'leiji_zhichu' : leiji_zhichu,
 
                 })
             response.code = 200
@@ -162,7 +169,7 @@ def author_status(request,oper_type):
                 response.code = 400
                 response.msg = "公司不存在"
 
-
+        ## 查询三方配置
         elif oper_type == "query_service_settings":
             type = request.GET.get('type')
 
@@ -234,6 +241,8 @@ def author_status(request,oper_type):
                     'ret_data': ret_data,
                     'data_count': 3
                 }
+
+
 
         return JsonResponse(response.__dict__)
 
