@@ -1072,13 +1072,13 @@ def user_send_gongzhonghao_template_msg(request):
                 activity_name = activity_obj.activity_name
                 title = activity_obj.article.title
                 reach_forward_num = activity_obj.reach_forward_num
-                activity_single_money = activity_obj.activity_single_money
+                # activity_single_money = activity_obj.activity_single_money
                 start_time = activity_obj.start_time.strftime('%Y-%m-%d %H:%M')
                 end_time = activity_obj.end_time.strftime('%Y-%m-%d %H:%M')
                 if not position:
                     position = ''
-                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包%s元。 分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
-                    reach_forward_num, activity_single_money, start_time, end_time)
+                remark = '活动规则: 关注公众号并分享文章给朋友/朋友圈,每满足%s人查看,立返现金红包。分享不停,红包不停,上不封顶。活动日期: %s 至 %s' % (
+                    reach_forward_num, start_time, end_time)
                 data = {
                     'first': {
                         'value': ('        您好,我是%s的%s%s,很高兴为您服务, 欢迎您参加【分享文章 赚现金活动】\n' % (

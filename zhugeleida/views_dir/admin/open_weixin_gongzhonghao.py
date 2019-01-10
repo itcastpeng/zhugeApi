@@ -920,11 +920,11 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                             if forward_read_count >= reach_forward_num:
 
-                                                _content = '转发后阅读人数已达【%s】人,已发红包【%s】个,还差【%s】人又能再拿现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
+                                                _content = '转发后阅读人数:【%s】人\n已发红包:【%s】个\n还差【%s】人又能再拿现金红包 \n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦!🤗 ' % (
                                                     forward_read_count, already_send_redPacket_num, short_num)
 
                                             else:
-                                                _content = '转发后阅读人数已达【%s】人,还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
+                                                _content = '转发后阅读人数:【%s】人\n还差【%s】人可立获现金红包,\n    转发多多,红包多多🤞🏻,上不封顶,邀请朋友继续助力呦! 🤗 ' % (
                                                     forward_read_count, short_num)
 
 
