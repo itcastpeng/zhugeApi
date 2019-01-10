@@ -24,7 +24,6 @@ def monitor_send_gzh_template_msg(request):
     remark = request.GET.get('remark')
 
 
-
     obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
     authorizer_refresh_token = obj.authorizer_refresh_token
     authorizer_appid = obj.authorization_appid

@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -521,10 +521,13 @@ ip = 'http://127.0.0.1:8001'
 
 url = ip +   '/zhugeleida/mycelery/monitor_send_gzh_template_msg' # 分页 聊天信息记录
 # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-get_data['company_id'] = 1
-get_data['customer_id'] = 852
+get_data['company_id'] = 2
+get_data['customer_id'] = 1873
 get_data['type'] = 'gongzhonghao_template_tishi'
-ret = requests.post(url, data=post_data ,params=get_data)
+get_data['title'] = '大发送到gongzhonghao_template_tishi'
+get_data['content'] = 'content'
+get_data['remark'] = 'remark'
+ret = requests.get(url, data=post_data ,params=get_data)
 
 
 
