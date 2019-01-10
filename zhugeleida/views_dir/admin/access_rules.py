@@ -35,6 +35,7 @@ def access_rules(request):
 
             ret_data = []
             count = objs.count()
+
             for obj in objs:
 
                 super_name = ''
