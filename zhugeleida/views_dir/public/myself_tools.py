@@ -57,5 +57,6 @@ def tools_oper(request,oper_type):
                 }
                 tasks.monitor_send_gzh_template_msg.delay(json.dumps(data_dict))
 
-
+            response.code = 200
+            response.msg = '发送成功'
 
