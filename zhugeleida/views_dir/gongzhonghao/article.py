@@ -278,12 +278,18 @@ def article_oper(request, oper_type, o_id):
 
                 obj = zgld_article_objs[0]
                 insert_ads = json.loads(obj.insert_ads) if obj.insert_ads else ''  # 插入的广告语
-                if insert_ads and insert_ads.get('mingpian'):
 
+                if insert_ads and insert_ads.get('mingpian'):
+                    webchat_code = ''
+                    product_function_type = ''
+                    company_obj = ''
                     company_objs = models.zgld_company.objects.filter(id=company_id)
+
                     if  company_objs:
                         company_obj = company_objs[0]
                         is_customer_unique = company_obj.is_customer_unique
+                        product_function_type = company_obj.product_function_type
+
 
                         if is_customer_unique: # 唯一性
                             objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
@@ -302,11 +308,17 @@ def article_oper(request, oper_type, o_id):
                     else:
                         mingpian_avatar =  zgld_userprofile_obj.avatar
 
+                    if product_function_type == 3: #
+                        webchat_code = company_obj.xcx_qr_code
+
+                    else:
+                        webchat_code = zgld_userprofile_obj.qr_code
+
                     insert_ads['username'] = zgld_userprofile_obj.username
                     insert_ads['avatar'] = mingpian_avatar
                     insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
                     insert_ads['position'] = zgld_userprofile_obj.position
-                    insert_ads['webchat_code'] = zgld_userprofile_obj.qr_code  # 展示企业微信二维码
+                    insert_ads['webchat_code'] = webchat_code  # 展示小程序的二维码
 
                 # 获取所有数据
                 ret_data = []

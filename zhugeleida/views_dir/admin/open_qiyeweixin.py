@@ -521,6 +521,7 @@ def open_qiyeweixin(request, oper_type):
 
                 if company_objs:
                     company_id = company_objs[0].id
+                    product_function_type = company_objs[0].product_function_type  #  (1, '小程序版|公众号版'),   (2, '小程序版'),   (3, '公众号版'),
 
                     # is_show_technical_support = company_objs[0].is_show_jszc
 
@@ -562,7 +563,7 @@ def open_qiyeweixin(request, oper_type):
                             user_profile_obj.save()
 
                             redirect_url = url + '?token=' + token + '&id=' + str(
-                                user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login + '&company_id=' + str(company_id)
+                                user_id) + '&avatar=' + avatar + '&is_first_login=' + is_first_login + '&company_id=' + str(company_id) + '&product_function_type=' + str(product_function_type)
 
                             print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', user_id, "|",
                                   userid,
@@ -571,7 +572,7 @@ def open_qiyeweixin(request, oper_type):
                             return redirect(redirect_url)
 
                         elif boss_status == 1 and app_type == 'boss':  #
-                            redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar + '&company_id=' + str(company_id)
+                            redirect_url = url + '?token=' + token + '&id=' + str(user_id) + '&avatar=' + avatar + '&company_id=' + str(company_id) +  '&product_function_type=' + str(product_function_type)
 
                             print('----------【雷达用户】存在且《登录成功》，user_id | userid | redirect_url ---->', userid, "|",
                                   userid, "\n", redirect_url)
