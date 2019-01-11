@@ -55,6 +55,7 @@ def tools_oper(request,oper_type):
                     'content' : content,
                     'remark' :  remark
                 }
+
                 tasks.monitor_send_gzh_template_msg.delay(json.dumps(data_dict))
 
             response.code = 200
