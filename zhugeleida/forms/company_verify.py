@@ -7,7 +7,14 @@ import datetime
 
 # 添加公司信息
 class CompanyAddForm(forms.Form):
-    # print('添加公司')
+
+    product_function_type =  forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "产品功能类型不能为空"
+        }
+    )
+
     name = forms.CharField(
         required=True,
         error_messages={
@@ -73,6 +80,17 @@ class ThreeServiceAddForm(forms.Form):
 
 # 更新用户信息
 class CompanyUpdateForm(forms.Form):
+
+
+    product_function_type =  forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "产品功能类型不能为空"
+        }
+    )
+
+
+
     company_id = forms.IntegerField(
         required=True,
         error_messages={

@@ -91,6 +91,10 @@ def company(request):
                     'leiji_chongzhi' :  leiji_chongzhi,
                     'leiji_zhichu' : leiji_zhichu,
 
+                    'product_function_type' : obj.product_function_type,
+                    'product_function_type_text' : obj.get_product_function_type_display(),
+                    'xcx_qr_code' : obj.xcx_qr_code,
+
                 })
             response.code = 200
             response.data = {
@@ -317,11 +321,13 @@ def company_oper(request, oper_type, o_id):
 
         # 添加公司
         if oper_type == "add_company":
+
             company_data = {
                 'name' : request.POST.get('name'),
                 'charging_start_time' : request.POST.get('charging_start_time'),
                 'open_length_time' : request.POST.get('open_length_time'),
-                'mingpian_available_num': request.POST.get('mingpian_available_num').strip()
+                'mingpian_available_num': request.POST.get('mingpian_available_num').strip(),
+                'product_function_type' : request.POST.get('product_function_type'),
 
             }
             forms_obj = CompanyAddForm(company_data)
@@ -330,7 +336,7 @@ def company_oper(request, oper_type, o_id):
                 charging_start_time = str(forms_obj.cleaned_data.get('charging_start_time'))
                 open_length_time = forms_obj.cleaned_data.get('open_length_time')
 
-                account_expired_time = datetime.datetime.now()
+
                 # if open_length_time == 1: # (1, "一个月"),
                 charging_start_time = datetime.datetime.strptime(charging_start_time, '%Y-%m-%d')
                 account_expired_time = datetime_offset_by_month(charging_start_time,open_length_time)
@@ -355,7 +361,9 @@ def company_oper(request, oper_type, o_id):
                     'open_length_time': open_length_time,          #开通时长
                     'mingpian_available_num':  request.POST.get('mingpian_available_num'),
                     'account_expired_time' : account_expired_time, #账户过期时间
-                    'remarks' : request.POST.get('remarks')
+                    'remarks' : request.POST.get('remarks'),
+                    'product_function_type': request.POST.get('product_function_type'),
+                    'xcx_qr_code': request.POST.get('xcx_qr_code')
                 }
 
                 models.zgld_company.objects.create(**company_data)
@@ -376,7 +384,9 @@ def company_oper(request, oper_type, o_id):
                 'name': request.POST.get('name'),
                 'charging_start_time': request.POST.get('charging_start_time'),
                 'open_length_time': request.POST.get('open_length_time'),
-                'mingpian_available_num': request.POST.get('mingpian_available_num').strip()
+                'mingpian_available_num': request.POST.get('mingpian_available_num').strip(),
+                'product_function_type': request.POST.get('product_function_type'),
+
             }
             forms_obj = CompanyUpdateForm(company_data)
             if forms_obj.is_valid():
@@ -412,7 +422,9 @@ def company_oper(request, oper_type, o_id):
                     'open_length_time': open_length_time,        # 开通时长
                     'mingpian_available_num': request.POST.get('mingpian_available_num'),
                     'account_expired_time': account_expired_time,  # 账户过期时间
-                    'remarks': request.POST.get('remarks')
+                    'remarks': request.POST.get('remarks'),
+                    'product_function_type': request.POST.get('product_function_type'),
+                    'xcx_qr_code' : request.POST.get('xcx_qr_code')
                 }
 
                 company_id = forms_obj.cleaned_data.get('company_id')

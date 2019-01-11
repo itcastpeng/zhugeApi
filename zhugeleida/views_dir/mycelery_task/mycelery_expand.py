@@ -14,7 +14,7 @@ from zhugeleida.public.common import create_qrcode
 
 ## 发送公众号模板消息提示到用户
 @csrf_exempt
-def monitor_send_gzh_template_msg(request):
+def common_send_gzh_template_msg(request):
     response = ResponseObj()
 
     print('---发送公众号模板消息request.GET -->', request.GET)
@@ -25,42 +25,39 @@ def monitor_send_gzh_template_msg(request):
     content = request.GET.get('content')
     remark = request.GET.get('remark')
 
-    company_id_list = json.loads(company_id)
-
-    for company_id in company_id_list:
-    # 创建二维码
-
-        objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
-        authorization_appid =  objs[0].authorization_appid
-
-        redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=type_BindingUserNotify|company_id_%s' % (company_id)
-
-        print('-------- 静默方式下跳转的 需拼接的 redirect_uri ------->', redirect_uri)
-        scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-        state = 'snsapi_base'
-        component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
-
-        authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
-            authorization_appid, redirect_uri, scope, state, component_appid)
-
-        print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>', authorize_url)
-        qrcode_data = {
-            'url': authorize_url,
-            'type': 'binding_gzh_user_notify'
-        }
-
-        response_ret = create_qrcode(qrcode_data)
-        pre_qrcode_url = response_ret.get('pre_qrcode_url')
-
-        if pre_qrcode_url:
-            print('绑定公众号和客户通知者的二维码 pre_qrcode_url---------->>', pre_qrcode_url)
-            objs.update(
-                gzh_notice_qrcode=pre_qrcode_url
-            )
-
-
-
-    return  JsonResponse(response.__dict__)
+    # company_id_list = json.loads(company_id)
+    # for company_id in company_id_list:
+    # # 创建二维码
+    #
+    #     objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+    #     authorization_appid =  objs[0].authorization_appid
+    #
+    #     redirect_uri = 'http://api.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=type_BindingUserNotify|company_id_%s' % (company_id)
+    #
+    #     print('-------- 静默方式下跳转的 需拼接的 redirect_uri ------->', redirect_uri)
+    #     scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    #     state = 'snsapi_base'
+    #     component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+    #
+    #     authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+    #         authorization_appid, redirect_uri, scope, state, component_appid)
+    #
+    #     print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>', authorize_url)
+    #     qrcode_data = {
+    #         'url': authorize_url,
+    #         'type': 'binding_gzh_user_notify'
+    #     }
+    #
+    #     response_ret = create_qrcode(qrcode_data)
+    #     pre_qrcode_url = response_ret.get('pre_qrcode_url')
+    #
+    #     if pre_qrcode_url:
+    #         print('绑定公众号和客户通知者的二维码 pre_qrcode_url---------->>', pre_qrcode_url)
+    #         objs.update(
+    #             gzh_notice_qrcode=pre_qrcode_url
+    #         )
+    #
+    # return  JsonResponse(response.__dict__)
 
     obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
     authorizer_refresh_token = obj.authorizer_refresh_token

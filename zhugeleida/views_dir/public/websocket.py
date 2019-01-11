@@ -666,7 +666,7 @@ def xiaochengxu_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '查询成功-获取聊天数量',
                                 }
-
+                                print('------ 查询数量返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 rc.set(customer_id_position_key, 'output')
                                 continue

@@ -26,7 +26,7 @@ urlpatterns = [
 
     url(r'^crontab_create_user_to_customer_qrCode_poster$', mycelery.crontab_create_user_to_customer_qrCode_poster),     # 定时生成海报
 
-    url(r'^monitor_send_gzh_template_msg$', mycelery_expand.monitor_send_gzh_template_msg),  # 发送公众号的模板消息
+    url(r'^monitor_send_gzh_template_msg$', mycelery_expand.common_send_gzh_template_msg),  # 发送公众号的模板消息
     url(r'^record_money_process$', mycelery.record_money_process),  # 发送公众号的模板消息
 
 ]
