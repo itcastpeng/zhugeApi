@@ -356,7 +356,8 @@ def chat_oper(request, oper_type, o_id):
                     content=content,
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=send_type
+                    send_type=send_type,
+                    # is_customer_new_msg=False # 代表此条客户已经读取了
                 )
 
                 flow_up_objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
