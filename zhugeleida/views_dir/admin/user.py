@@ -341,9 +341,11 @@ def user_oper(request, oper_type, o_id):
                             depart_id_list = []
                         obj.department = depart_id_list
 
-                        # 生成企业用户二维码
-                        data_dict ={ 'user_id': obj.id, 'customer_id': ''}
-                        tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+                        product_function_type = obj.company.product_function_type
+                        if product_function_type != 3: # (3, '公众号版')
+                            # 生成企业用户二维码
+                            data_dict ={ 'user_id': obj.id, 'customer_id': ''}
+                            tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
                         _data = {
                             'company_id': company_id,
@@ -719,8 +721,12 @@ def user_oper(request, oper_type, o_id):
                                 #     obj.department = department_list
 
                                 # 生成企业用户二维码
-                                data_dict = {'user_id': obj.id, 'customer_id': ''}
-                                tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+                                product_function_type = obj.company.product_function_type
+                                if product_function_type != 3:  # (3, '公众号版')
+
+                                    data_dict = {'user_id': obj.id, 'customer_id': ''}
+                                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+
                         response.code = 200
                         response.msg = "同步成功并生成用户二维码成功"
 
@@ -911,9 +917,11 @@ def user_oper(request, oper_type, o_id):
                                 obj.save()
                                 models.zgld_temp_userprofile.objects.filter(id=temp_obj.id).delete() # 删除已经通过审核的员工。
 
-                                # 生成企业用户二维码
-                                data_dict = {'user_id': obj.id, 'customer_id': ''}
-                                tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
+                                product_function_type = obj.company.product_function_type
+                                if product_function_type != 3:  # (3, '公众号版')
+                                    # 生成企业用户二维码
+                                    data_dict = {'user_id': obj.id, 'customer_id': ''}
+                                    tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))
 
                                 # 获取用户头像信息
                                 _data = {

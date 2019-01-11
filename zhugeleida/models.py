@@ -17,6 +17,14 @@ class zgld_company(models.Model):
     weChatQrCode = models.CharField(verbose_name='企业微信二维码', max_length=256, default='')
     remarks = models.TextField(verbose_name="备注",null=True)
 
+    product_function_type_choice = (
+        (1, '小程序版|公众号版'),
+        (2, '小程序版'),
+        (3, '公众号版'),
+    )
+    product_function_type = models.SmallIntegerField(verbose_name='产品功能类型', default=1, choices=product_function_type_choice)
+    xcx_qr_code = models.CharField(verbose_name='企业小程序二维码', max_length=128, null=True)
+
     shopping_type_choice = (
         (1,'产品'),
         (2,'商城')

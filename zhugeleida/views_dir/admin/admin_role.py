@@ -117,7 +117,7 @@ def init_data(super_id_id=None):
     for obj in objs:
         current_data = {
             'id' : obj.id,
-            'name' : obj.name,
+            'expand': 'true',
             'title': obj.title,
             'super_id_id': obj.super_id_id
         }
@@ -125,7 +125,7 @@ def init_data(super_id_id=None):
         children_data = init_data(obj.id)
 
         if children_data:
-            current_data['children_data'] = children_data
+            current_data['children'] = children_data
 
         result_data.append(current_data)
 

@@ -56,8 +56,8 @@ def user_gongzhonghao_auth(request):
         if _type == 'BindingUserNotify':
             redirect_url = binding_gzh_user_notify(request)
 
-            # return redirect(redirect_url)
-            return HttpResponse(redirect_url)
+            return redirect(redirect_url)
+
 
 
         article_id = relate.split('|')[0].split('_')[2]
@@ -215,25 +215,43 @@ def user_gongzhonghao_auth(request):
                 country = ret_json['country']  #
                 headimgurl = ret_json['headimgurl']  #
                 token = account.get_token(account.str_encrypt(openid))
-                obj = models.zgld_customer.objects.create(
-                    company_id=company_id,
-                    token=token,
-                    openid=openid,
-                    user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                    username=customer_name,
-                    sex=sex,
-                    province=province,
-                    city=city,
-                    country=country,
-                    headimgurl=headimgurl,
-                )
-                print('---------- 公众号-新用户创建成功 crete successful ---->')
+
+                customer_objs = models.zgld_customer.objects.filter(openid=openid)
+                if customer_objs:
+                    customer_objs.update(
+                        company_id=company_id,
+                        user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                        username=customer_name,
+                        sex=sex,
+                        province=province,
+                        city=city,
+                        country=country,
+                        headimgurl=headimgurl
+                    )
+                    client_id = customer_objs[0].id
+                    print('---------- 公众号-新用户修改成功 update successful ---->',client_id)
+
+                else:
+                    obj = models.zgld_customer.objects.create(
+                        company_id=company_id,
+                        token=token,
+                        openid=openid,
+                        user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                        username=customer_name,
+                        sex=sex,
+                        province=province,
+                        city=city,
+                        country=country,
+                        headimgurl=headimgurl,
+                    )
+                    client_id = obj.id
+                    print('---------- 公众号-新用户创建成功 crete successful ---->',client_id)
 
                 if not uid:  # 代表预览的后台分享出去的链接
                     article_url = '/gongzhonghao/yulanneirong/'
                 else:  # 代表是雷达用户分享出去的。
                     article_url = '/gongzhonghao/leidawenzhang/'
-                client_id = obj.id
+
 
                 redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
                     url=url,
@@ -250,16 +268,16 @@ def user_gongzhonghao_auth(request):
                 data = {
                     'article_id': article_id,
                     'user_id': uid,  # 文章作者-ID
-                    'customer_id': obj.id,
+                    'customer_id': client_id,
                     'level': level,
                     'pid': pid,
                     'company_id': company_id,
                 }
                 pid = int(pid) if pid else ''
-                customer_id = int(obj.id)
+                customer_id = int(client_id)
                 if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
                     print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
-                        uid, obj.id, customer_name), '|', json.dumps(data))
+                        uid, client_id, customer_name), '|', json.dumps(data))
                     tasks.binding_article_customer_relate.delay(data)
 
             else:
@@ -411,7 +429,7 @@ def binding_gzh_user_notify(request):
             print('---------- 公众号-新用户创建成功 crete successful ---->')
             client_id = obj.id
 
-        fanhui_url = url + '/#/'  # '/gongzhonghao/yulanneirong/'
+        fanhui_url = url + '/#/gzh_success/index'
         gzh_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=appid)
         qrcode_url = ''
         if gzh_objs:
@@ -425,7 +443,6 @@ def binding_gzh_user_notify(request):
         )
 
     print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
-
 
 
     return redirect_url

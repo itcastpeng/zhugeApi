@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-ip = 'http://127.0.0.1:8001'
+# ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-# ip = 'http://api.zhugeyingxiao.com'
+ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -519,13 +519,26 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, data=post_data ,params=get_data)
 
 
-url = ip +   '/zhugeleida/mycelery/monitor_send_gzh_template_msg' # 分页 聊天信息记录
+url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/monitor_send_gzh_template_msg' # 分页 聊天信息记录
+
+get_data['title'] = '标题'
+get_data['content'] = '具体内容'
+get_data['remark'] = '备注'
+
+ret = requests.get(url, params=get_data )
+
+
+url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/common_send_gzh_template_msg' # 分页 聊天信息记录
 # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
 get_data['company_id'] = 1
-get_data['customer_id'] = 852
-get_data['type'] = 'gongzhonghao_template_tishi'
-ret = requests.post(url, data=post_data ,params=get_data)
+get_data['customer_id'] = 854
 
+get_data['type'] = 'gongzhonghao_template_tishi' # 固定类型
+get_data['title'] = '标题'
+get_data['content'] = '具体内容'
+get_data['remark'] = '备注'
+
+ret = requests.get(url, data=post_data ,params=get_data)
 
 
 # import random

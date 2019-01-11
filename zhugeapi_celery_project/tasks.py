@@ -257,3 +257,13 @@ def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序I
 def mallOrderTimeToRefresh():# 商城订单 定时刷新 十分钟未付款自动改状态
     url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/timeToRefresh'
     requests.get(url)
+
+@app.task
+def monitor_send_gzh_template_msg(data):
+    print('--- 【公众号-监控发送模板消息数据】 --->', data)
+    get_data = data
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/common_send_gzh_template_msg'  # 分页 聊天信息记录
+    s.get(url, params=get_data)

@@ -62,7 +62,7 @@ def chat(request):
 
             mingpian_avatar = ''
             ret_data_list = []
-
+            customer_headimgurl = ''
             if objs:
 
                 phone = objs[0].userprofile.mingpian_phone if objs[0].userprofile.mingpian_phone else objs[0].userprofile.wechat_phone
@@ -107,6 +107,7 @@ def chat(request):
                             msg = str(msg, 'utf-8')
                             _content['msg'] = msg
 
+                    customer_headimgurl = obj.customer.headimgurl
                     base_info_dict = {
                         'customer_id': obj.customer.id,
                         'from_user_name': customer_name,
@@ -117,7 +118,7 @@ def chat(request):
                         'user_name' : obj.userprofile.username,
                         'user_avatar': mingpian_avatar,
 
-                        'customer_headimgurl': obj.customer.headimgurl,
+                        'customer_headimgurl': customer_headimgurl ,
                         'dateTime': obj.create_date,
 
                         'send_type': obj.send_type,
@@ -145,6 +146,7 @@ def chat(request):
                     'position': objs[0].userprofile.position,
                     'user_name': objs[0].userprofile.username,
                     'user_avatar': mingpian_avatar,
+                    'customer_headimgurl' : customer_headimgurl,
                 }
 
 
