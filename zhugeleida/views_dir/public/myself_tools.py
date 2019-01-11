@@ -60,3 +60,4 @@ def tools_oper(request,oper_type):
             response.code = 200
             response.msg = '发送成功'
 
+        return JsonResponse(response.__dict__)
