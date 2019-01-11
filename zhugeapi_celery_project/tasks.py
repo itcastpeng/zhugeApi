@@ -265,7 +265,5 @@ def monitor_send_gzh_template_msg(data):
 
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/monitor_send_gzh_template_msg'  # 分页 聊天信息记录
-    # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/common_send_gzh_template_msg'  # 分页 聊天信息记录
     s.get(url, params=get_data)

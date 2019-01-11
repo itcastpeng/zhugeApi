@@ -55,8 +55,9 @@ def tools_oper(request,oper_type):
                     'content' : content,
                     'remark' :  remark
                 }
+                print('监控发送的数据 --------->',data_dict)
 
-                tasks.monitor_send_gzh_template_msg.delay(json.dumps(data_dict))
+                tasks.monitor_send_gzh_template_msg.delay(data_dict)
 
             response.code = 200
             response.msg = '发送成功'
