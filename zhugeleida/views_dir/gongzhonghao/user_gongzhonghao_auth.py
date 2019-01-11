@@ -56,8 +56,8 @@ def user_gongzhonghao_auth(request):
         if _type == 'BindingUserNotify':
             redirect_url = binding_gzh_user_notify(request)
 
-            # return redirect(redirect_url)
-            return HttpResponse(redirect_url)
+            return redirect(redirect_url)
+
 
 
         article_id = relate.split('|')[0].split('_')[2]
@@ -429,7 +429,7 @@ def binding_gzh_user_notify(request):
             print('---------- 公众号-新用户创建成功 crete successful ---->')
             client_id = obj.id
 
-        fanhui_url = url + '/#/'  # '/gongzhonghao/yulanneirong/'
+        fanhui_url = url + '/#/gzh_success/index'
         gzh_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=appid)
         qrcode_url = ''
         if gzh_objs:
