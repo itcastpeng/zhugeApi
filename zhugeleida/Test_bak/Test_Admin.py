@@ -521,7 +521,7 @@ ip = 'http://api.zhugeyingxiao.com'
 
 url = ip +   '/zhugeleida/mycelery/monitor_send_gzh_template_msg' # 分页 聊天信息记录
 # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-get_data['company_id'] = 2
+get_data['company_id'] = [1,5,2,11]
 get_data['customer_id'] = 1873
 get_data['type'] = 'gongzhonghao_template_tishi'
 get_data['title'] = '大发送到gongzhonghao_template_tishi'

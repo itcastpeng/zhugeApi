@@ -25,8 +25,9 @@ def monitor_send_gzh_template_msg(request):
     content = request.GET.get('content')
     remark = request.GET.get('remark')
 
+    company_id_list = json.loads(company_id)
 
-    for company_id in [1,2,4,5]:
+    for company_id in company_id_list:
     # 创建二维码
 
         objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
