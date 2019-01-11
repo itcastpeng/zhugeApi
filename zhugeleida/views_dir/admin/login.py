@@ -48,7 +48,10 @@ def login(request):
                         userprofile_obj.token = token
                     else:
                         token = userprofile_obj.token
-
+                    gzh_notice_qrcode = ''
+                    gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                    if gzh_objs:
+                        gzh_notice_qrcode = gzh_objs[0].gzh_notice_qrcode
 
                     last_login_date_obj = userprofile_obj.last_login_date
                     last_login_date = last_login_date_obj.strftime('%Y-%m-%d %H:%M:%S') if last_login_date_obj else ''
@@ -64,7 +67,9 @@ def login(request):
                         'avatar':  userprofile_obj.avatar,
                         'last_login_date': last_login_date,
                         'is_reset_password': is_reset_password,
-                        'weChatQrCode':userprofile_obj.company.weChatQrCode
+
+                        'weChatQrCode': userprofile_obj.company.weChatQrCode,
+                        'gzh_notice_qrcode' : gzh_notice_qrcode,
                     }
                     print('response.data  -->', response.data )
 
