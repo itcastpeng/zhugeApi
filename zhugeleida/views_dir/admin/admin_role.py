@@ -186,6 +186,7 @@ def admin_role_init(request):
             response.code = 200
             response.msg = '查询成功'
             response.data = {
+                'rules_id_list': rules_id_list,
                 'admin_role_id' : admin_role_id,
                 'admin_role_name' : admin_role_name,
                 'ret_data': ret_data,
