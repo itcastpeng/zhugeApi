@@ -613,7 +613,7 @@ def xiaochengxu_websocket(request, oper_type):
                         objs.update(
                             is_customer_new_msg=False
                         )
-                    rc.set(redis_customer_id_key, False)
+                        rc.set(redis_customer_id_key, False)
 
             else:
                 try:
