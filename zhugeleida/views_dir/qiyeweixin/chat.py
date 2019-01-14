@@ -244,7 +244,8 @@ def chat_oper(request, oper_type, o_id):
                         content=Content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
-                        send_type=1
+                        send_type=1,
+                        is_user_new_msg=False
                 )
 
                 user_type = obj.customer.user_type # 客户类型
@@ -273,10 +274,10 @@ def chat_oper(request, oper_type, o_id):
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
 
-                rc.set(redis_user_id_key, True)
+                # rc.set(redis_user_id_key, True)
                 rc.set(redis_customer_id_key, True)
 
                 response.code = 200
