@@ -1380,9 +1380,15 @@ def deal_gzh_picture_url(url):
             #######
             s = requests.session()
             s.keep_alive = False  # 关闭多余连接
+            filename = ''
             html = s.get(data_src)
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = "/gzh_article_%s.jpg" % (now_time)
+            if 'wx_fmt=gif' in data_src:
+                filename = "/gzh_article_%s.gif" % (now_time)
+            else:
+
+                filename = "/gzh_article_%s.jpg" % (now_time)
+
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
             with open(file_dir, 'wb') as file:
                 file.write(html.content)
@@ -1403,7 +1409,12 @@ def deal_gzh_picture_url(url):
     content = str(style) + str(body)
     print('最后的html---->>', content)
 
-    # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
+    dict = {'data-src': 'src' }
+    for key, value in dict.items():
+        content = content.replace(key, value)
+        # print(url)
+
+    # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' } #wx_fmt=gif
     # for key, value in dict.items():
     #     content = content.replace(key, value)
     #     # print(url)
