@@ -48,7 +48,7 @@ def home_page(request):
             used_days = 0
             available_days = (account_expired_time - charging_start_time).days
 
-        
+
         ret_data = {
             'company_name': company_name,
             'username': user_obj[0].username,
