@@ -18,8 +18,7 @@ from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_c
 from zhugeleida.public.common import action_record
 from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
 
-from  django.conf import settings
-from selenium import webdriver
+from bs4 import BeautifulSoup
 import time
 import requests
 import re,os
@@ -365,8 +364,8 @@ def article(request, oper_type):
                             cover_picture = deal_gzh_picUrl_to_local(cover_picture)
 
 
-                        if content:
-                            content = deal_gzh_picture_url(content)
+                        if url:
+                            content = deal_gzh_picture_url(url)
 
                         dict_data = {
                             'user_id': user_id,
@@ -1335,7 +1334,7 @@ def article_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def deal_gzh_picture_url(content):
+def deal_gzh_picture_url(url):
 
     '''
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
@@ -1349,16 +1348,65 @@ def deal_gzh_picture_url(content):
     # print("电话号码 : ", num)
 
     # 移除非数字的内容
+    url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
 
-    dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
+    ret = requests.get(url)
 
-    for key, value in dict.items():
-        content = content.replace(key, value)
-        # print(url)
+    ret.encoding = 'utf8'
 
-    print('----- 此图片来自微信公众平台 替换为 ----->',content)
+    soup = BeautifulSoup(ret.text, 'lxml')
 
-    return  content
+    style_tags = soup.find_all('style')
+    # print('style_tags -->', style_tags)
+
+    # style_html = " ".join(style_tags)
+
+    style = ""
+    for style_tag in style_tags:
+        print('style_tag -->', style_tag)
+        style += str(style_tag)
+
+    print(style)
+
+    body = soup.find('div', id="js_content")
+
+    body.attrs['style'] = "padding: 20px 16px 12px;"
+
+    img_tags = soup.find_all('img')
+    for img_tag in img_tags:
+        data_src = img_tag.attrs.get('data-src')
+        if data_src:
+
+            #######
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            html = s.get(data_src)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = "/gzh_article_%s.jpg" % (now_time)
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+            with open(file_dir, 'wb') as file:
+                file.write(html.content)
+            print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
+            #######
+
+            img_tag.attrs['data-src'] = file_dir
+            print('data_src ----->',data_src)
+
+    with open('index_template.html', 'r', encoding='utf8') as f:
+        html = f.read().format(
+            style=style,
+            body=body
+        )
+    print('最后的html---->>', html)
+
+    # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
+    # for key, value in dict.items():
+    #     content = content.replace(key, value)
+    #     # print(url)
+    # print('----- 此图片来自微信公众平台 替换为 ----->',content)
+
+
+    return  html
 
 def deal_gzh_picUrl_to_local(url):
 
