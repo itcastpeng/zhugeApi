@@ -1395,9 +1395,9 @@ def deal_gzh_picture_url(url):
     # with open('./index_template.html', 'r', encoding='utf8') as f:
     #     html = f.read().format(
     #         style=style,
-    #         body=style
+    #         body=body
     #     )
-    content = style + style
+    content = style + body
     print('最后的html---->>', content)
 
     # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
