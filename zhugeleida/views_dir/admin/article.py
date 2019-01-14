@@ -1397,6 +1397,9 @@ def deal_gzh_picture_url(url):
     #         style=style,
     #         body=body
     #     )
+    print('组合样式 style ------>>',style)
+    print('组合身体 body ------>>',body)
+
     content = style + body
     print('最后的html---->>', content)
 
