@@ -1400,7 +1400,7 @@ def deal_gzh_picture_url(url):
     print('组合样式 style ------>>',style)
     print('组合身体 body ------>>',body)
 
-    content = style + body
+    content = str(style) + str(body)
     print('最后的html---->>', content)
 
     # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
