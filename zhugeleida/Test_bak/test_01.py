@@ -59,7 +59,7 @@ import json
 from urllib.parse import unquote
 
 # 解析URl转换
-share_url = '/zhugeleida/mycelery/user_send_action_log?timestamp=1547021393414&user_id=854&uid=17&company_id=1&action=14&rand_str=7d3169d64d8667f35ce6c4313cb69e21&pid=&remark=%E6%AD%A3%E5%9C%A8%E6%9F%A5%E7%9C%8B%E6%96%87%E7%AB%A0%E3%80%8A%E6%B2%A1%E3%80%90%E7%95%99%E9%87%8F%E3%80%91%E6%AF%94%E6%B2%A1%E6%B5%81%E9%87%8F%E6%9B%B4%E5%8F%AF%E6%80%95%E2%80%94%E5%90%88%E4%BC%97%E5%BA%B7%E6%A1%A5%E3%80%8B%2C%E7%9C%8B%E6%9D%A5%E5%AF%B9%E6%82%A8%E7%9A%84%E6%96%87%E7%AB%A0%E6%84%9F%E5%85%B4%E8%B6%A3'
+share_url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=https%3A%2F%2Fopen.weixin.qq.com%2Fconnect%2Foauth2%2Fauthorize%3Fappid%3Dwxf6c91d4f4c2116fe%26redirect_uri%3Dhttp%3A%2F%2Fapi.zhugeyingxiao.com%2Fzhugeleida%2Fgongzhonghao%2Fwork_gongzhonghao_auth%3Frelate%3Darticle_id_97%7Cpid_%7Clevel_1%7Cuid_236%7Ccompany_id_12%26response_type%3Dcode%26scope%3Dsnsapi_base%26state%3Dsnsapi_base%26component_appid%3Dwx6ba07e6ddcdc69b3%23wechat_redirect]'
 
 ## 解码URl
 redirect_url = unquote(share_url, 'utf-8')

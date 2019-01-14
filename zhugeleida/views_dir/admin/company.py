@@ -61,11 +61,15 @@ def company(request):
                 now_date = datetime.datetime.now()
                 print('(now_date - obj.charging_start_time).days ------->>',(now_date - obj.charging_start_time).days)
 
-                if now_date > obj.charging_start_time:
-                    used_days = (now_date - obj.charging_start_time).days  # 用户使用了多少天了
-                    available_days = (obj.account_expired_time - datetime.datetime.now()).days  # 还剩多天可以用
+                if now_date > obj.charging_start_time and now_date < obj.account_expired_time:
+                    used_days = (now_date - obj.charging_start_time).days                        # 用户使用了多少天了
+                    available_days = (obj.account_expired_time - datetime.datetime.now()).days   # 还剩多天可以用
 
-                else:
+                elif now_date >= obj.account_expired_time:
+                    used_days = (obj.account_expired_time - obj.charging_start_time).days  # 用户使用了多少天了
+                    available_days = 0  # 还剩多天可以用
+
+                elif now_date <= obj.charging_start_time:
                     used_days = 0
                     available_days  = (obj.account_expired_time - obj.charging_start_time).days
 

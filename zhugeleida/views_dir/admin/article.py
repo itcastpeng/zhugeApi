@@ -265,12 +265,17 @@ def article(request, oper_type):
                         item_list = _response.data.get('item')
                         total_count = _response.data.get('total_count')
                         print('---- 临时素材列表 media_id_list ---->>',media_id_list)
-
+                        status_text = ''
+                        status = ''
                         for item in item_list:
                             media_id = item.get('media_id')
 
                             if media_id in media_id_list:
-                                continue
+                                status_text = '已同步'
+                                status = 1
+                            else:
+                                status_text = '未同步'
+                                status = 0
 
                             thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
                             thumb_url = deal_gzh_picture_url(thumb_url)
@@ -287,6 +292,8 @@ def article(request, oper_type):
                                 'digest' :  item.get('content').get('news_item')[0].get('digest'),
                                 'url' :  item.get('content').get('news_item')[0].get('url'),
                                 'content' : item.get('content').get('news_item')[0].get('content'),
+                                'status_text': status_text,
+                                'status' : status
                             }
 
                             ret_data.append(data)
