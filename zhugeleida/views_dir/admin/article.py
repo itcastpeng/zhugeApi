@@ -375,9 +375,17 @@ def article(request, oper_type):
                             'summary': summary,
                             'content': content,
                             'cover_picture': cover_picture,
-                            'media_id': media_id
+                            'media_id': media_id,
+                            'url' : url
                         }
-                        models.zgld_article.objects.create(**dict_data)
+                        article_objs = models.zgld_article.objects.filter(media_id=media_id)
+
+                        if article_objs:
+                            article_objs.update(**dict_data)
+
+                        else:
+                            models.zgld_article.objects.create(**dict_data)
+
                         response.code = 200
                         response.msg = '同步成功'
 
