@@ -57,8 +57,17 @@ def company(request):
             for obj in objs:
                 # print('---- obj.account_expired_time --->>',obj.account_expired_time,'|',datetime.datetime.now())
 
-                available_days = (obj.account_expired_time - datetime.datetime.now()).days  # 还剩多天可以用
-                used_days = (datetime.datetime.now() - obj.create_date).days  # 用户使用了多少天了
+
+                now_date = datetime.datetime.now()
+                print('(now_date - obj.charging_start_time).days ------->>',(now_date - obj.charging_start_time).days)
+
+                if now_date > obj.charging_start_time:
+                    used_days = (now_date - obj.charging_start_time).days  # 用户使用了多少天了
+                    available_days = (obj.account_expired_time - datetime.datetime.now()).days  # 还剩多天可以用
+
+                else:
+                    used_days = 0
+                    available_days  = (obj.account_expired_time - obj.charging_start_time).days
 
                 customer_num = models.zgld_user_customer_belonger.objects.filter(
                     user__company_id=obj.id).count()  # 已获取客户数
