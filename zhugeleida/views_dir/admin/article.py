@@ -1392,12 +1392,13 @@ def deal_gzh_picture_url(url):
             img_tag.attrs['data-src'] = file_dir
             print('data_src ----->',data_src)
 
-    with open('index_template.html', 'r', encoding='utf8') as f:
-        html = f.read().format(
-            style=style,
-            body=body
-        )
-    print('最后的html---->>', html)
+    # with open('./index_template.html', 'r', encoding='utf8') as f:
+    #     html = f.read().format(
+    #         style=style,
+    #         body=style
+    #     )
+    content = style + style
+    print('最后的html---->>', content)
 
     # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
     # for key, value in dict.items():
@@ -1406,7 +1407,7 @@ def deal_gzh_picture_url(url):
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
 
-    return  html
+    return  content
 
 def deal_gzh_picUrl_to_local(url):
 
