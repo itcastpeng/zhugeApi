@@ -1439,7 +1439,7 @@ def deal_gzh_picture_url(url):
         if '&' in shipin_url:
             shipin_url = shipin_url.split('&')[0]
 
-        print('视频链接 ----->>\n', shipin_url)
+        print('视频链接 shipin_url----->>\n', shipin_url)
         iframe_tag.attrs['data-src'] = shipin_url
         iframe_tag.attrs['allowfullscreen'] = True
 
