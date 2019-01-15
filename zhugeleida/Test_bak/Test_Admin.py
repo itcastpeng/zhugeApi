@@ -504,7 +504,8 @@ ip = 'http://api.zhugeyingxiao.com'
 
 url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
 get_data['company_id'] = 2
-post_data['media_id_list'] =  json.dumps(['ivcZrCjmhDznUrwcjIReRPoDiI2Fke3LVhHU7hNXTXE'])  #json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
+post_data['source_url'] = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
+# post_data['media_id_list'] =  json.dumps(['ivcZrCjmhDznUrwcjIReRPoDiI2Fke3LVhHU7hNXTXE'])  #json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
 
 ret = requests.post(url, data=post_data ,params=get_data)
 

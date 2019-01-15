@@ -349,7 +349,7 @@ def article(request, oper_type):
                         'summary': '简介测试',
                         'cover_picture': '',
                         'media_id': None,
-                        'url': source_url,
+                        'source_url': source_url,
                         'content' : content,
                         'source' : 2  #   (2,'转载')
                     }
@@ -404,7 +404,7 @@ def article(request, oper_type):
                                 'content': content,
                                 'cover_picture': cover_picture,
                                 'media_id': media_id,
-                                'url' : url
+                                'source_url' : url
                             }
                             article_objs = models.zgld_article.objects.filter(media_id=media_id)
 
