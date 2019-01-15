@@ -614,6 +614,7 @@ def xiaochengxu_websocket(request, oper_type):
                             is_customer_new_msg=False
                         )
                         rc.set(redis_customer_id_key, False)
+
                     else:
                         rc.set(redis_customer_id_key, 'Stop')
             else:

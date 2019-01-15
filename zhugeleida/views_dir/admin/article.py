@@ -1428,13 +1428,23 @@ def deal_gzh_picture_url(url):
             img_tag.attrs['data-src'] = file_dir
             print('data_src ----->',data_src)
 
-    # with open('./index_template.html', 'r', encoding='utf8') as f:
-    #     html = f.read().format(
-    #         style=style,
-    #         body=body
-    #     )
+    ### 处理视频的URL
+    iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
+    #video = body.find_all('video')
+    print(' iframe ------>>\n', iframe)
+
+    for iframe_tag in iframe:
+        shipin_url = iframe_tag.get('data-src')
+
+        if '&' in shipin_url:
+            shipin_url = shipin_url.split('&')[0]
+
+        print('视频链接 ----->>\n', shipin_url)
+        iframe_tag.attrs['data-src'] = shipin_url
+        iframe_tag.attrs['allowfullscreen'] = True
+
     print('组合样式 style ------>>',style)
-    print('组合身体 body ------>>',body)
+    print('组合身体 body ------>>', body)
 
     content = str(style) + str(body)
     print('最后的html---->>', content)
