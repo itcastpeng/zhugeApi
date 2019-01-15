@@ -1436,10 +1436,12 @@ def deal_gzh_picture_url(url):
     for iframe_tag in iframe:
         shipin_url = iframe_tag.get('data-src')
 
-        if '&' in shipin_url:
-            shipin_url = shipin_url.split('&')[0]
-        #data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
-        
+        if '&' in shipin_url and 'vid=' in  shipin_url:
+            vid_num =  shipin_url.split('vid=')[1]
+            _url = shipin_url.split('?')[0]
+            shipin_url = _url + '?vid=' + vid_num
+            #data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
+
         print('视频链接 shipin_url----->>\n', shipin_url)
         iframe_tag.attrs['data-src'] = shipin_url
         iframe_tag.attrs['allowfullscreen'] = True
