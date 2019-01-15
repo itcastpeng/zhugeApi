@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 import time
 import requests
 import re,os
-import random
+from urllib.parse import unquote
 
 
 def init_data(article_id, user_id, pid=None, level=1):
@@ -1435,6 +1435,21 @@ def deal_gzh_picture_url(url):
 
     for iframe_tag in iframe:
         shipin_url = iframe_tag.get('data-src')
+        data_cover_url = iframe_tag.get('data-cover')
+        if data_cover_url:
+            data_cover_url = unquote(data_cover_url, 'utf-8')
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            html = s.get(data_cover_url)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = "/gzh_article_%s.jpg" % (now_time)
+
+            data_cover_url = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+            with open(data_cover_url, 'wb') as file:
+                file.write(html.content)
+
+
+        print('封面URL data_cover_url ------->>', data_cover_url)
 
         if '&' in shipin_url and 'vid=' in  shipin_url:
             vid_num =  shipin_url.split('vid=')[1]
@@ -1445,6 +1460,7 @@ def deal_gzh_picture_url(url):
         print('视频链接 shipin_url----->>\n', shipin_url)
         iframe_tag.attrs['data-src'] = shipin_url
         iframe_tag.attrs['allowfullscreen'] = True
+        iframe_tag.attrs['data_cover'] = 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
     print('组合样式 style ------>>',style)
     print('组合身体 body ------>>', body)

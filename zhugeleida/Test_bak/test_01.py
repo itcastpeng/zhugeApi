@@ -59,7 +59,7 @@ import json
 from urllib.parse import unquote
 
 # 解析URl转换
-share_url = 'http://zhugeleida.zhugeyingxiao.com/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=https%3A%2F%2Fopen.weixin.qq.com%2Fconnect%2Foauth2%2Fauthorize%3Fappid%3Dwxf6c91d4f4c2116fe%26redirect_uri%3Dhttp%3A%2F%2Fapi.zhugeyingxiao.com%2Fzhugeleida%2Fgongzhonghao%2Fwork_gongzhonghao_auth%3Frelate%3Darticle_id_97%7Cpid_%7Clevel_1%7Cuid_236%7Ccompany_id_12%26response_type%3Dcode%26scope%3Dsnsapi_base%26state%3Dsnsapi_base%26component_appid%3Dwx6ba07e6ddcdc69b3%23wechat_redirect]'
+share_url = 'http%3A%2F%2Fshp.qpic.cn%2Fqqvideo_ori%2F0%2Fz08202kwzjw_496_280%2F0'
 
 ## 解码URl
 redirect_url = unquote(share_url, 'utf-8')
