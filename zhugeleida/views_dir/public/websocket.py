@@ -646,6 +646,8 @@ def xiaochengxu_websocket(request, oper_type):
                             customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)  # 小程序 在聊天还是聊天页外面
 
                             if  type == 'query_num':
+                                print('小程序已经output query_num ----------->>')
+                                rc.set(customer_id_position_key, 'output')
 
                                 phone = ''
                                 if phone_flag < 3:
@@ -669,7 +671,7 @@ def xiaochengxu_websocket(request, oper_type):
                                 }
                                 print('------ 查询数量返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
-                                rc.set(customer_id_position_key, 'output')
+
                                 continue
 
                             elif type == 'lived':
