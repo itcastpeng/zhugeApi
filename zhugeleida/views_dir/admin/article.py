@@ -1482,10 +1482,13 @@ def deal_gzh_picture_url(url):
 
             # results_url = re.findall('^url\((\w+)\)', content)
             # pattern = re.compile(r'url\(\"\w',re.I)  # 通过 re.compile 获得一个正则表达式对象
-            pattern = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+\?\w+=\w+', re.I)  # 通过 re.compile 获得一个正则表达式对象
-            results_url_list = pattern.findall(content)
-            print(' 匹配的微信图片链接 results_url_list ---->', json.dumps(results_url_list))
-
+            pattern1 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+\?\w+=\w+', re.I)  # 通过 re.compile 获得一个正则表达式对象
+            pattern2 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+', re.I)
+            results_url_list_1 = pattern1.findall(content)
+            results_url_list_2 = pattern2.findall(content)
+            print(' 匹配的微信图片链接 results_url_list_1 ---->', json.dumps(results_url_list_1))
+            print(' 匹配的微信图片链接 results_url_list_2 ---->', json.dumps(results_url_list_2))
+            results_url_list = results_url_list_1.extend(results_url_list_2)
 
             for pattern_url in results_url_list:
                 print('匹配的url--------<<',pattern_url)
