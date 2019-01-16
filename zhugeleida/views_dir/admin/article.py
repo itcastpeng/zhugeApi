@@ -1468,15 +1468,15 @@ def deal_gzh_picture_url(url):
     content = str(style) + str(body)
     print('最后的html---->>', content)
 
-    dict = {'data-src': 'src' }
-    for key, value in dict.items():
-        content = content.replace(key, value)
-        # print(url)
-
-    # dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' } #wx_fmt=gif
+    # dict = {'data-src': 'src' }
     # for key, value in dict.items():
     #     content = content.replace(key, value)
     #     # print(url)
+
+    dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' ,'?wx_fmt=gif' : ''} #wx_fmt=gif
+    for key, value in dict.items():
+        content = content.replace(key, value)
+        # print(url)
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
 
