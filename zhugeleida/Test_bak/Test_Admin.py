@@ -502,11 +502,13 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-# url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
-# get_data['company_id'] = 2
-# post_data['media_id_list'] = json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
-#
-# ret = requests.post(url, data=post_data ,params=get_data)
+url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
+get_data['company_id'] = 2
+post_data['source_url'] = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502885335&idx=1&sn=4b2c05ce119948494822f430a8a2b322&chksm=08ace0ed3fdb69fb4783142b29a10cf3bf9ed4447c809df5f439214f95d6eb21d11951c57bf5#rd'
+
+# post_data['media_id_list'] =  json.dumps(['ivcZrCjmhDznUrwcjIReRPoDiI2Fke3LVhHU7hNXTXE'])  #json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
+
+ret = requests.post(url, data=post_data ,params=get_data)
 
 
 #############################################################################################
@@ -519,26 +521,26 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data=post_data ,params=get_data)
 
 
-url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/monitor_send_gzh_template_msg' # 分页 聊天信息记录
+# url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/monitor_send_gzh_template_msg' # 分页 聊天信息记录
+#
+# get_data['title'] = '标题'
+# get_data['content'] = '具体内容'
+# get_data['remark'] = '备注'
+#
+# ret = requests.get(url, params=get_data)
 
-get_data['title'] = '标题'
-get_data['content'] = '具体内容'
-get_data['remark'] = '备注'
 
-ret = requests.get(url, params=get_data )
-
-
-url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/common_send_gzh_template_msg' # 分页 聊天信息记录
-# get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
-get_data['company_id'] = 1
-get_data['customer_id'] = 854
-
-get_data['type'] = 'gongzhonghao_template_tishi' # 固定类型
-get_data['title'] = '标题'
-get_data['content'] = '具体内容'
-get_data['remark'] = '备注'
-
-ret = requests.get(url, data=post_data ,params=get_data)
+# url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/common_send_gzh_template_msg' # 分页 聊天信息记录
+# # get_data['data'] = json.dumps({'user_id': 55, 'customer_id' : 854})
+# get_data['company_id'] = 1
+# get_data['customer_id'] = 854
+#
+# get_data['type'] = 'gongzhonghao_template_tishi' # 固定类型
+# get_data['title'] = '标题'
+# get_data['content'] = '具体内容'
+# get_data['remark'] = '备注'
+#
+# ret = requests.get(url, data=post_data ,params=get_data)
 
 
 # import random

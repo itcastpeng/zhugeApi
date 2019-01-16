@@ -18,12 +18,11 @@ from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_c
 from zhugeleida.public.common import action_record
 from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
 
-from  django.conf import settings
-from selenium import webdriver
+from bs4 import BeautifulSoup
 import time
 import requests
 import re,os
-import random
+from urllib.parse import unquote
 
 
 def init_data(article_id, user_id, pid=None, level=1):
@@ -265,12 +264,17 @@ def article(request, oper_type):
                         item_list = _response.data.get('item')
                         total_count = _response.data.get('total_count')
                         print('---- 临时素材列表 media_id_list ---->>',media_id_list)
-
+                        status_text = ''
+                        status = ''
                         for item in item_list:
                             media_id = item.get('media_id')
 
                             if media_id in media_id_list:
-                                continue
+                                status_text = '已同步'
+                                status = 1
+                            else:
+                                status_text = '未同步'
+                                status = 0
 
                             thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
                             thumb_url = deal_gzh_picture_url(thumb_url)
@@ -287,6 +291,8 @@ def article(request, oper_type):
                                 'digest' :  item.get('content').get('news_item')[0].get('digest'),
                                 'url' :  item.get('content').get('news_item')[0].get('url'),
                                 'content' : item.get('content').get('news_item')[0].get('content'),
+                                'status_text': status_text,
+                                'status' : status
                             }
 
                             ret_data.append(data)
@@ -320,62 +326,100 @@ def article(request, oper_type):
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
             media_id_list = request.POST.get('media_id_list')
+            source_url = request.POST.get('source_url')
+
             _form_data = {
                 'company_id' : company_id,
-                'media_id_list' : media_id_list
+                'media_id_list' : media_id_list,
+                'source_url' : source_url
             }
 
             forms_obj = SyncMyarticleForm(_form_data)
 
             if forms_obj.is_valid():
-                media_id_list = json.loads(media_id_list)
 
-                company_id = forms_obj.cleaned_data.get('company_id')
+                if source_url: # 有来源URL
+                    source_url = source_url.strip()
+                    content = deal_gzh_picture_url(source_url)
 
-                objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
-                authorization_appid = objs[0].authorization_appid
-
-                for media_id in media_id_list:
-                    _data = {
-                        'authorizer_appid': authorization_appid,
+                    dict_data = {
+                        'user_id': user_id,
                         'company_id': company_id,
-                        'media_id' : media_id
+                        'title': '标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        'summary': '简介测试',
+                        'cover_picture': '',
+                        'media_id': None,
+                        'source_url': source_url,
+                        'content' : content,
+                        'source' : 2  #   (2,'转载')
                     }
+                    article_objs = models.zgld_article.objects.filter(source_url=source_url)
 
-                    user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-                    _response = user_obj_cla.get_material()
-
-                    if _response.code == 200:
-                        article_data_dict = _response.data
-                        news_item_dict = article_data_dict.get('news_item')[0]
-
-                        title =  news_item_dict.get('title')
-                        summary =  news_item_dict.get('digest')  # 摘要
-                        content = news_item_dict.get('content')  # 封面图
-                        cover_picture =  news_item_dict.get('thumb_url') #  封面图
-                        url =  news_item_dict.get('url') #  原文链接
-                        if cover_picture:
-                            cover_picture = deal_gzh_picUrl_to_local(cover_picture)
-
-
-                        if content:
-                            content = deal_gzh_picture_url(content)
-
-                        dict_data = {
-                            'user_id': user_id,
-                            'company_id': company_id,
-                            'title': title,
-                            'summary': summary,
-                            'content': content,
-                            'cover_picture': cover_picture,
-                            'media_id': media_id
-                        }
+                    if article_objs:
+                        article_objs.update(**dict_data)
+                        response.code = 200
+                        response.msg = '覆盖修改文章成功'
+                    else:
                         models.zgld_article.objects.create(**dict_data)
                         response.code = 200
-                        response.msg = '同步成功'
+                        response.msg = '创建新文章成功'
 
-                    else:
-                        response = _response
+                else:
+                    media_id_list = json.loads(media_id_list)
+                    company_id = forms_obj.cleaned_data.get('company_id')
+                    objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                    authorization_appid = objs[0].authorization_appid
+
+                    for media_id in media_id_list:
+                        _data = {
+                            'authorizer_appid': authorization_appid,
+                            'company_id': company_id,
+                            'media_id' : media_id
+                        }
+
+                        user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+                        _response = user_obj_cla.get_material()
+
+                        if _response.code == 200:
+                            article_data_dict = _response.data
+                            news_item_dict = article_data_dict.get('news_item')[0]
+
+                            title =  news_item_dict.get('title')
+                            summary =  news_item_dict.get('digest')  # 摘要
+                            content = news_item_dict.get('content')  # 封面图
+                            cover_picture =  news_item_dict.get('thumb_url') #  封面图
+                            url =  news_item_dict.get('url') #  原文链接
+                            if cover_picture:
+                                cover_picture = deal_gzh_picUrl_to_local(cover_picture)
+
+
+                            if url:
+                                content = deal_gzh_picture_url(url)
+
+                            dict_data = {
+                                'user_id': user_id,
+                                'company_id': company_id,
+                                'title': title,
+                                'summary': summary,
+                                'content': content,
+                                'cover_picture': cover_picture,
+                                'media_id': media_id,
+                                'source_url' : url
+                            }
+                            article_objs = models.zgld_article.objects.filter(media_id=media_id)
+
+                            if article_objs:
+                                article_objs.update(**dict_data)
+                                response.code = 200
+                                response.msg = '覆盖修改文章成功'
+
+                            else:
+                                models.zgld_article.objects.create(**dict_data)
+                                response.code = 200
+                                response.msg = '新建文章成功'
+
+                        else:
+                            response = _response
 
 
 
@@ -1320,7 +1364,7 @@ def article_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def deal_gzh_picture_url(content):
+def deal_gzh_picture_url(url):
 
     '''
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
@@ -1334,14 +1378,107 @@ def deal_gzh_picture_url(content):
     # print("电话号码 : ", num)
 
     # 移除非数字的内容
+    #url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
 
-    dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' }
+    ret = requests.get(url)
 
+    ret.encoding = 'utf8'
+
+    soup = BeautifulSoup(ret.text, 'lxml')
+
+    style_tags = soup.find_all('style')
+    # print('style_tags -->', style_tags)
+
+    # style_html = " ".join(style_tags)
+
+    style = ""
+    for style_tag in style_tags:
+        print('style_tag -->', style_tag)
+        style += str(style_tag)
+
+    print(style)
+
+    body = soup.find('div', id="js_content")
+
+    body.attrs['style'] = "padding: 20px 16px 12px;"
+
+    img_tags = soup.find_all('img')
+    for img_tag in img_tags:
+        data_src = img_tag.attrs.get('data-src')
+        if data_src:
+
+            #######
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            filename = ''
+            html = s.get(data_src)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+            if 'wx_fmt=gif' in data_src:
+                filename = "/gzh_article_%s.gif" % (now_time)
+            else:
+
+                filename = "/gzh_article_%s.jpg" % (now_time)
+
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+            with open(file_dir, 'wb') as file:
+                file.write(html.content)
+            print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
+            #######
+
+            img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
+            print('data_src ----->',data_src)
+
+    ### 处理视频的URL
+    iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
+    #video = body.find_all('video')
+    print(' iframe ------>>\n', iframe)
+
+    for iframe_tag in iframe:
+        shipin_url = iframe_tag.get('data-src')
+        data_cover_url = iframe_tag.get('data-cover')
+        if data_cover_url:
+            data_cover_url = unquote(data_cover_url, 'utf-8')
+            # s = requests.session()
+            # s.keep_alive = False  # 关闭多余连接
+            # html = s.get(data_cover_url)
+            # now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            # filename = "/gzh_article_%s.jpg" % (now_time)
+            #
+            # data_cover_url = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+            # with open(data_cover_url, 'wb') as file:
+            #     file.write(html.content)
+
+
+        print('封面URL data_cover_url ------->>', data_cover_url)
+
+        if '&' in shipin_url and 'vid=' in  shipin_url:
+            vid_num =  shipin_url.split('vid=')[1]
+            _url = shipin_url.split('?')[0]
+            shipin_url = _url + '?vid=' + vid_num
+            #data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
+
+        print('视频链接 shipin_url----->>\n', shipin_url)
+        iframe_tag.attrs['data-src'] = shipin_url
+        iframe_tag.attrs['allowfullscreen'] = True
+        iframe_tag.attrs['data-cover'] = data_cover_url #'http://statics.api.zhugeyingxiao.com/' + data_cover_url
+
+    print('组合样式 style ------>>',style)
+    print('组合身体 body ------>>', body)
+
+    content = str(style) + str(body)
+    print('最后的html---->>', content)
+
+    # dict = {'data-src': 'src' }
+    # for key, value in dict.items():
+    #     content = content.replace(key, value)
+    #     # print(url)
+
+    dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' ,'?wx_fmt=gif' : ''} #wx_fmt=gif
     for key, value in dict.items():
         content = content.replace(key, value)
         # print(url)
+    # print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
-    print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
     return  content
 

@@ -385,11 +385,7 @@ def user_oper(request, oper_type, o_id):
                     response.msg = '用户ID不存在'
 
             else:
-                if str(request.GET.get('user_id')) == str(o_id):
-                    response.msg = '不允许删除自己'
-                    response.code = 305
 
-                else:
                     user_objs = models.zgld_userprofile.objects.filter(id=o_id)
                     if user_objs:
                         company_id =  user_objs[0].company_id
@@ -410,14 +406,17 @@ def user_oper(request, oper_type, o_id):
                             # ret = requests.get(Conf['delete_user_url'], params=get_user_data)
 
                             weixin_ret = json.loads(ret.text)
+                            print('微信删除 weixin_ret 接口返回-------->>',weixin_ret)
 
                             if weixin_ret['errcode'] == 0:
                                 user_objs.delete()
+                                print('删除成功------->>')
                                 response.code = 200
                                 response.msg = "删除成功"
 
                             elif weixin_ret['errcode'] == 60111: # userId not found
                                 user_objs.delete()
+                                print('userId not found并删除本地用户------->>')
                                 response.code = 200
                                 response.msg = "删除成功"
 

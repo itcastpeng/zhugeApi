@@ -4,7 +4,8 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.utils.timezone import timedelta, datetime
+from django.utils.timezone import timedelta
+import datetime
 from zhugeleida.forms.admin import homepage_verify
 import json
 from django.db.models import Q, Sum
@@ -23,14 +24,30 @@ def home_page(request):
         company_id = user_obj[0].company_id
         mingpian_available_num = user_obj[0].company.mingpian_available_num  # 可开通名片数量
         user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()  # # 员工总数
-        account_expired_time = user_obj[0].company.account_expired_time
-        create_date = user_obj[0].company.create_date
-        available_days = (account_expired_time - datetime.now()).days  # 还剩多天可以用
 
-        used_days = (datetime.now() - user_obj[0].company.create_date).days  # 用户使用了多少天了
-        # customer_num = models.zgld_user_customer_belonger.objects.select_related('user').filter(
-        #     user__company_id=company_id).count()  # 已获取客户数
+        account_expired_time = user_obj[0].company.account_expired_time
+        charging_start_time = user_obj[0].company.charging_start_time
+        create_date = user_obj[0].company.create_date
+
+        # available_days = (account_expired_time - datetime.datetime.now()).days  # 还剩多天可以用
+        # used_days = (datetime.datetime.now() - user_obj[0].company.create_date).days  # 用户使用了多少天了
+
         customer_num = models.zgld_customer.objects.filter(company_id=company_id).count()
+        now_date = datetime.datetime.now()
+        used_days = ''
+        available_days = ''
+        if now_date > charging_start_time and now_date < account_expired_time:
+            used_days = (now_date - charging_start_time).days  # 用户使用了多少天了
+            available_days = (account_expired_time - now_date).days  # 还剩多天可以用
+
+        elif now_date >= account_expired_time:
+            used_days = (account_expired_time - charging_start_time).days  # 用户使用了多少天了
+            available_days = 0  # 还剩多天可以用
+
+        elif now_date <= charging_start_time:
+            used_days = 0
+            available_days = (account_expired_time - charging_start_time).days
+
 
         ret_data = {
             'company_name': company_name,

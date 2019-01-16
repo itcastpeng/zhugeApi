@@ -233,7 +233,7 @@ class MyarticleForm(forms.Form):
 
 class SyncMyarticleForm(forms.Form):
     media_id_list = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': '素材列表不能为空'
         }
@@ -245,6 +245,16 @@ class SyncMyarticleForm(forms.Form):
             'required': '公司ID不存在'
         }
     )
+
+    source_url = forms.CharField(
+        required=False,
+        error_messages={
+            'required': '图文页的URL不能为空'
+        }
+    )
+
+
+
 
 
 # 判断是否是数字

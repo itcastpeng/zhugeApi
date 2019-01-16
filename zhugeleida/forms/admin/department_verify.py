@@ -37,9 +37,11 @@ class DepartmentAddForm(forms.Form):
 
     # 查询用户名判断是否存在
     def clean_name(self):
+        company_id = self.data['company_id']
         name = self.data['name']
         objs = models.zgld_department.objects.filter(
             name=name,
+            company_id=company_id
         )
         if objs:
             self.add_error('name', '部门名已存在')
@@ -102,8 +104,10 @@ class DepartmentUpdateForm(forms.Form):
     # 查询用户名判断是否存在
     def clean_name(self):
         name = self.data['name']
+        company_id = self.data['company_id']
         objs = models.zgld_department.objects.filter(
             name=name,
+            company_id=company_id
         ).exclude(id=self.data.get('department_id'))
 
         if objs:
