@@ -1391,6 +1391,10 @@ def deal_gzh_picture_url(url):
 
     # style_html = " ".join(style_tags)
 
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    filename = ''
+
     style = ""
     for style_tag in style_tags:
         print('style_tag -->', style_tag)
@@ -1408,11 +1412,9 @@ def deal_gzh_picture_url(url):
         if data_src:
 
             #######
-            s = requests.session()
-            s.keep_alive = False  # 关闭多余连接
-            filename = ''
-            html = s.get(data_src)
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+            html = s.get(data_src)
+
             if 'wx_fmt=gif' in data_src:
                 filename = "/gzh_article_%s.gif" % (now_time)
             else:
@@ -1473,9 +1475,40 @@ def deal_gzh_picture_url(url):
     #     content = content.replace(key, value)
     #     # print(url)
 
-    dict = {'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' ,'?wx_fmt=gif' : ''} #wx_fmt=gif
+    dict = {'url': '', 'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' ,'?wx_fmt=gif' : '', } #wx_fmt=gif
     for key, value in dict.items():
-        content = content.replace(key, value)
+
+        if key == 'url':
+
+            pattern1 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+\?\w+=\w+', re.I)  # 通过 re.compile 获得一个正则表达式对象
+            pattern2 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+', re.I)
+            results_url_list_1 = pattern1.findall(content)
+            results_url_list_2 = pattern2.findall(content)
+            print(' 匹配的微信图片链接 results_url_list_1 ---->', json.dumps(results_url_list_1))
+            print(' 匹配的微信图片链接 results_url_list_2 ---->', json.dumps(results_url_list_2))
+            results_url_list_1.extend(results_url_list_2)
+            # print('合并的 results_url_list ----->>',results_url_list_1)
+
+            for pattern_url in results_url_list_1:
+                print('匹配的url--------<<',pattern_url)
+                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+                ## 把图片下载到本地
+                html = s.get(pattern_url)
+                if 'wx_fmt=gif' in pattern_url:
+                    filename = "/gzh_article_%s.gif" % (now_time)
+                else:
+                    filename = "/gzh_article_%s.jpg" % (now_time)
+
+                file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+                with open(file_dir, 'wb') as file:
+                    file.write(html.content)
+                print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
+                #######
+                sub_url = 'http://statics.api.zhugeyingxiao.com/' + file_dir
+                content = content.replace(pattern_url, sub_url)
+
+        else:
+            content = content.replace(key, value)
         # print(url)
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
 

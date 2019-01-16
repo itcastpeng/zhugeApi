@@ -26,8 +26,9 @@ def article_tag(request):
         }
         q = conditionCom(request, field_dict)
         print('q -->', q)
+        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
-        tag_list = models.zgld_article_tag.objects.filter(user_id=user_id).values('id','name')
+        tag_list = models.zgld_article_tag.objects.filter(user__company_id=company_id).values('id','name')
         tag_data = list(tag_list)
 
         response.code = 200

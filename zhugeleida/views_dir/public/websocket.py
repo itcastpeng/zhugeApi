@@ -39,6 +39,7 @@ def leida_websocket(request, oper_type):
         uwsgi.websocket_handshake()
 
         while True:
+            time.sleep(1)
 
             redis_user_id_key_flag = rc.get(redis_user_id_key)
             redis_customer_id_flag = rc.get(redis_customer_id_key) # 判断 小程序是否已读了
@@ -147,7 +148,6 @@ def leida_websocket(request, oper_type):
                     # print('------[雷达用户-非阻塞] websocket_recv_nb ----->>',data)
 
                     if not data:
-                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode('utf-8'))
@@ -237,6 +237,7 @@ def leida_websocket(request, oper_type):
 
         uwsgi.websocket_handshake()
         while True:
+            time.sleep(1)
 
             redis_user_query_info_key_flag = rc.get(redis_user_query_info_key)
             print('---- 雷达【消息数量】 循环 | uid: %s --->>' % str(user_id))
@@ -267,7 +268,7 @@ def leida_websocket(request, oper_type):
 
                     print('------[雷达【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(1)
+
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
@@ -365,6 +366,7 @@ def leida_websocket(request, oper_type):
 
         uwsgi.websocket_handshake()
         while True:
+            time.sleep(1)
 
             redis_user_query_contact_key_flag = rc.get(redis_user_query_contact_key)
             print('---- 雷达【消息列表】 循环 | uid: %s --->>' % str(user_id))
@@ -399,7 +401,6 @@ def leida_websocket(request, oper_type):
 
                     print('------[雷达【消息列表】-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
@@ -517,6 +518,7 @@ def xiaochengxu_websocket(request, oper_type):
         phone_flag = 0
         uwsgi.websocket_handshake()
         while True:
+            time.sleep(1)
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
             print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
@@ -624,7 +626,6 @@ def xiaochengxu_websocket(request, oper_type):
 
                     print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
@@ -915,6 +916,7 @@ def gongzhonghao_websocket(request, oper_type):
         customer_id = ''
         uwsgi.websocket_handshake()
         while True:
+            time.sleep(1)
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
             print('---- 公众号 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
@@ -1026,7 +1028,6 @@ def gongzhonghao_websocket(request, oper_type):
 
                     print('------[公众号-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
-                        time.sleep(1)
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
@@ -1195,13 +1196,14 @@ def public_websocket(request, oper_type):
         uwsgi.websocket_handshake()
         i = 0
         while True:
+            time.sleep(1)
 
             try:
                 data = uwsgi.websocket_recv()
                 # data = uwsgi.websocket_recv_nb()
                 print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
-                    time.sleep(1)
+
                     response_data = {
                         'code': 504,
                         'msg': '链接超时,关闭长连接',
