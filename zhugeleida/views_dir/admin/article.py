@@ -1460,7 +1460,7 @@ def deal_gzh_picture_url(url):
         print('视频链接 shipin_url----->>\n', shipin_url)
         iframe_tag.attrs['data-src'] = shipin_url
         iframe_tag.attrs['allowfullscreen'] = True
-        iframe_tag.attrs['data_cover'] = 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
+        iframe_tag.attrs['data-cover'] = 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
     print('组合样式 style ------>>',style)
     print('组合身体 body ------>>', body)
