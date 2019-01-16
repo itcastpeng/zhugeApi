@@ -1390,7 +1390,7 @@ def deal_gzh_picture_url(url):
     # print('style_tags -->', style_tags)
 
     # style_html = " ".join(style_tags)
-    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
     filename = ''
@@ -1412,7 +1412,7 @@ def deal_gzh_picture_url(url):
         if data_src:
 
             #######
-
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
             html = s.get(data_src)
 
             if 'wx_fmt=gif' in data_src:
@@ -1489,7 +1489,7 @@ def deal_gzh_picture_url(url):
 
             for pattern_url in results_url_list:
                 print('匹配的url--------<<',pattern_url)
-
+                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
                 ## 把图片下载到本地
                 html = s.get(pattern_url)
                 if 'wx_fmt=gif' in pattern_url:
