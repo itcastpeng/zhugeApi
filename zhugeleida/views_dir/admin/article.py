@@ -1412,7 +1412,7 @@ def deal_gzh_picture_url(url):
             s.keep_alive = False  # 关闭多余连接
             filename = ''
             html = s.get(data_src)
-            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
             if 'wx_fmt=gif' in data_src:
                 filename = "/gzh_article_%s.gif" % (now_time)
             else:
@@ -1425,7 +1425,7 @@ def deal_gzh_picture_url(url):
             print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
             #######
 
-            img_tag.attrs['data-src'] = file_dir
+            img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
             print('data_src ----->',data_src)
 
     ### 处理视频的URL
