@@ -1488,7 +1488,8 @@ def deal_gzh_picture_url(url):
             results_url_list_2 = pattern2.findall(content)
             print(' 匹配的微信图片链接 results_url_list_1 ---->', json.dumps(results_url_list_1))
             print(' 匹配的微信图片链接 results_url_list_2 ---->', json.dumps(results_url_list_2))
-            results_url_list = results_url_list_1.extend(results_url_list_2)
+            results_url_list= results_url_list_1.extend(results_url_list_2)
+            print('合并的 results_url_list',results_url_list)
 
             for pattern_url in results_url_list:
                 print('匹配的url--------<<',pattern_url)
