@@ -1484,11 +1484,11 @@ def deal_gzh_picture_url(url):
             # pattern = re.compile(r'url\(\"\w',re.I)  # 通过 re.compile 获得一个正则表达式对象
             pattern = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+\?\w+=\w+', re.I)  # 通过 re.compile 获得一个正则表达式对象
             results_url_list = pattern.findall(content)
-            print(' 匹配的微信图片链接 results_url_list ---->', results_url_list)
+            print(' 匹配的微信图片链接 results_url_list ---->', json.dumps(results_url_list))
 
 
             for pattern_url in results_url_list:
-                print(pattern_url)
+                print('匹配的url--------<<',pattern_url)
 
                 ## 把图片下载到本地
                 html = s.get(pattern_url)
@@ -1500,7 +1500,7 @@ def deal_gzh_picture_url(url):
                 file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
                 with open(file_dir, 'wb') as file:
                     file.write(html.content)
-                print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
+                print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
                 #######
                 sub_url = 'http://statics.api.zhugeyingxiao.com/' + file_dir
                 content = content.replace(pattern_url, sub_url)
