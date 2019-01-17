@@ -193,146 +193,148 @@ def common_send_gzh_template_msg(request):
 @csrf_exempt
 def batchget_article_material(request):
     response = ResponseObj()
-    print('---批量获取-文章素材 request.GET -->', request.GET)
-    company_id = request.GET.get('company_id')
 
-    objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+    if request.method == 'GET':
 
-    if objs:
+        print('---批量获取-文章素材 request.GET -->', request.GET)
+        company_id = request.GET.get('company_id')
 
-        length = 20
+        objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
-        authorization_appid = objs[0].authorization_appid
-        _data = {
-            'authorizer_appid': authorization_appid,
-            'company_id': company_id,
-        }
+        if objs:
 
-        user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+            length = 20
+            authorization_appid = objs[0].authorization_appid
+            _data = {
+                'authorizer_appid': authorization_appid,
+                'company_id': company_id,
+            }
 
-        material_count_response = user_obj_cla.get_material_count()
-        news_count = material_count_response.data.get('news_count')
+            user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+
+            material_count_response = user_obj_cla.get_material_count()
+            news_count = material_count_response.data.get('news_count')
 
 
-        if news_count > 0:
-            media_id_list = models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
-                'media_id', flat=True).distinct()  # 已经入模板库的 文章列表
-
-            if news_count == len(media_id_list):
-                response.code = 301
-                response.msg = '微信文章数据源和本地数据一致'
-                print('公司ID: %s | 微信文章数据源和本地数据一致 news_count:%s ------------>>' % (company_id,news_count))
-                return JsonResponse(response.__dict__)
-
-            divmod_ret = divmod(news_count, length)
-            shoudle_page_num = divmod_ret[0] + 1  # 总共的页数
-            yushu = divmod_ret[1]
-
-            print('数值 shoudle_page_num ------>>',shoudle_page_num)
-            for current_page in range(shoudle_page_num):
-
-                _data = {
-                    'authorizer_appid': authorization_appid,
-                    'company_id': company_id,
-                    'count': length,
-                    'offset': current_page,
-                }
-
-                user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-
-                _response = user_obj_cla.batchget_article_material()
-                total_count = _response.data.get('total_count')
+            if news_count > 0:
+                media_id_list = models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
+                    'media_id', flat=True).distinct()  # 已经入模板库的 文章列表
 
                 if news_count == len(media_id_list):
                     response.code = 301
                     response.msg = '微信文章数据源和本地数据一致'
-                    print('公司ID: %s | 微信文章数据源和本地数据一致 ------------>>' % (company_id))
-
+                    print('公司ID: %s | 微信文章数据源和本地数据一致 news_count:%s ------------>>' % (company_id,news_count))
                     return JsonResponse(response.__dict__)
 
-                else:
-                    '''
-                     ret_json = {
-                        "total_count": 1,
-                        "item_count": 1,
-                        "item": [{
-                            "update_time": 1545553692,
-                            "media_id": "ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA",
-                            "content": {
-                                "update_time": 1545553692,
-                                "news_item": [{
-                                    "content_source_url": "",
-                                    "author": "",
-                                    "digest": "没【留量】比没流量更可怕—合众康桥2018-12-10关注公众号并分享文章领现金红包合众康桥-专注医院品牌营",
-                                    "title": "没【留量】比没流量更可怕—合众康桥",
-                                    "only_fans_can_comment": 0,
-                                    "content": "<p>没【留量】比没流量更可怕—合众康桥</p><p>2018-12-10</p><p>关注公众号并分享文章</p><p>领现金红包</p><p style=\"line-height: 26px;text-align: center;\">合众康桥-专注医院品牌营销，<br  /></p><p style=\"line-height: 26px;text-align: center;\">帮助医院提升50%转化率</p><p style=\"line-height: 26px;text-align: center;\">5年来坚守一个小承诺</p><p style=\"line-height: 26px;text-align: center;\">不达标，就退款</p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4981684981684982\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7j1eqrTNvHN8W26vsZVLuKomhVRZ50vFTAtO77lpwoxiaxElBibloYJoA/640?wx_fmt=png\" data-type=\"png\" data-w=\"546\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4375\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7V62unBfhw6tAHf7oVE3fIQA2YmHyGBWz15c8HU5SVBm3UpeBY6RIcA/640?wx_fmt=png\" data-type=\"png\" data-w=\"544\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4132841328413284\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7RiaE9NbicwFQlLfeRoM7btadv0nmvfiaM9DHiaFyOrq0ibp4o8a0FMt2IhQ/640?wx_fmt=png\" data-type=\"png\" data-w=\"542\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.449355432780847\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7nY8IE1knoqwpUuzNT3pz5a0v9YeZJQY57Iz55hFjBVxohkwxs2icplQ/640?wx_fmt=png\" data-type=\"png\" data-w=\"543\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.5347912524850895\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7HMibZvLpzEqb7RuhQD32xwkNY20I2AXyHdh0dKKbPiajLsqduOkeI3rA/640?wx_fmt=png\" data-type=\"png\" data-w=\"503\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4453441295546559\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7hUtohc0S8ia46uZGhJp0HgzRMndh2WKd7XzBG2x7pxpwwvNjBughwzw/640?wx_fmt=png\" data-type=\"png\" data-w=\"494\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4225865209471766\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7AqxPpkkcgXV8u6kDic2acct2wfbez4Zno2op2Ws14Guq5PvHC2VNuEQ/640?wx_fmt=png\" data-type=\"png\" data-w=\"549\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.501930501930502\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7TIib08I3WdpejzDWTDu5drZfr8t6qMXh2n7Q4U8mRrW0iaBpcibqpysqA/640?wx_fmt=png\" data-type=\"png\" data-w=\"518\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"0.5485110470701249\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7zIe58HmQnxq7wc1GNOia4T2MFCUj3jBBWEe459bvsjhGO35WJUnkeiaA/640?wx_fmt=png\" data-type=\"png\" data-w=\"1041\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;\"><br  /></p><p><img class=\"\" data-ratio=\"1\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7jnibhbsZqXxCYWq8YEjJwpibqmDQ2Kfm7gsFFZgAerX4ZS9RdWPUmBSg/640?wx_fmt=png\" data-type=\"png\" data-w=\"474\" style=\"width: 46px;height: 46px;border-radius: 23px;\"></p><p>张炬</p><p>营销专员</p><p>13020006631</p><p><br  /></p>",
-                                    "thumb_media_id": "ivcZrCjmhDznUrwcjIReRF5RhHkNuJqdzycndksV39s",
-                                    "thumb_url": "http://mmbiz.qpic.cn/mmbiz_jpg/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7lBRILWoKKVuvdHe4BmVxhiclQnYo2F1TDU7CcibXawl9E2n1MOicTkt6w/0?wx_fmt=jpeg",
-                                    "show_cover_pic": 0,
-                                    "url": "http://mp.weixin.qq.com/s?__biz=Mzg4MzA1ODU0Mw==&mid=100000003&idx=1&sn=53707000490e5f038874127c557caf03&chksm=4f4c7303783bfa1568406085f6715521b9e672a3472205bce4e5e9828de52edc19995c9e308e#rd",
-                                    "need_open_comment": 0
-                                }],
-                                "create_time": 1545553602
-                            }
-                        }]
-                    }    
-                    '''
+                divmod_ret = divmod(news_count, length)
+                shoudle_page_num = divmod_ret[0] + 1  # 总共的页数
+                yushu = divmod_ret[1]
 
-                    if _response.code == 200:
-                        item_list = _response.data.get('item')  # 获取的素材文章列表
-                        print('---- 接口返回-获取素材列表 item_list ------->>', item_list)
+                print('数值 shoudle_page_num ------>>',shoudle_page_num)
+                for current_page in range(shoudle_page_num):
 
-                        for item in item_list:
-                            media_id = item.get('media_id')
-                            update_time = item.get('update_time')
+                    _data = {
+                        'authorizer_appid': authorization_appid,
+                        'company_id': company_id,
+                        'count': length,
+                        'offset': current_page,
+                    }
 
-                            if media_id in media_id_list:
-                                #status_text = '已同步'
-                                #status = 1
-                                print('media_id: %s 已同步至模板库,直接pass -------->>' % media_id)
-                                continue
+                    user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
 
-                            else:
-                                #status_text = '未同步'
-                                #status = 0
+                    _response = user_obj_cla.batchget_article_material()
+                    total_count = _response.data.get('total_count')
 
-                                thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
-                                thumb_url = deal_gzh_picture_url(thumb_url)
+                    if news_count == len(media_id_list):
+                        response.code = 301
+                        response.msg = '微信文章数据源和本地数据一致'
+                        print('公司ID: %s | 微信文章数据源和本地数据一致 ------------>>' % (company_id))
 
-                                ltime = time.localtime(update_time)
-                                update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
-
-                                data = {
-                                    'company_id' : company_id,
-                                    'media_id': media_id,
-                                    'source_url': item.get('content').get('news_item')[0].get('url'),
-
-                                    'title': item.get('content').get('news_item')[0].get('title'),
-                                    'cover_picture': thumb_url,
-                                    'summary': item.get('content').get('news_item')[0].get('digest'),  #图文消息的摘要
-                                    'content': item.get('content').get('news_item')[0].get('content'),
-                                    'update_time': update_time,
-
-                                    'source': 1  # (1, '同步[公众号文章]到模板库')
-                                }
-                                template_article_objs = models.zgld_template_article.objects.filter(company_id=1,source=1,media_id=media_id)
-                                if template_article_objs:
-                                    template_article_objs.update(**data)
-                                else:
-                                    models.zgld_template_article.objects.create(**data)
-                                media_id_list.append(media_id)
-                                print('media_id: %s 新增同步至模板库,创建成功 -------->>' % media_id)
+                        return JsonResponse(response.__dict__)
 
                     else:
-                        response.code = _response.code
-                        response.msg =  _response.msg
-                        print('获取素材报错: %s | %s  ------------>>' % (_response.code,_response.msg))
+                        '''
+                         ret_json = {
+                            "total_count": 1,
+                            "item_count": 1,
+                            "item": [{
+                                "update_time": 1545553692,
+                                "media_id": "ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA",
+                                "content": {
+                                    "update_time": 1545553692,
+                                    "news_item": [{
+                                        "content_source_url": "",
+                                        "author": "",
+                                        "digest": "没【留量】比没流量更可怕—合众康桥2018-12-10关注公众号并分享文章领现金红包合众康桥-专注医院品牌营",
+                                        "title": "没【留量】比没流量更可怕—合众康桥",
+                                        "only_fans_can_comment": 0,
+                                        "content": "<p>没【留量】比没流量更可怕—合众康桥</p><p>2018-12-10</p><p>关注公众号并分享文章</p><p>领现金红包</p><p style=\"line-height: 26px;text-align: center;\">合众康桥-专注医院品牌营销，<br  /></p><p style=\"line-height: 26px;text-align: center;\">帮助医院提升50%转化率</p><p style=\"line-height: 26px;text-align: center;\">5年来坚守一个小承诺</p><p style=\"line-height: 26px;text-align: center;\">不达标，就退款</p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4981684981684982\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7j1eqrTNvHN8W26vsZVLuKomhVRZ50vFTAtO77lpwoxiaxElBibloYJoA/640?wx_fmt=png\" data-type=\"png\" data-w=\"546\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4375\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7V62unBfhw6tAHf7oVE3fIQA2YmHyGBWz15c8HU5SVBm3UpeBY6RIcA/640?wx_fmt=png\" data-type=\"png\" data-w=\"544\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4132841328413284\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7RiaE9NbicwFQlLfeRoM7btadv0nmvfiaM9DHiaFyOrq0ibp4o8a0FMt2IhQ/640?wx_fmt=png\" data-type=\"png\" data-w=\"542\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.449355432780847\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7nY8IE1knoqwpUuzNT3pz5a0v9YeZJQY57Iz55hFjBVxohkwxs2icplQ/640?wx_fmt=png\" data-type=\"png\" data-w=\"543\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.5347912524850895\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7HMibZvLpzEqb7RuhQD32xwkNY20I2AXyHdh0dKKbPiajLsqduOkeI3rA/640?wx_fmt=png\" data-type=\"png\" data-w=\"503\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4453441295546559\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7hUtohc0S8ia46uZGhJp0HgzRMndh2WKd7XzBG2x7pxpwwvNjBughwzw/640?wx_fmt=png\" data-type=\"png\" data-w=\"494\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.4225865209471766\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7AqxPpkkcgXV8u6kDic2acct2wfbez4Zno2op2Ws14Guq5PvHC2VNuEQ/640?wx_fmt=png\" data-type=\"png\" data-w=\"549\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"1.501930501930502\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7TIib08I3WdpejzDWTDu5drZfr8t6qMXh2n7Q4U8mRrW0iaBpcibqpysqA/640?wx_fmt=png\" data-type=\"png\" data-w=\"518\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;width: 781px;overflow: hidden;\"><img class=\"\" data-ratio=\"0.5485110470701249\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7zIe58HmQnxq7wc1GNOia4T2MFCUj3jBBWEe459bvsjhGO35WJUnkeiaA/640?wx_fmt=png\" data-type=\"png\" data-w=\"1041\" style=\"max-width: 340px;\" width=\"100%\"></p><p style=\"line-height: 26px;\"><br  /></p><p><img class=\"\" data-ratio=\"1\" data-src=\"https://mmbiz.qpic.cn/mmbiz_png/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7jnibhbsZqXxCYWq8YEjJwpibqmDQ2Kfm7gsFFZgAerX4ZS9RdWPUmBSg/640?wx_fmt=png\" data-type=\"png\" data-w=\"474\" style=\"width: 46px;height: 46px;border-radius: 23px;\"></p><p>张炬</p><p>营销专员</p><p>13020006631</p><p><br  /></p>",
+                                        "thumb_media_id": "ivcZrCjmhDznUrwcjIReRF5RhHkNuJqdzycndksV39s",
+                                        "thumb_url": "http://mmbiz.qpic.cn/mmbiz_jpg/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7lBRILWoKKVuvdHe4BmVxhiclQnYo2F1TDU7CcibXawl9E2n1MOicTkt6w/0?wx_fmt=jpeg",
+                                        "show_cover_pic": 0,
+                                        "url": "http://mp.weixin.qq.com/s?__biz=Mzg4MzA1ODU0Mw==&mid=100000003&idx=1&sn=53707000490e5f038874127c557caf03&chksm=4f4c7303783bfa1568406085f6715521b9e672a3472205bce4e5e9828de52edc19995c9e308e#rd",
+                                        "need_open_comment": 0
+                                    }],
+                                    "create_time": 1545553602
+                                }
+                            }]
+                        }    
+                        '''
 
-        else:
-            print('----------->>')
-            response.code = 302
-            response.msg = '一个素材都没有'
-            print('公司ID: %s | 微信文章【数据源为空】 ------------>>' % (company_id))
+                        if _response.code == 200:
+                            item_list = _response.data.get('item')  # 获取的素材文章列表
+                            print('---- 接口返回-获取素材列表 item_list ------->>', item_list)
 
-        return JsonResponse(response.__dict__)
+                            for item in item_list:
+                                media_id = item.get('media_id')
+                                update_time = item.get('update_time')
+
+                                if media_id in media_id_list:
+                                    #status_text = '已同步'
+                                    #status = 1
+                                    print('media_id: %s 已同步至模板库,直接pass -------->>' % media_id)
+                                    continue
+
+                                else:
+                                    #status_text = '未同步'
+                                    #status = 0
+
+                                    thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
+                                    thumb_url = deal_gzh_picture_url(thumb_url)
+
+                                    ltime = time.localtime(update_time)
+                                    update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
+
+                                    data = {
+                                        'company_id' : company_id,
+                                        'media_id': media_id,
+                                        'source_url': item.get('content').get('news_item')[0].get('url'),
+
+                                        'title': item.get('content').get('news_item')[0].get('title'),
+                                        'cover_picture': thumb_url,
+                                        'summary': item.get('content').get('news_item')[0].get('digest'),  #图文消息的摘要
+                                        'content': item.get('content').get('news_item')[0].get('content'),
+                                        'update_time': update_time,
+
+                                        'source': 1  # (1, '同步[公众号文章]到模板库')
+                                    }
+                                    template_article_objs = models.zgld_template_article.objects.filter(company_id=1,source=1,media_id=media_id)
+                                    if template_article_objs:
+                                        template_article_objs.update(**data)
+                                    else:
+                                        models.zgld_template_article.objects.create(**data)
+                                    media_id_list.append(media_id)
+                                    print('media_id: %s 新增同步至模板库,创建成功 -------->>' % media_id)
+
+                        else:
+                            response.code = _response.code
+                            response.msg =  _response.msg
+                            print('获取素材报错: %s | %s  ------------>>' % (_response.code,_response.msg))
+
+            else:
+                print('----------->>')
+                response.code = 302
+                response.msg = '一个素材都没有'
+                print('公司ID: %s | 微信文章【数据源为空】 ------------>>' % (company_id))
+
+            return JsonResponse(response.__dict__)
