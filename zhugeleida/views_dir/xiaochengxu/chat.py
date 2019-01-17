@@ -452,12 +452,12 @@ def chat_oper(request, oper_type, o_id):
                                 }
                                 content = json.dumps(_content)
 
-                                models.zgld_chatinfo.objects.create(
-                                    content=content,
-                                    userprofile_id=user_id,
-                                    customer_id=customer_id,
-                                    send_type=2
-                                )
+                                # models.zgld_chatinfo.objects.create(
+                                #     content=content,
+                                #     userprofile_id=user_id,
+                                #     customer_id=customer_id,
+                                #     send_type=2
+                                # )
                                 customer_obj.phone = phoneNumber
                                 customer_obj.save()
 
