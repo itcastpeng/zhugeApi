@@ -535,6 +535,7 @@ def xiaochengxu_websocket(request, oper_type):
 
                 ret_data_list = []
                 count = objs.count()
+                customer_id_position_key_flag = rc.get(customer_id_position_key)
                 if objs:
 
                     for obj in objs:
@@ -587,10 +588,6 @@ def xiaochengxu_websocket(request, oper_type):
                         ret_data_list.append(base_info_dict)
 
                     ret_data_list.reverse()
-
-                    customer_id_position_key_flag = rc.get(customer_id_position_key)
-
-
                     chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id,
                                                                          customer_id=customer_id, send_type=1,
                                                                          is_customer_new_msg=True).count()
@@ -610,15 +607,16 @@ def xiaochengxu_websocket(request, oper_type):
                     print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
-                    print('--- list(msg_obj) -->>', ret_data_list)
-                    if customer_id_position_key_flag == 'input':
-                        objs.update(
-                            is_customer_new_msg=False
-                        )
-                        rc.set(redis_customer_id_key, False)
+                print('--- list(msg_obj) -->>', ret_data_list)
 
-                    else:
-                        rc.set(redis_customer_id_key, 'Stop')
+                if customer_id_position_key_flag == 'input':
+                    objs.update(
+                        is_customer_new_msg=False
+                    )
+                    rc.set(redis_customer_id_key, False)
+
+                else:
+                    rc.set(redis_customer_id_key, 'Stop')
             else:
                 try:
                     # data = uwsgi.websocket_recv()

@@ -187,7 +187,7 @@ def home_page_oper(request, oper_type):
 
                 ret_data = []
                 for day in range(int(days), 0, -1):
-                    now_time = datetime.now()
+                    now_time = datetime.datetime.now()
                     start_time = (now_time - timedelta(days=day)).strftime("%Y-%m-%d")
                     stop_time = (now_time - timedelta(days=day - 1)).strftime("%Y-%m-%d")
                     # stop_time = now_time.strftime("%Y-%m-%d")
@@ -218,7 +218,7 @@ def home_page_oper(request, oper_type):
 
             # 昨天数据
             q2 = Q()
-            now_time = datetime.now()
+            now_time = datetime.datetime.now()
             start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
             q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
@@ -241,7 +241,7 @@ def home_page_oper(request, oper_type):
 
             # 今日新增
             q5 = Q()
-            now_time = datetime.now().strftime("%Y-%m-%d")
+            now_time = datetime.datetime.now().strftime("%Y-%m-%d")
             q5.add(Q(**{'create_date__gte': now_time}), Q.AND)
             ret_data['today_data'] = deal_search_time(data, q5)
 

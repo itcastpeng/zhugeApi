@@ -817,13 +817,29 @@ class zgld_chatinfo(models.Model):
 class zgld_template_article(models.Model):
 
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='模板文章作者', null=True)
+    company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
+
+    source_choices = ((1, '同步[公众号文章]到模板库'),
+                      (2, '同步[本地文章库]到模板库'),
+                      )
+    source = models.SmallIntegerField(default=1, verbose_name='文章来源', choices=source_choices)
+
+    status_choices = (
+                        (0, '未同步到[正式文章库]'),
+                        (1, '已同步到[正式文章库]'),
+                      )
+    status = models.SmallIntegerField(default=0, verbose_name='文章状态', choices=status_choices)
+
+    media_id = models.CharField(verbose_name="素材ID", max_length=128, null=True)
+    source_url = models.CharField(verbose_name="公众号文章原生URL", max_length=256, null=True)
+
     title = models.CharField(verbose_name='文章标题', max_length=128)
     cover_picture = models.CharField(verbose_name="封面图片URL", max_length=128)
     summary = models.CharField(verbose_name='文章摘要', max_length=255)
     content = models.TextField(verbose_name='文章内容', null=True)
+    update_time =  models.DateTimeField(verbose_name="最后更新时间",null=True)
 
     tags = models.ManyToManyField('zgld_template_article_tag',verbose_name="模板文章关联的标签")
-    qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:

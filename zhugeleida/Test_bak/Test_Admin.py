@@ -497,18 +497,24 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 # url =  ip + '/zhugeleida/admin/article/climb_gzh_article_list'  # 获取产品的列表
-# get_data['company_id'] = 2
+# get_data['company_id'] = 1
+# get_data['status'] = 0
 #
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
 url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
 get_data['company_id'] = 2
-post_data['source_url'] = 'https://mp.weixin.qq.com/s/gOtmE8DH34xJtU8Eh5-w6w'  #'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502885335&idx=1&sn=4b2c05ce119948494822f430a8a2b322&chksm=08ace0ed3fdb69fb4783142b29a10cf3bf9ed4447c809df5f439214f95d6eb21d11951c57bf5#rd'
-
+post_data['source_url'] = 'https://mp.weixin.qq.com/s/mpu_h9qm8CMXJAH-DyqLLw'   # 'https://mp.weixin.qq.com/s/gOtmE8DH34xJtU8Eh5-w6w'  #'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502885335&idx=1&sn=4b2c05ce119948494822f430a8a2b322&chksm=08ace0ed3fdb69fb4783142b29a10cf3bf9ed4447c809df5f439214f95d6eb21d11951c57bf5#rd'
 # post_data['media_id_list'] =  json.dumps(['ivcZrCjmhDznUrwcjIReRPoDiI2Fke3LVhHU7hNXTXE'])  #json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
-
 ret = requests.post(url, data=post_data ,params=get_data)
+
+
+
+# url =  ip + '/zhugeleida/mycelery/batchget_article_material'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.get(url, data=post_data ,params=get_data)
+
 
 
 #############################################################################################
