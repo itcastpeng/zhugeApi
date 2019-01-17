@@ -496,9 +496,11 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-# url =  ip + '/zhugeleida/admin/article/climb_gzh_article_list'  # 获取产品的列表
-# get_data['company_id'] = 1
-# ret = requests.get(url, data = post_data ,params=get_data)
+url =  ip + '/zhugeleida/admin/article/climb_gzh_article_list'  # 获取产品的列表
+get_data['company_id'] = 1
+get_data['status'] = 0
+
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 # url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
@@ -509,9 +511,9 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 
-url =  ip + '/zhugeleida/mycelery/batchget_article_material'  # 获取产品的列表
-get_data['company_id'] = 1
-ret = requests.get(url, data=post_data ,params=get_data)
+# url =  ip + '/zhugeleida/mycelery/batchget_article_material'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.get(url, data=post_data ,params=get_data)
 
 
 

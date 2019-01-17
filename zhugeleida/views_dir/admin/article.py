@@ -272,7 +272,7 @@ def article(request, oper_type):
                         status = obj.status
 
                         thumb_url = obj.cover_picture
-                        cover_picture = deal_gzh_picture_url(thumb_url)
+                        cover_picture = deal_gzh_picUrl_to_local(thumb_url)
 
                         update_time = obj.update_time
                         ltime =  time.localtime(update_time)
