@@ -333,14 +333,15 @@ def article(request, oper_type):
                 ## 通过URL获取文章内容
                 if source_url: # 有来源URL
                     source_url = source_url.strip()
-                    content = deal_gzh_picture_url(source_url)
+
+                    msg_title, msg_desc, cover_url, content = deal_gzh_picture_url('only_url',source_url)
 
                     dict_data = {
                         'user_id': user_id,
                         'company_id': company_id,
-                        'title': '标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                        'summary': '简介测试',
-                        'cover_picture': '',
+                        'title':  msg_title,#'标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        'summary': msg_desc,
+                        'cover_picture': cover_url,
                         'media_id': None,
                         'source_url': source_url,
                         'content' : content,
@@ -388,7 +389,7 @@ def article(request, oper_type):
 
 
                             if url:
-                                content = deal_gzh_picture_url(url)
+                                content = deal_gzh_picture_url('',url)
 
                             dict_data = {
                                 'user_id': user_id,
@@ -1360,7 +1361,7 @@ def article_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def deal_gzh_picture_url(url):
+def deal_gzh_picture_url(leixing,url):
 
     '''
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
@@ -1380,16 +1381,49 @@ def deal_gzh_picture_url(url):
 
     ret.encoding = 'utf8'
 
+
     soup = BeautifulSoup(ret.text, 'lxml')
+
+    msg_title = ''
+    msg_desc = ''
+    cover_url = ''
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+
+    if leixing == 'only_url':
+        ### 匹配出标题 描述 和 封面URL
+        pattern1 = re.compile(r'var msg_title = (.*);', re.I)  # 通过 re.compile 获得一个正则表达式对象
+        pattern2 = re.compile(r'var msg_desc = (.*);', re.I)  # 通过 re.compile 获得一个正则表达式对象
+        pattern3 = re.compile(r'var msg_cdn_url = (.*);', re.I)  # 通过 re.compile 获得一个正则表达式对象
+
+        results_url_list_1 = pattern1.findall(ret.text)
+        results_url_list_2 = pattern2.findall(ret.text)
+        results_url_list_3 = pattern3.findall(ret.text)
+
+        msg_title = results_url_list_1[0].replace('"', '')
+        msg_desc = results_url_list_2[0].replace('"', '')
+        cover_url =  results_url_list_3[0].replace('"', '')
+
+        ## 把图片下载到本地
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+        html = s.get(cover_url)
+        if 'wx_fmt=gif' in cover_url:
+            filename = "/gzh_article_%s.gif" % (now_time)
+        else:
+            filename = "/gzh_article_%s.jpg" % (now_time)
+
+        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+        with open(file_dir, 'wb') as file:
+            file.write(html.content)
+        print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
+        #######
+        cover_url =  file_dir
+
 
     style_tags = soup.find_all('style')
     # print('style_tags -->', style_tags)
-
     # style_html = " ".join(style_tags)
 
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    filename = ''
 
     style = ""
     for style_tag in style_tags:
@@ -1509,7 +1543,13 @@ def deal_gzh_picture_url(url):
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
 
-    return  content
+    if leixing == 'only_url':
+
+         return  msg_title,msg_desc,cover_url,content
+
+    else:
+
+         return  content
 
 def deal_gzh_picUrl_to_local(url):
 
