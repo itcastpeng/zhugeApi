@@ -661,6 +661,44 @@ class get_customer_gongzhonghao_userinfo(object):
 
         return response
 
+
+    #获取素材总数
+    def get_material_count(self):
+
+        response = Response.ResponseObj()
+        authorizer_access_token = self.create_token()
+
+        get_materialcount_url = 'https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token=ACCESS_TOKEN'
+        # https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738734
+
+        get_material_data = {
+            'access_token': authorizer_access_token
+        }
+
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        ret = s.get(get_materialcount_url, params=get_material_data)
+
+        ret.encoding = 'utf-8'
+        ret_json = ret.json()
+        print('----------- 【公众号】获取素材列表 接口返回 ---------->>', json.dumps(ret_json))
+
+        if 'errcode' not in ret_json:
+
+            response.data = ret_json
+            response.code = 200
+            response.msg = '获取成功'
+
+        else:
+            errcode = ret_json.get('errcode')
+            errmsg = ret_json.get('errmsg')
+            response.code = errcode
+            response.msg = errmsg
+            print('---------【公众号】获取素材列表 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+        return response
+
     ## 获取永久素材
     def  get_material(self):
 

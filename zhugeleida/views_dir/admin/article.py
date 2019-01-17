@@ -214,22 +214,22 @@ def article(request, oper_type):
                 current_page = forms_obj.cleaned_data.get('current_page')
                 length = forms_obj.cleaned_data.get('length')
                 company_id = forms_obj.cleaned_data.get('company_id')
+                status = request.GET.get('status')
 
-                objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                objs = models.zgld_template_article.objects.filter(company_id=company_id,source=1,status=status)
 
                 if objs:
 
-                    authorization_appid = objs[0].authorization_appid
-                    _data = {
-                        'authorizer_appid': authorization_appid,
-                        'company_id': company_id,
-                        'count' : length,
-                        'offset' : current_page - 1,
-                    }
-
-                    user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-                    _response = user_obj_cla.batchget_article_material()
-
+                    # authorization_appid = objs[0].authorization_appid
+                    # _data = {
+                    #     'authorizer_appid': authorization_appid,
+                    #     'company_id': company_id,
+                    #     'count' : length,
+                    #     'offset' : current_page - 1,
+                    # }
+                    #
+                    # user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+                    # _response = user_obj_cla.batchget_article_material()
                     # ret_json = {
                     #     "total_count": 1,
                     #     "item_count": 1,
@@ -256,62 +256,53 @@ def article(request, oper_type):
                     #     }]
                     # }
 
+                    total_count = objs.count()
+                    if length != 0:
+                        print('current_page -->', current_page)
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+
                     ret_data = []
-                    if _response.code == 200:
 
-                        media_id_list = models.zgld_article.objects.filter(company_id=company_id).values_list('media_id',flat=True).distinct()
+                    for obj in objs:
+                        media_id = obj.media_id
 
-                        item_list = _response.data.get('item')
-                        total_count = _response.data.get('total_count')
-                        print('---- 临时素材列表 media_id_list ---->>',media_id_list)
-                        status_text = ''
-                        status = ''
-                        for item in item_list:
-                            media_id = item.get('media_id')
+                        status_text = obj.get_status_display()
+                        status = obj.status
 
-                            if media_id in media_id_list:
-                                status_text = '已同步'
-                                status = 1
-                            else:
-                                status_text = '未同步'
-                                status = 0
+                        thumb_url = obj.cover_picture
+                        cover_picture = deal_gzh_picture_url(thumb_url)
 
-                            thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
-                            thumb_url = deal_gzh_picture_url(thumb_url)
+                        update_time = obj.update_time
+                        ltime =  time.localtime(update_time)
+                        update_time = time.strftime('%Y-%m-%d %H:%M:%S',ltime)
 
-                            update_time = item.get('update_time')
-                            ltime =  time.localtime(update_time)
-                            update_time = time.strftime('%Y-%m-%d %H:%M:%S',ltime)
-
-                            data  = {
-                                'media_id' : media_id,
-                                'update_time' : update_time,
-                                'title' :  item.get('content').get('news_item')[0].get('title'),
-                                'thumb_url' : thumb_url,
-                                'digest' :  item.get('content').get('news_item')[0].get('digest'),
-                                'url' :  item.get('content').get('news_item')[0].get('url'),
-                                'content' : item.get('content').get('news_item')[0].get('content'),
-                                'status_text': status_text,
-                                'status' : status
-                            }
-
-                            ret_data.append(data)
-
-                        response.data = {
-                            'ret_data' : ret_data,
-                            'total_count' : total_count,
+                        data  = {
+                            'media_id' : media_id,
+                            'update_time' : update_time,
+                            'title' :  obj.title,
+                            'thumb_url' : cover_picture,
+                            'digest' :  obj.summary, #文章摘要
+                            'url' :  obj.source_url,
+                            'content' : obj.content,
+                            'status_text': status_text,
+                            'status' : status
                         }
-                        response.code = 200
-                        response.msg = '获取成功'
 
-                    else:
-                        response = _response
+                        ret_data.append(data)
 
+                    response.data = {
+                        'ret_data' : ret_data,
+                        'total_count' : total_count,
+                    }
+                    response.code = 200
+                    response.msg = '获取成功'
 
 
                 else:
                     response.code = 302
-                    response.msg = '公众号不存在'
+                    response.msg = '模板文章无数据'
 
             else:
                 response.code = 301
@@ -338,6 +329,7 @@ def article(request, oper_type):
 
             if forms_obj.is_valid():
 
+                ## 通过URL获取文章内容
                 if source_url: # 有来源URL
                     source_url = source_url.strip()
                     content = deal_gzh_picture_url(source_url)
@@ -364,6 +356,7 @@ def article(request, oper_type):
                         response.code = 200
                         response.msg = '创建新文章成功'
 
+                # 同步微信公众号的图文素材到本地正式文章库
                 else:
                     media_id_list = json.loads(media_id_list)
                     company_id = forms_obj.cleaned_data.get('company_id')
