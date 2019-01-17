@@ -337,4 +337,4 @@ def batchget_article_material(request):
                 response.msg = '一个素材都没有'
                 print('公司ID: %s | 微信文章【数据源为空】 ------------>>' % (company_id))
 
-            return JsonResponse(response.__dict__)
+    return JsonResponse(response.__dict__)

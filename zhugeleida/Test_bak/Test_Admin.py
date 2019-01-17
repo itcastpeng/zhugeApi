@@ -513,7 +513,7 @@ ip = 'http://api.zhugeyingxiao.com'
 url =  ip + '/zhugeleida/mycelery/batchget_article_material'  # 获取产品的列表
 get_data['company_id'] = 2
 
-ret = requests.post(url, data=post_data ,params=get_data)
+ret = requests.get(url, data=post_data ,params=get_data)
 
 
 
