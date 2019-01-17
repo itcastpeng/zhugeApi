@@ -637,6 +637,7 @@ class get_customer_gongzhonghao_userinfo(object):
             "offset": self.offset,    # 0表示从第一个素材 返回
             "count": self.count       # 取值在1到20之间
         }
+        print('获取值 authorizer_access_token ------>>',authorizer_access_token,json.dumps(post_material_data))
 
         s = requests.session()
         s.keep_alive = False  # 关闭多余连接
