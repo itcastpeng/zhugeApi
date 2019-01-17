@@ -217,8 +217,8 @@ def batchget_article_material(request):
 
 
             if news_count > 0:
-                media_id_list = models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
-                    'media_id', flat=True).distinct()  # 已经入模板库的 文章列表
+                media_id_list = list(models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
+                    'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
 
                 if news_count == len(media_id_list):
                     response.code = 301

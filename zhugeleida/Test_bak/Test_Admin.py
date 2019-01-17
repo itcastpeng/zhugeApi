@@ -497,8 +497,7 @@ ip = 'http://api.zhugeyingxiao.com'
 
 
 # url =  ip + '/zhugeleida/admin/article/climb_gzh_article_list'  # 获取产品的列表
-# get_data['company_id'] = 2
-#
+# get_data['company_id'] = 1
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
