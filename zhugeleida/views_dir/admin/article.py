@@ -274,9 +274,7 @@ def article(request, oper_type):
                         thumb_url = obj.cover_picture
                         cover_picture = deal_gzh_picUrl_to_local(thumb_url)
 
-                        update_time = obj.update_time
-                        ltime =  time.localtime(update_time)
-                        update_time = time.strftime('%Y-%m-%d %H:%M:%S',ltime)
+                        update_time = obj.update_time.strftime('%Y-%m-%d %H:%M:%S')
 
                         data  = {
                             'media_id' : media_id,
