@@ -8,7 +8,7 @@ from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
 
 from zhugeleida.public.common import get_customer_gongzhonghao_userinfo, create_qrcode
 import json, datetime, redis, base64, requests, time
-from zhugeleida.views_dir.admin.article import deal_gzh_picture_url
+from zhugeleida.views_dir.admin.article import deal_gzh_picture_url,deal_gzh_picUrl_to_local
 
 
 ## 发送公众号模板消息提示到用户
@@ -300,7 +300,7 @@ def batchget_article_material(request):
                                     #status = 0
 
                                     thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
-                                    thumb_url = deal_gzh_picture_url(thumb_url)
+                                    cover_picture = deal_gzh_picUrl_to_local(thumb_url)
 
                                     ltime = time.localtime(update_time)
                                     update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
@@ -323,6 +323,7 @@ def batchget_article_material(request):
                                         template_article_objs.update(**data)
                                     else:
                                         models.zgld_template_article.objects.create(**data)
+
                                     media_id_list.append(media_id)
                                     print('media_id: %s 新增同步至模板库,创建成功 -------->>' % media_id)
 
