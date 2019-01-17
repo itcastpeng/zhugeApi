@@ -669,7 +669,7 @@ class get_customer_gongzhonghao_userinfo(object):
         response = Response.ResponseObj()
         authorizer_access_token = self.create_token()
 
-        get_materialcount_url = 'https://api.weixin.qq.com/cgi-bin/material/get_materialcount?access_token=ACCESS_TOKEN'
+        get_materialcount_url = 'https://api.weixin.qq.com/cgi-bin/material/get_materialcount'
         # https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1444738734
 
         get_material_data = {
