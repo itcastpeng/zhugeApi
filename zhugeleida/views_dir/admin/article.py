@@ -268,11 +268,14 @@ def article(request, oper_type):
                     for obj in objs:
                         media_id = obj.media_id
 
-                        status_text = obj.get_status_display()
-                        status = obj.status
+                        if obj.status == 0:
+                            status_text = '未同步'
+                        else:
+                            status_text = '已同步'
 
-                        thumb_url = obj.cover_picture
-                        cover_picture = deal_gzh_picUrl_to_local(thumb_url)
+                        status = obj.status
+                        cover_picture = obj.cover_picture
+                        # cover_picture = deal_gzh_picUrl_to_local(thumb_url)
 
                         update_time = obj.update_time.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -408,6 +411,8 @@ def article(request, oper_type):
                                 models.zgld_article.objects.create(**dict_data)
                                 response.code = 200
                                 response.msg = '新建文章成功'
+
+                            models.zgld_template_article.objects.filter(media_id=media_id).update(status=1)
 
                         else:
                             response = _response
@@ -562,6 +567,7 @@ def article_oper(request, oper_type, o_id):
         # 修改文章
         elif oper_type == "update":
             status = request.POST.get('status')
+            type = request.POST.get('type')
 
             article_data = {
                 'status' : status,
@@ -570,8 +576,7 @@ def article_oper(request, oper_type, o_id):
                 'title': request.POST.get('title'),
                 'summary': request.POST.get('summary'),
                 'content': request.POST.get('content'),
-                'cover_picture': request.POST.get('cover_picture'),
-
+                'cover_picture': request.POST.get('cover_picture')
             }
 
             forms_obj = ArticleUpdateForm(article_data)
@@ -611,7 +616,7 @@ def article_oper(request, oper_type, o_id):
 
                 status = int(status)
                 # 消息提示给雷达用户
-                if status == 1:
+                if status == 1 and type != 'yulan':
                     user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
                     data = {}
 

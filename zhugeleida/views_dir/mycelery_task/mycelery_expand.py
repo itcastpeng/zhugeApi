@@ -192,6 +192,7 @@ def common_send_gzh_template_msg(request):
 ## 定时器获取微信公众号文章到文章模板库
 @csrf_exempt
 def batchget_article_material(request):
+
     response = ResponseObj()
 
     if request.method == 'GET':

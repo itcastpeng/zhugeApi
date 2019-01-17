@@ -1722,7 +1722,22 @@ def bufa_send_activity_redPacket(request):
                     customer_id = activity_redPacket_obj.customer_id
                     article_id = activity_redPacket_obj.article_id
 
-                    activity_single_money = activity_redPacket_obj.activity.activity_single_money
+                    activity_single_money = ''
+                    mode = activity_redPacket_obj.activity.mode
+                    if mode == 1:  # 随机金额
+                        max_single_money = activity_redPacket_obj.activity.max_single_money
+                        min_single_money = activity_redPacket_obj.activity.min_single_money
+
+                        rand_num = random.uniform(max_single_money, min_single_money)
+                        activity_single_money = float(round(rand_num, 2))
+
+                    elif mode == 2:  # 固定金额
+
+                        activity_single_money = activity_redPacket_obj.activity.activity_single_money
+
+
+
+
                     activity_name = activity_redPacket_obj.activity.activity_name
 
                     bufa_redPacket_num = should_send_redPacket_num - already_send_redPacket_num
