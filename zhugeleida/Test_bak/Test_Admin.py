@@ -23,9 +23,9 @@ post_data = {
 
 }
 
-# ip = 'http://127.0.0.1:8001'
+ip = 'http://127.0.0.1:8001'
 # ip = 'http://192.168.100.20:8000'
-ip = 'http://api.zhugeyingxiao.com'
+# ip = 'http://api.zhugeyingxiao.com'
 
 
 
@@ -431,6 +431,33 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
+
+# url =  ip + '/zhugeleida/admin/money_manage/generate_money_record_excel'  # 获取产品的列表
+# get_data['company_id'] = 1
+# # get_data['start_time'] = 1
+# # get_data['start_time'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
+#
+#
+#
+# url =  ip + '/zhugeleida/admin/money_manage/generate_money_record_excel'  # 获取产品的列表
+# get_data['company_id'] = 1
+# # get_data['start_time'] = 1
+# # get_data['start_time'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/admin/theOrder/generate_theOrder_excel/0'  # 获取产品的列表
+get_data['company_id'] = 1
+# get_data['start_time'] = 1
+# get_data['start_time'] = 1
+ret = requests.get(url, data = post_data ,params=get_data)
+
+
+
+
+
+
 ##################################### 文章 + 文章标签 + 文章增删改查 ###############################
 
 
@@ -503,11 +530,11 @@ ip = 'http://api.zhugeyingxiao.com'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
-get_data['company_id'] = 2
-post_data['source_url'] = 'https://mp.weixin.qq.com/s/NpG9594hyKxMys3UL1SmNA'   # 'https://mp.weixin.qq.com/s/gOtmE8DH34xJtU8Eh5-w6w'  #'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502885335&idx=1&sn=4b2c05ce119948494822f430a8a2b322&chksm=08ace0ed3fdb69fb4783142b29a10cf3bf9ed4447c809df5f439214f95d6eb21d11951c57bf5#rd'
-# post_data['media_id_list'] =  json.dumps(['ivcZrCjmhDznUrwcjIReRPoDiI2Fke3LVhHU7hNXTXE'])  #json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
-ret = requests.post(url, data=post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/article/sync_gzh_article'  # 获取产品的列表
+# get_data['company_id'] = 2
+# post_data['source_url'] = 'https://mp.weixin.qq.com/s/NpG9594hyKxMys3UL1SmNA'   # 'https://mp.weixin.qq.com/s/gOtmE8DH34xJtU8Eh5-w6w'  #'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502885335&idx=1&sn=4b2c05ce119948494822f430a8a2b322&chksm=08ace0ed3fdb69fb4783142b29a10cf3bf9ed4447c809df5f439214f95d6eb21d11951c57bf5#rd'
+# # post_data['media_id_list'] =  json.dumps(['ivcZrCjmhDznUrwcjIReRPoDiI2Fke3LVhHU7hNXTXE'])  #json.dumps(['ivcZrCjmhDznUrwcjIReRKw072mb7eq1Kn9MNz7oAxA'])
+# ret = requests.post(url, data=post_data ,params=get_data)
 
 
 

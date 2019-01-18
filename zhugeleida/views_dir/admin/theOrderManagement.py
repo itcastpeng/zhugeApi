@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.xiaochengxu.theOrder_verify import UpdateForm, SelectForm 
 import json, base64, datetime, time
 from django.db.models import Q
+import xlwt,os
 
 # 后台订单查询
 @csrf_exempt
@@ -124,6 +125,7 @@ def theOrder(request):
         }
         response.msg = '查询成功'
         response.code = 200
+
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
@@ -209,9 +211,82 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
             response.msg = '查询成功'
             response.data = otherData
 
+
+        # 生成资金记录Excel表格
+        elif oper_type == 'generate_theOrder_excel':
+            company_id = request.GET.get('company_id')
+
+            ## 搜索条件
+            start_time = request.GET.get('start_time')
+            end_time = request.GET.get('end_time')
+
+            q1 = Q()
+            q1.connector = 'and'
+            q1.children.append(('gongsimingcheng_id', company_id))
+
+            if start_time:
+                q1.add(Q(**{'createDate__gte': start_time}), Q.AND)
+            if end_time:
+                q1.add(Q(**{'createDate__lte': end_time}), Q.AND)
+
+            data_list = [['编号', '订单号', '商品名称', '单价/数量', '总价','应付','业务员','手机号','收货人','状态','创建时间']]
+            book = xlwt.Workbook()  # 新建一个excel
+
+            objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'yewuUser').filter(q1).order_by('-createDate')
+
+            index = 0
+            for obj in objs:
+                index = index + 1
+                yewuUser = ''
+                yewu = ''
+                if obj.yewuUser:
+                    yewuUser = obj.yewuUser.username
+                    yewu = obj.yewuUser_id
+                shouhuoren = ''
+                if obj.shouHuoRen:
+                    decode_username = base64.b64decode(obj.shouHuoRen.username)
+                    shouhuoren = str(decode_username, 'utf-8')
+
+
+                if obj.goodsPrice:
+                    countPrice = obj.goodsPrice * obj.unitRiceNum
+                    data_list.append([
+                        index,
+                        obj.orderNumber,  # 订单号
+                        obj.goodsName,      #商品名称
+                        obj.goodsPrice + '/'+ obj.unitRiceNum,   #单价/数量
+                        countPrice,       # 总价
+                        obj.yingFuKuan,   # 应付
+                        yewuUser,         # 业务员
+                        obj.phone,        # 手机号
+                        shouhuoren, #收货人
+                        obj.get_theOrderStatus_display(),
+                        obj.createDate.strftime('%Y-%m-%d %H:%M:%S')
+                    ])
+
+            print('----data_list -->>', data_list)
+
+            sheet = book.add_sheet('sheet1')  # 添加一个sheet页
+            row = 0  # 控制行
+            for stu in data_list:
+                col = 0  # 控制列
+                for s in stu:  # 再循环里面list的值，每一列
+                    sheet.write(row, col, s)
+                    col += 1
+                row += 1
+
+            excel_name = '订单记录_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            download_excel_path = 'http://api.zhugeyingxiao.com/' + os.path.join('statics', 'zhugeleida', 'fild_upload',
+                                                                                 '{}.xlsx'.format(excel_name))
+            book.save(os.path.join(os.getcwd(), 'statics', 'zhugeleida', 'fild_upload', '{}.xlsx'.format(excel_name)))
+            response.data = {'download_excel_path': download_excel_path}
+            response.code = 200
+            response.msg = '生成成功'
+
+
         else:
-            response.code = 402
-            response.msg = "请求异常"
+                response.code = 402
+                response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
 
