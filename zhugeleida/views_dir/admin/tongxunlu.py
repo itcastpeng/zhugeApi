@@ -433,6 +433,27 @@ def tongxunlu_oper(request, oper_type):
                 response.data = json.loads(forms_obj.errors.as_json())
 
 
+        ## 删除客户先关的对应关系
+        elif oper_type == 'delete_customer_relate':
 
+            customer_id = request.POST.get('customer_id')
+            user_id = request.GET.get('user_id')
+            admin_userprofile_obj =  models.zgld_admin_userprofile.objects.get(id=user_id)
+            role_id =   admin_userprofile_obj.role_id
+            role_name =   admin_userprofile_obj.role.name
+
+            user_objs = models.zgld_customer.objects.filter(id=customer_id)
+
+            if user_objs and '管理员' in role_name:
+                user_objs.delete()
+                response.code = 200
+                response.msg = "删除成功"
+            elif not user_objs:
+                response.code = 302
+                response.msg = '客户ID不存在'
+
+            elif '管理员' not  in role_name:
+                response.code = 403
+                response.msg = '删除操作无权限'
 
     return JsonResponse(response.__dict__)
