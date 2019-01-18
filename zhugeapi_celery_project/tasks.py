@@ -247,6 +247,15 @@ def crontab_create_user_to_customer_qrCode_poster():
     s.get(url)
 
 
+## 批量获取图文素材
+@app.task
+def crontab_batchget_article_material():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/crontab_batchget_article_material'
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    s.post(url)
+
+
 @app.task
 def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序ID
     if xiaochengxuid:

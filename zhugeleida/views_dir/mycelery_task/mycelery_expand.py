@@ -191,14 +191,31 @@ def common_send_gzh_template_msg(request):
 
 ## 定时器获取微信公众号文章到文章模板库
 @csrf_exempt
+def crontab_batchget_article_material(request):
+
+    if request.method == 'POST':
+        company_ids_list = models.zgld_gongzhonghao_app.objects.all().values_list('company_id',flat=True)
+        for company_id in company_ids_list:
+            url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/batchget_article_material'  # 获取产品的列表
+            get_data = {
+                'company_id': company_id
+            }
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            s.get(url,params=get_data)
+
+
+## 定时器获取微信公众号文章到文章模板库
+@csrf_exempt
 def batchget_article_material(request):
 
     response = ResponseObj()
 
     if request.method == 'GET':
 
-        print('---批量获取-文章素材 request.GET -->', request.GET)
+
         company_id = request.GET.get('company_id')
+        print('----- company_id: %s | 批量获取-文章素材 GET ---->' % (company_id), request.GET)
 
         objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
 
