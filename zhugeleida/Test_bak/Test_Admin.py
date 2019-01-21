@@ -440,21 +440,26 @@ ip = 'http://127.0.0.1:8001'
 #
 #
 #
-# url =  ip + '/zhugeleida/admin/money_manage/generate_money_record_excel'  # 获取产品的列表
-# get_data['company_id'] = 1
-# # get_data['start_time'] = 1
-# # get_data['start_time'] = 1
-# ret = requests.get(url, data = post_data ,params=get_data)
-
-
-url =  ip + '/zhugeleida/admin/theOrder/generate_theOrder_excel/0'  # 获取产品的列表
+url =  ip + '/zhugeleida/admin/money_manage/generate_money_record_excel'  # 获取产品的列表
 get_data['company_id'] = 1
 # get_data['start_time'] = 1
 # get_data['start_time'] = 1
 ret = requests.get(url, data = post_data ,params=get_data)
 
 
+# url =  ip + '/zhugeleida/admin/theOrder/generate_theOrder_excel/0'  # 获取产品的列表
+# get_data['company_id'] = 1
+# # get_data['start_time'] = 1
+# # get_data['start_time'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
+
+
+# url =  ip + '/zhugeleida/admin/tuiKuanDingDan/generate_tuiKuan_Order_excel/0'  # 获取产品的列表
+# get_data['company_id'] = 1
+# # get_data['start_time'] = 1
+# # get_data['start_time'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 
 

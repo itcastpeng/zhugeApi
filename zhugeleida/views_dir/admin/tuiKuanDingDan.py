@@ -11,6 +11,7 @@ import requests
 import xml.dom.minidom as xmldom
 import os, random, datetime
 from zhugeleida.views_dir.mycelery_task.mycelery import record_money_process
+import xlwt,os,datetime
 
 # 退款单 查询
 @csrf_exempt
@@ -243,9 +244,72 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = "退款订单不存在"
 
+
+
     else:
-        response.code = 402
-        response.msg = "请求异常"
+
+
+        ## 生成退款的Excel 表格
+        if oper_type == 'generate_tuiKuan_Order_excel':
+            company_id = request.GET.get('company_id')
+
+            ## 搜索条件
+            start_time = request.GET.get('start_time')
+            end_time = request.GET.get('end_time')
+
+            q1 = Q()
+            q1.connector = 'and'
+            q1.children.append(('orderNumber__gongsimingcheng_id', company_id))
+
+            if start_time:
+                q1.add(Q(**{'create_date__gte': start_time}), Q.AND)
+            if end_time:
+                q1.add(Q(**{'create_date__lte': end_time}), Q.AND)
+
+            data_list = [['编号', '退款原因', '退款金额', '生成时间', '退款时间', '状态',]]
+            book = xlwt.Workbook()  # 新建一个excel
+
+            objs = models.zgld_shangcheng_tuikuan_dingdan_management.objects.select_related('orderNumber').filter(q1).order_by('-shengChengDateTime')
+
+            index = 0
+            for obj in objs:
+                index = index + 1
+                tuikuan = ''
+                if obj.tuiKuanDateTime:
+                    tuikuan = obj.tuiKuanDateTime.strftime('%Y-%m-%d %H:%M:%S')
+
+
+                data_list.append([
+                    index,
+                    obj.get_tuiKuanYuanYin_display(),                                 # 退款原因
+                    obj.orderNumber.yingFuKuan,                                       # 退款金额
+                    obj.obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),         # 生成时间
+                    tuikuan,                                                          # 退款时间
+                    obj.orderNumber.get_theOrderStatus_display(),    # 状态
+                ])
+
+
+            print('----data_list -->>', data_list)
+            sheet = book.add_sheet('sheet1')  # 添加一个sheet页
+            row = 0  # 控制行
+            for stu in data_list:
+                col = 0  # 控制列
+                for s in stu:  # 再循环里面list的值，每一列
+                    sheet.write(row, col, s)
+                    col += 1
+                row += 1
+
+            excel_name = '退款订单记录_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            download_excel_path = 'http://api.zhugeyingxiao.com/' + os.path.join('statics', 'zhugeleida', 'fild_upload',
+                                                                                 '{}.xlsx'.format(excel_name))
+            book.save(os.path.join(os.getcwd(), 'statics', 'zhugeleida', 'fild_upload', '{}.xlsx'.format(excel_name)))
+            response.data = {'download_excel_path': download_excel_path}
+            response.code = 200
+            response.msg = '生成生成'
+
+
+
+
     return JsonResponse(response.__dict__)
 
 
