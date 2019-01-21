@@ -45,6 +45,7 @@ class zgld_company(models.Model):
     leiji_chongzhi = models.FloatField(verbose_name='累计充值', null=True, default=0)
     leiji_zhichu = models.FloatField(verbose_name='累计支出', null=True, default=0)
 
+    bossleida_data_tongji =  models.TextField(verbose_name='BOSS雷达数据统计[公司]',default='{}')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -387,7 +388,8 @@ class zgld_userprofile(models.Model):
     sign_num = models.IntegerField(verbose_name='签名被赞个数', default=0)
     voice = models.CharField(verbose_name='语音介绍', null=True, max_length=128)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    # user_expired = models.DateTimeField(verbose_name="用户过期时间",null=True)
+    bossleida_data_tongji = models.TextField(verbose_name='BOSS雷达数据统计[个人]',default='{}')
+
     last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True)
 
     def __str__(self):

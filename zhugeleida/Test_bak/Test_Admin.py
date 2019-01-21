@@ -314,10 +314,14 @@ ip = 'http://127.0.0.1:8001'
 
 
 
+# url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/acount_data' # 统计-名片状态+账号状态
+# get_data['company_id'] = 1
+# ret = requests.get(url, params=get_data)
 
 
-
-
+url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/line_info' # 统计-名片状态+账号状态
+get_data['company_id'] = 1
+ret = requests.get(url, params=get_data)
 
 
 #查询企业用户
@@ -440,11 +444,11 @@ ip = 'http://127.0.0.1:8001'
 #
 #
 #
-url =  ip + '/zhugeleida/admin/money_manage/generate_money_record_excel'  # 获取产品的列表
-get_data['company_id'] = 1
-# get_data['start_time'] = 1
-# get_data['start_time'] = 1
-ret = requests.get(url, data = post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/money_manage/generate_money_record_excel'  # 获取产品的列表
+# get_data['company_id'] = 1
+# # get_data['start_time'] = 1
+# # get_data['start_time'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
 
 # url =  ip + '/zhugeleida/admin/theOrder/generate_theOrder_excel/0'  # 获取产品的列表
