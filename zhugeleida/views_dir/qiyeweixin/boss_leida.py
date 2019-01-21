@@ -686,8 +686,8 @@ def home_page_oper(request, oper_type):
             if company_objs and type != 'personal':
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
-                ret_data = data_tongji_dict['line_info']
-                date_time =  data_tongji_dict['date_time']
+                ret_data = data_tongji_dict.get('line_info')
+                date_time =  data_tongji_dict.get('date_time')
                 if today_datetime == date_time:
                     response.code = 200
                     response.msg = '查询成功'
