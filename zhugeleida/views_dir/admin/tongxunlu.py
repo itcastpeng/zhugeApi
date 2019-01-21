@@ -22,6 +22,8 @@ def tongxunlu(request):
     if request.method == "GET":
 
         forms_obj = TongxunluSelectForm(request.GET)
+        user_id = request.GET.get('user_id')
+
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
@@ -43,7 +45,7 @@ def tongxunlu(request):
 
             count = objs.count()
             if objs:
-
+                obj = objs[0]
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
@@ -127,11 +129,19 @@ def tongxunlu(request):
                         'create_date': obj.create_date,  # 跟进状态
                     })
 
+
+                obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+                role_id = obj.role_id
+                role_name = obj.role.name
+
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
+                    'role_name' : role_name,
+                    'role_id' : role_id
+
                 }
 
             else:
