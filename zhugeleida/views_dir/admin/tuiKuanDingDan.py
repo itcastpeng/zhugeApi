@@ -283,7 +283,7 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
                     index,
                     obj.get_tuiKuanYuanYin_display(),                                 # 退款原因
                     obj.orderNumber.yingFuKuan,                                       # 退款金额
-                    obj.obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),         # 生成时间
+                    obj.shengChengDateTime.strftime('%Y-%m-%d %H:%M:%S'),         # 生成时间
                     tuikuan,                                                          # 退款时间
                     obj.orderNumber.get_theOrderStatus_display(),    # 状态
                 ])
