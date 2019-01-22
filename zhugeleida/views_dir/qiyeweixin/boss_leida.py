@@ -675,7 +675,7 @@ def home_page_oper(request, oper_type):
         user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
         company_id = user_obj[0].company_id
 
-        type = request.GET.get('type')
+        # type = request.GET.get('type')
 
         ## 数据【总览】统计
         if oper_type == "acount_data":
