@@ -14,7 +14,7 @@ from django.db.models import Q, Sum
 from zhugeleida.forms.boosleida.boos_leida_verify import QueryHaveCustomerDetailForm, \
     QueryHudongHaveCustomerDetailPeopleForm, LineInfoForm
 
-from zhugeleida.views_dir.qiyeweixin.boss_leida import deal_search_time, deal_line_info
+from zhugeleida.views_dir.qiyeweixin.boss_leida import deal_search_time, deal_line_info,deal_sale_ranking_data
 
 ## 发送公众号模板消息提示到用户
 @csrf_exempt
@@ -368,9 +368,7 @@ def crontab_batchget_article_material(request):
 
     if request.method == 'POST':
 
-
         company_objs = models.zgld_company.objects.all()
-
         for obj in company_objs:
             company_id =  obj.id
             account_expired_time =  obj.account_expired_time
@@ -402,7 +400,6 @@ def crontab_batchget_article_material(request):
             }
             s.get(url_3,params=get_data_3)
 
-
             for user_obj in userprofile_objs:
                 url_4 = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/line_info'  # 获取产品的列表
                 get_data_4 = {
@@ -411,6 +408,33 @@ def crontab_batchget_article_material(request):
                     'type' : 'personal',
                 }
                 s.get(url_4,params=get_data_4)
+
+            url_5 = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/sales_ranking_customer_num'  #
+            get_data_5 = {
+                'company_id': company_id
+            }
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            s.get(url_5,params=get_data_5)
+
+            url_6 = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/hudong_pinlv_customer_num'  #
+            get_data_6 = {
+                'company_id': company_id
+            }
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            s.get(url_6,params=get_data_6)
+
+            url_7 = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/expect_chengjiaolv_customer_num'  #
+            get_data_7 = {
+                'company_id': company_id
+            }
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            s.get(url_7,params=get_data_7)
+
+
+
 
 
 ##  数据【总览】统计 和 数据【客户统计】数据
@@ -635,6 +659,177 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 response.code = 303
                 response.msg = "未验证通过"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+
+        ## 销售排行【按客户人数】
+        elif oper_type == "sales_ranking_customer_num":
+            forms_obj = LineInfoForm(request.POST)
+
+            if forms_obj.is_valid():
+                # user_id = request.GET.get('user_id')
+                # user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+                # company_id = user_obj[0].company_id
+                ret_data = {}
+                # 汇总数据
+                q1 = Q()
+                data = {'type': 'customer_data'}
+
+                q1.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等
+                ret_data['total_num_have_customer'] = deal_sale_ranking_data(data, q1)
+
+                # 昨天数据
+                q2 = Q()
+                now_time = datetime.datetime.now()
+                start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q2.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
+                q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_data['yesterday_new_customer'] = deal_sale_ranking_data(data, q2)
+
+                q3 = Q()
+                start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q3.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
+                q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_data['nearly_seven_new_customer'] = deal_sale_ranking_data(data, q3)
+
+                q4 = Q()
+                start_time = (now_time - timedelta(days=15)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q4.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
+                q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_data['nearly_fifteen_new_customer'] = deal_sale_ranking_data(data, q4)
+
+                q5 = Q()
+                start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q5.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
+                q5.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_data['nearly_thirty_new_customer'] = deal_sale_ranking_data(data, q5)
+
+                company_objs = models.zgld_company.objects.filter(id=company_id)
+                if company_objs:
+                    data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+                    data_tongji_dict['sales_ranking_customer_num'] = ret_data
+                    data_tongji_dict['date_time'] = datetime.datetime.now().strftime('%Y-%m-%d')
+                    bossleida_data_tongji = json.dumps(data_tongji_dict)
+                    company_objs.update(
+                        bossleida_data_tongji=bossleida_data_tongji
+                    )
+
+        ## 销售排行【按互动频率】
+        elif oper_type == "hudong_pinlv_customer_num":
+
+            ret_data = {}
+            for type in ['follow_num', 'consult_num']:
+                data = {'type': type, 'company_id': company_id}
+                ret_dict = {}
+
+                # # 汇总数据
+                # q1 = Q()
+                # q1.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
+                # ret_data['total_num_have_customer'] = deal_sale_ranking_data(data,q1)
+
+                # 昨天数据
+                q2 = Q()
+                now_time = datetime.datetime.now()
+                start_time = (now_time - timedelta(days=1)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q2.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q2.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_dict['yesterday_data'] = deal_sale_ranking_data(data, q2)
+
+                q3 = Q()
+                start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q3.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q3.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_dict['nearly_seven_data'] = deal_sale_ranking_data(data, q3)
+
+                q4 = Q()
+                start_time = (now_time - timedelta(days=15)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q4.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q4.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_dict['nearly_fifteen_data'] = deal_sale_ranking_data(data, q4)
+
+                q5 = Q()
+                start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
+                stop_time = now_time.strftime("%Y-%m-%d")
+                q5.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+                q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
+                ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
+
+                ret_data[type] = ret_dict
+
+                company_objs = models.zgld_company.objects.filter(id=company_id)
+                if company_objs:
+                    data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+                    data_tongji_dict['hudong_pinlv_customer_num'] = ret_data
+                    data_tongji_dict['date_time'] = datetime.datetime.now().strftime('%Y-%m-%d')
+                    bossleida_data_tongji = json.dumps(data_tongji_dict)
+                    company_objs.update(
+                        bossleida_data_tongji=bossleida_data_tongji
+                    )
+
+            # response.code = 200
+            # response.msg = '查询成功'
+            # response.data = {
+            #     'ret_data': ret_data
+            # }
+
+        ## 销售排行【按预计成交率】
+        elif oper_type == "expect_chengjiaolv_customer_num":
+            # user_id = request.GET.get('user_id')
+            # user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+            # company_id = user_obj[0].company_id
+
+            # for  pr in  in ['1_50','51_80','81_99','100']:
+            ret_dict = {}
+            q2 = Q()
+            data = {'type': 'expect_chengjiaolv',
+                    'company_id': company_id
+                    }
+
+            q2.add(Q(**{'expedted_pr__gte': 1}), Q.AND)  # 大于等于
+            q2.add(Q(**{'expedted_pr__lte': 50}), Q.AND)
+            ret_dict['pr_1_50'] = deal_sale_ranking_data(data, q2)
+
+            q3 = Q()
+            q3.add(Q(**{'expedted_pr__gte': 51}), Q.AND)  # 大于等于
+            q3.add(Q(**{'expedted_pr__lte': 80}), Q.AND)
+            ret_dict['pr_51_80'] = deal_sale_ranking_data(data, q3)
+
+            q4 = Q()
+            q4.add(Q(**{'expedted_pr__gte': 81}), Q.AND)  # 大于等于
+            q4.add(Q(**{'expedted_pr__lte': 99}), Q.AND)
+            ret_dict['pr_81_99'] = deal_sale_ranking_data(data, q4)
+
+            q5 = Q()
+            q5.add(Q(**{'expedted_pr': 100}), Q.AND)  # 大于等于
+            ret_dict['pr_100'] = deal_sale_ranking_data(data, q5)
+
+            company_objs = models.zgld_company.objects.filter(id=company_id)
+            if company_objs:
+                data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+                data_tongji_dict['expect_chengjiaolv_customer_num'] = ret_dict
+                data_tongji_dict['date_time'] = datetime.datetime.now().strftime('%Y-%m-%d')
+                bossleida_data_tongji = json.dumps(data_tongji_dict)
+                company_objs.update(
+                    bossleida_data_tongji=bossleida_data_tongji
+                )
+
+            # response.code = 200
+            # response.msg = '查询成功'
+            # response.data = {
+            #     'ret_data': ret_dict
+            # }
+
+
 
 
 

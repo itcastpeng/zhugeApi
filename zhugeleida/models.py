@@ -890,6 +890,13 @@ class zgld_article(models.Model):
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
     media_id = models.CharField(verbose_name="素材ID", max_length=128, null=True)
     source_url = models.CharField(verbose_name="公众号文章原生URL", max_length=256, null=True)
+
+    auto_tagging_choices = ( (0,'不开启'),
+                             (1,'开启'),
+                           )
+    is_auto_tagging = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=auto_tagging_choices)
+    tags_time_count = models.IntegerField(default=0, verbose_name="达到几秒实现打标签")
+
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 

@@ -601,9 +601,7 @@ def article_oper(request, oper_type, o_id):
                     if objs:
                         objs.update(stay_time=F('stay_time') + 5)  #
 
-                    article_access_log_objs = models.zgld_article_access_log.objects.filter(
-                        id=article_access_log_id,
-                    )
+                    article_access_log_objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
                     now_date_time = datetime.datetime.now()
                     if article_access_log_objs:
                         article_access_log_objs.update(

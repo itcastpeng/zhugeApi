@@ -319,9 +319,24 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, params=get_data)
 
 
-url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/line_info' # 统计-名片状态+账号状态
+# url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/line_info' # 统计-名片状态+账号状态
+# get_data['company_id'] = 1
+# ret = requests.get(url, params=get_data)
+
+
+# url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/sales_ranking_customer_num' # 统计-名片状态+账号状态
+# get_data['company_id'] = 1
+# ret = requests.get(url, params=get_data)
+
+# url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/hudong_pinlv_customer_num' # 统计-名片状态+账号状态
+# get_data['company_id'] = 1
+# ret = requests.get(url, params=get_data)
+
+
+url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/expect_chengjiaolv_customer_num' # 统计-名片状态+账号状态
 get_data['company_id'] = 1
 ret = requests.get(url, params=get_data)
+
 
 
 #查询企业用户
