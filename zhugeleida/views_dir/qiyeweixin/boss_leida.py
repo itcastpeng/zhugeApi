@@ -675,7 +675,7 @@ def home_page_oper(request, oper_type):
         user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
         company_id = user_obj[0].company_id
 
-        # type = request.GET.get('type')
+        Type = request.GET.get('type')
 
         ## 数据【总览】统计
         if oper_type == "acount_data":
@@ -683,7 +683,7 @@ def home_page_oper(request, oper_type):
             ####
             today_datetime = datetime.now().strftime('%Y-%m-%d')
             company_objs = models.zgld_company.objects.filter(id=company_id)
-            if company_objs and type != 'personal':
+            if company_objs and Type != 'personal':
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
                 ret_data = data_tongji_dict.get('line_info')
@@ -697,7 +697,7 @@ def home_page_oper(request, oper_type):
                     return JsonResponse(response.__dict__)
 
 
-            elif type == 'personal':
+            elif Type == 'personal':
                 userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
                 data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
                 ret_data  = data_tongji_dict.get('line_info')
@@ -773,7 +773,7 @@ def home_page_oper(request, oper_type):
                 ####
                 today_datetime = datetime.now().strftime('%Y-%m-%d')
                 company_objs = models.zgld_company.objects.filter(id=company_id)
-                if company_objs and type != 'personal':
+                if company_objs and Type != 'personal':
                     data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
                     ret_data = data_tongji_dict.get('line_info')
@@ -787,7 +787,7 @@ def home_page_oper(request, oper_type):
                         return JsonResponse(response.__dict__)
 
 
-                elif type == 'personal':
+                elif Type == 'personal':
                     userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
                     data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
                     ret_data = data_tongji_dict.get('line_info')
@@ -806,13 +806,13 @@ def home_page_oper(request, oper_type):
                 data = request.POST.copy()
                 q1 = Q()
                 q2 = Q()
-                if type == 'personal':  # 个人数据
+                if Type == 'personal':  # 个人数据
                     q1.add(Q(**{'user_id': user_id}), Q.AND)  # 搜索个人数据
                     q2.add(Q(**{'id': user_id}), Q.AND)  # 搜索个人数据
 
                 data['company_id'] = company_id
                 data['user_id'] = user_id
-                data['type'] = type
+                data['type'] = Type
 
                 ret_data = {}
                 for index in ['index_type_1', 'index_type_2', 'index_type_3', 'index_type_4']:
@@ -1014,8 +1014,8 @@ def home_page_oper(request, oper_type):
                     return JsonResponse(response.__dict__)
 
 
-            for Type in ['follow_num', 'consult_num']:
-                data = {'type': Type, 'company_id': company_id}
+            for _Type in ['follow_num', 'consult_num']:
+                data = {'type': _Type, 'company_id': company_id}
                 ret_dict = {}
 
                 # 昨天数据
@@ -1049,8 +1049,8 @@ def home_page_oper(request, oper_type):
                 ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
 
                 print('值 ret_dict----->>',ret_dict)
-                print('值 Type----->>',Type)
-                ret_data[Type] = ret_dict
+                print('值 Type----->>',_Type)
+                ret_data[_Type] = ret_dict
 
             response.code = 200
             response.msg = '查询成功'
@@ -1059,9 +1059,6 @@ def home_page_oper(request, oper_type):
             }
 
         elif oper_type == "expect_chengjiaolv_customer_num":
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-            company_id = user_obj[0].company_id
 
             today_datetime = datetime.now().strftime('%Y-%m-%d')
             company_objs = models.zgld_company.objects.filter(id=company_id)
