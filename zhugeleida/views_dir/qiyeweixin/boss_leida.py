@@ -996,11 +996,8 @@ def home_page_oper(request, oper_type):
 
         elif oper_type == "hudong_pinlv_customer_num":
 
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-            company_id = user_obj[0].company_id
-            ret_data = {}
 
+            ret_data = {}
             today_datetime = datetime.now().strftime('%Y-%m-%d')
             company_objs = models.zgld_company.objects.filter(id=company_id)
             if company_objs:
