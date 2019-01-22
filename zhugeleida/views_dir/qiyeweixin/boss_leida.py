@@ -997,23 +997,23 @@ def home_page_oper(request, oper_type):
         elif oper_type == "hudong_pinlv_customer_num":
 
 
-            ret_data = {}
+
             today_datetime = datetime.now().strftime('%Y-%m-%d')
             company_objs = models.zgld_company.objects.filter(id=company_id)
             if company_objs:
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
-                ret_data = data_tongji_dict.get('hudong_pinlv_customer_num')
+                _ret_data = data_tongji_dict.get('hudong_pinlv_customer_num')
                 date_time = data_tongji_dict.get('date_time')
                 if today_datetime == date_time:
                     response.code = 200
                     response.msg = '查询成功'
                     response.data = {
-                        'ret_data': ret_data
+                        'ret_data': _ret_data
                     }
                     return JsonResponse(response.__dict__)
 
-
+            ret_data = {}
             for _Type in ['follow_num', 'consult_num']:
                 data = {'type': _Type, 'company_id': company_id}
                 ret_dict = {}
