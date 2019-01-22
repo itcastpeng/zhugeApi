@@ -1017,8 +1017,8 @@ def home_page_oper(request, oper_type):
                     return JsonResponse(response.__dict__)
 
 
-            for type in ['follow_num', 'consult_num']:
-                data = {'type': type, 'company_id': company_id}
+            for Type in ['follow_num', 'consult_num']:
+                data = {'type': Type, 'company_id': company_id}
                 ret_dict = {}
 
                 # 昨天数据
@@ -1051,7 +1051,7 @@ def home_page_oper(request, oper_type):
                 q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
 
-                ret_data[type] = ret_dict
+                ret_data[Type] = ret_dict
 
             response.code = 200
             response.msg = '查询成功'
