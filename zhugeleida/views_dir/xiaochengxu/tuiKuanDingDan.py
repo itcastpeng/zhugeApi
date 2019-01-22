@@ -8,6 +8,7 @@ from zhugeleida.forms.xiaochengxu.tuiKuanDingDan_verify import AddForm, SelectFo
 import json, base64, time, random
 
 
+
 @csrf_exempt
 @account.is_token(models.zgld_customer)
 def tuiKuanDingDan(request):
@@ -186,6 +187,8 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = otherData
+
+
 
         else:
             response.code = 402

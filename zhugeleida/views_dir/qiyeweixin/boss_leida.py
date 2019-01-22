@@ -671,8 +671,47 @@ def home_page_oper(request, oper_type):
                 response.data = json.loads(forms_obj.errors.as_json())
 
     else:
+        user_id = request.GET.get('user_id')
+        user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+        company_id = user_obj[0].company_id
 
+        Type = request.GET.get('type')
+
+        ## 数据【总览】统计
         if oper_type == "acount_data":
+
+            ####
+            today_datetime = datetime.now().strftime('%Y-%m-%d')
+            company_objs = models.zgld_company.objects.filter(id=company_id)
+            if company_objs and Type != 'personal':
+                data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+
+                ret_data = data_tongji_dict.get('line_info')
+                date_time =  data_tongji_dict.get('date_time')
+                if today_datetime == date_time:
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data
+                    }
+                    return JsonResponse(response.__dict__)
+
+
+            elif Type == 'personal':
+                userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
+                data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
+                ret_data  = data_tongji_dict.get('line_info')
+                date_time =  data_tongji_dict.get('date_time')
+
+                if today_datetime == date_time:
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data
+                    }
+                    return JsonResponse(response.__dict__)
+
+
             ret_data = {}
             data = request.GET.copy()
             # 汇总数据
@@ -724,30 +763,56 @@ def home_page_oper(request, oper_type):
 
             }
 
+        ## 数据【客户统计】数据
         elif oper_type == "line_info":
             # print('request.POST', request.POST)
 
             forms_obj = LineInfoForm(request.POST)
-
             if forms_obj.is_valid():
 
-                user_id = request.GET.get('user_id')
-                type = request.GET.get('type')
+                ####
+                today_datetime = datetime.now().strftime('%Y-%m-%d')
+                company_objs = models.zgld_company.objects.filter(id=company_id)
+                if company_objs and Type != 'personal':
+                    data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
-                user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-                company_id = user_obj[0].company_id
+                    ret_data = data_tongji_dict.get('line_info')
+                    date_time = data_tongji_dict.get('date_time')
+                    if today_datetime == date_time:
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'ret_data': ret_data
+                        }
+                        return JsonResponse(response.__dict__)
+
+
+                elif Type == 'personal':
+                    userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
+                    data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
+                    ret_data = data_tongji_dict.get('line_info')
+                    date_time = data_tongji_dict.get('date_time')
+
+                    if today_datetime == date_time:
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'ret_data': ret_data
+                        }
+                        return JsonResponse(response.__dict__)
+
+
 
                 data = request.POST.copy()
-
                 q1 = Q()
                 q2 = Q()
-                if type == 'personal':  # 个人数据
+                if Type == 'personal':  # 个人数据
                     q1.add(Q(**{'user_id': user_id}), Q.AND)  # 搜索个人数据
                     q2.add(Q(**{'id': user_id}), Q.AND)  # 搜索个人数据
 
                 data['company_id'] = company_id
                 data['user_id'] = user_id
-                data['type'] = type
+                data['type'] = Type
 
                 ret_data = {}
                 for index in ['index_type_1', 'index_type_2', 'index_type_3', 'index_type_4']:
@@ -860,6 +925,24 @@ def home_page_oper(request, oper_type):
             forms_obj = LineInfoForm(request.POST)
 
             if forms_obj.is_valid():
+
+                ####
+                today_datetime = datetime.now().strftime('%Y-%m-%d')
+                company_objs = models.zgld_company.objects.filter(id=company_id)
+                if company_objs:
+                    data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+
+                    ret_data = data_tongji_dict.get('sales_ranking_customer_num')
+                    date_time = data_tongji_dict.get('date_time')
+                    if today_datetime == date_time:
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'ret_data': ret_data
+                        }
+                        return JsonResponse(response.__dict__)
+
+                ######
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
                 company_id = user_obj[0].company_id
@@ -913,19 +996,27 @@ def home_page_oper(request, oper_type):
 
         elif oper_type == "hudong_pinlv_customer_num":
 
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-            company_id = user_obj[0].company_id
+
+
+            today_datetime = datetime.now().strftime('%Y-%m-%d')
+            company_objs = models.zgld_company.objects.filter(id=company_id)
+            if company_objs:
+                data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+
+                _ret_data = data_tongji_dict.get('hudong_pinlv_customer_num')
+                date_time = data_tongji_dict.get('date_time')
+                if today_datetime == date_time:
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': _ret_data
+                    }
+                    return JsonResponse(response.__dict__)
+
             ret_data = {}
-
-            for type in ['follow_num', 'consult_num']:
-                data = {'type': type, 'company_id': company_id}
+            for _Type in ['follow_num', 'consult_num']:
+                data = {'type': _Type, 'company_id': company_id}
                 ret_dict = {}
-
-                # # 汇总数据
-                # q1 = Q()
-                # q1.add(Q(**{'user__company_id': company_id}), Q.AND)  # 大于等于
-                # ret_data['total_num_have_customer'] = deal_sale_ranking_data(data,q1)
 
                 # 昨天数据
                 q2 = Q()
@@ -957,7 +1048,9 @@ def home_page_oper(request, oper_type):
                 q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
 
-                ret_data[type] = ret_dict
+                print('值 ret_dict----->>',ret_dict)
+                print('值 Type----->>',_Type)
+                ret_data[_Type] = ret_dict
 
             response.code = 200
             response.msg = '查询成功'
@@ -966,11 +1059,23 @@ def home_page_oper(request, oper_type):
             }
 
         elif oper_type == "expect_chengjiaolv_customer_num":
-            user_id = request.GET.get('user_id')
-            user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-            company_id = user_obj[0].company_id
 
-            # for  pr in  in ['1_50','51_80','81_99','100']:
+            today_datetime = datetime.now().strftime('%Y-%m-%d')
+            company_objs = models.zgld_company.objects.filter(id=company_id)
+            if company_objs:
+                data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
+
+                ret_data = data_tongji_dict.get('expect_chengjiaolv_customer_num')
+                date_time = data_tongji_dict.get('date_time')
+                if today_datetime == date_time:
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data
+                    }
+                    return JsonResponse(response.__dict__)
+
+
             ret_dict = {}
             q2 = Q()
             data = {'type': 'expect_chengjiaolv',

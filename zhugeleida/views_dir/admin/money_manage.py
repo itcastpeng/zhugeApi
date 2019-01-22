@@ -21,7 +21,7 @@ UFDODER_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder"  # 该url是微�
 
 NOTIFY_URL = 'http://api.zhugeyingxiao.com/zhugeleida/admin/wx_pay/native_pay_callback'
 from bs4 import BeautifulSoup
-
+import xlwt,os
 
 def get_public_ip():
     file_exit = os.path.exists('get_ip38.text')
@@ -286,7 +286,7 @@ def money_manage(request, oper_type):
                             'source': obj.get_source_display(),  # 来源
                         })
 
-                #  查询成功 返回200 状态码
+                # 查询成功 返回200 状态码
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
@@ -294,7 +294,7 @@ def money_manage(request, oper_type):
                     'data_count': count,
                     'account_balance': account_balance,
                     'leiji_chongzhi': leiji_chongzhi,
-                    'leiji_zhichu': leiji_zhichu,
+                    'leiji_zhichu':   leiji_zhichu,
                 }
 
 
@@ -303,6 +303,80 @@ def money_manage(request, oper_type):
                 response.code = 301
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
+
+
+        # 生成资金记录Excel表格
+        elif oper_type == 'generate_money_record_excel':
+            company_id = request.GET.get('company_id')
+            order = request.GET.get('order', '-create_date')
+
+            ## 搜索条件
+            start_time = request.GET.get('start_time')
+            end_time = request.GET.get('end_time')
+
+            q1 = Q()
+            q1.connector = 'and'
+            q1.children.append(('company_id', company_id))
+
+            if start_time:
+                q1.add(Q(**{'create_date__gte': start_time}), Q.AND)
+            if end_time:
+                q1.add(Q(**{'create_date__lte': end_time}), Q.AND)
+
+            # if type:
+            #     type = int(type)
+            #     if type in [3, 4]:
+            #         q1.children.append(('type__in', [3, 4]))
+            #     else:
+            #         q1.children.append(('type', type))
+
+            data_list = [['编号', '交易时间', '交易金额', '余额', '交易类型', '来源']]
+            book = xlwt.Workbook()  # 新建一个excel
+
+            objs = models.zgld_money_record.objects.select_related('company').filter(q1).order_by(order)
+
+            index = 0
+            if objs:
+                for obj in objs:
+                    index = index + 1
+
+                    type = obj.type  # 交易类型
+                    transaction_amount = obj.transaction_amount  # 交易金额
+
+                    if transaction_amount:
+                        transaction_amount = str(transaction_amount)  # 交易金额
+                        if type in [1, 5]:  # (1,'充值成功'),  (5,'商城入账'),
+                            transaction_amount = '+' + transaction_amount
+                        else:
+                            transaction_amount = '-' + transaction_amount
+
+                    data_list.append([
+                        index,
+                        obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 记账时间
+                        transaction_amount,  # 交易金额
+                        obj.account_balance,  # 账户结余(元)
+                        obj.get_type_display(),  # 交易类型
+                        obj.get_source_display(),  # 来源
+                    ])
+
+
+            print('----data_list -->>', data_list)
+
+            sheet = book.add_sheet('sheet1')  # 添加一个sheet页
+            row = 0  # 控制行
+            for stu in data_list:
+                col = 0  # 控制列
+                for s in stu:  # 再循环里面list的值，每一列
+                    sheet.write(row, col, s)
+                    col += 1
+                row += 1
+
+            excel_name = '资金记录_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            download_excel_path = 'http://api.zhugeyingxiao.com/' + os.path.join('statics', 'zhugeleida', 'fild_upload','{}.xlsx'.format(excel_name))
+            book.save(os.path.join(os.getcwd(), 'statics', 'zhugeleida', 'fild_upload', '{}.xlsx'.format(excel_name)))
+            response.data = {'download_excel_path': download_excel_path}
+            response.code = 200
+            response.msg = '生成生成'
 
 
     return JsonResponse(response.__dict__)
