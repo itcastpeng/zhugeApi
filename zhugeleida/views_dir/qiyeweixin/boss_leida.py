@@ -1051,6 +1051,8 @@ def home_page_oper(request, oper_type):
                 q5.add(Q(**{'create_date__lte': stop_time}), Q.AND)
                 ret_dict['nearly_thirty_data'] = deal_sale_ranking_data(data, q5)
 
+                print('值 ret_dict----->>',ret_dict)
+                print('值 Type----->>',Type)
                 ret_data[Type] = ret_dict
 
             response.code = 200
