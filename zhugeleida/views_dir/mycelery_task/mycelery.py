@@ -1473,8 +1473,7 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
         authorization_appid = app_objs[0].authorization_appid
 
 
-    shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(
-        xiaochengxucompany_id=company_id)
+    shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(xiaochengxucompany_id=1) # 使用固定商户账户-发红包。
 
     shangHuHao = ''
     shangHuMiYao = ''
@@ -1847,7 +1846,7 @@ def bufa_send_activity_redPacket(request):
     return JsonResponse(response.__dict__)
 
 
-# 关注发红包发红包
+# 关注发红包
 @csrf_exempt
 def user_focus_send_activity_redPacket(request):
     response = Response.ResponseObj()
@@ -1911,7 +1910,7 @@ def user_focus_send_activity_redPacket(request):
                             # company_name = '【%s】' % (app_objs[0].company.name)
                             gongzhonghao_name = app_objs[0].name
 
-                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(xiaochengxucompany_id=company_id)
+                        shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(xiaochengxucompany_id=1) # 使用固定商户账户-发红包。
 
                         send_name = ''
                         shangHuHao = ''

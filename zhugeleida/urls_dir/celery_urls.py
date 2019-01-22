@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^batchget_article_material$', mycelery_expand.batchget_article_material),  # 定时器获取微信公众号文章到文章模板库
     url(r'^record_money_process$', mycelery.record_money_process),                   # 发送公众号的模板消息
 
-    url(r'^bossLeida_acount_data_and_line_info/(?P<oper_type>\w+)', mycelery_expand.bossLeida_acount_data_and_line_info),  # 发送公众号的模板消息
+    url(r'^bossLeida_acount_data_and_line_info/(?P<oper_type>\w+)$', mycelery_expand.bossLeida_acount_data_and_line_info),  # 发送公众号的模板消息
 
 
 
