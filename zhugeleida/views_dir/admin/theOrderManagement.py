@@ -254,7 +254,7 @@ def theOrderOper(request, oper_type, o_id):         # 修改订单基本信息
                         index,
                         obj.orderNumber,  # 订单号
                         obj.goodsName,      #商品名称
-                        obj.goodsPrice + '/'+ str(obj.unitRiceNum),   #单价/数量
+                        str(obj.goodsPrice) + '/'+ str(obj.unitRiceNum),   #单价/数量
                         countPrice,       # 总价
                         obj.yingFuKuan,   # 应付
                         yewuUser,         # 业务员
