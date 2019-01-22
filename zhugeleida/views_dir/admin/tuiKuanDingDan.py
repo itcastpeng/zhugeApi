@@ -262,9 +262,9 @@ def tuiKuanDingDanOper(request, oper_type, o_id):
             q1.children.append(('orderNumber__gongsimingcheng_id', company_id))
 
             if start_time:
-                q1.add(Q(**{'create_date__gte': start_time}), Q.AND)
+                q1.add(Q(**{'tuiKuanDateTime__gte': start_time}), Q.AND)
             if end_time:
-                q1.add(Q(**{'create_date__lte': end_time}), Q.AND)
+                q1.add(Q(**{'tuiKuanDateTime__lte': end_time}), Q.AND)
 
             data_list = [['编号', '退款原因', '退款金额', '生成时间', '退款时间', '状态',]]
             book = xlwt.Workbook()  # 新建一个excel
