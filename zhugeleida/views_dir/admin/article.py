@@ -439,6 +439,9 @@ def article_oper(request, oper_type, o_id):
         if oper_type == "add":
 
             status = request.POST.get('status')
+            is_auto_tagging = request.POST.get('is_auto_tagging')  # (0,'不开启'),   (1,'开启'),
+            tags_time_count = request.POST.get('tags_time_count')  # 达到几秒实现打标签
+
             article_data = {
                 'user_id': request.GET.get('user_id'),
                 'title': request.POST.get('title'),
@@ -464,7 +467,9 @@ def article_oper(request, oper_type, o_id):
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
                     'cover_picture': forms_obj.cleaned_data['cover_picture'].strip(),
-                    'insert_ads': request.POST.get('insert_ads')
+                    'insert_ads': request.POST.get('insert_ads'),
+                    'is_auto_tagging' : is_auto_tagging,
+                    'tags_time_count' :tags_time_count
                 }
 
                 obj = models.zgld_article.objects.create(**dict_data)
@@ -570,6 +575,9 @@ def article_oper(request, oper_type, o_id):
             status = request.POST.get('status')
             type = request.POST.get('type')
 
+            is_auto_tagging = request.POST.get('is_auto_tagging')  # (0,'不开启'),   (1,'开启'),
+            tags_time_count = request.POST.get('tags_time_count')  # 达到几秒实现打标签
+
             article_data = {
                 'status' : status,
                 'article_id': o_id,
@@ -589,7 +597,10 @@ def article_oper(request, oper_type, o_id):
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
                     'cover_picture': forms_obj.cleaned_data['cover_picture'],
-                    'insert_ads': request.POST.get('insert_ads')
+                    'insert_ads': request.POST.get('insert_ads'),
+                    'is_auto_tagging': is_auto_tagging,
+                    'tags_time_count': tags_time_count
+
                 }
 
                 article_id = forms_obj.cleaned_data['article_id']

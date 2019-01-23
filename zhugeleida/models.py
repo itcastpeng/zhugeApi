@@ -172,8 +172,7 @@ class zgld_xiaochengxu_app(models.Model):
         (9, '审核撤回成功'),
         (10, '审核撤回失败'),
         (11, '版本回退成功'),
-        (12, '版本回退失败'),
-
+        (12, '版本回退失败')
     )
     code_release_status = models.SmallIntegerField(verbose_name='代码发布流程状态', null=True, choices=code_release_status_choice)
     code_release_result = models.CharField(verbose_name='结果',max_length=1024,null=True)
@@ -574,6 +573,7 @@ class zgld_tag(models.Model):
         return 'tag: %s ' % (self.name)
 
     class Meta:
+        verbose_name_plural = "标签管理"
         app_label = "zhugeleida"
 
 
