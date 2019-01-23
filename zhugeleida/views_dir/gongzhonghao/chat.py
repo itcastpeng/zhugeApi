@@ -201,19 +201,20 @@ def chat_oper(request, oper_type, o_id):
                     content=content,
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=2
+                    send_type=2,
+                    is_customer_new_msg=False  # 代表此条客户已经读取了
                 )
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                # redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
 
                 redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
                 redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
 
 
                 rc.set(redis_user_id_key, True)
-                rc.set(redis_customer_id_key, True)
+                # rc.set(redis_customer_id_key, True)
                 rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
                 rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
 

@@ -612,6 +612,16 @@ def article_oper(request, oper_type, o_id):
 
                     if stay_time >= tags_time_count:
 
+                        # ## 方法1
+                        # customer_obj = models.zgld_customer.objects.get(id=o_id)
+                        #
+                        # if customer_obj:
+                        #     customer_obj.zgld_tag_set = tag_list
+
+
+
+
+                    ## 方式 2
                         already_tags_name_list = list(
                             models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name', flat=True))
 
