@@ -489,6 +489,8 @@ def activity_manage(request, oper_type):
         # 生成关注领红包的Excel表格
         elif oper_type == 'generate_focus_redPacket_excel':
             company_id = request.GET.get('company_id')
+            start_time = request.GET.get('start_time')
+            end_time = request.GET.get('end_time')
 
 
             data_list = [['编号','姓名','性别','地区','红包金额','是否关注','关注时间']]
@@ -498,6 +500,8 @@ def activity_manage(request, oper_type):
             q1.connector = 'and'
             q1.children.append(('user_type', 1))
             q1.children.append(('company_id', company_id))
+            q1.children.append(('create_date__gte', start_time))
+            q1.children.append(('create_date__lte', end_time))
             # q1.children.append(('is_subscribe', 1))  # 已经关注
             q1.children.append(('is_receive_redPacket', 1)) # (1, '发送了关注红包')
 
