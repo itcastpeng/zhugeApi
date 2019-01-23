@@ -2185,6 +2185,7 @@ def binding_article_customer_relate(request):
     data = request.GET.copy()
     print('------ 绑定文章客户关系 json.dumps(data) ------>>', json.dumps(data))
 
+    ###
     company_objs = models.zgld_company.objects.filter(id=company_id)
     if company_objs:
         company_obj = company_objs[0]
@@ -2278,6 +2279,53 @@ def binding_article_customer_relate(request):
                 print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>', customer_id, "|",user_id)
                 models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id, source=4)
 
+    user_objs = models.zgld_userprofile.objects.filter(id=user_id)
+
+
+    # 插入第一条用户和客户的对话信息 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复
+    msg = '终于等到你🌹,我是您的专属咨询代表【%s - %s】\n   如需沟通,您可在此或关注以下【公众号】进行沟通哦,期待您的回复!' % (company_objs[0].name, user_objs[0].username)
+    # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+    #                                     msg=msg)
+    _content = {'info_type': 1}
+    encodestr = base64.b64encode(msg.encode('utf-8'))
+    msg = str(encodestr, 'utf-8')
+    _content['msg'] = msg
+    content = json.dumps(_content)
+
+    models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id, content=content)
+
+    gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+    if gzh_objs:
+        gzh_obj = gzh_objs[0]
+        qrcode_url =  gzh_obj.qrcode_url
+        _content = {
+            'url': qrcode_url,
+            'info_type': 4  # 图片
+        }
+        content = json.dumps(_content)
+        models.zgld_chatinfo.objects.create(
+            content=content,
+            userprofile_id=user_id,
+            customer_id=customer_id,
+            send_type=1
+        )
+
+    print('---------- 插入 第一条用户和公众号客户的对话信息 successful ---->')
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+    redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+    redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+    redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
+    redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
+    redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
+
+
+    rc.set(redis_user_id_key, True)
+    rc.set(redis_customer_id_key, True)
+    rc.set(redis_customer_query_info_key, True) # 通知公众号文章客户消息数量变化了
+
+    rc.set(redis_user_query_info_key, True)     # 代表 雷达用户 消息数量发生了变化
+    rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
 
 
     activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id, status__in=[1, 2, 4]).order_by('-create_date')

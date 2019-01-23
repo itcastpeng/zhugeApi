@@ -466,8 +466,6 @@ def user_gongzhonghao_auth_oper(request, oper_type):
         url = qywx_config_dict.get('authorization_url')
         api_url = qywx_config_dict.get('api_url')
 
-
-
         if oper_type == 'create_gongzhonghao_share_auth_url':
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():

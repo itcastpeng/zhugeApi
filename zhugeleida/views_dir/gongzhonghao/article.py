@@ -654,7 +654,7 @@ def article_oper(request, oper_type, o_id):
                                 customer_obj.zgld_tag_set = tag_list
                                 response.code = 200
                                 response.msg = "添加成功"
-                        '''    
+                        '''
 
 
                     article_access_log_objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)

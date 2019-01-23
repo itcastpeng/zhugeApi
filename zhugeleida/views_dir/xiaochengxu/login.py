@@ -233,6 +233,25 @@ def login_oper(request, oper_type):
 
                         print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
 
+                        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+                        redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                        redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                        # redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
+
+                        redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(
+                            uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
+                        redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(
+                            uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
+
+                        rc.set(redis_user_id_key, True)
+                        rc.set(redis_customer_id_key, True)
+                        # rc.set(redis_customer_query_info_key, True)  # 通知公众号文章客户消息数量变化了
+
+                        rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
+                        rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
+
+
                         # 异步生成小程序和企业用户对应的小程序二维码
                         data_dict = {'user_id': user_id, 'customer_id': customer_id}
                         tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #

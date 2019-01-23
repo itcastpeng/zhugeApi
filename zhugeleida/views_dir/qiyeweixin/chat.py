@@ -276,8 +276,10 @@ def chat_oper(request, oper_type, o_id):
 
                 # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
                 redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
 
                 # rc.set(redis_user_id_key, True)
+                rc.set(redis_customer_query_info_key, True) # 通知公众号文章客户消息数量变化了
                 rc.set(redis_customer_id_key, True)
 
                 response.code = 200

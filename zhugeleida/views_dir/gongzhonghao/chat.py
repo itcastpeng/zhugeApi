@@ -211,6 +211,7 @@ def chat_oper(request, oper_type, o_id):
                 redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
                 redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
 
+
                 rc.set(redis_user_id_key, True)
                 rc.set(redis_customer_id_key, True)
                 rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
