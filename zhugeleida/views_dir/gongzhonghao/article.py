@@ -640,6 +640,14 @@ def article_oper(request, oper_type, o_id):
 
                                 parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
                                 _obj.tag_parent_id = parent_id
+                                if len(already_customer_id_list) == 0:
+                                    already_customer_id_list = []
+                                else:
+                                    tmp_list = []
+                                    for i in already_customer_id_list:
+                                        tmp_list.append(i)
+                                    already_customer_id_list = tmp_list
+
                                 _obj.tag_customer = already_customer_id_list  # [customer_id]
                                 _obj.save()
 
