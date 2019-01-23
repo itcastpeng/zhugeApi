@@ -2107,14 +2107,16 @@ def get_customer_gongzhonghao_userinfo(request):
 
     customer_objs = models.zgld_customer.objects.filter(openid=openid)
     customer_id = ''
+    formid = ''
     if customer_objs:
         customer_id = customer_objs[0].id
+        formid = customer_objs[0].formid
 
     if 'errcode' not in ret_json:
         openid = ret_json['openid']        # 用户唯一标
         subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
 
-        if int(subscribe) == 0:
+        if  formid != '已发':
             company_objs = models.zgld_company.objects.filter(id=company_id)
 
             user_objs = models.zgld_userprofile.objects.filter(id=user_id)
@@ -2166,7 +2168,9 @@ def get_customer_gongzhonghao_userinfo(request):
 
             rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
             rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
-
+            customer_objs.update(
+                formid='已发'
+            )
 
 
         customer_objs.update(

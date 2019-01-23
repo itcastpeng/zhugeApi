@@ -630,6 +630,7 @@ def article_oper(request, oper_type, o_id):
                                     'name': tag_name,
                                     'user_id': uid
                                 }
+                                print('值 already_customer_id_list-------->',already_customer_id_list)
 
                                 if tag_name not in already_tags_name_list:
                                     _obj = models.zgld_tag.objects.create(**tag_data)
