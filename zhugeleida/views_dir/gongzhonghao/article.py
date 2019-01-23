@@ -642,6 +642,21 @@ def article_oper(request, oper_type, o_id):
                                 _obj.tag_customer = already_customer_id_list  # [customer_id]
                                 _obj.save()
 
+
+                        '''
+                        # 操作tag，为客户添加多个标签
+                        elif oper_type == "customer_tag":
+                
+                            tag_list = json.loads(request.POST.get('tag_list'))
+                            customer_obj = models.zgld_customer.objects.get(id=o_id)
+                
+                            if customer_obj:
+                                customer_obj.zgld_tag_set = tag_list
+                                response.code = 200
+                                response.msg = "添加成功"
+                        '''    
+
+
                     article_access_log_objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
                     now_date_time = datetime.datetime.now()
                     if article_access_log_objs:
