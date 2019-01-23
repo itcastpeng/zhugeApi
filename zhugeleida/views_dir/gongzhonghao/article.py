@@ -646,7 +646,7 @@ def article_oper(request, oper_type, o_id):
                                     tmp_list = []
                                     for i in already_customer_id_list:
                                         tmp_list.append(int(i))
-                                        
+
                                     already_customer_id_list = tmp_list
 
                                 _obj.tag_customer = already_customer_id_list  # [customer_id]

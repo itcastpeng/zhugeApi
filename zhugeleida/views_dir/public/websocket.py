@@ -1122,10 +1122,10 @@ def gongzhonghao_websocket(request, oper_type):
                                                                                  is_customer_new_msg=True).count()
 
 
-                            if  type == 'query_num':
+                            if  type == 'register':
                                 response_data = {
                                     'msg_data': {
-                                        'chatinfo_count': chatinfo_count,
+                                        'unread_msg_num': chatinfo_count,
                                     },
                                     'code': 200,
                                     'msg': '获取成功',
