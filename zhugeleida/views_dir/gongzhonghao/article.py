@@ -652,12 +652,13 @@ def article_oper(request, oper_type, o_id):
                             if str(tag_id) not in already_tag_list:
                                 already_tag_list.append(str(tag_id))
 
-                        now_tag_list = [int(i)  for i in already_tag_list]
+                        if already_tag_list:
+                            now_tag_list = [int(i)  for i in already_tag_list]
 
-                        print('值 now_tag_list ----->>',now_tag_list)
+                            print('值 now_tag_list ----->>',now_tag_list)
 
-                        if customer_obj:
-                            customer_obj.zgld_tag_set = now_tag_list
+                            if customer_obj:
+                                customer_obj.zgld_tag_set = now_tag_list
 
 
                     # ## 方式 2
