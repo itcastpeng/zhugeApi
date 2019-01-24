@@ -1132,6 +1132,15 @@ def gongzhonghao_websocket(request, oper_type):
                                 }
                                 uwsgi.websocket_send(json.dumps(response_data))
 
+                            elif type == 'lived': # 验证链接是否存活
+                                response_data = {
+                                    'code': 270,
+                                    'msg': '为了新中国的胜利向我开炮',
+                                }
+                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                uwsgi.websocket_send(json.dumps(response_data))
+                                continue
+
                             elif type == 'closed':
                                 msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
                                 ret_data = {
