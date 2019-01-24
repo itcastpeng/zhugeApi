@@ -974,6 +974,7 @@ def gongzhonghao_websocket(request, oper_type):
                                     'msg': msg
                                 }
                                 rc.set(customer_id_position_key, 'output')
+                                rc.set(redis_customer_id_key, 'Stop')
                                 return JsonResponse(ret_data)
 
 
