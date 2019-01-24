@@ -1121,7 +1121,6 @@ def gongzhonghao_websocket(request, oper_type):
                                                                                  send_type=1,
                                                                                  is_customer_new_msg=True).count()
 
-
                             if  type == 'register':
                                 response_data = {
                                     'msg_data': {
