@@ -631,8 +631,7 @@ def article_oper(request, oper_type, o_id):
                                 print('值 already_tag_list 为空 ------>>')
                                 already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id', flat=True))
                                 already_company_tags_name_list = list(
-                                    models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name',
-                                                                                                            flat=True))
+                                    models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name',flat=True))
 
                             tag_data = {
                                 'name': tag_name,
