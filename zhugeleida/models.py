@@ -1346,7 +1346,86 @@ class zgld_money_record(models.Model):
     create_date = models.DateTimeField(verbose_name="记账时间", auto_now_add=True)
 
     class Meta:
-
         verbose_name_plural = "资金记录表"
         app_label = "zhugeleida"
 
+
+
+#公众号-案例标签表
+class zgld_case_tag(models.Model):
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
+    name = models.CharField(verbose_name='标签名称', max_length=32)
+    # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
+
+    class Meta:
+        verbose_name_plural = "案例标签表"
+        app_label = "zhugeleida"
+
+
+
+#案例库数据表
+class zgld_case(models.Model):
+        user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
+        company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
+        customer_name  = models.CharField('zgld_customer', verbose_name='客户姓名', null=True, blank=True)
+
+        title = models.CharField(verbose_name='文章标题', max_length=128)
+        cover_picture = models.TextField(verbose_name="封面图片URL",null=True)
+        tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
+
+        read_count = models.IntegerField(verbose_name="阅读数量", default=0)
+        up_count = models.IntegerField(default=0, verbose_name="点赞次数")
+        comment_count = models.IntegerField(default=0, verbose_name="被评论数量")
+
+        status_choices = ((1, '已发'),
+                          (2, '未发'),
+                          (3, '删除'),  # 逻辑删除
+                          )
+        status = models.SmallIntegerField(default=2, verbose_name='案例状态', choices=status_choices)
+        update_date = models.DateTimeField(verbose_name="日记最后修改时间")
+        create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+        class Meta:
+            verbose_name_plural = "案例表"
+            app_label = "zhugeleida"
+
+
+#案例日记表
+class zgld_diary(models.Model):
+
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
+    case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
+    company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
+    title = models.CharField(verbose_name='文章标题', max_length=128)
+    diary_date = models.DateTimeField(verbose_name="日记时间")
+    cover_picture = models.CharField(verbose_name="封面图片URL", max_length=128)
+    content = models.TextField(verbose_name='日记内容', null=True)
+
+    read_count = models.IntegerField(verbose_name="阅读数量", default=0)
+    up_count = models.IntegerField(default=0,verbose_name="点赞次数")
+    comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
+
+    status_choices = ( (1,'已发'),
+                       (2,'未发'),
+                       (3,'删除'), # 逻辑删除
+                     )
+    status = models.SmallIntegerField(default=2, verbose_name='日记状态', choices=status_choices)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
+
+
+    class Meta:
+        verbose_name_plural = "案例日记表"
+        app_label = "zhugeleida"
+
+##日记评论表
+class zgld_diary_comment(models.Model):
+    # company = models.ForeignKey('zgld_company', verbose_name='所属公司', null=True)
+    diary = models.ForeignKey('zgld_diary', verbose_name="关联的日记", null=True)
+    from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='from_customer',null=True) ## 关联的客户
+    to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='to_customer', null=True) ## 关联的客户
+    content = models.TextField(verbose_name="评论内容", null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "日记评论表"
+        app_label = "zhugeleida"
