@@ -122,6 +122,12 @@ class zgld_gongzhonghao_app(models.Model):
                       )
     mode = models.SmallIntegerField(default=1, verbose_name='红包发送方式', choices=mode_choices)
 
+
+    is_used_daifa_choices = (  (1, '代发红包'),
+                               (2, '自己商户发红包')
+                             )
+    is_used_daifa_redPacket = models.SmallIntegerField(default=1, verbose_name='是否开启代发红包', choices=is_used_daifa_choices)
+
     max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
     min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
 
