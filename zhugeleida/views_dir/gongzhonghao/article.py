@@ -614,11 +614,25 @@ def article_oper(request, oper_type, o_id):
 
                         # 方法1
                         customer_obj = models.zgld_customer.objects.get(id=o_id)
-                        already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id',flat=True))
 
-                        already_tags_name_list = list(models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name', flat=True))
 
+
+                        already_tag_name_list = list(customer_obj.zgld_tag_set.all().values_list('name', flat=True)) # 此客户已经拥有的标签
+
+                        already_tag_list = ''
+                        already_company_tags_name_list = ''
                         for tag_name in tags_name_list:
+
+                            if tag_name in already_tag_name_list: # 满足 文章标签已经在 【客户标签列表中】就不用创建
+                                print('tag_name 文章标签已经在 【客户标签列表中】---------->>',tag_name,"|",already_tag_name_list)
+                                continue
+
+                            elif not already_tag_list:
+                                print('值 already_tag_list 为空 ------>>')
+                                already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id', flat=True))
+                                already_company_tags_name_list = list(
+                                    models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name',
+                                                                                                            flat=True))
 
                             tag_data = {
                                 'name': tag_name,
@@ -626,7 +640,7 @@ def article_oper(request, oper_type, o_id):
                             }
                             print('值 already_tag_list-------->', already_tag_list)
 
-                            if tag_name not in already_tags_name_list:
+                            if tag_name not in already_company_tags_name_list:
                                 _obj = models.zgld_tag.objects.create(**tag_data)
                                 tag_id = _obj.id
 
@@ -639,6 +653,9 @@ def article_oper(request, oper_type, o_id):
                                 already_tag_list.append(str(tag_id))
 
                         now_tag_list = [int(i)  for i in already_tag_list]
+
+                        print('值 now_tag_list ----->>',now_tag_list)
+
                         if customer_obj:
                             customer_obj.zgld_tag_set = now_tag_list
 
