@@ -38,16 +38,11 @@ class CaseTagAddForm(forms.Form):
 
 # 添加标签信息
 class CaseTagSingleAddForm(forms.Form):
-    # parent_tag_id = forms.CharField(
-    #     required=True,
-    #     error_messages={
-    #         'required': "一级标签不能为空"
-    #     }
-    # )
-    user_id = forms.CharField(
+
+    company_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "用户ID不能为空"
+            'required': "公司ID不能为空"
         }
     )
 
@@ -59,21 +54,13 @@ class CaseTagSingleAddForm(forms.Form):
 
     )
 
-    # 查询标签名判断是否存在
-    # def clean_parent_tag_id(self):
-    #     parent_tag_id = self.data['parent_tag_id']
-    #     objs = models.zgld_article_tag.objects.filter(
-    #         id=parent_tag_id, user_id=self.data.get('user_id')
-    #     )
-    #     if not objs:
-    #         self.add_error('name', '一级标签不存在')
-    #     else:
-    #         return parent_tag_id
 
     def clean_tag_name(self):
+        company_id = self.data['company_id']
         tag_name = self.data['tag_name']
+
         objs = models.zgld_case_tag.objects.filter(
-            name=tag_name, user_id=self.data.get('user_id')
+            name=tag_name, company_id=company_id
         )
         if objs:
             self.add_error('tag_name', '不能存在相同的标签名')
@@ -84,14 +71,14 @@ class CaseTagSingleAddForm(forms.Form):
 
 
 
-# 添加标签信息
+# 修改标签信息
 class CaseTagUpdateAddForm(forms.Form):
-    # parent_tag_id = forms.CharField(
-    #     required=True,
-    #     error_messages={
-    #         'required': "一级标签不能为空"
-    #     }
-    # )
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
     tag_id = forms.CharField(
         required=True,
         error_messages={
@@ -107,30 +94,23 @@ class CaseTagUpdateAddForm(forms.Form):
 
     )
 
-    # 查询标签名判断是否存在
-    # def clean_parent_tag_id(self):
-    #     parent_tag_id = self.data['parent_tag_id']
-    #     objs = models.zgld_article_tag.objects.filter(
-    #         id=parent_tag_id, user_id=self.data.get('user_id')
-    #     )
-    #     if not objs:
-    #         self.add_error('name', '一级标签不存在')
-    #     else:
-    #         return parent_tag_id
+
 
     def clean_tag_name(self):
         tag_id = self.data['tag_id']
+        company_id = self.data['company_id']
         tag_name =  self.data['tag_name']
         objs = models.zgld_case_tag.objects.filter(
-            name=tag_name, user_id=self.data.get('user_id')
+            name=tag_name, company_id=company_id
         ).exclude(id=tag_id)
+
         if objs:
             self.add_error('tag_name', '不能存在相同的标签名')
         else:
             return tag_name
 
 
-# 判断是否是数字
+# 分页
 class TagUserSelectForm(forms.Form):
     current_page = forms.IntegerField(
         required=False,

@@ -14,19 +14,20 @@ from publicFunc.condition_com import conditionCom
 # 文章的标签查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def article_tag(request):
+def case_tag(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
 
         user_id = request.GET.get('user_id')
+        company_id = request.GET.get('company_id')
+
         field_dict = {
             'tag_id': '',
             'name': '__contains', #标签搜索
         }
         q = conditionCom(request, field_dict)
         print('q -->', q)
-        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
         tag_list = models.zgld_case_tag.objects.filter(company_id=company_id).values('id','name')
         tag_data = list(tag_list)
@@ -47,7 +48,7 @@ def article_tag(request):
 # 文章的标签操作
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
-def article_tag_oper(request, oper_type,o_id):
+def case_tag_oper(request, oper_type,o_id):
     response = Response.ResponseObj()
 
     if request.method == "POST":
@@ -104,11 +105,13 @@ def article_tag_oper(request, oper_type,o_id):
         #加单层标签+默认标签或者用户专属标签
         elif oper_type == "update":
 
+            tag_name = request.POST.get('tag_name')
             company_id = request.GET.get('company_id')
+
             tag_data = {
                 'tag_id' : o_id,
                 'company_id' : company_id,
-                'tag_name' : request.POST.get('tag_name')   # 二级标签
+                'tag_name' : tag_name   # 标签名字
             }
 
             forms_obj = CaseTagUpdateAddForm(tag_data)
@@ -118,7 +121,7 @@ def article_tag_oper(request, oper_type,o_id):
 
                 #说明新建的一级标签
                 case_tag_objs = models.zgld_case_tag.objects.filter(
-                   id = tag_id,company_id=company_id
+                   id=tag_id,company_id=company_id
                 )
                 case_tag_objs.update(
                     name = tag_name
@@ -137,7 +140,7 @@ def article_tag_oper(request, oper_type,o_id):
 
             company_id = request.GET.get('company_id')
             tag_data = {
-                'user_id' : request.GET.get('user_id'),
+                'company_id' : company_id,
                 'tag_name' : request.POST.get('tag_name')   # 二级标签
             }
 
