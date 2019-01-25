@@ -93,7 +93,7 @@ def contact(request):
                     send_type=2
                     )
                 _count = _objs.count()
-
+                print(' zgld_tag_set ---------->',obj.customer.zgld_tag_set.all().order_by('-create_date').values_list('name', flat=True))
                 base_info_dict = {
                     'customer_id': obj.customer_id,
                     'customer_source' : obj.customer.user_type or '',
