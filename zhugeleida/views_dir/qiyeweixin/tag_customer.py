@@ -150,12 +150,16 @@ def tag_customer_oper(request, oper_type, o_id):
                 customer_list = json.loads(request.POST.get('customer_list'))
                 if customer_list:
                     print('customer_list ------->>',customer_list)
-                    
-                    objs = models.zgld_tag.objects.filter(id=o_id,user__company_id=company_id)
 
-                    objs[0].tag_customer = customer_list
-                    response.code = 200
-                    response.msg = "添加成功"
+                    objs = models.zgld_tag.objects.filter(id=o_id,user__company_id=company_id)
+                    if objs:
+                        objs[0].tag_customer = customer_list
+                        response.code = 200
+                        response.msg = "添加成功"
+                    else:
+                        response.code = 302
+                        response.msg = "标签不存在"
+
                 else:
                     response.code = 302
                     response.msg = "标签关联客户不能为空"
