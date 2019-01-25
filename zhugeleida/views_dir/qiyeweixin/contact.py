@@ -104,7 +104,8 @@ def contact(request):
                     'name': customer_name,
                     'dateTime': deal_time.deal_time(obj.create_date),
                     'msg': msg,
-                    'count' :_count
+                    'count' :_count,
+                    'tags_list' : obj.customer.zgld_tag_set.order_by('-create_date').values_list('name',flat=True)
                 }
 
                 ret_data_list.append(base_info_dict)
