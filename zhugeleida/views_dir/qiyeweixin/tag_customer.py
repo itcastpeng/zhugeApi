@@ -141,7 +141,7 @@ def tag_customer_oper(request, oper_type, o_id):
             company_id =   request.GET.get('company_id')
 
             tag_data = {
-                'tag_id': tag_id,
+                'tag_id': o_id,
                 # 'name' : request.POST.get('name'),
             }
 
@@ -149,7 +149,7 @@ def tag_customer_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 customer_list = json.loads(request.POST.get('customer_list'))
                 if customer_list:
-                    objs = models.zgld_tag.objects.filter(id=tag_id,user__company_id=company_id)
+                    objs = models.zgld_tag.objects.filter(id=o_id,user__company_id=company_id)
 
                     objs[0].tag_customer = customer_list
                     response.code = 200
