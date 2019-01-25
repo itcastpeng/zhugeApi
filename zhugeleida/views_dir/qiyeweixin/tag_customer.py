@@ -150,9 +150,12 @@ def tag_customer_oper(request, oper_type, o_id):
                 customer_list = json.loads(request.POST.get('customer_list'))
                 if customer_list:
                     print('customer_list ------->>',customer_list)
+                    parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
 
-                    objs = models.zgld_tag.objects.filter(id=o_id,user__company_id=company_id)
+                    objs = models.zgld_tag.objects.filter(id=o_id)
+
                     if objs:
+
                         objs[0].tag_customer = customer_list
                         response.code = 200
                         response.msg = "添加成功"
