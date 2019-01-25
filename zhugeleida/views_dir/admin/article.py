@@ -803,10 +803,7 @@ def article_oper(request, oper_type, o_id):
 
                     for _obj in _objs:
                         article_id = _obj.get('article_id')
-                        _access_log_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
-
-                                                                                         customer_id=customer_id).order_by(
-                            '-last_access_date')
+                        _access_log_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,customer_id=customer_id).order_by('-last_access_date')
                         last_access_date = ''
                         if _access_log_objs:
                             last_access_date = _access_log_objs[0].last_access_date.strftime('%Y-%m-%d %H:%M:%S')
@@ -816,7 +813,6 @@ def article_oper(request, oper_type, o_id):
                         stay_time = _obj.get('stay_time__sum')
                         stay_time = conversion_seconds_hms(stay_time)
                         ret_data.append({
-
                             'article_id': article_id,
                             'article_title': _obj.get('article__title'),
                             'stay_time': stay_time,
@@ -842,6 +838,7 @@ def article_oper(request, oper_type, o_id):
                 print('------- 未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
 
         ## 客户展示分级影响力。按level 展示出相对数据
         elif oper_type == 'customer_effect_ranking_by_level':

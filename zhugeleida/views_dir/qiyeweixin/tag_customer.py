@@ -134,6 +134,50 @@ def tag_customer_oper(request, oper_type, o_id):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
 
+        # 添加标签
+        elif  oper_type == "update":
+
+            tag_id =   request.POST.get('tag_id')
+            company_id =   request.GET.get('company_id')
+
+            tag_data = {
+                'tag_id': tag_id,
+                # 'name' : request.POST.get('name'),
+            }
+
+            forms_obj = TagCustomerUpdateForm(tag_data)
+            if forms_obj.is_valid():
+                customer_list = json.loads(request.POST.get('customer_list'))
+                if customer_list:
+                    objs = models.zgld_tag.objects.filter(id=tag_id,user__company_id=company_id)
+
+                    objs[0].tag_customer = customer_list
+                    response.code = 200
+                    response.msg = "添加成功"
+                else:
+                    response.code = 302
+                    response.msg = "标签关联客户不能为空"
+
+            else:
+                # print("验证不通过")
+                print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+        # 删除用户标签
+
+        elif oper_type == "delete":
+            tag_id = request.POST.get('id')
+            company_id = request.GET.get('company_id')
+
+            tag_objs = models.zgld_tag.objects.filter(id=tag_id,user__company_id=company_id)
+            if tag_objs:
+                tag_objs.delete()
+                response.code = 200
+                response.msg = "删除成功"
+            else:
+                response.code = 302
+                response.msg = '标签不存在'
+
 
     else:
         response.code = 402

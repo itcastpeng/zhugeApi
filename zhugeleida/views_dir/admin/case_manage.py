@@ -54,7 +54,7 @@ def case_manage(request, oper_type):
 
 
                 print('-----q1---->>', q1)
-                objs = models.zgld_case.objects.select_related('company').filter(q1).order_by(order)
+                objs = models.zgld_case.objects.select_related('company').filter(q1).order_by(order).exclude(id=3)
                 count = objs.count()
 
                 if length != 0:
@@ -127,8 +127,8 @@ def case_manage_oper(request, oper_type, o_id):
                 response.msg = "删除成功"
 
             else:
-                response.code = 301
-                response.msg = '活动不存在或者正在进行中'
+                response.code = 302
+                response.msg = '案例不存在'
 
         # 修改-案例
         elif oper_type == 'update':
