@@ -1369,7 +1369,7 @@ class zgld_case(models.Model):
     customer_name  = models.CharField(max_length=64,verbose_name='客户昵称', null=True)
     headimgurl = models.CharField(verbose_name="客户头像url", max_length=256, default='statics/imgs/Avator.jpg')
 
-    # title = models.CharField(verbose_name='案例名称', max_length=128)
+    case_name = models.CharField(verbose_name='案例名称', max_length=128)
     cover_picture = models.TextField(verbose_name="封面图片URL",null=True)
     tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
     status_choices = ((1, '已发'),

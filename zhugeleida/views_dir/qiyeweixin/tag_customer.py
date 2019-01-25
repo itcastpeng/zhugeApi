@@ -69,12 +69,13 @@ def tag_customer(request):
                 customer_list = []
                 for c_obj in obj.tag_customer.all():
                     try:
-                        username = base64.b64decode(c_obj.customer.username)
+                        username = base64.b64decode(c_obj.username)
                         customer_name = str(username, 'utf-8')
                         print('----- 解密b64decode username----->', username)
+
                     except Exception as e:
-                        print('----- b64decode解密失败的 customer_id 是 | e ----->', c_obj.customer_id, "|", e)
-                        customer_name = '客户ID%s' % (c_obj.customer_id)
+                        print('----- b64decode解密失败的 customer_id 是 | e ----->', c_obj.id, "|", e)
+                        customer_name = '客户ID%s' % (c_obj.id)
 
                     customer_list.append({'id': c_obj.id,'headimgurl': c_obj.headimgurl ,'name': customer_name})
 

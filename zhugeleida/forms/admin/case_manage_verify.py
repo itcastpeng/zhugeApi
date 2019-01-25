@@ -104,6 +104,14 @@ class SetFocusGetRedPacketForm(forms.Form):
 #增加活动
 class CaseAddForm(forms.Form):
 
+
+    case_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "案例名称不能为空"
+        }
+    )
+
     customer_name = forms.CharField(
         required=True,
         error_messages={

@@ -134,6 +134,7 @@ def case_manage_oper(request, oper_type, o_id):
         elif oper_type == 'update':
 
             case_id = request.GET.get('case_id')
+            case_name = request.GET.get('case_name')
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
             customer_name = request.POST.get('customer_name')
@@ -145,7 +146,7 @@ def case_manage_oper(request, oper_type, o_id):
                 cover_picture = json.dumps(cover_picture)
 
             form_data = {
-
+                'case_name' : case_name,
                 'company_id': company_id,
                 'customer_name': customer_name,  # 活动名称
                 'headimgurl': headimgurl,  # 文章ID
@@ -184,6 +185,7 @@ def case_manage_oper(request, oper_type, o_id):
         # 增加-案例
         elif oper_type == "add":
 
+            case_name = request.GET.get('case_name')
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
             customer_name = request.POST.get('customer_name')
@@ -195,7 +197,7 @@ def case_manage_oper(request, oper_type, o_id):
                 cover_picture = json.dumps(cover_picture)
 
             form_data = {
-
+                'case_name' : case_name,
                 'company_id': company_id,
                 'customer_name': customer_name,  # 活动名称
                 'headimgurl': headimgurl,  # 文章ID
