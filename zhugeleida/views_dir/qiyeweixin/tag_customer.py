@@ -117,10 +117,13 @@ def tag_customer_oper(request, oper_type, o_id):
 
             forms_obj = TagCustomerAddForm(tag_data)
             if forms_obj.is_valid():
+                parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
                 customer_list = json.loads(request.POST.get('customer_list'))
                 if customer_list:
                     obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
+                    obj.tag_parent_id = parent_id
                     obj.tag_customer = customer_list
+
                     response.code = 200
                     response.msg = "添加成功"
                 else:
@@ -137,9 +140,6 @@ def tag_customer_oper(request, oper_type, o_id):
         # 添加标签
         elif  oper_type == "update":
 
-            tag_id =   request.POST.get('tag_id')
-            company_id =   request.GET.get('company_id')
-
             tag_data = {
                 'tag_id': o_id,
                 # 'name' : request.POST.get('name'),
@@ -150,13 +150,12 @@ def tag_customer_oper(request, oper_type, o_id):
                 customer_list = json.loads(request.POST.get('customer_list'))
                 if customer_list:
                     print('customer_list ------->>',customer_list)
-                    parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
 
                     objs = models.zgld_tag.objects.filter(id=o_id)
-
                     if objs:
-
-                        objs[0].tag_customer = customer_list
+                        objs.update(
+                            tag_customer=customer_list
+                        )
                         response.code = 200
                         response.msg = "添加成功"
                     else:
