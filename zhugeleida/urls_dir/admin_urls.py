@@ -4,7 +4,8 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     home_page, product, help_doc, article,article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, tongxunlu,money_manage
+    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, tongxunlu,money_manage,case_tag,case_manage
+
 
 
 urlpatterns = [
@@ -119,6 +120,14 @@ urlpatterns = [
     # 文章的标签管理
     url(r'^article_tag/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article_tag.article_tag_oper),
     url(r'^article_tag$', article_tag.article_tag),
+
+    # 案例-标签管理
+    url(r'^case_tag/(?P<oper_type>\w+)/(?P<o_id>\d+)$', case_tag.case_tag_oper),
+    url(r'^case_tag$', case_tag.case_tag),
+
+    # 案例管理
+    url(r'^case_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', case_manage.case_manage_oper),
+    url(r'^case_manage/(?P<oper_type>\w+)$', case_manage.case_manage),
 
     # 话术分组管理
     url(r'^talkGroupManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),

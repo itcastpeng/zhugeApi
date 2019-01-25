@@ -8,7 +8,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.tag_customer_verify import TagCustomerAddForm, TagCustomerUpdateForm, TagCustomerSelectForm
 import time
 import datetime
-import json
+import json,base64
+
 
 from publicFunc.condition_com import conditionCom
 
@@ -67,7 +68,16 @@ def tag_customer(request):
             for obj in objs:
                 customer_list = []
                 for c_obj in obj.tag_customer.all():
-                    customer_list.append({'id': c_obj.id,'headimgurl': c_obj.headimgurl ,'name': c_obj.username})
+                    try:
+                        username = base64.b64decode(c_obj.username)
+                        customer_name = str(username, 'utf-8')
+                        print('----- 解密b64decode username----->', username)
+
+                    except Exception as e:
+                        print('----- b64decode解密失败的 customer_id 是 | e ----->', c_obj.id, "|", e)
+                        customer_name = '客户ID%s' % (c_obj.id)
+
+                    customer_list.append({'id': c_obj.id,'headimgurl': c_obj.headimgurl ,'name': customer_name})
 
                 if customer_list:
                     customer_num = len(customer_list)
@@ -123,6 +133,59 @@ def tag_customer_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
+        # 添加标签
+        elif  oper_type == "update":
+
+            tag_id =   request.POST.get('tag_id')
+            company_id =   request.GET.get('company_id')
+
+            tag_data = {
+                'tag_id': o_id,
+                # 'name' : request.POST.get('name'),
+            }
+
+            forms_obj = TagCustomerUpdateForm(tag_data)
+            if forms_obj.is_valid():
+                customer_list = json.loads(request.POST.get('customer_list'))
+                if customer_list:
+                    print('customer_list ------->>',customer_list)
+                    parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
+
+                    objs = models.zgld_tag.objects.filter(id=o_id)
+
+                    if objs:
+
+                        objs[0].tag_customer = customer_list
+                        response.code = 200
+                        response.msg = "添加成功"
+                    else:
+                        response.code = 302
+                        response.msg = "标签不存在"
+
+                else:
+                    response.code = 302
+                    response.msg = "标签关联客户不能为空"
+
+            else:
+                # print("验证不通过")
+                print(forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+        # 删除用户标签
+
+        elif oper_type == "delete":
+            tag_id = request.POST.get('id')
+            company_id = request.GET.get('company_id')
+
+            tag_objs = models.zgld_tag.objects.filter(id=tag_id,user__company_id=company_id)
+            if tag_objs:
+                tag_objs.delete()
+                response.code = 200
+                response.msg = "删除成功"
+            else:
+                response.code = 302
+                response.msg = '标签不存在'
 
 
     else:

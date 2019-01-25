@@ -291,6 +291,7 @@ def user_gongzhonghao_auth(request):
             'openid': openid,
             'authorizer_appid': appid,
             'headimgurl': headimgurl,
+            'user_id' : uid
         }
         # 获取 公众号的用户信息
         tasks.get_customer_gongzhonghao_userinfo.delay(_data)
@@ -465,8 +466,6 @@ def user_gongzhonghao_auth_oper(request, oper_type):
 
         url = qywx_config_dict.get('authorization_url')
         api_url = qywx_config_dict.get('api_url')
-
-
 
         if oper_type == 'create_gongzhonghao_share_auth_url':
             forms_obj = CreateShareUrl(request.GET)

@@ -14,13 +14,7 @@ class TagCustomerAddForm(forms.Form):
             'required': "标签不能为空"
         }
     )
-    # tag_user = forms.CharField(
-    #     required=True,
-    #     error_messages = {
-    #         'required': "关联用户不能为空"
-    #     }
-    #
-    # )
+
 
     # 查询标签名判断是否存在
     def clean_name(self):
@@ -43,24 +37,24 @@ class TagCustomerUpdateForm(forms.Form):
         }
     )
 
-    name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '标签名不能为空'
-        }
-    )
+    # name = forms.CharField(
+    #     required=True,
+    #     error_messages={
+    #         'required': '标签名不能为空'
+    #     }
+    # )
 
-    # 判断标签是否存在
-    def clean_name(self):
-        tag_id = self.data['tag_id']
-        name = self.data['name']
-        objs = models.zgld_tag.objects.filter(
-            name=name,
-        )
-        if not objs:
-            self.add_error('name', '标签不存在')
-        else:
-            return name
+    # # 判断标签是否存在
+    # def clean_name(self):
+    #     tag_id = self.data['tag_id']
+    #     name = self.data['name']
+    #     objs = models.zgld_tag.objects.filter(
+    #         name=name,
+    #     )
+    #     if not objs:
+    #         self.add_error('name', '标签不存在')
+    #     else:
+    #         return name
 
 
 # 判断是否是数字

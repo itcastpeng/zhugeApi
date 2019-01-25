@@ -333,9 +333,9 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, params=get_data)
 
 
-url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/expect_chengjiaolv_customer_num' # 统计-名片状态+账号状态
-get_data['company_id'] = 1
-ret = requests.get(url, params=get_data)
+# url = ip + '/zhugeleida/mycelery/bossLeida_acount_data_and_line_info/expect_chengjiaolv_customer_num' # 统计-名片状态+账号状态
+# get_data['company_id'] = 1
+# ret = requests.get(url, params=get_data)
 
 
 
@@ -540,8 +540,55 @@ ret = requests.get(url, params=get_data)
 # ret = requests.post(url, data = post_data ,params=get_data)
 
 
+#### 案例标签管理
+
+# url =  ip + '/zhugeleida/admin/case_tag'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+# url =  ip + '/zhugeleida/admin/case_tag/add/0'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['tag_name'] = '隆鼻'
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+# url =  ip + '/zhugeleida/admin/case_tag/update/1'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['tag_name'] = '隆鼻33333'
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+# url =  ip + '/zhugeleida/admin/case_tag/delete/1'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.post(url, data = post_data ,params=get_data)
 
 
+#######
+# url =  ip + '/zhugeleida/admin/case_manage/case_list'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+
+# url =  ip + '/zhugeleida/admin/case_manage/add/0'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['case_name'] = '我的美白之旅'
+# post_data['customer_name'] = '李汉杰'
+# post_data['headimgurl'] = 'xxx.jpg'
+# post_data['status'] =  1 #
+# post_data['cover_picture'] = json.dumps({})
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+url =  ip + '/zhugeleida/admin/case_manage/update/1'  # 获取产品的列表
+get_data['company_id'] = 1
+
+post_data['case_name'] = '我的美白之旅3'
+post_data['customer_name'] = '李汉杰-就是我，不一样的暗火'
+post_data['headimgurl'] = 'xxx.jpg'
+post_data['status'] =  1 #
+post_data['cover_picture'] = json.dumps({})
+
+ret = requests.post(url, data = post_data ,params=get_data)
+
+###################
 
 # url =  ip + '/zhugeleida/gongzhonghao/article/myarticle/1'  # 获取产品的列表
 # ret = requests.get(url, data = post_data ,params=get_data)
