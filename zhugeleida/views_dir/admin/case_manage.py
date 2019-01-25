@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.forms.admin.case_manage_verify import SetFocusGetRedPacketForm, CaseAddForm, CaseSelectForm, \
+from zhugeleida.forms.admin.case_manage_verify import SetFocusGetRedPacketForm, CaseAddForm, CaseSelectForm, CaseUpdateForm, \
     ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
 
 import json,datetime
@@ -64,9 +64,8 @@ def case_manage(request, oper_type):
 
                 ret_data = []
                 if objs:
+
                     for obj in objs:
-
-
                         status = obj.status
                         status_text = obj.get_status_display()
                         cover_picture = obj.cover_picture
@@ -83,8 +82,8 @@ def case_manage(request, oper_type):
                             'status': status,
                             'status_text': status_text,
 
-                            'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S'),
-                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
+                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
                 #  查询成功 返回200 状态码
@@ -117,7 +116,8 @@ def case_manage_oper(request, oper_type, o_id):
         # 删除-案例
         if oper_type == "delete":
 
-            objs = models.zgld_case.objects.filter(id=o_id)
+            company_id = request.GET.get('company_id')
+            objs = models.zgld_case.objects.filter(id=o_id,company_id=company_id)
 
             if objs:
                 objs.update(
@@ -133,10 +133,11 @@ def case_manage_oper(request, oper_type, o_id):
         # 修改-案例
         elif oper_type == 'update':
 
-            case_id = request.GET.get('case_id')
-            case_name = request.GET.get('case_name')
+            case_id = o_id
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
+
+            case_name = request.POST.get('case_name')
             customer_name = request.POST.get('customer_name')
             headimgurl = request.POST.get('headimgurl')
             status = request.POST.get('status')
@@ -146,21 +147,22 @@ def case_manage_oper(request, oper_type, o_id):
                 cover_picture = json.dumps(cover_picture)
 
             form_data = {
+                'case_id' : case_id,
                 'case_name' : case_name,
                 'company_id': company_id,
                 'customer_name': customer_name,  # 活动名称
                 'headimgurl': headimgurl,  # 文章ID
                 'status': status,
-
             }
 
-            forms_obj = CaseAddForm(form_data)
+            forms_obj = CaseUpdateForm(form_data)
             if forms_obj.is_valid():
 
                 objs = models.zgld_case.objects.filter(company_id=company_id,id=case_id)
                 if objs:
                     objs.update(
                         user_id=user_id,
+                        case_name=case_name,
                         customer_name=customer_name.strip(),
                         headimgurl=headimgurl,
                         cover_picture=cover_picture,
@@ -185,10 +187,13 @@ def case_manage_oper(request, oper_type, o_id):
         # 增加-案例
         elif oper_type == "add":
 
-            case_name = request.GET.get('case_name')
+
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
+
+            case_name = request.POST.get('case_name')
             customer_name = request.POST.get('customer_name')
+
             headimgurl = request.POST.get('headimgurl')
             status  = request.POST.get('status')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
@@ -210,6 +215,7 @@ def case_manage_oper(request, oper_type, o_id):
 
                 obj = models.zgld_case.objects.create(
                     user_id=user_id,
+                    case_name=case_name,
                     company_id=company_id,
                     customer_name=customer_name.strip(),
                     headimgurl=headimgurl,

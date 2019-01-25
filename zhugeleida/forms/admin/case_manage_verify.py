@@ -139,7 +139,80 @@ class CaseAddForm(forms.Form):
             'required': "头像不能为空"
         }
     )
+    def clean_case_name(self):
 
+        company_id = self.data['company_id']
+        case_name =  self.data['case_name']
+
+        objs = models.zgld_case.objects.filter(
+            case_name=case_name, company_id=company_id
+        )
+
+        if objs:
+            self.add_error('case_name', '不能存在相同的案例名')
+        else:
+            return case_name
+
+
+# 修改案例
+class CaseUpdateForm(forms.Form):
+
+    case_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "案例ID不能为空"
+        }
+    )
+
+    case_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "案例名称不能为空"
+        }
+    )
+
+    customer_name = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "客户名字不能为空"
+        }
+    )
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    status = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "状态不能为空"
+        }
+    )
+
+    headimgurl = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "头像不能为空"
+        }
+    )
+
+    def clean_case_name(self):
+
+        case_id = self.data['case_id']
+        company_id = self.data['company_id']
+        case_name = self.data['case_name']
+
+        objs = models.zgld_case.objects.filter(
+            case_name=case_name, company_id=company_id
+        ).exclude(id=case_id)
+
+        if objs:
+            self.add_error('case_name', '不能存在相同的案例名')
+        else:
+            return case_name
 
 
 #修改活动

@@ -1382,7 +1382,7 @@ class zgld_case(models.Model):
     up_count = models.IntegerField(default=0, verbose_name="点赞次数")
     comment_count = models.IntegerField(default=0, verbose_name="被评论数量")
 
-    update_date = models.DateTimeField(verbose_name="日记最后修改时间")
+    update_date = models.DateTimeField(verbose_name="日记最后修改时间",null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:

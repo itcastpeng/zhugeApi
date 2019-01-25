@@ -562,12 +562,31 @@ ip = 'http://127.0.0.1:8001'
 
 
 #######
+# url =  ip + '/zhugeleida/admin/case_manage/case_list'  # 获取产品的列表
+# get_data['company_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
-url =  ip + '/zhugeleida/admin/case_manage/case_list'  # 获取产品的列表
+
+# url =  ip + '/zhugeleida/admin/case_manage/add/0'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['case_name'] = '我的美白之旅'
+# post_data['customer_name'] = '李汉杰'
+# post_data['headimgurl'] = 'xxx.jpg'
+# post_data['status'] =  1 #
+# post_data['cover_picture'] = json.dumps({})
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+url =  ip + '/zhugeleida/admin/case_manage/update/1'  # 获取产品的列表
 get_data['company_id'] = 1
-ret = requests.get(url, data = post_data ,params=get_data)
 
+post_data['case_name'] = '我的美白之旅3'
+post_data['customer_name'] = '李汉杰-就是我，不一样的暗火'
+post_data['headimgurl'] = 'xxx.jpg'
+post_data['status'] =  1 #
+post_data['cover_picture'] = json.dumps({})
 
+ret = requests.post(url, data = post_data ,params=get_data)
 
 ###################
 
