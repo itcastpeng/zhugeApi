@@ -561,6 +561,11 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.post(url, data = post_data ,params=get_data)
 
 
+#######
+
+url =  ip + '/zhugeleida/admin/case_manage/case_list'  # 获取产品的列表
+get_data['company_id'] = 1
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 

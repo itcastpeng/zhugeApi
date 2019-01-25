@@ -188,32 +188,3 @@ def case_tag_oper(request, oper_type,o_id):
 
     return JsonResponse(response.__dict__)
 
-
-def tree_search(d_dic,tag_dic):
-
-    for k,v in d_dic.items():
-
-        if k[0] == tag_dic[2]:
-
-            d_dic[k][tag_dic] = {}
-            return
-        else:
-            if v:
-                tree_search(d_dic[k],tag_dic)
-
-def build_tree(query_set_list):
-
-    d_dic = { }
-
-    for tag_dic in query_set_list:
-
-        if tag_dic[2] is None:
-
-            d_dic[tag_dic] = {}
-
-        else:
-            tree_search(d_dic, tag_dic)
-
-    return d_dic
-
-

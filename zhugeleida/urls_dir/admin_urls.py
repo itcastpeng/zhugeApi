@@ -126,8 +126,8 @@ urlpatterns = [
     url(r'^case_tag$', case_tag.case_tag),
 
     # 案例管理
-    url(r'^case/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article_tag.article_tag_oper),
-    url(r'^case_manage$', case_manage.case_manage),
+    url(r'^case_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article_tag.article_tag_oper),
+    url(r'^case_manage/(?P<oper_type>\w+)$', case_manage.case_manage),
 
     # 话术分组管理
     url(r'^talkGroupManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),

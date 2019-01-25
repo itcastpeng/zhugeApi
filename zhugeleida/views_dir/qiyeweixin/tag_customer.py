@@ -8,7 +8,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.tag_customer_verify import TagCustomerAddForm, TagCustomerUpdateForm, TagCustomerSelectForm
 import time
 import datetime
-import json
+import json,base64
+
 
 from publicFunc.condition_com import conditionCom
 
@@ -67,7 +68,15 @@ def tag_customer(request):
             for obj in objs:
                 customer_list = []
                 for c_obj in obj.tag_customer.all():
-                    customer_list.append({'id': c_obj.id,'headimgurl': c_obj.headimgurl ,'name': c_obj.username})
+                    try:
+                        username = base64.b64decode(c_obj.customer.username)
+                        customer_name = str(username, 'utf-8')
+                        print('----- 解密b64decode username----->', username)
+                    except Exception as e:
+                        print('----- b64decode解密失败的 customer_id 是 | e ----->', c_obj.customer_id, "|", e)
+                        customer_name = '客户ID%s' % (c_obj.customer_id)
+
+                    customer_list.append({'id': c_obj.id,'headimgurl': c_obj.headimgurl ,'name': customer_name})
 
                 if customer_list:
                     customer_num = len(customer_list)
