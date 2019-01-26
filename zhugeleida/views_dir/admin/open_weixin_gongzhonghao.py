@@ -893,7 +893,8 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             'openid': openid,
                             'authorizer_appid': app_id,
                             'company_id': company_id,
-                            'type': 'get_gzh_user_whole_info'
+                            'type': 'get_gzh_user_whole_info',
+
                         }
                         tasks.get_customer_gongzhonghao_userinfo.delay(__data)
 

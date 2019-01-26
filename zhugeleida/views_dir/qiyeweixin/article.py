@@ -226,6 +226,27 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
+        # 修改用户启用状态
+        elif oper_type == "update_article_status":
+
+            status = request.POST.get('status')    #(1, "启用"),  (2, "未启用")
+            company_id = request.GET.get('company_id')
+
+            objs = models.zgld_article.objects.filter(id=o_id,company_id=company_id)
+
+            if objs:
+                if status:
+                    objs.update(status=status)
+                    response.code = 200
+                    response.msg = "发布成功"
+
+            else:
+                response.code = 302
+                response.msg = "文章不存在"
+
+
+
     elif request.method == "GET":
         # 查询自己的文章
         if oper_type == 'myarticle':

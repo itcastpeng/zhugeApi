@@ -315,6 +315,7 @@ def create_user_or_customer_qr_code(request):
     response = ResponseObj()
     print('---- 【生成小程序二维码 celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
+
     data = request.GET.get('data')
     if data:
         data = json.loads(request.GET.get('data'))
@@ -326,83 +327,92 @@ def create_user_or_customer_qr_code(request):
         print('---- celery request.POST | data 数据 -->', request.POST, '|')
         user_id = request.POST.get('user_id')
         customer_id = request.POST.get('customer_id', '')
+    company_id = ''
+    product_function_type = ''
+    userprofile_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
+    if userprofile_objs:
+        company_id = userprofile_objs[0].company_id
+        product_function_type = userprofile_objs[0].company.product_function_type
 
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    if product_function_type != 3:
+        xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
 
-    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    if not customer_id:
-        path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
-        user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
+        if xiaochengxu_app_objs:
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            if not customer_id:
+                path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
+                user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
 
-    else:
-        path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
-        user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
+            else:
+                path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
+                user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
 
-    get_qr_data = {}
-    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+            get_qr_data = {}
+            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-    userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
-    company_id = userprofile_obj.company_id
-    obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-    authorizer_refresh_token = obj.authorizer_refresh_token
-    authorizer_appid = obj.authorization_appid
+            # userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
+            # company_id = userprofile_obj.company_id
 
-    component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
-    key_name = '%s_authorizer_access_token' % (authorizer_appid)
+            authorizer_refresh_token = xiaochengxu_app_objs[0].authorizer_refresh_token
+            authorizer_appid = xiaochengxu_app_objs[0].authorization_appid
 
-    authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+            component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
+            key_name = '%s_authorizer_access_token' % (authorizer_appid)
 
-    if not authorizer_access_token:
-        data = {
-            'key_name': key_name,
-            'authorizer_refresh_token': authorizer_refresh_token,
-            'authorizer_appid': authorizer_appid
-        }
-        authorizer_access_token_ret = create_authorizer_access_token(data)
-        authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
+            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-    get_qr_data['access_token'] = authorizer_access_token
+            if not authorizer_access_token:
+                data = {
+                    'key_name': key_name,
+                    'authorizer_refresh_token': authorizer_refresh_token,
+                    'authorizer_appid': authorizer_appid
+                }
+                authorizer_access_token_ret = create_authorizer_access_token(data)
+                authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
 
-    post_qr_data = {'path': path, 'width': 430}
+            get_qr_data['access_token'] = authorizer_access_token
 
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    qr_ret = s.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+            post_qr_data = {'path': path, 'width': 430}
 
-    # qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+            s = requests.session()
+            s.keep_alive = False  # 关闭多余连接
+            qr_ret = s.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
 
-    if not qr_ret.content:
-        rc.delete('xiaochengxu_token')
-        response.msg = "生成小程序二维码未验证通过"
+            # qr_ret = requests.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
 
-        return response
+            if not qr_ret.content:
+                rc.delete('xiaochengxu_token')
+                response.msg = "生成小程序二维码未验证通过"
 
-    # print('-------qr_ret---->', qr_ret.text)
+                return response
 
-    IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'qr_code') + user_qr_code
-    with open('%s' % (IMG_PATH), 'wb') as f:
-        f.write(qr_ret.content)
+            # print('-------qr_ret---->', qr_ret.text)
 
-    if customer_id:
-        user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
-        user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
-        user_obj.qr_code = user_qr_code_path
-        user_obj.save()
-        print('----celery生成用户-客户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
+            IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'qr_code') + user_qr_code
+            with open('%s' % (IMG_PATH), 'wb') as f:
+                f.write(qr_ret.content)
 
-        # 一并生成海报
-        data_dict = {'user_id': user_id, 'customer_id': customer_id}
-        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+            if customer_id:
+                user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
+                user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
+                user_obj.qr_code = user_qr_code_path
+                user_obj.save()
+                print('----celery生成用户-客户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
-    else:  # 没有 customer_id 说明不是在小程序中生成
-        user_obj = models.zgld_userprofile.objects.get(id=user_id)
-        user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
-        user_obj.save()
-        print('----celery生成企业用户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
+                # 一并生成海报
+                data_dict = {'user_id': user_id, 'customer_id': customer_id}
+                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-    response.data = {'qr_code': user_obj.qr_code}
-    response.code = 200
-    response.msg = "生成小程序二维码成功"
+            else:  # 没有 customer_id 说明不是在小程序中生成
+                user_obj = models.zgld_userprofile.objects.get(id=user_id)
+                user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
+                user_obj.save()
+                print('----celery生成企业用户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
+
+            response.data = {'qr_code': user_obj.qr_code}
+            response.code = 200
+            response.msg = "生成小程序二维码成功"
 
     return JsonResponse(response.__dict__)
 
