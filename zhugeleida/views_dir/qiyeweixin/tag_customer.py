@@ -153,9 +153,7 @@ def tag_customer_oper(request, oper_type, o_id):
 
                     objs = models.zgld_tag.objects.filter(id=o_id)
                     if objs:
-                        objs.update(
-                            tag_customer=customer_list
-                        )
+                        objs[0].tag_customer = customer_list
                         response.code = 200
                         response.msg = "添加成功"
                     else:

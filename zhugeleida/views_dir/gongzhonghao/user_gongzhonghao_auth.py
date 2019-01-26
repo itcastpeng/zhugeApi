@@ -291,7 +291,8 @@ def user_gongzhonghao_auth(request):
             'openid': openid,
             'authorizer_appid': appid,
             'headimgurl': headimgurl,
-            'user_id' : uid
+            'user_id' : uid,
+            'company_id':company_id
         }
         # 获取 公众号的用户信息
         tasks.get_customer_gongzhonghao_userinfo.delay(_data)

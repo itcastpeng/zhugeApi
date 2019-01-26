@@ -104,6 +104,9 @@ def article(request, oper_type):
 
             return JsonResponse(response.__dict__)
 
+
+
+
     return JsonResponse(response.__dict__)
 
 
@@ -251,6 +254,53 @@ def article_oper(request, oper_type, o_id):
                 print('------- 验证未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 评论文章功能
+        elif oper_type == 'review_article':
+
+            customer_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+
+            parent_id = request.GET.get('pid')
+
+            request_data_dict = {
+                'article_id': o_id,
+                'uid': uid,  # 文章所属用户的ID
+                'customer_id': customer_id,  # 文章所属用户的ID
+
+            }
+
+            forms_obj = Forward_ArticleForm(request_data_dict)
+            if forms_obj.is_valid():
+                article_id = o_id
+                forward_type = forms_obj.cleaned_data.get('forward_type')
+
+                objs = models.zgld_article.objects.filter(id=article_id)
+                objs.update(forward_count=F('forward_count') + 1)  #
+
+                if uid:
+                    q = Q()
+                    q.add(Q(**{'article_id': article_id}), Q.AND)
+                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
+                    q.add(Q(**{'user_id': uid}), Q.AND)
+
+                    if parent_id:
+                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+                    else:
+                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+
+                    models.zgld_article_to_customer_belonger.objects.filter(q).update(
+                        forward_count=F('forward_count') + 1)
+
+
+                    response.code = 200
+                    response.msg = "记录转发文章成功"
+            else:
+
+                print('------- 公众号-转发文章未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
     else:
 
@@ -497,7 +547,11 @@ def article_oper(request, oper_type, o_id):
             return JsonResponse(response.__dict__)
 
 
-        # 转发公众号
+        # 推荐的文章列表
+        elif oper_type == 'recommend_article_list':
+            pass
+
+        # 转发公众号文章
         elif oper_type == 'forward_article':
 
             uid = request.GET.get('uid')

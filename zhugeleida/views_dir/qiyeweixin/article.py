@@ -31,6 +31,8 @@ def article(request, oper_type):
         if forms_obj.is_valid():
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             user_id = request.GET.get('user_id')
+            status = request.GET.get('status')
+
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')  # 默认是最新内容展示 ，阅读次数展示read_count， 被转发次数forward_count
@@ -45,9 +47,13 @@ def article(request, oper_type):
 
             company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
 
+            _status = 1
+            if status:
+                _status = status
+
             q = conditionCom(request_data, field_dict)
             q.add(Q(**{'company_id': company_id}), Q.AND)
-            q.add(Q(**{'status': 1 }), Q.AND)
+            q.add(Q(**{'status': _status }), Q.AND)
 
             tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
             if tag_list:
@@ -219,6 +225,27 @@ def article_oper(request, oper_type, o_id):
                 print(forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
+        # 修改用户启用状态
+        elif oper_type == "update_article_status":
+
+            status = request.POST.get('status')    #(1, "启用"),  (2, "未启用")
+            company_id = request.GET.get('company_id')
+
+            objs = models.zgld_article.objects.filter(id=o_id,company_id=company_id)
+
+            if objs:
+                if status:
+                    objs.update(status=status)
+                    response.code = 200
+                    response.msg = "发布成功"
+
+            else:
+                response.code = 302
+                response.msg = "文章不存在"
+
+
 
     elif request.method == "GET":
         # 查询自己的文章

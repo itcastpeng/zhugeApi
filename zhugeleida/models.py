@@ -376,6 +376,7 @@ class zgld_userprofile(models.Model):
     status_choices = (
         (1, "AI雷达启用"),
         (2, "AI雷达不启用"),
+        # (3, "文章管理员")
 
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="AI雷达状态", default=2)
@@ -385,6 +386,13 @@ class zgld_userprofile(models.Model):
         (2, "Boss雷达不启用"),
     )
     boss_status = models.SmallIntegerField(choices=boss_status_choices, verbose_name="Boss雷达状态", default=2)
+
+    article_admin_status_choices = (
+        (1, "文章管理员启用"),
+        (2, "文章管理员不启用")
+    )
+    article_admin_status = models.SmallIntegerField(choices=article_admin_status_choices, verbose_name="文章管理员状态", default=2)
+
 
     popularity = models.IntegerField(verbose_name='人气数(被查看)', default=0)
     praise = models.IntegerField(verbose_name='被赞数', default=0)
