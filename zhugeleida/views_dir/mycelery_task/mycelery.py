@@ -1494,12 +1494,19 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
     shangHuMiYao = ''
     code = ''
     msg = ''
+    account_balance = ''
     if shangcheng_objs:
         shangcheng_obj = shangcheng_objs[0]
         shangHuHao = shangcheng_obj.shangHuHao
         shangHuMiYao = shangcheng_obj.shangHuMiYao
 
-        account_balance = shangcheng_objs[0].xiaochengxucompany.account_balance  #账户余额
+        if is_used_daifa_redPacket == 1:  # 代发红包，要看自己平台上午有没有钱
+            company_obj = models.zgld_company.objects.get(id=company_id)
+            account_balance = company_obj.account_balance  # # 账户余额
+
+        elif is_used_daifa_redPacket == 2:
+            account_balance = shangcheng_obj.xiaochengxucompany.account_balance  # # 账户余额
+
 
         if activity_single_money > account_balance and is_used_daifa_redPacket ==1: #当 发送金额大于账户余额
             code = 199 # 余额不足
@@ -1511,17 +1518,16 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
             activity_objs.update(
                 reason='平台账户余额不足,请充值'
             )
-            objs = models.zgld_customer.objects.filter(session_key='notifier',
-                                                       company_id=company_id)
-
+            objs = models.zgld_customer.objects.filter(session_key='notifier',company_id__in=[int(company_id),1,2])
+            remark = 'openid: %s | company_id: %s | %s' % (openid, company_id, '')
             for obj in objs:
                 data_dict = {
                     'company_id': obj.company_id,
                     'customer_id': obj.id,
                     'type': 'gongzhonghao_template_tishi',
-                    'title': '平台账户余额不足提示',
-                    'content': '关注领红包余额不足，请联系管理员进行充值',
-                    'remark': ''
+                    'title':  '平台账户余额不足提示[文章活动]',
+                    'content': '转发文章|发红包-平台账户余额不足，请联系管理员进行充值',
+                    'remark': remark
                 }
                 print('红包发送报错数据 --------->', data_dict)
                 tasks.monitor_send_gzh_template_msg.delay(data_dict)
@@ -1615,7 +1621,7 @@ def Red_Packet_Sending_Process(activity_objs,activity_redPacket_objs,data):
                     'company_id': obj.company_id,
                     'customer_id': obj.id,
                     'type': 'gongzhonghao_template_tishi',
-                    'title': '商户红包报错提示',
+                    'title': '商户红包报错提示[文章活动]',
                     'content': '商户发红包发生错误,请及时排查',
                     'remark': remark
                 }
@@ -2010,34 +2016,42 @@ def user_focus_send_activity_redPacket(request):
                         if is_used_daifa_redPacket == 2:  # (1, '代发红包'),  (2, '自己商户发红包')
                             _company_id = company_id
 
+                        ## 判断使用的商户发红包
                         shangcheng_objs = models.zgld_shangcheng_jichushezhi.objects.select_related('xiaochengxucompany').filter(xiaochengxucompany_id=_company_id) # 使用固定商户账户-发红包。
-
                         send_name = ''
                         shangHuHao = ''
                         shangHuMiYao = ''
                         code = ''
+                        account_balance = ''
                         if shangcheng_objs:
                             shangcheng_obj = shangcheng_objs[0]
                             shangHuHao = shangcheng_obj.shangHuHao
                             shangHuMiYao = shangcheng_obj.shangHuMiYao
 
-                            account_balance = shangcheng_objs[0].xiaochengxucompany.account_balance  # 账户余额
+
+                            if is_used_daifa_redPacket == 1:  # 代发红包，要看自己平台上午有没有钱
+                                company_obj = models.zgld_company.objects.get(id=company_id)
+                                account_balance = company_obj.account_balance  # # 账户余额
+
+                            elif is_used_daifa_redPacket == 2:
+                                account_balance = shangcheng_obj.xiaochengxucompany.account_balance  # # 账户余额
+
                             if focus_get_money > account_balance and is_used_daifa_redPacket==1:  # 当 发送金额大于账户余额
                                 code = 199  # 余额不足
                                 app_objs.update(
                                     reason='平台账户余额不足,请联系管理员充值'
                                 )
-                                objs = models.zgld_customer.objects.filter(session_key='notifier',
-                                                                           company_id=company_id)
 
+                                remark = 'openid: %s | company_id: %s | %s' % (openid, company_id, '')
+                                objs = models.zgld_customer.objects.filter(session_key='notifier',company_id__in=[int(company_id),1,2])
                                 for obj in objs:
                                     data_dict = {
                                         'company_id': obj.company_id,
                                         'customer_id': obj.id,
                                         'type': 'gongzhonghao_template_tishi',
-                                        'title': '平台账户余额不足提示',
-                                        'content': '关注发红包余额不足，请联系管理员进行充值',
-                                        'remark': ''
+                                        'title':   '平台账户余额不足提示',
+                                        'content': '关注公众号|发红包平台余额不足，请联系管理员进行充值',
+                                        'remark': remark
                                     }
                                     print('红包发送报错数据 --------->', data_dict)
                                     tasks.monitor_send_gzh_template_msg.delay(data_dict)
@@ -2100,8 +2114,8 @@ def user_focus_send_activity_redPacket(request):
                                         'company_id': obj.company_id,
                                         'customer_id': obj.id,
                                         'type': 'gongzhonghao_template_tishi',
-                                        'title': '商户红包报错提示',
-                                        'content': '商户发红包发生错误,请及时排查',
+                                        'title': '商户发红包报错提示[关注领红包]',
+                                        'content': '关注公众号|发送现金红包-发生错误,请及时排查',
                                         'remark': remark
                                     }
                                     print('红包发送报错数据 --------->', data_dict)

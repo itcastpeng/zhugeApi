@@ -920,6 +920,20 @@ class zgld_article(models.Model):
 
 
 
+##文章评论表
+class zgld_article_comment(models.Model):
+    # company = models.ForeignKey('zgld_company', verbose_name='所属公司', null=True)
+    article = models.ForeignKey('zgld_article', verbose_name="关联的日记", null=True)
+    from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='FromCustomer',null=True) ## 关联的客户
+    to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='ToCustomer', null=True) ## 关联的客户
+    content = models.TextField(verbose_name="评论内容", null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "日记评论表"
+        app_label = "zhugeleida"
+
+
 # 公众号-文章-活动(任务)管理表
 class zgld_article_activity(models.Model):
     article = models.ForeignKey('zgld_article',verbose_name='文章')

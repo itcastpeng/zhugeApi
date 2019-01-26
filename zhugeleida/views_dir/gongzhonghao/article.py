@@ -5,16 +5,15 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, \
-    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm, LocationForm
+    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm, LocationForm,ReviewArticleForm,ArticleReviewSelectForm,RecommendArticleSelectForm
 
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
 
 import json
-from django.db.models import Q, F
+from django.db.models import Q, F,Count
 from zhugeleida.public.condition_com import conditionCom
-import datetime
-from django.db.models import Count
+import datetime,base64
 
 import requests
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
@@ -104,6 +103,8 @@ def article(request, oper_type):
 
             return JsonResponse(response.__dict__)
 
+        elif oper_type == 'article_':
+            pass
 
 
 
@@ -258,46 +259,33 @@ def article_oper(request, oper_type, o_id):
         # 评论文章功能
         elif oper_type == 'review_article':
 
-            customer_id = request.GET.get('user_id')
-            uid = request.GET.get('uid')
-
-            parent_id = request.GET.get('pid')
+            from_customer_id = request.GET.get('user_id')
+            content = request.POST.get('content')
 
             request_data_dict = {
                 'article_id': o_id,
-                'uid': uid,  # 文章所属用户的ID
-                'customer_id': customer_id,  # 文章所属用户的ID
-
+                'content': content,             # 文章所属用户的ID
+                'customer_id': from_customer_id,   # 文章所属用户的ID
             }
 
-            forms_obj = Forward_ArticleForm(request_data_dict)
+            forms_obj = ReviewArticleForm(request_data_dict)
             if forms_obj.is_valid():
-                article_id = o_id
-                forward_type = forms_obj.cleaned_data.get('forward_type')
 
-                objs = models.zgld_article.objects.filter(id=article_id)
-                objs.update(forward_count=F('forward_count') + 1)  #
+                encodestr = base64.b64encode(content.encode('utf-8'))
+                msg = str(encodestr, 'utf-8')
 
-                if uid:
-                    q = Q()
-                    q.add(Q(**{'article_id': article_id}), Q.AND)
-                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
-                    q.add(Q(**{'user_id': uid}), Q.AND)
+                create_data = {
+                    'article_id' : o_id,
+                    'content' : msg,
+                    'from_customer_id' : from_customer_id
+                }
+                obj = models.zgld_article_comment.objects.create(**create_data)
 
-                    if parent_id:
-                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-                    else:
-                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-
-                    models.zgld_article_to_customer_belonger.objects.filter(q).update(
-                        forward_count=F('forward_count') + 1)
-
-
-                    response.code = 200
-                    response.msg = "记录转发文章成功"
+                response.code = 200
+                response.msg = "记录成功"
             else:
 
-                print('------- 公众号-转发文章未能通过------->>', forms_obj.errors)
+                print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
@@ -546,10 +534,122 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
+        ## 文章评论列表展示
+        elif oper_type == 'article_review_list':
+
+            user_id = request.GET.get('user_id')
+            form_data = {
+                'article_id' : o_id
+            }
+            forms_obj = ArticleReviewSelectForm(form_data)
+
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+                objs = models.zgld_article_comment.objects.select_related('from_customer','to_customer').filter(article_id=o_id).order_by('-create_date')
+
+                count = objs.count()
+                if objs:
+
+                    # if length != 0:
+                    #     start_line = (current_page - 1) * length
+                    #     stop_line = start_line + length
+                    #     objs = objs[start_line: stop_line]
+
+                    ret_data = []
+                    for obj in objs:
+
+                        try:
+                            username = base64.b64decode(obj.from_customer.username)
+                            customer_name = str(username, 'utf-8')
+                            print('----- 解密b64decode username----->', username)
+                        except Exception as e:
+                            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.from_customer_id, "|", e)
+                            customer_name = '客户ID%s' % (obj.from_customer_id)
+
+
+                        _content = base64.b64decode(obj.content)
+                        content = str(_content, 'utf-8')
+                        print('----- 解密b64decode 内容content----->', content)
+
+                        ret_data.append({
+                            'from_customer_id': obj.from_customer_id,
+                            'from_customer_name': customer_name,
+                            'from_customer_headimgurl': obj.from_customer.headimgurl,
+                            'content': content,
+                            'create_time' : obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                        })
+
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'data_count': count,
+                    }
+
+                else:
+                    response.code = 302
+                    response.msg = '没有数据'
+
+            else:
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
         # 推荐的文章列表
         elif oper_type == 'recommend_article_list':
-            pass
+            customer_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+            company_id = request.GET.get('company_id')
+
+            form_data = {
+                'article_id': o_id,
+                'company_id' : company_id,
+                'uid' : uid
+            }
+            forms_obj = RecommendArticleSelectForm(form_data)
+
+            if forms_obj.is_valid():
+
+                objs = models.zgld_article.objects.select_related('user', 'company').exclude(id=o_id,status=1).order_by('-read_count')
+
+                count = objs.count()
+                if objs:
+
+                    objs = objs[0:3]
+                    ret_data = []
+                    for obj in objs:
+                        _data = {
+                            'article_id': obj.id,
+                            'uid' : uid,  # 雷达用户ID。
+                            'company_id' :  company_id
+                        }
+                        article_url = create_gongzhonghao_share_auth_url(_data)
+
+                        ret_data.append({
+                            'article_id': obj.id,
+                            'title': obj.title,
+                            'article_url' : article_url,
+                            'read_count' : obj.read_count,
+                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                        })
+
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'data_count': count,
+                    }
+
+                else:
+                    response.code = 302
+                    response.msg = '没有数据'
+
+            else:
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
         # 转发公众号文章
         elif oper_type == 'forward_article':
@@ -893,3 +993,69 @@ def article_oper(request, oper_type, o_id):
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
 
     return JsonResponse(response.__dict__)
+
+def create_gongzhonghao_share_auth_url(data):
+
+
+    uid = data.get('uid')  # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
+    article_id = data.get('article_id')
+    company_id = data.get('company_id')
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    api_url = qywx_config_dict.get('api_url')
+
+
+    pid = ''
+    level = 1
+    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+        api_url, article_id, pid, level, uid, company_id)
+
+    # token = qywx_config_dict.get('token')
+    # encodingAESKey = qywx_config_dict.get('encodingAESKey')
+
+    print('--------  嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
+
+    scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    state = 'snsapi_base'
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    component_appid = qywx_config_dict.get('app_id')
+    gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
+    authorization_appid = gongzhonghao_app_obj.authorization_appid
+
+    # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+    appid = authorization_appid
+    share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+    appid, redirect_uri, scope, state, component_appid)
+
+    from urllib.parse import quote
+    bianma_share_url = quote(share_url, 'utf-8')
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        qywx_config_dict = three_service_obj.config
+        if qywx_config_dict:
+            qywx_config_dict = json.loads(qywx_config_dict)
+
+    leida_http_url = qywx_config_dict.get('authorization_url')
+    share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (leida_http_url, bianma_share_url)
+
+    print('------ 【雷达企业用户】正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>', share_url)
+
+    return  share_url

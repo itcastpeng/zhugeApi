@@ -64,11 +64,27 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/gongzhonghao/article/location_convert/0'  # 获取产品的列表
-post_data['x_num'] = '34.264642646862'
-post_data['y_num'] = '108.95108518068'
+# url =  ip + '/zhugeleida/gongzhonghao/article/location_convert/0'  # 获取产品的列表
+# post_data['x_num'] = '34.264642646862'
+# post_data['y_num'] = '108.95108518068'
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
 
-ret = requests.post(url, data = post_data ,params=get_data)
+
+# url =  ip + '/zhugeleida/gongzhonghao/article/review_article/3'  # 获取产品的列表
+# post_data['content'] = '3 不错的文章。。。。'
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+
+# url =  ip + '/zhugeleida/gongzhonghao/article/article_review_list/3'  # 获取产品的列表
+# ret = requests.get(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/gongzhonghao/article/recommend_article_list/3'  # 获取产品的列表
+get_data['uid'] = 1
+get_data['company_id'] = 1
+
+ret = requests.get(url, data = post_data ,params=get_data)
 
 
 ####################################################################################
