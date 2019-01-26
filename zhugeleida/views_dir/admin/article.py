@@ -1210,25 +1210,6 @@ def article_oper(request, oper_type, o_id):
                         return JsonResponse(response.__dict__)
 
                     elif level == 0 and uid:
-                        # _objs = objs.filter(level=1).values('user_id','user__username').annotate(Count('user'))
-                        # _objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                        #                                                                         'customer').filter(
-                        #     article_id=article_id, level=1).values('user_id', 'user__username').annotate(
-                        #     Count('user'))
-                        #
-                        # ret_user_data = []
-                        # for _obj in _objs:
-                        #     user_id = _obj.get('user_id')
-                        #     username = _obj.get('user__username')
-                        #     user__count = _obj.get('user__count')
-                        #
-                        #     print('-------> user_id username -------->>', user__count, "|", user_id, username)
-                        #
-                        #     data_dict = {
-                        #         'uid': user_id,  # 所属雷达用户
-                        #         'user_name': username
-                        #     }
-                        #     ret_user_data.append(data_dict)
 
                         username = obj.user.username
                         gender = obj.user.gender
@@ -1285,11 +1266,13 @@ def article_oper(request, oper_type, o_id):
                     # 查询第一层所有的用户的下级层人数和层级数
                     elif level == 1 and not query_customer_id:
                         level = level + 1
-                        objs = objs.order_by('level').filter(level=1, user_id=uid)
+                        # objs = objs.order_by('level').filter(level=1, user_id=uid)
+                        objs = objs.filter(level=1, user_id=uid).order_by('-stay_time')
 
                     elif level >= 1 and query_customer_id:
 
-                        objs = objs.order_by('level').filter(level=level+1, customer_parent_id=query_customer_id)
+                        # objs = objs.order_by('level').filter(level=level+1, customer_parent_id=query_customer_id)
+                        objs = objs.filter(level=level+1, customer_parent_id=query_customer_id).order_by('-stay_time')
                         level = level + 2
 
                     # count = objs.count()
