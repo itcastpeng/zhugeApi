@@ -480,8 +480,8 @@ def user_gongzhonghao_auth_oper(request, oper_type):
 
                 gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
-                if level:
-                    level = int(level) + 1
+
+                level += 1
                 pid = customer_id
                 appid = authorization_appid
                 redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
