@@ -1417,9 +1417,10 @@ class zgld_diary(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
     company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
+
     title = models.CharField(verbose_name='文章标题', max_length=128)
     diary_date = models.DateTimeField(verbose_name="日记时间")
-    cover_picture = models.CharField(verbose_name="封面图片URL", max_length=128)
+    cover_picture = models.CharField(verbose_name="封面图URL和视频URL", max_length=128)
     content = models.TextField(verbose_name='日记内容', null=True)
 
     read_count = models.IntegerField(verbose_name="阅读数量", default=0)
