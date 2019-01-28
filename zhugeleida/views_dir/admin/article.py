@@ -746,6 +746,9 @@ def article_oper(request, oper_type, o_id):
                         'content': obj.content,  # 文章内容
                         'tag_list': tag_list,
                         'insert_ads': insert_ads,  # 插入的广告语
+                        'is_auto_tagging' : obj.is_auto_tagging,
+                        'is_auto_tagging_text' : obj.get_is_auto_tagging_display(),
+                        'tags_time_count' : obj.tags_time_count,
 
                     })
 

@@ -190,22 +190,23 @@ def diary_manage_oper(request, oper_type, o_id):
 
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
-
             case_id = request.POST.get('case_id')
-            customer_name = request.POST.get('customer_name')
 
-            headimgurl = request.POST.get('headimgurl')
-            status  = request.POST.get('status')
+            title = request.POST.get('title')
+            diary_date = request.POST.get('diary_date')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
+            content = request.POST.get('content')
 
-            if cover_picture:
-                cover_picture = json.dumps(cover_picture)
+            status = request.POST.get('status')
+
+
 
             form_data = {
-                'diary_name' : diary_name,
-                'company_id': company_id,
-                'customer_name': customer_name,  # 活动名称
-                'headimgurl': headimgurl,  # 文章ID
+                'case_id' : case_id,
+                'title': title,
+                'diary_date': diary_date,  # 活动名称
+
+                'content': content,  # 文章ID
                 'status': status,
 
             }
@@ -215,8 +216,11 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 obj = models.zgld_diary.objects.create(
                     user_id=user_id,
-                    diary_name=diary_name,
+                    case_id=case_id,
                     company_id=company_id,
+
+                    title=title,
+                    diary_date=diary_date,
                     customer_name=customer_name.strip(),
                     headimgurl=headimgurl,
                     cover_picture=cover_picture,
