@@ -500,12 +500,15 @@ def activity_manage(request, oper_type):
             q1.connector = 'and'
             q1.children.append(('user_type', 1))
             q1.children.append(('company_id', company_id))
-            q1.children.append(('create_date__gte', start_time))
-            q1.children.append(('create_date__lte', end_time))
+            if start_time or end_time:
+                q1.children.append(('create_date__gte', start_time))
+                q1.children.append(('create_date__lte', end_time))
             # q1.children.append(('is_subscribe', 1))  # 已经关注
             q1.children.append(('is_receive_redPacket', 1)) # (1, '发送了关注红包')
 
+            print('关注领红包 q1 -------->>',q1)
             objs = models.zgld_customer.objects.filter(q1).order_by('-create_date')
+            print(' objs ------>',objs)
 
             if objs:  # 说明有人参加活动
 
