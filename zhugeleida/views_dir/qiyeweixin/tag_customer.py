@@ -137,6 +137,7 @@ def tag_customer_oper(request, oper_type, o_id):
                     obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
                     obj.tag_parent_id = parent_id
                     obj.tag_customer = customer_list
+                    obj.save()
 
                     response.code = 200
                     response.msg = "添加成功"
