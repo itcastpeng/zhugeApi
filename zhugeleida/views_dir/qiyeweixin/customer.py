@@ -90,6 +90,8 @@ def customer(request):
                         'expedted_pr': expedted_pr,  # 预计成交概率
                         'ai_pr':  expedted_pr,  # AI 预计成交概率
 
+                        'user_type' : obj.user_type,
+
                         'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': customer_name,  # 备注名
                         'phone': phone,              # 手机号
