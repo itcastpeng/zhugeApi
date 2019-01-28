@@ -9,7 +9,7 @@ from zhugeleida.forms.qiyeweixin.tag_customer_verify import TagCustomerAddForm, 
 import time
 import datetime
 import json,base64
-
+from django.db.models import Q
 
 from publicFunc.condition_com import conditionCom
 
@@ -65,7 +65,8 @@ def tag_customer(request):
 
             q = conditionCom(request, field_dict)
             if tag_type:
-                q.add('tag_type',tag_type)
+                q.add(Q(**{'tag_type': tag_type}), Q.AND)
+
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
