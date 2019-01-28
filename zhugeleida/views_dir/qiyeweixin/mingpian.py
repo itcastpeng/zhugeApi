@@ -77,9 +77,6 @@ def mingpian(request):
                     'email': obj.email or '',
                     'country': obj.get_country_display() or '',
 
-                    'article_admin_status' : obj.article_admin_status,
-                    'article_admin_status_text' : obj.get_article_admin_status_display(),
-
                     'qr_code': obj.qr_code,     # 生成的小程序二维码
                     'wechat': obj.wechat or '',  # 微信号
                     'wechat_phone': obj.wechat_phone or '',  # 微信绑定的手机号 | 管理员可以修改

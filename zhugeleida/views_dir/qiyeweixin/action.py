@@ -85,6 +85,7 @@ def action(request, oper_type):
 
                     ret_data.append({
                         'user_id': obj.user_id,
+                        'customer_username': username,
                         'customer_id': obj.customer_id,
                         'headimgurl': obj.customer.headimgurl,
                         'customer_source': obj.customer.user_type,

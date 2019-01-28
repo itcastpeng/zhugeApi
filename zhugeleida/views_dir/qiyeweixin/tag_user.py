@@ -20,14 +20,18 @@ def tag_user(request):
         # 获取参数 页数 默认1
 
         user_id = request.GET.get('user_id')
+        tag_type = request.GET.get('tag_type')
+
         field_dict = {
             'tag_id': '',
             'name': '__contains',
         }
         q = conditionCom(request, field_dict)
         print('q -->', q)
+        if tag_type:        # (1, '微信公众号'),  (2, '微信小程序'),
+            q.add(Q(**{'tag_type': tag_type}), Q.AND)
 
-        tag_list = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.values('id','name')
+        tag_list = models.zgld_userprofile.objects.get(id=user_id).zgld_user_tag_set.filter(q).values('id','name')
 
 
         response.code = 200

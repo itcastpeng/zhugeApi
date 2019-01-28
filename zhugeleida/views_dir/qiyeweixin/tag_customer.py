@@ -9,7 +9,7 @@ from zhugeleida.forms.qiyeweixin.tag_customer_verify import TagCustomerAddForm, 
 import time
 import datetime
 import json,base64
-
+from django.db.models import Q
 
 from publicFunc.condition_com import conditionCom
 
@@ -49,16 +49,24 @@ def tag_customer(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
+        tag_type = request.GET.get('tag_type')
+
+
+
         forms_obj = TagCustomerSelectForm(request.GET)
         if forms_obj.is_valid():
 
-            order = request.GET.get('order', 'create_date')
+            order = request.GET.get('order', '-create_date')
 
             field_dict = {
                  'id': '',
                  'name': '__contains',
             }
+
             q = conditionCom(request, field_dict)
+            if tag_type:
+                q.add(Q(**{'tag_type': tag_type}), Q.AND)
+
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
@@ -68,6 +76,7 @@ def tag_customer(request):
             for obj in objs:
                 customer_list = []
                 for c_obj in obj.tag_customer.all():
+
                     try:
                         username = base64.b64decode(c_obj.username)
                         customer_name = str(username, 'utf-8')
@@ -111,14 +120,19 @@ def tag_customer_oper(request, oper_type, o_id):
         # 添加标签
         if oper_type == "add":
 
+            tag_type = request.POST.get('tag_type')
+
             tag_data = {
                 'name' : request.POST.get('name'),
+                'tag_type' : tag_type
             }
+
 
             forms_obj = TagCustomerAddForm(tag_data)
             if forms_obj.is_valid():
                 parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
                 customer_list = json.loads(request.POST.get('customer_list'))
+
                 if customer_list:
                     obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
                     obj.tag_parent_id = parent_id

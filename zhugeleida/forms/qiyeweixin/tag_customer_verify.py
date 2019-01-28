@@ -14,6 +14,12 @@ class TagCustomerAddForm(forms.Form):
             'required': "标签不能为空"
         }
     )
+    tag_type  = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "标签类型不能为空"
+        }
+    )
 
 
     # 查询标签名判断是否存在
@@ -64,6 +70,13 @@ class TagCustomerSelectForm(forms.Form):
         error_messages={
             'required': "页码数据类型错误"
         }
+    )
+    tag_type = forms.IntegerField(
+        required=True,
+        error_messages = {
+            'required': "标签类型不能为空"
+        }
+
     )
 
     length = forms.IntegerField(

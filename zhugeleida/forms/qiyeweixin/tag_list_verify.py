@@ -22,6 +22,15 @@ class TagListAddForm(forms.Form):
 
     )
 
+    tag_type = forms.IntegerField(
+        required=True,
+        error_messages = {
+            'required': "标签类型不能为空"
+        }
+
+    )
+
+
     # 查询标签名判断是否存在
     def clean_name(self):
         name = self.data['name']

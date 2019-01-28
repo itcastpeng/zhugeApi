@@ -27,7 +27,7 @@ def tag_list(request):
         customer_id = request.GET.get('customer_id')
 
 
-        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id','user_id')
+        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).filter(name='自定义').values_list('id', 'name', 'tag_parent_id','user_id')
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
@@ -77,6 +77,7 @@ def tag_list_oper(request, oper_type, o_id):
 
             tag_data = {
                 'name': request.POST.get('name'),
+                'tag_type': request.POST.get('tag_type'),
                 'user_id': request.GET.get('user_id')
             }
 

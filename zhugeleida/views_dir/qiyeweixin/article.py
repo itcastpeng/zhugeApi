@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm, ArticleSelectForm, \
     ArticleUpdateForm, MyarticleForm, ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, \
     HideCustomerDataForm, ArticleAccessLogForm, ArticleForwardInfoForm,EffectRankingByTableForm
-
+from zhugeleida.public.common import action_record
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 from zhugeleida.views_dir.admin.article import mailuotu
 import time
@@ -45,7 +45,10 @@ def article(request, oper_type):
 
             request_data = request.GET.copy()
 
-            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+            user_obj = models.zgld_userprofile.objects.get(id=user_id)
+            company_id = user_obj.company_id
+            article_admin_status = user_obj.article_admin_status
+            article_admin_status_text = user_obj.get_article_admin_status_display()
 
             _status = 1
             if status:
@@ -112,10 +115,17 @@ def article(request, oper_type):
                     'cover_url': obj.cover_picture,  # 文章图片链接
                     'tag_list': list(obj.tags.values('id', 'name')),
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
-                    'is_have_activity': is_have_activity
+                    'is_have_activity': is_have_activity,
+
+
+
                 })
+
+
             response.code = 200
             response.data = {
+                'article_admin_status' : article_admin_status,
+                'article_admin_status_text' : article_admin_status_text,
                 'ret_data': ret_data,
                 'data_count': count,
             }
@@ -229,7 +239,7 @@ def article_oper(request, oper_type, o_id):
 
         # 修改用户启用状态
         elif oper_type == "update_article_status":
-
+            article_id = o_id
             status = request.POST.get('status')    #(1, "启用"),  (2, "未启用")
             company_id = request.GET.get('company_id')
 
@@ -240,6 +250,32 @@ def article_oper(request, oper_type, o_id):
                     objs.update(status=status)
                     response.code = 200
                     response.msg = "发布成功"
+
+                    if status == 1:
+                        user_objs = models.zgld_userprofile.objects.filter(company_id=company_id, status=1)
+                        data = {}
+
+                        customer_objs = models.zgld_customer.objects.filter(user_type=3, company_id=company_id)
+                        if customer_objs:
+                            customer_id = customer_objs[0].id
+                        else:
+                            encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
+                            customer_name = str(encodestr, 'utf-8')
+                            obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
+                                                                      company_id=company_id,
+                                                                      headimgurl='statics/imgs/leidaguanjia.jpg')
+                            customer_id = obj.id
+
+                        for _obj in user_objs:
+                            _user_id = _obj.id
+
+                            remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (objs[0].title)
+                            print('---- 关注公众号提示 [消息提醒]--->>', remark)
+                            data['user_id'] = customer_id
+                            data['uid'] = _user_id
+                            data['action'] = 666
+                            data['article_id'] = article_id
+                            action_record(data, remark)  # 此步骤封装到 异步中。
 
             else:
                 response.code = 302
@@ -699,6 +735,7 @@ def article_oper(request, oper_type, o_id):
             parent_id = request.GET.get('pid')
             current_page = request.GET.get('current_page')
             length = request.GET.get('length')
+            type =  request.GET.get('type')
 
             request_data_dict = {
                 'article_id': o_id,
@@ -717,10 +754,11 @@ def article_oper(request, oper_type, o_id):
                 q.add(Q(**{'customer_id': customer_id}), Q.AND)
                 q.add(Q(**{'user_id': user_id}), Q.AND)
 
-                if parent_id:
-                    q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-                else:
-                    q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+                if not type:
+                    if parent_id:
+                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+                    else:
+                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
 
                 print('---- 获取文章访问日志 q------>>',q)
 
