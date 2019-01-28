@@ -112,7 +112,11 @@ def article(request, oper_type):
                     'cover_url': obj.cover_picture,  # 文章图片链接
                     'tag_list': list(obj.tags.values('id', 'name')),
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
-                    'is_have_activity': is_have_activity
+                    'is_have_activity': is_have_activity,
+
+                    'article_admin_status': obj.article_admin_status,
+                    'article_admin_status_text': obj.get_article_admin_status_display(),
+
                 })
             response.code = 200
             response.data = {
