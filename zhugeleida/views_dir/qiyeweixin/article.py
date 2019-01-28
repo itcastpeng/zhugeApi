@@ -45,7 +45,10 @@ def article(request, oper_type):
 
             request_data = request.GET.copy()
 
-            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+            user_obj = models.zgld_userprofile.objects.get(id=user_id)
+            company_id = user_obj.company_id
+            article_admin_status = user_obj.article_admin_status
+            article_admin_status_text = user_obj.get_article_admin_status_display()
 
             _status = 1
             if status:
@@ -114,12 +117,15 @@ def article(request, oper_type):
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
                     'is_have_activity': is_have_activity,
 
-                    'article_admin_status': obj.user.article_admin_status,
-                    'article_admin_status_text': obj.user.get_article_admin_status_display(),
+
 
                 })
+
+
             response.code = 200
             response.data = {
+                'article_admin_status' : article_admin_status,
+                'article_admin_status_text' : article_admin_status_text,
                 'ret_data': ret_data,
                 'data_count': count,
             }
