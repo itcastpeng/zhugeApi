@@ -114,8 +114,8 @@ def article(request, oper_type):
                     'insert_ads': json.loads(obj.insert_ads) if obj.insert_ads else '',  # 插入的广告语
                     'is_have_activity': is_have_activity,
 
-                    'article_admin_status': obj.article_admin_status,
-                    'article_admin_status_text': obj.get_article_admin_status_display(),
+                    'article_admin_status': obj.user.article_admin_status,
+                    'article_admin_status_text': obj.user.get_article_admin_status_display(),
 
                 })
             response.code = 200
