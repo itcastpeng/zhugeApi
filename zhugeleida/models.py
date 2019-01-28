@@ -440,6 +440,7 @@ class zgld_temp_userprofile(models.Model):
 # 用户标签
 class zgld_user_tag(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name='标签所属用户')
+
     name = models.CharField(verbose_name='标签名称', max_length=64)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -581,6 +582,12 @@ class zgld_tag(models.Model):
     name = models.CharField(verbose_name='标签名称', max_length=64)
     tag_parent = models.ForeignKey('self', verbose_name='标签父级', null=True)
     tag_customer = models.ManyToManyField('zgld_customer', verbose_name='关联到客户')
+    tag_type_choices = (
+        (1, '微信公众号'),
+        (2, '微信小程序'),
+    )
+    tag_type = models.SmallIntegerField(verbose_name='标签类型', choices=tag_type_choices, default=1)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
@@ -1420,7 +1427,7 @@ class zgld_diary(models.Model):
 
     title = models.CharField(verbose_name='文章标题', max_length=128)
     diary_date = models.DateTimeField(verbose_name="日记时间")
-    cover_picture = models.CharField(verbose_name="封面图URL和视频URL", max_length=128)
+    cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True)
     content = models.TextField(verbose_name='日记内容', null=True)
 
     read_count = models.IntegerField(verbose_name="阅读数量", default=0)

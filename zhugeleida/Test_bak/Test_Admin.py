@@ -577,16 +577,52 @@ ip = 'http://127.0.0.1:8001'
 #
 # ret = requests.post(url, data = post_data ,params=get_data)
 
-url =  ip + '/zhugeleida/admin/case_manage/update/1'  # 获取产品的列表
+# url =  ip + '/zhugeleida/admin/case_manage/update/1'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['case_name'] = '我的美白之旅3'
+# post_data['customer_name'] = '李汉杰-就是我，不一样的暗火'
+# post_data['headimgurl'] = 'xxx.jpg'
+# post_data['status'] =  1 #
+# post_data['cover_picture'] = json.dumps({})
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+###
+# url =  ip + '/zhugeleida/admin/diary_manage/add/0'  # 获取产品的列表
+# get_data['company_id'] = 1
+#
+# post_data['case_id'] = 1
+# post_data['title'] = '我的美白日记1'
+# post_data['diary_date'] = '2019-01-28 13:50:00'
+# post_data['cover_picture'] = 'xxx.jpg'
+# post_data['content'] = 'fsdfsdf' #
+#
+# post_data['status'] = 1
+# post_data['cover_show_type'] = 1
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+
+##
+# url =  ip + '/zhugeleida/admin/diary_manage/update/1'  # 获取产品的列表
+# get_data['company_id'] = 1
+#
+# post_data['case_id'] = 1
+# post_data['title'] = '我的美白日记1'
+# post_data['diary_date'] = '2019-01-28 13:50:00'
+# post_data['cover_picture'] = json.dumps('{}')
+# post_data['content'] = json.dumps('{}')
+#
+# post_data['status'] = 1
+# post_data['cover_show_type'] = 1
+#
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/admin/diary_manage/diary_list'  # 获取产品的列表
 get_data['company_id'] = 1
+ret = requests.get(url, data = post_data ,params=get_data)
 
-post_data['case_name'] = '我的美白之旅3'
-post_data['customer_name'] = '李汉杰-就是我，不一样的暗火'
-post_data['headimgurl'] = 'xxx.jpg'
-post_data['status'] =  1 #
-post_data['cover_picture'] = json.dumps({})
 
-ret = requests.post(url, data = post_data ,params=get_data)
+
 
 ###################
 

@@ -95,6 +95,13 @@ def contact(request):
                 _count = _objs.count()
                 # print('值 zgld_tag_set ---------->',list(obj.customer.zgld_tag_set.values_list('name', flat=True)))  #.values_list('name', flat=True))
 
+                tags_list = []
+                if obj.customer.user_type == 1:
+                    tags_list =  list(obj.customer.zgld_tag_set.filter(tag_type=1).order_by('-create_date').values_list('name', flat=True))
+
+                elif obj.customer.user_type == 2:
+                    tags_list = list(obj.customer.zgld_tag_set.filter(tag_type=2).order_by('-create_date').values_list('name', flat=True))
+
                 base_info_dict = {
                     'customer_id': obj.customer_id,
                     'customer_source' : obj.customer.user_type or '',
@@ -106,7 +113,7 @@ def contact(request):
                     'dateTime': deal_time.deal_time(obj.create_date),
                     'msg': msg,
                     'count' :_count,
-                    'tags_list' : list(obj.customer.zgld_tag_set.all().order_by('-create_date').values_list('name',flat=True))
+                    'tags_list' : tags_list
                 }
 
                 ret_data_list.append(base_info_dict)

@@ -4,7 +4,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-
+from bs4 import BeautifulSoup
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, diaryAddForm, diarySelectForm, diaryUpdateForm, \
     ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
@@ -31,19 +31,19 @@ def diary_manage(request, oper_type):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-update_date')
+                order = request.GET.get('order', '-create_date')
 
                 ## 搜索条件
                 diary_id = request.GET.get('diary_id')  #
                 search_activity_status = request.GET.get('status')  #
-                customer_name = request.GET.get('customer_name')  #
+                title = request.GET.get('title')  #
 
                 q1 = Q()
                 q1.connector = 'and'
                 q1.children.append(('company_id', company_id))
 
-                if customer_name:
-                    q1.children.append(('customer_name__contains', customer_name))
+                if title:
+                    q1.children.append(('title__contains', title))
 
                 if diary_id:
                     q1.children.append(('id', diary_id))
@@ -54,7 +54,7 @@ def diary_manage(request, oper_type):
 
 
                 print('-----q1---->>', q1)
-                objs = models.zgld_diary.objects.select_related('company').filter(q1).order_by(order).exclude(id=3)
+                objs = models.zgld_diary.objects.select_related('company').filter(q1).order_by(order).exclude(status__in=[3])
                 count = objs.count()
 
                 if length != 0:
@@ -69,20 +69,29 @@ def diary_manage(request, oper_type):
                         status = obj.status
                         status_text = obj.get_status_display()
                         cover_picture = obj.cover_picture
+                        content = obj.content
+
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
+                        if content:
+                            content = json.loads(content)
 
                         ret_data.append({
                             'diary_id': obj.id,
+                            'case_id': obj.case_id,
                             'company_id': obj.company_id,
-                            'customer_name': obj.customer_name,
-                            'headimgurl': obj.headimgurl,
-                            'cover_picture' : cover_picture,
+
+                            'title': obj.title,
+                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if obj.diary_date else '',
+                            'cover_picture': cover_picture,
+                            'content': content,
 
                             'status': status,
                             'status_text': status_text,
 
-                            'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
+                            'cover_show_type' : obj.cover_show_type,
+                            'cover_show_type_text' : obj.get_cover_show_type_display(),
+
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
@@ -136,7 +145,7 @@ def diary_manage_oper(request, oper_type, o_id):
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
 
-            diary_id = request.POST.get('diary_id')
+            diary_id = o_id
             case_id = request.POST.get('case_id')
             title = request.POST.get('title')
             diary_date = request.POST.get('diary_date')
@@ -144,7 +153,7 @@ def diary_manage_oper(request, oper_type, o_id):
             content = request.POST.get('content')
 
             status = request.POST.get('status')
-            cover_show_type = request.POST.get('status')  # (1,'只展示图片'),  (2,'只展示视频'),
+            cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
 
             form_data = {
 
@@ -164,9 +173,21 @@ def diary_manage_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 diary_objs = models.zgld_diary.objects.filter(id=diary_id)
 
+                if cover_show_type == 1: # (1,'只展示图片'), (2,'只展示视频'),
+                    _content = json.loads(content)
+                    soup = BeautifulSoup(_content, 'lxml')
+
+                    img_tags = soup.find_all('img')
+                    for img_tag in img_tags:
+                        data_src = img_tag.attrs.get('src')
+                        if data_src:
+                            print(data_src)
+
+
+
+
                 diary_objs.update(
                     user_id = user_id,
-                    diary_id = diary_id,
                     case_id = case_id,
                     company_id = company_id,
 
@@ -200,15 +221,15 @@ def diary_manage_oper(request, oper_type, o_id):
 
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
-            case_id = request.POST.get('case_id')
 
+            case_id = request.POST.get('case_id')
             title = request.POST.get('title')
             diary_date = request.POST.get('diary_date')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
             content = request.POST.get('content')
 
             status = request.POST.get('status')
-            cover_show_type  = request.POST.get('status') # (1,'只展示图片'),  (2,'只展示视频'),
+            cover_show_type  = request.POST.get('cover_show_type') # (1,'只展示图片'),  (2,'只展示视频'),
 
 
             form_data = {
@@ -227,8 +248,19 @@ def diary_manage_oper(request, oper_type, o_id):
 
             forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
+                if cover_show_type == 1:  # (1,'只展示图片'), (2,'只展示视频'),
 
-                obj = models.zgld_diary.objects.create(
+                    _content = json.loads(content)
+                    _cover_picture = json.loads(cover_picture)
+                    soup = BeautifulSoup(_content, 'lxml')
+
+                    img_tags = soup.find_all('img')
+                    for img_tag in img_tags:
+                        data_src = img_tag.attrs.get('src')
+                        if data_src:
+                            print(data_src)
+
+                models.zgld_diary.objects.create(
                     user_id=user_id,
                     case_id=case_id,
                     company_id=company_id,
@@ -246,8 +278,6 @@ def diary_manage_oper(request, oper_type, o_id):
                     case_objs.update(
                         update_date=datetime.datetime.now()
                     )
-
-
 
                 response.code = 200
                 response.msg = "添加成功"

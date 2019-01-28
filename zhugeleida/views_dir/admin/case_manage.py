@@ -19,7 +19,7 @@ def case_manage(request, oper_type):
 
     if request.method == "GET":
 
-        # 查询 文章-活动(任务)
+        # 查询案例
         if oper_type == 'case_list':
 
             print('request.GET----->', request.GET)
@@ -53,8 +53,10 @@ def case_manage(request, oper_type):
                     q1.children.append(('status', search_activity_status))  #
 
 
+
+
                 print('-----q1---->>', q1)
-                objs = models.zgld_case.objects.select_related('company').filter(q1).order_by(order).exclude(id=3)
+                objs = models.zgld_case.objects.select_related('company').filter(q1).order_by(order).exclude(status=3)
                 count = objs.count()
 
                 if length != 0:
