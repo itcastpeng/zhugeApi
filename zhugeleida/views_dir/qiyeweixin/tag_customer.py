@@ -121,7 +121,7 @@ def tag_customer_oper(request, oper_type, o_id):
         if oper_type == "add":
 
             tag_type = request.POST.get('tag_type')
-
+            user_id =  request.GET.get('user_id')
             tag_data = {
                 'name' : request.POST.get('name'),
                 'tag_type' : tag_type
@@ -137,6 +137,7 @@ def tag_customer_oper(request, oper_type, o_id):
                     obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
                     obj.tag_parent_id = parent_id
                     obj.tag_customer = customer_list
+                    obj.user_id = user_id
                     obj.save()
 
                     response.code = 200
