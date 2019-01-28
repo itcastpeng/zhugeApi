@@ -133,53 +133,63 @@ def diary_manage_oper(request, oper_type, o_id):
         # 修改-案例
         elif oper_type == 'update':
 
-            diary_id = o_id
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
 
-            diary_name = request.POST.get('diary_name')
-            customer_name = request.POST.get('customer_name')
-            headimgurl = request.POST.get('headimgurl')
-            status = request.POST.get('status')
+            diary_id = request.POST.get('diary_id')
+            case_id = request.POST.get('case_id')
+            title = request.POST.get('title')
+            diary_date = request.POST.get('diary_date')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
+            content = request.POST.get('content')
 
-            if cover_picture:
-                cover_picture = json.dumps(cover_picture)
+            status = request.POST.get('status')
+            cover_show_type = request.POST.get('status')  # (1,'只展示图片'),  (2,'只展示视频'),
 
             form_data = {
-                'diary_id' : diary_id,
-                'diary_name' : diary_name,
+
+                'case_id': case_id,
                 'company_id': company_id,
-                'customer_name': customer_name,  # 活动名称
-                'headimgurl': headimgurl,  # 文章ID
+
+                'title': title,
+                'diary_date': diary_date,  # 活动名称
+                'cover_picture': cover_picture,  # 活动名称
+                'content': content,  # 活动名称
+
                 'status': status,
+                'cover_show_type': cover_show_type,
             }
 
             forms_obj = diaryUpdateForm(form_data)
             if forms_obj.is_valid():
+                diary_objs = models.zgld_diary.objects.filter(id=diary_id)
 
-                objs = models.zgld_diary.objects.filter(company_id=company_id,id=diary_id)
-                if objs:
-                    objs.update(
-                        user_id=user_id,
-                        diary_name=diary_name,
-                        customer_name=customer_name.strip(),
-                        headimgurl=headimgurl,
-                        cover_picture=cover_picture,
-                        status=status
+                diary_objs.update(
+                    user_id = user_id,
+                    diary_id = diary_id,
+                    case_id = case_id,
+                    company_id = company_id,
+
+                    title = title,
+                    diary_date = diary_date,
+                    cover_picture = cover_picture,
+                    content = content,
+
+                    status = status,
+                    cover_show_type = cover_show_type
+                )
+
+
+
+                case_objs = models.zgld_case.objects.filter(id=case_id)
+                if case_objs:
+                    case_objs.update(
+                        update_date=datetime.datetime.now()
                     )
 
-                    obj =objs[0]
-                    tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
-                    if tags_id_list:
-                        obj.tags = tags_id_list
+                response.code = 200
+                response.msg = "添加成功"
 
-                    response.code = 200
-                    response.msg = "修改成功"
-
-                else:
-                    response.code = 302
-                    response.msg = "案例不存在"
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
@@ -198,17 +208,21 @@ def diary_manage_oper(request, oper_type, o_id):
             content = request.POST.get('content')
 
             status = request.POST.get('status')
-
+            cover_show_type  = request.POST.get('status') # (1,'只展示图片'),  (2,'只展示视频'),
 
 
             form_data = {
+
                 'case_id' : case_id,
+                'company_id' :company_id,
+
                 'title': title,
                 'diary_date': diary_date,  # 活动名称
+                'cover_picture': cover_picture,  # 活动名称
+                'content': content,  # 活动名称
 
-                'content': content,  # 文章ID
                 'status': status,
-
+                'cover_show_type' : cover_show_type,
             }
 
             forms_obj = diaryAddForm(form_data)
@@ -221,15 +235,19 @@ def diary_manage_oper(request, oper_type, o_id):
 
                     title=title,
                     diary_date=diary_date,
-                    customer_name=customer_name.strip(),
-                    headimgurl=headimgurl,
                     cover_picture=cover_picture,
-                    status=status
-                )
+                    content=content,
 
-                tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
-                if tags_id_list:
-                    obj.tags = tags_id_list
+                    status=status,
+                    cover_show_type=cover_show_type
+                )
+                case_objs = models.zgld_case.objects.filter(id=case_id)
+                if case_objs:
+                    case_objs.update(
+                        update_date=datetime.datetime.now()
+                    )
+
+
 
                 response.code = 200
                 response.msg = "添加成功"

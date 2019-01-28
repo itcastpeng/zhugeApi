@@ -1432,6 +1432,12 @@ class zgld_diary(models.Model):
                        (3,'删除'), # 逻辑删除
                      )
     status = models.SmallIntegerField(default=2, verbose_name='日记状态', choices=status_choices)
+
+    cover_show_type_choices = ( (1,'只展示图片'),
+                                (2,'只展示视频'),
+
+                     )
+    cover_show_type = models.SmallIntegerField(default=2, verbose_name='封面展示类型', choices=cover_show_type_choices)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 

@@ -104,25 +104,44 @@ class SetFocusGetRedPacketForm(forms.Form):
 #增加活动
 class diaryAddForm(forms.Form):
 
-
-    diary_name = forms.CharField(
+    case_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "案例名称不能为空"
+            'required': "案例ID不能为空"
         }
     )
 
-    customer_name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "客户名字不能为空"
-        }
-    )
-
-    company_id = forms.IntegerField(
+    company_id = forms.CharField(
         required=True,
         error_messages={
             'required': "公司ID不能为空"
+        }
+    )
+
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "标题不能为空"
+        }
+    )
+
+    diary_date = forms.DateTimeField(
+        required=True,
+        error_messages={
+            'required': "日记日期不能为空"
+        }
+    )
+
+    cover_picture  = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "封面不能为空"
+        }
+    )
+    content  = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
         }
     )
 
@@ -133,12 +152,13 @@ class diaryAddForm(forms.Form):
         }
     )
 
-    headimgurl  = forms.CharField(
+    cover_show_type = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "头像不能为空"
+            'required': "展示类型不能为空"
         }
     )
+
     def clean_diary_name(self):
 
         company_id = self.data['company_id']
@@ -149,39 +169,51 @@ class diaryAddForm(forms.Form):
         )
 
         if objs:
-            self.add_error('diary_name', '不能存在相同的案例名')
+            self.add_error('diary_name', '不能存在相同的文章名')
         else:
             return diary_name
 
 
 # 修改案例
 class diaryUpdateForm(forms.Form):
-
-    diary_id = forms.IntegerField(
+    case_id = forms.IntegerField(
         required=True,
         error_messages={
             'required': "案例ID不能为空"
         }
     )
 
-    diary_name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "案例名称不能为空"
-        }
-    )
-
-    customer_name = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "客户名字不能为空"
-        }
-    )
-
-    company_id = forms.IntegerField(
+    company_id = forms.CharField(
         required=True,
         error_messages={
             'required': "公司ID不能为空"
+        }
+    )
+
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "标题不能为空"
+        }
+    )
+
+    diary_date = forms.DateTimeField(
+        required=True,
+        error_messages={
+            'required': "日记日期不能为空"
+        }
+    )
+
+    cover_picture = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "封面不能为空"
+        }
+    )
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
         }
     )
 
@@ -192,15 +224,14 @@ class diaryUpdateForm(forms.Form):
         }
     )
 
-    headimgurl = forms.CharField(
+    cover_show_type = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "头像不能为空"
+            'required': "展示类型不能为空"
         }
     )
 
     def clean_diary_name(self):
-
         diary_id = self.data['diary_id']
         company_id = self.data['company_id']
         diary_name = self.data['diary_name']
@@ -210,9 +241,10 @@ class diaryUpdateForm(forms.Form):
         ).exclude(id=diary_id)
 
         if objs:
-            self.add_error('diary_name', '不能存在相同的案例名')
+            self.add_error('diary_name', '不能存在相同的文章名')
         else:
             return diary_name
+
 
 
 #修改活动
