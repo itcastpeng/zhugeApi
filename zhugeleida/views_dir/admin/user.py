@@ -199,7 +199,11 @@ def user(request):
                             'status': obj.status,
                             'status_text': obj.get_status_display(),
                             'boss_status': obj.boss_status,
-                            'boss_status_text': obj.get_boss_status_display()
+                            'boss_status_text': obj.get_boss_status_display(),
+
+                            'article_admin_status': obj.article_admin_status,
+                            'article_admin_status_text': obj.get_article_admin_status_display()
+
 
                         })
                         #  查询成功 返回200 状态码
