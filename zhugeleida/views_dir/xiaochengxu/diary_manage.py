@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from bs4 import BeautifulSoup
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, diaryAddForm, diarySelectForm,ReviewDiaryForm,DiaryReviewSelectForm
+from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, PraiseDiaryForm, diarySelectForm,ReviewDiaryForm,DiaryReviewSelectForm
 from django.db.models import F,Q
 import json,datetime
 from django.db.models import Q, Sum, Count
@@ -35,8 +35,8 @@ def diary_manage(request, oper_type):
 
                 ## 搜索条件
                 diary_id = request.GET.get('diary_id')  #
-                search_activity_status = request.GET.get('status')  #
-                title = request.GET.get('title')  #
+                title = request.GET.get('title')        #
+                user_id = request.GET.get('user_id')        #
 
                 q1 = Q()
                 q1.connector = 'and'
@@ -56,13 +56,9 @@ def diary_manage(request, oper_type):
                         )
 
 
-                # now_date_time = datetime.datetime.now()
-                if search_activity_status:
-                    q1.children.append(('status', search_activity_status))  #
-
-
+                q1.children.append(('status__in', [1]))  #
                 print('-----q1---->>', q1)
-                objs = models.zgld_diary.objects.select_related('company').filter(q1).order_by(order).exclude(status__in=[3])
+                objs = models.zgld_diary.objects.select_related('company').filter(q1).order_by(order)
                 count = objs.count()
 
                 if length != 0:
@@ -72,12 +68,27 @@ def diary_manage(request, oper_type):
 
                 ret_data = []
                 if objs:
+                    first_diary_date = models.zgld_diary.objects.filter(q1).order_by('create_date')[0].diary_date
 
                     for obj in objs:
+
+                        diary_up_down_objs = models.zgld_diary_up_down.objects.filter(diary_id=obj.id,
+                                                                                      customer_id=user_id)
+                        if diary_up_down_objs:
+                            is_praise_diary = 1
+                            is_praise_diary_text = '已经赞过此日记'
+                        else:
+                            is_praise_diary = 0
+                            is_praise_diary_text = '没有赞过此日记'
+
+
                         status = obj.status
                         status_text = obj.get_status_display()
                         cover_picture = obj.cover_picture
                         content = obj.content
+
+                        interval_days  =  (obj.diary_date - first_diary_date).days
+
 
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
@@ -89,10 +100,15 @@ def diary_manage(request, oper_type):
                             'case_id': obj.case_id,
                             'company_id': obj.company_id,
 
+                            'is_praise_diary': is_praise_diary,
+                            'is_praise_diary_text' : is_praise_diary_text,
+
                             'title': obj.title,
-                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if obj.diary_date else '',
+                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d %H:%M') if obj.diary_date else '',
                             'cover_picture': cover_picture,
                             'content': content,
+
+                            'interval_days' : interval_days,
 
                             'status': status,
                             'status_text': status_text,
@@ -133,7 +149,7 @@ def diary_manage(request, oper_type):
 
 
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_customer)
 def diary_manage_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
 
@@ -162,7 +178,13 @@ def diary_manage_oper(request, oper_type, o_id):
                     'content': msg,
                     'from_customer_id': from_customer_id
                 }
-                obj = models.zgld_diary_comment.objects.create(**create_data)
+                models.zgld_diary_comment.objects.create(**create_data)
+                diary_objs = models.zgld_diary.objects.filter(id=o_id)
+                if diary_objs:
+                    diary_objs.update(
+                        comment_count=F('comment_count') + 1
+                    )
+
                 response.code = 200
                 response.msg = "记录成功"
             else:
@@ -170,6 +192,51 @@ def diary_manage_oper(request, oper_type, o_id):
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        elif oper_type == 'praise_diary':
+            customer_id = request.GET.get('user_id')
+            # status = request.POST.get('status')
+
+            request_data_dict = {
+                'diary_id': o_id,
+                'status': 1,  # 文章所属用户的ID
+
+            }
+
+            forms_obj = PraiseDiaryForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                create_data = {
+                    'diary_id': o_id,
+                    'customer_id' :customer_id,
+                    'status' :1
+                }
+
+                diary_up_down_objs = models.zgld_diary_up_down.objects.filter(diary_id=o_id,customer_id=customer_id)
+                if diary_up_down_objs:
+                    diary_up_down_objs.update(
+                        status=1
+                    )
+                    response.code = 302
+                    response.msg = "已经点过赞了"
+
+                else:
+                    models.zgld_diary_up_down.objects.create(**create_data)
+
+                    diary_objs = models.zgld_diary.objects.filter(id=o_id)
+                    if diary_objs:
+                        diary_objs.update(
+                            up_count=F('up_count') + 1
+                        )
+
+                    response.code = 200
+                    response.msg = "记录成功"
+            else:
+
+                print('-------未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
     elif request.method == 'GET':
 

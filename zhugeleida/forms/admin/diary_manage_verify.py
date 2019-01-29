@@ -618,4 +618,23 @@ class DiaryReviewSelectForm(forms.Form):
         return length
 
 
+class PraiseDiaryForm(forms.Form):
+
+    diary_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    status = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "状态不能为空"
+        }
+    )
+
+
+
+
 

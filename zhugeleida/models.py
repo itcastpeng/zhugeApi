@@ -1465,3 +1465,21 @@ class zgld_diary_comment(models.Model):
     class Meta:
         verbose_name_plural = "日记评论表"
         app_label = "zhugeleida"
+
+
+# 日记被赞【是否靠谱】
+class zgld_diary_up_down(models.Model):
+    diary = models.ForeignKey('zgld_diary', verbose_name='被赞的日记')
+    customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
+    status_choices = ((0, '未点赞'),
+                      (1, '点赞')
+                      )
+    status = models.SmallIntegerField(default=2, verbose_name='状态', choices=status_choices)
+
+    class Meta:
+        unique_together = [
+            ('diary', 'customer'),
+        ]
+        verbose_name_plural = "日记点赞表"
+        app_label = "zhugeleida"
+

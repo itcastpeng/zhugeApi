@@ -76,8 +76,8 @@ def case_manage(request, oper_type):
                                 _history_tags_record =  customer_objs[0].history_tags_record
                                 history_tags_record = json.loads(_history_tags_record)
                                 history_tags_record.append( {
-                                    'tag_id': search_tag_id,
-                                    'tag_name' : tag_name
+                                    'id': search_tag_id,
+                                    'name' : tag_name
                                 })
 
                                 customer_objs.update(
@@ -99,10 +99,8 @@ def case_manage(request, oper_type):
                     last_diary_data = ''
                     for obj in objs:
 
-
                         status = obj.status
                         status_text = obj.get_status_display()
-
 
                         cover_picture = obj.cover_picture
                         if cover_picture:

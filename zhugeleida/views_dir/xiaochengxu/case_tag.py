@@ -52,7 +52,7 @@ def case_tag(request,oper_type):
             print('q -->', q)
             q.add(Q(**{'company_id': company_id}), Q.AND)
             q.add(Q(**{'id': user_id}), Q.AND)
-
+            print(q)
             customer_objs = models.zgld_customer.objects.filter(q)
             if customer_objs:
                 customer_obj = customer_objs[0]
@@ -65,6 +65,9 @@ def case_tag(request,oper_type):
                     'ret_data': history_tags_record,
 
                 }
+            else:
+                response.code = 302
+                response.msg = '暂无数据'
 
         # 热门搜索
         elif oper_type == 'top_search_tag_list':
@@ -77,10 +80,10 @@ def case_tag(request,oper_type):
                 'name': '__contains',  # 标签搜索
             }
             q = conditionCom(request, field_dict)
-            print('q -->', q)
             q.add(Q(**{'company_id': company_id}), Q.AND)
+            print('q -->', q)
 
-            tag_list = models.zgld_case_tag.objects.filter(q).order_by('-search_amount').values_list('id','name',flat=True)
+            tag_list = models.zgld_case_tag.objects.filter(q).order_by('-search_amount').values('id','name')
             tag_data = list(tag_list)
 
             response.code = 200
