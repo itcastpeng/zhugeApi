@@ -747,143 +747,142 @@ def article_oper(request, oper_type, o_id):
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-
+                    print('查询值 q--->>',q)
                     objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(q)
                     if objs:
+                        obj = objs[0]
                         objs.update(stay_time=F('stay_time') + 5)  #
 
-                    obj = objs[0]
-                    company_id = ''
-                    userprofile_objs = models.zgld_userprofile.objects.filter(id=uid)
-                    if userprofile_objs:
-                        company_id = userprofile_objs[0].company_id
+                        company_id = ''
+                        userprofile_objs = models.zgld_userprofile.objects.filter(id=uid)
+                        if userprofile_objs:
+                            company_id = userprofile_objs[0].company_id
 
-                    ### 自动打标签
-                    tags_time_count = obj.article.tags_time_count
-                    tags_name_list = list(obj.article.tags.all().values_list('name', flat=True))
+                        ### 自动打标签
+                        tags_time_count = obj.article.tags_time_count
+                        stay_time = obj.stay_time
 
-                    stay_time = obj.stay_time
+                        if stay_time >= tags_time_count:
+                            tags_name_list = list(obj.article.tags.all().values_list('name', flat=True))
 
-                    if stay_time >= tags_time_count:
-
-                        # 方法1
-                        customer_obj = models.zgld_customer.objects.get(id=o_id)
-                        already_tag_name_list = list(customer_obj.zgld_tag_set.all().values_list('name', flat=True)) # 此客户已经拥有的标签
-
-                        already_tag_list = ''
-                        already_company_tags_name_list = ''
-                        for tag_name in tags_name_list:
-
-                            if tag_name in already_tag_name_list: # 满足 文章标签已经在 【客户标签列表中】就不用创建
-                                print('tag_name 文章标签已经在 【客户标签列表中】---------->>',tag_name,"|",already_tag_name_list)
-                                continue
-
-                            elif not already_tag_list:
-                                print('值 already_tag_list 为空 ------>>')
-                                already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id', flat=True))
-                                already_company_tags_name_list = list(models.zgld_tag.objects.filter(user_id=uid,user__company_id=company_id).values_list('name',flat=True))
-
-                            tag_data = {
-                                'name': tag_name,
-                                'user_id': uid
-                            }
-                            print('值 already_tag_list-------->', already_tag_list)
-
-                            if tag_name not in already_company_tags_name_list:
-                                parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
-                                _obj = models.zgld_tag.objects.create(**tag_data)
-                                _obj.tag_parent_id = parent_id
-                                _obj.save()
-                                tag_id = _obj.id
-
-
-                            else:
-                                _objs = models.zgld_tag.objects.filter(name=tag_name,user_id=uid, user__company_id=company_id)
-                                _obj = _objs[0]
-                                tag_id = _obj.id
-
-                            if str(tag_id) not in already_tag_list:
-                                already_tag_list.append(str(tag_id))
-
-                        if already_tag_list:
-                            now_tag_list = [int(i)  for i in already_tag_list]
-
-                            print('值 now_tag_list ----->>',now_tag_list)
-
-                            if customer_obj:
-                                customer_obj.zgld_tag_set = now_tag_list
-
-                        '''
-                        # 操作tag，为客户添加多个标签
-                        elif oper_type == "customer_tag":
-                
-                            tag_list = json.loads(request.POST.get('tag_list'))
+                            # 方法1
                             customer_obj = models.zgld_customer.objects.get(id=o_id)
-                
-                            if customer_obj:
-                                customer_obj.zgld_tag_set = tag_list
-                                response.code = 200
-                                response.msg = "添加成功"
-                        '''
+                            already_tag_name_list = list(customer_obj.zgld_tag_set.all().values_list('name', flat=True)) # 此客户已经拥有的标签
+
+                            already_tag_list = ''
+                            already_company_tags_name_list = ''
+                            for tag_name in tags_name_list:
+
+                                if tag_name in already_tag_name_list: # 满足 文章标签已经在 【客户标签列表中】就不用创建
+                                    print('tag_name 文章标签已经在 【客户标签列表中】---------->>',tag_name,"|",already_tag_name_list)
+                                    continue
+
+                                elif not already_tag_list:
+                                    print('值 already_tag_list 为空 ------>>')
+                                    already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id', flat=True))
+                                    already_company_tags_name_list = list(models.zgld_tag.objects.filter(user_id=uid,user__company_id=company_id).values_list('name',flat=True))
+
+                                tag_data = {
+                                    'name': tag_name,
+                                    'user_id': uid
+                                }
+                                print('值 already_tag_list-------->', already_tag_list)
+
+                                if tag_name not in already_company_tags_name_list:
+                                    parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
+                                    _obj = models.zgld_tag.objects.create(**tag_data)
+                                    _obj.tag_parent_id = parent_id
+                                    _obj.save()
+                                    tag_id = _obj.id
 
 
-                    article_access_log_objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
-                    now_date_time = datetime.datetime.now()
-                    if article_access_log_objs:
-                        article_access_log_objs.update(
-                            stay_time=F('stay_time') + 5,
-                            last_access_date=now_date_time
-                        )
-                        # 'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
-                        is_have_activity = int(is_have_activity) if is_have_activity else ''
-                        reach_stay_time = int(reach_stay_time) if reach_stay_time else ''
+                                else:
+                                    _objs = models.zgld_tag.objects.filter(name=tag_name,user_id=uid, user__company_id=company_id)
+                                    _obj = _objs[0]
+                                    tag_id = _obj.id
 
-                        if activity_id and is_have_activity == 1 and reach_stay_time != 0:
-                            print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
-                            activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(
-                                status=3).order_by('-create_date')
-                            now_date_time = datetime.datetime.now()
-                            is_limit_area = ''
-                            if activity_objs:
-                                activity_obj = activity_objs[0]
-                                start_time = activity_obj.start_time
-                                end_time = activity_obj.end_time
-                                reach_stay_time = activity_obj.reach_stay_time
+                                if str(tag_id) not in already_tag_list:
+                                    already_tag_list.append(str(tag_id))
 
-                                print('库值 start_time------>>', start_time)
-                                print('库值 end_time------>>', end_time)
-                                print('库值 reach_stay_time------>>', reach_stay_time)
+                            if already_tag_list:
+                                now_tag_list = [int(i)  for i in already_tag_list]
 
-                                if now_date_time >= start_time and now_date_time <= end_time:
-                                    print('活动开启并活动在进行中 -------->>')
+                                print('值 now_tag_list ----->>',now_tag_list)
 
-                                    article_access_log_obj = article_access_log_objs[0]
+                                if customer_obj:
+                                    customer_obj.zgld_tag_set = now_tag_list
 
-                                    if reach_stay_time != 0:  # 0 代表 没有时间限制
-                                        stay_time = article_access_log_obj.stay_time
-                                        print('库值 stay_time-------->', stay_time)
-                                        print('库值 reach_stay_time-------->', reach_stay_time)
+                            '''
+                            # 操作tag，为客户添加多个标签
+                            elif oper_type == "customer_tag":
+                    
+                                tag_list = json.loads(request.POST.get('tag_list'))
+                                customer_obj = models.zgld_customer.objects.get(id=o_id)
+                    
+                                if customer_obj:
+                                    customer_obj.zgld_tag_set = tag_list
+                                    response.code = 200
+                                    response.msg = "添加成功"
+                            '''
 
-                                        if stay_time >= reach_stay_time:
 
-                                            if parent_id:
-                                                # company_id = ''
-                                                # userprofile_objs = models.zgld_userprofile.objects.filter(id=uid)
-                                                # if userprofile_objs:
-                                                #     company_id = userprofile_objs[0].company_id
+                        article_access_log_objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
+                        now_date_time = datetime.datetime.now()
+                        if article_access_log_objs:
+                            article_access_log_objs.update(
+                                stay_time=F('stay_time') + 5,
+                                last_access_date=now_date_time
+                            )
+                            # 'is_have_activity': is_have_activity,  # 是否搞活动。0 是没有活动，1 是活动已经开启。
+                            is_have_activity = int(is_have_activity) if is_have_activity else ''
+                            reach_stay_time = int(reach_stay_time) if reach_stay_time else ''
 
-                                                _data = {
-                                                    'article_access_log_id': article_access_log_id,
-                                                    'customer_id': customer_id,
-                                                    'user_id': uid,
-                                                    'parent_id': parent_id,
-                                                    'article_id': article_id,
-                                                    'activity_id': activity_id,
-                                                    'company_id': company_id,
-                                                }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
-                                                print('传输异步数据 tasks json.dumps(_data) --------->>', json.dumps(_data))
+                            if activity_id and is_have_activity == 1 and reach_stay_time != 0:
+                                print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
+                                activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(
+                                    status=3).order_by('-create_date')
+                                now_date_time = datetime.datetime.now()
+                                is_limit_area = ''
+                                if activity_objs:
+                                    activity_obj = activity_objs[0]
+                                    start_time = activity_obj.start_time
+                                    end_time = activity_obj.end_time
+                                    reach_stay_time = activity_obj.reach_stay_time
 
-                                                tasks.user_forward_send_activity_redPacket.delay(_data)
+                                    print('库值 start_time------>>', start_time)
+                                    print('库值 end_time------>>', end_time)
+                                    print('库值 reach_stay_time------>>', reach_stay_time)
+
+                                    if now_date_time >= start_time and now_date_time <= end_time:
+                                        print('活动开启并活动在进行中 -------->>')
+
+                                        article_access_log_obj = article_access_log_objs[0]
+
+                                        if reach_stay_time != 0:  # 0 代表 没有时间限制
+                                            stay_time = article_access_log_obj.stay_time
+                                            print('库值 stay_time-------->', stay_time)
+                                            print('库值 reach_stay_time-------->', reach_stay_time)
+
+                                            if stay_time >= reach_stay_time:
+
+                                                if parent_id:
+                                                    # company_id = ''
+                                                    # userprofile_objs = models.zgld_userprofile.objects.filter(id=uid)
+                                                    # if userprofile_objs:
+                                                    #     company_id = userprofile_objs[0].company_id
+
+                                                    _data = {
+                                                        'article_access_log_id': article_access_log_id,
+                                                        'customer_id': customer_id,
+                                                        'user_id': uid,
+                                                        'parent_id': parent_id,
+                                                        'article_id': article_id,
+                                                        'activity_id': activity_id,
+                                                        'company_id': company_id,
+                                                    }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
+                                                    print('传输异步数据 tasks json.dumps(_data) --------->>', json.dumps(_data))
+
+                                                    tasks.user_forward_send_activity_redPacket.delay(_data)
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
