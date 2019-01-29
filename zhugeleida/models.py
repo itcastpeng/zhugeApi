@@ -1402,7 +1402,7 @@ class zgld_case(models.Model):
 
     case_name = models.CharField(verbose_name='案例名称', max_length=128)
     cover_picture = models.TextField(verbose_name="封面图片URL",null=True)
-    tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
+    tags = models.ManyToManyField('zgld_case_tag', verbose_name="文章关联的标签")
     status_choices = ((1, '已发'),
                       (2, '未发'),
                       (3, '删除'),  # 逻辑删除
@@ -1443,9 +1443,8 @@ class zgld_diary(models.Model):
     status = models.SmallIntegerField(default=2, verbose_name='日记状态', choices=status_choices)
 
     cover_show_type_choices = ( (1,'只展示图片'),
-                                (2,'只展示视频'),
-
-                     )
+                                (2,'只展示视频')
+                               )
     cover_show_type = models.SmallIntegerField(default=2, verbose_name='封面展示类型', choices=cover_show_type_choices)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 

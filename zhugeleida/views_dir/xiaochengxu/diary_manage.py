@@ -6,11 +6,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from bs4 import BeautifulSoup
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, diaryAddForm, diarySelectForm, diaryUpdateForm, \
-    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
-
+from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, diaryAddForm, diarySelectForm,ReviewDiaryForm,DiaryReviewSelectForm
+from django.db.models import F,Q
 import json,datetime
 from django.db.models import Q, Sum, Count
+import base64
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -46,7 +46,15 @@ def diary_manage(request, oper_type):
                     q1.children.append(('title__contains', title))
 
                 if diary_id:
+
                     q1.children.append(('id', diary_id))
+
+                    diary_objs = models.zgld_diary.objects.filter(id=diary_id)
+                    if diary_objs:
+                        diary_objs.update( # 阅读次数
+                            read_count=F('read_count') + 1
+                        )
+
 
                 # now_date_time = datetime.datetime.now()
                 if search_activity_status:
@@ -89,6 +97,11 @@ def diary_manage(request, oper_type):
                             'status': status,
                             'status_text': status_text,
 
+                            'read_count' : obj.read_count, #
+                            'comment_count' : obj.comment_count, #
+                            'up_count' : obj.up_count, #
+
+
                             'cover_show_type' : obj.cover_show_type,
                             'cover_show_type_text' : obj.get_cover_show_type_display(),
 
@@ -110,6 +123,10 @@ def diary_manage(request, oper_type):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+    elif request.method == "POST":
+        pass
+
+
 
 
     return JsonResponse(response.__dict__)
@@ -122,169 +139,102 @@ def diary_manage_oper(request, oper_type, o_id):
 
     if request.method == "POST":
 
-        # 删除-案例
-        if oper_type == "delete":
+        # 评论日记
+        if oper_type == 'review_diary':
 
-            company_id = request.GET.get('company_id')
-            objs = models.zgld_diary.objects.filter(id=o_id,company_id=company_id)
-
-            if objs:
-                objs.update(
-                    status=3
-                )
-                response.code = 200
-                response.msg = "删除成功"
-
-            else:
-                response.code = 302
-                response.msg = '案例不存在'
-
-        # 修改-案例
-        elif oper_type == 'update':
-
-            user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
-
-            diary_id = o_id
-            case_id = request.POST.get('case_id')
-            title = request.POST.get('title')
-            diary_date = request.POST.get('diary_date')
-            cover_picture = request.POST.get('cover_picture')  # 文章ID
+            from_customer_id = request.GET.get('user_id')
             content = request.POST.get('content')
 
-            status = request.POST.get('status')
-            cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
-
-            form_data = {
-
-                'case_id': case_id,
-                'company_id': company_id,
-
-                'title': title,
-                'diary_date': diary_date,  # 活动名称
-                'cover_picture': cover_picture,  # 活动名称
-                'content': content,  # 活动名称
-
-                'status': status,
-                'cover_show_type': cover_show_type,
+            request_data_dict = {
+                'diary_id': o_id,
+                'content': content,  # 文章所属用户的ID
+                'customer_id': from_customer_id,  # 文章所属用户的ID
             }
 
-            forms_obj = diaryUpdateForm(form_data)
+            forms_obj = ReviewDiaryForm(request_data_dict)
             if forms_obj.is_valid():
-                diary_objs = models.zgld_diary.objects.filter(id=diary_id)
 
-                if cover_show_type == 1: # (1,'只展示图片'), (2,'只展示视频'),
-                    _content = json.loads(content)
-                    soup = BeautifulSoup(_content, 'lxml')
+                encodestr = base64.b64encode(content.encode('utf-8'))
+                msg = str(encodestr, 'utf-8')
 
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
-
-
-
-
-                diary_objs.update(
-                    user_id = user_id,
-                    case_id = case_id,
-                    company_id = company_id,
-
-                    title = title,
-                    diary_date = diary_date,
-                    cover_picture = cover_picture,
-                    content = content,
-
-                    status = status,
-                    cover_show_type = cover_show_type
-                )
-
-
-
-                case_objs = models.zgld_case.objects.filter(id=case_id)
-                if case_objs:
-                    case_objs.update(
-                        update_date=datetime.datetime.now()
-                    )
-
+                create_data = {
+                    'diary_id': o_id,
+                    'content': msg,
+                    'from_customer_id': from_customer_id
+                }
+                obj = models.zgld_diary_comment.objects.create(**create_data)
                 response.code = 200
-                response.msg = "添加成功"
-
+                response.msg = "记录成功"
             else:
+
+                print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        # 增加-案例
-        elif oper_type == "add":
+    elif request.method == 'GET':
 
+        ## 文章评论列表展示
+        if oper_type == 'diary_id_review_list':
 
             user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
-
-            case_id = request.POST.get('case_id')
-            title = request.POST.get('title')
-            diary_date = request.POST.get('diary_date')
-            cover_picture = request.POST.get('cover_picture')  # 文章ID
-            content = request.POST.get('content')
-
-            status = request.POST.get('status')
-            cover_show_type  = request.POST.get('cover_show_type') # (1,'只展示图片'),  (2,'只展示视频'),
-
-
             form_data = {
-
-                'case_id' : case_id,
-                'company_id' :company_id,
-
-                'title': title,
-                'diary_date': diary_date,  # 活动名称
-                'cover_picture': cover_picture,  # 活动名称
-                'content': content,  # 活动名称
-
-                'status': status,
-                'cover_show_type' : cover_show_type,
+                'diary_id' : o_id
             }
+            forms_obj = DiaryReviewSelectForm(form_data)
 
-            forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
-                if cover_show_type == 1:  # (1,'只展示图片'), (2,'只展示视频'),
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
 
-                    _content = json.loads(content)
-                    _cover_picture = json.loads(cover_picture)
-                    soup = BeautifulSoup(_content, 'lxml')
+                objs = models.zgld_diary_comment.objects.select_related('from_customer','to_customer').filter(diary_id=o_id).order_by('-create_date')
 
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
+                count = objs.count()
+                if objs:
 
-                models.zgld_diary.objects.create(
-                    user_id=user_id,
-                    case_id=case_id,
-                    company_id=company_id,
+                    # if length != 0:
+                    #     start_line = (current_page - 1) * length
+                    #     stop_line = start_line + length
+                    #     objs = objs[start_line: stop_line]
 
-                    title=title,
-                    diary_date=diary_date,
-                    cover_picture=cover_picture,
-                    content=content,
+                    ret_data = []
+                    for obj in objs:
 
-                    status=status,
-                    cover_show_type=cover_show_type
-                )
-                case_objs = models.zgld_case.objects.filter(id=case_id)
-                if case_objs:
-                    case_objs.update(
-                        update_date=datetime.datetime.now()
-                    )
+                        try:
+                            username = base64.b64decode(obj.from_customer.username)
+                            customer_name = str(username, 'utf-8')
+                            print('----- 解密b64decode username----->', username)
+                        except Exception as e:
+                            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.from_customer_id, "|", e)
+                            customer_name = '客户ID%s' % (obj.from_customer_id)
 
-                response.code = 200
-                response.msg = "添加成功"
+
+                        _content = base64.b64decode(obj.content)
+                        content = str(_content, 'utf-8')
+                        print('----- 解密b64decode 内容content----->', content)
+
+                        ret_data.append({
+                            'from_customer_id': obj.from_customer_id,
+                            'from_customer_name': customer_name,
+                            'from_customer_headimgurl': obj.from_customer.headimgurl,
+                            'content': content,
+                            'create_time' : obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                        })
+
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'data_count': count,
+                    }
+
+                else:
+                    response.code = 302
+                    response.msg = '没有数据'
 
             else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
+                response.code = 402
+                response.msg = "请求异常"
+                response.data = json.loads(forms_obj.errors.as_json())
 
 
 

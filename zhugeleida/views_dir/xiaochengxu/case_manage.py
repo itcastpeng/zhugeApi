@@ -108,54 +108,57 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
-                        case_id = obj.case_id
+                        _case_id = obj.case_id
 
                         ## 查找出最新更新的日记
-                        diary_objs = models.zgld_diary.objects.filter(case_id=case_id).order_by('-create_date')
-                        if diary_objs:
+                        if not case_id: # 当满足 不是查询单个的情况
+                            diary_objs = models.zgld_diary.objects.filter(case_id=_case_id).order_by('-create_date')
+                            if diary_objs:
 
-                            diary_obj = diary_objs[0]
-                            _status = obj.status
-                            _status_text = obj.get_status_display()
-                            _cover_picture = obj.cover_picture
-                            _content = obj.content
+                                diary_obj = diary_objs[0]
+                                _status = obj.status
+                                _status_text = obj.get_status_display()
+                                _cover_picture = obj.cover_picture
+                                _content = obj.content
 
-                            if _cover_picture:
-                                _cover_picture = json.loads(_cover_picture)
-                            if _content:
-                                _content = json.loads(_content)
+                                if _cover_picture:
+                                    _cover_picture = json.loads(_cover_picture)
+                                if _content:
+                                    _content = json.loads(_content)
 
-                            last_diary_data = {
-                                'diary_id': diary_obj.id,
-                                'case_id': diary_obj.case_id,
-                                'company_id': diary_obj.company_id,
+                                last_diary_data = {
+                                    'diary_id': diary_obj.id,
+                                    'case_id': diary_obj.case_id,
+                                    'company_id': diary_obj.company_id,
 
-                                'title': diary_obj.title,
-                                'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.diary_date else '',
-                                'cover_picture': _cover_picture,
-                                'content': _content,
+                                    'title': diary_obj.title,
+                                    'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.diary_date else '',
+                                    'cover_picture': _cover_picture,
+                                    'content': _content,
 
-                                'status': _status,
-                                'status_text': _status_text,
+                                    'status': _status,
+                                    'status_text': _status_text,
 
-                                'cover_show_type': diary_obj.cover_show_type,
-                                'cover_show_type_text': diary_obj.get_cover_show_type_display(),
+                                    'cover_show_type': diary_obj.cover_show_type,
+                                    'cover_show_type_text': diary_obj.get_cover_show_type_display(),
 
-                                'create_date': diary_obj.create_date.strftime(
-                                    '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
-                            }
+                                    'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
+                                }
 
-
+                        tag_list = list(obj.tags.values('id', 'name'))
                         ret_data.append({
-                            'case_id': case_id,
+                            'case_id': _case_id,
                             'company_id': obj.company_id,
                             'customer_name': obj.customer_name,
+
                             'headimgurl': obj.headimgurl,
                             'cover_picture' : cover_picture,
 
                             'status': status,
                             'status_text': status_text,
-                            'last_diary_data' :last_diary_data,
+                            'tag_list' : tag_list,
+
+                            'last_diary_data' : last_diary_data, # 最后日记的内容
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })

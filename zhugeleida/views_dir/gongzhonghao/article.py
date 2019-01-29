@@ -955,6 +955,7 @@ def article_oper(request, oper_type, o_id):
 
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
 
+
     return JsonResponse(response.__dict__)
 
 def create_gongzhonghao_share_auth_url(data):
