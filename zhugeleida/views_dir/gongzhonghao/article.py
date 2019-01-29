@@ -485,11 +485,13 @@ def article_oper(request, oper_type, o_id):
                     is_focus_get_redpacket = 2  # 默认是不开启关注领红包
                     focus_get_money = ''
                     gongzhonghao_mode = ''
+                    gongzhonghao_name = ''
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
                         gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                         qrcode_url = gongzhonghao_app_obj.qrcode_url
                         gongzhonghao_mode = gongzhonghao_app_obj.mode
+                        gongzhonghao_name = gongzhonghao_app_obj.name
 
                         is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
                         if is_focus_get_redpacket:
@@ -516,6 +518,7 @@ def article_oper(request, oper_type, o_id):
 
                         'gongzhonghao_mode': gongzhonghao_mode,
                         'activity_mode': activity_mode,
+                        'gongzhonghao_name':gongzhonghao_name
                     }
 
                 else:
