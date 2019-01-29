@@ -57,6 +57,7 @@ def tag_customer(request):
         if forms_obj.is_valid():
 
             order = request.GET.get('order', '-create_date')
+            user_id = request.GET.get('user_id')
 
             field_dict = {
                  'id': '',
@@ -67,6 +68,7 @@ def tag_customer(request):
             if tag_type:
                 q.add(Q(**{'tag_type': tag_type}), Q.AND)
 
+            q.add(Q(**{'user_id': user_id}), Q.AND)
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
@@ -121,7 +123,7 @@ def tag_customer_oper(request, oper_type, o_id):
         if oper_type == "add":
 
             tag_type = request.POST.get('tag_type')
-
+            user_id =  request.GET.get('user_id')
             tag_data = {
                 'name' : request.POST.get('name'),
                 'tag_type' : tag_type
@@ -137,6 +139,8 @@ def tag_customer_oper(request, oper_type, o_id):
                     obj = models.zgld_tag.objects.create(**forms_obj.cleaned_data)
                     obj.tag_parent_id = parent_id
                     obj.tag_customer = customer_list
+                    obj.user_id = user_id
+                    obj.save()
 
                     response.code = 200
                     response.msg = "添加成功"
