@@ -25,10 +25,10 @@ def tag_list(request):
         print('q -->', q)
         user_id = request.GET.get('user_id')
         customer_id = request.GET.get('customer_id')
-
+        tag_type = request.GET.get('tag_type')
 
         # tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id','user_id')
-        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id','user_id')
+        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).filter(tag_type=tag_type).values_list('id', 'name', 'tag_parent_id','user_id')
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
