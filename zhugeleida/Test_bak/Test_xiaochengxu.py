@@ -86,10 +86,17 @@ ip = 'http://127.0.0.1:8001'
 
 
 ### 案例管理
-url = ip + '/zhugeleida/xiaochengxu/case_manage/case_list' #
-get_data['company_id']=1
-ret = requests.get(url, params=get_data)
+# url = ip + '/zhugeleida/xiaochengxu/case_manage/case_list' #
+# get_data['company_id']=1
+# # get_data['case_id'] = 1
+# ret = requests.get(url, params=get_data)
 
+## 案例标签 列表展示
+
+url = ip + '/zhugeleida/xiaochengxu/case_tag/case_list' #
+get_data['company_id']=1
+# get_data['case_id'] = 1
+ret = requests.get(url, params=get_data)
 
 
 

@@ -108,7 +108,7 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
-                        _case_id = obj.case_id
+                        _case_id = obj.id
 
                         ## 查找出最新更新的日记
                         if not case_id: # 当满足 不是查询单个的情况
@@ -116,10 +116,10 @@ def case_manage(request, oper_type):
                             if diary_objs:
 
                                 diary_obj = diary_objs[0]
-                                _status = obj.status
-                                _status_text = obj.get_status_display()
-                                _cover_picture = obj.cover_picture
-                                _content = obj.content
+                                _status = diary_obj.status
+                                _status_text = diary_obj.get_status_display()
+                                _cover_picture = diary_obj.cover_picture
+                                _content = diary_obj.content
 
                                 if _cover_picture:
                                     _cover_picture = json.loads(_cover_picture)
