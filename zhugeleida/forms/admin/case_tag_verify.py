@@ -39,7 +39,7 @@ class CaseTagAddForm(forms.Form):
 # 添加标签信息
 class CaseTagSingleAddForm(forms.Form):
 
-    company_id = forms.IntegerField(
+    company_id = forms.CharField(
         required=True,
         error_messages={
             'required': "公司ID不能为空"

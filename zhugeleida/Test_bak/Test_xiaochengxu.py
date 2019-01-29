@@ -80,9 +80,17 @@ ip = 'http://127.0.0.1:8001'
 # url = 'http://127.0.0.1:8000/zhugeleida/qiyeweixin/contact' #
 # ret = requests.get(url, params=get_data)
 
-url = ip + '/zhugeleida/xiaochengxu/goodsClass' #
-get_data['company_id']=2
+# url = ip + '/zhugeleida/xiaochengxu/goodsClass' #
+# get_data['company_id']=2
+# ret = requests.get(url, params=get_data)
+
+
+### 案例管理
+url = ip + '/zhugeleida/xiaochengxu/case_manage/case_list' #
+get_data['company_id']=1
 ret = requests.get(url, params=get_data)
+
+
 
 
 # url =ip +  '/zhugeleida/qiyeweixin/action/get_new_log'       #得到相应的动作的-->访问日志
