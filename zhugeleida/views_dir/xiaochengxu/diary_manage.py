@@ -13,7 +13,7 @@ import json,datetime
 from django.db.models import Q, Sum, Count
 
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
+@account.is_token(models.zgld_customer)
 def diary_manage(request, oper_type):
     response = Response.ResponseObj()
 

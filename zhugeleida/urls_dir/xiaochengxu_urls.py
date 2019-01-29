@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, customer
 from zhugeleida.views_dir.xiaochengxu import login, mingpian, product, prepaidManagement, theOrderManagement, \
-    tuiKuanDingDan, mallManagementShow,test_login,goodsClassification,case_manage,case_tag
+    tuiKuanDingDan, mallManagementShow,test_login,goodsClassification,case_manage,case_tag,diary_manage
 
 from zhugeleida.views_dir.xiaochengxu import chat, website
 from zhugeleida.views_dir.public import  websocket

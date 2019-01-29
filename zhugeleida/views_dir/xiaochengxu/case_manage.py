@@ -96,10 +96,14 @@ def case_manage(request, oper_type):
 
                 ret_data = []
                 if objs:
-
+                    last_diary_data = ''
                     for obj in objs:
+
+
                         status = obj.status
                         status_text = obj.get_status_display()
+
+
                         cover_picture = obj.cover_picture
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
@@ -109,8 +113,38 @@ def case_manage(request, oper_type):
                         ## 查找出最新更新的日记
                         diary_objs = models.zgld_diary.objects.filter(case_id=case_id).order_by('-create_date')
                         if diary_objs:
+
                             diary_obj = diary_objs[0]
-                            title = diary_obj.title
+                            _status = obj.status
+                            _status_text = obj.get_status_display()
+                            _cover_picture = obj.cover_picture
+                            _content = obj.content
+
+                            if _cover_picture:
+                                _cover_picture = json.loads(_cover_picture)
+                            if _content:
+                                _content = json.loads(_content)
+
+                            last_diary_data = {
+                                'diary_id': diary_obj.id,
+                                'case_id': diary_obj.case_id,
+                                'company_id': diary_obj.company_id,
+
+                                'title': diary_obj.title,
+                                'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.diary_date else '',
+                                'cover_picture': _cover_picture,
+                                'content': _content,
+
+                                'status': _status,
+                                'status_text': _status_text,
+
+                                'cover_show_type': diary_obj.cover_show_type,
+                                'cover_show_type_text': diary_obj.get_cover_show_type_display(),
+
+                                'create_date': diary_obj.create_date.strftime(
+                                    '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
+                            }
+
 
                         ret_data.append({
                             'case_id': case_id,
@@ -121,18 +155,21 @@ def case_manage(request, oper_type):
 
                             'status': status,
                             'status_text': status_text,
-
+                            'last_diary_data' :last_diary_data,
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
-                #  查询成功 返回200 状态码
-                response.code = 200
-                response.msg = '查询成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count
-                }
+                    #  查询成功 返回200 状态码
+                    response.code = 200
+                    response.msg = '查询成功'
+                    response.data = {
+                        'ret_data': ret_data,
+                        'data_count': count
+                    }
+                else:
+                    response.code = 302
+                    response.msg = '数据不存在'
 
 
             else:
