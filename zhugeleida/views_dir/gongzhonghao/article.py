@@ -768,9 +768,6 @@ def article_oper(request, oper_type, o_id):
 
                         # 方法1
                         customer_obj = models.zgld_customer.objects.get(id=o_id)
-
-
-
                         already_tag_name_list = list(customer_obj.zgld_tag_set.all().values_list('name', flat=True)) # 此客户已经拥有的标签
 
                         already_tag_list = ''
@@ -784,8 +781,7 @@ def article_oper(request, oper_type, o_id):
                             elif not already_tag_list:
                                 print('值 already_tag_list 为空 ------>>')
                                 already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id', flat=True))
-                                already_company_tags_name_list = list(
-                                    models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name',flat=True))
+                                already_company_tags_name_list = list(models.zgld_tag.objects.filter(user_id=uid,user__company_id=company_id).values_list('name',flat=True))
 
                             tag_data = {
                                 'name': tag_name,
@@ -794,11 +790,15 @@ def article_oper(request, oper_type, o_id):
                             print('值 already_tag_list-------->', already_tag_list)
 
                             if tag_name not in already_company_tags_name_list:
+                                parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
                                 _obj = models.zgld_tag.objects.create(**tag_data)
+                                _obj.tag_parent_id = parent_id
+                                _obj.save()
                                 tag_id = _obj.id
 
+
                             else:
-                                _objs = models.zgld_tag.objects.filter(name=tag_name, user__company_id=company_id)
+                                _objs = models.zgld_tag.objects.filter(name=tag_name,user_id=uid, user__company_id=company_id)
                                 _obj = _objs[0]
                                 tag_id = _obj.id
 
@@ -812,49 +812,6 @@ def article_oper(request, oper_type, o_id):
 
                             if customer_obj:
                                 customer_obj.zgld_tag_set = now_tag_list
-
-
-                    # ## 方式 2
-                    #     already_tags_name_list = list(
-                    #         models.zgld_tag.objects.filter(user__company_id=company_id).values_list('name', flat=True))
-                    #
-                    #     _obj = ''
-                    #     for tag_name in tags_name_list:
-                    #
-                    #         already_customer_id_list = list(
-                    #             models.zgld_tag.objects.filter(user__company_id=company_id, name=tag_name).values_list(
-                    #                 'tag_customer',
-                    #                 flat=True))
-                    #
-                    #         if customer_id not in already_customer_id_list:
-                    #
-                    #             already_customer_id_list.append(customer_id)
-                    #             tag_data = {
-                    #                 'name': tag_name,
-                    #                 'user_id': uid
-                    #             }
-                    #             print('值 already_customer_id_list-------->',already_customer_id_list)
-                    #
-                    #             if tag_name not in already_tags_name_list:
-                    #                 _obj = models.zgld_tag.objects.create(**tag_data)
-                    #             else:
-                    #                 _objs = models.zgld_tag.objects.filter(name=tag_name, user__company_id=company_id)
-                    #                 _obj = _objs[0]
-                    #
-                    #             parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
-                    #             _obj.tag_parent_id = parent_id
-                    #             if len(already_customer_id_list) == 0:
-                    #                 already_customer_id_list = []
-                    #             else:
-                    #                 tmp_list = []
-                    #                 for i in already_customer_id_list:
-                    #                     tmp_list.append(int(i))
-                    #
-                    #                 already_customer_id_list = tmp_list
-                    #
-                    #             _obj.tag_customer = already_customer_id_list  # [customer_id]
-                    #             _obj.save()
-
 
                         '''
                         # 操作tag，为客户添加多个标签

@@ -57,6 +57,7 @@ def tag_customer(request):
         if forms_obj.is_valid():
 
             order = request.GET.get('order', '-create_date')
+            user_id = request.GET.get('user_id')
 
             field_dict = {
                  'id': '',
@@ -67,6 +68,7 @@ def tag_customer(request):
             if tag_type:
                 q.add(Q(**{'tag_type': tag_type}), Q.AND)
 
+            q.add(Q(**{'user_id': user_id}), Q.AND)
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
