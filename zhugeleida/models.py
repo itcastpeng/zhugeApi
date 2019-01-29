@@ -586,7 +586,7 @@ class zgld_tag(models.Model):
         (1, '微信公众号'),
         (2, '微信小程序'),
     )
-    tag_type = models.SmallIntegerField(verbose_name='标签类型', choices=tag_type_choices, default=1)
+    tag_type = models.SmallIntegerField(verbose_name='标签类型', choices=tag_type_choices,null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

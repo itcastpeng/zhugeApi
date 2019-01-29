@@ -787,7 +787,8 @@ def article_oper(request, oper_type, o_id):
 
                                 tag_data = {
                                     'name': tag_name,
-                                    'user_id': uid
+                                    'user_id': uid,
+                                    'tag_type' : 1 # (1, '微信公众号'),
                                 }
                                 print('值 already_tag_list-------->', already_tag_list)
 

@@ -11,6 +11,7 @@ import json
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
 
+
 # 查询标签和所属的用户
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -28,7 +29,9 @@ def tag_list(request):
         tag_type = request.GET.get('tag_type')
 
         # tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).values_list('id', 'name', 'tag_parent_id','user_id')
-        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).filter(tag_type=tag_type).values_list('id', 'name', 'tag_parent_id','user_id')
+        tag_values = models.zgld_tag.objects.filter(Q(user_id=user_id) | Q(user_id__isnull=True)).filter(
+            Q(tag_type=tag_type) | Q(tag_type__isnull=True)).values_list('id', 'name', 'tag_parent_id', 'user_id')
+
         tag_dict = {}
         ret_data = []
         date_list = list(tag_values)
@@ -46,8 +49,8 @@ def tag_list(request):
                         tag_flag = False
 
                     if tag[2] == obj[0]:
-                        tag_dict['name']  = obj[1]
-                        tag_dict['tags'].append({ 'id': tag[0],'name': tag[1],'is_select': tag_flag})
+                        tag_dict['name'] = obj[1]
+                        tag_dict['tags'].append({'id': tag[0], 'name': tag[1], 'is_select': tag_flag})
                         # tag_dict[obj[0]].append({tag[0]})
 
                 ret_data.append(tag_dict)
@@ -107,7 +110,7 @@ def tag_list_oper(request, oper_type, o_id):
         elif oper_type == 'delete_tag':
             user_id = request.GET.get('user_id')
 
-            objs = models.zgld_tag.objects.filter(id=o_id,user_id=user_id)
+            objs = models.zgld_tag.objects.filter(id=o_id, user_id=user_id)
 
             if objs:
                 objs.delete()
