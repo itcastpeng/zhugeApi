@@ -26,6 +26,7 @@ def tongxunlu(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             user_id = request.GET.get('user_id')
+            customer_type = request.GET.get('customer_type')
             order = request.GET.get('order', '-create_date')  # 排序为【默认为】成交率; 最后跟进时间; 最后活动时间
 
             field_dict = {
@@ -44,6 +45,13 @@ def tongxunlu(request):
 
             if order == '-customer__expedted_pr':
                 order = '-expedted_pr'
+
+            if customer_type:
+                customer_type = int(customer_type)
+                if customer_type == 1:
+                    q.add(Q(**{'source__in': [4]}), Q.AND)
+                elif customer_type == 2:
+                    q.add(Q(**{'source__in': [1,2,3]}), Q.AND)
 
             objs = models.zgld_user_customer_belonger.objects.select_related('user', 'customer').filter(q).order_by(order)
 
