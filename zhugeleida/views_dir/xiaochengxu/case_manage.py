@@ -10,7 +10,7 @@ from zhugeleida.forms.admin.case_manage_verify import SetFocusGetRedPacketForm, 
     ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
 
 import json,datetime
-from django.db.models import Q, Sum, Count
+from django.db.models import Q,F, Sum, Count
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -27,14 +27,14 @@ def case_manage(request, oper_type):
             forms_obj = CaseSelectForm(request.GET)
             if forms_obj.is_valid():
                 print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-
+                user_id = request.GET.get('user_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-update_date')
 
                 ## 搜索条件
-                tag_ids_list = request.GET.get('tag_ids_list')  #
+                search_tag_id = request.GET.get('search_tag_id')  #
                 case_id = request.GET.get('case_id')  #
                 search_activity_status = request.GET.get('status')  #
                 customer_name = request.GET.get('customer_name')  #
@@ -54,10 +54,35 @@ def case_manage(request, oper_type):
                 if search_activity_status:
                     q1.children.append(('status', search_activity_status))  #
 
-                if tag_ids_list:
-                    tag_ids_list = json.loads(tag_ids_list)
+                if search_tag_id:
+                    tag_ids_list = []
+                    tag_ids_list.append(int(search_tag_id))
                     q1.children.append(('tags__in', tag_ids_list))  #
 
+
+
+                    ## 记录热门搜索的想项目 和 历史搜索记录
+                    if search_tag_id:
+
+                        _case_objs = models.zgld_case_tag.objects.filter(id=search_tag_id)
+                        if _case_objs:
+                            tag_name = _case_objs[0].name
+                            _case_objs.update(
+                                search_amount=F('search_amount') + 1
+                            )
+
+                            customer_objs = models.zgld_customer.objects.filter(id=user_id)
+                            if customer_objs:
+                                _history_tags_record =  customer_objs[0].history_tags_record
+                                history_tags_record = json.loads(_history_tags_record)
+                                history_tags_record.append( {
+                                    'tag_id': search_tag_id,
+                                    'tag_name' : tag_name
+                                })
+
+                                customer_objs.update(
+                                    history_tags_record=json.dumps(history_tags_record)
+                                )
 
 
                 print('-----q1---->>', q1)
@@ -79,8 +104,16 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
+                        case_id = obj.case_id
+
+                        ## 查找出最新更新的日记
+                        diary_objs = models.zgld_diary.objects.filter(case_id=case_id).order_by('-create_date')
+                        if diary_objs:
+                            diary_obj = diary_objs[0]
+                            title = diary_obj.title
+
                         ret_data.append({
-                            'case_id': obj.id,
+                            'case_id': case_id,
                             'company_id': obj.company_id,
                             'customer_name': obj.customer_name,
                             'headimgurl': obj.headimgurl,

@@ -642,8 +642,9 @@ class zgld_customer(models.Model):
         (1, '发送了关注红包')
     )
     is_receive_redPacket =  models.SmallIntegerField(verbose_name='是否发送过关注红包', choices=receive_redPacket_choices,default=0)
-
     redPacket_money = models.FloatField(verbose_name='发红包金额', default=0)
+    history_tags_record = models.TextField('历史标签记录',null=True,default='[]')
+    history_browse_record = models.TextField('历史浏览记录',default='[]')
 
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -1384,6 +1385,7 @@ class zgld_money_record(models.Model):
 class zgld_case_tag(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
     name = models.CharField(verbose_name='标签名称', max_length=32)
+    search_amount  = models.IntegerField(verbose_name="搜索数量", default=0)
     # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
 
     class Meta:
