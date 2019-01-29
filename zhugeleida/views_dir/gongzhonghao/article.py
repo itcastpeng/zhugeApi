@@ -766,7 +766,7 @@ def article_oper(request, oper_type, o_id):
                             tags_name_list = list(obj.article.tags.all().values_list('name', flat=True))
 
                             # 方法1
-                            customer_obj = models.zgld_customer.objects.get(id=o_id)
+                            customer_obj = models.zgld_customer.objects.get(id=customer_id)
                             already_tag_name_list = list(customer_obj.zgld_tag_set.all().values_list('name', flat=True)) # 此客户已经拥有的标签
 
                             already_tag_list = ''
@@ -883,6 +883,9 @@ def article_oper(request, oper_type, o_id):
                                                     print('传输异步数据 tasks json.dumps(_data) --------->>', json.dumps(_data))
 
                                                     tasks.user_forward_send_activity_redPacket.delay(_data)
+
+                    else:
+                        print('无关系 article_to_customer_belonger -------->>',q)
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
