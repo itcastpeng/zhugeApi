@@ -520,3 +520,18 @@ class ArticleRedPacketSelectForm(forms.Form):
         return length
 
 
+
+class CollectionDiaryForm(forms.Form):
+    case_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    status = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "状态不能为空"
+        }
+    )

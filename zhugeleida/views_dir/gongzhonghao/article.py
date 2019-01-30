@@ -485,11 +485,13 @@ def article_oper(request, oper_type, o_id):
                     is_focus_get_redpacket = 2  # 默认是不开启关注领红包
                     focus_get_money = ''
                     gongzhonghao_mode = ''
+                    gongzhonghao_name = ''
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
                         gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                         qrcode_url = gongzhonghao_app_obj.qrcode_url
                         gongzhonghao_mode = gongzhonghao_app_obj.mode
+                        gongzhonghao_name = gongzhonghao_app_obj.name
 
                         is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
                         if is_focus_get_redpacket:
@@ -516,6 +518,7 @@ def article_oper(request, oper_type, o_id):
 
                         'gongzhonghao_mode': gongzhonghao_mode,
                         'activity_mode': activity_mode,
+                        'gongzhonghao_name':gongzhonghao_name
                     }
 
                 else:
@@ -784,7 +787,8 @@ def article_oper(request, oper_type, o_id):
 
                                 tag_data = {
                                     'name': tag_name,
-                                    'user_id': uid
+                                    'user_id': uid,
+                                    'tag_type' : 1 # (1, '微信公众号'),
                                 }
                                 print('值 already_tag_list-------->', already_tag_list)
 
@@ -950,6 +954,7 @@ def article_oper(request, oper_type, o_id):
             ret_json = ret.json()
 
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+
 
     return JsonResponse(response.__dict__)
 

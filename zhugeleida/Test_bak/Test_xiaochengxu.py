@@ -80,9 +80,62 @@ ip = 'http://127.0.0.1:8001'
 # url = 'http://127.0.0.1:8000/zhugeleida/qiyeweixin/contact' #
 # ret = requests.get(url, params=get_data)
 
-url = ip + '/zhugeleida/xiaochengxu/goodsClass' #
-get_data['company_id']=2
-ret = requests.get(url, params=get_data)
+# url = ip + '/zhugeleida/xiaochengxu/goodsClass' #
+# get_data['company_id']=2
+# ret = requests.get(url, params=get_data)
+
+
+### 案例管理
+# url = ip + '/zhugeleida/xiaochengxu/case_manage/case_list' #
+# get_data['company_id']=1
+# get_data['search_tag_id'] = 1  # search_tag_id
+# ret = requests.get(url, params=get_data)
+
+## 案例标签 列表展示
+
+# url = ip + '/zhugeleida/xiaochengxu/case_tag/case_list' #
+# get_data['company_id']=1
+# get_data['name']= '隆'
+# ret = requests.get(url, params=get_data)
+
+
+## 历史标签记录
+# url = ip + '/zhugeleida/xiaochengxu/case_tag/history_case_list' #
+# get_data['company_id']=1
+# # get_data['case_id'] = 1
+# ret = requests.get(url, params=get_data)
+
+#热门搜索
+
+# url = ip + '/zhugeleida/xiaochengxu/case_tag/top_search_tag_list' #
+# get_data['company_id']=1
+# ret = requests.get(url, params=get_data)
+
+
+# url = ip + '/zhugeleida/xiaochengxu/diary_manage/diary_list' #
+# get_data['company_id']=1
+# ret = requests.get(url, params=get_data)
+
+# url = ip + '/zhugeleida/xiaochengxu/diary_manage/praise_diary/1' #
+#
+# ret = requests.post(url, params=get_data)
+
+# url = ip + '/zhugeleida/xiaochengxu/diary_manage/diary_id_review_list/1' #
+# ret = requests.get(url, params=get_data,data = post_data)
+
+# 收藏案例
+url = ip + '/zhugeleida/xiaochengxu/case_manage/collection_case' #
+get_data['company_id']=1
+post_data['status'] = 1
+post_data['case_id'] = 1
+
+ret = requests.post(url, params=get_data,data = post_data)
+
+
+
+
+
+
 
 
 # url =ip +  '/zhugeleida/qiyeweixin/action/get_new_log'       #得到相应的动作的-->访问日志

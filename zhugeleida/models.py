@@ -586,7 +586,7 @@ class zgld_tag(models.Model):
         (1, '微信公众号'),
         (2, '微信小程序'),
     )
-    tag_type = models.SmallIntegerField(verbose_name='标签类型', choices=tag_type_choices, default=1)
+    tag_type = models.SmallIntegerField(verbose_name='标签类型', choices=tag_type_choices,null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -642,8 +642,9 @@ class zgld_customer(models.Model):
         (1, '发送了关注红包')
     )
     is_receive_redPacket =  models.SmallIntegerField(verbose_name='是否发送过关注红包', choices=receive_redPacket_choices,default=0)
-
     redPacket_money = models.FloatField(verbose_name='发红包金额', default=0)
+    history_tags_record = models.TextField('历史标签记录',null=True,default='[]')
+    history_browse_record = models.TextField('历史浏览记录',default='[]')
 
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
@@ -1384,6 +1385,7 @@ class zgld_money_record(models.Model):
 class zgld_case_tag(models.Model):
     company = models.ForeignKey('zgld_company', verbose_name='所属企业', null=True)
     name = models.CharField(verbose_name='标签名称', max_length=32)
+    search_amount  = models.IntegerField(verbose_name="搜索数量", default=0)
     # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
 
     class Meta:
@@ -1400,7 +1402,7 @@ class zgld_case(models.Model):
 
     case_name = models.CharField(verbose_name='案例名称', max_length=128)
     cover_picture = models.TextField(verbose_name="封面图片URL",null=True)
-    tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
+    tags = models.ManyToManyField('zgld_case_tag', verbose_name="文章关联的标签")
     status_choices = ((1, '已发'),
                       (2, '未发'),
                       (3, '删除'),  # 逻辑删除
@@ -1441,9 +1443,8 @@ class zgld_diary(models.Model):
     status = models.SmallIntegerField(default=2, verbose_name='日记状态', choices=status_choices)
 
     cover_show_type_choices = ( (1,'只展示图片'),
-                                (2,'只展示视频'),
-
-                     )
+                                (2,'只展示视频')
+                               )
     cover_show_type = models.SmallIntegerField(default=2, verbose_name='封面展示类型', choices=cover_show_type_choices)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
@@ -1463,4 +1464,27 @@ class zgld_diary_comment(models.Model):
 
     class Meta:
         verbose_name_plural = "日记评论表"
+        app_label = "zhugeleida"
+
+
+# 日记被赞 或者收藏日记
+class zgld_diary_action(models.Model):
+    diary = models.ForeignKey('zgld_diary', verbose_name='被赞的日记',null=True)
+    case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
+    action_choices = ((1, '点赞日记'),
+                      (2, '收藏日记')
+                      )
+    action = models.SmallIntegerField(verbose_name='客户动作', choices=action_choices,null=True)
+
+    status_choices = ((0, '未点赞|未收藏'),
+                      (1, '已点赞|已收藏')
+                      )
+    status = models.SmallIntegerField(verbose_name='状态', choices=status_choices,null=True)
+
+    class Meta:
+        unique_together = [
+            ('diary', 'customer'),
+        ]
+        verbose_name_plural = "客户-日记行为记录表"
         app_label = "zhugeleida"

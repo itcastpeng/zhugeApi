@@ -97,10 +97,10 @@ def contact(request):
 
                 tags_list = []
                 if obj.customer.user_type == 1:
-                    tags_list =  list(obj.customer.zgld_tag_set.filter(tag_type=1).order_by('-create_date').values_list('name', flat=True))
+                    tags_list =  list(obj.customer.zgld_tag_set.filter(tag_type=1,user_id=user_id).order_by('-create_date').values_list('name', flat=True))
 
                 elif obj.customer.user_type == 2:
-                    tags_list = list(obj.customer.zgld_tag_set.filter(tag_type=2).order_by('-create_date').values_list('name', flat=True))
+                    tags_list = list(obj.customer.zgld_tag_set.filter(tag_type=2,user_id=user_id).order_by('-create_date').values_list('name', flat=True))
 
                 base_info_dict = {
                     'customer_id': obj.customer_id,

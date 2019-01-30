@@ -552,3 +552,85 @@ class ArticleRedPacketSelectForm(forms.Form):
         return length
 
 
+class ReviewDiaryForm(forms.Form):
+    diary_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '日记ID不能为空'
+        }
+    )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '内容不能为空'
+        }
+    )
+
+    def clean_article_id(self):
+        diary_id = self.data['diary_id']
+
+        objs = models.zgld_diary.objects.filter(
+            id=diary_id
+        )
+
+        if not objs:
+            self.add_error('diary_id', '文章不存在')
+        else:
+            return diary_id
+
+
+class DiaryReviewSelectForm(forms.Form):
+
+    diary_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        }
+    )
+
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
+
+
+class PraiseDiaryForm(forms.Form):
+
+    diary_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    status = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "状态不能为空"
+        }
+    )
+
