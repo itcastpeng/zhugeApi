@@ -127,6 +127,14 @@ def case_manage(request, oper_type):
                                 _cover_picture = diary_obj.cover_picture
                                 _content = diary_obj.content
 
+                                diary_up_down_objs = models.zgld_diary_action.objects.filter(diary_id=diary_obj.id,customer_id=customer_id,action=1)
+                                if diary_up_down_objs:
+                                    is_praise_diary = 1
+                                    is_praise_diary_text = '已经赞过此日记'
+                                else:
+                                    is_praise_diary = 0
+                                    is_praise_diary_text = '没有赞过此日记'
+
                                 if _cover_picture:
                                     _cover_picture = json.loads(_cover_picture)
                                 if _content:
@@ -137,10 +145,17 @@ def case_manage(request, oper_type):
                                     'case_id': diary_obj.case_id,
                                     'company_id': diary_obj.company_id,
 
+                                    'is_praise_diary': is_praise_diary,
+                                    'is_praise_diary_text': is_praise_diary_text,
+
                                     'title': diary_obj.title,
                                     'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d') if diary_obj.diary_date else '', #'%Y-%m-%d %H:%M:%S'
                                     'cover_picture': _cover_picture,
                                     'content': _content,
+
+                                    'read_count': obj.read_count,  #
+                                    'comment_count': obj.comment_count,  #
+                                    'up_count': obj.up_count,  #
 
                                     'status': _status,
                                     'status_text': _status_text,
