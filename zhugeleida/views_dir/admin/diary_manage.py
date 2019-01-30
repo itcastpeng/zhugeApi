@@ -82,7 +82,7 @@ def diary_manage(request, oper_type):
                             'company_id': obj.company_id,
 
                             'title': obj.title,
-                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if obj.diary_date else '',
+                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
                             'cover_picture': cover_picture,
                             'content': content,
 
@@ -148,6 +148,7 @@ def diary_manage_oper(request, oper_type, o_id):
             diary_id = o_id
             case_id = request.POST.get('case_id')
             title = request.POST.get('title')
+            summary = request.POST.get('summary')
             diary_date = request.POST.get('diary_date')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
             content = request.POST.get('content')
@@ -161,6 +162,7 @@ def diary_manage_oper(request, oper_type, o_id):
                 'company_id': company_id,
 
                 'title': title,
+                'summary' : summary,
                 'diary_date': diary_date,  # 活动名称
                 'cover_picture': cover_picture,  # 活动名称
                 'content': content,  # 活动名称
@@ -171,20 +173,17 @@ def diary_manage_oper(request, oper_type, o_id):
 
             forms_obj = diaryUpdateForm(form_data)
             if forms_obj.is_valid():
+
                 diary_objs = models.zgld_diary.objects.filter(id=diary_id)
-
-                if cover_show_type == 1: # (1,'只展示图片'), (2,'只展示视频'),
-                    _content = json.loads(content)
-                    soup = BeautifulSoup(_content, 'lxml')
-
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
-
-
-
+                # if cover_show_type == 1: # (1,'只展示图片'), (2,'只展示视频'),
+                #     _content = json.loads(content)
+                #     soup = BeautifulSoup(_content, 'lxml')
+                #
+                #     img_tags = soup.find_all('img')
+                #     for img_tag in img_tags:
+                #         data_src = img_tag.attrs.get('src')
+                #         if data_src:
+                #             print(data_src)
 
                 diary_objs.update(
                     user_id = user_id,
@@ -192,6 +191,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     company_id = company_id,
 
                     title = title,
+                    summary=summary,
+
                     diary_date = diary_date,
                     cover_picture = cover_picture,
                     content = content,
@@ -223,7 +224,10 @@ def diary_manage_oper(request, oper_type, o_id):
             company_id = request.GET.get('company_id')
 
             case_id = request.POST.get('case_id')
+
             title = request.POST.get('title')
+            summary = request.POST.get('summary')
+
             diary_date = request.POST.get('diary_date')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
             content = request.POST.get('content')
@@ -238,6 +242,8 @@ def diary_manage_oper(request, oper_type, o_id):
                 'company_id' :company_id,
 
                 'title': title,
+                'summary': summary,
+
                 'diary_date': diary_date,  # 活动名称
                 'cover_picture': cover_picture,  # 活动名称
                 'content': content,  # 活动名称
@@ -248,17 +254,17 @@ def diary_manage_oper(request, oper_type, o_id):
 
             forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
-                if cover_show_type == 1:  # (1,'只展示图片'), (2,'只展示视频'),
 
-                    _content = json.loads(content)
-                    _cover_picture = json.loads(cover_picture)
-                    soup = BeautifulSoup(_content, 'lxml')
-
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
+                # if cover_show_type == 1:  # (1,'只展示图片'), (2,'只展示视频'),
+                    # _content = json.loads(content)
+                    # _cover_picture = json.loads(cover_picture)
+                    # soup = BeautifulSoup(_content, 'lxml')
+                    #
+                    # img_tags = soup.find_all('img')
+                    # for img_tag in img_tags:
+                    #     data_src = img_tag.attrs.get('src')
+                    #     if data_src:
+                    #         print(data_src)
 
                 models.zgld_diary.objects.create(
                     user_id=user_id,
@@ -266,6 +272,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     company_id=company_id,
 
                     title=title,
+                    summary=summary,
                     diary_date=diary_date,
                     cover_picture=cover_picture,
                     content=content,

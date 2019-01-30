@@ -1427,7 +1427,9 @@ class zgld_diary(models.Model):
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
     company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
 
-    title = models.CharField(verbose_name='文章标题', max_length=128)
+    title = models.CharField(verbose_name='日记标题', max_length=128)
+    summary = models.CharField(verbose_name='日记摘要', max_length=255)
+
     diary_date = models.DateTimeField(verbose_name="日记时间")
     cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True)
     content = models.TextField(verbose_name='日记内容', null=True)
@@ -1485,8 +1487,6 @@ class zgld_diary_action(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
-        unique_together = [
-            ('diary', 'customer'),
-        ]
+
         verbose_name_plural = "客户-日记行为记录表"
         app_label = "zhugeleida"

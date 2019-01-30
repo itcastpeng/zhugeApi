@@ -138,7 +138,7 @@ def case_manage(request, oper_type):
                                     'company_id': diary_obj.company_id,
 
                                     'title': diary_obj.title,
-                                    'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.diary_date else '',
+                                    'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d') if diary_obj.diary_date else '', #'%Y-%m-%d %H:%M:%S'
                                     'cover_picture': _cover_picture,
                                     'content': _content,
 
