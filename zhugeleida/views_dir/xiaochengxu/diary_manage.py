@@ -220,7 +220,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     'status' :1,
                     'action' :1 # 点赞
                 }
-
+                diary_objs = models.zgld_diary.objects.filter(id=o_id)
                 diary_up_down_objs = models.zgld_diary_action.objects.filter(action=1,diary_id=o_id,customer_id=customer_id)
                 if diary_up_down_objs:
                     diary_up_down_objs.update(
@@ -228,16 +228,24 @@ def diary_manage_oper(request, oper_type, o_id):
                     )
                     response.code = 302
                     response.msg = "已经点过赞了"
-
+                    response.data = {
+                        'up_count': diary_objs[0].up_count,
+                        'is_praise_diary': 1,
+                        'is_praise_diary_text': '已赞过此日记'
+                    }
                 else:
                     models.zgld_diary_action.objects.create(**create_data)
 
-                    diary_objs = models.zgld_diary.objects.filter(id=o_id)
+
                     if diary_objs:
                         diary_objs.update(
                             up_count=F('up_count') + 1
                         )
-
+                    response.data = {
+                        'up_count': diary_objs[0].up_count,
+                        'is_praise_diary': 1,
+                        'is_praise_diary_text': '已赞此案例'
+                    }
                     response.code = 200
                     response.msg = "记录成功"
             else:
