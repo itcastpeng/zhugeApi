@@ -1471,15 +1471,19 @@ class zgld_diary_comment(models.Model):
 class zgld_diary_up_down(models.Model):
     diary = models.ForeignKey('zgld_diary', verbose_name='被赞的日记')
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
-    status_choices = ((0, '未点赞'),
-                      (1, '点赞')
+    action_choices = ((1, '点赞日记'),
+                      (2, '收藏日记')
                       )
-    status = models.SmallIntegerField(default=2, verbose_name='状态', choices=status_choices)
+    action = models.SmallIntegerField(verbose_name='客户动作', choices=action_choices,null=True)
+
+    status_choices = ((0, '未点赞|未收藏'),
+                      (1, '已点赞|已收藏')
+                      )
+    status = models.SmallIntegerField(verbose_name='状态', choices=status_choices,null=True)
 
     class Meta:
         unique_together = [
             ('diary', 'customer'),
         ]
-        verbose_name_plural = "日记点赞表"
+        verbose_name_plural = "客户-日记行为记录表"
         app_label = "zhugeleida"
-

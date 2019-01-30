@@ -91,6 +91,9 @@ def img_merge(request):
         elif img_source == 'leida_chat':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'chat')
 
+        elif img_source == 'case':
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'case')
+
         fileData = ''
 
         for chunk in range(chunk_num):
