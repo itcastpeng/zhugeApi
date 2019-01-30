@@ -137,12 +137,14 @@ def case_manage(request, oper_type):
 
                                 if _cover_picture:
                                     _cover_picture = json.loads(_cover_picture)
-                                if _content:
-                                    _content = json.loads(_content)
+                                # if _content:
+                                #     _content = json.loads(_content)
 
                                 last_diary_data = {
                                     'diary_id': diary_obj.id,
                                     'case_id': diary_obj.case_id,
+
+
                                     'company_id': diary_obj.company_id,
 
                                     'is_praise_diary': is_praise_diary,

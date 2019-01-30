@@ -91,8 +91,8 @@ def diary_manage(request, oper_type):
 
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
-                        if content:
-                            content = json.loads(content)
+                        # if content:
+                        #     content = json.loads(content)
 
                         ret_data.append({
                             'diary_id': obj.id,
