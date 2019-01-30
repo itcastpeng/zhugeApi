@@ -628,13 +628,9 @@ class PraiseDiaryForm(forms.Form):
     )
 
     status = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "状态不能为空"
         }
     )
-
-
-
-
 

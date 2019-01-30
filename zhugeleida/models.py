@@ -1467,9 +1467,10 @@ class zgld_diary_comment(models.Model):
         app_label = "zhugeleida"
 
 
-# 日记被赞【是否靠谱】
-class zgld_diary_up_down(models.Model):
-    diary = models.ForeignKey('zgld_diary', verbose_name='被赞的日记')
+# 日记被赞 或者收藏日记
+class zgld_diary_action(models.Model):
+    diary = models.ForeignKey('zgld_diary', verbose_name='被赞的日记',null=True)
+    case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
     action_choices = ((1, '点赞日记'),
                       (2, '收藏日记')

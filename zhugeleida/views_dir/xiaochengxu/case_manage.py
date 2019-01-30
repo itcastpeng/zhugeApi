@@ -7,7 +7,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.forms.admin.case_manage_verify import SetFocusGetRedPacketForm, CaseAddForm, CaseSelectForm, CaseUpdateForm, \
-    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
+    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm,CollectionDiaryForm
+
 
 import json,datetime
 from django.db.models import Q,F, Sum, Count
@@ -49,6 +50,11 @@ def case_manage(request, oper_type):
 
                 if case_id:
                     q1.children.append(('id', case_id))
+
+
+                    ##记录客户查看单个案例的操作
+
+
 
                 # now_date_time = datetime.datetime.now()
                 if search_activity_status:
@@ -179,7 +185,48 @@ def case_manage(request, oper_type):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+    elif  request.method == "POST":
 
+        ## 收藏案例
+        if  oper_type == 'collection_case':
+            customer_id = request.GET.get('user_id')
+            case_id = request.POST.get('case_id')
+            status = request.POST.get('status')
+
+            request_data_dict = {
+                'case_id': case_id,
+                'status': status,  # 文章所属用户的ID
+            }
+
+            forms_obj = CollectionDiaryForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                create_data = {
+                    'case_id': case_id,
+                    'customer_id': customer_id,
+                    'status': status,
+                    'action': 2  # 收藏
+                }
+
+                case_up_down_objs = models.zgld_diary_action.objects.filter(action=2, case_id=case_id,customer_id=customer_id)
+                if case_up_down_objs:
+                    case_up_down_objs.update(
+                        status=status
+                    )
+
+                    response.code = 200
+                    response.msg = "记录成功"
+
+                else:
+                    models.zgld_diary_action.objects.create(**create_data)
+
+                    response.code = 200
+                    response.msg = "记录成功"
+            else:
+
+                print('-------未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 

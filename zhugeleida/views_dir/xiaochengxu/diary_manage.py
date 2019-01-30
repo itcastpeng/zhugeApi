@@ -193,6 +193,8 @@ def diary_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
+        ## 点赞日记
         elif oper_type == 'praise_diary':
             customer_id = request.GET.get('user_id')
             # status = request.POST.get('status')
@@ -209,10 +211,11 @@ def diary_manage_oper(request, oper_type, o_id):
                 create_data = {
                     'diary_id': o_id,
                     'customer_id' :customer_id,
-                    'status' :1
+                    'status' :1,
+                    'action' :1 # 点赞
                 }
 
-                diary_up_down_objs = models.zgld_diary_up_down.objects.filter(diary_id=o_id,customer_id=customer_id)
+                diary_up_down_objs = models.zgld_diary_action.objects.filter(action=1,diary_id=o_id,customer_id=customer_id)
                 if diary_up_down_objs:
                     diary_up_down_objs.update(
                         status=1
@@ -221,7 +224,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     response.msg = "已经点过赞了"
 
                 else:
-                    models.zgld_diary_up_down.objects.create(**create_data)
+                    models.zgld_diary_action.objects.create(**create_data)
 
                     diary_objs = models.zgld_diary.objects.filter(id=o_id)
                     if diary_objs:
@@ -236,6 +239,7 @@ def diary_manage_oper(request, oper_type, o_id):
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
 
 
     elif request.method == 'GET':
