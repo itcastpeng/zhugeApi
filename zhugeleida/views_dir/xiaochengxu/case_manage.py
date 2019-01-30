@@ -506,24 +506,33 @@ def case_manage(request, oper_type):
                     'status' : 1,
                     'action' : 4  # 点赞
                 }
-
+                case_objs = models.zgld_case.objects.filter(id=case_id)
                 diary_up_down_objs = models.zgld_diary_action.objects.filter(action=4,case_id=case_id,customer_id=customer_id)
                 if diary_up_down_objs:
                     diary_up_down_objs.update(
                         status=1
                     )
+                    response.data = {
+                        'up_count': case_objs[0].up_count,
+                        'is_praise_diary': 1,
+                        'is_praise_diary_text': '已赞过此案例了'
+                    }
                     response.code = 302
                     response.msg = "已经点过赞了"
 
                 else:
                     models.zgld_diary_action.objects.create(**create_data)
 
-                    case_objs = models.zgld_case.objects.filter(id=case_id)
+
                     if case_objs:
                         case_objs.update( #点赞
                             up_count=F('up_count') + 1
                         )
-
+                    response.data = {
+                        'up_count': case_objs[0].up_count,
+                        'is_praise_diary' : 1,
+                        'is_praise_diary_text' : '已赞此案例'
+                    }
                     response.code = 200
                     response.msg = "记录成功"
             else:
