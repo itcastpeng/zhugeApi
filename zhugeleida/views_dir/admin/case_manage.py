@@ -224,6 +224,7 @@ def case_manage_oper(request, oper_type, o_id):
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
                 if tags_id_list:
                     obj.tags = tags_id_list
+                    obj.save()
 
                 response.code = 200
                 response.msg = "添加成功"
