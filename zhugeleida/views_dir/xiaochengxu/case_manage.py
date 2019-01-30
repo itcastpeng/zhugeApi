@@ -57,6 +57,13 @@ def case_manage(request, oper_type):
                         case_id=case_id,customer_id=customer_id,action=3
                     )
 
+                    ## 记录单个案例浏览量
+                    case_objs = models.zgld_case.objects.filter(id=case_id)
+                    if case_objs:
+                        case_objs.update(
+                            read_count=F('read_count') + 1
+                        )
+
 
                 # now_date_time = datetime.datetime.now()
                 if search_activity_status:
@@ -127,13 +134,7 @@ def case_manage(request, oper_type):
                                 _cover_picture = diary_obj.cover_picture
                                 _content = diary_obj.content
 
-                                diary_up_down_objs = models.zgld_diary_action.objects.filter(diary_id=diary_obj.id,customer_id=customer_id,action=1)
-                                if diary_up_down_objs:
-                                    is_praise_diary = 1
-                                    is_praise_diary_text = '已经赞过此日记'
-                                else:
-                                    is_praise_diary = 0
-                                    is_praise_diary_text = '没有赞过此日记'
+
 
                                 if _cover_picture:
                                     _cover_picture = json.loads(_cover_picture)
@@ -147,17 +148,14 @@ def case_manage(request, oper_type):
 
                                     'company_id': diary_obj.company_id,
 
-                                    'is_praise_diary': is_praise_diary,
-                                    'is_praise_diary_text': is_praise_diary_text,
+                                    # 'is_praise_diary': is_praise_diary,
+                                    # 'is_praise_diary_text': is_praise_diary_text,
 
                                     'title': diary_obj.title,
                                     'diary_date': diary_obj.diary_date.strftime('%Y-%m-%d') if diary_obj.diary_date else '', #'%Y-%m-%d %H:%M:%S'
                                     'cover_picture': _cover_picture,
                                     'content': _content,
 
-                                    'read_count': obj.read_count,  #
-                                    'comment_count': obj.comment_count,  #
-                                    'up_count': obj.up_count,  #
 
                                     'status': _status,
                                     'status_text': _status_text,
@@ -169,6 +167,15 @@ def case_manage(request, oper_type):
                                 }
 
                         tag_list = list(obj.tags.values('id', 'name'))
+                        diary_up_down_objs = models.zgld_diary_action.objects.filter(case_id=obj.id,
+                                                                                     customer_id=customer_id, action=4)
+                        if diary_up_down_objs:
+                            is_praise_diary = 1
+                            is_praise_diary_text = '已经赞过此日记'
+                        else:
+                            is_praise_diary = 0
+                            is_praise_diary_text = '没有赞过此日记'
+
                         ret_data.append({
                             'case_id': _case_id,
                             'case_name': obj.case_name,
@@ -177,6 +184,13 @@ def case_manage(request, oper_type):
 
                             'headimgurl': obj.headimgurl,
                             'cover_picture' : cover_picture,
+
+                            'read_count': obj.read_count,  #
+                            'comment_count': obj.comment_count,  #
+                            'up_count': obj.up_count,  #
+
+                            'is_praise_diary': is_praise_diary,
+                            'is_praise_diary_text': is_praise_diary_text,
 
                             'status': status,
                             'status_text': status_text,
@@ -469,6 +483,55 @@ def case_manage(request, oper_type):
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
+
+        ##点赞案例
+        elif oper_type == 'praise_case':
+            customer_id = request.GET.get('user_id')
+            case_id = request.POST.get('case_id')
+
+            request_data_dict = {
+                'case_id': case_id,
+                'status': 1,
+
+            }
+
+            forms_obj = CollectionDiaryForm(request_data_dict)
+            if forms_obj.is_valid():
+
+                create_data = {
+                    'case_id': case_id,
+                    'customer_id' :customer_id,
+                    'status' : 1,
+                    'action' : 4  # 点赞
+                }
+
+                diary_up_down_objs = models.zgld_diary_action.objects.filter(action=4,case_id=case_id,customer_id=customer_id)
+                if diary_up_down_objs:
+                    diary_up_down_objs.update(
+                        status=1
+                    )
+                    response.code = 302
+                    response.msg = "已经点过赞了"
+
+                else:
+                    models.zgld_diary_action.objects.create(**create_data)
+
+                    case_objs = models.zgld_case.objects.filter(id=case_id)
+                    if case_objs:
+                        case_objs.update( #点赞
+                            up_count=F('up_count') + 1
+                        )
+
+                    response.code = 200
+                    response.msg = "记录成功"
+            else:
+
+                print('-------未能通过------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
     return JsonResponse(response.__dict__)
 

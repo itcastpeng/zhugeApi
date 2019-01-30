@@ -1474,9 +1474,10 @@ class zgld_diary_action(models.Model):
     diary = models.ForeignKey('zgld_diary', verbose_name='被赞的日记',null=True)
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
-    action_choices = ((1, '点赞案例'),
+    action_choices = ((1, '点赞日记'),
                       (2, '收藏日记'),
-                      (3, '浏览案例')
+                      (3, '浏览案例'),
+                      (4, '点赞案例')
                       )
     action = models.SmallIntegerField(verbose_name='客户动作', choices=action_choices,null=True)
 

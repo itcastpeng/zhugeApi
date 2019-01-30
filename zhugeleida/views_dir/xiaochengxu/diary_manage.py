@@ -183,6 +183,13 @@ def diary_manage_oper(request, oper_type, o_id):
                     diary_objs.update(
                         comment_count=F('comment_count') + 1
                     )
+                ## 记录单个案例浏览量
+                case_objs = models.zgld_case.objects.filter(id=diary_objs[0].case_id)
+                if case_objs:
+                    case_objs.update(
+                        comment_count=F('comment_count') + 1
+                    )
+
 
                 response.code = 200
                 response.msg = "记录成功"
