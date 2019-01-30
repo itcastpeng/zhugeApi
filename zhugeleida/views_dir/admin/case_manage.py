@@ -74,8 +74,10 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
+                        tag_list = list(obj.tags.values('id', 'name'))
                         ret_data.append({
                             'case_id': obj.id,
+                            'case_name' : obj.case_name,
                             'company_id': obj.company_id,
                             'customer_name': obj.customer_name,
                             'headimgurl': obj.headimgurl,
@@ -83,6 +85,8 @@ def case_manage(request, oper_type):
 
                             'status': status,
                             'status_text': status_text,
+
+                            'tag_list': tag_list,
 
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
@@ -145,8 +149,6 @@ def case_manage_oper(request, oper_type, o_id):
             status = request.POST.get('status')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
 
-            if cover_picture:
-                cover_picture = json.dumps(cover_picture)
 
             form_data = {
                 'case_id' : case_id,
@@ -200,9 +202,6 @@ def case_manage_oper(request, oper_type, o_id):
             status  = request.POST.get('status')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
 
-            if cover_picture:
-                cover_picture = json.dumps(cover_picture)
-
             form_data = {
                 'case_name' : case_name,
                 'company_id': company_id,
@@ -228,6 +227,7 @@ def case_manage_oper(request, oper_type, o_id):
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
                 if tags_id_list:
                     obj.tags = tags_id_list
+                    obj.save()
 
                 response.code = 200
                 response.msg = "添加成功"

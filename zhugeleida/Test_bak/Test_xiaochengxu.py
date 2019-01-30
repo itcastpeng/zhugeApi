@@ -88,7 +88,9 @@ ip = 'http://127.0.0.1:8001'
 ### 案例管理
 # url = ip + '/zhugeleida/xiaochengxu/case_manage/case_list' #
 # get_data['company_id']=1
-# get_data['search_tag_id'] = 1  # search_tag_id
+# get_data['case_id'] = 1
+#
+# # get_data['search_tag_id'] = 1  # search_tag_id
 # ret = requests.get(url, params=get_data)
 
 ## 案例标签 列表展示
@@ -124,16 +126,19 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, params=get_data,data = post_data)
 
 # 收藏案例
-url = ip + '/zhugeleida/xiaochengxu/case_manage/collection_case' #
+# url = ip + '/zhugeleida/xiaochengxu/case_manage/collection_case' #
+# get_data['company_id']=1
+# post_data['status'] = 1
+# post_data['case_id'] = 1
+# ret = requests.post(url, params=get_data,data = post_data)
+
+# url = ip + '/zhugeleida/xiaochengxu/case_manage/browse_case_list_record' #
+# get_data['company_id']=1
+# ret = requests.get(url, params=get_data,data = post_data)
+
+url = ip + '/zhugeleida/xiaochengxu/case_manage/collection_case_list_record' #
 get_data['company_id']=1
-post_data['status'] = 1
-post_data['case_id'] = 1
-
-ret = requests.post(url, params=get_data,data = post_data)
-
-
-
-
+ret = requests.get(url, params=get_data,data = post_data)
 
 
 

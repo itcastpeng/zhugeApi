@@ -124,6 +124,12 @@ class diaryAddForm(forms.Form):
             'required': "标题不能为空"
         }
     )
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "摘要不能为空"
+        }
+    )
 
     diary_date = forms.DateTimeField(
         required=True,
@@ -194,6 +200,13 @@ class diaryUpdateForm(forms.Form):
         required=True,
         error_messages={
             'required': "标题不能为空"
+        }
+    )
+
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "摘要不能为空"
         }
     )
 

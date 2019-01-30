@@ -145,7 +145,7 @@ class CaseAddForm(forms.Form):
         case_name =  self.data['case_name']
 
         objs = models.zgld_case.objects.filter(
-            case_name=case_name, company_id=company_id
+            case_name=case_name, company_id=company_id,status=1
         )
 
         if objs:
@@ -206,7 +206,7 @@ class CaseUpdateForm(forms.Form):
         case_name = self.data['case_name']
 
         objs = models.zgld_case.objects.filter(
-            case_name=case_name, company_id=company_id
+            case_name=case_name, company_id=company_id,status=1
         ).exclude(id=case_id)
 
         if objs:
@@ -535,3 +535,33 @@ class CollectionDiaryForm(forms.Form):
             'required': "状态不能为空"
         }
     )
+
+
+class BrowseCaseSelectForm(forms.Form):
+
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
