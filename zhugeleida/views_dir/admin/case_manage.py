@@ -74,6 +74,7 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
+                        tag_list = list(obj.tags.values('id', 'name'))
                         ret_data.append({
                             'case_id': obj.id,
                             'case_name' : obj.case_name,
@@ -84,6 +85,8 @@ def case_manage(request, oper_type):
 
                             'status': status,
                             'status_text': status_text,
+
+                            'tag_list': tag_list,
 
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
