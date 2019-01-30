@@ -146,8 +146,6 @@ def case_manage_oper(request, oper_type, o_id):
             status = request.POST.get('status')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
 
-            if cover_picture:
-                cover_picture = json.dumps(cover_picture)
 
             form_data = {
                 'case_id' : case_id,
@@ -200,9 +198,6 @@ def case_manage_oper(request, oper_type, o_id):
             headimgurl = request.POST.get('headimgurl')
             status  = request.POST.get('status')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
-
-            if cover_picture:
-                cover_picture = json.dumps(cover_picture)
 
             form_data = {
                 'case_name' : case_name,
