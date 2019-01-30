@@ -525,7 +525,7 @@ class CollectionDiaryForm(forms.Form):
     case_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': '文章ID不能为空'
+            'required': '案例ID不能为空'
         }
     )
 
