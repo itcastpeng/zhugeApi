@@ -145,7 +145,7 @@ class CaseAddForm(forms.Form):
         case_name =  self.data['case_name']
 
         objs = models.zgld_case.objects.filter(
-            case_name=case_name, company_id=company_id
+            case_name=case_name, company_id=company_id,status=1
         )
 
         if objs:
@@ -206,7 +206,7 @@ class CaseUpdateForm(forms.Form):
         case_name = self.data['case_name']
 
         objs = models.zgld_case.objects.filter(
-            case_name=case_name, company_id=company_id
+            case_name=case_name, company_id=company_id,status=1
         ).exclude(id=case_id)
 
         if objs:
