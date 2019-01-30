@@ -104,7 +104,7 @@ def diary_manage(request, oper_type):
                             'is_praise_diary_text' : is_praise_diary_text,
 
                             'title': obj.title,
-                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d %H:%M') if obj.diary_date else '',
+                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
                             'cover_picture': cover_picture,
                             'content': content,
 

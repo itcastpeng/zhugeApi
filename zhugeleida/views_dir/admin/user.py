@@ -797,22 +797,24 @@ def user_oper(request, oper_type, o_id):
                 obj.department = json.dumps(depart_id_list)
                 obj.save()
 
-                ### 提醒董庆豪和尚露 审核用户
-                corpid = 'wx81159f52aff62388'  # 企业ID
-                corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
-                redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
-                _obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
-                url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/approval_audit'
-                msg = """【审核用户】：{username}\n【点击链接】：{url}\n """.format(
-                    username=username,
-                    url=url,
-                )
-                _obj.send_message(
-                    agentid=1000005,
-                    msg=msg,
-                    # touser="zhangcong"
-                    touser="1531186501974|1531464629357|1531476018476"
-                )
+                if int(company_id) == 2: # 当给医美雷达公司添加的时候，才给提示
+
+                    ### 提醒董庆豪和尚露 审核用户
+                    corpid = 'wx81159f52aff62388'  # 企业ID
+                    corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
+                    redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
+                    _obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/approval_audit'
+                    msg = """【审核用户】：{username}\n【点击链接】：{url}\n """.format(
+                        username=username,
+                        url=url,
+                    )
+                    _obj.send_message(
+                        agentid=1000005,
+                        msg=msg,
+                        # touser="zhangcong"
+                        touser="1531186501974|1531464629357|1531476018476"
+                    )
 
                 response.code = 200
                 response.msg = "添加用户成功"
