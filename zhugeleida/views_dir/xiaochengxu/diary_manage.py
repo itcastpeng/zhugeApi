@@ -72,7 +72,7 @@ def diary_manage(request, oper_type):
 
                     for obj in objs:
 
-                        diary_up_down_objs = models.zgld_diary_up_down.objects.filter(diary_id=obj.id,
+                        diary_up_down_objs = models.zgld_diary_action.objects.filter(diary_id=obj.id,
                                                                                       customer_id=user_id)
                         if diary_up_down_objs:
                             is_praise_diary = 1

@@ -76,6 +76,7 @@ def case_manage(request, oper_type):
 
                         ret_data.append({
                             'case_id': obj.id,
+                            'case_name' : obj.case_name,
                             'company_id': obj.company_id,
                             'customer_name': obj.customer_name,
                             'headimgurl': obj.headimgurl,
