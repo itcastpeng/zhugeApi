@@ -148,17 +148,24 @@ def comment_manage(request, oper_type):
             objs = ''
             if _type == 'diary':
                 objs = models.zgld_diary_comment.objects.filter(id__in=ids_list, from_customer__company_id=company_id)
+                if objs:
+                    print('diary 数据存在 ------->',request.POST)
+                    objs.update(
+                        is_audit_pass=1
+                    )
+                    response.code = 200
+                    response.msg = "审核成功"
 
             elif _type == 'article':
                 objs = models.zgld_article_comment.objects.filter(id__in=ids_list, from_customer__company_id=company_id)
+                if objs:
+                    print('article 数据存在 ------->', request.POST)
+                    objs.update(
+                        is_audit_pass=1
+                    )
 
-            if objs:
-                objs.update(
-                    is_audit_pass=1
-                )
-
-                response.code = 200
-                response.msg = "添加成功"
+                    response.code = 200
+                    response.msg = "审核成功"
 
             else:
                 response.code = 302
