@@ -112,6 +112,13 @@ def case_manage(request, oper_type):
                 ret_data = []
                 if objs:
                     last_diary_data = ''
+                    is_open_comment = ''
+                    is_open_comment_text = ''
+                    gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                    if gongzhonghao_app_objs:
+                        is_open_comment = gongzhonghao_app_objs[0].is_open_comment
+                        is_open_comment_text = gongzhonghao_app_objs[0].get_is_open_comment_display()
+
                     for obj in objs:
 
                         status = obj.status
@@ -191,6 +198,9 @@ def case_manage(request, oper_type):
 
                             'is_praise_diary': is_praise_diary,
                             'is_praise_diary_text': is_praise_diary_text,
+
+                            'is_open_comment' : is_open_comment,
+                            'is_open_comment_text' :is_open_comment_text,
 
                             'status': status,
                             'status_text': status_text,

@@ -71,7 +71,6 @@ urlpatterns = [
     url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
     # 案例管理
-
     url(r'^case_manage/(?P<oper_type>\w+)$', case_manage.case_manage),
 
     # 案例标签管理

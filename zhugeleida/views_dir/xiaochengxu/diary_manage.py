@@ -6,11 +6,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from bs4 import BeautifulSoup
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, PraiseDiaryForm, diarySelectForm,ReviewDiaryForm,DiaryReviewSelectForm
-from django.db.models import F,Q
-import json,datetime
-from django.db.models import Q, Sum, Count
-import base64
+from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, PraiseDiaryForm, diarySelectForm, \
+    ReviewDiaryForm, DiaryReviewSelectForm
+from django.db.models import F, Q
+import json, datetime, base64
+
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -35,8 +35,8 @@ def diary_manage(request, oper_type):
 
                 ## 搜索条件
                 diary_id = request.GET.get('diary_id')  #
-                title = request.GET.get('title')        #
-                user_id = request.GET.get('user_id')        #
+                title = request.GET.get('title')  #
+                user_id = request.GET.get('user_id')  #
 
                 q1 = Q()
                 q1.connector = 'and'
@@ -51,10 +51,9 @@ def diary_manage(request, oper_type):
 
                     diary_objs = models.zgld_diary.objects.filter(id=diary_id)
                     if diary_objs:
-                        diary_objs.update( # 阅读次数
+                        diary_objs.update(  # 阅读次数
                             read_count=F('read_count') + 1
                         )
-
 
                 q1.children.append(('status__in', [1]))  #
                 print('-----q1---->>', q1)
@@ -72,7 +71,8 @@ def diary_manage(request, oper_type):
 
                     for obj in objs:
 
-                        diary_up_down_objs = models.zgld_diary_action.objects.filter(diary_id=obj.id, customer_id=user_id,action=1)
+                        diary_up_down_objs = models.zgld_diary_action.objects.filter(diary_id=obj.id,
+                                                                                     customer_id=user_id, action=1)
                         if diary_up_down_objs:
                             is_praise_diary = 1
                             is_praise_diary_text = '已经赞过此日记'
@@ -80,17 +80,15 @@ def diary_manage(request, oper_type):
                             is_praise_diary = 0
                             is_praise_diary_text = '没有赞过此日记'
 
-
                         status = obj.status
                         status_text = obj.get_status_display()
                         cover_picture = obj.cover_picture
                         content = obj.content
 
-                        interval_days  =  (obj.diary_date - first_diary_date).days
-
+                        interval_days = (obj.diary_date - first_diary_date).days
 
                         if cover_picture:
-                            cover_picture =  json.loads(cover_picture)
+                            cover_picture = json.loads(cover_picture)
                         # if content:
                         #     content = json.loads(content)
 
@@ -100,25 +98,24 @@ def diary_manage(request, oper_type):
                             'company_id': obj.company_id,
 
                             'is_praise_diary': is_praise_diary,
-                            'is_praise_diary_text' : is_praise_diary_text,
+                            'is_praise_diary_text': is_praise_diary_text,
 
                             'title': obj.title,
-                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
+                            'diary_date': obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
                             'cover_picture': cover_picture,
                             'content': content,
 
-                            'interval_days' : interval_days,
+                            'interval_days': interval_days,
 
                             'status': status,
                             'status_text': status_text,
 
-                            'read_count' : obj.read_count, #
-                            'comment_count' : obj.comment_count, #
-                            'up_count' : obj.up_count, #
+                            'read_count': obj.read_count,  #
+                            'comment_count': obj.comment_count,  #
+                            'up_count': obj.up_count,  #
 
-
-                            'cover_show_type' : obj.cover_show_type,
-                            'cover_show_type_text' : obj.get_cover_show_type_display(),
+                            'cover_show_type': obj.cover_show_type,
+                            'cover_show_type_text': obj.get_cover_show_type_display(),
 
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
@@ -140,9 +137,6 @@ def diary_manage(request, oper_type):
 
     elif request.method == "POST":
         pass
-
-
-
 
     return JsonResponse(response.__dict__)
 
@@ -190,7 +184,6 @@ def diary_manage_oper(request, oper_type, o_id):
                         comment_count=F('comment_count') + 1
                     )
 
-
                 response.code = 200
                 response.msg = "记录成功"
             else:
@@ -216,12 +209,13 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 create_data = {
                     'diary_id': o_id,
-                    'customer_id' :customer_id,
-                    'status' :1,
-                    'action' :1 # 点赞
+                    'customer_id': customer_id,
+                    'status': 1,
+                    'action': 1  # 点赞
                 }
                 diary_objs = models.zgld_diary.objects.filter(id=o_id)
-                diary_up_down_objs = models.zgld_diary_action.objects.filter(action=1,diary_id=o_id,customer_id=customer_id)
+                diary_up_down_objs = models.zgld_diary_action.objects.filter(action=1, diary_id=o_id,
+                                                                             customer_id=customer_id)
                 if diary_up_down_objs:
                     diary_up_down_objs.update(
                         status=1
@@ -235,7 +229,6 @@ def diary_manage_oper(request, oper_type, o_id):
                     }
                 else:
                     models.zgld_diary_action.objects.create(**create_data)
-
 
                     if diary_objs:
                         diary_objs.update(
@@ -259,11 +252,11 @@ def diary_manage_oper(request, oper_type, o_id):
     elif request.method == 'GET':
 
         ## 文章评论列表展示
-        if oper_type == 'diary_id_review_list':
+        if oper_type == 'diary_review_list':
 
-            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('user_id')
             form_data = {
-                'diary_id' : o_id
+                'diary_id': o_id
             }
             forms_obj = DiaryReviewSelectForm(form_data)
 
@@ -271,7 +264,8 @@ def diary_manage_oper(request, oper_type, o_id):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
 
-                objs = models.zgld_diary_comment.objects.select_related('from_customer','to_customer').filter(diary_id=o_id).order_by('-create_date')
+                objs = models.zgld_diary_comment.objects.select_related('from_customer', 'to_customer').filter(
+                    diary_id=o_id).filter(Q(is_audit_pass=1) | Q(from_customer=customer_id)).order_by('-create_date')
 
                 count = objs.count()
                 if objs:
@@ -292,7 +286,6 @@ def diary_manage_oper(request, oper_type, o_id):
                             print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.from_customer_id, "|", e)
                             customer_name = '客户ID%s' % (obj.from_customer_id)
 
-
                         _content = base64.b64decode(obj.content)
                         content = str(_content, 'utf-8')
                         print('----- 解密b64decode 内容content----->', content)
@@ -302,7 +295,7 @@ def diary_manage_oper(request, oper_type, o_id):
                             'from_customer_name': customer_name,
                             'from_customer_headimgurl': obj.from_customer.headimgurl,
                             'content': content,
-                            'create_time' : obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                            'create_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                         })
 
                     response.code = 200
@@ -320,7 +313,5 @@ def diary_manage_oper(request, oper_type, o_id):
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
-
-
 
     return JsonResponse(response.__dict__)

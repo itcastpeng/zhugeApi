@@ -8,7 +8,7 @@ from zhugeleida.forms.qiyeweixin.tag_user_verify import TagUserAddForm,TagUserUp
 import time
 import datetime
 import json
-
+from django.db.models import Q
 from publicFunc.condition_com import conditionCom
 
 # 标签 和 标签用户的查询

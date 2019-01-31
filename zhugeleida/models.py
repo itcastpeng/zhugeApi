@@ -946,6 +946,11 @@ class zgld_article_comment(models.Model):
     from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='FromCustomer',null=True) ## 关联的客户
     to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='ToCustomer', null=True) ## 关联的客户
     content = models.TextField(verbose_name="评论内容", null=True)
+    is_audit_pass_choices = ((0, '未进行审核'),
+                             (1, '审核通过'),
+                             )
+    is_audit_pass = models.SmallIntegerField(default=0, verbose_name='是否通过审核', choices=is_audit_pass_choices)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -1472,6 +1477,11 @@ class zgld_diary_comment(models.Model):
     diary = models.ForeignKey('zgld_diary', verbose_name="关联的日记", null=True)
     from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='from_customer',null=True) ## 关联的客户
     to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='to_customer', null=True) ## 关联的客户
+    is_audit_pass_choices = ( (0, '未进行审核'),
+                              (1, '审核通过'),
+                            )
+    is_audit_pass = models.SmallIntegerField(default=0, verbose_name='是否通过审核', choices=is_audit_pass_choices)
+
     content = models.TextField(verbose_name="评论内容", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
