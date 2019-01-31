@@ -1552,7 +1552,6 @@ def gzh_auth_process_oper(request, oper_type):
                 response.code = 302
 
 
-
     elif request.method == "GET":
 
         #获取公众号基本信息
