@@ -131,6 +131,10 @@ class zgld_gongzhonghao_app(models.Model):
     max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
     min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
 
+    is_open_comment_choices = ( (0,'不开启评论'),
+                                (1,'开启评论'),
+                           )
+    is_open_comment = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=is_open_comment_choices)
 
     reason = models.CharField(verbose_name='发送红包失败原因',max_length=512,null=True)
 
@@ -192,6 +196,12 @@ class zgld_xiaochengxu_app(models.Model):
     introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True, default="IT科技>硬件与设备")
     ext_json = models.TextField(verbose_name="第三方自定义的配置", null=True)
+
+    is_open_comment_choices = ((0, '不开启评论'),
+                               (1, '开启评论'),
+                               )
+    is_open_comment = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=is_open_comment_choices)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
@@ -912,11 +922,6 @@ class zgld_article(models.Model):
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
     media_id = models.CharField(verbose_name="素材ID", max_length=128, null=True)
     source_url = models.CharField(verbose_name="公众号文章原生URL", max_length=256, null=True)
-
-    auto_tagging_choices = ( (0,'不开启'),
-                             (1,'开启'),
-                           )
-    is_auto_tagging = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=auto_tagging_choices)
 
     auto_tagging_choices = ( (0,'不开启'),
                              (1,'开启'),

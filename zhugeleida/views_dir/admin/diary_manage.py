@@ -73,7 +73,7 @@ def diary_manage(request, oper_type):
 
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
-                        
+
                         ret_data.append({
                             'diary_id': obj.id,
                             'case_id': obj.case_id,
@@ -82,6 +82,7 @@ def diary_manage(request, oper_type):
                             'title': obj.title,
                             'diary_date' : obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
                             'cover_picture': cover_picture,
+                            'summary': obj.summary,
                             'content': content,
 
                             'status': status,

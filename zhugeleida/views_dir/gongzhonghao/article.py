@@ -486,12 +486,16 @@ def article_oper(request, oper_type, o_id):
                     focus_get_money = ''
                     gongzhonghao_mode = ''
                     gongzhonghao_name = ''
+                    is_open_comment_text = ''
+                    is_open_comment = ''
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
                         gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                         qrcode_url = gongzhonghao_app_obj.qrcode_url
                         gongzhonghao_mode = gongzhonghao_app_obj.mode
                         gongzhonghao_name = gongzhonghao_app_obj.name
+                        is_open_comment = gongzhonghao_app_obj.is_open_comment
+                        is_open_comment_text = gongzhonghao_app_obj.get_is_open_comment_display()
 
                         is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
                         if is_focus_get_redpacket:
@@ -516,6 +520,8 @@ def article_oper(request, oper_type, o_id):
                         'start_time': _start_time,
                         'end_time': _end_time,
 
+                        'is_open_comment_text': is_open_comment_text,
+                        'is_open_comment': is_open_comment,
                         'gongzhonghao_mode': gongzhonghao_mode,
                         'activity_mode': activity_mode,
                         'gongzhonghao_name':gongzhonghao_name
