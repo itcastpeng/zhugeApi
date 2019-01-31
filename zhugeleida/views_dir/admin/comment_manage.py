@@ -77,6 +77,7 @@ def comment_manage(request, oper_type):
                         print('----- 解密b64decode 内容content----->', content)
 
                         ret_data.append({
+                            'id' : obj.id,
                             'from_customer_id': obj.from_customer_id,
                             'from_customer_name': customer_name,
                             'from_customer_headimgurl': obj.from_customer.headimgurl,
