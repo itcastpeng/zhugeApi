@@ -917,6 +917,12 @@ class zgld_article(models.Model):
                              (1,'开启'),
                            )
     is_auto_tagging = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=auto_tagging_choices)
+
+    auto_tagging_choices = ( (0,'不开启'),
+                             (1,'开启'),
+                           )
+    is_auto_tagging = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=auto_tagging_choices)
+
     tags_time_count = models.IntegerField(default=0, verbose_name="达到几秒实现打标签")
 
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
