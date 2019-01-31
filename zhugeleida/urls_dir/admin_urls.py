@@ -4,7 +4,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     home_page, product, help_doc, article,article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
     plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, tongxunlu,money_manage,case_tag,case_manage,diary_manage
+    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, tongxunlu,money_manage,case_tag,case_manage,diary_manage,comment_manage
 
 
 
@@ -132,6 +132,9 @@ urlpatterns = [
     # 日记管理
     url(r'^diary_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', diary_manage.diary_manage_oper),
     url(r'^diary_manage/(?P<oper_type>\w+)$', diary_manage.diary_manage),
+
+    # 评论管理
+    url(r'^comment_manage/(?P<oper_type>\w+)$', comment_manage.comment_manage),
 
     # 话术分组管理
     url(r'^talkGroupManage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),

@@ -131,6 +131,10 @@ class zgld_gongzhonghao_app(models.Model):
     max_single_money = models.FloatField(verbose_name='随机最大单个金额(元)',default=0,null=True)
     min_single_money = models.FloatField(verbose_name='随机最小单个金额(元)',default=0,null=True)
 
+    is_open_comment_choices = ( (0,'不开启评论'),
+                                (1,'开启评论'),
+                           )
+    is_open_comment = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=is_open_comment_choices)
 
     reason = models.CharField(verbose_name='发送红包失败原因',max_length=512,null=True)
 
@@ -192,6 +196,12 @@ class zgld_xiaochengxu_app(models.Model):
     introduce = models.CharField(verbose_name="小程序介绍", max_length=1024,null=True)
     service_category = models.CharField(verbose_name="服务类目", max_length=64,null=True, default="IT科技>硬件与设备")
     ext_json = models.TextField(verbose_name="第三方自定义的配置", null=True)
+
+    is_open_comment_choices = ((0, '不开启评论'),
+                               (1, '开启评论'),
+                               )
+    is_open_comment = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=is_open_comment_choices)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     def __str__(self):
@@ -917,6 +927,7 @@ class zgld_article(models.Model):
                              (1,'开启'),
                            )
     is_auto_tagging = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=auto_tagging_choices)
+
     tags_time_count = models.IntegerField(default=0, verbose_name="达到几秒实现打标签")
 
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
@@ -935,6 +946,11 @@ class zgld_article_comment(models.Model):
     from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='FromCustomer',null=True) ## 关联的客户
     to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='ToCustomer', null=True) ## 关联的客户
     content = models.TextField(verbose_name="评论内容", null=True)
+    is_audit_pass_choices = ((0, '未进行审核'),
+                             (1, '审核通过'),
+                             )
+    is_audit_pass = models.SmallIntegerField(default=0, verbose_name='是否通过审核', choices=is_audit_pass_choices)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -1461,6 +1477,11 @@ class zgld_diary_comment(models.Model):
     diary = models.ForeignKey('zgld_diary', verbose_name="关联的日记", null=True)
     from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='from_customer',null=True) ## 关联的客户
     to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='to_customer', null=True) ## 关联的客户
+    is_audit_pass_choices = ( (0, '未进行审核'),
+                              (1, '审核通过'),
+                            )
+    is_audit_pass = models.SmallIntegerField(default=0, verbose_name='是否通过审核', choices=is_audit_pass_choices)
+
     content = models.TextField(verbose_name="评论内容", null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

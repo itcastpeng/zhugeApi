@@ -5,15 +5,16 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, \
-    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm, LocationForm,ReviewArticleForm,ArticleReviewSelectForm,RecommendArticleSelectForm
+    MyarticleForm, StayTime_ArticleForm, Forward_ArticleForm, LocationForm, ReviewArticleForm, ArticleReviewSelectForm, \
+    RecommendArticleSelectForm
 
 from zhugeapi_celery_project import tasks
 from zhugeleida.public.common import action_record
 
 import json
-from django.db.models import Q, F,Count
+from django.db.models import Q, F, Count
 from zhugeleida.public.condition_com import conditionCom
-import datetime,base64
+import datetime, base64
 
 import requests
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
@@ -105,8 +106,6 @@ def article(request, oper_type):
 
         elif oper_type == 'article_':
             pass
-
-
 
     return JsonResponse(response.__dict__)
 
@@ -264,8 +263,8 @@ def article_oper(request, oper_type, o_id):
 
             request_data_dict = {
                 'article_id': o_id,
-                'content': content,             # 文章所属用户的ID
-                'customer_id': from_customer_id,   # 文章所属用户的ID
+                'content': content,  # 文章所属用户的ID
+                'customer_id': from_customer_id,  # 文章所属用户的ID
             }
 
             forms_obj = ReviewArticleForm(request_data_dict)
@@ -275,9 +274,9 @@ def article_oper(request, oper_type, o_id):
                 msg = str(encodestr, 'utf-8')
 
                 create_data = {
-                    'article_id' : o_id,
-                    'content' : msg,
-                    'from_customer_id' : from_customer_id
+                    'article_id': o_id,
+                    'content': msg,
+                    'from_customer_id': from_customer_id
                 }
                 obj = models.zgld_article_comment.objects.create(**create_data)
 
@@ -486,12 +485,16 @@ def article_oper(request, oper_type, o_id):
                     focus_get_money = ''
                     gongzhonghao_mode = ''
                     gongzhonghao_name = ''
+                    is_open_comment_text = ''
+                    is_open_comment = ''
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
                         gongzhonghao_app_obj = gongzhonghao_app_objs[0]
                         qrcode_url = gongzhonghao_app_obj.qrcode_url
                         gongzhonghao_mode = gongzhonghao_app_obj.mode
                         gongzhonghao_name = gongzhonghao_app_obj.name
+                        is_open_comment = gongzhonghao_app_obj.is_open_comment
+                        is_open_comment_text = gongzhonghao_app_obj.get_is_open_comment_display()
 
                         is_focus_get_redpacket = gongzhonghao_app_obj.is_focus_get_redpacket
                         if is_focus_get_redpacket:
@@ -516,9 +519,11 @@ def article_oper(request, oper_type, o_id):
                         'start_time': _start_time,
                         'end_time': _end_time,
 
+                        'is_open_comment_text': is_open_comment_text,
+                        'is_open_comment': is_open_comment,
                         'gongzhonghao_mode': gongzhonghao_mode,
                         'activity_mode': activity_mode,
-                        'gongzhonghao_name':gongzhonghao_name
+                        'gongzhonghao_name': gongzhonghao_name
                     }
 
                 else:
@@ -540,9 +545,9 @@ def article_oper(request, oper_type, o_id):
         ## 文章评论列表展示
         elif oper_type == 'article_review_list':
 
-            user_id = request.GET.get('user_id')
+            customer_id = request.GET.get('user_id')
             form_data = {
-                'article_id' : o_id
+                'article_id': o_id
             }
             forms_obj = ArticleReviewSelectForm(form_data)
 
@@ -550,7 +555,8 @@ def article_oper(request, oper_type, o_id):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
 
-                objs = models.zgld_article_comment.objects.select_related('from_customer','to_customer').filter(article_id=o_id).order_by('-create_date')
+                objs = models.zgld_article_comment.objects.select_related('from_customer', 'to_customer').filter(
+                    article_id=o_id).filter(Q(is_audit_pass=1) | Q(from_customer=customer_id)).order_by('-create_date')
 
                 count = objs.count()
                 if objs:
@@ -571,7 +577,6 @@ def article_oper(request, oper_type, o_id):
                             print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.from_customer_id, "|", e)
                             customer_name = '客户ID%s' % (obj.from_customer_id)
 
-
                         _content = base64.b64decode(obj.content)
                         content = str(_content, 'utf-8')
                         print('----- 解密b64decode 内容content----->', content)
@@ -581,7 +586,7 @@ def article_oper(request, oper_type, o_id):
                             'from_customer_name': customer_name,
                             'from_customer_headimgurl': obj.from_customer.headimgurl,
                             'content': content,
-                            'create_time' : obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                            'create_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                         })
 
                     response.code = 200
@@ -608,14 +613,16 @@ def article_oper(request, oper_type, o_id):
 
             form_data = {
                 'article_id': o_id,
-                'company_id' : company_id,
-                'uid' : uid
+                'company_id': company_id,
+                'uid': uid
             }
             forms_obj = RecommendArticleSelectForm(form_data)
 
             if forms_obj.is_valid():
 
-                objs = models.zgld_article.objects.select_related('user', 'company').exclude(id=o_id,status=1).order_by('-read_count')
+                objs = models.zgld_article.objects.select_related('user', 'company').exclude(id=o_id,
+                                                                                             status=1).order_by(
+                    '-read_count')
 
                 count = objs.count()
                 if objs:
@@ -625,16 +632,16 @@ def article_oper(request, oper_type, o_id):
                     for obj in objs:
                         _data = {
                             'article_id': obj.id,
-                            'uid' : uid,  # 雷达用户ID。
-                            'company_id' :  company_id
+                            'uid': uid,  # 雷达用户ID。
+                            'company_id': company_id
                         }
                         article_url = create_gongzhonghao_share_auth_url(_data)
 
                         ret_data.append({
                             'article_id': obj.id,
                             'title': obj.title,
-                            'article_url' : article_url,
-                            'read_count' : obj.read_count,
+                            'article_url': article_url,
+                            'read_count': obj.read_count,
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                         })
 
@@ -750,7 +757,7 @@ def article_oper(request, oper_type, o_id):
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-                    print('查询值 q--->>',q)
+                    print('查询值 q--->>', q)
                     objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(q)
                     if objs:
                         obj = objs[0]
@@ -770,25 +777,30 @@ def article_oper(request, oper_type, o_id):
 
                             # 方法1
                             customer_obj = models.zgld_customer.objects.get(id=customer_id)
-                            already_tag_name_list = list(customer_obj.zgld_tag_set.all().values_list('name', flat=True)) # 此客户已经拥有的标签
+                            already_tag_name_list = list(
+                                customer_obj.zgld_tag_set.all().values_list('name', flat=True))  # 此客户已经拥有的标签
 
                             already_tag_list = ''
                             already_company_tags_name_list = ''
                             for tag_name in tags_name_list:
 
-                                if tag_name in already_tag_name_list: # 满足 文章标签已经在 【客户标签列表中】就不用创建
-                                    print('tag_name 文章标签已经在 【客户标签列表中】---------->>',tag_name,"|",already_tag_name_list)
+                                if tag_name in already_tag_name_list:  # 满足 文章标签已经在 【客户标签列表中】就不用创建
+                                    print('tag_name 文章标签已经在 【客户标签列表中】---------->>', tag_name, "|",
+                                          already_tag_name_list)
                                     continue
 
                                 elif not already_tag_list:
                                     print('值 already_tag_list 为空 ------>>')
-                                    already_tag_list = list(customer_obj.zgld_tag_set.all().values_list('id', flat=True))
-                                    already_company_tags_name_list = list(models.zgld_tag.objects.filter(user_id=uid,user__company_id=company_id).values_list('name',flat=True))
+                                    already_tag_list = list(
+                                        customer_obj.zgld_tag_set.all().values_list('id', flat=True))
+                                    already_company_tags_name_list = list(models.zgld_tag.objects.filter(user_id=uid,
+                                                                                                         user__company_id=company_id).values_list(
+                                        'name', flat=True))
 
                                 tag_data = {
                                     'name': tag_name,
                                     'user_id': uid,
-                                    'tag_type' : 1 # (1, '微信公众号'),
+                                    'tag_type': 1  # (1, '微信公众号'),
                                 }
                                 print('值 already_tag_list-------->', already_tag_list)
 
@@ -801,7 +813,8 @@ def article_oper(request, oper_type, o_id):
 
 
                                 else:
-                                    _objs = models.zgld_tag.objects.filter(name=tag_name,user_id=uid, user__company_id=company_id)
+                                    _objs = models.zgld_tag.objects.filter(name=tag_name, user_id=uid,
+                                                                           user__company_id=company_id)
                                     _obj = _objs[0]
                                     tag_id = _obj.id
 
@@ -809,9 +822,9 @@ def article_oper(request, oper_type, o_id):
                                     already_tag_list.append(str(tag_id))
 
                             if already_tag_list:
-                                now_tag_list = [int(i)  for i in already_tag_list]
+                                now_tag_list = [int(i) for i in already_tag_list]
 
-                                print('值 now_tag_list ----->>',now_tag_list)
+                                print('值 now_tag_list ----->>', now_tag_list)
 
                                 if customer_obj:
                                     customer_obj.zgld_tag_set = now_tag_list
@@ -829,8 +842,8 @@ def article_oper(request, oper_type, o_id):
                                     response.msg = "添加成功"
                             '''
 
-
-                        article_access_log_objs = models.zgld_article_access_log.objects.filter(id=article_access_log_id)
+                        article_access_log_objs = models.zgld_article_access_log.objects.filter(
+                            id=article_access_log_id)
                         now_date_time = datetime.datetime.now()
                         if article_access_log_objs:
                             article_access_log_objs.update(
@@ -843,7 +856,8 @@ def article_oper(request, oper_type, o_id):
 
                             if activity_id and is_have_activity == 1 and reach_stay_time != 0:
                                 print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
-                                activity_objs = models.zgld_article_activity.objects.filter(article_id=article_id).exclude(
+                                activity_objs = models.zgld_article_activity.objects.filter(
+                                    article_id=article_id).exclude(
                                     status=3).order_by('-create_date')
                                 now_date_time = datetime.datetime.now()
                                 is_limit_area = ''
@@ -884,12 +898,13 @@ def article_oper(request, oper_type, o_id):
                                                         'activity_id': activity_id,
                                                         'company_id': company_id,
                                                     }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
-                                                    print('传输异步数据 tasks json.dumps(_data) --------->>', json.dumps(_data))
+                                                    print('传输异步数据 tasks json.dumps(_data) --------->>',
+                                                          json.dumps(_data))
 
                                                     tasks.user_forward_send_activity_redPacket.delay(_data)
 
                     else:
-                        print('无关系 article_to_customer_belonger -------->>',q)
+                        print('无关系 article_to_customer_belonger -------->>', q)
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
@@ -955,12 +970,10 @@ def article_oper(request, oper_type, o_id):
 
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
 
-
     return JsonResponse(response.__dict__)
 
+
 def create_gongzhonghao_share_auth_url(data):
-
-
     uid = data.get('uid')  # 雷达用户ID。代表此企业用户从雷达里分享出去-这个文章。
     article_id = data.get('article_id')
     company_id = data.get('company_id')
@@ -974,7 +987,6 @@ def create_gongzhonghao_share_auth_url(data):
             qywx_config_dict = json.loads(qywx_config_dict)
 
     api_url = qywx_config_dict.get('api_url')
-
 
     pid = ''
     level = 1
@@ -1004,7 +1016,7 @@ def create_gongzhonghao_share_auth_url(data):
     # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
     appid = authorization_appid
     share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
-    appid, redirect_uri, scope, state, component_appid)
+        appid, redirect_uri, scope, state, component_appid)
 
     from urllib.parse import quote
     bianma_share_url = quote(share_url, 'utf-8')
@@ -1018,8 +1030,9 @@ def create_gongzhonghao_share_auth_url(data):
             qywx_config_dict = json.loads(qywx_config_dict)
 
     leida_http_url = qywx_config_dict.get('authorization_url')
-    share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (leida_http_url, bianma_share_url)
+    share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (
+    leida_http_url, bianma_share_url)
 
     print('------ 【雷达企业用户】正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>', share_url)
 
-    return  share_url
+    return share_url
