@@ -1496,7 +1496,7 @@ class zgld_diary_action(models.Model):
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
     action_choices = ((1, '点赞日记'),
-                      (2, '收藏日记'),
+                      (2, '收藏案例'),
                       (3, '浏览案例'),
                       (4, '点赞案例')
                       )

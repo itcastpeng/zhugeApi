@@ -476,16 +476,27 @@ def case_manage(request, oper_type):
 
                 case_up_down_objs = models.zgld_diary_action.objects.filter(action=2, case_id=case_id,customer_id=customer_id)
                 if case_up_down_objs:
+
                     case_up_down_objs.update(
                         status=status
                     )
+                    case_up_down_obj = case_up_down_objs[0]
+                    status = case_up_down_obj.status
+                    status_text = case_up_down_obj.get_status_display()
 
+                    response.data = {
+                        'status': status,
+                        'status_text': status_text
+                    }
                     response.code = 200
                     response.msg = "记录成功"
 
                 else:
-                    models.zgld_diary_action.objects.create(**create_data)
-
+                    case_up_down_obj =  models.zgld_diary_action.objects.create(**create_data)
+                    response.data = {
+                        'status' : case_up_down_obj.status,
+                        'status_text': '已收藏此案例'
+                    }
                     response.code = 200
                     response.msg = "记录成功"
             else:
