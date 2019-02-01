@@ -212,7 +212,7 @@ def diary_manage_oper(request, oper_type, o_id):
                         cover_picture=cover_picture_list
                     )
 
-                
+
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
                     case_objs.update(
