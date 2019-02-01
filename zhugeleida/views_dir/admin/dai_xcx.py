@@ -129,7 +129,17 @@ def create_authorizer_access_token(data):
     # app_id = data.get('app_id')
     # app_secret = data.get('app_secret')
 
-    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3) # 小程序
+    company_id = data.get('company_id')
+    app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+    services_type = app_objs[0].three_services_type
+
+    three_services_type = ''
+    if services_type == 1:  # (1, '小程序(名片版)第三方平台'),
+        three_services_type = 3
+    elif services_type == 2:  # (2, '小程序(案例库)第三方平台')
+        three_services_type = 4
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type) # 小程序
     if three_service_objs:
         three_service_obj = three_service_objs[0]
         qywx_config_dict = three_service_obj.config
@@ -226,10 +236,19 @@ def create_authorizer_access_token(data):
         print('------ 【公众号第三方-无配置信息】 create_authorizer_access_token ------>>')
 
 # 获取第三方平台 component_token_ret.json
-def create_component_access_token():
+def create_component_access_token(company_id):
     response = Response.ResponseObj()
 
-    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3) # 小程序
+    app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+    services_type = app_objs[0].three_services_type
+    three_services_type = ''
+    if services_type == 1:  # (1, '小程序(名片版)第三方平台'),
+        three_services_type = 3
+    elif services_type == 2:  # (2, '小程序(案例库)第三方平台')
+        three_services_type = 4
+
+
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type) # 小程序
     if three_service_objs:
         three_service_obj = three_service_objs[0]
         qywx_config_dict = three_service_obj.config
@@ -353,7 +372,8 @@ def dai_xcx_oper(request, oper_type):
                             data = {
                                 'key_name': key_name,
                                 'authorizer_refresh_token' : authorizer_refresh_token,
-                                'authorizer_appid' : authorizer_appid
+                                'authorizer_appid' : authorizer_appid,
+                                'company_id': obj.company_id
                             }
                             authorizer_access_token_result = create_authorizer_access_token(data)
                             if authorizer_access_token_result.code == 200:
@@ -438,7 +458,8 @@ def dai_xcx_oper(request, oper_type):
                             data = {
                                 'key_name': key_name,
                                 'authorizer_refresh_token': authorizer_refresh_token,
-                                'authorizer_appid': authorizer_appid
+                                'authorizer_appid': authorizer_appid,
+                                'company_id': obj.company_id
                             }
                             authorizer_access_token_result = create_authorizer_access_token(data)
                             if authorizer_access_token_result.code == 200:
@@ -528,7 +549,8 @@ def dai_xcx_oper(request, oper_type):
                                     data = {
                                         'key_name': key_name,
                                         'authorizer_refresh_token': authorizer_refresh_token,
-                                        'authorizer_appid': authorizer_appid
+                                        'authorizer_appid': authorizer_appid,
+                                        'company_id': obj.company_id
                                     }
                                     authorizer_access_token_result = create_authorizer_access_token(data)
                                     if authorizer_access_token_result.code == 200:
@@ -709,7 +731,8 @@ def dai_xcx_oper(request, oper_type):
                                 data = {
                                     'key_name': key_name,
                                     'authorizer_refresh_token': authorizer_refresh_token,
-                                    'authorizer_appid': authorizer_appid
+                                    'authorizer_appid': authorizer_appid,
+                                    'company_id': obj.company_id
                                 }
                                 authorizer_access_token_result = create_authorizer_access_token(data)
                                 if authorizer_access_token_result.code == 200:
@@ -765,7 +788,8 @@ def dai_xcx_oper(request, oper_type):
                                 data = {
                                     'key_name': key_name,
                                     'authorizer_refresh_token': authorizer_refresh_token,
-                                    'authorizer_appid': authorizer_appid
+                                    'authorizer_appid': authorizer_appid,
+                                    'company_id': obj.company_id
                                 }
                                 print('--- 创建token 数据data-->>',data)
                                 authorizer_access_token_result = create_authorizer_access_token(data)
@@ -851,7 +875,8 @@ def dai_xcx_oper(request, oper_type):
                                 data = {
                                     'key_name': key_name,
                                     'authorizer_refresh_token': authorizer_refresh_token,
-                                    'authorizer_appid': authorizer_appid
+                                    'authorizer_appid': authorizer_appid,
+                                    'company_id': obj.company_id
                                 }
                                 authorizer_access_token_result = create_authorizer_access_token(data)
                                 if authorizer_access_token_result.code == 200:
@@ -909,7 +934,11 @@ def dai_xcx_oper(request, oper_type):
         if oper_type == "template_list":
 
             gettemplate_list_url = 'https://api.weixin.qq.com/wxa/gettemplatelist'
-            response_ret = create_component_access_token()
+            user_id =request.GET.get('user_id')
+
+            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+
+            response_ret = create_component_access_token(company_id)
             component_access_token = response_ret
 
             gettemplate_list_data = {
@@ -972,7 +1001,8 @@ def dai_xcx_oper(request, oper_type):
                     data = {
                         'key_name': key_name,
                         'authorizer_refresh_token': authorizer_refresh_token,
-                        'authorizer_appid': authorizer_appid
+                        'authorizer_appid': authorizer_appid,
+                        'company_id': obj.company_id
                     }
                     authorizer_access_token_result = create_authorizer_access_token(data)
                     if authorizer_access_token_result.code == 200:
@@ -1052,7 +1082,8 @@ def  batch_get_latest_audit_status(data):
                 data = {
                     'key_name': key_name,
                     'authorizer_refresh_token': authorizer_refresh_token,
-                    'authorizer_appid': authorizer_appid
+                    'authorizer_appid': authorizer_appid,
+                    'company_id': obj.app.company_id
                 }
                 authorizer_access_token_result = create_authorizer_access_token(data)
                 if authorizer_access_token_result.code == 200:

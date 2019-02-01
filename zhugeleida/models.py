@@ -58,8 +58,9 @@ class zgld_three_service_setting(models.Model):
     # company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     type_choice = (
         (1, '企业微信第三方服务商'),
-        (2, '公众号第三方平台'),
-        (3, '小程序第三方平台')
+        (2, '公众号(文章版)第三方平台'),
+        (3, '小程序(名片版)第三方平台'),
+        (4, '小程序(案例库)第三方平台')
     )
     three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice,null=True)
     config = models.CharField(max_length=2048,verbose_name="企业微信第三方配置", null=True)
@@ -201,6 +202,12 @@ class zgld_xiaochengxu_app(models.Model):
                                (1, '开启评论'),
                                )
     is_open_comment = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=is_open_comment_choices)
+
+    type_choice = (
+        (1, '小程序(名片版)第三方平台'),
+        (2, '小程序(案例库)第三方平台')
+    )
+    three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice, null=True,default=1)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

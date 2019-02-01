@@ -366,7 +366,8 @@ def create_user_or_customer_qr_code(request):
                 data = {
                     'key_name': key_name,
                     'authorizer_refresh_token': authorizer_refresh_token,
-                    'authorizer_appid': authorizer_appid
+                    'authorizer_appid': authorizer_appid,
+                    'company_id': company_id
                 }
                 authorizer_access_token_ret = create_authorizer_access_token(data)
                 authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
@@ -686,7 +687,7 @@ def user_send_template_msg(request):
                 'key_name': key_name,
                 'authorizer_refresh_token': authorizer_refresh_token,
                 'authorizer_appid': authorizer_appid,
-
+                'company_id': company_id
             }
             # print('------ 使用的 data ------>>',data)
             authorizer_access_token_ret = create_authorizer_access_token(data)

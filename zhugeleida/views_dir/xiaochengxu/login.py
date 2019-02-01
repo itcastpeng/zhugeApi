@@ -70,8 +70,18 @@ def login(request):
                 is_release_version_num = False
                 print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
 
+
+
+            app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+            services_type = app_objs[0].three_services_type
+            three_services_type = ''
+            if services_type == 1:     # (1, '小程序(名片版)第三方平台'),
+                three_services_type=3
+            elif services_type == 2:   # (2, '小程序(案例库)第三方平台')
+                three_services_type=4
+
             component_appid = ''
-            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type)  # 小程序
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
                 qywx_config_dict = three_service_obj.config
@@ -96,7 +106,7 @@ def login(request):
                 print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',
                       (company_id, online_version_num, version_num))
 
-            component_access_token = create_component_access_token()
+            component_access_token = create_component_access_token(company_id)
             get_token_data = {
                 'appid': authorizer_appid,  # 授权小程序的AppID
                 'js_code': js_code,  # 登录时获取的 code
