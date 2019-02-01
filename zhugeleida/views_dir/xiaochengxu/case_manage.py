@@ -319,7 +319,7 @@ def case_manage(request, oper_type):
                             'cover_show_type_text': diary_obj.get_cover_show_type_display(),
 
                             'create_date': diary_obj.create_date.strftime(
-                                '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
+                                '%Y-%m-%d') if diary_obj.create_date else '',
                         }
 
                     tag_list = list(obj.case.tags.values('id', 'name'))
@@ -447,7 +447,7 @@ def case_manage(request, oper_type):
 
                         'last_diary_data': last_diary_data,  # 最后日记的内容
 
-                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                        'create_date': obj.create_date.strftime('%Y-%m-%d') if obj.create_date else '',
                     })
 
                     #  查询成功 返回200 状态码

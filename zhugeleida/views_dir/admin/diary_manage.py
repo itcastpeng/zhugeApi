@@ -11,6 +11,57 @@ from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm,
 import requests,cv2,os
 import json,datetime
 from django.db.models import Q, Sum, Count
+# import threading
+
+
+
+
+
+def create_video_coverURL(obj,url):
+
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+
+    res = s.get(url,stream=True)
+
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+    video_filename = "diary_video_%s_%s.mp4" % (obj.id,now_time)  # amr
+    video_file_dir = os.path.join('statics', 'zhugeleida','imgs','admin' ,'diary') + video_filename
+
+    # 写入收到的视频数据
+    with open(video_file_dir, 'ab') as file:
+        file.write(res.content)
+        file.flush()
+    print('x下载的视频链接 video_file_dir ------->',video_file_dir)
+    video_url = url
+    _cover_picture_list = []
+
+    img_file_dir =  get_video_pic(video_file_dir)
+    _cover_picture_list.append(video_url)
+    _cover_picture_list.append(img_file_dir)
+    cover_picture_list = json.dumps(_cover_picture_list)
+    obj.cover_picture = cover_picture_list
+    obj.save()
+
+
+    return img_file_dir
+
+def get_video_pic(video_file_dir):
+    cap = cv2.VideoCapture(video_file_dir)
+    cap.set(1, int(cap.get(7)/2)) # 取它的中间帧
+    rval, frame = cap.read() # 如果rval为False表示这个视频有问题，为True则正常
+    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+    video_cover_picture_filename = "diary_video_cover_picture_%s_%s.jpg" % (1, now_time)  # amr
+
+    video_cover_picture_file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'diary') + video_cover_picture_filename
+    if rval:
+        cv2.imwrite(video_cover_picture_file_dir, frame)  # 存储为图像
+        os.remove(video_file_dir)
+    print('视频地址 video_cover_picture_file_dir --------->',video_cover_picture_file_dir)
+
+    cap.release()
+    return  video_cover_picture_file_dir
+
 
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -205,17 +256,23 @@ def diary_manage_oper(request, oper_type, o_id):
                 if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
 
 
-                    _cover_picture_list = []
+                    # _cover_picture_list = []
                     video_url = json.loads(cover_picture)[0]
-                    _cover_picture_list.append(video_url)
+                    obj =  diary_objs[0]
 
-                    img_file_dir = create_video_coverURL(diary_objs[0].id,video_url)
-                    _cover_picture_list.append(img_file_dir)
+                    import threading
+                    t1 = threading.Thread(target=create_video_coverURL, args=(obj,video_url))  # 创建一个线程对象t1 子线程
+                    t1.start()
 
-                    cover_picture_list = json.dumps(_cover_picture_list)
-                    diary_objs.update(
-                        cover_picture=cover_picture_list
-                    )
+                    # _cover_picture_list.append(video_url)
+                    #
+                    # img_file_dir = create_video_coverURL(diary_objs[0].id,video_url)
+                    # _cover_picture_list.append(img_file_dir)
+                    #
+                    # cover_picture_list = json.dumps(_cover_picture_list)
+                    # diary_objs.update(
+                    #     cover_picture=cover_picture_list
+                    # )
 
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
@@ -301,15 +358,18 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
 
-                    _cover_picture_list = []
+                    # _cover_picture_list = []
                     video_url = json.loads(cover_picture)[0]
-                    img_file_dir = create_video_coverURL(obj.id, video_url)
 
-                    _cover_picture_list.append(video_url)
-                    _cover_picture_list.append(img_file_dir)
-                    cover_picture_list = json.dumps(_cover_picture_list)
-                    obj.cover_picture = cover_picture_list
-                    obj.save()
+                    t1 = threading.Thread(target=create_video_coverURL, args=(obj, video_url))  # 创建一个线程对象t1 子线程
+                    t1.start()
+
+                    # img_file_dir = create_video_coverURL(obj.id, video_url)
+                    # _cover_picture_list.append(video_url)
+                    # _cover_picture_list.append(img_file_dir)
+                    # cover_picture_list = json.dumps(_cover_picture_list)
+                    # obj.cover_picture = cover_picture_list
+                    # obj.save()
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
@@ -327,40 +387,3 @@ def diary_manage_oper(request, oper_type, o_id):
 
 
     return JsonResponse(response.__dict__)
-
-def create_video_coverURL(diary_id,url):
-
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-
-    res = s.get(url,stream=True)
-
-    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-    video_filename = "diary_video_%s_%s.mp4" % (diary_id,now_time)  # amr
-    video_file_dir = os.path.join('statics', 'zhugeleida','imgs','admin' ,'diary') + video_filename
-
-    # 写入收到的视频数据
-    with open(video_file_dir, 'ab') as file:
-        file.write(res.content)
-        file.flush()
-    print('x下载的视频链接 video_file_dir ------->',video_file_dir)
-
-    img_file_dir =  get_video_pic(video_file_dir)
-
-    return img_file_dir
-
-def get_video_pic(video_file_dir):
-    cap = cv2.VideoCapture(video_file_dir)
-    cap.set(1, int(cap.get(7)/2)) # 取它的中间帧
-    rval, frame = cap.read() # 如果rval为False表示这个视频有问题，为True则正常
-    now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-    video_cover_picture_filename = "diary_video_cover_picture_%s_%s.jpg" % (1, now_time)  # amr
-
-    video_cover_picture_file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'diary') + video_cover_picture_filename
-    if rval:
-        cv2.imwrite(video_cover_picture_file_dir, frame)  # 存储为图像
-        os.remove(video_file_dir)
-    print('视频地址 video_cover_picture_file_dir --------->',video_cover_picture_file_dir)
-
-    cap.release()
-    return  video_cover_picture_file_dir
