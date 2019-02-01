@@ -183,6 +183,18 @@ def case_manage(request, oper_type):
                             is_praise_diary = 0
                             is_praise_diary_text = '没有赞过此日记'
 
+                        case_up_down_objs = models.zgld_diary_action.objects.filter(action=2, case_id=obj.id,
+                                                                                    customer_id=customer_id)
+                        if case_up_down_objs:
+                            case_up_down_obj = case_up_down_objs[0]
+                            status = case_up_down_obj.status
+                            status_text = case_up_down_obj.get_status_display()
+                            is_collection_case = status
+                            is_collection_case_text = status_text
+                        else:
+                            is_collection_case = 0
+                            is_collection_case_text = '没有收藏此案例'
+
                         ret_data.append({
                             'case_id': _case_id,
                             'case_name': obj.case_name,
@@ -201,6 +213,9 @@ def case_manage(request, oper_type):
 
                             'is_open_comment' : is_open_comment,
                             'is_open_comment_text' :is_open_comment_text,
+
+                            'is_collection_case' : is_collection_case,
+                            'is_collection_case_text' : is_collection_case_text,
 
                             'status': status,
                             'status_text': status_text,
