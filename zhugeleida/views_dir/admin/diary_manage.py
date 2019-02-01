@@ -201,12 +201,17 @@ def diary_manage_oper(request, oper_type, o_id):
                     cover_show_type = cover_show_type
                 )
 
-                img_file_dir = create_video_coverURL(diary_objs[0].id)
+
                 if cover_show_type == 2:  # (1,'只展示图片'), (2,'只展示视频'),
+
+
                     _cover_picture_list = []
                     video_url = json.loads(cover_picture)[0]
                     _cover_picture_list.append(video_url)
+                    
+                    img_file_dir = create_video_coverURL(diary_objs[0].id,video_url)
                     _cover_picture_list.append(img_file_dir)
+
                     cover_picture_list = json.dumps(_cover_picture_list)
                     diary_objs.update(
                         cover_picture=cover_picture_list
@@ -293,10 +298,13 @@ def diary_manage_oper(request, oper_type, o_id):
                     cover_show_type=cover_show_type
                 )
 
-                img_file_dir = create_video_coverURL(obj.id)
+
                 if cover_show_type == 2:  # (1,'只展示图片'), (2,'只展示视频'),
+
                     _cover_picture_list = []
                     video_url = json.loads(cover_picture)[0]
+                    img_file_dir = create_video_coverURL(obj.id, video_url)
+
                     _cover_picture_list.append(video_url)
                     _cover_picture_list.append(img_file_dir)
                     cover_picture_list = json.dumps(_cover_picture_list)
@@ -320,11 +328,10 @@ def diary_manage_oper(request, oper_type, o_id):
 
     return JsonResponse(response.__dict__)
 
-def create_video_coverURL(diary_id):
+def create_video_coverURL(diary_id,url):
 
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
-    url = 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400'
 
     res = s.get(url,stream=True)
 
@@ -336,6 +343,7 @@ def create_video_coverURL(diary_id):
     with open(video_file_dir, 'ab') as file:
         file.write(res.content)
         file.flush()
+    print('x下载的视频链接 video_file_dir ------->',video_file_dir)
 
     img_file_dir =  get_video_pic(video_file_dir)
 
@@ -352,6 +360,7 @@ def get_video_pic(video_file_dir):
     if rval:
         cv2.imwrite(video_cover_picture_file_dir, frame)  # 存储为图像
         os.remove(video_file_dir)
+    print('视频地址 video_cover_picture_file_dir --------->',video_cover_picture_file_dir)
 
     cap.release()
     return  video_cover_picture_file_dir
