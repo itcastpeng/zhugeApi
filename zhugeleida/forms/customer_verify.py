@@ -151,7 +151,7 @@ class Customer_information_UpdateForm(forms.Form):
 #
 class CustomerSelectForm(forms.Form):
     customer_id = forms.CharField(
-        required = True,
+        required = False,
         error_messages={
             'required': "备注名不能为空"
         }
