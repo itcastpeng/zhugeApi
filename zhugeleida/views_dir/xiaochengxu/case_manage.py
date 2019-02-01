@@ -187,10 +187,10 @@ def case_manage(request, oper_type):
                                                                                     customer_id=customer_id)
                         if case_up_down_objs:
                             case_up_down_obj = case_up_down_objs[0]
-                            status = case_up_down_obj.status
-                            status_text = case_up_down_obj.get_status_display()
-                            is_collection_case = status
-                            is_collection_case_text = status_text
+                            status_ = case_up_down_obj.status
+                            status_text_ = case_up_down_obj.get_status_display()
+                            is_collection_case = status_
+                            is_collection_case_text = status_text_
                         else:
                             is_collection_case = 0
                             is_collection_case_text = '没有收藏此案例'
