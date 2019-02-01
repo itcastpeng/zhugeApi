@@ -25,7 +25,7 @@ def create_video_coverURL(obj,url):
     res = s.get(url,stream=True)
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-    video_filename = "diary_video_%s_%s.mp4" % (obj.id,now_time)  # amr
+    video_filename = "/diary_video_%s_%s.mp4" % (obj.id,now_time)  # amr
     video_file_dir = os.path.join('statics', 'zhugeleida','imgs','admin' ,'diary') + video_filename
 
     # 写入收到的视频数据
@@ -273,7 +273,6 @@ def diary_manage_oper(request, oper_type, o_id):
                     # diary_objs.update(
                     #     cover_picture=cover_picture_list
                     # )
-
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
