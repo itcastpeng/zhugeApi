@@ -69,7 +69,7 @@ def create_small_program_qr_code(data):
             'key_name': key_name,
             'authorizer_refresh_token': authorizer_refresh_token,
             'authorizer_appid': authorizer_appid,
-
+            'company_id' :company_id
         }
         authorizer_access_token = create_authorizer_access_token(data)  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
 

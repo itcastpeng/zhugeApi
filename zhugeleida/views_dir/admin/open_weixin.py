@@ -30,13 +30,14 @@ def open_weixin(request, oper_type):
 
             postdata = request.body.decode(encoding='UTF-8')
 
-            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
-            qywx_config_dict = ''
-            if three_service_objs:
-                three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.config
-                if qywx_config_dict:
-                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            # three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+            # qywx_config_dict = ''
+            # if three_service_objs:
+            #     three_service_obj = three_service_objs[0]
+            #     qywx_config_dict = three_service_obj.config
+            #     if qywx_config_dict:
+            #         qywx_config_dict = json.loads(qywx_config_dict)
 
 
             global decryp_xml_tree
@@ -65,13 +66,27 @@ def open_weixin(request, oper_type):
                 encrypt = xml_tree.find("Encrypt").text
                 app_id = xml_tree.find("AppId").text
 
+                appid = ''
+                for _type in [3,4]:
+
+                    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=_type)  # 小程序
+                    qywx_config_dict = ''
+                    if three_service_objs:
+                        three_service_obj = three_service_objs[0]
+                        qywx_config_dict = three_service_obj.config
+                        if qywx_config_dict:
+                            qywx_config_dict = json.loads(qywx_config_dict)
+
+                        appid = qywx_config_dict.get('app_id') # 平台配置中已存在的appid
+                        if app_id == appid:
+                            break
+
                 # print('----- 授权公众号授权 postdata---->>',postdata)
 
                 print('appid -->', app_id)
                 print('encrypt -->', encrypt)
 
 
-                appid = qywx_config_dict.get('app_id')
                 token = qywx_config_dict.get('token')
                 encodingAESKey = qywx_config_dict.get('encodingAESKey')
 
@@ -103,6 +118,23 @@ def open_weixin(request, oper_type):
             except Exception as e:
                 auth_code = decryp_xml_tree.find('AuthorizationCode').text
                 authorization_appid = decryp_xml_tree.find('AuthorizerAppid').text  # authorizer_appid 授权方de  appid
+
+
+                app_objs = models.zgld_xiaochengxu_app.objects.filter(authorization_appid=authorization_appid)
+                services_type = app_objs[0].three_services_type
+                three_services_type = ''
+                if services_type == 1:  # (1, '小程序(名片版)第三方平台'),
+                    three_services_type = 3
+                elif services_type == 2:  # (2, '小程序(案例库)第三方平台')
+                    three_services_type = 4
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type)  # 小程序
+                qywx_config_dict = ''
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
 
                 app_id =  qywx_config_dict.get('app_id')
                 # app_id = 'wx67e2fde0f694111c'
@@ -341,7 +373,16 @@ def open_weixin(request, oper_type):
         elif oper_type == "create_grant_url":
             user_id = request.GET.get('user_id')
 
-            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+            services_type = app_objs[0].three_services_type
+            three_services_type = ''
+            if services_type == 1:     # (1, '小程序(名片版)第三方平台'),
+                three_services_type=3
+            elif services_type == 2:   # (2, '小程序(案例库)第三方平台')
+                three_services_type=4
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type)  # 小程序
             qywx_config_dict = ''
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
@@ -350,12 +391,15 @@ def open_weixin(request, oper_type):
                     qywx_config_dict = json.loads(qywx_config_dict)
 
             app_id = qywx_config_dict.get('app_id')
+            app_secret = qywx_config_dict.get('app_secret')
             # app_id = 'wx67e2fde0f694111c'
-
+            _data = {
+                'app_id' :app_id,
+                'app_secret' :app_secret
+            }
 
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-            response_ret =  create_component_access_token()
+            response_ret =  create_component_access_token(_data)
             component_access_token = response_ret.data.get('component_access_token')
 
             get_pre_auth_data = {
@@ -598,7 +642,17 @@ def xcx_auth_process_oper(request, oper_type):
                 get_wx_info_data = {}
                 post_wx_info_data = {}
 
-                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+                company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+                app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+                services_type = app_objs[0].three_services_type
+                three_services_type = ''
+                if services_type == 1:  # (1, '小程序(名片版)第三方平台'),
+                    three_services_type = 3
+                elif services_type == 2:  # (2, '小程序(案例库)第三方平台')
+                    three_services_type = 4
+
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type)  # 小程序
                 qywx_config_dict = ''
                 if three_service_objs:
                     three_service_obj = three_service_objs[0]
@@ -607,9 +661,13 @@ def xcx_auth_process_oper(request, oper_type):
                         qywx_config_dict = json.loads(qywx_config_dict)
 
                 app_id = qywx_config_dict.get('app_id')
+                app_secret = qywx_config_dict.get('app_secret')
                 # app_id = 'wx67e2fde0f694111c' # 三方平台的appid
-
-                component_access_token_ret = create_component_access_token()
+                data_ = {
+                    'app_id' : app_id,
+                    'app_secret' : app_secret
+                }
+                component_access_token_ret = create_component_access_token(data_)
                 component_access_token = component_access_token_ret.data.get('component_access_token')
                 post_wx_info_data['component_appid'] = app_id
                 post_wx_info_data['authorizer_appid'] = authorizer_appid
@@ -670,22 +728,22 @@ def xcx_auth_process_oper(request, oper_type):
 
 
 ## 生成请 第三方平台 自己 的component_access_token
-def create_component_access_token():
+def create_component_access_token(data):
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
 
     component_verify_ticket = rc.get('ComponentVerifyTicket')
 
-    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
-    qywx_config_dict = ''
-    if three_service_objs:
-        three_service_obj = three_service_objs[0]
-        qywx_config_dict = three_service_obj.config
-        if qywx_config_dict:
-            qywx_config_dict = json.loads(qywx_config_dict)
-
-    app_id = qywx_config_dict.get('app_id')
-    app_secret = qywx_config_dict.get('app_secret')
+    # three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
+    # qywx_config_dict = ''
+    # if three_service_objs:
+    #     three_service_obj = three_service_objs[0]
+    #     qywx_config_dict = three_service_obj.config
+    #     if qywx_config_dict:
+    #         qywx_config_dict = json.loads(qywx_config_dict)
+    #
+    app_id = data.get('app_id')
+    app_secret = data.get('app_secret')
 
     # app_id = 'wx67e2fde0f694111c'
     # app_secret = '4a9690b43178a1287b2ef845158555ed'

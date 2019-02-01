@@ -77,13 +77,15 @@ def crate_token(request, oper_type):
                 authorizer_refresh_token = obj.authorizer_refresh_token
                 name = obj.name
                 authorizer_appid = obj.authorization_appid
+                company_id = obj.company_id
 
                 if not authorizer_access_token:
 
                     data = {
                         'key_name': key_name,
                         'authorizer_refresh_token': authorizer_refresh_token,
-                        'authorizer_appid': authorizer_appid
+                        'authorizer_appid': authorizer_appid,
+                        'company_id': company_id
                     }
                     authorizer_access_token_result = xiaochengxu_create_authorizer_access_token(data)
                     if authorizer_access_token_result.code == 200:
