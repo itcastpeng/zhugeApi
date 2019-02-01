@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import user, quanxian, customer
+from zhugeleida.views_dir.xiaochengxu import user, quanxian, customer
 from zhugeleida.views_dir.xiaochengxu import login, mingpian, product, prepaidManagement, theOrderManagement, \
     tuiKuanDingDan, mallManagementShow,test_login,goodsClassification,case_manage,case_tag,diary_manage
 
@@ -17,8 +17,7 @@ urlpatterns = [
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
     url(r'^user$', user.user),
 
-    # 修改客户和客户信息表
-    url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', customer.customer_oper),
+
     url(r'^customer$', customer.customer),
 
     # 实时聊天
