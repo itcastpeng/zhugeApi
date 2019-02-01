@@ -202,13 +202,13 @@ def diary_manage_oper(request, oper_type, o_id):
                 )
 
 
-                if cover_show_type == 2:  # (1,'只展示图片'), (2,'只展示视频'),
+                if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
 
 
                     _cover_picture_list = []
                     video_url = json.loads(cover_picture)[0]
                     _cover_picture_list.append(video_url)
-                    
+
                     img_file_dir = create_video_coverURL(diary_objs[0].id,video_url)
                     _cover_picture_list.append(img_file_dir)
 
@@ -299,7 +299,7 @@ def diary_manage_oper(request, oper_type, o_id):
                 )
 
 
-                if cover_show_type == 2:  # (1,'只展示图片'), (2,'只展示视频'),
+                if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
 
                     _cover_picture_list = []
                     video_url = json.loads(cover_picture)[0]
