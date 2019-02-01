@@ -64,8 +64,7 @@ def customer(request):
                     mem = info_obj[0].mem if info_obj else ''
                     sex = info_obj[0].sex if info_obj else ''
 
-                    belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
-                    # print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
+
                     day_interval =  datetime.datetime.today() - obj.create_date
 
                     encodestr = base64.b64decode(obj.username)
@@ -78,7 +77,6 @@ def customer(request):
                         'headimgurl': obj.headimgurl,
 
                         'user_type' : obj.user_type,
-                        'source': belonger_obj.get_source_display(),  # 来源
                         'memo_name': customer_name,  # 备注名
                         'phone': phone,              # 手机号
                         'sex':  sex,
