@@ -168,8 +168,41 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     im = Image.open(file_path).convert('RGBA')
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
+    width, height = txt.size
 
-    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", 25)
+    font_size = 20
+
+    if  height <= 1000 and  height > 900:
+        font_size = 20
+
+    elif  height <= 900 and  height > 800:
+        font_size = 20
+
+    elif  height <= 800 and  height > 700:
+        font_size = 40
+
+    elif  height <= 700 and  height > 600:
+        font_size = 35
+
+    elif  height <= 600 and  height > 500:
+        font_size = 30
+
+    elif  height <= 500 and  height > 400:
+        font_size = 25
+
+    elif  height <= 400 and  height > 300:
+        font_size = 20
+
+    elif  height <= 300 and  height > 200:
+        font_size = 15
+
+    elif  height <= 200 and  height > 100:
+        font_size = 10
+
+    elif height <= 100 and height >0:
+        font_size = 5
+
+    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
@@ -178,7 +211,7 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     elif img_source == 'case':
         shuiyin_name = models.zgld_xiaochengxu_app.objects.get(id=company_id).name
 
-    d.text((txt.size[0]-txt.size[0], txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
+    d.text((0, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
 
     print('值 txt.size[0] ---->>',txt.size[0])
