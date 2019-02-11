@@ -177,7 +177,10 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
 
     d.text((txt.size[0]-150, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
-    out.save(file_path)
+ 
+    front_file_name = file_path.split('.')[0]
+    file_name =  front_file_name + 'png'
+    out.save(file_name)
 
 
 
