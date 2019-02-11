@@ -180,7 +180,7 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
 
     print('值  file_path.split[0] --->' , file_path.split('.')[0])
     front_file_name = file_path.split('.')[0]
-    file_name =  front_file_name + 'png'
+    file_name =  front_file_name + '.png'
     out.save(file_name)
 
 
