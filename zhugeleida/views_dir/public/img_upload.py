@@ -159,6 +159,9 @@ def upload_generation_dir(dir_name):
 ## 给图片添加水印
 def setup_picture_shuiyin(file_path,company_id,img_source):
 
+    print('值 file_path ---->>',file_path)
+    print('值 company_id ---->>',company_id)
+    print('值 img_source ---->>',img_source)
 
     im = Image.open(file_path).convert('RGBA')
     txt=Image.new('RGBA', im.size, (0,0,0,0))
