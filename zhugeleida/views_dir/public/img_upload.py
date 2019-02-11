@@ -125,7 +125,8 @@ def img_merge(request):
         img_data = base64.b64decode(fileData)
         file_obj.write(img_data)
 
-        if  img_source == 'article':
+        if  img_source == 'article' or  img_source == 'cover_picture':
+            
             setup_picture_shuiyin(img_path, company_id,'article')
 
         elif   img_source == 'case':
