@@ -168,7 +168,8 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     im = Image.open(file_path).convert('RGBA')
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
-    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", 30)
+
+    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
@@ -180,11 +181,16 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     d.text((txt.size[0]-txt.size[0], txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
 
+    print('值 txt.size[0] ---->>',txt.size[0])
+    print('值 txt.size[1] ---->>',txt.size[1])
+
     print('值  file_path.split[0] --->' , file_path.split('.')[0])
     front_file_name = file_path.split('.')[0]
     file_name =  front_file_name + '.png'
 
     out.save(file_name)
+
+    return file_name
 
 
 
