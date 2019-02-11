@@ -126,10 +126,10 @@ def img_merge(request):
         file_obj.write(img_data)
 
         if  img_source == 'article' or  img_source == 'cover_picture':
-            
+            company_id = 1
             setup_picture_shuiyin(img_path, company_id,'article')
 
-        elif   img_source == 'case':
+        elif  img_source == 'case':
             setup_picture_shuiyin(img_path, company_id, 'case')
 
         response.data = {
@@ -163,7 +163,7 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     im = Image.open(file_path).convert('RGBA')
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
-    fnt=ImageFont.truetype("C:\\Windows\\Fonts\\simsun.ttc", 25)
+    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", 25)
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
