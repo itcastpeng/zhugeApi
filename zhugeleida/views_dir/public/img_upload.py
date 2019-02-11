@@ -127,10 +127,10 @@ def img_merge(request):
 
         if  img_source == 'article' or  img_source == 'cover_picture':
             company_id = 1
-            setup_picture_shuiyin(img_path, company_id,'article')
+            img_path = setup_picture_shuiyin(img_path, company_id,'article')
 
         elif  img_source == 'case':
-            setup_picture_shuiyin(img_path, company_id, 'case')
+            img_path = setup_picture_shuiyin(img_path, company_id, 'case')
 
         response.data = {
             'picture_url': img_path,
@@ -177,7 +177,9 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
 
     d.text((txt.size[0]-150, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
-    out.show()
+    # out.show()
+
+    return out
 
 
 # 图片上传
