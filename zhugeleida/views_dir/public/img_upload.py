@@ -125,11 +125,13 @@ def img_merge(request):
         img_data = base64.b64decode(fileData)
         file_obj.write(img_data)
 
+        user_id = request.GET.get('user_id')
         if  img_source == 'article' or  img_source == 'cover_picture':
-            company_id = 1
+            company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
             img_path = setup_picture_shuiyin(img_path, company_id,'article')
 
         elif  img_source == 'case':
+            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
             img_path = setup_picture_shuiyin(img_path, company_id, 'case')
 
         response.data = {
@@ -166,7 +168,7 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     im = Image.open(file_path).convert('RGBA')
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
-    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", 25)
+    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", 30)
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
@@ -175,12 +177,13 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     elif img_source == 'case':
         shuiyin_name = models.zgld_xiaochengxu_app.objects.get(id=company_id).name
 
-    d.text((txt.size[0]-150, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
+    d.text((txt.size[0]-txt.size[0], txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
 
     print('值  file_path.split[0] --->' , file_path.split('.')[0])
     front_file_name = file_path.split('.')[0]
     file_name =  front_file_name + '.png'
+
     out.save(file_name)
 
 
