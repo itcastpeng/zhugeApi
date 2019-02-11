@@ -169,7 +169,7 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
 
-    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
+    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", 25)
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
