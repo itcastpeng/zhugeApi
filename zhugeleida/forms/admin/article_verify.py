@@ -62,6 +62,63 @@ class ArticleAddForm(forms.Form):
         else:
             return title
 
+# 添加公司信息
+class LocalArticleAddForm(forms.Form):
+    user_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '用户ID不存在'
+        }
+    )
+    status = forms.CharField(
+        required=True,
+        error_messages={
+            'required': 'status不能为空'
+        }
+    )
+
+    title = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章标题不能为空"
+        }
+    )
+
+    summary = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章摘要不能为空"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "文章封面不能为空"
+        }
+    )
+
+    content = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "内容不能为空"
+        }
+    )
+
+
+    # 查询用户名判断是否存在
+    def clean_title(self):
+        title = self.data['title']
+        user_id = self.data['user_id']
+        print('----user_id ---title---->',user_id,title)
+        objs = models.zgld_article.objects.filter(
+            title=title,company_id=1
+        ).exclude(status__in=[3])
+
+        if objs:
+            self.add_error('title', '文章名已存在')
+        else:
+            return title
+
 
 # 更新用户信息
 class ArticleUpdateForm(forms.Form):
