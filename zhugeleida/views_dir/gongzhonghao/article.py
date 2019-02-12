@@ -620,8 +620,7 @@ def article_oper(request, oper_type, o_id):
 
             if forms_obj.is_valid():
 
-                objs = models.zgld_article.objects.select_related('user', 'company').exclude(id=o_id,
-                                                                                             status=1).order_by(
+                objs = models.zgld_article.objects.select_related('user', 'company').filter(status=1,company_id=company_id).exclude(id=o_id).order_by(
                     '-read_count')
 
                 count = objs.count()

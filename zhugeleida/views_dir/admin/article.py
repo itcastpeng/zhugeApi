@@ -498,6 +498,12 @@ def article(request, oper_type):
                 response.code = 200
                 response.msg = '创建新文章成功'
 
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+
     return JsonResponse(response.__dict__)
 
 
