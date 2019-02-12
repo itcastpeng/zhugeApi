@@ -45,6 +45,10 @@ def img_upload(request):
     return JsonResponse(response.__dict__)
 
 
+data_path_dict = {
+    'user_photo': os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo')
+}
+
 # 合并图片
 @csrf_exempt
 # @account.is_token(models.zgld_admin_userprofile)
@@ -63,6 +67,8 @@ def img_merge(request):
         print('-----img_source----->', img_source)
 
         file_dir = ''
+
+        # file_dir = data_path_dict['user_photo']
         if img_source == 'user_photo':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'user_photo')
 
@@ -116,7 +122,8 @@ def img_merge(request):
                     file_save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'tmp', file_name)
                     with open(file_save_path, 'r') as f:
                         fileData += f.read()
-                    os.remove(file_save_path)
+                    print('file_save_path -->', file_save_path)
+                    # os.remove(file_save_path)
                     break
 
                 except FileNotFoundError:
