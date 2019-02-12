@@ -434,8 +434,7 @@ def open_weixin_gongzhonghao(request, oper_type):
             # 生成授权链接
             redirect_uri = '%s/admin/#/empower/empower_xcx/' % (leida_http_url)
             # get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=2' % (app_id, pre_auth_code, redirect_uri) #授权注册页面扫码授权
-            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=1' % (
-                app_id, pre_auth_code, redirect_uri)  # auth_type=1  1则商户扫码后，手机端仅展示公众号
+            get_bind_auth_data = '&component_appid=%s&pre_auth_code=%s&redirect_uri=%s&auth_type=1' % (app_id, pre_auth_code, redirect_uri)  # auth_type=1  1则商户扫码后，手机端仅展示公众号
 
             pre_auth_code_url = 'https://mp.weixin.qq.com/cgi-bin/componentloginpage?' + get_bind_auth_data
 

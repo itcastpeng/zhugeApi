@@ -578,6 +578,8 @@ def xcx_auth_process_oper(request, oper_type):
             forms_obj = open_weixin_verify.UpdateIDForm(request.POST)
             if forms_obj.is_valid():
                 authorization_appid = request.POST.get('authorization_appid').strip()
+                three_services_type = request.POST.get('three_services_type')
+
 
                 print("验证通过")
                 user_id = request.GET.get('user_id')
@@ -587,14 +589,15 @@ def xcx_auth_process_oper(request, oper_type):
                 if objs:
                     objs.update(
                         authorization_appid=authorization_appid,
-                        company_id=company_id
+                        company_id=company_id,
+                        three_services_type=three_services_type
                     )
                 else:
                     models.zgld_xiaochengxu_app.objects.create(
                         user_id=user_id,
                         company_id=company_id,
                         authorization_appid=authorization_appid,
-
+                        three_services_type=three_services_type
                     )
                 response.code = 200
                 response.msg = "修改成功"

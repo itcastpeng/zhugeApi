@@ -6,6 +6,8 @@ from zhugeleida.forms.public import img_upload_verify
 from zhugeleida.forms.public import img_merge_verify
 from django.http import HttpResponse
 import datetime as dt, time, json, uuid, os, base64
+from PIL import Image, ImageDraw,ImageFont
+from zhugeleida import models
 
 # 上传图片（分片上传）
 @csrf_exempt
@@ -50,7 +52,7 @@ def img_merge(request):
         timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
         chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
         expanded_name = img_name.split('.')[-1]  # 扩展名
-        picture_type = request.POST.get('picture_type')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
+        company_id = request.POST.get('company_id')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
 
@@ -79,6 +81,7 @@ def img_merge(request):
         elif img_source == 'article':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article')
 
+
         elif img_source == 'admin_qrcode':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
 
@@ -93,6 +96,8 @@ def img_merge(request):
 
         elif img_source == 'case':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'case')
+
+
 
         fileData = ''
 
@@ -120,6 +125,15 @@ def img_merge(request):
         img_data = base64.b64decode(fileData)
         file_obj.write(img_data)
 
+        user_id = request.GET.get('user_id')
+        if  img_source == 'article' or  img_source == 'cover_picture':
+            company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            img_path = setup_picture_shuiyin(img_path, company_id,'article')
+
+        elif  img_source == 'case':
+            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            img_path = setup_picture_shuiyin(img_path, company_id, 'case')
+
         response.data = {
             'picture_url': img_path,
         }
@@ -143,6 +157,74 @@ def upload_generation_dir(dir_name):
         os.makedirs(url_part)
 
     return url_part, filedir
+
+## 给图片添加水印
+def setup_picture_shuiyin(file_path,company_id,img_source):
+
+    print('值 file_path ---->>',file_path)
+    print('值 company_id ---->>',company_id)
+    print('值 img_source ---->>',img_source)
+
+    im = Image.open(file_path).convert('RGBA')
+    txt=Image.new('RGBA', im.size, (0,0,0,0))
+    # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
+    width, height = txt.size
+
+    font_size = 25
+
+    if  height <= 1000 and  height > 900:
+        font_size = 60
+
+    elif  height <= 900 and  height > 800:
+        font_size = 50
+
+    elif  height <= 800 and  height > 700:
+        font_size = 45
+
+    elif  height <= 700 and  height > 600:
+        font_size = 40
+
+    elif  height <= 600 and  height > 500:
+        font_size = 35
+
+    elif  height <= 500 and  height > 400:
+        font_size = 30
+
+    elif  height <= 400 and  height > 300:
+        font_size = 25
+
+    elif  height <= 300 and  height > 200:
+        font_size = 20
+
+    elif  height <= 200 and  height > 100:
+        font_size = 15
+
+    elif height <= 100 and height >0:
+        font_size = 10
+
+    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
+    d=ImageDraw.Draw(txt)
+    shuiyin_name = ''
+    if img_source == 'article':
+        shuiyin_name = models.zgld_gongzhonghao_app.objects.get(id=company_id).name
+
+    elif img_source == 'case':
+        shuiyin_name = models.zgld_xiaochengxu_app.objects.get(id=company_id).name
+
+    d.text((10, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
+    out=Image.alpha_composite(im, txt)
+
+    print('值 txt.size[0] ---->>',txt.size[0])
+    print('值 txt.size[1] ---->>',txt.size[1])
+
+    print('值  file_path.split[0] --->' , file_path.split('.')[0])
+    front_file_name = file_path.split('.')[0]
+    file_name =  front_file_name + '.png'
+
+    out.save(file_name)
+
+    return file_name
+
 
 
 # 图片上传
