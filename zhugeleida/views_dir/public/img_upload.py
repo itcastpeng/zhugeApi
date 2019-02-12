@@ -9,7 +9,7 @@ import datetime as dt, time, json, uuid, os, base64
 from PIL import Image, ImageDraw,ImageFont
 
 from zhugeleida import models
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
 # 上传图片（分片上传）
