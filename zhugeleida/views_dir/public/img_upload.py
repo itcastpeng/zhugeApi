@@ -7,6 +7,7 @@ from zhugeleida.forms.public import img_merge_verify
 from django.http import HttpResponse
 import datetime as dt, time, json, uuid, os, base64
 from PIL import Image, ImageDraw,ImageFont
+import subprocess
 
 from zhugeleida import models
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -80,7 +81,6 @@ def img_merge(request):
         elif img_source == 'wcx_head_image': # 上传小程序头像
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'wcx_head_image')
 
-
         elif img_source == 'article':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article')
 
@@ -131,11 +131,11 @@ def img_merge(request):
         user_id = request.GET.get('user_id')
         if  img_source == 'article' or  img_source == 'cover_picture':
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            img_path = setup_picture_shuiyin(img_path, company_id,'article')
+            img_path = setup_picture_shuiyin(img_name,img_path, company_id,'article')
 
         elif  img_source == 'case':
             company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            img_path = setup_picture_shuiyin(img_path, company_id, 'case')
+            img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
 
         response.data = {
             'picture_url': img_path,
@@ -162,8 +162,9 @@ def upload_generation_dir(dir_name):
     return url_part, filedir
 
 ## 给图片添加水印
-def setup_picture_shuiyin(file_path,company_id,img_source):
+def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
 
+    print('值 img_name ---->>',img_name)
     print('值 file_path ---->>',file_path)
     print('值 company_id ---->>',company_id)
     print('值 img_source ---->>',img_source)
@@ -173,9 +174,13 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     print('值 BasePath --------->>', BASE_DIR)
     print('值 file_path --------->>', _file_path)
 
-    print('值是否存在 _file_path ------->',os.path.exists(_file_path))
+    ret = subprocess.call('/bin/cp  %s  /data/tmp' % (file_path))
+    print('------ subprocess 返回码 -------->>', ret)
 
-    im = Image.open(_file_path).convert('RGBA')
+    print('值是否存在 _file_path ------->',os.path.exists(_file_path))
+    now_file_name = '/data/tmp/' + img_name
+
+    im = Image.open(now_file_name).convert('RGBA')
 
 
     txt=Image.new('RGBA', im.size, (0,0,0,0))
