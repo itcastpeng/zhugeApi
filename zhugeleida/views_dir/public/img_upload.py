@@ -166,8 +166,9 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     print('值 company_id ---->>',company_id)
     print('值 img_source ---->>',img_source)
     from PIL import Image, ImageDraw, ImageFont
-    
-    im = Image.open(file_path).convert('RGBA')
+
+    im = Image.open('/tmp/zhangju/_20190212123822.jpg').convert('RGBA')
+
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
     width, height = txt.size
