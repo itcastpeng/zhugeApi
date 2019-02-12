@@ -5,7 +5,8 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
-    ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm,GzhArticleSelectForm,SyncMyarticleForm
+    ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm, \
+    GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 import datetime
@@ -16,12 +17,12 @@ from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.public.common import action_record
-from zhugeleida.public.common import  get_customer_gongzhonghao_userinfo
+from zhugeleida.public.common import get_customer_gongzhonghao_userinfo
 
 from bs4 import BeautifulSoup
 import time
 import requests
-import re,os
+import re, os
 from urllib.parse import unquote
 
 
@@ -109,8 +110,6 @@ def mailuotu(article_id, q):
     return article_title, result_data, max_person_num
 
 
-
-
 # 文章管理查询
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -143,7 +142,7 @@ def article(request, oper_type):
 
                 q = conditionCom(request_data, field_dict)
                 q.add(Q(**{'company_id': company_id}), Q.AND)
-                q.add(Q(**{'status__in': [1,2]}), Q.AND)
+                q.add(Q(**{'status__in': [1, 2]}), Q.AND)
 
                 tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else []
                 if tag_list:
@@ -206,7 +205,7 @@ def article(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        #获取公众号文章列表
+        # 获取公众号文章列表
         elif oper_type == 'climb_gzh_article_list':
 
             forms_obj = GzhArticleSelectForm(request.GET)
@@ -216,7 +215,7 @@ def article(request, oper_type):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 status = request.GET.get('status')
 
-                objs = models.zgld_template_article.objects.filter(company_id=company_id,source=1,status=status)
+                objs = models.zgld_template_article.objects.filter(company_id=company_id, source=1, status=status)
 
                 if objs:
 
@@ -279,23 +278,23 @@ def article(request, oper_type):
 
                         update_time = obj.update_time.strftime('%Y-%m-%d %H:%M:%S')
 
-                        data  = {
-                            'media_id' : media_id,
-                            'update_time' : update_time,
-                            'title' :  obj.title,
-                            'thumb_url' : cover_picture,
-                            'digest' :  obj.summary, #文章摘要
-                            'url' :  obj.source_url,
-                            'content' : obj.content,
+                        data = {
+                            'media_id': media_id,
+                            'update_time': update_time,
+                            'title': obj.title,
+                            'thumb_url': cover_picture,
+                            'digest': obj.summary,  # 文章摘要
+                            'url': obj.source_url,
+                            'content': obj.content,
                             'status_text': status_text,
-                            'status' : status
+                            'status': status
                         }
 
                         ret_data.append(data)
 
                     response.data = {
-                        'ret_data' : ret_data,
-                        'total_count' : total_count,
+                        'ret_data': ret_data,
+                        'total_count': total_count,
                     }
                     response.code = 200
                     response.msg = '获取成功'
@@ -309,6 +308,44 @@ def article(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 鑫鹏查询本地库的文章的阅读详情
+        elif oper_type == 'query_local_article_readinfo':
+
+            user_id = request.GET.get('user_id')
+            article_id = request.GET.get('article_id')
+
+            _form_data = {
+                'article_id': article_id
+            }
+
+            forms_obj = QueryarticleInfoForm(_form_data)
+
+            if forms_obj.is_valid():
+                # print('-----obj.tags.values---->', obj.tags.values('id','name'))
+                objs = models.zgld_article.objects.filter(id=article_id)
+                if objs:
+                    obj = objs[0]
+
+                    response.data = {
+                        'article_id': obj.id,
+                        'title': obj.title,  # 文章标题
+                        'status_code': obj.status,  # 状态
+                        'status': obj.get_status_display(),  # 状态
+                        'source_code': obj.source,  # 状态
+                        'source': obj.get_source_display(),  # 状态
+                        'author': obj.user.username,  # 如果为原创显示,文章作者
+                        'avatar': obj.user.avatar,  # 用户的头像
+                        'read_count': obj.read_count,  # 被阅读数量
+                        'forward_count': obj.forward_count,  # 被转发个数
+                        'create_date': obj.create_date,  # 文章创建时间
+                        'cover_url': obj.cover_picture,  # 文章图片链接
+                    }
+                    response.code = 200
+                    response.msg = '查询成功'
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     elif request.method == "POST":
 
@@ -321,9 +358,9 @@ def article(request, oper_type):
             source_url = request.POST.get('source_url')
 
             _form_data = {
-                'company_id' : company_id,
-                'media_id_list' : media_id_list,
-                'source_url' : source_url
+                'company_id': company_id,
+                'media_id_list': media_id_list,
+                'source_url': source_url
             }
 
             forms_obj = SyncMyarticleForm(_form_data)
@@ -331,21 +368,21 @@ def article(request, oper_type):
             if forms_obj.is_valid():
 
                 ## 通过URL获取文章内容
-                if source_url: # 有来源URL
+                if source_url:  # 有来源URL
                     source_url = source_url.strip()
 
-                    msg_title, msg_desc, cover_url, content = deal_gzh_picture_url('only_url',source_url)
+                    msg_title, msg_desc, cover_url, content = deal_gzh_picture_url('only_url', source_url)
 
                     dict_data = {
                         'user_id': user_id,
                         'company_id': company_id,
-                        'title':  msg_title,#'标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        'title': msg_title,  # '标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                         'summary': msg_desc,
                         'cover_picture': cover_url,
                         'media_id': None,
                         'source_url': source_url,
-                        'content' : content,
-                        'source' : 2  #   (2,'转载')
+                        'content': content,
+                        'source': 2  # (2,'转载')
                     }
                     article_objs = models.zgld_article.objects.filter(source_url=source_url)
 
@@ -369,7 +406,7 @@ def article(request, oper_type):
                         _data = {
                             'authorizer_appid': authorization_appid,
                             'company_id': company_id,
-                            'media_id' : media_id
+                            'media_id': media_id
                         }
 
                         user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
@@ -379,17 +416,16 @@ def article(request, oper_type):
                             article_data_dict = _response.data
                             news_item_dict = article_data_dict.get('news_item')[0]
 
-                            title =  news_item_dict.get('title')
-                            summary =  news_item_dict.get('digest')  # 摘要
+                            title = news_item_dict.get('title')
+                            summary = news_item_dict.get('digest')  # 摘要
                             content = news_item_dict.get('content')  # 封面图
-                            cover_picture =  news_item_dict.get('thumb_url') #  封面图
-                            url =  news_item_dict.get('url') #  原文链接
+                            cover_picture = news_item_dict.get('thumb_url')  # 封面图
+                            url = news_item_dict.get('url')  # 原文链接
                             if cover_picture:
                                 cover_picture = deal_gzh_picUrl_to_local(cover_picture)
 
-
                             if url:
-                                content = deal_gzh_picture_url('',url)
+                                content = deal_gzh_picture_url('', url)
 
                             dict_data = {
                                 'user_id': user_id,
@@ -399,7 +435,7 @@ def article(request, oper_type):
                                 'content': content,
                                 'cover_picture': cover_picture,
                                 'media_id': media_id,
-                                'source_url' : url
+                                'source_url': url
                             }
                             article_objs = models.zgld_article.objects.filter(media_id=media_id)
 
@@ -424,6 +460,43 @@ def article(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        ## 给赵新鹏的接口|同步文章
+        elif oper_type == 'sync_local_article':
+            user_id = request.GET.get('user_id')
+
+            title = request.POST.get('title')
+            summary = request.POST.get('summary')
+            cover_picture = request.POST.get('cover_picture')
+            content = request.POST.get('content')
+
+            company_id = 1
+
+            article_data = {
+                'user_id': user_id,
+                'title': title,
+                'summary': summary,
+                'content': content,
+                'cover_picture': cover_picture,
+                'status': 1
+            }
+
+            forms_obj = ArticleAddForm(article_data)
+
+            if forms_obj.is_valid():
+                dict_data = {
+                    'user_id': user_id,
+                    'company_id': company_id,
+                    'title': title,  # '标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    'summary': summary,
+                    'cover_picture': cover_picture,
+                    'media_id': None,
+                    'content': content,
+                    'source': 2  # (2,'转载')
+                }
+                obj = models.zgld_article.objects.create(**dict_data)
+                response.data = {'article_id': obj.id}
+                response.code = 200
+                response.msg = '创建新文章成功'
 
     return JsonResponse(response.__dict__)
 
@@ -460,7 +533,7 @@ def article_oper(request, oper_type, o_id):
                 title = forms_obj.cleaned_data['title']
 
                 dict_data = {
-                    'status' : status, #
+                    'status': status,  #
                     'user_id': user_id,
                     'company_id': company_id,
                     'title': title,
@@ -468,8 +541,8 @@ def article_oper(request, oper_type, o_id):
                     'content': forms_obj.cleaned_data['content'],
                     'cover_picture': forms_obj.cleaned_data['cover_picture'].strip(),
                     'insert_ads': request.POST.get('insert_ads'),
-                    'is_auto_tagging' : is_auto_tagging,
-                    'tags_time_count' :tags_time_count
+                    'is_auto_tagging': is_auto_tagging,
+                    'tags_time_count': tags_time_count
                 }
 
                 obj = models.zgld_article.objects.create(**dict_data)
@@ -488,12 +561,11 @@ def article_oper(request, oper_type, o_id):
                 if tags_id_list:
                     obj.tags = tags_id_list
 
-
                 status = int(status)
 
                 # 消息提示给雷达用户
                 if status == 1:
-                    user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
+                    user_objs = models.zgld_userprofile.objects.filter(company_id=company_id, status=1)
                     data = {}
                     customer_objs = models.zgld_customer.objects.filter(user_type=3, company_id=company_id)
                     if customer_objs:
@@ -502,12 +574,13 @@ def article_oper(request, oper_type, o_id):
                         encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
                         customer_name = str(encodestr, 'utf-8')
                         obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
-                                                                  company_id=company_id,headimgurl='statics/imgs/leidaguanjia.jpg')
+                                                                  company_id=company_id,
+                                                                  headimgurl='statics/imgs/leidaguanjia.jpg')
                         customer_id = obj.id
 
                     for _obj in user_objs:
-                        _user_id  = _obj.id
-                        article_id  = obj.id
+                        _user_id = _obj.id
+                        article_id = obj.id
 
                         remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (forms_obj.cleaned_data['title'])
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
@@ -516,8 +589,6 @@ def article_oper(request, oper_type, o_id):
                         data['action'] = 666
                         data['article_id'] = article_id
                         action_record(data, remark)  # 此步骤封装到 异步中。
-
-
 
                 data = {
                     'company_id': company_id,
@@ -579,7 +650,7 @@ def article_oper(request, oper_type, o_id):
             tags_time_count = request.POST.get('tags_time_count')  # 达到几秒实现打标签
 
             article_data = {
-                'status' : status,
+                'status': status,
                 'article_id': o_id,
                 'user_id': request.GET.get('user_id'),
                 'title': request.POST.get('title'),
@@ -590,9 +661,9 @@ def article_oper(request, oper_type, o_id):
 
             forms_obj = ArticleUpdateForm(article_data)
             if forms_obj.is_valid():
-                title  = forms_obj.cleaned_data['title']
+                title = forms_obj.cleaned_data['title']
                 dict_data = {
-                    'status' : status,
+                    'status': status,
                     'title': forms_obj.cleaned_data['title'],
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
@@ -625,11 +696,10 @@ def article_oper(request, oper_type, o_id):
 
                 company_id = objs[0].company_id
 
-
                 status = int(status)
                 # 消息提示给雷达用户
                 if status == 1 and type != 'yulan':
-                    user_objs = models.zgld_userprofile.objects.filter(company_id=company_id,status=1)
+                    user_objs = models.zgld_userprofile.objects.filter(company_id=company_id, status=1)
                     data = {}
 
                     customer_objs = models.zgld_customer.objects.filter(user_type=3, company_id=company_id)
@@ -639,11 +709,12 @@ def article_oper(request, oper_type, o_id):
                         encodestr = base64.b64encode('雷达管家'.encode('utf-8'))
                         customer_name = str(encodestr, 'utf-8')
                         obj = models.zgld_customer.objects.create(user_type=3, username=customer_name,
-                                                                  company_id=company_id,headimgurl='statics/imgs/leidaguanjia.jpg')
+                                                                  company_id=company_id,
+                                                                  headimgurl='statics/imgs/leidaguanjia.jpg')
                         customer_id = obj.id
 
                     for _obj in user_objs:
-                        _user_id  = _obj.id
+                        _user_id = _obj.id
 
                         remark = '【温馨提示】:管理员发布了文章《%s》,大家积极转发呦' % (forms_obj.cleaned_data['title'])
                         print('---- 关注公众号提示 [消息提醒]--->>', remark)
@@ -685,6 +756,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
     elif request.method == 'GET':
 
         # 获取文章详情
@@ -700,7 +772,8 @@ def article_oper(request, oper_type, o_id):
                 print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 article_id = forms_obj.cleaned_data.get('article_id')
 
-                objs = models.zgld_article.objects.select_related('user', 'company', 'plugin_report').filter(id=article_id)
+                objs = models.zgld_article.objects.select_related('user', 'company', 'plugin_report').filter(
+                    id=article_id)
                 count = objs.count()
 
                 # 获取所有数据
@@ -746,9 +819,9 @@ def article_oper(request, oper_type, o_id):
                         'content': obj.content,  # 文章内容
                         'tag_list': tag_list,
                         'insert_ads': insert_ads,  # 插入的广告语
-                        'is_auto_tagging' : obj.is_auto_tagging,
-                        'is_auto_tagging_text' : obj.get_is_auto_tagging_display(),
-                        'tags_time_count' : obj.tags_time_count,
+                        'is_auto_tagging': obj.is_auto_tagging,
+                        'is_auto_tagging_text': obj.get_is_auto_tagging_display(),
+                        'tags_time_count': obj.tags_time_count,
 
                     })
 
@@ -806,7 +879,9 @@ def article_oper(request, oper_type, o_id):
 
                     for _obj in _objs:
                         article_id = _obj.get('article_id')
-                        _access_log_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,customer_id=customer_id).order_by('-last_access_date')
+                        _access_log_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
+                                                                                         customer_id=customer_id).order_by(
+                            '-last_access_date')
                         last_access_date = ''
                         if _access_log_objs:
                             last_access_date = _access_log_objs[0].last_access_date.strftime('%Y-%m-%d %H:%M:%S')
@@ -1162,8 +1237,7 @@ def article_oper(request, oper_type, o_id):
                         gender = obj.user.gender
                         user_dict = objs.values('user_id').annotate(Sum('read_count'), Sum(
                             'forward_friend_circle_count'), Sum('forward_friend_count'))[0]
-                        print('---- user_dict 数据 ---->>',user_dict)
-
+                        print('---- user_dict 数据 ---->>', user_dict)
 
                         read_count_sum = user_dict.get('read_count__sum')
                         forward_friend_sum = user_dict.get('forward_friend_count__sum')
@@ -1191,7 +1265,7 @@ def article_oper(request, oper_type, o_id):
                             # 'area': area,
 
                             'read_count': read_count_sum,
-                            'forward_friend_circle_count':forward_friend_sum,
+                            'forward_friend_circle_count': forward_friend_sum,
                             'forward_friend_count': forward_friend_circle_sum,
 
                             'lower_people_count': total_count,
@@ -1275,7 +1349,7 @@ def article_oper(request, oper_type, o_id):
                     elif level >= 1 and query_customer_id:
 
                         # objs = objs.order_by('level').filter(level=level+1, customer_parent_id=query_customer_id)
-                        objs = objs.filter(level=level+1, customer_parent_id=query_customer_id).order_by('-stay_time')
+                        objs = objs.filter(level=level + 1, customer_parent_id=query_customer_id).order_by('-stay_time')
                         level = level + 2
 
                     # count = objs.count()
@@ -1283,11 +1357,10 @@ def article_oper(request, oper_type, o_id):
                         customer_id = obj.customer_id
                         _level = obj.level
 
-
                         print('---- article_id, uid, customer_id, level ----->>', article_id, uid, customer_id,
                               level + 1)
 
-                        result_data, result_level = jisuan_level_num(article_id, uid, customer_id, level )
+                        result_data, result_level = jisuan_level_num(article_id, uid, customer_id, level)
 
                         lower_people_count = len(result_level)
                         if lower_people_count > 0:
@@ -1331,7 +1404,6 @@ def article_oper(request, oper_type, o_id):
 
                         ret_data.append(data_dict)
 
-
                     response.code = 200
                     response.msg = '返回成功'
                     response.data = {
@@ -1355,8 +1427,7 @@ def article_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def deal_gzh_picture_url(leixing,url):
-
+def deal_gzh_picture_url(leixing, url):
     '''
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
     http://mmbiz.qpic.cn/mmbiz_jpg/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7lBRILWoKKVuvdHe4BmVxhiclQnYo2F1TDU7CcibXawl9E2n1MOicTkt6w/0?wx_fmt=jpeg
@@ -1369,12 +1440,11 @@ def deal_gzh_picture_url(leixing,url):
     # print("电话号码 : ", num)
 
     # 移除非数字的内容
-    #url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
+    # url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
 
     ret = requests.get(url)
 
     ret.encoding = 'utf8'
-
 
     soup = BeautifulSoup(ret.text, 'lxml')
 
@@ -1396,7 +1466,7 @@ def deal_gzh_picture_url(leixing,url):
 
         msg_title = results_url_list_1[0].replace('"', '')
         msg_desc = results_url_list_2[0].replace('"', '')
-        cover_url =  results_url_list_3[0].replace('"', '')
+        cover_url = results_url_list_3[0].replace('"', '')
 
         ## 把图片下载到本地
         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
@@ -1411,13 +1481,11 @@ def deal_gzh_picture_url(leixing,url):
             file.write(html.content)
         print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
         #######
-        cover_url =  file_dir
-
+        cover_url = file_dir
 
     style_tags = soup.find_all('style')
     # print('style_tags -->', style_tags)
     # style_html = " ".join(style_tags)
-
 
     style = ""
     for style_tag in style_tags:
@@ -1452,11 +1520,11 @@ def deal_gzh_picture_url(leixing,url):
             #######
 
             img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
-            print('data_src ----->',data_src)
+            print('data_src ----->', data_src)
 
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
-    #video = body.find_all('video')
+    # video = body.find_all('video')
     print(' iframe ------>>\n', iframe)
 
     for iframe_tag in iframe:
@@ -1474,21 +1542,20 @@ def deal_gzh_picture_url(leixing,url):
             # with open(data_cover_url, 'wb') as file:
             #     file.write(html.content)
 
-
         print('封面URL data_cover_url ------->>', data_cover_url)
 
-        if '&' in shipin_url and 'vid=' in  shipin_url:
-            vid_num =  shipin_url.split('vid=')[1]
+        if '&' in shipin_url and 'vid=' in shipin_url:
+            vid_num = shipin_url.split('vid=')[1]
             _url = shipin_url.split('?')[0]
             shipin_url = _url + '?vid=' + vid_num
-            #data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
+            # data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
 
         print('视频链接 shipin_url----->>\n', shipin_url)
         iframe_tag.attrs['data-src'] = shipin_url
         iframe_tag.attrs['allowfullscreen'] = True
-        iframe_tag.attrs['data-cover'] = data_cover_url #'http://statics.api.zhugeyingxiao.com/' + data_cover_url
+        iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
-    print('组合样式 style ------>>',style)
+    print('组合样式 style ------>>', style)
     print('组合身体 body ------>>', body)
 
     content = str(style) + str(body)
@@ -1499,7 +1566,8 @@ def deal_gzh_picture_url(leixing,url):
     #     content = content.replace(key, value)
     #     # print(url)
 
-    dict = {'url': '', 'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '' ,'?wx_fmt=jpeg' : '' ,'?wx_fmt=gif' : '', } #wx_fmt=gif
+    dict = {'url': '', 'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '', '?wx_fmt=jpeg': '',
+            '?wx_fmt=gif': '', }  # wx_fmt=gif
     for key, value in dict.items():
 
         if key == 'url':
@@ -1514,7 +1582,7 @@ def deal_gzh_picture_url(leixing,url):
             # print('合并的 results_url_list ----->>',results_url_list_1)
 
             for pattern_url in results_url_list_1:
-                print('匹配的url--------<<',pattern_url)
+                print('匹配的url--------<<', pattern_url)
                 now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
                 ## 把图片下载到本地
                 html = s.get(pattern_url)
@@ -1536,17 +1604,16 @@ def deal_gzh_picture_url(leixing,url):
         # print(url)
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
 
-
     if leixing == 'only_url':
 
-         return  msg_title,msg_desc,cover_url,content
+        return msg_title, msg_desc, cover_url, content
 
     else:
 
-         return  content
+        return content
+
 
 def deal_gzh_picUrl_to_local(url):
-
     print('-----【公众号】 发送的图片 PicUrl ---->>', url)
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
@@ -1555,9 +1622,8 @@ def deal_gzh_picUrl_to_local(url):
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
     filename = "/article_%s.jpg" % (now_time)
 
-    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article')  + filename
+    file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
     with open(file_dir, 'wb') as file:
         file.write(html.content)
 
-
-    return  file_dir
+    return file_dir

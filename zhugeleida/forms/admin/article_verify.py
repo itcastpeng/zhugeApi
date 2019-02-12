@@ -255,6 +255,15 @@ class SyncMyarticleForm(forms.Form):
 
 
 
+# 判断是否是数字
+class QueryarticleInfoForm(forms.Form):
+
+    article_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
 
 
 # 判断是否是数字
