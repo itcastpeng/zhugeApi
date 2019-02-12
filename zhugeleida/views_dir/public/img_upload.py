@@ -173,6 +173,8 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     print('值 BasePath --------->>', BASE_DIR)
     print('值 file_path --------->>', _file_path)
 
+    print('值是否存在 _file_path ------->',os.path.exists(_file_path))
+
     im = Image.open(_file_path).convert('RGBA')
 
 
