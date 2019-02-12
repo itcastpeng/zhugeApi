@@ -131,8 +131,10 @@ def img_merge(request):
 
         # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
-        file_obj = open(img_path, 'ab')
+        file_obj = open(img_path, 'wb')
+        print("fileData -->", fileData)
         img_data = base64.b64decode(fileData)
+        print("type(img_data) -->", type(img_data))
         file_obj.write(img_data)
 
         user_id = request.GET.get('user_id')
