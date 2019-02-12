@@ -9,7 +9,8 @@ import datetime as dt, time, json, uuid, os, base64
 from PIL import Image, ImageDraw,ImageFont
 
 from zhugeleida import models
-BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 
 # 上传图片（分片上传）
 @csrf_exempt
@@ -167,11 +168,13 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     print('值 company_id ---->>',company_id)
     print('值 img_source ---->>',img_source)
 
-    _file_path = BasePath + '/' +file_path
+    _file_path = BASE_DIR + '/' +file_path
     # im = Image.open('/tmp/zhangju/_20190212123822.jpg').convert('RGBA')
-    print('值 BasePath --------->>', BasePath)
+    print('值 BasePath --------->>', BASE_DIR)
     print('值 file_path --------->>', _file_path)
-    
+
+    print('值是否存在 _file_path ------->',os.path.exists(_file_path))
+
     im = Image.open(_file_path).convert('RGBA')
 
 
