@@ -127,13 +127,13 @@ def img_merge(request):
         file_obj.write(img_data)
 
         user_id = request.GET.get('user_id')
-        # if  img_source == 'article' or  img_source == 'cover_picture':
-        #     company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-        #     img_path = setup_picture_shuiyin(img_path, company_id,'article')
-        #
-        # elif  img_source == 'case':
-        #     company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-        #     img_path = setup_picture_shuiyin(img_path, company_id, 'case')
+        if  img_source == 'article' or  img_source == 'cover_picture':
+            company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            img_path = setup_picture_shuiyin(img_path, company_id,'article')
+
+        elif  img_source == 'case':
+            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            img_path = setup_picture_shuiyin(img_path, company_id, 'case')
 
         response.data = {
             'picture_url': img_path,
