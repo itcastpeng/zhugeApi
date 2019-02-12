@@ -168,7 +168,7 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     print('值 company_id ---->>',company_id)
     print('值 img_source ---->>',img_source)
 
-    _file_path = BASE_DIR + '/' +file_path
+    _file_path = '/data/www/zhugeApi' + '/' + file_path
     # im = Image.open('/tmp/zhangju/_20190212123822.jpg').convert('RGBA')
     print('值 BasePath --------->>', BASE_DIR)
     print('值 file_path --------->>', _file_path)
