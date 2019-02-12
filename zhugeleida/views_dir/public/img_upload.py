@@ -184,6 +184,8 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     print('值 file_path --------->>', _file_path)
     print('值是否存在 _file_path ------->', os.path.exists(_file_path))
 
+    return False
+
     ret = subprocess.Popen('/bin/cp  %s  /data/tmp' % (_file_path),shell=True)
     print('------ subprocess 返回码 -------->>', ret)
     ret.wait()
