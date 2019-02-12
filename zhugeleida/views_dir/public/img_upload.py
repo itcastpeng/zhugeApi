@@ -177,6 +177,7 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
 
     ret = subprocess.Popen('/bin/cp  %s  /data/tmp' % (_file_path),shell=True)
     print('------ subprocess 返回码 -------->>', ret)
+    ret.wait()
 
     now_file_name = '/data/tmp/' + img_name
 
