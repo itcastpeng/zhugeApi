@@ -497,6 +497,9 @@ def article(request, oper_type):
                 response.data = {'article_id': obj.id}
                 response.code = 200
                 response.msg = '创建新文章成功'
+                response.note = {
+                    'article_id': '通过此文章ID查询详情'
+                }
 
             else:
                 response.code = 301
