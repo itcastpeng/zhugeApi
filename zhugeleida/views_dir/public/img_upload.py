@@ -1,14 +1,15 @@
 from publicFunc import Response
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-# BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))t
+
 from zhugeleida.forms.public import img_upload_verify
 from zhugeleida.forms.public import img_merge_verify
 from django.http import HttpResponse
 import datetime as dt, time, json, uuid, os, base64
-# from PIL import Image, ImageDraw,ImageFont
+from PIL import Image, ImageDraw,ImageFont
 
 from zhugeleida import models
+BasePath = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 # 上传图片（分片上传）
 @csrf_exempt
@@ -165,9 +166,12 @@ def setup_picture_shuiyin(file_path,company_id,img_source):
     print('值 file_path ---->>',file_path)
     print('值 company_id ---->>',company_id)
     print('值 img_source ---->>',img_source)
-    from PIL import Image, ImageDraw, ImageFont
 
-    im = Image.open('/tmp/zhangju/_20190212123822.jpg').convert('RGBA')
+    file_path = BasePath + '/' +file_path
+    # im = Image.open('/tmp/zhangju/_20190212123822.jpg').convert('RGBA')
+    im = Image.open(file_path).convert('RGBA')
+    print('值 BasePath --------->>', BasePath)
+    print('值 file_path --------->>', file_path)
 
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
