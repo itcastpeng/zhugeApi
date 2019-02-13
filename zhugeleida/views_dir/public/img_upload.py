@@ -210,10 +210,10 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
-        shuiyin_name = models.zgld_gongzhonghao_app.objects.get(id=company_id).name
+        shuiyin_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
 
     elif img_source == 'case':
-        shuiyin_name = models.zgld_xiaochengxu_app.objects.get(id=company_id).name
+        shuiyin_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
 
     d.text((10, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
