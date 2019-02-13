@@ -156,6 +156,7 @@ def img_merge(request):
         }
         ret = subprocess.Popen('du -sk  /data/www/zhugeApi/%s ' % (img_path), shell=True,stdout=PIPE)
         print('【1】ret.stdout.read() --------->>', ret.stdout.read())
+        print('【3】值 os.path.getsize(img_path) ---------->>', os.path.getsize(img_path))
         response.code = 200
         response.msg = "添加图片成功"
 
