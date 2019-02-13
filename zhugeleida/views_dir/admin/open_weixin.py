@@ -107,7 +107,9 @@ def open_weixin(request, oper_type):
                 # rc.get('ComponentVerifyTicket')
 
                 if ret == 0:
-                    rc.set('ComponentVerifyTicket', ComponentVerifyTicket, 10000)
+                    Ticket_name = 'ComponentVerifyTicket_%s' % (appid)
+                    # rc.set('ComponentVerifyTicket', ComponentVerifyTicket, 10000)
+                    rc.set(Ticket_name, ComponentVerifyTicket, 10000)
                     print('--------授权公众号消息解密 ComponentVerifyTicket--------->>', ComponentVerifyTicket)
 
                 else:
@@ -735,8 +737,6 @@ def create_component_access_token(data):
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     response = Response.ResponseObj()
 
-    component_verify_ticket = rc.get('ComponentVerifyTicket')
-
     # three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=3)  # 小程序
     # qywx_config_dict = ''
     # if three_service_objs:
@@ -747,6 +747,12 @@ def create_component_access_token(data):
     #
     app_id = data.get('app_id')
     app_secret = data.get('app_secret')
+
+    Ticket_name = 'ComponentVerifyTicket_%s' % (app_id)
+
+    # component_verify_ticket = rc.get('ComponentVerifyTicket')
+    component_verify_ticket = rc.get(Ticket_name)
+
 
     # app_id = 'wx67e2fde0f694111c'
     # app_secret = '4a9690b43178a1287b2ef845158555ed'

@@ -161,7 +161,12 @@ def create_authorizer_access_token(data):
             post_component_data = {}
             post_component_data['component_appid'] = app_id
             post_component_data['component_appsecret'] = app_secret
-            component_verify_ticket = rc.get('ComponentVerifyTicket')
+
+            Ticket_name = 'ComponentVerifyTicket_%s' % (app_id)
+
+            # component_verify_ticket = rc.get('ComponentVerifyTicket')
+            component_verify_ticket = rc.get(Ticket_name)
+
             post_component_data['component_verify_ticket'] = component_verify_ticket
 
             post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'
@@ -269,7 +274,12 @@ def create_component_access_token(company_id):
             post_component_data = {}
             post_component_data['component_appid'] = app_id
             post_component_data['component_appsecret'] = app_secret
-            component_verify_ticket = rc.get('ComponentVerifyTicket')
+            # component_verify_ticket = rc.get('ComponentVerifyTicket')
+
+            Ticket_name = 'ComponentVerifyTicket_%s' % (app_id)
+
+            component_verify_ticket = rc.get(Ticket_name)
+
             post_component_data['component_verify_ticket'] = component_verify_ticket
 
             post_component_url = 'https://api.weixin.qq.com/cgi-bin/component/api_component_token'

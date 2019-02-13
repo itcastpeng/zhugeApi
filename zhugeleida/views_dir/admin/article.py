@@ -343,7 +343,6 @@ def article(request, oper_type):
                         _objs = _objs.values('article_id').annotate(Sum('stay_time'))
                         stay_time = _objs[0].get('stay_time__sum')
                         print('stay_time -------->',stay_time)
-                        stay_time = conversion_seconds_hms(stay_time)
 
                     _objs = objs.values('media_id').annotate(Sum('read_count'))
                     read_count = _objs[0].get('read_count__sum')
