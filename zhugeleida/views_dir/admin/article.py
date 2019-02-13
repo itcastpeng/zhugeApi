@@ -338,7 +338,7 @@ def article(request, oper_type):
 
                     _objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
                                                                                            'customer').filter(article_id=obj.id)
-                    stay_time = ''
+                    stay_time = 0
                     if _objs:
                         _objs = _objs.values('article_id').annotate(Sum('stay_time'))
                         stay_time = _objs[0].get('stay_time__sum')

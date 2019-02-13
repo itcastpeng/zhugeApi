@@ -10,7 +10,7 @@ class UpdateIDForm(forms.Form):
     )
 
     three_services_type = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "三方类型区分 不能为空"
         }
