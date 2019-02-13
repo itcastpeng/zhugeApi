@@ -207,7 +207,7 @@ class zgld_xiaochengxu_app(models.Model):
         (1, '小程序(名片版)第三方平台'),
         (2, '小程序(案例库)第三方平台')
     )
-    three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice, null=True,default=1)
+    three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice, null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
