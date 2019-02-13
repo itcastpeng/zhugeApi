@@ -222,7 +222,7 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
         if x == 0:
             font_size = 10
         else:
-            font_size = x * 10
+            font_size = x * 8
 
         fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
         d=ImageDraw.Draw(txt)

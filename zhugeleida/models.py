@@ -855,7 +855,7 @@ class zgld_chatinfo(models.Model):
 
 
 #公众号-模板文章详细表
-class zgld_template_article(models.Model):
+class  zgld_template_article(models.Model):
 
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='模板文章作者', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
@@ -880,6 +880,7 @@ class zgld_template_article(models.Model):
     content = models.TextField(verbose_name='文章内容', null=True)
     update_time =  models.DateTimeField(verbose_name="最后更新时间",null=True)
 
+    author = models.CharField(verbose_name='文章作者', max_length=256,null=True)
     tags = models.ManyToManyField('zgld_template_article_tag',verbose_name="模板文章关联的标签")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
