@@ -230,11 +230,12 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
         elif img_source == 'case':
             shuiyin_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
 
-        d.text((10, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
+        d.text((10, txt.size[1] - font_size), shuiyin_name,font=fnt, fill=(255,255,255,255))
         out=Image.alpha_composite(im, txt)
 
         print('值 txt.size[0] ---->>',txt.size[0])
         print('值 txt.size[1] ---->>',txt.size[1])
+        print('值 font_size ---->>',font_size)
 
         print('值  file_path.split[0] --->' , file_path.split('.')[0])
         front_file_name = file_path.split('.')[0]
