@@ -154,6 +154,8 @@ def img_merge(request):
         response.data = {
             'picture_url': img_path,
         }
+        ret = subprocess.Popen('du -sk  ./%s ' % (img_path), shell=True)
+        print('【1】ret.stdout.read() --------->>', ret.stdout.read())
         response.code = 200
         response.msg = "添加图片成功"
 
@@ -196,7 +198,7 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     # ret.wait()
     # now_file_name = '/data/tmp/' + img_name
     ret = subprocess.Popen('du -sk  %s ' % (_file_path),shell=True)
-    print('ret.stdout.read() --------->>',ret.stdout.read())
+    print('【1】ret.stdout.read() --------->>',ret.stdout.read())
 
     print('【2】值 os.path.getsize(img_path) ---------->>', os.path.getsize(_file_path))
 
