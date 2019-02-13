@@ -194,18 +194,20 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     # ret = subprocess.Popen('/bin/cp  %s  /data/tmp' % (_file_path),shell=True)
     # print('------ subprocess 返回码 -------->>', ret)
     # ret.wait()
-    #
     # now_file_name = '/data/tmp/' + img_name
+    ret = subprocess.Popen('du -sk  %s ' % (_file_path),shell=True)
+
+    print('ret.stdout.read() --------->>',ret.stdout.read())
 
     print('【2】值 os.path.getsize(img_path) ---------->>', os.path.getsize(_file_path))
 
     file_size = os.path.getsize(_file_path)
     if file_size == 0:
         return False
+
     try:
 
         im = Image.open(_file_path).convert('RGBA')
-
         txt=Image.new('RGBA', im.size, (0,0,0,0))
         # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
         width, height = txt.size
