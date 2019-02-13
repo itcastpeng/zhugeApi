@@ -141,11 +141,15 @@ def img_merge(request):
         user_id = request.GET.get('user_id')
         if  img_source == 'article' or  img_source == 'cover_picture':
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            img_path = setup_picture_shuiyin(img_name,img_path, company_id,'article')
+            _img_path = setup_picture_shuiyin(img_name,img_path, company_id,'article')
+            if  _img_path:
+                img_path =  _img_path
 
         elif  img_source == 'case':
             company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
+            _img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
+            if  _img_path:
+                img_path =  _img_path
 
         response.data = {
             'picture_url': img_path,
@@ -194,40 +198,47 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     # now_file_name = '/data/tmp/' + img_name
 
     print('【2】值 os.path.getsize(img_path) ---------->>', os.path.getsize(_file_path))
-    im = Image.open(_file_path).convert('RGBA')
 
+    file_size = os.path.getsize(_file_path)
+    if file_size == 0:
+        return False
+    try:
 
-    txt=Image.new('RGBA', im.size, (0,0,0,0))
-    # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
-    width, height = txt.size
+        im = Image.open(_file_path).convert('RGBA')
 
+        txt=Image.new('RGBA', im.size, (0,0,0,0))
+        # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
+        width, height = txt.size
 
-    x, _v = divmod(height, 100)
-    font_size = 10 + x * 10
+        x, _v = divmod(height, 100)
+        font_size = 10 + x * 10
 
+        fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
+        d=ImageDraw.Draw(txt)
+        shuiyin_name = ''
+        if img_source == 'article':
+            shuiyin_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
 
-    fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
-    d=ImageDraw.Draw(txt)
-    shuiyin_name = ''
-    if img_source == 'article':
-        shuiyin_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
+        elif img_source == 'case':
+            shuiyin_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
 
-    elif img_source == 'case':
-        shuiyin_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
+        d.text((10, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
+        out=Image.alpha_composite(im, txt)
 
-    d.text((10, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
-    out=Image.alpha_composite(im, txt)
+        print('值 txt.size[0] ---->>',txt.size[0])
+        print('值 txt.size[1] ---->>',txt.size[1])
 
-    print('值 txt.size[0] ---->>',txt.size[0])
-    print('值 txt.size[1] ---->>',txt.size[1])
+        print('值  file_path.split[0] --->' , file_path.split('.')[0])
+        front_file_name = file_path.split('.')[0]
+        file_name =  front_file_name + '.png'
 
-    print('值  file_path.split[0] --->' , file_path.split('.')[0])
-    front_file_name = file_path.split('.')[0]
-    file_name =  front_file_name + '.png'
+        out.save(file_name)
+        return file_name
 
-    out.save(file_name)
+    except OSError as e:
+        print('转换报错 ---->>', e)
+        return False
 
-    return file_name
 
 
 
