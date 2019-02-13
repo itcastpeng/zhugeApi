@@ -154,7 +154,7 @@ def img_merge(request):
         response.data = {
             'picture_url': img_path,
         }
-        ret = subprocess.Popen('du -sk  ./%s ' % (img_path), shell=True)
+        ret = subprocess.Popen('du -sk  /data/www/zhugeApi/%s ' % (img_path), shell=True)
         print('【1】ret.stdout.read() --------->>', ret.stdout.read())
         response.code = 200
         response.msg = "添加图片成功"
@@ -192,12 +192,12 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     print('值是否存在 _file_path ------->', os.path.exists(_file_path))
 
     # return False
-
+    from subprocess import Popen, PIPE
     # ret = subprocess.Popen('/bin/cp  %s  /data/tmp' % (_file_path),shell=True)
     # print('------ subprocess 返回码 -------->>', ret)
     # ret.wait()
     # now_file_name = '/data/tmp/' + img_name
-    ret = subprocess.Popen('du -sk  %s ' % (_file_path),shell=True)
+    ret = subprocess.Popen('du -sk  %s ' % (_file_path),shell=True,stdout=PIPE)
     print('【1】ret.stdout.read() --------->>',ret.stdout.read())
 
     print('【2】值 os.path.getsize(img_path) ---------->>', os.path.getsize(_file_path))
