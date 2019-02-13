@@ -131,13 +131,17 @@ def img_merge(request):
 
         # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
-        file_obj = open(img_path, 'wb')
+        # file_obj = open(img_path, 'wb')
         # print("fileData -->", fileData)
         img_data = base64.b64decode(fileData)
         # print("type(img_data) -->", type(img_data))
-        file_obj.write(img_data)
+        # file_obj.write(img_data)
+        # file_obj.flush()
+        with open(img_path, 'wb') as f:
+            f.write(img_data)
 
         print('【1】值 os.path.getsize(img_path) ---------->>',os.path.getsize(img_path))
+
         user_id = request.GET.get('user_id')
         if  img_source == 'article' or  img_source == 'cover_picture':
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
