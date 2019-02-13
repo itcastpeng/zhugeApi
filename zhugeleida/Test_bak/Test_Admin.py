@@ -697,13 +697,19 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.post(url, data=post_data,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/article/query_local_article_readinfo'  # 获取产品的列表
-get_data['article_id'] = 3
+# url =  ip + '/zhugeleida/admin/article/query_local_article_readinfo'  # 获取产品的列表
+# get_data['article_id'] = 3
+# ret = requests.get(url, data=post_data ,params=get_data)
+
+url =  ip + '/zhugeleida/admin/article/local_article_list'  # 获取产品的列表
+get_data['company_id'] = 1
+get_data['status'] = 1      # (0, '未同步到[正式文章库]'),  (1, '已同步到[正式文章库]'),
 ret = requests.get(url, data=post_data ,params=get_data)
 
-
-
-
+# url =  ip + '/zhugeleida/admin/article/sync_template_article_to_formal'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['template_article_id_list'] = json.dumps(['1'])
+# ret = requests.post(url, data=post_data ,params=get_data)
 
 
 # url =  ip + '/zhugeleida/mycelery/batchget_article_material'  # 获取产品的列表

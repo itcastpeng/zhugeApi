@@ -96,6 +96,12 @@ class LocalArticleAddForm(forms.Form):
             'required': "文章封面不能为空"
         }
     )
+    author= forms.CharField(
+        required=True,
+        error_messages={
+            'required': "作者名字不能为空"
+        }
+    )
 
     content = forms.CharField(
         required=True,
@@ -118,6 +124,23 @@ class LocalArticleAddForm(forms.Form):
             self.add_error('title', '文章名已存在')
         else:
             return title
+
+
+class SyncTemplateArticleForm(forms.Form):
+    template_article_id_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '文章列表不能为空'
+        }
+    )
+
+    company_id = forms.CharField(
+        required=True,
+        error_messages={
+            'required': '公司ID不存在'
+        }
+    )
+
 
 
 # 更新用户信息

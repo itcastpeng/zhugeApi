@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
     ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm, \
-    GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm,LocalArticleAddForm
+    GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm,LocalArticleAddForm,SyncTemplateArticleForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 import datetime
@@ -322,57 +322,124 @@ def article(request, oper_type):
 
             if forms_obj.is_valid():
                 # print('-----obj.tags.values---->', obj.tags.values('id','name'))
-                objs = models.zgld_template_article.objects.filter(id=article_id,source=2)
+                # objs = models.zgld_template_article.objects.filter(id=article_id,source=2)
+                # if objs:
+                #     template_obj = objs[0]
+                #     template_article_id = template_obj.id
+                #     status = template_obj.status
+                #     if status == 0:
+                #         response.code = 301
+                #         response.msg = '此文章未同步到[正式文章库]'
+
+                    # else:
+                objs = models.zgld_article.objects.filter(media_id=article_id,status=1)
                 if objs:
-                    template_obj = objs[0]
-                    _article_id = template_obj.media_id
-                    status = template_obj.status
-                    if status == 0:
-                        response.code = 301
-                        response.msg = '此文章未同步到[正式文章库]'
+                    obj = objs[0]
 
-                    else:
-                        objs = models.zgld_article.objects.filter(id=_article_id)
-                        if objs:
-                            obj = objs[0]
+                    _objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                                                                                           'customer').filter(article_id=obj.id)
+                    stay_time = ''
+                    if _objs:
+                        _objs = _objs.values('article_id').annotate(Sum('stay_time'))
+                        stay_time = _objs[0].get('stay_time__sum')
+                        print('stay_time -------->',stay_time)
+                        stay_time = conversion_seconds_hms(stay_time)
 
-                            objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                                   'customer').filter(article_id=_article_id)
-                            stay_time = ''
-                            if objs:
-                                _objs = objs.values('article_id').annotate(Sum('stay_time'))
-                                stay_time = _objs[0].get('stay_time__sum')
-                                print('stay_time -------->',stay_time)
-                                stay_time = conversion_seconds_hms(stay_time)
+                    _objs = objs.values('media_id').annotate(Sum('read_count'))
+                    read_count = _objs[0].get('read_count__sum')
 
-                            response.data = {
-                                'article_id': obj.id,
-                                'title': obj.title,  # 文章标题
-                                'status_code': obj.status,  # 状态
-                                'status': obj.get_status_display(),  # 状态
-                                'source_code': obj.source,  # 状态
-                                'source': obj.get_source_display(),  # 状态
-                                'author': obj.user.username,  # 如果为原创显示,文章作者
-                                'avatar': obj.user.avatar,  # 用户的头像
-                                'read_count': obj.read_count,  # 被阅读数量
-                                'forward_count': obj.forward_count,  # 被转发个数
-                                'stay_time' : stay_time,
-                                'create_date': obj.create_date,  # 文章创建时间
-                                'cover_url': obj.cover_picture,  # 文章图片链接
-                            }
-                            response.code = 200
-                            response.msg = '查询成功'
+                    template_article_objs = models.zgld_template_article.objects.filter(id=article_id,source=2)
+                    author = ''
+                    if template_article_objs:
+                        template_obj = template_article_objs[0]
+                        author = template_obj.author
 
+
+                    response.data = {
+                        'article_id' :article_id,
+                        'title': obj.title,  # 文章标题
+                        'author': author,  # 如果为原创显示,文章作者
+
+                        'read_count' :read_count,
+                        'stay_time' : stay_time,
+                    }
+                    response.code = 200
+                    response.msg = '查询成功'
+
+                else:
+                    response.code = 302
+                    response.msg = '此文章未能同步到正式库'
+
+                # else:
+                #     response.code = 302
+                #     response.msg = '模板文章无数据'
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        ## 入库到本地文章库的列表展示
+        elif oper_type == 'local_article_list':
+
+            forms_obj = GzhArticleSelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data.get('current_page')
+                length = forms_obj.cleaned_data.get('length')
+                company_id = forms_obj.cleaned_data.get('company_id')
+                status = request.GET.get('status')
+                objs = models.zgld_template_article.objects.filter(company_id=company_id, source=2,status=status)
+
+                if objs:
+
+                    total_count = objs.count()
+                    if length != 0:
+                        print('current_page -->', current_page)
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+
+                    ret_data = []
+
+                    for obj in objs:
+                        template_article_id = obj.id
+
+                        if obj.status == 0:
+                            status_text = '未同步到正式库'
                         else:
-                            response.code = 302
-                            response.msg = '正式文章不存在'
+                            status_text = '已同步到正式库'
+
+                        status = obj.status
+
+                        data = {
+                            'template_article_id' : template_article_id,
+                            'title': obj.title,
+                            'author' : obj.author,
+                            'content': obj.content,
+                            'status_text': status_text,
+                            'status': status
+                        }
+                        ret_data.append(data)
+
+                    response.data = {
+                        'ret_data': ret_data,
+                        'total_count': total_count,
+                    }
+                    response.code = 200
+                    response.msg = '获取成功'
+                    response.note = {
+                        'template_article_id': '文章ID',
+                        'title': '标题',
+                        'author': '作者姓名',
+                        'content': '文章内容',
+                        'status_text': '状态说明' ,
+                        'status': '状态'
+                    }
+
 
                 else:
                     response.code = 302
                     response.msg = '模板文章无数据'
-            else:
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
+
+
 
     elif request.method == "POST":
 
@@ -495,6 +562,7 @@ def article(request, oper_type):
             summary = request.POST.get('summary')
             cover_picture = request.POST.get('cover_picture')
             content = request.POST.get('content')
+            author = request.POST.get('edit_name')
 
             company_id = 1
 
@@ -505,7 +573,8 @@ def article(request, oper_type):
                 'content': content,
                 'cover_picture': cover_picture,
                 'status': 0 , #(0, '未同步到[正式文章库]'),
-                "company_id" :1
+                "company_id" :1,
+                "author" : author
             }
 
             forms_obj = LocalArticleAddForm(article_data)
@@ -519,7 +588,8 @@ def article(request, oper_type):
                     'cover_picture': cover_picture,
                     'media_id': None,
                     'content': content,
-                    'source': 2  #  (2, '同步[本地文章库]到模板库'),
+                    'source': 2 , #  (2, '同步[本地文章库]到模板库'),
+                    'author': author
                 }
                 obj = models.zgld_template_article.objects.create(**dict_data)
                 response.data = {'article_id': obj.id}
@@ -532,6 +602,63 @@ def article(request, oper_type):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 同步本地文章库到正式库
+        elif oper_type == 'sync_template_article_to_formal':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+
+            template_article_id_list = request.POST.get('template_article_id_list')
+
+            _form_data = {
+
+                'company_id': company_id,
+                'template_article_id_list': template_article_id_list,
+            }
+
+            forms_obj = SyncTemplateArticleForm(_form_data)
+
+            if forms_obj.is_valid():
+
+                template_article_id_list = json.loads(template_article_id_list)
+                company_id = forms_obj.cleaned_data.get('company_id')
+
+                objs = models.zgld_template_article.objects.filter(id__in=template_article_id_list)
+
+                for obj in objs:
+
+                    template_article_id = obj.id
+
+                    title = obj.title
+                    content = obj.content
+
+                    dict_data = {
+                        'user_id': user_id,
+                        'company_id': company_id,
+                        'title': title,
+                        'source': 2,
+                        'status': 2,
+                        # 'summary': summary,
+                        'content': content,
+                        # 'cover_picture': cover_picture,
+                        'media_id' : template_article_id
+                    }
+                    article_objs = models.zgld_article.objects.filter(media_id=template_article_id)
+
+                    if article_objs:
+                        article_objs.update(**dict_data)
+                        response.code = 200
+                        response.msg = '覆盖修改文章成功'
+
+                    else:
+                        models.zgld_article.objects.create(**dict_data)
+                        response.code = 200
+                        response.msg = '新建文章成功'
+
+                    models.zgld_template_article.objects.filter(id=template_article_id).update(status=1)
+                    response.note = {
+                        'msg': '修改文章成功'
+                    }
 
 
 
