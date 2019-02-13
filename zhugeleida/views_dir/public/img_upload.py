@@ -132,11 +132,12 @@ def img_merge(request):
         # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
         file_obj = open(img_path, 'wb')
-        print("fileData -->", fileData)
+        # print("fileData -->", fileData)
         img_data = base64.b64decode(fileData)
-        print("type(img_data) -->", type(img_data))
+        # print("type(img_data) -->", type(img_data))
         file_obj.write(img_data)
 
+        print('【1】值 os.path.getsize(img_path) ---------->>',os.path.getsize(img_path))
         user_id = request.GET.get('user_id')
         if  img_source == 'article' or  img_source == 'cover_picture':
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -184,61 +185,35 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     print('值 file_path --------->>', _file_path)
     print('值是否存在 _file_path ------->', os.path.exists(_file_path))
 
-    return False
+    # return False
 
-    ret = subprocess.Popen('/bin/cp  %s  /data/tmp' % (_file_path),shell=True)
-    print('------ subprocess 返回码 -------->>', ret)
-    ret.wait()
+    # ret = subprocess.Popen('/bin/cp  %s  /data/tmp' % (_file_path),shell=True)
+    # print('------ subprocess 返回码 -------->>', ret)
+    # ret.wait()
+    #
+    # now_file_name = '/data/tmp/' + img_name
 
-    now_file_name = '/data/tmp/' + img_name
-
-    im = Image.open(now_file_name).convert('RGBA')
+    print('【2】值 os.path.getsize(img_path) ---------->>', os.path.getsize(_file_path))
+    im = Image.open(_file_path).convert('RGBA')
 
 
     txt=Image.new('RGBA', im.size, (0,0,0,0))
     # fnt=ImageFont.truetype("c:/Windows/fonts/Tahoma.ttf", 30)
     width, height = txt.size
 
-    font_size = 25
 
-    if  height <= 1000 and  height > 900:
-        font_size = 60
+    x, _v = divmod(height, 100)
+    font_size = 10 + x * 10
 
-    elif  height <= 900 and  height > 800:
-        font_size = 50
-
-    elif  height <= 800 and  height > 700:
-        font_size = 45
-
-    elif  height <= 700 and  height > 600:
-        font_size = 40
-
-    elif  height <= 600 and  height > 500:
-        font_size = 35
-
-    elif  height <= 500 and  height > 400:
-        font_size = 30
-
-    elif  height <= 400 and  height > 300:
-        font_size = 25
-
-    elif  height <= 300 and  height > 200:
-        font_size = 20
-
-    elif  height <= 200 and  height > 100:
-        font_size = 15
-
-    elif height <= 100 and height >0:
-        font_size = 10
 
     fnt=ImageFont.truetype("/usr/share/fonts/chinese/simsun.ttc", font_size)
     d=ImageDraw.Draw(txt)
     shuiyin_name = ''
     if img_source == 'article':
-        shuiyin_name = models.zgld_gongzhonghao_app.objects.get(id=company_id).name
+        shuiyin_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
 
     elif img_source == 'case':
-        shuiyin_name = models.zgld_xiaochengxu_app.objects.get(id=company_id).name
+        shuiyin_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
 
     d.text((10, txt.size[1]-30), shuiyin_name,font=fnt, fill=(255,255,255,255))
     out=Image.alpha_composite(im, txt)
