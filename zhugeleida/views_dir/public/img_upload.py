@@ -196,7 +196,6 @@ def setup_picture_shuiyin(img_name,file_path,company_id,img_source):
     # ret.wait()
     # now_file_name = '/data/tmp/' + img_name
     ret = subprocess.Popen('du -sk  %s ' % (_file_path),shell=True)
-
     print('ret.stdout.read() --------->>',ret.stdout.read())
 
     print('【2】值 os.path.getsize(img_path) ---------->>', os.path.getsize(_file_path))
