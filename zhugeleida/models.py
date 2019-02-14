@@ -45,8 +45,12 @@ class zgld_company(models.Model):
     leiji_chongzhi = models.FloatField(verbose_name='累计充值', null=True, default=0)
     leiji_zhichu = models.FloatField(verbose_name='累计支出', null=True, default=0)
 
+    seconds = models.IntegerField(verbose_name='每几秒【多少钱】', null=True, default=0)
+    article_account = models.FloatField(verbose_name='付给的钱数', null=True, default=0)
+
     bossleida_data_tongji =  models.TextField(verbose_name='BOSS雷达数据统计[公司]',default='{}')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
 
     class Meta:
         verbose_name_plural = "公司表"
@@ -918,7 +922,7 @@ class zgld_article(models.Model):
     content = models.TextField(verbose_name='文章内容', null=True)
 
     tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
-    # up_count = models.IntegerField(default=0,verbose_name="赞次数")
+    up_count = models.IntegerField(default=0,verbose_name="赞次数")
     # down_count = models.IntegerField(default=0,verbose_name="踩次数")
     cover_picture  = models.CharField(verbose_name="封面图片URL",max_length=128)
     read_count = models.IntegerField(verbose_name="文章阅读数量",default=0)
@@ -946,6 +950,21 @@ class zgld_article(models.Model):
         app_label = "zhugeleida"
 
 
+# 文章被赞
+class zgld_article_action(models.Model):
+    article = models.ForeignKey('zgld_article', verbose_name='被赞的文章',null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
+
+    status_choices = ((0, '未点赞'),
+                      (1, '已点赞')
+                      )
+    status = models.SmallIntegerField(verbose_name='状态', choices=status_choices,null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+
+        verbose_name_plural = "客户-文章-行为记录表"
+        app_label = "zhugeleida"
 
 ##文章评论表
 class zgld_article_comment(models.Model):

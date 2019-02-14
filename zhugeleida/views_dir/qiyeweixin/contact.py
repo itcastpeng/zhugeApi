@@ -67,24 +67,23 @@ def contact(request):
 
                 content = obj.content
 
-                if not content:
-                    continue
-
-                _content = json.loads(content)
-                info_type = _content.get('info_type')
                 msg = ''
-                if info_type:
-                    info_type = int(info_type)
-                    if info_type == 1:
-                        msg = _content.get('msg')
-                        msg = base64.b64decode(msg)
-                        msg = str(msg, 'utf-8')
+                if  content:
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
 
-                    elif info_type == 2:
-                        msg ='向您咨询:' +  _content.get('product_name')
+                    if info_type:
+                        info_type = int(info_type)
+                        if info_type == 1:
+                            msg = _content.get('msg')
+                            msg = base64.b64decode(msg)
+                            msg = str(msg, 'utf-8')
 
-                    elif info_type == 3:
-                        msg = _content.get('msg')
+                        elif info_type == 2:
+                            msg ='向您咨询:' +  _content.get('product_name')
+
+                        elif info_type == 3:
+                            msg = _content.get('msg')
 
                 _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=obj.userprofile_id,

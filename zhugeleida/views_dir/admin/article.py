@@ -352,13 +352,21 @@ def article(request, oper_type):
                     if template_article_objs:
                         template_obj = template_article_objs[0]
                         author = template_obj.author
+                    author_payment = 0
+                    if stay_time != 0:
+                        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
+                        company_obj =  models.zgld_company.objects.get(id=company_id)
+                        seconds =  company_obj.seconds
+                        article_account =  company_obj.article_account
+                        every_seconds_account = (article_account / seconds)
+                        author_payment  =  (stay_time * every_seconds_account)
 
                     response.data = {
                         'article_id' :article_id,
                         'title': obj.title,  # 文章标题
                         'author': author,  # 如果为原创显示,文章作者
-
+                        'author_payment' :author_payment,
                         'read_count' :read_count,
                         'stay_time' : stay_time,
                     }
@@ -366,8 +374,18 @@ def article(request, oper_type):
                     response.msg = '查询成功'
 
                 else:
-                    response.code = 302
+                    objs = models.zgld_template_article.objects.filter(id=article_id)
+                    obj = objs[0]
+                    response.code = 200
                     response.msg = '此文章未能同步到正式库'
+                    response.data = {
+                        'article_id' :article_id,
+                        'title': obj.title,  # 文章标题
+                        'author': obj.author,  # 如果为原创显示,文章作者
+
+                        'read_count' :0,
+                        'stay_time' : 0,
+                    }
 
                 # else:
                 #     response.code = 302
@@ -483,6 +501,7 @@ def article(request, oper_type):
                         article_objs.update(**dict_data)
                         response.code = 200
                         response.msg = '覆盖修改文章成功'
+
                     else:
                         models.zgld_article.objects.create(**dict_data)
                         response.code = 200
@@ -559,18 +578,19 @@ def article(request, oper_type):
 
             title = request.POST.get('title')
             summary = request.POST.get('summary')
-            cover_picture = request.POST.get('cover_picture')
+            # cover_picture = request.POST.get('cover_picture')
             content = request.POST.get('content')
             author = request.POST.get('edit_name')
-
             company_id = 1
+            print('author-------------> ', author)
+            print(request.POST)
 
             article_data = {
                 'user_id': user_id,
                 'title': title,
                 'summary': summary,
                 'content': content,
-                'cover_picture': cover_picture,
+                # 'cover_picture': cover_picture,
                 'status': 0 , #(0, '未同步到[正式文章库]'),
                 "company_id" :1,
                 "author" : author
@@ -584,7 +604,7 @@ def article(request, oper_type):
                     'company_id': company_id,
                     'title': title,  # '标题_%s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                     'summary': summary,
-                    'cover_picture': cover_picture,
+                    # 'cover_picture': cover_picture,
                     'media_id': None,
                     'content': content,
                     'source': 2 , #  (2, '同步[本地文章库]到模板库'),
@@ -659,7 +679,7 @@ def article(request, oper_type):
                         'msg': '修改文章成功'
                     }
 
-
+        
 
     return JsonResponse(response.__dict__)
 

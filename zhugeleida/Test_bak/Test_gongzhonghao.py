@@ -80,12 +80,16 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.get(url, data = post_data ,params=get_data)
 
 
-url =  ip + '/zhugeleida/gongzhonghao/article/recommend_article_list/3'  # 获取产品的列表
-get_data['uid'] = 1
-get_data['company_id'] = 1
+# url =  ip + '/zhugeleida/gongzhonghao/article/recommend_article_list/3'  # 获取产品的列表
+# get_data['uid'] = 1
+# get_data['company_id'] = 1
+# ret = requests.get(url, data = post_data ,params=get_data)
 
-ret = requests.get(url, data = post_data ,params=get_data)
 
+url =  ip + '/zhugeleida/gongzhonghao/article/praise_article/3'  # 获取产品的列表
+post_data['status'] = 0
+
+ret = requests.post(url, data = post_data ,params=get_data)
 
 ####################################################################################
 

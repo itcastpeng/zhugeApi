@@ -81,6 +81,9 @@ def comment_manage(request, oper_type):
                             'from_customer_id': obj.from_customer_id,
                             'from_customer_name': customer_name,
                             'from_customer_headimgurl': obj.from_customer.headimgurl,
+                            'title' : obj.article.title,
+                            'cover_picture' : obj.article.cover_picture,
+
                             'content': content,
                             'create_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                         })

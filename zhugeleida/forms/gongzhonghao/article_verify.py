@@ -294,6 +294,22 @@ class RecommendArticleSelectForm(forms.Form):
 
 
 
+class PraiseArticleForm(forms.Form):
+
+    article_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '文章ID不能为空'
+        }
+    )
+
+    status = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "状态不能为空"
+        }
+    )
+
 
 class ArticleReviewSelectForm(forms.Form):
     article_id = forms.IntegerField(
