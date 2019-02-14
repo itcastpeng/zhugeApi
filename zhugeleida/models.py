@@ -45,8 +45,12 @@ class zgld_company(models.Model):
     leiji_chongzhi = models.FloatField(verbose_name='累计充值', null=True, default=0)
     leiji_zhichu = models.FloatField(verbose_name='累计支出', null=True, default=0)
 
+    seconds = models.IntegerField(verbose_name='每几秒【多少钱】', null=True, default=0)
+    article_account = models.FloatField(verbose_name='付给的钱数', null=True, default=0)
+
     bossleida_data_tongji =  models.TextField(verbose_name='BOSS雷达数据统计[公司]',default='{}')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
 
     class Meta:
         verbose_name_plural = "公司表"

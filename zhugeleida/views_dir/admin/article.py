@@ -352,13 +352,21 @@ def article(request, oper_type):
                     if template_article_objs:
                         template_obj = template_article_objs[0]
                         author = template_obj.author
+                    author_payment = 0
+                    if stay_time != 0:
+                        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
+                        company_obj =  models.zgld_company.objects.get(id=company_id)
+                        seconds =  company_obj.seconds
+                        article_account =  company_obj.article_account
+                        every_seconds_account = (article_account / seconds)
+                        author_payment  =  (stay_time * every_seconds_account)
 
                     response.data = {
                         'article_id' :article_id,
                         'title': obj.title,  # 文章标题
                         'author': author,  # 如果为原创显示,文章作者
-
+                        'author_payment' :author_payment,
                         'read_count' :read_count,
                         'stay_time' : stay_time,
                     }
