@@ -286,11 +286,13 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        ## 点赞日记
+        ## 点赞文章
         elif oper_type == 'praise_article':
             customer_id = request.GET.get('user_id')
-            article_id = request.POST.get('article_id')
-            status = request.POST.get('status')
+
+            article_id = o_id
+            # status = request.POST.get('status')
+            status = 1
 
 
             request_data_dict = {
@@ -304,8 +306,7 @@ def article_oper(request, oper_type, o_id):
                 create_data = {
                     'article_id': o_id,
                     'customer_id': customer_id,
-                    'status': status,
-                    'action': 1  # 点赞
+                    'status': status
                 }
                 article_objs = models.zgld_article.objects.filter(id=o_id)
                 article_up_down_objs = models.zgld_article_action.objects.filter(article_id=o_id,customer_id=customer_id)
@@ -317,8 +318,8 @@ def article_oper(request, oper_type, o_id):
                     response.msg = "点赞记录完成"
                     response.data = {
                         'up_count': article_objs[0].up_count,
-                        'is_praise_article': status,
-                        'is_praise_article_text': article_up_down_objs[0].get_status_display()
+                        'is_praise_article': 1,
+                        'is_praise_article_text': '已赞此文章' #article_up_down_objs[0].get_status_display()
                     }
                 else:
                     models.zgld_article_action.objects.create(**create_data)
@@ -417,6 +418,16 @@ def article_oper(request, oper_type, o_id):
                 tag_list = list(obj.tags.values('id', 'name'))
                 # print('-----obj.tags.values---->', tag_list)
                 title = obj.title
+
+                article_up_down_objs = models.zgld_article_action.objects.filter(article_id=o_id,
+                                                                                 customer_id=customer_id)
+                if article_up_down_objs:
+                    is_praise_article_text = '已赞此文章'
+                    is_praise_article =  1
+                else:
+                    is_praise_article_text = '未赞此文章'
+                    is_praise_article = 0
+
                 ret_data.append({
                     'id': obj.id,
                     'title': title,  # 文章标题
@@ -426,6 +437,8 @@ def article_oper(request, oper_type, o_id):
                     'create_date': obj.create_date,  # 文章创建时间
                     'cover_url': obj.cover_picture,  # 文章图片链接
                     'up_count': obj.up_count,  # 文章内容
+                    'is_praise_article_text' : is_praise_article_text,
+                    'is_praise_article' :  is_praise_article,
                     'content': obj.content,  # 文章内容
                     'tag_list': tag_list,
                     'insert_ads': insert_ads
@@ -586,7 +599,6 @@ def article_oper(request, oper_type, o_id):
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
                     }
-
 
             else:
                 print('------- 公众号查看我的文章未能通过------->>', forms_obj.errors)
