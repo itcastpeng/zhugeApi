@@ -91,7 +91,7 @@ class LocalArticleAddForm(forms.Form):
         }
     )
     cover_picture = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "文章封面不能为空"
         }

@@ -644,62 +644,63 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.post(url, data=post_data ,params=get_data)
 
 
-# url = ip + '/zhugeleida/admin/article/sync_local_article' # 添加产品
-# post_data['title'] = '第三方士大夫'
-# post_data['summary'] = '摘要'
-# post_data['cover_picture'] = 'statics/zhugeleida/imgs/xiaochengxu/website/Website_scroll_1.png'
-# content =  {
-# 	'cover_data': [{
-# 		'type': 'picture_url',
-# 		'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Website_scroll_1.png', 'statics/zhugeleida/imgs/xiaochengxu/website/Website_scroll_2.png']
-# 	}],
-# 	'article_data': [{
-# 			'type': 'title',
-# 			'data': ['xx我是标题1']
-# 		},
-# 		{
-# 			'type': 'picture_url',
-# 			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_1.png']
-# 		},
-# 		{
-# 			'type': 'content',
-# 			'data': ['我是内容1']
-# 		},
-#
-# 		{
-# 			'type': 'picture_url',
-# 			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_2.png']
-# 		},
-# 		{
-# 			'type': 'title',
-# 			'data': ['我是标题2']
-# 		},
-# 		{
-# 			'type': 'content',
-# 			'data': ['我是内容1']
-# 		},
-#
-# 		{
-# 			'type': 'picture_url',
-# 			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_3.png']
-# 		},
-# 		{
-# 			'type': 'content',
-# 			'data': ['我是内容3']
-# 		},
-# 		{
-# 			'type': 'picture_url',
-# 			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_4.png']
-# 		}
-# 	]
-# }
-# post_data['content'] = json.dumps(content)
-# ret = requests.post(url, data=post_data,params=get_data)
+url = ip + '/zhugeleida/admin/article/sync_local_article' # 添加产品
+post_data['title'] = '第三方士大夫'
+post_data['summary'] = '摘要'
+post_data['cover_picture'] = 'statics/zhugeleida/imgs/xiaochengxu/website/Website_scroll_1.png'
+content =  {
+	'cover_data': [{
+		'type': 'picture_url',
+		'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Website_scroll_1.png', 'statics/zhugeleida/imgs/xiaochengxu/website/Website_scroll_2.png']
+	}],
+	'article_data': [{
+			'type': 'title',
+			'data': ['xx我是标题1']
+		},
+		{
+			'type': 'picture_url',
+			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_1.png']
+		},
+		{
+			'type': 'content',
+			'data': ['我是内容1']
+		},
+
+		{
+			'type': 'picture_url',
+			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_2.png']
+		},
+		{
+			'type': 'title',
+			'data': ['我是标题2']
+		},
+		{
+			'type': 'content',
+			'data': ['我是内容1']
+		},
+
+		{
+			'type': 'picture_url',
+			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_3.png']
+		},
+		{
+			'type': 'content',
+			'data': ['我是内容3']
+		},
+		{
+			'type': 'picture_url',
+			'data': ['statics/zhugeleida/imgs/xiaochengxu/website/Content_4.png']
+		}
+	]
+}
+post_data['content'] = json.dumps(content)
+post_data['edit_name'] = 'edit_name'
+ret = requests.post(url, data=post_data,params=get_data)
 
 
-url =  ip + '/zhugeleida/admin/article/query_local_article_readinfo'  # 获取产品的列表
-get_data['article_id'] = 1
-ret = requests.get(url, data=post_data ,params=get_data)
+# url =  ip + '/zhugeleida/admin/article/query_local_article_readinfo'  # 获取产品的列表
+# get_data['article_id'] = 1
+# ret = requests.get(url, data=post_data ,params=get_data)
 
 # url =  ip + '/zhugeleida/admin/article/local_article_list'  # 获取产品的列表
 # get_data['company_id'] = 1

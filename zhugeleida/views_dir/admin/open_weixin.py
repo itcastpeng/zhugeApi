@@ -414,8 +414,7 @@ def open_weixin(request, oper_type):
             # exist_pre_auth_code = rc.get('pre_auth_code')
             # if not exist_pre_auth_code:
             pre_auth_code_url = 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode'
-            pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data,
-                                              data=json.dumps(post_pre_auth_data))
+            pre_auth_code_ret = requests.post(pre_auth_code_url, params=get_pre_auth_data,data=json.dumps(post_pre_auth_data))
             pre_auth_code_ret = pre_auth_code_ret.json()
             pre_auth_code = pre_auth_code_ret.get('pre_auth_code')
             print('------ 获取第三方平台 pre_auth_code 预授权码 ----->', pre_auth_code_ret)
