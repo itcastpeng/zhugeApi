@@ -2162,6 +2162,7 @@ def get_customer_gongzhonghao_userinfo(request):
     type = request.GET.get('type')
     openid = request.GET.get('openid')
     user_id = request.GET.get('user_id')
+    client_id = request.GET.get('client_id')
 
     headimgurl = request.GET.get('headimgurl')
 
@@ -2182,145 +2183,142 @@ def get_customer_gongzhonghao_userinfo(request):
 
         return JsonResponse(response.__dict__)
 
-    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-    qywx_config_dict = ''
-    if three_service_objs:
-        three_service_obj = three_service_objs[0]
-        qywx_config_dict = three_service_obj.config
-        if qywx_config_dict:
-            qywx_config_dict = json.loads(qywx_config_dict)
-
-    app_id = qywx_config_dict.get('app_id')
-    app_secret = qywx_config_dict.get('app_secret')
-
-    objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorizer_appid)
-    authorizer_refresh_token = ''
-    if objs:
-        authorizer_refresh_token = objs[0].authorizer_refresh_token
-
-    key_name = 'authorizer_access_token_%s' % (authorizer_appid)
-
-    _data = {
-        'authorizer_appid': authorizer_appid,
-        'authorizer_refresh_token': authorizer_refresh_token,
-        'key_name': key_name,
-        'app_id': app_id,  # 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
-        'app_secret': app_secret,  # '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
-    }
-
-    authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
-    authorizer_access_token = authorizer_access_token_ret.data
-
-    # access_token = "14_8p_bIh8kVgaZpnn_8IQ3y77mhJcSLoLuxnqtrE-mKYuOfXFPnNYhZAOWk8AZ-NeK6-AthHxolrSOJr1HvlV-gSlspaO0YFYbkPrsjJzKxalWQtlBxX4n-v11mqJElbT0gn3WVo9UO5zQpQMmTDGjAEDZJM"
-    # openid = 'ob5mL1Q4faFlL2Hv2S43XYKbNO-k'
-
-    get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
-    get_user_info_data = {
-        'access_token': authorizer_access_token,
-        'openid': openid,
-        'lang': 'zh_CN',
-    }
-
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    ret = s.get(get_user_info_url, params=get_user_info_data)
-    # ret = requests.get(get_user_info_url, params=get_user_info_data)
-
-    ret.encoding = 'utf-8'
-    ret_json = ret.json()
-    print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
-
     customer_objs = models.zgld_customer.objects.filter(openid=openid)
-    customer_id = ''
-    formid = ''
     if customer_objs:
         customer_id = customer_objs[0].id
         formid = customer_objs[0].formid
 
-    if 'errcode' not in ret_json:
-        openid = ret_json['openid']  # 用户唯一标
-        subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
 
-        if formid != '已发':
-            company_objs = models.zgld_company.objects.filter(id=company_id)
+        app_id = qywx_config_dict.get('app_id')
+        app_secret = qywx_config_dict.get('app_secret')
 
-            user_objs = models.zgld_userprofile.objects.filter(id=user_id)
+        objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=authorizer_appid)
+        authorizer_refresh_token = ''
+        if objs:
+            authorizer_refresh_token = objs[0].authorizer_refresh_token
 
-            # 插入第一条用户和客户的对话信息 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复
-            msg = '终于等到你🌹，我是您的专属咨询代表【%s - %s】。   如需沟通，您可在此或扫码关注【公众号】, 并在公众号内进行回复(支持语音、图片、文字)' % (
-                company_objs[0].name, user_objs[0].username)
-            # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
-            #                                     msg=msg)
-            _content = {'info_type': 1}
-            encodestr = base64.b64encode(msg.encode('utf-8'))
-            msg = str(encodestr, 'utf-8')
-            _content['msg'] = msg
-            content = json.dumps(_content)
+        key_name = 'authorizer_access_token_%s' % (authorizer_appid)
 
-            models.zgld_chatinfo.objects.create(
-                send_type=1,
-                userprofile_id=user_id,
-                customer_id=customer_id,
-                content=content
-            )
+        _data = {
+            'authorizer_appid': authorizer_appid,
+            'authorizer_refresh_token': authorizer_refresh_token,
+            'key_name': key_name,
+            'app_id': app_id,  # 'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
+            'app_secret': app_secret,  # '0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
+        }
 
-            gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
-            if gzh_objs:
-                gzh_obj = gzh_objs[0]
-                qrcode_url = gzh_obj.qrcode_url
-                _content = {
-                    'url': qrcode_url,
-                    'info_type': 4  # 图片
-                }
+        authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
+        authorizer_access_token = authorizer_access_token_ret.data
+
+        # access_token = "14_8p_bIh8kVgaZpnn_8IQ3y77mhJcSLoLuxnqtrE-mKYuOfXFPnNYhZAOWk8AZ-NeK6-AthHxolrSOJr1HvlV-gSlspaO0YFYbkPrsjJzKxalWQtlBxX4n-v11mqJElbT0gn3WVo9UO5zQpQMmTDGjAEDZJM"
+        # openid = 'ob5mL1Q4faFlL2Hv2S43XYKbNO-k'
+
+        get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
+        get_user_info_data = {
+            'access_token': authorizer_access_token,
+            'openid': openid,
+            'lang': 'zh_CN',
+        }
+
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        ret = s.get(get_user_info_url, params=get_user_info_data)
+        # ret = requests.get(get_user_info_url, params=get_user_info_data)
+
+        ret.encoding = 'utf-8'
+        ret_json = ret.json()
+        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+
+        if 'errcode' not in ret_json:
+            openid = ret_json['openid']  # 用户唯一标
+            subscribe = ret_json['subscribe']  # 值为0时，代表此用户没有关注该公众号
+
+            if formid != '已发':
+                company_objs = models.zgld_company.objects.filter(id=company_id)
+                user_objs = models.zgld_userprofile.objects.filter(id=user_id)
+
+                # 插入第一条用户和客户的对话信息 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复
+                msg = '终于等到你🌹，我是您的专属咨询代表【%s - %s】。   如需沟通，您可在此或扫码关注【公众号】, 并在公众号内进行回复(支持语音、图片、文字)' % (
+                    company_objs[0].name, user_objs[0].username)
+                # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
+                #                                     msg=msg)
+                _content = {'info_type': 1}
+                encodestr = base64.b64encode(msg.encode('utf-8'))
+                msg = str(encodestr, 'utf-8')
+                _content['msg'] = msg
                 content = json.dumps(_content)
+
                 models.zgld_chatinfo.objects.create(
-                    content=content,
+                    send_type=1,
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    send_type=1,
-                    is_last_msg=False
+                    content=content
                 )
 
-            print('---------- 插入 第一条用户和公众号客户的对话信息 successful ---->')
-            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+                gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                if gzh_objs:
+                    gzh_obj = gzh_objs[0]
+                    qrcode_url = gzh_obj.qrcode_url
+                    _content = {
+                        'url': qrcode_url,
+                        'info_type': 4  # 图片
+                    }
+                    content = json.dumps(_content)
+                    models.zgld_chatinfo.objects.create(
+                        content=content,
+                        userprofile_id=user_id,
+                        customer_id=customer_id,
+                        send_type=1,
+                        is_last_msg=False
+                    )
 
-            redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
-            redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
-            redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
-            redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(
-                uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
-            redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(
-                uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
+                print('---------- 插入 第一条用户和公众号客户的对话信息 successful ---->')
+                rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-            rc.set(redis_user_id_key, True)
-            rc.set(redis_customer_id_key, True)
-            rc.set(redis_customer_query_info_key, True)  # 通知公众号文章客户消息数量变化了
+                redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
+                redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
+                redis_customer_query_info_key = 'message_customer_id_{cid}_info_num'.format(cid=customer_id)
+                redis_user_query_info_key = 'message_user_id_{uid}_info_num'.format(
+                    uid=user_id)  # 小程序发过去消息,雷达用户的key 消息数量发生变化
+                redis_user_query_contact_key = 'message_user_id_{uid}_contact_list'.format(
+                    uid=user_id)  # 小程序发过去消息,雷达用户的key 消息列表发生变化
 
-            rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
-            rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
+                rc.set(redis_user_id_key, True)
+                rc.set(redis_customer_id_key, True)
+                rc.set(redis_customer_query_info_key, True)  # 通知公众号文章客户消息数量变化了
+
+                rc.set(redis_user_query_info_key, True)  # 代表 雷达用户 消息数量发生了变化
+                rc.set(redis_user_query_contact_key, True)  # 代表 雷达用户 消息列表的数量发生了变化
+                customer_objs.update(
+                    formid='已发'
+                )
+
             customer_objs.update(
-                formid='已发'
+                is_subscribe=subscribe
             )
+            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
 
-        customer_objs.update(
-            is_subscribe=subscribe
-        )
-        print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+        # 保存头像到本地的数据库
+        if headimgurl:
+            html = s.get(headimgurl)
 
-    # 保存头像到本地的数据库
-    if headimgurl:
-        html = s.get(headimgurl)
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+            filename = "/gzh_cid_%s_%s.jpg" % (customer_id, now_time)
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'headimgurl') + filename
+            with open(file_dir, 'wb') as file:
+                file.write(html.content)
+            print('----- 生成 到本地头像 file_dir ---->>', file_dir)
 
-        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        filename = "/gzh_cid_%s_%s.jpg" % (customer_id, now_time)
-        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'headimgurl') + filename
-        with open(file_dir, 'wb') as file:
-            file.write(html.content)
-        print('----- 生成 到本地头像 file_dir ---->>', file_dir)
-
-        customer_objs.update(
-            headimgurl=file_dir
-        )
+            customer_objs.update(
+                headimgurl=file_dir
+            )
 
     return JsonResponse(response.__dict__)
 
