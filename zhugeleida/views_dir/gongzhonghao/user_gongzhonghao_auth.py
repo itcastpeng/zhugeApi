@@ -181,7 +181,6 @@ def user_gongzhonghao_auth(request):
                 print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', redirect_url)
 
         # 非静默
-
         else:
             print('ret_data -->', ret_data)
             get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
@@ -292,7 +291,8 @@ def user_gongzhonghao_auth(request):
             'authorizer_appid': appid,
             'headimgurl': headimgurl,
             'user_id' : uid,
-            'company_id':company_id
+            'company_id': company_id,
+            'client_id' : client_id
         }
         # 获取 公众号的用户信息
         tasks.get_customer_gongzhonghao_userinfo.delay(_data)
