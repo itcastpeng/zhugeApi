@@ -816,7 +816,8 @@ class zgld_accesslog(models.Model):
         (15,'转发文章到朋友'),
         (16,'转发文章到朋友圈'),
         (17,'报名活动'),
-        (18,'下单成功\取消订单')
+        (18,'下单成功\取消订单'),
+        (19, '点赞文章'),  # 取消了对您的靠谱
 
     )
 
@@ -954,7 +955,7 @@ class zgld_article(models.Model):
 class zgld_article_action(models.Model):
     article = models.ForeignKey('zgld_article', verbose_name='被赞的文章',null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
-
+    user = models.ForeignKey('zgld_userprofile', verbose_name='企业用户', null=True)
     status_choices = ((0, '未点赞'),
                       (1, '已点赞')
                       )

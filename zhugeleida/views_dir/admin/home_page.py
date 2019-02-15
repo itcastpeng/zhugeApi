@@ -22,7 +22,7 @@ def home_page(request):
         user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
         company_name = user_obj[0].company.name
         company_id = user_obj[0].company_id
-        mingpian_available_num = user_obj[0].company.mingpian_available_num  # 可开通名片数量
+        mingpian_available_num = user_obj[0].company.mingpian_available_num                 # 可开通名片数量
         user_count = models.zgld_userprofile.objects.filter(company_id=company_id).count()  # # 员工总数
 
         account_expired_time = user_obj[0].company.account_expired_time
@@ -85,22 +85,21 @@ def deal_search_time(data, q):
         user_customer_flowup__user__company=company_id).filter(q).count()
 
     browse_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                             action=1).filter(
-        q).count()  # 浏览名片的总数(包含着保存名片)
+                                                                             action__in=[1,14]).filter(q).count()  # 浏览名片的总数(包含着保存名片)
 
     forward_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                              action=6).filter(
-        q).count()  # 被转发的总数-不包括转发产品
+                                                                              action__in=[6,15,16]).filter(q).count()  # 被转发的总数-不包括转发产品
+
     saved_total_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
                                                                                   action=8).filter(q).count()  # 保存手机号
 
-    objs = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(
-        Sum('praise'))
-
-    praise__sum = 0
-    if objs:
-        obj = objs[0]
-        praise__sum = obj.get('praise__sum')
+    # objs = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q).values('company_id').annotate(Sum('praise'))
+    # praise__sum = 0
+    # if objs:
+    #     obj = objs[0]
+    #     praise__sum = obj.get('praise__sum')
+    praise__sum = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
+                                                                              action__in=[9, 19]).filter(q).count()  # 被转发的总数-不包括转发产品
 
     ret = {
         'customer_num': customer_num,  # 客户总数
@@ -145,8 +144,7 @@ def deal_line_info(data):
 
     elif index_type == 4:  # 被转发总数
         forward_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                                  action=6).filter(
-            q1).count()  # 被转发的总数-不包括转发产品
+                                                                                  action=6).filter(q1).count()  # 被转发的总数-不包括转发产品
         return forward_num
 
     elif index_type == 5:  # 被保存总数
@@ -156,12 +154,15 @@ def deal_line_info(data):
         return saved_total_num
 
     elif index_type == 6:  # 被赞总数
-        objs = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q1).values('company_id').annotate(
-            Sum('praise'))
-        praise__sum = 0
-        if objs:
-            obj = objs[0]
-            praise__sum = obj.get('praise__sum')
+        # objs = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q1).values('company_id').annotate(
+        #     Sum('praise'))
+        # praise__sum = 0
+        # if objs:
+        #     obj = objs[0]
+        #     praise__sum = obj.get('praise__sum')
+        praise__sum = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
+                                                                                  action__in=[9, 19]).filter(
+            q1).count()  # 被转发的总数-不包括转发产品
 
         return praise__sum
 

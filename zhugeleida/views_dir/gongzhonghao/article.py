@@ -289,6 +289,7 @@ def article_oper(request, oper_type, o_id):
         ## 点赞文章
         elif oper_type == 'praise_article':
             customer_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
 
             article_id = o_id
             # status = request.POST.get('status')
@@ -298,6 +299,7 @@ def article_oper(request, oper_type, o_id):
             request_data_dict = {
                 'article_id': article_id,
                 'status': status,  # 文章所属用户的ID
+                'uid': uid,  # 文章所属用户的ID
             }
 
             forms_obj = PraiseArticleForm(request_data_dict)
@@ -306,10 +308,11 @@ def article_oper(request, oper_type, o_id):
                 create_data = {
                     'article_id': o_id,
                     'customer_id': customer_id,
-                    'status': status
+                    'status': status,
+                    'user_id': uid,  # 文章所属用户的ID
                 }
                 article_objs = models.zgld_article.objects.filter(id=o_id)
-                article_up_down_objs = models.zgld_article_action.objects.filter(article_id=o_id,customer_id=customer_id)
+                article_up_down_objs = models.zgld_article_action.objects.filter(article_id=o_id,customer_id=customer_id,user_id=uid)
                 if article_up_down_objs:
                     article_up_down_objs.update(
                         status=status
@@ -335,6 +338,14 @@ def article_oper(request, oper_type, o_id):
                     }
                     response.code = 200
                     response.msg = "记录成功"
+
+                title = models.zgld_article.objects.get(id=article_id).title
+                remark = '点赞了您的文章《%s》' % (title)
+                data = request.GET.copy()
+                data['action'] = 19
+                action_record(data, remark)
+
+
             else:
 
                 print('-------未能通过------->>', forms_obj.errors)
