@@ -310,6 +310,13 @@ class PraiseArticleForm(forms.Form):
         }
     )
 
+    uid = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "所属用户不能为空"
+        }
+    )
+
 
 class ArticleReviewSelectForm(forms.Form):
     article_id = forms.IntegerField(

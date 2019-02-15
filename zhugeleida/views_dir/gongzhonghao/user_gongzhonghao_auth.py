@@ -286,16 +286,19 @@ def user_gongzhonghao_auth(request):
 
         print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
 
-        _data = {
-            'openid': openid,
-            'authorizer_appid': appid,
-            'headimgurl': headimgurl,
-            'user_id' : uid,
-            'company_id': company_id,
-            'client_id' : client_id
-        }
-        # 获取 公众号的用户信息
-        tasks.get_customer_gongzhonghao_userinfo.delay(_data)
+        if openid:
+            _data = {
+                'openid': openid,
+                'authorizer_appid': appid,
+                'headimgurl': headimgurl,
+                'user_id' : uid,
+                'company_id': company_id,
+                'client_id' : client_id
+            }
+            # 获取 公众号的用户信息
+            tasks.get_customer_gongzhonghao_userinfo.delay(_data)
+        else:
+            print('没有获取到 openid------->>')
 
         return redirect(redirect_url)
 
