@@ -60,11 +60,19 @@ def login(request):
             user_type = forms_obj.cleaned_data.get('user_type')
             company_id = forms_obj.cleaned_data.get('company_id')
             user_id = forms_obj.cleaned_data.get('uid')
+            xcx_type = request.GET.get('xcx_type')
 
             company_id = int(company_id) if company_id else ''
 
             is_release_version_num = True
-            if not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
+            if xcx_type == 'case_type' and company_id: # 案例类型的话
+                company_id = 12
+                is_release_version_num = False
+                print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
+                      user_id, company_id)
+
+
+            elif not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
                 # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
                 company_id = 1
                 is_release_version_num = False
@@ -274,6 +282,8 @@ def login_oper(request, oper_type):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
 
 
     else:
