@@ -85,6 +85,7 @@ def login(request):
             three_services_type = ''
             if services_type == 1:     # (1, '小程序(名片版)第三方平台'),
                 three_services_type=3
+
             elif services_type == 2:   # (2, '小程序(案例库)第三方平台')
                 three_services_type=4
 
@@ -153,10 +154,9 @@ def login(request):
                 client_id = obj.id
                 print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
 
-            if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
+            if not user_id and xcx_type != 'case_type':  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
                 user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
                 print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
-
 
 
 
