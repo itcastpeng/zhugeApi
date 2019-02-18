@@ -83,6 +83,7 @@ def diary_manage(request, oper_type):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
+                case_id = request.GET.get('case_id')
 
                 ## 搜索条件
                 diary_id = request.GET.get('diary_id')  #
@@ -92,6 +93,7 @@ def diary_manage(request, oper_type):
                 q1 = Q()
                 q1.connector = 'and'
                 q1.children.append(('company_id', company_id))
+                q1.children.append(('case_id', case_id))
 
                 if title:
                     q1.children.append(('title__contains', title))
