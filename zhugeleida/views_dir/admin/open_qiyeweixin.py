@@ -677,8 +677,7 @@ def open_qiyeweixin(request, oper_type):
                         agentid = _agent_dict.get('agentid')
 
                 access_token = get_permanent_code_info.get('access_token')  # 授权方（企业）access_token
-                permanent_code = get_permanent_code_info.get(
-                    'permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
+                permanent_code = get_permanent_code_info.get('permanent_code')  # 企业微信永久授权码 | 每个企业授权的每个应用的永久授权码、授权信息都是唯一的
 
                 if permanent_code:
                     key_name = 'access_token_qiyeweixin_%s_%s' % (corpid, SuiteId)

@@ -18,9 +18,10 @@ class zgld_company(models.Model):
     remarks = models.TextField(verbose_name="备注",null=True)
 
     product_function_type_choice = (
-        (1, '小程序版|公众号版'),
-        (2, '小程序版'),
-        (3, '公众号版'),
+        (1, '小程序(名片)版|公众号(文章)版'),
+        (2, '小程序版(名片)版'),
+        (3, '公众号(文章) 版'),
+        (4, '小程序(案例)版|公众号(文章)版'),
     )
     product_function_type = models.SmallIntegerField(verbose_name='产品功能类型', default=1, choices=product_function_type_choice)
     xcx_qr_code = models.CharField(verbose_name='企业小程序二维码', max_length=128, null=True)

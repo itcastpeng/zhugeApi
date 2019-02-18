@@ -325,6 +325,7 @@ def create_user_or_customer_qr_code(request):
         print('---- celery request.POST | data 数据 -->', request.POST, '|')
         user_id = request.POST.get('user_id')
         customer_id = request.POST.get('customer_id', '')
+
     company_id = ''
     product_function_type = ''
     userprofile_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
