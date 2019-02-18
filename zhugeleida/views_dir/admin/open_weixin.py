@@ -154,7 +154,11 @@ def open_weixin(request, oper_type):
 
                 get_access_token_data = {}
                 post_access_token_data = {}
-                component_access_token = rc.get('component_access_token')
+
+                component_access_token_name = 'component_access_token_%s' % (app_id)
+                # component_access_token = rc.get('component_access_token')
+                component_access_token = rc.get(component_access_token_name)
+
                 access_token_url = 'https://api.weixin.qq.com/cgi-bin/component/api_query_auth'
                 get_access_token_data['component_access_token'] = component_access_token
                 post_access_token_data['component_appid'] = app_id
@@ -761,8 +765,11 @@ def create_component_access_token(data):
         'component_verify_ticket' : component_verify_ticket
     }
 
+    component_access_token_name = 'component_access_token_%s' % (app_id)
 
-    token_ret = rc.get('component_access_token')
+    # token_ret = rc.get('component_access_token')
+    token_ret = rc.get(component_access_token_name)
+
     print('--- Redis 里存储的 component_access_token---->>', token_ret)
 
     if not token_ret:
@@ -774,7 +781,8 @@ def create_component_access_token(data):
 
         if access_token:
             token_ret = access_token
-            rc.set('component_access_token', access_token, 7000)
+            # rc.set('component_access_token', access_token, 7000)
+            rc.set(component_access_token_name, access_token, 7000)
         else:
             response.code = 400
             response.msg = "-------- 获取第三方平台 component_token_ret 返回错误 ------->"
