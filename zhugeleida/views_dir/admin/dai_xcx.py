@@ -953,8 +953,9 @@ def dai_xcx_oper(request, oper_type):
 
             gettemplate_list_url = 'https://api.weixin.qq.com/wxa/gettemplatelist'
             user_id =request.GET.get('user_id')
+            company_id =request.GET.get('company_id')
 
-            company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            # company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
 
             response_ret = create_component_access_token(company_id)
             component_access_token = response_ret
