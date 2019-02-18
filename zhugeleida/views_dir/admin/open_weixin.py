@@ -473,7 +473,8 @@ def xcx_auth_process(request):
             response.code = 200
             response.msg = "请求成功。请先填写步骤1 app_id信息"
             response.data = {
-                'step': 1
+                'step': 1,
+                'type_choice' : models.zgld_xiaochengxu_app.type_choice
             }
 
         else:

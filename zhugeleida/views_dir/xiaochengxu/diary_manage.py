@@ -32,6 +32,7 @@ def diary_manage(request, oper_type):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
+                case_id = request.GET.get('case_id')
 
                 ## 搜索条件
                 diary_id = request.GET.get('diary_id')  #
@@ -54,6 +55,9 @@ def diary_manage(request, oper_type):
                         diary_objs.update(  # 阅读次数
                             read_count=F('read_count') + 1
                         )
+
+                if case_id:
+                    q1.children.append(('case_id', case_id))
 
                 q1.children.append(('status__in', [1]))  #
                 print('-----q1---->>', q1)
@@ -265,8 +269,7 @@ def diary_manage_oper(request, oper_type, o_id):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
 
-                objs = models.zgld_diary_comment.objects.select_related('from_customer', 'to_customer').filter(
-                    diary_id=o_id).filter(Q(is_audit_pass=1) | Q(from_customer=customer_id)).order_by('-create_date')
+                objs = models.zgld_diary_comment.objects.select_related('from_customer', 'to_customer').filter(diary_id=o_id).filter(Q(is_audit_pass=1) | Q(from_customer=customer_id)).order_by('-create_date')
 
                 count = objs.count()
                 if objs:
@@ -314,5 +317,6 @@ def diary_manage_oper(request, oper_type, o_id):
                 response.code = 402
                 response.msg = "请求异常"
                 response.data = json.loads(forms_obj.errors.as_json())
+
 
     return JsonResponse(response.__dict__)
