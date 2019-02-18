@@ -65,8 +65,8 @@ def login(request):
             company_id = int(company_id) if company_id else ''
 
             is_release_version_num = True
-            if xcx_type == 'case_type' and company_id: # 案例类型的话
-                company_id = 12
+            if xcx_type == 'case_type' and not company_id: # 案例类型的话
+                company_id = 13
                 is_release_version_num = False
                 print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
                       user_id, company_id)
