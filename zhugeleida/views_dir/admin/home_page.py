@@ -161,8 +161,7 @@ def deal_line_info(data):
         #     obj = objs[0]
         #     praise__sum = obj.get('praise__sum')
         praise__sum = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                                  action__in=[9, 19]).filter(
-            q1).count()  # 被转发的总数-不包括转发产品
+                                                                                  action__in=[9, 19]).filter(q1).count()  # 被转发的总数-不包括转发产品
 
         return praise__sum
 

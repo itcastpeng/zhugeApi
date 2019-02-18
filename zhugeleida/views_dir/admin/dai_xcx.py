@@ -154,9 +154,11 @@ def create_authorizer_access_token(data):
         # app_secret = '4a9690b43178a1287b2ef845158555ed'
         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-        component_access_token = rc.get('component_access_token')
-        if not component_access_token:
+        # component_access_token = rc.get('component_access_token')
+        component_access_token_name = 'component_access_token_%s' % (app_id)
 
+        component_access_token = rc.get(component_access_token_name)
+        if not component_access_token:
             get_pre_auth_data = {}
             post_component_data = {}
             post_component_data['component_appid'] = app_id
@@ -179,10 +181,12 @@ def create_authorizer_access_token(data):
 
             print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
             component_token_ret = component_token_ret.json()
-            access_token = component_token_ret.get('component_access_token')
+            # access_token = component_token_ret.get('component_access_token')
+            access_token = component_token_ret.get(component_access_token_name)
             if access_token:
                 get_pre_auth_data['component_access_token'] = access_token
-                rc.set('component_access_token', access_token, 7000)
+                # rc.set('component_access_token', access_token, 7000)
+                rc.set(component_access_token_name, access_token, 7000)
                 component_access_token = access_token
 
             else:
@@ -267,7 +271,10 @@ def create_component_access_token(company_id):
         # app_secret = '4a9690b43178a1287b2ef845158555ed'
         rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-        component_access_token = rc.get('component_access_token')
+        component_access_token_name = 'component_access_token_%s' % (app_id)
+
+        # component_access_token = rc.get('component_access_token')
+        component_access_token = rc.get(component_access_token_name)
         if not component_access_token:
 
             get_pre_auth_data = {}
@@ -295,7 +302,8 @@ def create_component_access_token(company_id):
             access_token = component_token_ret.get('component_access_token')
             if access_token:
                 get_pre_auth_data['component_access_token'] = access_token
-                rc.set('component_access_token', access_token, 7000)
+                # rc.set('component_access_token', access_token, 7000)
+                rc.set(component_access_token_name, access_token, 7000)
                 component_access_token = access_token
 
             else:
