@@ -93,7 +93,8 @@ def diary_manage(request, oper_type):
                 q1 = Q()
                 q1.connector = 'and'
                 q1.children.append(('company_id', company_id))
-                q1.children.append(('case_id', case_id))
+                if case_id:
+                    q1.children.append(('case_id', case_id))
 
                 if title:
                     q1.children.append(('title__contains', title))
@@ -116,8 +117,8 @@ def diary_manage(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-                if objs:
 
+                if objs:
                     for obj in objs:
                         status = obj.status
                         status_text = obj.get_status_display()
