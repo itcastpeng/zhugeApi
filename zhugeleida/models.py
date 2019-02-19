@@ -1458,6 +1458,11 @@ class zgld_case(models.Model):
     up_count = models.IntegerField(default=0, verbose_name="点赞次数")
     comment_count = models.IntegerField(default=0, verbose_name="被评论数量")
 
+    case_type_choices = ((1, '普通案例'),
+                         (2, '时间轴案例')
+                        )
+    case_type = models.SmallIntegerField(default=2, verbose_name='案例类型', choices=case_type_choices)
+
     update_date = models.DateTimeField(verbose_name="日记最后修改时间",null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

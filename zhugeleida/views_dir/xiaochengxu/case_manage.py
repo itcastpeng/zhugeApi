@@ -90,11 +90,20 @@ def case_manage(request, oper_type):
                             if customer_objs:
                                 _history_tags_record =  customer_objs[0].history_tags_record
                                 history_tags_record = json.loads(_history_tags_record)
+
+                                history_tags_record =  history_tags_record[0:13]
+                                recode_tag_name = []
+                                for recode_tag_name_dict in history_tags_record:
+                                    recode_tag_name.append(recode_tag_name_dict['name'])
+
+                                if tag_name  in recode_tag_name:
+                                    index_num = tag_name.index(recode_tag_name)
+                                    history_tags_record.remove(index_num)
+
                                 history_tags_record.append( {
                                     'id': search_tag_id,
                                     'name' : tag_name
                                 })
-
                                 customer_objs.update(
                                     history_tags_record=json.dumps(history_tags_record)
                                 )
@@ -220,6 +229,9 @@ def case_manage(request, oper_type):
                             'status': status,
                             'status_text': status_text,
                             'tag_list' : tag_list,
+
+                            'case_type': obj.case_type,
+                            'case_type_text': obj.get_case_type_display(),
 
                             'last_diary_data' : last_diary_data, # 最后日记的内容
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
