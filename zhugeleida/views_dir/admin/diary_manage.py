@@ -11,7 +11,7 @@ from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm,
 import requests,cv2,os
 import json,datetime
 from django.db.models import Q, Sum, Count
-# import threading
+import threading
 
 
 
@@ -215,9 +215,9 @@ def diary_manage_oper(request, oper_type, o_id):
                 'company_id': company_id,
 
                 'title': title,
-                'summary' : summary,
+                # 'summary' : summary,
                 'diary_date': diary_date,  # 活动名称
-                'cover_picture': cover_picture,  # 活动名称
+                # 'cover_picture': cover_picture,  # 活动名称
                 'content': content,  # 活动名称
 
                 'status': status,
@@ -228,15 +228,6 @@ def diary_manage_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
 
                 diary_objs = models.zgld_diary.objects.filter(id=diary_id)
-                # if cover_show_type == 1: # (1,'只展示图片'), (2,'只展示视频'),
-                #     _content = json.loads(content)
-                #     soup = BeautifulSoup(_content, 'lxml')
-                #
-                #     img_tags = soup.find_all('img')
-                #     for img_tag in img_tags:
-                #         data_src = img_tag.attrs.get('src')
-                #         if data_src:
-                #             print(data_src)
 
 
                 diary_objs.update(
@@ -245,10 +236,10 @@ def diary_manage_oper(request, oper_type, o_id):
                     company_id = company_id,
 
                     title = title,
-                    summary=summary,
+                    # summary=summary,
 
                     diary_date = diary_date,
-                    cover_picture = cover_picture,
+                    # cover_picture = cover_picture,
                     content = content,
 
                     status = status,
@@ -263,19 +254,39 @@ def diary_manage_oper(request, oper_type, o_id):
                     video_url = json.loads(cover_picture)[0]
                     obj =  diary_objs[0]
 
-                    import threading
+
                     t1 = threading.Thread(target=create_video_coverURL, args=(obj,video_url))  # 创建一个线程对象t1 子线程
                     t1.start()
 
-                    # _cover_picture_list.append(video_url)
-                    #
-                    # img_file_dir = create_video_coverURL(diary_objs[0].id,video_url)
-                    # _cover_picture_list.append(img_file_dir)
-                    #
-                    # cover_picture_list = json.dumps(_cover_picture_list)
-                    # diary_objs.update(
-                    #     cover_picture=cover_picture_list
-                    # )
+
+                elif int(cover_show_type) == 1: # (1,'只展示图片')
+                    _content = json.loads(content)
+                    _cover_picture = json.loads(cover_picture)
+                    soup = BeautifulSoup(_content, 'lxml')
+
+                    img_tags = soup.find_all('img')
+                    for img_tag in img_tags:
+                        data_src = img_tag.attrs.get('src')
+                        if data_src:
+                            print(data_src)
+                            _cover_picture.append(data_src)
+
+                    diary_objs.update(
+                        cover_picture=json.dumps(_cover_picture)
+                    )
+
+                if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
+                    _content = json.loads(content)
+                    soup = BeautifulSoup(_content, 'lxml')
+                    img_tags = soup.find_all('p')
+                    data_text = ''
+                    for img_tag in img_tags:
+                        data_src = img_tag.text
+                        if data_src:
+                            data_text += data_src
+
+                    print('简介内容------>>',data_text[0:50])
+                    diary_objs.update(summary = data_text)
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
@@ -316,10 +327,10 @@ def diary_manage_oper(request, oper_type, o_id):
                 'company_id' :company_id,
 
                 'title': title,
-                'summary': summary,
+                # 'summary': summary,
+                # 'cover_picture': cover_picture,  # 活动名称
 
                 'diary_date': diary_date,  # 活动名称
-                'cover_picture': cover_picture,  # 活动名称
                 'content': content,  # 活动名称
 
                 'status': status,
@@ -329,18 +340,6 @@ def diary_manage_oper(request, oper_type, o_id):
             forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
 
-                # if cover_show_type == 1:  # (1,'只展示图片'), (2,'只展示视频'),
-                    # _content = json.loads(content)
-                    # _cover_picture = json.loads(cover_picture)
-                    # soup = BeautifulSoup(_content, 'lxml')
-                    #
-                    # img_tags = soup.find_all('img')
-                    # for img_tag in img_tags:
-                    #     data_src = img_tag.attrs.get('src')
-                    #     if data_src:
-                    #         print(data_src)
-
-
 
                 obj = models.zgld_diary.objects.create(
                     user_id=user_id,
@@ -348,9 +347,9 @@ def diary_manage_oper(request, oper_type, o_id):
                     company_id=company_id,
 
                     title=title,
-                    summary=summary,
+                    # summary=summary,
+                    # cover_picture=cover_picture,
                     diary_date=diary_date,
-                    cover_picture=cover_picture,
                     content=content,
 
                     status=status,
@@ -366,12 +365,36 @@ def diary_manage_oper(request, oper_type, o_id):
                     t1 = threading.Thread(target=create_video_coverURL, args=(obj, video_url))  # 创建一个线程对象t1 子线程
                     t1.start()
 
-                    # img_file_dir = create_video_coverURL(obj.id, video_url)
-                    # _cover_picture_list.append(video_url)
-                    # _cover_picture_list.append(img_file_dir)
-                    # cover_picture_list = json.dumps(_cover_picture_list)
-                    # obj.cover_picture = cover_picture_list
-                    # obj.save()
+                elif int(cover_show_type) == 1:
+                    _content = json.loads(content)
+                    _cover_picture = json.loads(cover_picture)
+                    soup = BeautifulSoup(_content, 'lxml')
+
+                    img_tags = soup.find_all('img')
+                    for img_tag in img_tags:
+                        data_src = img_tag.attrs.get('src')
+                        if data_src:
+                            print(data_src)
+                            _cover_picture.append(data_src)
+
+                    obj.cover_picture =  json.dumps(_cover_picture)
+                    obj.save()
+
+                if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
+                    _content = json.loads(content)
+                    soup = BeautifulSoup(_content, 'lxml')
+                    img_tags = soup.find_all('p')
+                    data_text = ''
+                    for img_tag in img_tags:
+                        data_src = img_tag.text
+                        if data_src:
+                            data_text += data_src
+
+                    print('简介内容------>>', data_text[0:50])
+                    obj.summary = data_text
+                    obj.save()
+
+
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:

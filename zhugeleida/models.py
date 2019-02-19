@@ -1478,7 +1478,7 @@ class zgld_diary(models.Model):
     company = models.ForeignKey('zgld_company',verbose_name='文章所属公司',null=True)
 
     title = models.CharField(verbose_name='日记标题', max_length=128)
-    summary = models.CharField(verbose_name='日记摘要', max_length=255)
+    summary = models.CharField(verbose_name='日记摘要', max_length=255,null=True)
 
     diary_date = models.DateTimeField(verbose_name="日记时间")
     cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True)
