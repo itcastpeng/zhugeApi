@@ -62,7 +62,7 @@ def case_tag(request,oper_type):
 
                 response.code = 200
                 response.data = {
-                    'ret_data': history_tags_record,
+                    'ret_data': history_tags_record[0:13],
 
                 }
             else:
@@ -84,7 +84,7 @@ def case_tag(request,oper_type):
             print('q -->', q)
 
             tag_list = models.zgld_case_tag.objects.filter(q).order_by('-search_amount').values('id','name')
-            tag_data = list(tag_list)
+            tag_data = list(tag_list)[0:13]
 
             response.code = 200
             response.data = {
