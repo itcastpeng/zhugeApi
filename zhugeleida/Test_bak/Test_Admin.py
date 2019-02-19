@@ -587,18 +587,18 @@ ip = 'http://127.0.0.1:8001'
 # ret = requests.post(url, data = post_data ,params=get_data)
 
 ###
-# url =  ip + '/zhugeleida/admin/diary_manage/add/0'  # 获取产品的列表
-# get_data['company_id'] = 1
-#
-# post_data['case_id'] = 1
-# post_data['title'] = '我的美白日记1'
-# post_data['diary_date'] = '2019-01-28 13:50:00'
+url =  ip + '/zhugeleida/admin/diary_manage/add/0'  # 获取产品的列表
+get_data['company_id'] = 1
+
+post_data['case_id'] = 1
+post_data['title'] = '我的美白日记1'
+post_data['diary_date'] = '2019-01-28 13:50:00'
 # post_data['cover_picture'] = 'xxx.jpg'
-# post_data['content'] = 'fsdfsdf' #
-#
-# post_data['status'] = 1
-# post_data['cover_show_type'] = 1
-# ret = requests.post(url, data = post_data ,params=get_data)
+post_data['content'] = '<p>测试一下哈哈哈哈哈哈测试一下哈哈哈哈哈哈测试一下哈</p>'
+
+post_data['status'] = 1
+post_data['cover_show_type'] = 1
+ret = requests.post(url, data = post_data ,params=get_data)
 
 
 ##
