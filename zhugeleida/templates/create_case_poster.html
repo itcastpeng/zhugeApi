@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Test</title>
+<style type="text/css">
+    *{
+        margin:0 auto;
+        padding:0;
+    }
+    .btn{
+        width:100px;
+        height:30px;
+        line-height:30px;
+        background:green;
+        color:#fff;
+        border-radius:10px;
+        -webkit-border-radius:10px;
+        text-align:center;
+        display:block;
+        text-decoration:none;
+    }
+    .container{
+        background:#fff;
+        width:700px;
+        height:888px;
+        overflow: hidden;
+    }
+    #jietu{
+        width:604px;
+        height:851px;
+    }
+    .tu{
+        width:480px;
+        height:500px;
+        margin:0 auto;
+    }
+    .tu img{
+        width:480px;
+        height: 460px;
+        margin-top:30px;
+    }
+    .xinxi{
+        width:603px;
+        height: 70px;
+        margin: 0 auto;
+        margin-top: 30px;
+        overflow: hidden;
+    }
+    .xinxi1{
+        width:222px;
+        float: left;
+        height: 212px;
+    }
+    .xinxi1 h2{
+        font-size: 32px;
+        font-weight: 500;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
+    }
+    h2{
+        margin-top: 30px;
+        margin-bottom: 30px;
+        font-size: 27px;
+        line-height: 40px;
+        letter-spacing: 1.3px;
+    }
+
+
+    .gongsi{
+        width:100%;
+        overflow: hidden;
+        text-align: center;
+        font-size: 25px;
+        color: #000;
+        line-height: 25px;
+        letter-spacing: 1px;
+
+    }
+    .xcxt{
+        width:180px;
+        margin-left: -8px;
+        margin-top: 50px;
+        height: 212px;
+        float: left;
+        text-align: center;
+    }
+    .xcxt img{
+        width:150px;
+        height: 150px;
+        margin-left: 2px;
+        margin-top: 5px;
+        margin-right: 2px;
+        margin-bottom: 5px;
+    }
+    .wenzi{
+        width: 400px;
+        font-size: 22px;
+        line-height: 40px;
+        margin-top: 110px;
+        overflow: hidden;
+        letter-spacing: 1px;
+    }
+</style>
+</head>
+
+<body style="background: #000; height: 1000px">
+    <div class="container" id="container">
+        <div id="jietu">
+            <div class="tu"><img src="{{ ret_data.user_avatar }}"></div>
+{#            <div class="xinxi">#}
+{#                <span>{{ ret_data.username }}</span>#}
+                <h2  style="text-align: center;display:block;" >网曝邓伦杨紫热恋真的假的? 如果是真的你们同意吗?</h2>
+
+{#            </div>#}
+             <hr/>
+
+             <div class="xcxt"><img src="{{ ret_data.qr_code_url }}">
+
+{#            <div class="gongsi">{{ ret_data.company }}</div>#}
+             </div>
+
+             <div class="wenzi">识别小程序, 进去 米扬丽格 阅读全文 </div></div>
+    </div>
+</body>
+
+</html>

@@ -260,9 +260,9 @@ def diary_manage_oper(request, oper_type, o_id):
 
 
                 elif int(cover_show_type) == 1: # (1,'只展示图片')
-                    _content = json.loads(content)
+                    # _content = json.loads(content)
                     _cover_picture = json.loads(cover_picture)
-                    soup = BeautifulSoup(_content, 'lxml')
+                    soup = BeautifulSoup(content, 'lxml')
 
                     img_tags = soup.find_all('img')
                     for img_tag in img_tags:
@@ -276,8 +276,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     )
 
                 if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
-                    _content = json.loads(content)
-                    soup = BeautifulSoup(_content, 'lxml')
+                    # _content = json.loads(content)
+                    soup = BeautifulSoup(content, 'lxml')
                     img_tags = soup.find_all('p')
                     data_text = ''
                     for img_tag in img_tags:
@@ -366,9 +366,9 @@ def diary_manage_oper(request, oper_type, o_id):
                     t1.start()
 
                 elif int(cover_show_type) == 1:
-                    _content = json.loads(content)
+                    # _content = json.loads(content)
                     _cover_picture = json.loads(cover_picture)
-                    soup = BeautifulSoup(_content, 'lxml')
+                    soup = BeautifulSoup(content, 'lxml')
 
                     img_tags = soup.find_all('img')
                     for img_tag in img_tags:
@@ -381,8 +381,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     obj.save()
 
                 if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
-                    _content = json.loads(content)
-                    soup = BeautifulSoup(_content, 'lxml')
+                    # _content = json.loads(content)
+                    soup = BeautifulSoup(content, 'lxml')
                     img_tags = soup.find_all('p')
                     data_text = ''
                     for img_tag in img_tags:
