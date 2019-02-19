@@ -125,7 +125,7 @@ class diaryAddForm(forms.Form):
         }
     )
     summary = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "摘要不能为空"
         }
@@ -139,7 +139,7 @@ class diaryAddForm(forms.Form):
     )
 
     cover_picture  = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "封面不能为空"
         }
@@ -204,7 +204,7 @@ class diaryUpdateForm(forms.Form):
     )
 
     summary = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "摘要不能为空"
         }
@@ -218,7 +218,7 @@ class diaryUpdateForm(forms.Form):
     )
 
     cover_picture = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
             'required': "封面不能为空"
         }
