@@ -261,7 +261,7 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 elif int(cover_show_type) == 1: # (1,'只展示图片')
                     # _content = json.loads(content)
-                    _cover_picture = json.loads(cover_picture)
+                    _cover_picture = []
                     soup = BeautifulSoup(content, 'lxml')
 
                     img_tags = soup.find_all('img')
@@ -367,7 +367,7 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 elif int(cover_show_type) == 1:
                     # _content = json.loads(content)
-                    _cover_picture = json.loads(cover_picture)
+                    _cover_picture = []
                     soup = BeautifulSoup(content, 'lxml')
 
                     img_tags = soup.find_all('img')
