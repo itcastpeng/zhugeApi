@@ -484,7 +484,18 @@ def dai_xcx_oper(request, oper_type):
                                 authorizer_access_token = authorizer_access_token_result.data
                             else:
                                 return JsonResponse(authorizer_access_token.__dict__)
-                        path = 'pages/mingpian/index'
+
+                        company_id = obj.company_id
+
+                        three_services_type = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).three_services_type
+                        path = ''
+                        if three_services_type == 1:    #  (1, '小程序(名片版)第三方平台'),
+                            path = 'pages/mingpian/index'
+
+                        elif three_services_type == 2:  #  (2, '小程序(案例库)第三方平台')
+                            path = '/pages/index/index'
+
+
                         # path = 'pages/mingpian/index?uid=1&source=1'
                         get_qrcode_data = {
                             'access_token': authorizer_access_token,
