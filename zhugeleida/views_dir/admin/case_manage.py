@@ -87,6 +87,8 @@ def case_manage(request, oper_type):
                             'status_text': status_text,
 
                             'tag_list': tag_list,
+                            'case_type': obj.case_type,
+                            'case_type_text': obj.get_case_type_display(),
 
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',

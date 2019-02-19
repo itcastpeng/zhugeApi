@@ -181,8 +181,8 @@ def create_authorizer_access_token(data):
 
             print('--------- 获取第三方平台 component_token_ret.json --------->>', component_token_ret.json())
             component_token_ret = component_token_ret.json()
-            # access_token = component_token_ret.get('component_access_token')
-            access_token = component_token_ret.get(component_access_token_name)
+
+            access_token = component_token_ret.get('component_access_token')
             if access_token:
                 get_pre_auth_data['component_access_token'] = access_token
                 # rc.set('component_access_token', access_token, 7000)
