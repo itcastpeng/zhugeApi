@@ -224,7 +224,7 @@ def diary_poster_html(request):
             'qr_code_url': qr_code,
         }
 
-        return render(request, 'create_case_poster.html', locals())
+        return render(request, 'poster_case.html', locals())
 
 
 

@@ -31,7 +31,7 @@ def case_manage(request, oper_type):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-update_date')
+                order = request.GET.get('order', '-create_date')
 
                 ## 搜索条件
                 case_id = request.GET.get('case_id')  #
@@ -79,6 +79,10 @@ def case_manage(request, oper_type):
                         if gongzhonghao_app_obj:
                             poster_company_logo = gongzhonghao_app_obj.poster_company_logo
 
+                        become_beautiful_cover = obj.become_beautiful_cover
+                        if become_beautiful_cover:
+                            become_beautiful_cover = json.loads(become_beautiful_cover)
+
                         poster_cover = obj.poster_cover
                         if poster_cover:
                             poster_cover = json.loads(poster_cover)
@@ -98,6 +102,7 @@ def case_manage(request, oper_type):
                             'tag_list': tag_list,
                             'case_type': obj.case_type,
                             'poster_cover': poster_cover,
+                            'become_beautiful_cover': become_beautiful_cover,
 
                             'case_type_text': obj.get_case_type_display(),
 
