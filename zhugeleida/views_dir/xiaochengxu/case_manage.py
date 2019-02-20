@@ -479,7 +479,7 @@ def case_manage(request, oper_type):
                 response.data = json.loads(forms_obj.errors.as_json())
 
 
-        ## 案例-海报
+        ## 案例-海报内容
         elif oper_type == 'case_poster':
             user_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
@@ -493,7 +493,7 @@ def case_manage(request, oper_type):
             poster_company_logo = app_obj.poster_company_logo
 
             #
-            models.zgld_user_customer_belonger.objects.filter(user)
+            # models.zgld_user_customer_belonger.objects.filter(user)
 
 
             case_objs = models.zgld_case.objects.filter(id=case_id)
@@ -583,7 +583,7 @@ def case_manage(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
 
-        ##点赞案例
+        ## 点赞案例
         elif oper_type == 'praise_case':
             customer_id = request.GET.get('user_id')
             case_id = request.POST.get('case_id')
