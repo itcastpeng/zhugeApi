@@ -204,6 +204,10 @@ def case_manage(request, oper_type):
                             is_collection_case = 0
                             is_collection_case_text = '没有收藏此案例'
 
+                        become_beautiful_cover = obj.become_beautiful_cover
+                        if become_beautiful_cover:
+                            become_beautiful_cover = json.loads(become_beautiful_cover)
+
                         ret_data.append({
                             'case_id': _case_id,
                             'case_name': obj.case_name,
@@ -223,12 +227,17 @@ def case_manage(request, oper_type):
                             'is_open_comment' : is_open_comment,
                             'is_open_comment_text' :is_open_comment_text,
 
+                            'become_beautiful_cover' : become_beautiful_cover,
+
                             'is_collection_case' : is_collection_case,
                             'is_collection_case_text' : is_collection_case_text,
 
                             'status': status,
                             'status_text': status_text,
                             'tag_list' : tag_list,
+
+
+
 
                             'case_type': obj.case_type,
                             'case_type_text': obj.get_case_type_display(),
