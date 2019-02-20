@@ -75,9 +75,9 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
-                        gongzhonghao_app_objs = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-                        if gongzhonghao_app_objs:
-                            poster_company_logo = gongzhonghao_app_objs[0].poster_company_logo
+                        gongzhonghao_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+                        if gongzhonghao_app_obj:
+                            poster_company_logo = gongzhonghao_app_obj.poster_company_logo
 
                         poster_cover = obj.poster_cover
                         if poster_cover:
