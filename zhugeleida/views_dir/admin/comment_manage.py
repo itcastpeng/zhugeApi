@@ -174,5 +174,25 @@ def comment_manage(request, oper_type):
                 response.code = 302
                 response.msg = "数据不存在"
 
+        ## 评论是否开启
+        elif oper_type == 'setting_open_comment':
+            user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
+            is_open_comment = request.POST.get('is_open_comment')
+
+
+            objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+            if objs and is_open_comment:
+                objs.update(
+                    is_open_comment=is_open_comment
+                )
+                response.code = 200
+                response.msg = "设置成功"
+
+            else:
+                response.code = 200
+                response.msg = "公众号不存在"
+
+
     return JsonResponse(response.__dict__)
 

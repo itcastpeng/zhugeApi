@@ -6,7 +6,7 @@ import requests
 import json
 
 # token = '3385f306019d810ac6bdc00e9e08b0b4'
-token = '90e8114abd1a309516eaa48af1d6b36a'
+token = '3385f306019d810ac6bdc00e9e08b0b4'
 timestamp = str(int(time.time() * 1000))
 
 get_data = {
@@ -136,11 +136,15 @@ ip = 'http://127.0.0.1:8001'
 # get_data['company_id']=1
 # ret = requests.get(url, params=get_data,data = post_data)
 
-url = ip + '/zhugeleida/xiaochengxu/case_manage/collection_case_list_record' #
-get_data['company_id']=1
+# url = ip + '/zhugeleida/xiaochengxu/case_manage/collection_case_list_record' #
+# get_data['company_id']=1
+# ret = requests.get(url, params=get_data,data = post_data)
+
+url = ip + '/zhugeleida/xiaochengxu/case_manage/case_poster' #
+get_data['company_id'] = 1
+get_data['case_id'] = 1
+
 ret = requests.get(url, params=get_data,data = post_data)
-
-
 
 
 # url =ip +  '/zhugeleida/qiyeweixin/action/get_new_log'       #得到相应的动作的-->访问日志

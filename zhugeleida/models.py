@@ -1448,6 +1448,9 @@ class zgld_case(models.Model):
 
     case_name = models.CharField(verbose_name='案例名称', max_length=128)
     cover_picture = models.TextField(verbose_name="封面图片URL",null=True)
+    poster_cover = models.TextField(verbose_name="海报封面图片URL",null=True)
+    become_beautiful_cover = models.TextField(verbose_name="变美封面图片URL",null=True)
+
     tags = models.ManyToManyField('zgld_case_tag', verbose_name="文章关联的标签")
     status_choices = ((1, '已发'),
                       (2, '未发'),

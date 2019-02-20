@@ -31,7 +31,7 @@ def case_manage(request, oper_type):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-                order = request.GET.get('order', '-update_date')
+                order = request.GET.get('order', '-create_date')
 
                 ## 搜索条件
                 case_id = request.GET.get('case_id')  #
@@ -75,7 +75,14 @@ def case_manage(request, oper_type):
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
 
-                        poster_company_logo = obj.poster_company_logo
+                        gongzhonghao_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+                        if gongzhonghao_app_obj:
+                            poster_company_logo = gongzhonghao_app_obj.poster_company_logo
+
+                        become_beautiful_cover = obj.become_beautiful_cover
+                        if become_beautiful_cover:
+                            become_beautiful_cover = json.loads(become_beautiful_cover)
+
                         poster_cover = obj.poster_cover
                         if poster_cover:
                             poster_cover = json.loads(poster_cover)
@@ -95,6 +102,7 @@ def case_manage(request, oper_type):
                             'tag_list': tag_list,
                             'case_type': obj.case_type,
                             'poster_cover': poster_cover,
+                            'become_beautiful_cover': become_beautiful_cover,
 
                             'case_type_text': obj.get_case_type_display(),
 
@@ -158,7 +166,10 @@ def case_manage_oper(request, oper_type, o_id):
             customer_name = request.POST.get('customer_name')
             headimgurl = request.POST.get('headimgurl')
             status = request.POST.get('status')
+            case_type = request.POST.get('case_type') #'case_type': obj.case_type,
+
             cover_picture = request.POST.get('cover_picture')  # 文章ID
+            become_beautiful_cover = request.POST.get('become_beautiful_cover')  # 文章ID
 
 
             form_data = {
@@ -181,7 +192,9 @@ def case_manage_oper(request, oper_type, o_id):
                         customer_name=customer_name.strip(),
                         headimgurl=headimgurl,
                         cover_picture=cover_picture,
-                        status=status
+                        status=status,
+                        case_type=case_type,
+                        become_beautiful_cover=become_beautiful_cover
                     )
 
                     obj =objs[0]
@@ -213,6 +226,9 @@ def case_manage_oper(request, oper_type, o_id):
             status  = request.POST.get('status')
             cover_picture = request.POST.get('cover_picture')  # 文章ID
 
+            become_beautiful_cover = request.POST.get('become_beautiful_cover')  # 文章ID
+            case_type = request.POST.get('case_type')
+
             form_data = {
                 'case_name' : case_name,
                 'company_id': company_id,
@@ -232,7 +248,9 @@ def case_manage_oper(request, oper_type, o_id):
                     customer_name=customer_name.strip(),
                     headimgurl=headimgurl,
                     cover_picture=cover_picture,
-                    status=status
+                    status=status,
+                    become_beautiful_cover=become_beautiful_cover,
+                    case_type=case_type
                 )
 
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
@@ -247,6 +265,8 @@ def case_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
+        ## 海报-设置
         elif oper_type == "poster_setting":
 
 
@@ -254,6 +274,7 @@ def case_manage_oper(request, oper_type, o_id):
             poster_cover = request.POST.get('poster_cover')
             poster_company_logo = request.POST.get('poster_company_logo')
 
+            print('request.POST ------>>',poster_cover)
             if poster_company_logo:
                 xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
                 if xiaochengxu_app_objs:

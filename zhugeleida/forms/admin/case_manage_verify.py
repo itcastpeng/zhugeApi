@@ -229,7 +229,7 @@ class PosterSettingForm(forms.Form):
         }
     )
 
-    poster_cover = forms.IntegerField(
+    poster_cover = forms.CharField(
         required=True,
         error_messages={
             'required': "海报封面不能为空"

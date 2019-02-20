@@ -356,7 +356,6 @@ def create_user_or_customer_qr_code(request):
             authorizer_refresh_token = xiaochengxu_app_objs[0].authorizer_refresh_token
             authorizer_appid = xiaochengxu_app_objs[0].authorization_appid
 
-            component_appid = 'wx67e2fde0f694111c'  # 第三平台的app id
             key_name = '%s_authorizer_access_token' % (authorizer_appid)
 
             authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。

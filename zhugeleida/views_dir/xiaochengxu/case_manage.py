@@ -204,6 +204,10 @@ def case_manage(request, oper_type):
                             is_collection_case = 0
                             is_collection_case_text = '没有收藏此案例'
 
+                        become_beautiful_cover = obj.become_beautiful_cover
+                        if become_beautiful_cover:
+                            become_beautiful_cover = json.loads(become_beautiful_cover)
+
                         ret_data.append({
                             'case_id': _case_id,
                             'case_name': obj.case_name,
@@ -223,12 +227,17 @@ def case_manage(request, oper_type):
                             'is_open_comment' : is_open_comment,
                             'is_open_comment_text' :is_open_comment_text,
 
+                            'become_beautiful_cover' : become_beautiful_cover,
+
                             'is_collection_case' : is_collection_case,
                             'is_collection_case_text' : is_collection_case_text,
 
                             'status': status,
                             'status_text': status_text,
                             'tag_list' : tag_list,
+
+
+
 
                             'case_type': obj.case_type,
                             'case_type_text': obj.get_case_type_display(),
@@ -238,12 +247,14 @@ def case_manage(request, oper_type):
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
+
                     #  查询成功 返回200 状态码
                     response.code = 200
                     response.msg = '查询成功'
                     response.data = {
                         'ret_data': ret_data,
-                        'data_count': count
+                        'data_count': count,
+
                     }
                 else:
                     response.code = 302
@@ -476,6 +487,56 @@ def case_manage(request, oper_type):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+
+        ## 案例-海报内容
+        elif oper_type == 'case_poster':
+            user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+
+            company_id = request.GET.get('company_id')
+            case_id = request.GET.get('case_id')
+
+
+            ret_data = []
+            app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            poster_company_logo = app_obj.poster_company_logo
+
+            #
+            # models.zgld_user_customer_belonger.objects.filter(user)
+
+
+            case_objs = models.zgld_case.objects.filter(id=case_id)
+            if case_objs:
+                poster_cover = case_objs[0].poster_cover
+
+                if poster_cover:
+                    poster_cover = case_objs[0].loads(poster_cover)
+
+                for obj in case_objs:
+                    ret_data.append(
+                        {
+                            'case_id': obj.id,
+                            'poster_cover': poster_cover or '',
+                            'poster_company_logo': poster_company_logo or ''
+                        }
+                    )
+
+                response.data = ret_data
+                response.note = {
+                    'case_id': '案例ID',
+                    'poster_cover': '海报封面',
+                    'poster_company_logo': '海报公司log'
+                }
+
+                response.code = 200
+                response.msg = "返回成功"
+
+
+            else:
+                response.code = 301
+                response.msg = "案例不存在"
+
+
     elif  request.method == "POST":
 
         ## 收藏案例
@@ -531,8 +592,7 @@ def case_manage(request, oper_type):
                 response.msg = json.loads(forms_obj.errors.as_json())
 
 
-
-        ##点赞案例
+        ## 点赞案例
         elif oper_type == 'praise_case':
             customer_id = request.GET.get('user_id')
             case_id = request.POST.get('case_id')
@@ -586,6 +646,8 @@ def case_manage(request, oper_type):
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
 
 
     return JsonResponse(response.__dict__)
