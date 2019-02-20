@@ -588,15 +588,22 @@ ip = 'http://127.0.0.1:8001'
 
 
 
-url =  ip + '/zhugeleida/admin/case_manage/poster_setting/2'  # 获取产品的列表
-get_data['company_id'] = 1
-post_data['poster_cover'] = json.dumps(['xxxx','yyyy'])
-ret = requests.post(url, data = post_data ,params=get_data)
-
 # url =  ip + '/zhugeleida/admin/case_manage/poster_setting/2'  # 获取产品的列表
 # get_data['company_id'] = 1
 # post_data['poster_cover'] = json.dumps(['xxxx','yyyy'])
 # ret = requests.post(url, data = post_data ,params=get_data)
+
+# url =  ip + '/zhugeleida/admin/case_manage/poster_setting/2'  # 获取产品的列表
+# get_data['company_id'] = 1
+# post_data['poster_company_logo'] = 'ddddd'
+# ret = requests.post(url, data = post_data ,params=get_data)
+
+
+url =  ip + '/zhugeleida/admin/comment_manage/setting_open_comment'  # 获取产品的列表
+get_data['company_id'] = 1
+
+ret = requests.post(url, data = post_data ,params=get_data)
+
 
 ###
 # url =  ip + '/zhugeleida/admin/diary_manage/add/0'  # 获取产品的列表
