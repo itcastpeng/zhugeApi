@@ -214,6 +214,31 @@ class CaseUpdateForm(forms.Form):
         else:
             return case_name
 
+class PosterSettingForm(forms.Form):
+    case_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "案例ID不能为空"
+        }
+    )
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    poster_cover = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "海报封面不能为空"
+        }
+    )
+
+
+
+
 
 #修改活动
 class ActivityUpdateForm(forms.Form):
