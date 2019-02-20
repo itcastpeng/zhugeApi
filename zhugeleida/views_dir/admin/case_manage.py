@@ -254,6 +254,7 @@ def case_manage_oper(request, oper_type, o_id):
             poster_cover = request.POST.get('poster_cover')
             poster_company_logo = request.POST.get('poster_company_logo')
 
+            print('request.POST ------>>',poster_cover)
             if poster_company_logo:
                 xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
                 if xiaochengxu_app_objs:
