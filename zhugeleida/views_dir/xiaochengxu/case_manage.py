@@ -238,12 +238,14 @@ def case_manage(request, oper_type):
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
+
                     #  查询成功 返回200 状态码
                     response.code = 200
                     response.msg = '查询成功'
                     response.data = {
                         'ret_data': ret_data,
-                        'data_count': count
+                        'data_count': count,
+
                     }
                 else:
                     response.code = 302

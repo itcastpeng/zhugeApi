@@ -78,6 +78,7 @@ urlpatterns = [
 
     #日记的海报
     url(r'^diary_manage/poster_html$', diary_manage.diary_poster_html),
+
     # 日记管理
     url(r'^diary_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', diary_manage.diary_manage_oper),
     url(r'^diary_manage/(?P<oper_type>\w+)$', diary_manage.diary_manage),
