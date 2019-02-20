@@ -213,6 +213,7 @@ class zgld_xiaochengxu_app(models.Model):
         (2, '小程序(案例库)第三方平台')
     )
     three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice, null=True)
+    poster_company_logo =  models.CharField(verbose_name="公司海报logo", max_length=1024,null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

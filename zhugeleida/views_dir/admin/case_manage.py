@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.forms.admin.case_manage_verify import SetFocusGetRedPacketForm, CaseAddForm, CaseSelectForm, CaseUpdateForm, \
-    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
+    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm,PosterSettingForm
 
 import json,datetime
 from django.db.models import Q, Sum, Count
@@ -65,6 +65,7 @@ def case_manage(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
+                poster_company_logo = ''
                 if objs:
 
                     for obj in objs:
@@ -73,6 +74,11 @@ def case_manage(request, oper_type):
                         cover_picture = obj.cover_picture
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
+
+                        poster_company_logo = obj.poster_company_logo
+                        poster_cover = obj.poster_cover
+                        if poster_cover:
+                            poster_cover = json.loads(poster_cover)
 
                         tag_list = list(obj.tags.values('id', 'name'))
                         ret_data.append({
@@ -88,6 +94,8 @@ def case_manage(request, oper_type):
 
                             'tag_list': tag_list,
                             'case_type': obj.case_type,
+                            'poster_cover': poster_cover,
+
                             'case_type_text': obj.get_case_type_display(),
 
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
@@ -99,7 +107,8 @@ def case_manage(request, oper_type):
                 response.msg = '查询成功'
                 response.data = {
                     'ret_data': ret_data,
-                    'data_count': count
+                    'data_count': count,
+                    'poster_company_logo': poster_company_logo,
                 }
 
 
@@ -238,6 +247,54 @@ def case_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        elif oper_type == "poster_setting":
+
+
+            company_id = request.GET.get('company_id')
+            poster_cover = request.POST.get('poster_cover')
+            poster_company_logo = request.POST.get('poster_company_logo')
+
+            if poster_company_logo:
+                xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+                if xiaochengxu_app_objs:
+                    xiaochengxu_app_objs.update(
+                        poster_company_logo = poster_company_logo
+                    )
+                    response.code = 200
+                    response.msg = "修改成功"
+
+                else:
+                    response.code = 301
+                    response.msg = "小程序不存在"
+            else:
+
+                tag_data = {
+                    'case_id' : o_id,
+                    'company_id' : company_id,
+                    'poster_cover' : poster_cover   # 标签名字
+                }
+
+                forms_obj = PosterSettingForm(tag_data)
+                if forms_obj.is_valid():
+
+                    poster_cover = forms_obj.cleaned_data['poster_cover']
+                    if poster_cover:
+                        poster_cover = json.loads(poster_cover)
+
+                    case_objs = models.zgld_case.objects.filter(
+                       id=o_id,company_id=company_id
+                    )
+                    case_objs.update(
+                        poster_cover = json.dumps(poster_cover)
+                    )
+
+                    response.code = 200
+                    response.msg = "修改成功"
+
+
+                else:
+                    response.code = 303
+                    response.msg = json.loads(forms_obj.errors.as_json())
 
 
     return JsonResponse(response.__dict__)

@@ -1042,6 +1042,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                         if MsgType == 'text' or MsgType == 'voice' or  MsgType == 'image':
+                            MediaId = collection.getElementsByTagName("MsgId")[0].childNodes[0].data
 
                             flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
                                 customer_id=customer_id).order_by('-last_follow_time')
@@ -1089,7 +1090,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                                 elif MsgType == 'voice':
-                                    MediaId = collection.getElementsByTagName("MediaId")[0].childNodes[0].data
+                                    # MediaId = collection.getElementsByTagName("MediaId")[0].childNodes[0].data
                                     # Content = '【收到不支持的消息类型，暂无法显示】'
                                     objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                                     if objs:

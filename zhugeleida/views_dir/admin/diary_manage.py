@@ -248,15 +248,14 @@ def diary_manage_oper(request, oper_type, o_id):
 
 
                 if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
-
+                    pass
 
                     # _cover_picture_list = []
-                    video_url = json.loads(cover_picture)[0]
-                    obj =  diary_objs[0]
-
-
-                    t1 = threading.Thread(target=create_video_coverURL, args=(obj,video_url))  # 创建一个线程对象t1 子线程
-                    t1.start()
+                    # video_url = json.loads(cover_picture)[0]
+                    # obj =  diary_objs[0]
+                    #
+                    # t1 = threading.Thread(target=create_video_coverURL, args=(obj,video_url))  # 创建一个线程对象t1 子线程
+                    # t1.start()
 
 
                 elif int(cover_show_type) == 1: # (1,'只展示图片')
@@ -279,7 +278,7 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
                     # _content = json.loads(content)
-                    soup = BeautifulSoup(content, 'lxml')
+                    soup = BeautifulSoup(content, 'html.parser')
                     img_tags = soup.find_all('p')
                     data_text = ''
                     for img_tag in img_tags:
@@ -360,19 +359,18 @@ def diary_manage_oper(request, oper_type, o_id):
 
 
                 if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
-
+                    pass
                     # _cover_picture_list = []
-                    video_url = json.loads(cover_picture)[0]
-
-                    t1 = threading.Thread(target=create_video_coverURL, args=(obj, video_url))  # 创建一个线程对象t1 子线程
-                    t1.start()
+                    # video_url = json.loads(cover_picture)[0]
+                    #
+                    # t1 = threading.Thread(target=create_video_coverURL, args=(obj, video_url))  # 创建一个线程对象t1 子线程
+                    # t1.start()
 
                 elif int(cover_show_type) == 1:
                     # _content = json.loads(content)
                     _cover_picture = []
                     print('值 content cover_show_type----->>', content)
                     soup = BeautifulSoup(content, 'html.parser')
-
 
                     img_tags = soup.find_all('img')
                     for img_tag in img_tags:
@@ -388,7 +386,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     # _content = json.loads(content)
                     print('值 content summary ----->>', content)
 
-                    soup = BeautifulSoup(content, 'lxml')
+                    soup = BeautifulSoup(content, 'html.parser')
 
                     img_tags = soup.find_all('p')
                     data_text = ''
