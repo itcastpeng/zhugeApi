@@ -1236,6 +1236,8 @@ def gzh_auth_process(request):
             principal_name = obj[0].principal_name
             head_img = obj[0].head_img
             service_category = obj[0].service_category
+            is_open_comment = obj[0].is_open_comment
+            is_open_comment_text = obj[0].get_is_open_comment_display()
 
             if not authorization_appid:  # 没有App ID，首先填写
                 response.code = 200
@@ -1277,7 +1279,8 @@ def gzh_auth_process(request):
                         'head_img': head_img,  # 授权方头像
                         'verify_type_info': verify_type_info,  # 微信认证是否通过. True 为认证通过，Falsew为认证通过
                         'service_category': service_category,  # 服务类目
-
+                        'is_open_comment' : is_open_comment,
+                        'is_open_comment_text' : is_open_comment_text
                     }
                 }
                 response.code = 200

@@ -478,6 +478,56 @@ def case_manage(request, oper_type):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+
+        ## 案例-海报
+        elif oper_type == 'case_poster':
+            user_id = request.GET.get('user_id')
+            uid = request.GET.get('uid')
+
+            company_id = request.GET.get('company_id')
+            case_id = request.GET.get('case_id')
+
+
+            ret_data = []
+            app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            poster_company_logo = app_obj.poster_company_logo
+
+            #
+            models.zgld_user_customer_belonger.objects.filter(user)
+
+
+            case_objs = models.zgld_case.objects.filter(id=case_id)
+            if case_objs:
+                poster_cover = case_objs[0].poster_cover
+
+                if poster_cover:
+                    poster_cover = case_objs[0].loads(poster_cover)
+
+                for obj in case_objs:
+                    ret_data.append(
+                        {
+                            'case_id': obj.id,
+                            'poster_cover': poster_cover or '',
+                            'poster_company_logo': poster_company_logo or ''
+                        }
+                    )
+
+                response.data = ret_data
+                response.note = {
+                    'case_id': '案例ID',
+                    'poster_cover': '海报封面',
+                    'poster_company_logo': '海报公司log'
+                }
+
+                response.code = 200
+                response.msg = "返回成功"
+
+
+            else:
+                response.code = 301
+                response.msg = "案例不存在"
+
+
     elif  request.method == "POST":
 
         ## 收藏案例
@@ -531,7 +581,6 @@ def case_manage(request, oper_type):
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
 
         ##点赞案例
@@ -588,6 +637,8 @@ def case_manage(request, oper_type):
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
 
 
     return JsonResponse(response.__dict__)
