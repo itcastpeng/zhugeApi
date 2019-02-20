@@ -431,6 +431,7 @@ def article(request, oper_type):
                             'title': obj.title,
                             'author' : obj.author,
                             'content': obj.content,
+                            'create_date': obj.create_date,
                             'status_text': status_text,
                             'status': status
                         }
