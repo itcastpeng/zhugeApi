@@ -545,16 +545,34 @@ def create_user_or_customer_poster(request):
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
 
-    print(' create_user_or_customer_poster ---- 【生成海报celery】 request.GET | data 数据 -->', request.GET, '|',
-          request.GET.get('data'))
+    print(' create_user_or_customer_poster ---- 【生成海报celery】 request.GET | data 数据 -->', request.GET.get('data'))
 
     data = json.loads(request.GET.get('data'))
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
     print(' create_user_or_customer_poster --- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
-    objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+    poster_url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
 
+    _data = {
+        'user_id': user_id,
+        'customer_id' : customer_id,
+        'poster_url' : poster_url
+    }
+    create_poster_process(_data)
+
+    return JsonResponse(response.__dict__)
+
+
+def create_poster_process(data):
+    response = ResponseObj()
+
+
+    user_id = data.get('user_id')
+    customer_id = data.get('customer_id', '')
+    poster_url = data.get('poster_url', '')
+
+    objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
@@ -577,13 +595,11 @@ def create_user_or_customer_poster(request):
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
         driver.implicitly_wait(10)
 
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
-            customer_id, user_id)
 
-        print('--- create_user_or_customer_poster ---- url -->', url)
+        print('--- create_user_or_customer_poster ---- url -->', poster_url)
 
         try:
-            driver.get(url)
+            driver.get(poster_url)
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
             if customer_id:
@@ -640,7 +656,9 @@ def create_user_or_customer_poster(request):
             response.code = 400
             driver.quit()
 
-    return JsonResponse(response.__dict__)
+    return  response
+
+
 
 
 # 小程序生成token，并然后发送模板消息
