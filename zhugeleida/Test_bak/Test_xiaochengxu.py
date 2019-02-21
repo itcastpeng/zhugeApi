@@ -140,9 +140,12 @@ ip = 'http://127.0.0.1:8001'
 # get_data['company_id']=1
 # ret = requests.get(url, params=get_data,data = post_data)
 
-url = ip + '/zhugeleida/xiaochengxu/case_manage/case_poster' #
+url = ip + '/zhugeleida/xiaochengxu/case_manage/xcx_case_poster' #
 get_data['company_id'] = 1
+
 get_data['case_id'] = 1
+get_data['uid'] = 16
+print(url)
 
 ret = requests.get(url, params=get_data,data = post_data)
 
