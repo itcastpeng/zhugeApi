@@ -515,6 +515,7 @@ def case_manage(request, oper_type):
                     'user_id': uid,
                     'customer_id': customer_id,
                     'case_id': case_id,
+                    'company_id': company_id,
                     'user_customer_belonger_id': user_customer_belonger_id
                 }
                 print('_data ------>>',_data)
@@ -576,6 +577,7 @@ def case_manage(request, oper_type):
                     'user_id': uid,
                     'customer_id': customer_id,
                     'case_id': case_id,
+                    'company_id': company_id,
                     'user_customer_belonger_id' : user_customer_belonger_id
                 }
                 _response = create_user_customer_case_poster_qr_code(_data)
@@ -730,6 +732,7 @@ def create_user_customer_case_poster_qr_code(data):
     customer_id = data.get('customer_id')
     user_customer_belonger_id = data.get('user_customer_belonger_id')
     case_id = data.get('case_id')
+    company_id = data.get('company_id')
 
     poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(user_customer_belonger_id=user_customer_belonger_id,case_id=case_id)
     qr_code = ''
@@ -746,11 +749,6 @@ def create_user_customer_case_poster_qr_code(data):
 
     else:
         print('海报不存在二维码 ------>>', qr_code)
-
-        company_id = ''
-        userprofile_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-        if userprofile_objs:
-            company_id = userprofile_objs[0].company_id
 
         xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
 
