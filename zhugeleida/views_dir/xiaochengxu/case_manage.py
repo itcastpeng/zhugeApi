@@ -237,6 +237,8 @@ def case_manage(request, oper_type):
                             'status_text': status_text,
                             'tag_list': tag_list,
 
+                            'poster_cover' : obj.poster_cover or '',
+
                             'case_type': obj.case_type,
                             'case_type_text': obj.get_case_type_display(),
 
@@ -522,6 +524,9 @@ def case_manage(request, oper_type):
                 qr_code = ''
                 if _response.code == 200:
                     qr_code = _response.data.get('qr_code')
+
+
+
                 ret_data.append(
                     {
                         'case_id': case_id,
@@ -728,8 +733,8 @@ def create_user_customer_case_poster_qr_code(data):
     company_id = data.get('company_id')
 
     poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(user_customer_belonger_id=user_customer_belonger_id,case_id=case_id)
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s' % (
-        customer_id, user_id, case_id)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s' % (
+        customer_id, user_id, case_id,company_id)
 
     qr_code = ''
     if poster_belonger_objs:
