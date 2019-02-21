@@ -208,6 +208,13 @@ def case_manage(request, oper_type):
                             become_beautiful_cover = json.loads(become_beautiful_cover)
                         else:
                             become_beautiful_cover = ''
+
+                        poster_cover = obj.poster_cover
+                        if poster_cover:
+                            poster_cover = json.loads(poster_cover)
+                        else:
+                            poster_cover = []
+
                         ret_data.append({
                             'case_id': _case_id,
                             'case_name': obj.case_name,
@@ -237,7 +244,7 @@ def case_manage(request, oper_type):
                             'status_text': status_text,
                             'tag_list': tag_list,
 
-                            'poster_cover' : obj.poster_cover or '',
+                            'poster_cover' : poster_cover,
 
                             'case_type': obj.case_type,
                             'case_type_text': obj.get_case_type_display(),
@@ -508,7 +515,9 @@ def case_manage(request, oper_type):
                 poster_cover = case_objs[0].poster_cover
 
                 if poster_cover:
-                    poster_cover = case_objs[0].loads(poster_cover)
+                    poster_cover = json.loads(poster_cover)
+                else:
+                    poster_cover = []
 
                 _data = {
                     'user_id': uid,
@@ -530,7 +539,7 @@ def case_manage(request, oper_type):
                 ret_data.append(
                     {
                         'case_id': case_id,
-                        'poster_cover': poster_cover or '',
+                        'poster_cover': poster_cover,
                         'poster_company_logo': poster_company_logo or '',
                         'qr_code': qr_code or ''
                     }
