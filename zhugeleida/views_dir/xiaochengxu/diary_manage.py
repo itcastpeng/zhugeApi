@@ -170,7 +170,7 @@ def diary_poster_html(request):
         case_objs = models.zgld_case.objects.filter(id=case_id)
         poster_cover = []
         if case_objs:
-            poster_cover = case_objs[0].poster_cover
+            poster_cover = json.loads(case_objs[0].poster_cover)
 
         poster_company_logo = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).poster_company_logo
 
