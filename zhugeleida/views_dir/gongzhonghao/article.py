@@ -115,100 +115,100 @@ def article_oper(request, oper_type, o_id):
     import json
     if request.method == "POST":
         # 添加公众号文章
-        if oper_type == "add":
-            article_data = {
-                'user_id': request.GET.get('user_id'),
-                'title': request.POST.get('title'),
-                'summary': request.POST.get('summary'),
-                'content': request.POST.get('content'),
-                'cover_picture': request.POST.get('cover_picture'),
-            }
-
-            forms_obj = ArticleAddForm(article_data)
-
-            if forms_obj.is_valid():
-                print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
-
-                dict_data = {
-                    'user_id': request.GET.get('user_id'),
-                    'title': forms_obj.cleaned_data['title'],
-                    'summary': forms_obj.cleaned_data['summary'],
-                    'content': forms_obj.cleaned_data['content'],
-                    'cover_picture': forms_obj.cleaned_data['cover_picture'].strip(),
-                    'insert_ads': request.POST.get('insert_ads')
-                }
-
-                obj = models.zgld_article.objects.create(**dict_data)
-                tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
-                if tags_id_list:
-                    obj.tags = tags_id_list
-
-                response.code = 200
-                response.msg = "添加成功"
-
-            else:
-                # print("验证不通过")
-                print(forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-        # 删除公众号文章
-        elif oper_type == "delete":
-            print('------delete o_id --------->>', o_id)
-            user_id = request.GET.get('user_id')
-            article_objs = models.zgld_article.objects.filter(id=o_id, user_id=user_id)
-
-            if article_objs:
-                article_objs.delete()
-                response.code = 200
-                response.msg = "删除成功"
-
-            else:
-                response.code = 302
-                response.msg = '文章不存在'
-
-        # 修改公众号文章
-        elif oper_type == "update":
-            article_data = {
-                'article_id': o_id,
-                'user_id': request.GET.get('user_id'),
-                'title': request.POST.get('title'),
-                'summary': request.POST.get('summary'),
-                'content': request.POST.get('content'),
-                'cover_picture': request.POST.get('cover_picture'),
-
-            }
-
-            forms_obj = ArticleUpdateForm(article_data)
-            if forms_obj.is_valid():
-                dict_data = {
-                    'title': forms_obj.cleaned_data['title'],
-                    'summary': forms_obj.cleaned_data['summary'],
-                    'content': forms_obj.cleaned_data['content'],
-                    'cover_picture': forms_obj.cleaned_data['cover_picture'],
-                    'insert_ads': request.POST.get('insert_ads')
-                }
-                user_id = request.GET.get('user_id')
-                article_id = forms_obj.cleaned_data['article_id']
-                obj = models.zgld_article.objects.filter(
-                    id=article_id, user_id=user_id
-                )
-                obj.update(**dict_data)
-
-                tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
-                if tags_id_list:
-                    obj[0].tags = tags_id_list
-
-                response.code = 200
-                response.msg = "修改成功"
-            else:
-                # print("验证不通过")
-                print(forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
+        # if oper_type == "add":
+        #     article_data = {
+        #         'user_id': request.GET.get('user_id'),
+        #         'title': request.POST.get('title'),
+        #         'summary': request.POST.get('summary'),
+        #         'content': request.POST.get('content'),
+        #         'cover_picture': request.POST.get('cover_picture'),
+        #     }
+        #
+        #     forms_obj = ArticleAddForm(article_data)
+        #
+        #     if forms_obj.is_valid():
+        #         print('======forms_obj.cleaned_data====>>', forms_obj.cleaned_data)
+        #
+        #         dict_data = {
+        #             'user_id': request.GET.get('user_id'),
+        #             'title': forms_obj.cleaned_data['title'],
+        #             'summary': forms_obj.cleaned_data['summary'],
+        #             'content': forms_obj.cleaned_data['content'],
+        #             'cover_picture': forms_obj.cleaned_data['cover_picture'].strip(),
+        #             'insert_ads': request.POST.get('insert_ads')
+        #         }
+        #
+        #         obj = models.zgld_article.objects.create(**dict_data)
+        #         tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
+        #         if tags_id_list:
+        #             obj.tags = tags_id_list
+        #
+        #         response.code = 200
+        #         response.msg = "添加成功"
+        #
+        #     else:
+        #         # print("验证不通过")
+        #         print(forms_obj.errors)
+        #         response.code = 301
+        #         response.msg = json.loads(forms_obj.errors.as_json())
+        #
+        # # 删除公众号文章
+        # elif oper_type == "delete":
+        #     print('------delete o_id --------->>', o_id)
+        #     user_id = request.GET.get('user_id')
+        #     article_objs = models.zgld_article.objects.filter(id=o_id, user_id=user_id)
+        #
+        #     if article_objs:
+        #         article_objs.delete()
+        #         response.code = 200
+        #         response.msg = "删除成功"
+        #
+        #     else:
+        #         response.code = 302
+        #         response.msg = '文章不存在'
+        #
+        # # 修改公众号文章
+        # elif oper_type == "update":
+        #     article_data = {
+        #         'article_id': o_id,
+        #         'user_id': request.GET.get('user_id'),
+        #         'title': request.POST.get('title'),
+        #         'summary': request.POST.get('summary'),
+        #         'content': request.POST.get('content'),
+        #         'cover_picture': request.POST.get('cover_picture'),
+        #
+        #     }
+        #
+        #     forms_obj = ArticleUpdateForm(article_data)
+        #     if forms_obj.is_valid():
+        #         dict_data = {
+        #             'title': forms_obj.cleaned_data['title'],
+        #             'summary': forms_obj.cleaned_data['summary'],
+        #             'content': forms_obj.cleaned_data['content'],
+        #             'cover_picture': forms_obj.cleaned_data['cover_picture'],
+        #             'insert_ads': request.POST.get('insert_ads')
+        #         }
+        #         user_id = request.GET.get('user_id')
+        #         article_id = forms_obj.cleaned_data['article_id']
+        #         obj = models.zgld_article.objects.filter(
+        #             id=article_id, user_id=user_id
+        #         )
+        #         obj.update(**dict_data)
+        #
+        #         tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
+        #         if tags_id_list:
+        #             obj[0].tags = tags_id_list
+        #
+        #         response.code = 200
+        #         response.msg = "修改成功"
+        #     else:
+        #         # print("验证不通过")
+        #         print(forms_obj.errors)
+        #         response.code = 301
+        #         response.msg = json.loads(forms_obj.errors.as_json())
 
         # 经纬度转换成 地理位置
-        elif oper_type == 'location_convert':
+        if oper_type == 'location_convert':
             x_num = request.POST.get('x_num')
             y_num = request.POST.get('y_num')
 
@@ -286,7 +286,7 @@ def article_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-        ## 点赞文章
+        # 点赞文章
         elif oper_type == 'praise_article':
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
@@ -345,13 +345,11 @@ def article_oper(request, oper_type, o_id):
                 data['action'] = 19
                 action_record(data, remark)
 
-
             else:
 
                 print('-------未能通过------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
-
 
     else:
 
@@ -618,7 +616,7 @@ def article_oper(request, oper_type, o_id):
 
             return JsonResponse(response.__dict__)
 
-        ## 文章评论列表展示
+        # 文章评论列表展示
         elif oper_type == 'article_review_list':
 
             customer_id = request.GET.get('user_id')

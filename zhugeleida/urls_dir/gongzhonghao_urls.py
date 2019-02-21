@@ -9,7 +9,7 @@ urlpatterns = [
     # 代公众号 - 登录认证
     url(r'^work_gongzhonghao_auth$', user_gongzhonghao_auth.user_gongzhonghao_auth),
 
-    # 分享去的文章链接当点击后跳转。
+    # 分享出去的文章链接当点击后跳转。
     url(r'^work_gongzhonghao_auth/redirect_share_url$', user_gongzhonghao_auth.user_gongzhonghao_redirect_share_url),
 
     # 微信公众号-JS-SDK使用权限签名算法
