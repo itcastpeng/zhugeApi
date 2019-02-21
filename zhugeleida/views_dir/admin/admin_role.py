@@ -63,8 +63,9 @@ def admin_role(request):
                                     rule_dict['selected'] = False
 
                                 rule_dict['parent_rule_name'] = obj[1]
-                                if  rule[0]  in  rules_id_list:
-                                     rule_dict['children_rule_list'].append({'children_rule_id': rule[0], 'selected':True ,'children_rule_name': rule[1]})
+                                if rule[0] in rules_id_list:
+                                    rule_dict['children_rule_list'].append(
+                                        {'children_rule_id': rule[0], 'selected': True, 'children_rule_name': rule[1]})
 
                                 else:
                                     rule_dict['children_rule_list'].append(
@@ -105,11 +106,10 @@ def admin_role(request):
             response.msg = "请求异常"
             response.data = json.loads(forms_obj.errors.as_json())
 
-
     return JsonResponse(response.__dict__)
 
-def init_data(rules_id_list,super_id_id=None):
 
+def init_data(rules_id_list, super_id_id=None):
     result_data = []
 
     objs = models.zgld_access_rules.objects.filter(super_id_id=super_id_id)
@@ -117,35 +117,30 @@ def init_data(rules_id_list,super_id_id=None):
     for obj in objs:
 
         current_data = {
-            'id' : obj.id,
+            'id': obj.id,
             'expand': 'true',
             'title': obj.name,
             'super_id_id': obj.super_id_id
         }
-        print('init_data rules_id_list ------>>',rules_id_list)
+        print('init_data rules_id_list ------>>', rules_id_list)
 
         if int(obj.id) in rules_id_list:
-            print('数量 int(obj.id) ------------>>',int(obj.id))
+            print('数量 int(obj.id) ------------>>', int(obj.id))
 
             current_data['checked'] = True
         else:
             current_data['checked'] = False
 
-        children_data = init_data(rules_id_list,obj.id)
+        children_data = init_data(rules_id_list, obj.id)
 
         if children_data:
             current_data['children'] = children_data
 
         result_data.append(current_data)
 
-    print('result_data----------->>',json.dumps(result_data))
+    print('result_data----------->>', json.dumps(result_data))
 
-
-    return  result_data
-
-
-
-
+    return result_data
 
 
 @csrf_exempt
@@ -163,32 +158,31 @@ def admin_role_init(request):
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            id = request.GET.get('id')
             admin_role_id = ''
             admin_role_name = ''
-            if id:
+            if request.GET.get('id'):
                 objs = models.zgld_admin_role.objects.filter(q).order_by(order)
                 admin_role_name = objs[0].name
                 admin_role_id = objs[0].id
 
-                #将查询出来的数据 加入列表
-                rules_id_list = list(objs[0].rules.values_list('id',flat=True))
+                # 将查询出来的数据 加入列表
+                rules_id_list = list(objs[0].rules.values_list('id', flat=True))
 
-                print('查询出的 rules_id_list-------->>',rules_id_list)
+                print('查询出的 rules_id_list-------->>', rules_id_list)
 
                 ret_data = init_data(rules_id_list)
 
             else:
                 rules_id_list = []
-                ret_data =  init_data(rules_id_list)
+                ret_data = init_data(rules_id_list)
 
             #  查询成功 返回200 状态码
             response.code = 200
             response.msg = '查询成功'
             response.data = {
                 'rules_id_list': rules_id_list,
-                'admin_role_id' : admin_role_id,
-                'admin_role_name' : admin_role_name,
+                'admin_role_id': admin_role_id,
+                'admin_role_name': admin_role_name,
                 'ret_data': ret_data,
             }
 
@@ -197,11 +191,7 @@ def admin_role_init(request):
             response.msg = "请求异常"
             response.data = json.loads(forms_obj.errors.as_json())
 
-
     return JsonResponse(response.__dict__)
-
-
-
 
 
 #  角色操作
@@ -258,7 +248,7 @@ def admin_role_oper(request, oper_type, o_id):
             forms_obj = UpdateForm(form_data)
             if forms_obj.is_valid():
                 o_id = forms_obj.cleaned_data['o_id']
-                rules_list = json.loads(request.POST.get('rules_list')) if  request.POST.get('rules_list')  else []
+                rules_list = json.loads(request.POST.get('rules_list')) if request.POST.get('rules_list') else []
 
                 del forms_obj.cleaned_data['o_id']
 

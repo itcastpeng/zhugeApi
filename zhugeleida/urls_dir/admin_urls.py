@@ -1,15 +1,14 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.admin import role, company, login, user, department, website, \
-    home_page, product, help_doc, article,article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
-    plugin_report, plugin_goods, open_weixin,dai_xcx,xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
-    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi,open_qiyeweixin,\
-    theOrderManagement, tuiKuanDingDan, employeesOrders,activity_manage, tongxunlu,money_manage,case_tag,case_manage,diary_manage,comment_manage
-
-
+    home_page, product, help_doc, article, article_tag, access_rules, admin_role, admin_userprofile, plugin_mingpian, \
+    plugin_report, plugin_goods, open_weixin, dai_xcx, xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
+    speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi, open_qiyeweixin, \
+    theOrderManagement, tuiKuanDingDan, employeesOrders, activity_manage, tongxunlu, money_manage, case_tag, \
+    case_manage, diary_manage, comment_manage
 
 urlpatterns = [
-    
+
     # 登录
     url(r'^login$', login.login),
 
@@ -23,14 +22,14 @@ urlpatterns = [
     url(r'^home_page/(?P<oper_type>\w+)$', home_page.home_page_oper),
     url(r'^home_page$', home_page.home_page),
 
-    # 后台用户操作
+    # 后台-用户管理
     url(r'^admin_userprofile/(?P<oper_type>\w+)/(?P<o_id>\d+)$', admin_userprofile.admin_userprofile_oper),
     url(r'^admin_userprofile$', admin_userprofile.admin_userprofile),
 
     # 后台-角色操作
     url(r'^admin_role/(?P<oper_type>\w+)/(?P<o_id>\d+)$', admin_role.admin_role_oper),
     url(r'^admin_role$', admin_role.admin_role),
-    url(r'^admin_role_init$', admin_role.admin_role_init),
+    # url(r'^admin_role_init$', admin_role.admin_role_init),
 
     # 后台-权限管理
     url(r'^access_rules/(?P<oper_type>\w+)/(?P<o_id>\d+)$', access_rules.access_rules_oper),
@@ -42,16 +41,16 @@ urlpatterns = [
     # 企业微信服务商认证接入
     url(r'^open_qiyeweixin/(?P<oper_type>\w+)$', open_qiyeweixin.open_qiyeweixin),
 
-
     # 微信公众号通知+消息与事件接收
-    url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)/(?P<app_id>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao_oper),
+    url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)/(?P<app_id>\w+)$',
+        open_weixin_gongzhonghao.open_weixin_gongzhonghao_oper),
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao),
 
-    # 小程序第三方进入认证
+    # 小程序第三方进入认证 - 小程序授权
     url(r'^xcx_auth_process/update/(?P<oper_type>\w+)$', open_weixin.xcx_auth_process_oper),
     url(r'^xcx_auth_process$', open_weixin.xcx_auth_process),
 
-    # 公众号第三方进入认证
+    # 公众号第三方进入认证 - 公众号授权
     url(r'^gzh_auth_process/update/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.gzh_auth_process_oper),
     url(r'^gzh_auth_process$', open_weixin_gongzhonghao.gzh_auth_process),
 
@@ -61,14 +60,13 @@ urlpatterns = [
     # 代小程序发布
     url(r'^dai_xcx/(?P<oper_type>\w+)$', dai_xcx.dai_xcx_oper),
 
-    # 用户操作
+    # 客户操作
     url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
     url(r'^user$', user.user),
 
     # 所有客户的通讯录
     url(r'^tongxunlu/(?P<oper_type>\w+)$', tongxunlu.tongxunlu_oper),
     url(r'^tongxunlu$', tongxunlu.tongxunlu),
-
 
     # 角色操作
     url(r'^role/(?P<oper_type>\w+)/(?P<o_id>\d+)$', role.role_oper),
@@ -101,7 +99,7 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
     url(r'^article/(?P<oper_type>\w+)$', article.article),
 
-    # 公众号-文章管理
+    # 公众号-帮助文档管理
     url(r'^help_doc/(?P<oper_type>\w+)/(?P<o_id>\d+)$', help_doc.help_doc_oper),
     url(r'^help_doc$', help_doc.help_doc),
 
@@ -109,7 +107,7 @@ urlpatterns = [
     url(r'^plugin_mingpian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_mingpian.plugin_mingpian_oper),
     url(r'^plugin_mingpian$', plugin_mingpian.plugin_mingpian),
 
-    # 公众号插件报名管理
+    # 公众号-插件报名管理
     url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)$', plugin_report.plugin_report_oper),
     url(r'^plugin_report/(?P<oper_type>\w+)$', plugin_report.plugin_report),
 
@@ -145,8 +143,8 @@ urlpatterns = [
     url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
 
     # 商城基础设置
-    url(r'^jiChuSheZhi/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),    #  商城基础操作
-    url(r'^jiChuSheZhi$', shangchengjichushezhi.jiChuSheZhi),                       # 商城基础查询
+    url(r'^jiChuSheZhi/(?P<oper_type>\w+)$', shangchengjichushezhi.jiChuSheZhiOper),  # 商城基础操作
+    url(r'^jiChuSheZhi$', shangchengjichushezhi.jiChuSheZhi),  # 商城基础查询
     # url(r'^addSmallProgram$', shangchengjichushezhi.addSmallProgram),                       # 添加小程序ID
 
     # 商品分类管理
@@ -169,16 +167,14 @@ urlpatterns = [
     url(r'^employeesOrders$', employeesOrders.employeesOrders),  # 订单管理查询
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
 
-
     # 活动管理
-    url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),   # 关注领红包
-    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),                      # 关注领红包
+    url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),  # 关注领红包
+    url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),  # 关注领红包
 
-
-    #资金管理
+    # 资金管理
     url(r'^money_manage/(?P<oper_type>\w+)$', money_manage.money_manage),
 
-    url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option), # 微信支付回调地址[暂时搁置待删除]
-
+    # 微信支付回调地址[暂时搁置待删除]
+    url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option),
 
 ]
