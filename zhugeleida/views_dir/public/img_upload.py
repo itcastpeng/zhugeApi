@@ -142,6 +142,7 @@ def img_merge(request):
 
         print('【1】值 os.path.getsize(img_path) ---------->>',os.path.getsize(img_path))
 
+        ## 给文章的图片加水印
         user_id = request.GET.get('user_id')
         if  img_source == 'article' or  img_source == 'cover_picture':
             company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
@@ -149,6 +150,7 @@ def img_merge(request):
             if  _img_path:
                 img_path =  _img_path
 
+        ## 给案例的图片加水印
         elif  img_source == 'case':
             company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
             _img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
