@@ -823,18 +823,24 @@ def create_user_customer_case_poster_qr_code(data):
             user_obj = ''
             if customer_id:
                 user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
-                user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
-                user_obj.qr_code = user_qr_code_path
-                user_obj.save()
+                qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
+
+
                 print('----celery生成用户-客户对应的小程序二维码成功-->>',
                       'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
                 # # 一并生成案例海报
 
-                data_dict = {'user_id': user_id, 'customer_id': customer_id, 'poster_url': url}
+                data_dict = {
+                    'user_id': user_id,
+                    'customer_id': customer_id,
+                    'poster_url': url,
+                    'user_customer_belonger_id' : user_customer_belonger_id,
+                    'case_id' : case_id
+
+                }
                 tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-                qr_code = user_obj.qr_code
                 if qr_code:
                     case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                         user_customer_belonger_id=user_customer_belonger_id,
