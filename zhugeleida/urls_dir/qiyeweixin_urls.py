@@ -24,17 +24,17 @@ urlpatterns = [
     url(r'^tag_list/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tag_list.tag_list_oper),
     url(r'^tag_list$', tag_list.tag_list),
 
-    # 标签 和 标签用户的操作
-    url(r'^tag_user/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
-    url(r'^tag_user$', tag_user.tag_user),
+    # # 标签 和 标签用户的操作
+    # url(r'^tag_user/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
+    # url(r'^tag_user$', tag_user.tag_user),
 
-    # 搜索(客户\标签)
-    url(r'^search/(?P<oper_type>\w+)$', search.search),
+    # # 搜索(客户\标签)
+    # url(r'^search/(?P<oper_type>\w+)$', search.search),
 
 
     # 修改客户详情和客户关联信息表
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', customer.customer_oper),
-    url(r'^customer$', customer.customer),
+    url(r'^customer$', customer.customer),      # 查询用户详细信息
 
     # 客户通讯录
     url(r'^tongxunlu$', tongxunlu.tongxunlu),
