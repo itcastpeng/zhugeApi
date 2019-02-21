@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.qiyeweixin import user, quanxian
+# from zhugeleida.views_dir.qiyeweixin import user, quanxian
 from zhugeleida.views_dir.xiaochengxu import login, mingpian, product, prepaidManagement, theOrderManagement, \
     tuiKuanDingDan, mallManagementShow,test_login,goodsClassification,case_manage,case_tag,diary_manage,customer
 
@@ -9,15 +9,15 @@ from zhugeleida.views_dir.public import  websocket
 
 urlpatterns = [
 
-    # 权限操作
-    url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', quanxian.quanxian_oper),
-    url(r'^quanxian$', quanxian.quanxian),
+    # # 权限操作
+    # url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', quanxian.quanxian_oper),
+    # url(r'^quanxian$', quanxian.quanxian),
+    #
+    # # 用户操作
+    # url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
+    # url(r'^user$', user.user),
 
-    # 用户操作
-    url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
-    url(r'^user$', user.user),
-
-    # 修改客户和客户信息表
+    # 获取个人信息，小程序首屏展示信息
     url(r'^customer$', customer.customer),
 
     # 实时聊天
@@ -42,8 +42,8 @@ urlpatterns = [
     url(r'^login/(?P<oper_type>\w+)', login.login_oper),
     url(r'^login$', login.login),
 
-    url(r'^test_login/(?P<oper_type>\w+)$', test_login.login_oper),
-    url(r'^test_login$', test_login.login),
+    # url(r'^test_login/(?P<oper_type>\w+)$', test_login.login_oper),
+    # url(r'^test_login$', test_login.login),
 
 
     # 小程序官网
@@ -75,8 +75,7 @@ urlpatterns = [
     # 案例标签管理
     url(r'^case_tag/(?P<oper_type>\w+)$', case_tag.case_tag),
 
-
-    #日记的海报
+    # 日记的海报
     url(r'^diary_manage/poster_html$', diary_manage.diary_poster_html),
 
     # 日记管理

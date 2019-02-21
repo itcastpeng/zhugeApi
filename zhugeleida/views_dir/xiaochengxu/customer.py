@@ -26,7 +26,7 @@ def customer(request):
             print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
             customer_id = request.GET.get('user_id')
 
-            order = request.GET.get('order', '-create_date') #排序为成交率; 最后跟进时间; 最后活动时间
+            order = request.GET.get('order', '-create_date')    # 排序为成交率; 最后跟进时间; 最后活动时间
             field_dict = {
                 'create_date': '',
             }
@@ -64,13 +64,10 @@ def customer(request):
                     mem = info_obj[0].mem if info_obj else ''
                     sex = info_obj[0].sex if info_obj else ''
 
-
                     day_interval =  datetime.datetime.today() - obj.create_date
 
                     encodestr = base64.b64decode(obj.username)
                     customer_name = str(encodestr, 'utf-8')
-
-
                     ret_data.append({
                         'id': obj.id,
                         'username': customer_name,
