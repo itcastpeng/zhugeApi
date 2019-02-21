@@ -515,7 +515,9 @@ def case_manage(request, oper_type):
                 poster_cover = case_objs[0].poster_cover
 
                 if poster_cover:
-                    poster_cover = case_objs[0].loads(poster_cover)
+                    poster_cover = json.loads(poster_cover)
+                else:
+                    poster_cover = []
 
                 _data = {
                     'user_id': uid,
@@ -537,7 +539,7 @@ def case_manage(request, oper_type):
                 ret_data.append(
                     {
                         'case_id': case_id,
-                        'poster_cover': poster_cover or '',
+                        'poster_cover': poster_cover,
                         'poster_company_logo': poster_company_logo or '',
                         'qr_code': qr_code or ''
                     }
