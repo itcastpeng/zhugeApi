@@ -495,7 +495,14 @@ def case_manage(request, oper_type):
             app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
             poster_company_logo = app_obj.poster_company_logo
 
-            # models.zgld_user_customer_belonger.objects.filter(user)
+            print('值customer_id------>>',customer_id)
+            print('值customer_id------>>',customer_id)
+            user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=uid)
+
+            user_customer_belonger_id = ''
+            if user_customer_belonger_objs:
+                user_customer_belonger_id = user_customer_belonger_objs[0].id
+            print('user_customer_belonger_objs ------->>',user_customer_belonger_objs)
 
             case_objs = models.zgld_case.objects.filter(id=case_id)
             if case_objs:
@@ -508,8 +515,12 @@ def case_manage(request, oper_type):
                     'user_id': uid,
                     'customer_id': customer_id,
                     'case_id': case_id,
+                    'user_customer_belonger_id': user_customer_belonger_id
                 }
+                print('_data ------>>',_data)
+
                 _response = create_user_customer_case_poster_qr_code(_data)
+
                 qr_code = ''
                 if _response.code == 200:
                     qr_code = _response.data.get('qr_code')
@@ -537,6 +548,7 @@ def case_manage(request, oper_type):
                 response.code = 301
                 response.msg = "案例不存在"
 
+        ## 小程序获取案例海报截图
         elif oper_type == 'xcx_get_case_poster_screenshots':
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
@@ -554,10 +566,17 @@ def case_manage(request, oper_type):
                 if poster_cover:
                     poster_cover = case_objs[0].loads(poster_cover)
 
+                user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=uid)
+
+                user_customer_belonger_id = ''
+                if user_customer_belonger_objs:
+                    user_customer_belonger_id = user_customer_belonger_objs[0].id
+
                 _data = {
                     'user_id': uid,
                     'customer_id': customer_id,
                     'case_id': case_id,
+                    'user_customer_belonger_id' : user_customer_belonger_id
                 }
                 _response = create_user_customer_case_poster_qr_code(_data)
                 qr_code = ''
@@ -721,10 +740,13 @@ def create_user_customer_case_poster_qr_code(data):
 
     if  qr_code:
         response.data = {'qr_code': qr_code}
+        print('海报存在二维码 ------>>',qr_code)
         response.code = 200
-        response.msg = "生成小程序二维码成功"
+        response.msg = "存在二维码"
 
     else:
+        print('海报不存在二维码 ------>>', qr_code)
+
         company_id = ''
         userprofile_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
         if userprofile_objs:

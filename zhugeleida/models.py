@@ -1556,12 +1556,10 @@ class zgld_diary_action(models.Model):
 class zgld_customer_case_poster_belonger(models.Model):
 
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
-
     user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表', null=True)
 
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
     poster_url = models.CharField(verbose_name='用户-客户-对应的二维码', max_length=128, null=True)
-    customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属父级',related_name="customer_parent" ,null=True, blank=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
