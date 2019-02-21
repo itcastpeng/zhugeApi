@@ -550,14 +550,17 @@ def create_user_or_customer_poster(request):
     data = json.loads(request.GET.get('data'))
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
+    poster_url = data.get('poster_url', '')
     print(' create_user_or_customer_poster --- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
-    poster_url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
+    if poster_url:
+        url = poster_url
 
     _data = {
         'user_id': user_id,
         'customer_id' : customer_id,
-        'poster_url' : poster_url
+        'poster_url' : url
     }
     create_poster_process(_data)
 

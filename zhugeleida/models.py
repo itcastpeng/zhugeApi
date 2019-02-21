@@ -1302,7 +1302,6 @@ class zgld_goods_management(models.Model):
     createDate = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 
-
 # 小程序 - 订单管理
 class zgld_shangcheng_dingdan_guanli(models.Model):
     shangpinguanli = models.ForeignKey(to='zgld_goods_management', verbose_name='商品管理', null=True, blank=True)
@@ -1337,6 +1336,7 @@ class zgld_shangcheng_dingdan_guanli(models.Model):
     theOrderStatus = models.SmallIntegerField(verbose_name='订单状态', choices=order_status, default=1)
     createDate = models.DateTimeField(verbose_name="创建时间", null=True, blank=True)
     stopDateTime = models.DateTimeField(verbose_name="完成时间", null=True, blank=True)
+
 
 # 退款单管理
 class zgld_shangcheng_tuikuan_dingdan_management(models.Model):
@@ -1378,7 +1378,6 @@ class zgld_red_envelope_to_issue(models.Model):
 
     # endTheActivity = models.DateTimeField(verbose_name='活动结束时间', null=True, blank=True)
     articleId = models.IntegerField(verbose_name='文章ID', null=True, blank=True)
-
 
 
 #帮助文档
@@ -1509,6 +1508,7 @@ class zgld_diary(models.Model):
         verbose_name_plural = "案例日记表"
         app_label = "zhugeleida"
 
+
 ##日记评论表
 class zgld_diary_comment(models.Model):
     # company = models.ForeignKey('zgld_company', verbose_name='所属公司', null=True)
@@ -1550,3 +1550,22 @@ class zgld_diary_action(models.Model):
 
         verbose_name_plural = "客户-日记行为记录表"
         app_label = "zhugeleida"
+
+
+# 客户所属用户-关系绑定表
+class zgld_customer_case_poster_belonger(models.Model):
+
+    case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
+
+    user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表', null=True)
+
+    qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
+    poster_url = models.CharField(verbose_name='用户-客户-对应的二维码', max_length=128, null=True)
+    customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属父级',related_name="customer_parent" ,null=True, blank=True)
+
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "雷达用户|客户-生成海报关系表"
+        app_label = "zhugeleida"
+
