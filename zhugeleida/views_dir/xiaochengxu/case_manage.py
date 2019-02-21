@@ -752,8 +752,14 @@ def create_user_customer_case_poster_qr_code(data):
         poster_url =  poster_belonger_obj.poster_url
 
         if not  poster_url:
+            data_dict = {
+                'user_id': user_id,
+                'customer_id': customer_id,
+                'poster_url': url,
+                'user_customer_belonger_id': user_customer_belonger_id,
+                'case_id': case_id
 
-            data_dict = {'user_id': user_id, 'customer_id': customer_id, 'poster_url': url}
+            }
             tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
 
@@ -839,7 +845,6 @@ def create_user_customer_case_poster_qr_code(data):
                     'case_id' : case_id
 
                 }
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
                 if qr_code:
                     case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
@@ -857,6 +862,9 @@ def create_user_customer_case_poster_qr_code(data):
                             case_id=case_id,
                             qr_code=qr_code
                         )
+
+                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
 
             response.data = {'qr_code': qr_code}
             response.code = 200
