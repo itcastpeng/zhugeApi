@@ -573,13 +573,13 @@ def create_poster_process(data):
 
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
-    poster_url = data.get('poster_url', '')
+    poster_url = data.get('poster_url')
 
-    user_customer_belonger_id = data.get('user_customer_belonger_id', '')
-    case_id = data.get('case_id', '')
+    user_customer_belonger_id = data.get('user_customer_belonger_id')
+    case_id = data.get('case_id')
 
     print('create_poster_process 传递的值 -------------->>',data)
-    
+
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
