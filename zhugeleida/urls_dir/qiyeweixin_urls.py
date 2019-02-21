@@ -7,17 +7,16 @@ from zhugeleida.views_dir.public import  websocket
 
 urlpatterns = [
 
-    # 权限操作
-    url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', quanxian.quanxian_oper),
-    url(r'^quanxian$', quanxian.quanxian),
+    # # 权限操作
+    # url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', quanxian.quanxian_oper),
+    # url(r'^quanxian$', quanxian.quanxian),
+    #
+    #
+    # # 用户操作
+    # url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
+    # url(r'^user$', user.user),
 
-
-    # 用户操作
-    url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
-    url(r'^user$', user.user),
-
-
-    # 标签 和 标签客户的操作
+    # 通讯录-公众号标签
     url(r'^tag_customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tag_customer.tag_customer_oper),
     url(r'^tag_customer$', tag_customer.tag_customer),
 
@@ -29,7 +28,7 @@ urlpatterns = [
     url(r'^tag_user/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
     url(r'^tag_user$', tag_user.tag_user),
 
-    #搜索(客户\标签)
+    # 搜索(客户\标签)
     url(r'^search/(?P<oper_type>\w+)$', search.search),
 
 

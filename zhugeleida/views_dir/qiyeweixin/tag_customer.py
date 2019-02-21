@@ -13,13 +13,14 @@ from django.db.models import Q
 
 from publicFunc.condition_com import conditionCom
 
+
 def insert_sort(objs):
-    for i in  range(1,len(objs)):
-        if  objs[i]['customer_num']  >  objs[i-1]['customer_num']:
+    for i in range(1, len(objs)):
+        if objs[i]['customer_num'] > objs[i-1]['customer_num']:
             temp = objs[i]['customer_num']
             temp_tag_id = objs[i]['tag_id']
             name = objs[i]['name']
-            id = objs[i]['id']
+            _id = objs[i]['id']
             customer_list =  objs[i]['customer_list']
 
             for j in range(i-1,-1,-1):
@@ -37,21 +38,21 @@ def insert_sort(objs):
                 objs[index]['customer_num'] = temp
                 objs[index]['tag_id'] = temp_tag_id
                 objs[index]['name'] = name
-                objs[index]['id'] = id
+                objs[index]['id'] = _id
                 objs[index]['customer_list'] = customer_list
 
     return objs
 
-#查询标签和所属的用户
+
+# 查询标签和所属的用户
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
 def tag_customer(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         # 获取参数 页数 默认1
+        # 判断是小程序标签还是公众号标签
         tag_type = request.GET.get('tag_type')
-
-
 
         forms_obj = TagCustomerSelectForm(request.GET)
         if forms_obj.is_valid():
@@ -72,21 +73,14 @@ def tag_customer(request):
 
             objs = models.zgld_tag.objects.filter(q).order_by(order)
 
-
             # 获取所有数据
             ret_data = []
             for obj in objs:
                 customer_list = []
                 for c_obj in obj.tag_customer.all():
-
-                    try:
-                        username = base64.b64decode(c_obj.username)
-                        customer_name = str(username, 'utf-8')
-                        print('----- 解密b64decode username----->', username)
-
-                    except Exception as e:
-                        print('----- b64decode解密失败的 customer_id 是 | e ----->', c_obj.id, "|", e)
-                        customer_name = '客户ID%s' % (c_obj.id)
+                    username = base64.b64decode(c_obj.username)
+                    customer_name = str(username, 'utf-8')
+                    print('----- 解密b64decode username----->', username)
 
                     customer_list.append({'id': c_obj.id,'headimgurl': c_obj.headimgurl ,'name': customer_name})
 
@@ -111,6 +105,7 @@ def tag_customer(request):
         response.msg = "请求异常"
     return JsonResponse(response.__dict__)
 
+
 # 标签 和 标签客户的操作
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
@@ -123,12 +118,11 @@ def tag_customer_oper(request, oper_type, o_id):
         if oper_type == "add":
 
             tag_type = request.POST.get('tag_type')
-            user_id =  request.GET.get('user_id')
+            user_id = request.GET.get('user_id')
             tag_data = {
-                'name' : request.POST.get('name'),
-                'tag_type' : tag_type
+                'name': request.POST.get('name'),
+                'tag_type': tag_type
             }
-
 
             forms_obj = TagCustomerAddForm(tag_data)
             if forms_obj.is_valid():
