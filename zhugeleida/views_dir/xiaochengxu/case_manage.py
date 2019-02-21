@@ -224,9 +224,6 @@ def case_manage(request, oper_type):
                             'is_praise_diary': is_praise_diary,
                             'is_praise_diary_text': is_praise_diary_text,
 
-                            'cover_show_type': obj.cover_show_type,
-                            'cover_show_type_text': obj.get_cover_show_type_display(),
-
 
                             'is_open_comment': is_open_comment,
                             'is_open_comment_text': is_open_comment_text,
@@ -739,6 +736,7 @@ def create_user_customer_case_poster_qr_code(data):
     if poster_belonger_objs:
         poster_belonger_obj = poster_belonger_objs[0]
         qr_code =  poster_belonger_obj.qr_code
+        qr_code =  poster_belonger_obj.qr_code
 
 
     if  qr_code:
@@ -756,7 +754,7 @@ def create_user_customer_case_poster_qr_code(data):
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-            path = '/pages/detail/detail?uid=%s&case_id=%s' % (user_id, case_id)
+            path = '/pages/detail/detail?uid=%s&case_id=%s&source=1' % (user_id, case_id)
             user_qr_code = '/case_%s_customer_%s_user_%s_%s_qrcode.jpg' % (case_id, customer_id, user_id, now_time)
 
             get_qr_data = {}
@@ -819,6 +817,7 @@ def create_user_customer_case_poster_qr_code(data):
 
                 data_dict = {'user_id': user_id, 'customer_id': customer_id, 'poster_url': url}
                 tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
                 qr_code = user_obj.qr_code
                 if qr_code:
                     case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
