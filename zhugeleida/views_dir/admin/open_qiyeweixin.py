@@ -403,8 +403,6 @@ def open_qiyeweixin(request, oper_type):
                 response.msg = '企业微信第三方-无配置信息'
                 print('------ 【企业微信第三方-无配置信息】 get_ticket ------>>')
 
-
-
         # 获取微信回调数据
         elif oper_type == 'callback_data':
             msg_signature = request.GET.get('msg_signature')
@@ -470,14 +468,14 @@ def open_qiyeweixin(request, oper_type):
 
                 # SuiteId = 'wx1cbe3089128fda03'  # 通讯录三方应用
                 # SuiteId = qywx_config_dict['address_book'].get('sCorpID') # 通讯录三方应用
-                SuiteId = ''
+                suite_id = ''
                 auth_code = ''
                 _app_type = ''
                 url = ''
                 domain = qywx_config_dict['domain_urls'].get('leida_http_url')
                 if app_type == 'leida':
                     # SuiteId = 'wx5d26a7a856b22bec'
-                    SuiteId = qywx_config_dict['leida'].get('sCorpID')
+                    suite_id = qywx_config_dict['leida'].get('sCorpID')
                     url = domain
                 elif app_type == 'boss':
                     # SuiteId = 'wx36c67dd53366b6f0'
@@ -485,6 +483,7 @@ def open_qiyeweixin(request, oper_type):
                     SuiteId = qywx_config_dict['boss'].get('sCorpID')
                     url = domain + '/#/bossLeida'
 
+                # 后台扫码登录
                 elif 'scan_code_web_login' in app_type:
                     _app_type = app_type.split('|')[0]
                     auth_code = app_type.split('|')[1]
@@ -492,10 +491,10 @@ def open_qiyeweixin(request, oper_type):
 
                     # SuiteId = 'wx5d26a7a856b22bec'
                     # url = 'http://zhugeleida.zhugeyingxiao.com/'
-                    SuiteId = qywx_config_dict['leida'].get('sCorpID')
+                    suite_id = qywx_config_dict['leida'].get('sCorpID')
 
                 _data = {
-                    'SuiteId': SuiteId,  # 通讯录三方应用
+                    'SuiteId': suite_id,  # 通讯录三方应用
                 }
 
                 suite_access_token_ret = common.create_suite_access_token(_data)
@@ -607,8 +606,6 @@ def open_qiyeweixin(request, oper_type):
                 response.code = 301
                 response.msg = '企业微信第三方-无配置信息'
                 print('------ 【企业微信第三方-无配置信息】 work_weixin_auth ------>>')
-
-
 
         #  用户确认授权后，会进入回调URI(即redirect_uri)，并在URI参数中带上临时授权码
         elif oper_type == 'get_auth_code':
@@ -722,7 +719,6 @@ def open_qiyeweixin(request, oper_type):
                 response.code = 301
                 response.msg = '企业微信第三方-无配置信息'
                 print('------ 【企业微信第三方-无配置信息】 work_weixin_auth ------>>')
-
 
         # 用户使用企业微信管理员或成员帐号登录第三方网站，该登录授权基于OAuth2.0协议标准构建。
         elif oper_type == 'third_fang_single_login':
@@ -838,21 +834,57 @@ def open_qiyeweixin(request, oper_type):
                     response.msg = '服务商获取-用户信息报错'
                     print('------第三方平台 【服务商获取-用户信息】报错 ----->')
 
-        # 雷达后台扫码登录
+        # 雷达后台扫码登录-获取二维码
         elif oper_type == 'web_scan_authorize_qrcode':
             import uuid
             uuid = str(uuid.uuid1())
+
             three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=1)
             if three_service_objs:
                 three_service_obj = three_service_objs[0]
                 qywx_config_dict = three_service_obj.config
                 if qywx_config_dict:
                     qywx_config_dict = json.loads(qywx_config_dict)
+                    """
+                    qywx_config_dict = {
+                        "leida": {
+                            "sCorpID":"wx5d26a7a856b22bec",
+                            "sToken":"5lokfwWTqHXnb58VCV",
+                            "sEncodingAESKey":"ee2taRqANMUsH7JIhlSWIj4oeGAJG08qLCAXNf6HCxt"
+                        },
+                        "boss": {
+                            "sCorpID": "wx36c67dd53366b6f0",
+                            "sToken": "22LlaSyBP",
+                            "sEncodingAESKey": "NceYHABKQh3ir5yRrLqXumUJh3fifgS3WUldQua94be"
+                        }, 
+                        "address_book": {
+                            "sCorpID":"wx1cbe3089128fda03",
+                            "sToken":"8sCAJ3YuU6EfYWxI",
+                            "sEncodingAESKey": "3gSz92t8espUQgbXembgcDk3e6Hrs9SpJf34zQ8lqEj"
+                        },
+                        "general_parm": {
+                            "sCorpID":"wx81159f52aff62388",
+                            "sEncodingAESKey":"HwX3RsMfMx9O4KBTqzwk9UMJ9pjNGbjE7PTyPaK7Gyxu4Z_G0ypv9iXT97A3EFDt"
+                        }, 
+                        "domain_urls":{
+                            "leida_http_url":"http://zhugeleida.zhugeyingxiao.com"
+                        }
+                    }
+                    """
 
-                url = qywx_config_dict['domain_urls'].get('leida_http_url') #http://zhugeleida.zhugeyingxiao.com
-                sCorpID =  qywx_config_dict['leida'].get('sCorpID')
-                authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s/open_qiyeweixin/work_weixin_auth&response_type=code&scope=snsapi_userinfo&state=scan_code_web_login|%s#wechat_redirect' % (
-                    sCorpID,url,uuid)
+                # 此处参考企业微信服务商官方文档
+                # https://work.weixin.qq.com/api/doc#10975/%E7%BD%91%E9%A1%B5%E6%8E%88%E6%9D%83%E7%99%BB%E5%BD%95%E7%AC%AC%E4%B8%89%E6%96%B9
+                url = qywx_config_dict['domain_urls'].get('leida_http_url') # http://zhugeleida.zhugeyingxiao.com
+                appid = qywx_config_dict['leida'].get('sCorpID')
+
+                # nginx 会将该url跳转至 http://api.zhugeyingxiao.com/zhugeleida/admin/open_qiyeweixin/work_weixin_auth
+                redirect_uri = url + '/open_qiyeweixin/work_weixin_auth'    # http://zhugeleida.zhugeyingxiao.com/open_qiyeweixin/work_weixin_auth
+
+                authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope=snsapi_userinfo&state=scan_code_web_login|{uuid}#wechat_redirect'.format(
+                    appid=appid,
+                    redirect_uri=redirect_uri,
+                    uuid=uuid
+                )
 
                 qrcode_data = {
                     'url': authorize_url,

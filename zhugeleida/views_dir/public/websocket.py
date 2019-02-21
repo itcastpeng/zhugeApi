@@ -814,7 +814,6 @@ def gongzhonghao_websocket(request, oper_type):
                 print('---- 公众号 修改 Flag 为 True  --->>', redis_customer_id_key_flag)
                 print('---- 【公众号】 user_id | customer_id ------>>',customer_id,user_id)
 
-
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -1221,10 +1220,10 @@ def public_websocket(request, oper_type):
                 _data = json.loads(data.decode("utf-8"))
                 print('------ [扫码登录验证[auth_code] 发送过来的 数据:  ----->>', _data)
 
-                type = _data.get('type')
+                _type = _data.get('type')
                 auth_code = _data.get('auth_code')
 
-                if auth_code and  type == 'query_login_status':
+                if auth_code and _type == 'query_login_status':
                     auth_code_flag = rc.get(auth_code)
                     if auth_code_flag == 'True':
 
@@ -1306,7 +1305,6 @@ def public_websocket(request, oper_type):
                         uwsgi.websocket_send(json.dumps(ret_data))
                         return JsonResponse(ret_data)
 
-
                 elif type == 'closed':
                     msg = '确认关闭'
                     ret_data = {
@@ -1335,41 +1333,41 @@ def public_websocket(request, oper_type):
 
                 return JsonResponse(ret_data)
 
-    # 测试使用接口
-    if oper_type == 'chat':
-
-        """接受websocket传递过来的信息"""
-        uwsgi.websocket_handshake()
-        uwsgi.websocket_send("你还，很高心为你服务")
-
-        while True:
-            # msg = uwsgi.websocket_recv()
-            try:
-                msg = uwsgi.websocket_recv_nb()
-                print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
-                if not msg:
-                    time.sleep(1)
-                    continue
-
-                msg = msg.decode()
-                data = json.loads(msg)
-
-                data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-
-                print('----- websocket_recv ---->>>', data)
-
-                uwsgi.websocket_send(data["text"])
-
-
-            except Exception as  e:
-                ret_data = {
-                    'code': 400,
-                    'msg': '报错:%s 终止连接' % (e)
-                }
-                print('----  报错:%s 终止连接 --->>' % e)
-                # uwsgi.websocket_send(json.dumps(ret_data))
-
-                return JsonResponse(ret_data)
+    # # 测试使用接口
+    # if oper_type == 'chat':
+    #
+    #     """接受websocket传递过来的信息"""
+    #     uwsgi.websocket_handshake()
+    #     uwsgi.websocket_send("你还，很高心为你服务")
+    #
+    #     while True:
+    #         # msg = uwsgi.websocket_recv()
+    #         try:
+    #             msg = uwsgi.websocket_recv_nb()
+    #             print('------[--》測試-非阻塞測試] websocket_recv_nb ----->>', msg)
+    #             if not msg:
+    #                 time.sleep(1)
+    #                 continue
+    #
+    #             msg = msg.decode()
+    #             data = json.loads(msg)
+    #
+    #             data_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+    #
+    #             print('----- websocket_recv ---->>>', data)
+    #
+    #             uwsgi.websocket_send(data["text"])
+    #
+    #
+    #         except Exception as  e:
+    #             ret_data = {
+    #                 'code': 400,
+    #                 'msg': '报错:%s 终止连接' % (e)
+    #             }
+    #             print('----  报错:%s 终止连接 --->>' % e)
+    #             # uwsgi.websocket_send(json.dumps(ret_data))
+    #
+    #             return JsonResponse(ret_data)
 
 
 # 查询雷达消息未读的数量
