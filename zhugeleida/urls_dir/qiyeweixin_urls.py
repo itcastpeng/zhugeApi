@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', customer.customer_oper),
     url(r'^customer$', customer.customer),      # 查询用户详细信息
 
-    # 客户通讯录
+    # 通讯录列表
     url(r'^tongxunlu$', tongxunlu.tongxunlu),
 
     # 用户跟进常用语
@@ -51,7 +51,7 @@ urlpatterns = [
     url(r'^chat/(?P<oper_type>\w+)/(?P<o_id>\d+)', chat.chat_oper),
     url(r'^chat$', chat.chat),
 
-    # 获取聊天联系人列表
+    # 获取消息客户列表
     url(r'^contact/(?P<oper_type>\w+)$', contact.contact_oper),
     url(r'^contact$', contact.contact),
 
@@ -67,13 +67,12 @@ urlpatterns = [
     # 生成微信二维码 create_qr_code
     url(r'^qr_code_auth$', qr_code_auth.create_qr_code),
 
-    # 企业微信网页登录认证
-    url(r'^work_weixin_auth/(?P<company_id>\d+)$', user_weixin_auth.work_weixin_auth),
-    url(r'^work_weixin_auth/(?P<oper_type>\w+)$', user_weixin_auth.work_weixin_auth_oper),
+    # 企业微信网页登录认证 --- 疑问
+    # url(r'^work_weixin_auth/(?P<company_id>\d+)$', user_weixin_auth.work_weixin_auth),
+    url(r'^work_weixin_auth/(?P<oper_type>\w+)$', user_weixin_auth.work_weixin_auth_oper),      # 创建公众号分享url
 
-
-    #企业微信JS-SDK使用权限签名算法
-    url(r'^enterprise_weixin_sign$', user_weixin_auth.enterprise_weixin_sign),
+    # # 企业微信JS-SDK使用权限签名算法
+    # url(r'^enterprise_weixin_sign$', user_weixin_auth.enterprise_weixin_sign),
 
     # 访问企业微信-我的用户名片
     url(r'^mingpian/(?P<oper_type>\w+)$', mingpian.mingpian_oper),
@@ -87,11 +86,11 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
     url(r'^article/(?P<oper_type>\w+)$', article.article),
 
-    # 话术分组管理
+    # 聊天页-话术库-分组
     url(r'^talkGroupManage$', talkGroupManagement.talkGroupManage),
     # url(r'^talkGroupManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', talkGroupManagement.talkGroupManageOper),
 
-    # 话术详情管理
+    # 聊天页-话术库-详情
     url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
     # url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 ]

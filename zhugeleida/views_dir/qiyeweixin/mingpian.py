@@ -210,7 +210,6 @@ def mingpian_oper(request, oper_type):
             response.code = 200
             response.msg = '保存成功'
 
-
     else:
 
         # 查看用户照片和头像

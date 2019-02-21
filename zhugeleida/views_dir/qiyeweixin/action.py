@@ -25,7 +25,7 @@ def action(request, oper_type):
     '''
     if request.method == 'GET':
 
-        # 根据时间查询 日志
+        # 雷达-时间
         if oper_type == 'time':
             forms_obj = ActionSelectForm(request.GET)
             if forms_obj.is_valid():
@@ -103,58 +103,58 @@ def action(request, oper_type):
 
                 return JsonResponse(response.__dict__)
 
-        # 获取新的日志信息
-        elif oper_type == 'get_new_log':
-            forms_obj = ActionSelectForm(request.GET)
-            if forms_obj.is_valid():
-                response = Response.ResponseObj()
+        # # 获取新的日志信息
+        # elif oper_type == 'get_new_log':
+        #     forms_obj = ActionSelectForm(request.GET)
+        #     if forms_obj.is_valid():
+        #         response = Response.ResponseObj()
+        #
+        #         order = request.GET.get('order', '-create_date')
+        #
+        #         field_dict = {
+        #             'user_id': '',
+        #             'action': '',
+        #         }
+        #
+        #         q = conditionCom(request, field_dict)
+        #         q.add(Q(**{'is_new_msg': True}), Q.AND)
+        #
+        #
+        #         objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
+        #         count = objs.count()
+        #
+        #         ret_data = []
+        #         for obj in objs:
+        #
+        #             try:
+        #                 username = base64.b64decode(obj.customer.username)
+        #                 username = str(username, 'utf-8')
+        #                 print('----- 解密b64decode 客户的username----->', username)
+        #             except Exception as e:
+        #                 print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
+        #                 username = '客户ID%s' % (obj.customer_id)
+        #
+        #
+        #             ret_data.append({
+        #                 'user_id': obj.user_id,
+        #                 'customer_id': obj.customer_id,
+        #                 'action' : obj.get_action_display(),
+        #                 'log': username + obj.remark,
+        #                 'create_date': obj.create_date,
+        #             })
+        #
+        #         # print('----ret_data----->>', ret_data)
+        #         objs.update(is_new_msg=False)
+        #         response.code = 200
+        #         response.msg = '查询日志记录成功'
+        #         response.data = {
+        #             'ret_data': ret_data,
+        #             'data_count': count,
+        #         }
+        #
+        #         return JsonResponse(response.__dict__)
 
-                order = request.GET.get('order', '-create_date')
-
-                field_dict = {
-                    'user_id': '',
-                    'action': '',
-                }
-
-                q = conditionCom(request, field_dict)
-                q.add(Q(**{'is_new_msg': True}), Q.AND)
-
-
-                objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
-                count = objs.count()
-
-                ret_data = []
-                for obj in objs:
-
-                    try:
-                        username = base64.b64decode(obj.customer.username)
-                        username = str(username, 'utf-8')
-                        print('----- 解密b64decode 客户的username----->', username)
-                    except Exception as e:
-                        print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
-                        username = '客户ID%s' % (obj.customer_id)
-
-
-                    ret_data.append({
-                        'user_id': obj.user_id,
-                        'customer_id': obj.customer_id,
-                        'action' : obj.get_action_display(),
-                        'log': username + obj.remark,
-                        'create_date': obj.create_date,
-                    })
-
-                # print('----ret_data----->>', ret_data)
-                objs.update(is_new_msg=False)
-                response.code = 200
-                response.msg = '查询日志记录成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count,
-                }
-
-                return JsonResponse(response.__dict__)
-
-        # 查询日志记录
+        # 雷达-行为
         elif oper_type == 'count':
             forms_obj = ActionCountForm(request.GET)
             if forms_obj.is_valid():
@@ -219,7 +219,7 @@ def action(request, oper_type):
 
                 return JsonResponse(response.__dict__)
 
-        # 查询访问动能日志记录
+        # 雷达-人
         elif oper_type == 'customer':
             forms_obj = ActionCustomerForm(request.GET)
             response = Response.ResponseObj()
@@ -297,7 +297,7 @@ def action(request, oper_type):
 
             return JsonResponse(response.__dict__)
 
-        # 查询日志记录
+        # 雷达-人-详情
         elif oper_type == 'customer_detail':
             response = Response.ResponseObj()
             print('------ request.GET ----->>',request.GET)

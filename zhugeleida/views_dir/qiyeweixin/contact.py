@@ -135,8 +135,8 @@ def contact_oper(request,oper_type):
     response = Response.ResponseObj()
     if request.method == 'GET':
 
-        # 查询聊天信息数量
-        if  oper_type == 'query_num':
+        # 底部导航消息功能显示的未读数
+        if oper_type == 'query_num':
 
             response = Response.ResponseObj()
             user_id = request.GET.get('user_id')
