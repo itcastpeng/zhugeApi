@@ -684,12 +684,14 @@ def home_page_oper(request, oper_type):
 
         Type = request.GET.get('type')
 
-        ## 数据【总览】统计
+        # 数据【总览】统计
         if oper_type == "acount_data":
 
             ####
             today_datetime = datetime.now().strftime('%Y-%m-%d')
             company_objs = models.zgld_company.objects.filter(id=company_id)
+
+            # boos雷达中的数据
             if company_objs and Type != 'personal':
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
@@ -703,7 +705,7 @@ def home_page_oper(request, oper_type):
                     }
                     return JsonResponse(response.__dict__)
 
-
+            # 雷达-我-我的报表-个人数据
             elif Type == 'personal':
                 userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
                 data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
@@ -717,7 +719,6 @@ def home_page_oper(request, oper_type):
                         'ret_data': ret_data
                     }
                     return JsonResponse(response.__dict__)
-
 
             ret_data = {}
             data = request.GET.copy()
@@ -738,6 +739,7 @@ def home_page_oper(request, oper_type):
             data['stop_time'] = stop_time
             ret_data['yesterday_data'] = deal_search_time(data, q2)
 
+            # 近7天
             q3 = Q()
             start_time = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
@@ -747,6 +749,7 @@ def home_page_oper(request, oper_type):
             data['stop_time'] = stop_time
             ret_data['nearly_seven_days'] = deal_search_time(data, q3)
 
+            # 近30天
             q4 = Q()
             start_time = (now_time - timedelta(days=30)).strftime("%Y-%m-%d")
             stop_time = now_time.strftime("%Y-%m-%d")
@@ -770,7 +773,7 @@ def home_page_oper(request, oper_type):
 
             }
 
-        ## 数据【客户统计】数据
+        # 客户统计
         elif oper_type == "line_info":
             # print('request.POST', request.POST)
 
@@ -780,6 +783,8 @@ def home_page_oper(request, oper_type):
                 ####
                 today_datetime = datetime.now().strftime('%Y-%m-%d')
                 company_objs = models.zgld_company.objects.filter(id=company_id)
+
+                # boss雷达
                 if company_objs and Type != 'personal':
                     data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
@@ -793,7 +798,7 @@ def home_page_oper(request, oper_type):
                         }
                         return JsonResponse(response.__dict__)
 
-
+                # 雷达-我-我的报表-个人数据
                 elif Type == 'personal':
                     userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
                     data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
@@ -807,8 +812,6 @@ def home_page_oper(request, oper_type):
                             'ret_data': ret_data
                         }
                         return JsonResponse(response.__dict__)
-
-
 
                 data = request.POST.copy()
                 q1 = Q()
@@ -930,6 +933,7 @@ def home_page_oper(request, oper_type):
                 response.msg = "未验证通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
+        # 销售排行-按客户人数
         elif oper_type == "sales_ranking_customer_num":
             forms_obj = LineInfoForm(request.POST)
 
@@ -1003,9 +1007,8 @@ def home_page_oper(request, oper_type):
                     'ret_data': ret_data
                 }
 
+        # 销售排行-客户互动频率
         elif oper_type == "hudong_pinlv_customer_num":
-
-
 
             today_datetime = datetime.now().strftime('%Y-%m-%d')
             company_objs = models.zgld_company.objects.filter(id=company_id)
@@ -1067,6 +1070,7 @@ def home_page_oper(request, oper_type):
                 'ret_data': ret_data
             }
 
+        # 销售排行-按预计成交时间
         elif oper_type == "expect_chengjiaolv_customer_num":
 
             today_datetime = datetime.now().strftime('%Y-%m-%d')
