@@ -573,7 +573,12 @@ def create_poster_process(data):
 
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
-    poster_url = data.get('poster_url', '')
+    poster_url = data.get('poster_url')
+
+    user_customer_belonger_id = data.get('user_customer_belonger_id')
+    case_id = data.get('case_id')
+
+    print('create_poster_process 传递的值 -------------->>',data)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
     if not objs:  # 如果没有找到则表示异常
@@ -638,18 +643,40 @@ def create_poster_process(data):
 
             print('page_source -->', driver.page_source)
 
-            poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+            _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
             print('"create_user_or_customer_poster -->", --------- 生成海报URL -------->', poster_url)
-            objs.update(
-                poster_url=poster_url
-            )
+
+            if poster_url:
+
+                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                        user_customer_belonger_id=user_customer_belonger_id,
+                        case_id=case_id
+                    )
+                    if case_poster_belonger_objs:
+                        case_poster_belonger_objs.update(
+                            poster_url=_poster_url
+                        )
+
+                    else:
+                        models.zgld_customer_case_poster_belonger.objects.create(
+                            user_customer_belonger_id=user_customer_belonger_id,
+                            case_id=case_id,
+                            poster_url=_poster_url
+                        )
+
+
+            else:
+                objs.update(
+                    poster_url=_poster_url
+                )
 
             ret_data = {
                 'user_id': user_id,
-                'poster_url': poster_url,
+                'poster_url': _poster_url,
             }
-            print('"create_user_or_customer_poster -->", -----save_poster ret_data --->>', ret_data)
+
+            print('结果 ret_data --->>', ret_data)
             response.data = ret_data
             response.msg = "请求成功"
             response.code = 200

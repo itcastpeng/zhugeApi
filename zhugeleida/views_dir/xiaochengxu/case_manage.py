@@ -97,9 +97,18 @@ def case_manage(request, oper_type):
                                 for recode_tag_name_dict in history_tags_record:
                                     recode_tag_name.append(recode_tag_name_dict['name'])
 
+
+
+
                                 if tag_name in recode_tag_name:
-                                    index_num = tag_name.index(recode_tag_name)
-                                    history_tags_record.remove(index_num)
+                                    print('值 recode_tag_name----->>', recode_tag_name)
+                                    print('值 tag_name----->>', tag_name)
+
+                                    index_num = recode_tag_name.index(tag_name)
+                                    print('值 index_num---->',index_num)
+                                    print('值 history_tags_record ---->',history_tags_record)
+
+                                    del history_tags_record[index_num]
 
                                 history_tags_record.append({
                                     'id': search_tag_id,
@@ -208,6 +217,13 @@ def case_manage(request, oper_type):
                             become_beautiful_cover = json.loads(become_beautiful_cover)
                         else:
                             become_beautiful_cover = ''
+
+                        poster_cover = obj.poster_cover
+                        if poster_cover:
+                            poster_cover = json.loads(poster_cover)
+                        else:
+                            poster_cover = []
+
                         ret_data.append({
                             'case_id': _case_id,
                             'case_name': obj.case_name,
@@ -224,9 +240,6 @@ def case_manage(request, oper_type):
                             'is_praise_diary': is_praise_diary,
                             'is_praise_diary_text': is_praise_diary_text,
 
-                            'cover_show_type': obj.cover_show_type,
-                            'cover_show_type_text': obj.get_cover_show_type_display(),
-
 
                             'is_open_comment': is_open_comment,
                             'is_open_comment_text': is_open_comment_text,
@@ -239,6 +252,8 @@ def case_manage(request, oper_type):
                             'status': status,
                             'status_text': status_text,
                             'tag_list': tag_list,
+
+                            'poster_cover' : poster_cover,
 
                             'case_type': obj.case_type,
                             'case_type_text': obj.get_case_type_display(),
@@ -509,7 +524,9 @@ def case_manage(request, oper_type):
                 poster_cover = case_objs[0].poster_cover
 
                 if poster_cover:
-                    poster_cover = case_objs[0].loads(poster_cover)
+                    poster_cover = json.loads(poster_cover)
+                else:
+                    poster_cover = []
 
                 _data = {
                     'user_id': uid,
@@ -525,10 +542,13 @@ def case_manage(request, oper_type):
                 qr_code = ''
                 if _response.code == 200:
                     qr_code = _response.data.get('qr_code')
+
+
+
                 ret_data.append(
                     {
                         'case_id': case_id,
-                        'poster_cover': poster_cover or '',
+                        'poster_cover': poster_cover,
                         'poster_company_logo': poster_company_logo or '',
                         'qr_code': qr_code or ''
                     }
@@ -557,57 +577,52 @@ def case_manage(request, oper_type):
             case_id = request.GET.get('case_id')
 
             ret_data = []
-            app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            poster_company_logo = app_obj.poster_company_logo
 
-            case_objs = models.zgld_case.objects.filter(id=case_id)
-            if case_objs:
-                poster_cover = case_objs[0].poster_cover
+            user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=uid)
 
-                if poster_cover:
-                    poster_cover = case_objs[0].loads(poster_cover)
+            user_customer_belonger_id = ''
+            if user_customer_belonger_objs:
+                user_customer_belonger_id = user_customer_belonger_objs[0].id
 
-                user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=uid)
+            _data = {
+                'user_id': uid,
+                'customer_id': customer_id,
+                'case_id': case_id,
+                'company_id': company_id,
+                'user_customer_belonger_id' : user_customer_belonger_id
+            }
 
-                user_customer_belonger_id = ''
-                if user_customer_belonger_objs:
-                    user_customer_belonger_id = user_customer_belonger_objs[0].id
+            poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
 
-                _data = {
-                    'user_id': uid,
-                    'customer_id': customer_id,
+            poster_url = ''
+            if poster_belonger_objs:
+                poster_belonger_obj = poster_belonger_objs[0]
+                poster_url = poster_belonger_obj.poster_url
+
+                if not  poster_url:
+
+                    _response = create_user_customer_case_poster_qr_code(_data)
+
+
+            ret_data.append(
+                {
                     'case_id': case_id,
-                    'company_id': company_id,
-                    'user_customer_belonger_id' : user_customer_belonger_id
+                    'poster_url' : poster_url,
+
                 }
-                _response = create_user_customer_case_poster_qr_code(_data)
-                qr_code = ''
-                if _response.code == 200:
-                    qr_code = _response.data.get('qr_code')
+            )
 
-                ret_data.append(
-                    {
-                        'case_id': case_id,
-                        'poster_cover': poster_cover or '',
-                        'poster_company_logo': poster_company_logo or '',
-                        'qr_code': qr_code or ''
-                    }
-                )
+            response.data = ret_data
+            response.note = {
+                'case_id': '案例ID',
+                'poster_cover': '海报封面',
+                'poster_company_logo': '海报公司log'
+            }
 
-                response.data = ret_data
-                response.note = {
-                    'case_id': '案例ID',
-                    'poster_cover': '海报封面',
-                    'poster_company_logo': '海报公司log'
-                }
+            response.code = 200
+            response.msg = "返回成功"
 
-                response.code = 200
-                response.msg = "返回成功"
-
-
-            else:
-                response.code = 301
-                response.msg = "案例不存在"
 
 
     elif request.method == "POST":
@@ -720,6 +735,7 @@ def case_manage(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+
     return JsonResponse(response.__dict__)
 
 
@@ -735,10 +751,25 @@ def create_user_customer_case_poster_qr_code(data):
     company_id = data.get('company_id')
 
     poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(user_customer_belonger_id=user_customer_belonger_id,case_id=case_id)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s' % (
+        customer_id, user_id, case_id,company_id)
+
     qr_code = ''
     if poster_belonger_objs:
         poster_belonger_obj = poster_belonger_objs[0]
         qr_code =  poster_belonger_obj.qr_code
+        poster_url =  poster_belonger_obj.poster_url
+
+        if not  poster_url:
+            data_dict = {
+                'user_id': user_id,
+                'customer_id': customer_id,
+                'poster_url': url,
+                'user_customer_belonger_id': user_customer_belonger_id,
+                'case_id': case_id
+
+            }
+            tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
 
     if  qr_code:
@@ -756,7 +787,7 @@ def create_user_customer_case_poster_qr_code(data):
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-            path = '/pages/detail/detail?uid=%s&case_id=%s' % (user_id, case_id)
+            path = '/pages/detail/detail?uid=%s&case_id=%s&source=1' % (user_id, case_id)
             user_qr_code = '/case_%s_customer_%s_user_%s_%s_qrcode.jpg' % (case_id, customer_id, user_id, now_time)
 
             get_qr_data = {}
@@ -807,19 +838,23 @@ def create_user_customer_case_poster_qr_code(data):
             user_obj = ''
             if customer_id:
                 user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
-                user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
-                user_obj.qr_code = user_qr_code_path
-                user_obj.save()
+                qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
+
+
                 print('----celery生成用户-客户对应的小程序二维码成功-->>',
                       'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
                 # # 一并生成案例海报
-                url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s' % (
-                customer_id, user_id,case_id)
 
-                data_dict = {'user_id': user_id, 'customer_id': customer_id, 'poster_url': url}
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
-                qr_code = user_obj.qr_code
+                data_dict = {
+                    'user_id': user_id,
+                    'customer_id': customer_id,
+                    'poster_url': url,
+                    'user_customer_belonger_id' : user_customer_belonger_id,
+                    'case_id' : case_id
+
+                }
+
                 if qr_code:
                     case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                         user_customer_belonger_id=user_customer_belonger_id,
@@ -836,6 +871,9 @@ def create_user_customer_case_poster_qr_code(data):
                             case_id=case_id,
                             qr_code=qr_code
                         )
+
+                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+
 
             response.data = {'qr_code': qr_code}
             response.code = 200

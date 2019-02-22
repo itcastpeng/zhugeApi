@@ -152,76 +152,32 @@ def diary_manage(request, oper_type):
 def diary_poster_html(request):
 
     if request.method == 'GET':
-        customer_id = request.GET.get('user_id')
-        user_id = request.GET.get('uid')
+        user_id = request.GET.get('user_id')
+        customer_id = request.GET.get('customer_id')
+        user_customer_belonger_id = request.GET.get('user_customer_belonger_id')
+        case_id = request.GET.get('case_id')
+        company_id = request.GET.get('company_id')
 
-        obj = models.zgld_userprofile.objects.get(id=user_id)
-
-        user_photo_obj = models.zgld_user_photo.objects.filter(user_id=user_id, photo_type=2).order_by('-create_date')
-
-        if user_photo_obj:
-            user_avatar = "/" + user_photo_obj[0].photo_url
-
-        else:
-            if obj.avatar.startswith("http"):
-                user_avatar = obj.avatar
-            else:
-                user_avatar = "/" + obj.avatar
+        poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+            user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s' % (
+            customer_id, user_id, case_id)
 
         qr_code = ''
-        if  user_id and customer_id :
-             qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-             if qr_obj:
-                 qr_code =   qr_obj[0].qr_code
-                 if not qr_code:
-                     # 异步生成小程序和企业用户对应的小程序二维码
-                     data_dict = {'user_id': user_id, 'customer_id': customer_id}
+        if poster_belonger_objs:
+            poster_belonger_obj = poster_belonger_objs[0]
+            qr_code = poster_belonger_obj.qr_code
+        case_objs = models.zgld_case.objects.filter(id=case_id)
+        poster_cover = []
+        if case_objs:
+            poster_cover = json.loads(case_objs[0].poster_cover)
 
-                     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
-                     get_data = {
-                         'data': json.dumps(data_dict)
-                     }
-                     print('--- 小程序二维码: get_data-->', get_data)
-
-                     s = requests.session()
-                     s.keep_alive = False  # 关闭多余连接
-                     s.get(url, params=get_data)
-
-                     # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
-
-                 qr_code =  "/" + qr_obj[0].qr_code
-
-
-             print('--- 从 customer_belonger 里 --->>qr_code',qr_code)
-
-        elif user_id and  not customer_id:
-             qr_code = obj.qr_code
-             if not qr_code:
-                 # 异步生成小程序和企业用户对应的小程序二维码
-                 data_dict = {'user_id': user_id, 'customer_id': ''}
-                 # tasks.create_user_or_customer_small_program_qr_code.delay(json.dumps(data_dict))  #
-
-                 url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/create_user_or_customer_qr_code'
-                 get_data = {
-                     'data': json.dumps(data_dict)
-                 }
-                 print('--- 小程序二维码: get_data-->', get_data)
-
-                 s = requests.session()
-                 s.keep_alive = False  # 关闭多余连接
-                 s.get(url, params=get_data)
-
-             qr_code = "/" +  obj.qr_code
-             print('--- 从 zgld_userprofile 里 --->>qr_code',qr_code)
+        poster_company_logo = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).poster_company_logo
 
         ret_data = {
-            'user_id': obj.id,
-            'user_avatar': user_avatar,
-            'username': obj.username,
-            'position': obj.position,
-            'mingpian_phone': obj.mingpian_phone,
-            'company': obj.company.name,
+            'poster_company_logo' :poster_company_logo,
             'qr_code_url': qr_code,
+            'poster_cover' :poster_cover
         }
 
         return render(request, 'poster_case.html', locals())

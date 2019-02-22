@@ -67,17 +67,23 @@
 
 <body style="background: #000; height: 1000px">
 <div class="container" id="container">
-    <div id="jietu">
+    <div id="jietu" style="height: 100%">
+
+
         <div class="pictures">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
-            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
+
+              {% for iterm in poster_cover %}
+                 <img src= '/{{ iterm }}'>
+              {% endfor %}
+
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
+{#            <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">#}
         </div>
         <div class="content">
             <div class="desc">
@@ -86,14 +92,15 @@
             </div>
             <div class="code">
                 <div class="codediv">
-                    <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
+                    <img src="/{{ qr_code_url }}">
                 </div>
             </div>
             <div class="logo">
                 <div class="logodiv">
-                    <img src="http://img5.imgtn.bdimg.com/it/u=1332368042,4215041077&fm=26&gp=0.jpg">
+                    <img src="/{{ poster_company_logo }}">
                 </div>
             </div>
+
         </div>
     </div>
 </div>
