@@ -454,6 +454,7 @@ def open_weixin(request, oper_type):
             response.msg = '生成【授权链接】成功'
             response.data = pre_auth_code_url
 
+
     return JsonResponse(response.__dict__)
 
 
