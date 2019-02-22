@@ -51,12 +51,12 @@ class watermark(object):
                 x += 280
             num += 1
 
-        # # save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
-        save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', '1.png')  # 已打水印图片路径
+        save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
+        # save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', '1.png')  # 已打水印图片路径
         # # 保存
         # im1.show()
         im1.save(save_path)
-
+        return save_path
 
 
 
