@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
@@ -9,6 +9,14 @@ import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.qiyeweixin.oper_log_verify import OperLogAddForm
 import json
+
+
+@csrf_exempt
+@account.is_token(models.zgld_userprofile)
+def oper_log(request):
+    print("request.GET -->", request.GET)
+    print("request.POST -->", request.POST)
+    return HttpResponse("xxx")
 
 
 # cerf  token验证
