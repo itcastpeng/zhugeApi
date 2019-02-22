@@ -140,14 +140,33 @@ ip = 'http://127.0.0.1:8001'
 # get_data['company_id']=1
 # ret = requests.get(url, params=get_data,data = post_data)
 
-url = ip + '/zhugeleida/xiaochengxu/case_manage/xcx_case_poster' #
-get_data['company_id'] = 1
+# url = ip + '/zhugeleida/xiaochengxu/case_manage/xcx_case_poster' #
+# get_data['company_id'] = 1
+#
+# get_data['case_id'] = 1
+# get_data['uid'] = 16
+# print(url)
+#
+# ret = requests.get(url, params=get_data,data = post_data)
 
-get_data['case_id'] = 1
-get_data['uid'] = 16
-print(url)
 
-ret = requests.get(url, params=get_data,data = post_data)
+'''
+{"user_customer_belonger_id": 24,
+ "case_id":1,
+  "poster_url" : "http://127.0.0.1:80/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=1&uid=16&case_id=1&company_id=13", 
+  "customer_id": 1,
+  "user_id": 16 }
+
+'''
+
+url = 'http://127.0.0.1:80/zhugeleida/mycelery/create_user_or_customer_poster'  # 查询角色
+get_data['user_customer_belonger_id'] =  24
+get_data['case_id'] =  1
+get_data['poster_url'] =  "http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=1&uid=16&case_id=1&company_id=13"  #127.0.0.1:80
+get_data['customer_id'] =  1
+get_data['user_id'] =  16
+ret = requests.get(url, params=get_data)
+
 
 
 # url =ip +  '/zhugeleida/qiyeweixin/action/get_new_log'       #得到相应的动作的-->访问日志

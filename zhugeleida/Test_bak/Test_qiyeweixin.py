@@ -28,6 +28,12 @@ post_data = {
 ip = 'http://api.zhugeyingxiao.com'
 
 
+url =  ip + '/zhugeleida/qiyeweixin/oper_log'  # 查询角色
+ret = requests.get(url, params=get_data)
+
+
+
+
 
 
 

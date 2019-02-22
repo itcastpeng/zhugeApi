@@ -56,15 +56,19 @@ import json
 #
 # print(conversion_seconds_hms(2400))
 
-from urllib.parse import unquote
+from urllib.parse import unquote,quote
+
 
 # 解析URl转换
-share_url = 'http%3A%2F%2Fshp.qpic.cn%2Fqqvideo_ori%2F0%2Fz08202kwzjw_496_280%2F0'
+share_url = '/zhugeleida/mycelery/create_user_or_customer_poster?data=%7B%22user_customer_belonger_id%22%3A+24%2C+%22case_id%22%3A+%221%22%2C+%22poster_url%22%3A+%22http%3A%2F%2Fapi.zhugeyingxiao.com%2Fzhugeleida%2Fxiaochengxu%2Fdiary_manage%2Fposter_html%3Fuser_id%3D1%26uid%3D16%26case_id%3D1%26company_id%3D13%22%2C+%22customer_id%22%3A+%221%22%2C+%22user_id%22%3A+%2216%22%7D'
 
 ## 解码URl
 redirect_url = unquote(share_url, 'utf-8')
 print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
 
+url = '{"user_customer_belonger_id": 24, "case_id":1, "poster_url" : "http://127.0.0.1:80/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=1&uid=16&case_id=1&company_id=13",+"customer_id": 1,+"user_id": 16}'
+
+print('url----->>',quote(url, 'utf-8'))
 
 application_data = {
     'leida': {

@@ -545,13 +545,23 @@ def create_user_or_customer_poster(request):
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
 
-    print(' create_user_or_customer_poster ---- 【生成海报celery】 request.GET | data 数据 -->', request.GET.get('data'))
+    print('【生成海报celery】data 数据 ------>', request.GET.get('data'))
 
     data = json.loads(request.GET.get('data'))
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
     poster_url = data.get('poster_url', '')
-    print(' create_user_or_customer_poster --- [生成海报]customer_id | user_id --------->>', customer_id, user_id)
+    user_customer_belonger_id = data.get('user_customer_belonger_id', '')
+    case_id = data.get('case_id', '')
+
+    # user_id = request.GET.get('user_id')
+    # customer_id = request.GET.get('customer_id', '')
+    # poster_url = request.GET.get('poster_url', '')
+    # user_customer_belonger_id = request.GET.get('user_customer_belonger_id', '')
+    # case_id = request.GET.get('case_id', '')
+
+
+    print('[生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
     url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
     if poster_url:
@@ -560,7 +570,9 @@ def create_user_or_customer_poster(request):
     _data = {
         'user_id': user_id,
         'customer_id' : customer_id,
-        'poster_url' : url
+        'poster_url' : url,
+        'user_customer_belonger_id': user_customer_belonger_id ,
+        'case_id' : case_id
     }
     create_poster_process(_data)
 
@@ -574,11 +586,10 @@ def create_poster_process(data):
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
     poster_url = data.get('poster_url')
-
     user_customer_belonger_id = data.get('user_customer_belonger_id')
     case_id = data.get('case_id')
 
-    print('create_poster_process 传递的值 -------------->>',data)
+    print('传递的值 ------>>',data)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
     if not objs:  # 如果没有找到则表示异常
@@ -587,7 +598,6 @@ def create_poster_process(data):
 
     else:
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
-        print(' create_user_or_customer_poster ---->', BASE_DIR)
 
         platform = sys.platform  # 获取平台
         phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
@@ -598,16 +608,17 @@ def create_poster_process(data):
         else:
             phantomjs_path = phantomjs_path + '/phantomjs.exe'
 
-        print('create_user_or_customer_poster ----- phantomjs_path ----->>', phantomjs_path)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+
         driver.implicitly_wait(10)
 
 
-        print('--- create_user_or_customer_poster ---- url -->', poster_url)
-
         try:
+            print('值 driver 开始 ----->>',poster_url)
             driver.get(poster_url)
+            print('值 driver 结束 ----->>',poster_url)
+
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
             if customer_id:
@@ -621,8 +632,8 @@ def create_poster_process(data):
             driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
             element = driver.find_element_by_id("jietu")
-            print("create_user_or_customer_poster -->", element.location)  # 打印元素坐标
-            print("create_user_or_customer_poster -->", element.size)  # 打印元素大小
+            print("值 element.location -->", element.location)  # 打印元素坐标
+            print("值 element.size -->", element.size)  # 打印元素大小
 
             left = element.location['x']
             top = element.location['y']
@@ -641,11 +652,13 @@ def create_poster_process(data):
             else:
                 im.save(BASE_DIR + user_poster_file)
 
-            print('page_source -->', driver.page_source)
+            print('值 driver.page_source -->', driver.page_source)
 
             _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+
+            # print('临时截图 ------->>',BASE_DIR + user_poster_file_temp)
             if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-            print('"create_user_or_customer_poster -->", --------- 生成海报URL -------->', poster_url)
+            print('生成海报URL -------->', poster_url)
 
             if poster_url:
 
@@ -676,7 +689,7 @@ def create_poster_process(data):
                 'poster_url': _poster_url,
             }
 
-            print('结果 ret_data --->>', ret_data)
+            print('结果 ret_data ----->>', ret_data)
             response.data = ret_data
             response.msg = "请求成功"
             response.code = 200
@@ -686,7 +699,7 @@ def create_poster_process(data):
             response.code = 400
             driver.quit()
 
-    return  response
+    return  JsonResponse(response.__dict__)
 
 
 
