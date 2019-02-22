@@ -360,7 +360,7 @@ class zgld_access_rules(models.Model):
         return "%s" % self.name
 
 
-# 企业用户管理
+# 企业用户(咨询表)管理
 class zgld_userprofile(models.Model):
     userid = models.CharField(max_length=64, verbose_name='成员UserID')
     login_user = models.CharField(verbose_name="(登录)用户名", max_length=32,null=True)
@@ -435,6 +435,17 @@ class zgld_userprofile(models.Model):
         # unique_together = (("userid", "company"),)
         verbose_name_plural = "用户表"
         app_label = "zhugeleida"
+
+
+# 用户(咨询)操作雷达日志
+class ZgldUserOperLog(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name="咨询用户")
+
+    oper_type_choices = (
+        (1, "复制名字"),
+    )
+    oper_type = models.SmallIntegerField(verbose_name="操作类型", choices=oper_type_choices)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 
 # 企业用户临时表

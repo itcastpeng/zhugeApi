@@ -5,7 +5,7 @@ from zhugeleida.urls_dir  import admin_urls
 urlpatterns = [
 
     # 雷达后台
-    url(r'^admin/',include('zhugeleida.urls_dir.admin_urls')),
+    url(r'^admin/', include('zhugeleida.urls_dir.admin_urls')),
 
     # 公众号文章
     url(r'^gongzhonghao/', include('zhugeleida.urls_dir.gongzhonghao_urls')),

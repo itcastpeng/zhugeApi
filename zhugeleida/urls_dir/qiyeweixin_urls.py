@@ -1,9 +1,10 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
-    qr_code_auth, follow_language, follow_info,tag_list,article, talkGroupManagement, speechDetailsManagement
-from zhugeleida.views_dir.qiyeweixin import chat, contact,search,mingpian,tag_user,product,theOrderManagement
-from zhugeleida.views_dir.public import  websocket
+    qr_code_auth, follow_language, follow_info, tag_list, article, talkGroupManagement, speechDetailsManagement, oper_log
+
+from zhugeleida.views_dir.qiyeweixin import chat, contact, search, mingpian, tag_user, product, theOrderManagement
+from zhugeleida.views_dir.public import websocket
 
 urlpatterns = [
 
@@ -31,10 +32,9 @@ urlpatterns = [
     # # 搜索(客户\标签)
     # url(r'^search/(?P<oper_type>\w+)$', search.search),
 
-
     # 修改客户详情和客户关联信息表
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', customer.customer_oper),
-    url(r'^customer$', customer.customer),      # 查询用户详细信息
+    url(r'^customer$', customer.customer),  # 查询用户详细信息
 
     # 通讯录列表
     url(r'^tongxunlu$', tongxunlu.tongxunlu),
@@ -60,7 +60,6 @@ urlpatterns = [
     # 我的订单管理查询
     url(r'theOrder$', theOrderManagement.theOrder),
 
-
     # 获取访问日志动作。
     url(r'^action/(?P<oper_type>\w+)$', action.action),
 
@@ -69,7 +68,7 @@ urlpatterns = [
 
     # 企业微信网页登录认证 --- 疑问
     # url(r'^work_weixin_auth/(?P<company_id>\d+)$', user_weixin_auth.work_weixin_auth),
-    url(r'^work_weixin_auth/(?P<oper_type>\w+)$', user_weixin_auth.work_weixin_auth_oper),      # 创建公众号分享url
+    url(r'^work_weixin_auth/(?P<oper_type>\w+)$', user_weixin_auth.work_weixin_auth_oper),  # 创建公众号分享url
 
     # # 企业微信JS-SDK使用权限签名算法
     # url(r'^enterprise_weixin_sign$', user_weixin_auth.enterprise_weixin_sign),
@@ -93,4 +92,7 @@ urlpatterns = [
     # 聊天页-话术库-详情
     url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
     # url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
+
+    # 记录用户(咨询)操作日志
+    url(r'^oper_log/(?P<oper_type>\w+)$', oper_log.oper_log),
 ]
