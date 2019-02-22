@@ -160,8 +160,6 @@ def diary_poster_html(request):
 
         poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
             user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&user_customer_belonger_id=%s' % (
-            customer_id, user_id, case_id,user_customer_belonger_id)
 
         print('值 user_customer_belonger_id ---->',user_customer_belonger_id)
         print('值 case_id ---->', case_id)
@@ -183,10 +181,11 @@ def diary_poster_html(request):
         poster_company_logo = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).poster_company_logo
 
         ret_data = {
-            'poster_company_logo' :poster_company_logo,
+            'poster_company_logo' :qr_code,
             'qr_code_url': qr_code,
-            'poster_cover' :poster_cover
+            'poster_cover' : poster_cover
         }
+        print('ret_data ------>>',ret_data)
 
         return render(request, 'poster_case.html', locals())
 
