@@ -97,6 +97,10 @@ def case_manage(request, oper_type):
                                 for recode_tag_name_dict in history_tags_record:
                                     recode_tag_name.append(recode_tag_name_dict['name'])
 
+
+                                print('值 recode_tag_name----->>',recode_tag_name)
+                                print('值 tag_name----->>',tag_name)
+
                                 if tag_name in recode_tag_name:
                                     index_num = tag_name.index(recode_tag_name)
                                     history_tags_record.remove(index_num)
