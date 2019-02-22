@@ -480,7 +480,7 @@ def open_qiyeweixin(request, oper_type):
                 elif app_type == 'boss':
                     # SuiteId = 'wx36c67dd53366b6f0'
                     # url = 'http://zhugeleida.zhugeyingxiao.com/#/bossLeida'
-                    SuiteId = qywx_config_dict['boss'].get('sCorpID')
+                    suite_id = qywx_config_dict['boss'].get('sCorpID')
                     url = domain + '/#/bossLeida'
 
                 # 后台扫码登录
