@@ -601,8 +601,8 @@ def case_manage(request, oper_type):
                 poster_url = poster_belonger_obj.poster_url
 
                 if not  poster_url:
-                    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s' % (
-                        customer_id, uid, case_id, company_id)
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
+                        customer_id, uid, case_id, company_id,user_customer_belonger_id)
 
                     data_dict = {
                         'user_id': uid,
@@ -763,8 +763,8 @@ def create_user_customer_case_poster_qr_code(data):
     company_id = data.get('company_id')
 
     poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(user_customer_belonger_id=user_customer_belonger_id,case_id=case_id)
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s' % (
-        customer_id, user_id, case_id,company_id)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
+        customer_id, user_id, case_id,company_id,user_customer_belonger_id)
 
     qr_code = ''
     if poster_belonger_objs:
