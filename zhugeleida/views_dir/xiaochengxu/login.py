@@ -222,6 +222,12 @@ def login_oper(request, oper_type):
                         response.msg = "关系存在"
 
                     else:
+                        if not source:
+                            source = 1
+
+                        print('值 source------->>',source)
+                        print('值 customer_id------->>', customer_id)
+                        print('值 user_id------->>', user_id)
 
                         obj = models.zgld_user_customer_belonger.objects.create(customer_id=customer_id, user_id=user_id,
                                                                                 source=source)
