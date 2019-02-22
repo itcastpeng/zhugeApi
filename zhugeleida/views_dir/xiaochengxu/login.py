@@ -197,7 +197,7 @@ def login_oper(request, oper_type):
             if forms_obj.is_valid():
 
                 # user_type = forms_obj.cleaned_data.get('user_type')
-                source = forms_obj.cleaned_data.get('source')  # 1,代表扫码,2 代表转发
+                source = forms_obj.cleaned_data.get('source','1')  # 1,代表扫码,2 代表转发
                 user_id = forms_obj.cleaned_data.get('uid')  # 所属的企业用户的ID
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
                 parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
