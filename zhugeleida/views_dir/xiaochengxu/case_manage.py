@@ -106,6 +106,8 @@ def case_manage(request, oper_type):
 
                                     index_num = recode_tag_name.index(tag_name)
                                     print('值 index_num---->',index_num)
+                                    print('值 history_tags_record ---->',history_tags_record)
+
                                     history_tags_record.remove(index_num)
 
                                 history_tags_record.append({
