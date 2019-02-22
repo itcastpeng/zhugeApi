@@ -160,13 +160,17 @@ def diary_poster_html(request):
 
         poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
             user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s' % (
-            customer_id, user_id, case_id)
+        url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&user_customer_belonger_id=%s' % (
+            customer_id, user_id, case_id,user_customer_belonger_id)
+
+        print('值 user_customer_belonger_id ---->',user_customer_belonger_id)
+        print('值 case_id ---->', case_id)
 
         qr_code = ''
         if poster_belonger_objs:
             poster_belonger_obj = poster_belonger_objs[0]
             qr_code = poster_belonger_obj.qr_code
+
         case_objs = models.zgld_case.objects.filter(id=case_id)
         poster_cover = []
         if case_objs:
