@@ -4,7 +4,7 @@ import os, random, time, hashlib, base64
 
 from PIL import Image,ImageFont,ImageDraw
 import numpy as np
-from pylab import *
+# from pylab import *
 
 import cv2
 
