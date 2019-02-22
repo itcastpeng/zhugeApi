@@ -27,7 +27,7 @@ def user_send_action_log(data):
     # requests.get(url, params=get_data)
 
 
-# 转发发送红包
+# 关注发送红包
 @app.task
 def user_forward_send_activity_redPacket(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_forward_send_activity_redPacket'
@@ -40,17 +40,6 @@ def user_forward_send_activity_redPacket(data):
 
     # requests.get(url, params=get_data)
 
-
-# 转发发送红包
-@app.task
-def user_focus_send_activity_redPacket(data):
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_focus_send_activity_redPacket'
-    get_data = data
-    print('----------[公众号]关注文章后得红包 -->requests调用 get_data数据 ------------>',get_data)
-
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    s.get(url, params=get_data)
 
 
 # 转发发送红包
@@ -129,7 +118,7 @@ def create_user_or_customer_small_program_poster(data):
     # requests.get(url, params=get_data)
 
 
-# 发送模板消息。
+# 发送模板消息给客户提示。
 @app.task
 def user_send_template_msg_to_customer(data):
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_template_msg'
@@ -145,7 +134,7 @@ def user_send_template_msg_to_customer(data):
     # requests.get(url, params=get_data)
 
 
-# 发送模板消息。
+# 补发活动红包。
 @app.task
 def bufa_send_activity_redPacket():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/bufa_send_activity_redPacket'
@@ -191,6 +180,7 @@ def qiyeweixin_user_get_userinfo(data):
     # requests.get(url, params=get_data)
 
 
+## 定时器杀死phantomjs进程
 @app.task
 def kill_phantomjs_process():
     pids = psutil.pids()
@@ -224,7 +214,7 @@ def kill_phantomjs_process():
                     print ('----- Exception 没有如此进程!!!------>>')
 
 
-# 获取查询最新一次提交的审核状态并记录到数据库
+# 【定时器刷新小程序审核状态】获取查询最新一次提交的审核状态并记录到数据库
 @app.task
 def get_latest_audit_status_and_release_code():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/get_latest_audit_status_and_release_code'
@@ -238,7 +228,7 @@ def get_latest_audit_status_and_release_code():
 
     # requests.get(url, params=get_data)
 
-
+## 定时器生成小程序名片的二维码
 @app.task
 def crontab_create_user_to_customer_qrCode_poster():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/crontab_create_user_to_customer_qrCode_poster'
@@ -255,18 +245,21 @@ def crontab_batchget_article_material():
     s.keep_alive = False  # 关闭多余连接
     s.post(url)
 
+# 关联。
+# @app.task
+# def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序ID
+#     if xiaochengxuid:
+#         url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/addSmallProgram?xiaochengxuid={}'.format(xiaochengxuid)
+#         requests.get(url)
 
-@app.task
-def celery_addSmallProgram(xiaochengxuid): # 商城基础设置 添加小程序ID
-    if xiaochengxuid:
-        url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/addSmallProgram?xiaochengxuid={}'.format(xiaochengxuid)
-        requests.get(url)
 
+# 商城订单 定时刷新 十分钟未付款自动改状态
 @app.task
-def mallOrderTimeToRefresh():# 商城订单 定时刷新 十分钟未付款自动改状态
+def mallOrderTimeToRefresh():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/timeToRefresh'
     requests.get(url)
 
+## 关注公众号可获取-重要通知
 @app.task
 def monitor_send_gzh_template_msg(data):
     print('--- 【公众号-监控发送模板消息数据】 --->', data)
