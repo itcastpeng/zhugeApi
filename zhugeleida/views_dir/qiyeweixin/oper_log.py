@@ -17,10 +17,12 @@ import json
 @account.is_token(models.zgld_userprofile)
 def oper_log_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
     if request.method == "POST":
         if oper_type == "add":
             form_data = {
-                'oper_type': o_id
+                'oper_type': o_id,
+                'user_id': user_id,
             }
             forms_obj = OperLogAddForm(form_data)
 
