@@ -94,5 +94,5 @@ urlpatterns = [
     # url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 
     # 记录用户(咨询)操作日志
-    url(r'^oper_log/(?P<oper_type>\w+)$', oper_log.oper_log),
+    url(r'^oper_log/(?P<oper_type>\d+)$', oper_log.oper_log),
 ]
