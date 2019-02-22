@@ -12,6 +12,7 @@ import subprocess
 from zhugeleida import models
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from subprocess import Popen, PIPE
+from zhugeleida.views_dir.public.watermark import watermark
 
 # 上传图片（分片上传）
 @csrf_exempt
@@ -142,20 +143,30 @@ def img_merge(request):
 
         print('【1】值 os.path.getsize(img_path) ---------->>',os.path.getsize(img_path))
 
-        # ## 给文章的图片加水印
-        # user_id = request.GET.get('user_id')
-        # if  img_source == 'article' or  img_source == 'cover_picture':
-        #     company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-        #     _img_path = setup_picture_shuiyin(img_name,img_path, company_id,'article')
-        #     if  _img_path:
-        #         img_path =  _img_path
-        #
-        # ## 给案例的图片加水印
-        # elif  img_source == 'case':
-        #     company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-        #     _img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
-        #     if  _img_path:
-        #         img_path =  _img_path
+        ## 给文章的图片加水印
+
+
+        user_id = request.GET.get('user_id')
+        lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'mylg_watermark.png')
+
+        if  img_source == 'article' or  img_source == 'cover_picture':
+            # company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            # _img_path = setup_picture_shuiyin(img_name,img_path, company_id,'article')
+            obj = watermark()
+
+            _img_path = obj.cover_watermark(img_path, lujing)
+
+            if  _img_path:
+                img_path =  _img_path
+
+        ## 给案例的图片加水印
+        elif  img_source == 'case':
+            # company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+            # _img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
+            obj = watermark()
+            _img_path = obj.cover_watermark(img_path, lujing)
+            if  _img_path:
+                img_path =  _img_path
 
         response.data = {
             'picture_url': img_path,
