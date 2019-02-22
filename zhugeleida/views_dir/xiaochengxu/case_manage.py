@@ -98,11 +98,14 @@ def case_manage(request, oper_type):
                                     recode_tag_name.append(recode_tag_name_dict['name'])
 
 
-                                print('值 recode_tag_name----->>',recode_tag_name)
-                                print('值 tag_name----->>',tag_name)
+
 
                                 if tag_name in recode_tag_name:
+                                    print('值 recode_tag_name----->>', recode_tag_name)
+                                    print('值 tag_name----->>', tag_name)
+
                                     index_num = recode_tag_name.index(tag_name)
+                                    print('值 index_num---->',index_num)
                                     history_tags_record.remove(index_num)
 
                                 history_tags_record.append({
