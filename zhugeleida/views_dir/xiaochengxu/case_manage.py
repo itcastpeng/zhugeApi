@@ -601,6 +601,15 @@ def case_manage(request, oper_type):
                 poster_url = poster_belonger_obj.poster_url
 
                 if not  poster_url:
+                    data_dict = {
+                        'user_id': uid,
+                        'customer_id': customer_id,
+                        'poster_url': url,
+                        'user_customer_belonger_id': user_customer_belonger_id,
+                        'case_id': case_id
+
+                    }
+                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
                     _response = create_user_customer_case_poster_qr_code(_data)
 
