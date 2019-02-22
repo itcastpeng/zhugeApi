@@ -15,22 +15,23 @@ import json
 # 用户展示模块
 @csrf_exempt
 @account.is_token(models.zgld_userprofile)
-def oper_log(request, oper_type):
+def oper_log_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     if request.method == "POST":
-        form_data = {
-            'oper_type': oper_type
-        }
-        forms_obj = OperLogAddForm(form_data)
+        if oper_type == "add":
+            form_data = {
+                'oper_type': o_id
+            }
+            forms_obj = OperLogAddForm(form_data)
 
-        if forms_obj.is_valid():
-            models.ZgldUserOperLog.objects.create(**forms_obj.cleaned_data)
-            response.code = 200
-            response.msg = "记录成功"
+            if forms_obj.is_valid():
+                models.ZgldUserOperLog.objects.create(**forms_obj.cleaned_data)
+                response.code = 200
+                response.msg = "记录成功"
 
-        else:
-            response.code = 301
-            response.msg = json.loads(forms_obj.errors.as_json())
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 
