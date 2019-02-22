@@ -4,7 +4,7 @@ from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.public.crypto_.WXBizMsgCrypt import WXBizMsgCrypt
-from zhugeapi_celery_project.tasks import celery_addSmallProgram
+
 import redis, json, xml.etree.cElementTree as ET, requests
 from zhugeleida.forms.admin import open_weixin_verify
 
