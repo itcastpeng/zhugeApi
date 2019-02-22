@@ -488,7 +488,10 @@ def qiyeweixin_user_get_userinfo(request):
 @csrf_exempt
 def crontab_create_user_to_customer_qrCode_poster(request):
     if request.method == "GET":
-        objs = models.zgld_user_customer_belonger.objects.filter(Q(poster_url__isnull=True) | Q(qr_code__isnull=True))
+        company_list =  list(models.zgld_xiaochengxu_app.objects.filter(three_services_type=1).values_list('company_id',flat=True))
+
+        objs = models.zgld_user_customer_belonger.objects.filter(
+            Q(poster_url__isnull=True) | Q(qr_code__isnull=True)).filter(user__company_id__in=company_list)
 
         if objs:
             for obj in objs:
@@ -560,19 +563,19 @@ def create_user_or_customer_poster(request):
     # user_customer_belonger_id = request.GET.get('user_customer_belonger_id', '')
     # case_id = request.GET.get('case_id', '')
 
-
     print('[生成海报]customer_id | user_id --------->>', customer_id, user_id)
 
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (customer_id, user_id)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/mingpian/poster_html?user_id=%s&uid=%s' % (
+    customer_id, user_id)
     if poster_url:
         url = poster_url
 
     _data = {
         'user_id': user_id,
-        'customer_id' : customer_id,
-        'poster_url' : url,
-        'user_customer_belonger_id': user_customer_belonger_id ,
-        'case_id' : case_id
+        'customer_id': customer_id,
+        'poster_url': url,
+        'user_customer_belonger_id': user_customer_belonger_id,
+        'case_id': case_id
     }
     create_poster_process(_data)
 
@@ -582,14 +585,13 @@ def create_user_or_customer_poster(request):
 def create_poster_process(data):
     response = ResponseObj()
 
-
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
     poster_url = data.get('poster_url')
     user_customer_belonger_id = data.get('user_customer_belonger_id')
     case_id = data.get('case_id')
 
-    print('传递的值 ------>>',data)
+    print('传递的值 ------>>', data)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
     if not objs:  # 如果没有找到则表示异常
@@ -608,16 +610,14 @@ def create_poster_process(data):
         else:
             phantomjs_path = phantomjs_path + '/phantomjs.exe'
 
-
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
 
         driver.implicitly_wait(10)
 
-
         try:
-            print('值 driver 开始 ----->>',poster_url)
+            print('值 driver 开始 ----->>', poster_url)
             driver.get(poster_url)
-            print('值 driver 结束 ----->>',poster_url)
+            print('值 driver 结束 ----->>', poster_url)
 
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -662,21 +662,21 @@ def create_poster_process(data):
 
             if poster_url:
 
-                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                        user_customer_belonger_id=user_customer_belonger_id,
-                        case_id=case_id
+                case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                    user_customer_belonger_id=user_customer_belonger_id,
+                    case_id=case_id
+                )
+                if case_poster_belonger_objs:
+                    case_poster_belonger_objs.update(
+                        poster_url=_poster_url
                     )
-                    if case_poster_belonger_objs:
-                        case_poster_belonger_objs.update(
-                            poster_url=_poster_url
-                        )
 
-                    else:
-                        models.zgld_customer_case_poster_belonger.objects.create(
-                            user_customer_belonger_id=user_customer_belonger_id,
-                            case_id=case_id,
-                            poster_url=_poster_url
-                        )
+                else:
+                    models.zgld_customer_case_poster_belonger.objects.create(
+                        user_customer_belonger_id=user_customer_belonger_id,
+                        case_id=case_id,
+                        poster_url=_poster_url
+                    )
 
 
             else:
@@ -699,9 +699,7 @@ def create_poster_process(data):
             response.code = 400
             driver.quit()
 
-    return  JsonResponse(response.__dict__)
-
-
+    return JsonResponse(response.__dict__)
 
 
 # 小程序生成token，并然后发送模板消息
@@ -1403,7 +1401,7 @@ def user_forward_send_activity_redPacket(request):
                                     _send_log_dict = {
                                         'type': '数量满足|有地域限制【在发放范围内】',
                                         'activity_single_money': '发送的地域area: %s | 客户具体地址: formatted_address: %s' % (
-                                        area, formatted_address),
+                                            area, formatted_address),
                                         'send_time': now_time,
                                     }
 
@@ -1436,7 +1434,7 @@ def user_forward_send_activity_redPacket(request):
                                 _send_log_dict = {
                                     'type': '数量满足|有时间限制|Time_Flag: %s' % (time_Flag),
                                     'activity_single_money': 'Log_id:%s | 单次查看时间:%s | 时间限制: %s' % (
-                                    article_access_log_id, stay_time, reach_stay_time),
+                                        article_access_log_id, stay_time, reach_stay_time),
                                     'send_time': now_time,
                                 }
 
@@ -2554,7 +2552,7 @@ def binding_article_customer_relate(request):
 
             if redPacket_objs:
                 print('----- 活动发红包表数据【存在】 article_id:%s | activity_id:%s | customer_id: %s ----->>' % (
-                article_id, activity_id, customer_id))
+                    article_id, activity_id, customer_id))
 
 
             else:
