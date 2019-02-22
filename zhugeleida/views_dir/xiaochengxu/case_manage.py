@@ -102,7 +102,7 @@ def case_manage(request, oper_type):
                                 print('值 tag_name----->>',tag_name)
 
                                 if tag_name in recode_tag_name:
-                                    index_num = tag_name.index(recode_tag_name)
+                                    index_num = recode_tag_name.index(tag_name)
                                     history_tags_record.remove(index_num)
 
                                 history_tags_record.append({
