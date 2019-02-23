@@ -55,7 +55,7 @@ class SmallProgramAddForm(forms.Form):
 
 class LoginBindingForm(forms.Form):
     # print('添加标签')
-    source = forms.IntegerField(
+    source = forms.CharField(
         required=False,
         error_messages={
             'required': "客户来源不能为空"
