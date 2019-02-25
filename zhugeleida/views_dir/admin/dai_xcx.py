@@ -359,6 +359,7 @@ def dai_xcx_oper(request, oper_type):
                     for obj in objs:
                         authorizer_refresh_token = obj.authorizer_refresh_token
                         authorizer_appid = obj.authorization_appid
+                        company_id =  obj.company_id
 
                         ext_json = {
                             "extEnable": "true",
