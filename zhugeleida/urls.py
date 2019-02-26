@@ -10,7 +10,7 @@ urlpatterns = [
     # 公众号文章
     url(r'^gongzhonghao/', include('zhugeleida.urls_dir.gongzhonghao_urls')),
 
-    # 雷达
+    # AI雷达
     url(r'^qiyeweixin/', include('zhugeleida.urls_dir.qiyeweixin_urls')),
 
     # 小程序

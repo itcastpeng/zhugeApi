@@ -147,24 +147,17 @@ def img_merge(request):
 
 
         user_id = request.GET.get('user_id')
-        lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'mylg_watermark.png')
 
-        if  img_source == 'article' or  img_source == 'cover_picture':
-            # company_id =  models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            # _img_path = setup_picture_shuiyin(img_name,img_path, company_id,'article')
+        if  img_source in ['article', 'cover_picture', 'case']:
+            if img_source == 'case': # 给案例的图片加水印
+                watermark_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
+            else:
+                watermark_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
             obj = watermark()
 
+            lujing = obj.generate_watermark_img(watermark_name)
             _img_path = obj.cover_watermark(img_path, lujing)
 
-            if  _img_path:
-                img_path =  _img_path
-
-        ## 给案例的图片加水印
-        elif  img_source == 'case':
-            # company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
-            # _img_path = setup_picture_shuiyin(img_name,img_path, company_id, 'case')
-            obj = watermark()
-            _img_path = obj.cover_watermark(img_path, lujing)
             if  _img_path:
                 img_path =  _img_path
 
