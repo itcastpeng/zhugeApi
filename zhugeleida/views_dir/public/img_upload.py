@@ -147,6 +147,7 @@ def img_merge(request):
 
 
         user_id = request.GET.get('user_id')
+        company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
 
         if  img_source in ['article', 'cover_picture', 'case']:
             if img_source == 'case': # 给案例的图片加水印
@@ -164,9 +165,9 @@ def img_merge(request):
         response.data = {
             'picture_url': img_path,
         }
-        ret = subprocess.Popen('du -sk  /data/www/zhugeApi/%s ' % (img_path), shell=True,stdout=PIPE)
-        print('【1】ret.stdout.read() --------->>', ret.stdout.read())
-        print('【3】值 os.path.getsize(img_path) ---------->>', os.path.getsize(img_path))
+        # ret = subprocess.Popen('du -sk  /data/www/zhugeApi/%s ' % (img_path), shell=True,stdout=PIPE)
+        # print('【1】ret.stdout.read() --------->>', ret.stdout.read())
+        # print('【3】值 os.path.getsize(img_path) ---------->>', os.path.getsize(img_path))
         response.code = 200
         response.msg = "添加图片成功"
 
