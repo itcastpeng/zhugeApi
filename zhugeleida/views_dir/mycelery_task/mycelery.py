@@ -337,15 +337,34 @@ def create_user_or_customer_qr_code(request):
         xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
 
         if xiaochengxu_app_objs:
+            three_services_type = xiaochengxu_app_objs[0].three_services_type
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            if not customer_id:
-                path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
-                user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
 
-            else:
-                path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
-                user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
+
+            # three_services_type = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).three_services_type
+            path = ''
+            user_qr_code = ''
+            if three_services_type == 1:    #  (1, '小程序(名片版)第三方平台'),
+
+                if not customer_id:
+                    path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
+                    user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
+
+                else:
+                    path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
+                    user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
+
+            elif three_services_type == 2:  #  (2, '小程序(案例库)第三方平台')
+
+                _path = '/pages/index/index'
+                if not customer_id:
+                    path = '%s?uid=%s&source=1' % (_path,user_id)
+                    user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
+
+                else:
+                    path = '%s?uid=%s&source=1&pid=%s' % (_path,user_id, customer_id)  # 来源 1代表扫码 2 代表转发
+                    user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
 
             get_qr_data = {}
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
