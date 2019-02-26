@@ -852,8 +852,8 @@ class zgld_accesslog(models.Model):
 
 # 聊天室记录表
 class zgld_chatinfo(models.Model):
-    send_type_choice = ((1, 'user_to_customer'),
-                        (2, 'customer_to_user'),
+    send_type_choice = ((1, 'user_to_customer'), # 雷达用户发送给小程序客户|公众号客户
+                        (2, 'customer_to_user'),  #小程序客户|公众号客户发送给雷达用户
                         (3, 'chat_help_tips_info'), # 聊天的温馨提示信息
                         (4, 'store_temp_media')     # 存储临时素素材
                         )

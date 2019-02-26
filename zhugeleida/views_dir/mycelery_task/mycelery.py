@@ -1547,9 +1547,10 @@ def Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, data):
         shangcheng_obj = shangcheng_objs[0]
         shangHuHao = shangcheng_obj.shangHuHao
         shangHuMiYao = shangcheng_obj.shangHuMiYao
+        company_obj = models.zgld_company.objects.get(id=company_id)
 
         if is_used_daifa_redPacket == 1:  # 代发红包，要看自己平台上午有没有钱
-            company_obj = models.zgld_company.objects.get(id=company_id)
+
             account_balance = company_obj.account_balance  # # 账户余额
 
         elif is_used_daifa_redPacket == 2:
@@ -1566,7 +1567,9 @@ def Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, data):
                 reason='平台账户余额不足,请充值'
             )
             objs = models.zgld_customer.objects.filter(session_key='notifier', company_id__in=[int(company_id), 1, 2])
-            remark = 'openid: %s | company_id: %s | %s' % (openid, company_id, '')
+            name = company_obj.name
+
+            remark = 'openid: %s | company_id: %s | %s' % (openid, company_id, name)
             for obj in objs:
                 data_dict = {
                     'company_id': obj.company_id,
@@ -2068,9 +2071,10 @@ def user_focus_send_activity_redPacket(request):
                             shangcheng_obj = shangcheng_objs[0]
                             shangHuHao = shangcheng_obj.shangHuHao
                             shangHuMiYao = shangcheng_obj.shangHuMiYao
+                            company_obj = models.zgld_company.objects.get(id=company_id)
 
                             if is_used_daifa_redPacket == 1:  # 代发红包，要看自己平台上午有没有钱
-                                company_obj = models.zgld_company.objects.get(id=company_id)
+
                                 account_balance = company_obj.account_balance  # # 账户余额
 
                             elif is_used_daifa_redPacket == 2:
@@ -2081,8 +2085,9 @@ def user_focus_send_activity_redPacket(request):
                                 app_objs.update(
                                     reason='平台账户余额不足,请联系管理员充值'
                                 )
+                                name = company_obj.name
 
-                                remark = 'openid: %s | company_id: %s | %s' % (openid, company_id, '')
+                                remark = 'openid: %s | company_id: %s | %s' % (openid, company_id, name)
                                 objs = models.zgld_customer.objects.filter(session_key='notifier',
                                                                            company_id__in=[int(company_id), 1, 2])
                                 for obj in objs:
