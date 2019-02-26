@@ -95,5 +95,5 @@ urlpatterns = [
 
     # 记录用户(咨询)操作日志
     url(r'^oper_log/(?P<oper_type>\w+)/(?P<o_id>\d+)$', oper_log.oper_log_oper),
-    url(r'^oper_log$', oper_log.oper_log),
+    # url(r'^oper_log$', oper_log.oper_log),
 ]
