@@ -1162,12 +1162,29 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                             }
 
                                 content = json.dumps(_content)
-                                models.zgld_chatinfo.objects.create(
-                                    content=content,
-                                    userprofile_id=user_id,
-                                    customer_id=customer_id,
-                                    send_type=2
-                                )
+                                if MediaId:
+                                    chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
+
+                                    if not chatinfo_objs:
+                                        obj = models.zgld_chatinfo.objects.create(
+                                            content=content,
+                                            userprofile_id=user_id,
+                                            customer_id=customer_id,
+                                            send_type=2
+                                        )
+                                        obj.msg = MediaId
+                                        obj.save()
+
+
+                                else:
+
+                                    obj = models.zgld_chatinfo.objects.create(
+                                        content=content,
+                                        userprofile_id=user_id,
+                                        customer_id=customer_id,
+                                        send_type=2
+                                    )
+
 
                                 if user_id and customer_id:  # 发送的文字消息
                                     remark = ': %s' % (Content)
@@ -1647,7 +1664,7 @@ def gzh_auth_process_oper(request, oper_type):
                 response.msg = '公众号不存在'
                 response.code = 302
 
-
+        # 查询已经绑定的小程序
         elif oper_type == 'query_already_bind_xcx':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')

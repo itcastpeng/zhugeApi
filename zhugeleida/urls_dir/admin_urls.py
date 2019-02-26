@@ -42,8 +42,7 @@ urlpatterns = [
     url(r'^open_qiyeweixin/(?P<oper_type>\w+)$', open_qiyeweixin.open_qiyeweixin),
 
     # 微信公众号通知+消息与事件接收
-    url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)/(?P<app_id>\w+)$',
-        open_weixin_gongzhonghao.open_weixin_gongzhonghao_oper),
+    url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)/(?P<app_id>\w+)$',open_weixin_gongzhonghao.open_weixin_gongzhonghao_oper),
     url(r'^open_weixin_gongzhonghao/(?P<oper_type>\w+)$', open_weixin_gongzhonghao.open_weixin_gongzhonghao),
 
     # 小程序第三方进入认证 - 小程序授权

@@ -191,7 +191,7 @@ def theOrderOper(request, oper_type, o_id):
                 data = {}
                 data['uid'] = u_id
                 data['user_id'] = user_id
-                data['action'] = 18
+                data['action'] = 20
                 action_record(data, remark)
 
                 response.code = 200
