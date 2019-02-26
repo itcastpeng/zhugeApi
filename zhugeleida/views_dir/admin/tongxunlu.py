@@ -168,12 +168,19 @@ def tongxunlu_oper(request, oper_type):
 
             forms_obj = TongxunluUserList(request.GET)
             if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
 
                 company_id = forms_obj.cleaned_data.get('company_id')
                 user_objs_list = models.zgld_user_customer_belonger.objects.select_related('user').filter(
                     user__company_id=company_id).values('user_id', 'user__username').annotate(
                     user__sum=Count('user_id'))
                 count = len(list(user_objs_list))
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    user_objs_list = user_objs_list[start_line: stop_line]
 
                 print('---- list(user_objs_list) --->>', list(user_objs_list))
                 if count > 0:
@@ -184,6 +191,8 @@ def tongxunlu_oper(request, oper_type):
                         user_id = obj.get('user_id')
                         user__username = obj.get('user__username')
                         user_num = obj.get('user__sum')
+
+                        copy_name_num = models.ZgldUserOperLog.objects.filter(user_id=user_id, oper_type=1).count()
                         gongzhonghao_customer_num = models.zgld_user_customer_belonger.objects.select_related(
                             'customer').filter(user_id=user_id, customer__user_type=1).count()
 
@@ -194,7 +203,8 @@ def tongxunlu_oper(request, oper_type):
                             'username': user__username,
                             'total_customer_num': user_num,
                             'xiaochengxu_customer_num' : xiaochengxu_customer_num,
-                            'gongzhonghao_customer_num' : gongzhonghao_customer_num
+                            'gongzhonghao_customer_num' : gongzhonghao_customer_num,
+                            'copy_name_num': copy_name_num,
                         })
 
                     response.code = 200
