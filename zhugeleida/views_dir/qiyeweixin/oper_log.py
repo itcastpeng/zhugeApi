@@ -11,12 +11,12 @@ from zhugeleida.forms.qiyeweixin.oper_log_verify import OperLogAddForm
 import json
 
 
-@csrf_exempt
-@account.is_token(models.zgld_userprofile)
-def oper_log(request):
-    print("request.GET -->", request.GET)
-    print("request.POST -->", request.POST)
-    return HttpResponse("xxx")
+# @csrf_exempt
+# @account.is_token(models.zgld_userprofile)
+# def oper_log(request):
+#     print("request.GET -->", request.GET)
+#     print("request.POST -->", request.POST)
+#     return HttpResponse("xxx")
 
 
 # cerf  token验证
