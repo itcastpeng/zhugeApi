@@ -65,4 +65,8 @@ class watermark(object):
         image.save(lujing)
         return lujing
 
-
+if __name__ == '__main__':
+    obj = watermark()
+    mark_text = '米扬丽格'
+    path = obj.generate_watermark_img(mark_text)
+    # obj.cover_watermark(, path)
