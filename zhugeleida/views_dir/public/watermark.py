@@ -33,11 +33,9 @@ class watermark(object):
 
         num = 1
         for i in range(10):
-            print(num)
             x = 140
             y = 60
             if num % 2 == 0:
-                print('---------')
                 x = 3
                 y = 200
 
@@ -52,9 +50,6 @@ class watermark(object):
             num += 1
 
         save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
-        # save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', '1.png')  # 已打水印图片路径
-        # # 保存
-        # im1.show()
         im1.save(save_path)
         return save_path
 
