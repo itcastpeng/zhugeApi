@@ -30,6 +30,7 @@ class watermark(object):
             imageFile = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'mylg_reproduction.png')  # 已打水印图片路径
             save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
         # 打开底版图片
+        print('imageFile------------------> ', imageFile)
         im1 = Image.open(imageFile)
         draw = ImageDraw.Draw(im1)               # 绘图句柄
 
