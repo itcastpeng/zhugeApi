@@ -37,7 +37,7 @@ class watermark(object):
         font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体，第二个参数表示字符大小
 
         # 文字rgb颜色
-        rgb_color = (233, 233, 233, 150)
+        rgb_color = (233, 233, 233, 30)
 
         num = 1
         for i in range(10):
@@ -75,6 +75,7 @@ class watermark(object):
         else:
             lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
         image.save(lujing)
+        os.remove(watermark_path) # 删除水印
         return lujing
 
 
