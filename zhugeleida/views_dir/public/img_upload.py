@@ -61,7 +61,6 @@ def img_merge(request):
         timestamp = forms_obj.cleaned_data.get('timestamp')  # 时间戳
         chunk_num = forms_obj.cleaned_data.get('chunk_num')  # 一共多少份
         expanded_name = img_name.split('.')[-1]  # 扩展名
-        company_id = request.POST.get('company_id')  # 图片的类型  (1, '产品封面的图片'), (2, '产品介绍的图片')
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
 
@@ -124,40 +123,32 @@ def img_merge(request):
                     with open(file_save_path, 'r') as f:
                         fileData += f.read()
                     print('file_save_path -->', file_save_path)
-                    # os.remove(file_save_path)
+                    os.remove(file_save_path)
                     break
 
                 except FileNotFoundError:
                     time.sleep(0.1)
 
-        # user_id = request.GET.get('user_id')
         img_path = os.path.join(file_dir, img_name)
-        # file_obj = open(img_path, 'wb')
-        # print("fileData -->", fileData)
         img_data = base64.b64decode(fileData)
-        # print("type(img_data) -->", type(img_data))
-        # file_obj.write(img_data)
-        # file_obj.flush()
         with open(img_path, 'wb') as f:
             f.write(img_data)
 
         print('【1】值 os.path.getsize(img_path) ---------->>',os.path.getsize(img_path))
 
         ## 给文章的图片加水印
-
-
-        user_id = request.GET.get('user_id')
-        company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
-
         if  img_source in ['article', 'cover_picture', 'case']:
+            user_id = request.GET.get('user_id')
+            company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
+
             if img_source == 'case': # 给案例的图片加水印
                 watermark_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
             else:
                 watermark_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
             obj = watermark()
 
-            lujing = obj.generate_watermark_img(watermark_name)
-            _img_path = obj.cover_watermark(img_path, lujing)
+            watermark_path = obj.generate_watermark_img(watermark_name) # 生成水印图片
+            _img_path = obj.cover_watermark(img_path, watermark_path)  # 覆盖水印
 
             if  _img_path:
                 img_path =  _img_path
@@ -165,9 +156,7 @@ def img_merge(request):
         response.data = {
             'picture_url': img_path,
         }
-        # ret = subprocess.Popen('du -sk  /data/www/zhugeApi/%s ' % (img_path), shell=True,stdout=PIPE)
-        # print('【1】ret.stdout.read() --------->>', ret.stdout.read())
-        # print('【3】值 os.path.getsize(img_path) ---------->>', os.path.getsize(img_path))
+
         response.code = 200
         response.msg = "添加图片成功"
 

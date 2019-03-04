@@ -27,15 +27,13 @@ class watermark(object):
             imageFile = 'wuzi.png'
             save_path = 'test/wz.png'
         else:
-            imageFile = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'wuzi.png')  # 已打水印图片路径
+            imageFile = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'mylg_reproduction.png')  # 已打水印图片路径
             save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
         # 打开底版图片
         im1 = Image.open(imageFile)
         draw = ImageDraw.Draw(im1)               # 绘图句柄
-        # draw.rectangle()
 
         font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体，第二个参数表示字符大小
-
         # 文字rgb颜色
         rgb_color = (233, 233, 233, 30)
 
@@ -49,13 +47,17 @@ class watermark(object):
 
             if num > 4:
                 y += 560
+
             elif num > 2:
                 y += 280
 
             for i in range(5):
-
+                draw.line([(x - 60, y - 100), (x + 30, y - 10)], fill=rgb_color, width=2)
+                draw.line([(x + 150, y - 100), (x + 60, y - 10)], fill=rgb_color, width=2)
+                if num > 4:
+                    draw.line([(x - 60, y + 113), (x + 23, y + 30)], fill=rgb_color, width=2)
+                    draw.line([(x + 156, y + 113), (x + 73, y + 30)], fill=rgb_color, width=2)
                 draw.text((x, y) , mark_text, rgb_color, font=font)       # 绘图
-                # draw.text((x, y), mark_text, color, font=font, fill=(76, 234, 124, 180))       # 绘图
                 x += 280
             num += 1
 
@@ -73,7 +75,8 @@ class watermark(object):
         if __name__ == "__main__":
             lujing = 'test/tttt.png'
         else:
-            lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
+            lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark',
+                encryption() + '.png')  # 已打水印图片路径
         image.save(lujing)
         os.remove(watermark_path) # 删除水印
         return lujing
