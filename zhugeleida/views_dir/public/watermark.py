@@ -3,10 +3,10 @@ from PIL import Image
 import os, random, time, hashlib, base64
 
 from PIL import Image,ImageFont,ImageDraw
-import numpy as np
+# import numpy as np
 # from pylab import *
 
-import cv2
+# import cv2
 
 # 加密名字
 def encryption():
@@ -23,13 +23,21 @@ class watermark(object):
 
     # 生成水印图片
     def generate_watermark_img(self, mark_text):
-        imageFile = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'wuzi.png')  # 已打水印图片路径
+        if __name__ == "__main__":
+            imageFile = 'wuzi.png'
+            save_path = 'test/wz.png'
+        else:
+            imageFile = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'wuzi.png')  # 已打水印图片路径
+            save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
         # 打开底版图片
         im1 = Image.open(imageFile)
         draw = ImageDraw.Draw(im1)               # 绘图句柄
+        # draw.rectangle()
+
         font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体，第二个参数表示字符大小
 
-        color = (233, 233, 233)
+        # 文字rgb颜色
+        rgb_color = (233, 233, 233, 150)
 
         num = 1
         for i in range(10):
@@ -45,15 +53,15 @@ class watermark(object):
                 y += 280
 
             for i in range(5):
-                draw.text((x, y) , mark_text, color, font=font)       # 绘图
+
+                draw.text((x, y) , mark_text, rgb_color, font=font)       # 绘图
+                # draw.text((x, y), mark_text, color, font=font, fill=(76, 234, 124, 180))       # 绘图
                 x += 280
             num += 1
 
-        save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
+
         im1.save(save_path)
         return save_path
-
-
 
     # 覆盖水印图片
     def cover_watermark(self, img_path, watermark_path):
@@ -61,12 +69,18 @@ class watermark(object):
         shuiyin = Image.open(watermark_path)  # 水印
         r, g, b, a = shuiyin.split()
         image.paste(shuiyin, mask=a)
-        lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
+
+        if __name__ == "__main__":
+            lujing = 'test/tttt.png'
+        else:
+            lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
         image.save(lujing)
         return lujing
+
 
 if __name__ == '__main__':
     obj = watermark()
     mark_text = '米扬丽格'
     path = obj.generate_watermark_img(mark_text)
-    # obj.cover_watermark(, path)
+    print(path)
+    obj.cover_watermark('test/111.jpg', path)
