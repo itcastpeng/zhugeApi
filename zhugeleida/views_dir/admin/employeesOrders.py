@@ -22,6 +22,9 @@ def employeesOrders(request):
         yewuyuan = request.GET.get('yewuyuan')
         startCreateTime =  request.GET.get('startCreateTime')
         stopCreateTime = request.GET.get('stopCreateTime')
+        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+        q.add(Q(gongsimingcheng_id=company_id), Q.AND)
+
         if yewuyuan:
             q.add(Q(yewuUser__username__contains=yewuyuan), Q.AND)
         if startCreateTime and stopCreateTime:
