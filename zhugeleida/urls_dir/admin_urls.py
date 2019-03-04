@@ -5,7 +5,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     plugin_report, plugin_goods, open_weixin, dai_xcx, xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi, open_qiyeweixin, \
     theOrderManagement, tuiKuanDingDan, employeesOrders, activity_manage, tongxunlu, money_manage, case_tag, \
-    case_manage, diary_manage, comment_manage
+    case_manage, diary_manage, comment_manage, data_statistics
 
 urlpatterns = [
 
@@ -176,4 +176,6 @@ urlpatterns = [
     # 微信支付回调地址[暂时搁置待删除]
     url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option),
 
+    # 数据统计
+    url(r'^data_statistics$', data_statistics.data_statistics),
 ]
