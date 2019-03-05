@@ -363,6 +363,12 @@ def login_oper(request, oper_type):
                 elif page_info == 4:
                     remark = '已向您授权访问【公司官网】页面'
 
+                elif page_info == 5: # 米扬丽格 首次访问雷达日记首页
+                    remark = '已向您授权访问【日记首页】页面'
+
+                elif page_info == 6: # 米扬丽格 首次访问雷达日记列表
+                    remark = '已向您授权访问【日记详情】页面'
+
                 data = request.GET.copy()
                 print('data --> request.GET.copy() -->', data)
                 data['action'] = 13  # 代表用客户授权访问

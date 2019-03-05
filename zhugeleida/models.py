@@ -833,6 +833,9 @@ class zgld_accesslog(models.Model):
         (19, '点赞文章'),  # 取消了对您的靠谱
         (20, '取消订单'),  # 取消了对您的靠谱
 
+        (21, '查看日记首页'),  # 记录查看日记首页
+        (22, '查看日记详情'),  # 记录查看日记列表页
+
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
