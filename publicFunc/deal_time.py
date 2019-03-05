@@ -3,7 +3,7 @@ import datetime
 
 
 def deal_time(create_time):
-    print('create_time -->', create_time)
+    # print('create_time -->', create_time)
 
     # 获取当前时间的 datetime 对象
     now_dateTime = datetime.datetime.now()
