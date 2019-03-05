@@ -913,6 +913,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
             else:
+                print('MsgType--------MsgType-------------MsgType-------------MsgType----------MsgType------> ', MsgType)
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
@@ -1042,6 +1043,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                         if MsgType == 'text' or MsgType == 'voice' or  MsgType == 'image':
+                            print('-----===========---------=========---------->texttexttexttexttexttexttext ')
                             MediaId = collection.getElementsByTagName("MsgId")[0].childNodes[0].data
 
                             flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
@@ -1061,6 +1063,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                 if  MsgType == 'text':
                                     encodestr = base64.b64encode(Content.encode('utf-8'))
+                                    print('encodestr-----encodestr----------encodestr-------------------encodestr--------> ', encodestr)
                                     msg = str(encodestr, 'utf-8')
                                     _content = {
                                         'msg': msg,
@@ -1168,19 +1171,16 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                     chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
 
                                     if not chatinfo_objs:
-                                        obj = models.zgld_chatinfo.objects.create(
+                                        models.zgld_chatinfo.objects.create(
                                             content=content,
                                             userprofile_id=user_id,
                                             customer_id=customer_id,
-                                            send_type=2
+                                            send_type=2,
+                                            msg=MediaId
                                         )
-                                        obj.msg = MediaId
-                                        obj.save()
-
 
                                 else:
-
-                                    obj = models.zgld_chatinfo.objects.create(
+                                    models.zgld_chatinfo.objects.create(
                                         content=content,
                                         userprofile_id=user_id,
                                         customer_id=customer_id,
