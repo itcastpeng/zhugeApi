@@ -9,7 +9,7 @@ from publicFunc.Response import ResponseObj
 from django.http import JsonResponse
 import os
 import datetime
-import redis
+import redis, time
 from collections import OrderedDict
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
@@ -2342,7 +2342,8 @@ def get_customer_gongzhonghao_userinfo(request):
                     send_type=1,
                     userprofile_id=user_id,
                     customer_id=customer_id,
-                    content=content
+                    content=content,
+                    msg=int(time.time())
                 )
 
                 gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
@@ -2359,7 +2360,8 @@ def get_customer_gongzhonghao_userinfo(request):
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=1,
-                        is_last_msg=False
+                        is_last_msg=False,
+                        msg=int(time.time())
                     )
 
                 print('---------- 插入 第一条用户和公众号客户的对话信息 successful ---->')
