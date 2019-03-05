@@ -3,16 +3,10 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse,HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.user_verify import UserSelectForm
 import json
-import requests
-from zhugeapi_celery_project import tasks
-from django.db.models import Q
-import redis
-from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
-from zhugeleida.public.WorkWeixinOper import WorkWeixinOper
+from django.db.models import Q, Count, Sum
 
 
 # cerf  token验证
@@ -35,32 +29,62 @@ def data_statistics(request):
             q = conditionCom(request, field_dict)
 
             print('------q------>>',q)
+
             # 获取用户信息
-            admin_userobj = models.zgld_admin_userprofile.objects.get(id=user_id)
-            role_id = admin_userobj.role_id
+            admin_userobj = models.zgld_userprofile.objects.get(id=user_id)
             company_id = admin_userobj.company_id
 
-            user_objs = models.zgld_admin_userprofile.objects.filter(
+            objs = models.zgld_userprofile.objects.filter(
                 q,
                 company_id=company_id,
             )
-
-
-
-
-
+            count = objs.count()
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
 
 
             ret_data = []
-            #  查询成功 返回200 状态码
+            read_count = 0
+            forward_count = 0
+
+            for obj in objs:
+                print('obj.id----> ', obj.id)
+                copy_nickname = models.ZgldUserOperLog.objects.filter(user_id=obj.id).count()  # 复制昵称次数
+
+                read_count_obj = models.zgld_article_to_customer_belonger.objects.values('user_id').annotate(
+                    read_count=Sum('read_count'), forward_count=Sum('forward_count')).filter(user_id=obj.id) # 点击量 转发量
+                if read_count_obj:
+                    read_count = read_count_obj[0].get('read_count')
+                    forward_count = read_count_obj[0].get('forward_count')
+
+                phone_call_num = models.zgld_accesslog.objects.filter(user_id=obj.id, action=10).count() # 拨打电话次数
 
 
 
+                ret_data.append({
+                    'id': obj.id,
+                    'username': obj.username,
+                    'copy_nickname':copy_nickname,
+                    'read_count':read_count,
+                    'forward_count':forward_count,
+                    'phone_call_num':phone_call_num,
+                })
 
             response.code = 200
             response.msg = '查询成功'
             response.data = {
                 'ret_data': ret_data,
+                'count': count,
+            }
+
+            response.note = {
+                'username': '咨询名称',
+                'copy_nickname': '复制昵称次数',
+                'read_count': '点击量',
+                'forward_count': '转发量',
+                'phone_call_num': '拨打电话次数',
             }
 
         else:
