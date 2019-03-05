@@ -1163,7 +1163,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                                 content = json.dumps(_content)
-
+                                print('MediaId----------------------MediaId------------MediaId-MediaId-MediaId--------> ', MediaId)
                                 if MediaId:
                                     chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
 
