@@ -1161,29 +1161,38 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                                                 'info_type': 5  #
                                             }
 
-                                content = json.dumps(_content)
-                                if MediaId:
-                                    chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
 
-                                    if not chatinfo_objs:
+                                content = json.dumps(_content)
+
+                                chatinfo_obj = models.zgld_chatinfo.objects.filter(
+                                    userprofile_id=user_id,
+                                    customer_id=customer_id,
+                                    content=content,
+                                    send_type=2
+                                )
+                                if not chatinfo_obj: # 判断数据库是否存在 不存在插入 异步可能会 重复
+                                    if MediaId:
+                                        chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
+
+                                        if not chatinfo_objs:
+                                            obj = models.zgld_chatinfo.objects.create(
+                                                content=content,
+                                                userprofile_id=user_id,
+                                                customer_id=customer_id,
+                                                send_type=2
+                                            )
+                                            obj.msg = MediaId
+                                            obj.save()
+
+
+                                    else:
+
                                         obj = models.zgld_chatinfo.objects.create(
                                             content=content,
                                             userprofile_id=user_id,
                                             customer_id=customer_id,
                                             send_type=2
                                         )
-                                        obj.msg = MediaId
-                                        obj.save()
-
-
-                                else:
-
-                                    obj = models.zgld_chatinfo.objects.create(
-                                        content=content,
-                                        userprofile_id=user_id,
-                                        customer_id=customer_id,
-                                        send_type=2
-                                    )
 
 
                                 if user_id and customer_id:  # 发送的文字消息
