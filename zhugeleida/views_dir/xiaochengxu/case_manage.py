@@ -35,6 +35,7 @@ def case_manage(request, oper_type):
             if forms_obj.is_valid():
                 print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 customer_id = request.GET.get('user_id')
+                u_id = request.GET.get('u_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -263,6 +264,28 @@ def case_manage(request, oper_type):
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
+                    # 记录该客户 点击查看日记首页日志
+                    data = {
+                        'action': 21,
+                        'customer_id': customer_id,
+                        'user_id': u_id
+                    }
+                    log_count = models.zgld_accesslog.objects.filter(**data).count()
+                    if int(log_count) == 0:
+                        remark = '首次查看您的日记首页, 沟通从此刻开始'
+                    elif int(log_count) == 1:
+                        remark = '查看您的日记首页/第{}次, 把握深度交流的机会'.format(log_count)
+                    elif int(log_count) == 2:
+                        remark = '查看您的日记首页/第{}次, 建议标注重点客户'.format(log_count)
+                    else:
+                        remark = '查看您的日记首页/第{}次, 成交在望'.format(log_count)
+
+                    models.zgld_accesslog.objects.create(
+                        action=21,
+                        user_id=u_id,
+                        customer_id=customer_id,
+                        remark=remark
+                    )
                     #  查询成功 返回200 状态码
                     response.code = 200
                     response.msg = '查询成功'
