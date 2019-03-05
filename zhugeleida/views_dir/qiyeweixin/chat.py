@@ -245,7 +245,8 @@ def chat_oper(request, oper_type, o_id):
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=1,
-                        is_user_new_msg=False
+                        is_user_new_msg=False,
+                        msg=int(time.time())
                 )
 
                 user_type = obj.customer.user_type # 客户类型

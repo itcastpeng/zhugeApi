@@ -253,8 +253,7 @@ def login_oper(request, oper_type):
                         _content['msg'] = msg
                         content = json.dumps(_content)
 
-
-                        models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,content=content)
+                        models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,content=content,msg=int(time.time()))
 
                         print('---------- 插入 第一条用户和客户的对话信息 successful ---->')
 

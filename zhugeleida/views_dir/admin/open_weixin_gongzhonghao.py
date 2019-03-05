@@ -913,7 +913,6 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
             else:
-                print('MsgType--------MsgType-------------MsgType-------------MsgType----------MsgType------> ', MsgType)
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
                 gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=app_id)
@@ -933,7 +932,7 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                             Content = collection.getElementsByTagName("Content")[0].childNodes[0].data
                             # CreateTime = collection.getElementsByTagName("CreateTime")[0].childNodes[0].data
-                            print('-----【公众号】客户发送的内容 Content ---->>', Content)
+                            # print('-----【公众号】客户发送的内容 Content ---->>', Content)
 
                             if Content.startswith('T') or Content.startswith('t'):
 
@@ -1043,7 +1042,6 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                         if MsgType == 'text' or MsgType == 'voice' or  MsgType == 'image':
-                            print('-----===========---------=========---------->texttexttexttexttexttexttext ')
                             MediaId = collection.getElementsByTagName("MsgId")[0].childNodes[0].data
 
                             flow_up_objs = models.zgld_user_customer_belonger.objects.filter(
@@ -1063,7 +1061,6 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
                                 if  MsgType == 'text':
                                     encodestr = base64.b64encode(Content.encode('utf-8'))
-                                    print('encodestr-----encodestr----------encodestr-------------------encodestr--------> ', encodestr)
                                     msg = str(encodestr, 'utf-8')
                                     _content = {
                                         'msg': msg,
@@ -1166,27 +1163,16 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
 
 
                                 content = json.dumps(_content)
-                                print('MediaId----------------------MediaId------------MediaId-MediaId-MediaId--------> ', MediaId)
-                                if MediaId:
-                                    chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
+                                chatinfo_objs = models.zgld_chatinfo.objects.filter(msg=MediaId)
 
-                                    if not chatinfo_objs:
-                                        models.zgld_chatinfo.objects.create(
-                                            content=content,
-                                            userprofile_id=user_id,
-                                            customer_id=customer_id,
-                                            send_type=2,
-                                            msg=MediaId
-                                        )
-
-                                else:
+                                if not chatinfo_objs:
                                     models.zgld_chatinfo.objects.create(
                                         content=content,
                                         userprofile_id=user_id,
                                         customer_id=customer_id,
-                                        send_type=2
+                                        send_type=2,
+                                        msg=MediaId
                                     )
-
 
                                 if user_id and customer_id:  # 发送的文字消息
                                     remark = ': %s' % (Content)
