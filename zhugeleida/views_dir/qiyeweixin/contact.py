@@ -125,6 +125,21 @@ def contact(request):
                 'unread_msg_num': chatinfo_count,
             }
 
+            response.note = {
+                'customer_id': '客户ID',
+                'name': '客户姓名',
+                'customer_source': '客户访问类型ID(微信公众号 微信小程序)',
+                'customer_source_text': '客户访问类型',
+                'src': '客户头像',
+                'is_subscribe': '该客户是否订阅该公众号ID',
+                'is_subscribe_text': '该客户是否订阅该公众号 文本',
+                'dateTime': '消息发送时间',
+                'msg': '发送的消息',
+                'count': '该客户发送消息的数量',
+                'tags_list': '标签列表',
+                'unread_msg_num': '未读消息总数',
+            }
+
     return JsonResponse(response.__dict__)
 
 
