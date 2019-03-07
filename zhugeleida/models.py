@@ -437,14 +437,20 @@ class zgld_userprofile(models.Model):
         app_label = "zhugeleida"
 
 
-# 用户(咨询)操作雷达日志
+# 用户(咨询)操作雷达日志 / 客户操作日志(咨询复制咨询名字/客户点击咨询对话框 等.....)
 class ZgldUserOperLog(models.Model):
     user = models.ForeignKey('zgld_userprofile', verbose_name="咨询用户")
 
     oper_type_choices = (
         (1, "复制名字"),
+        (2, "客户点击咨询对话框"),
     )
     oper_type = models.SmallIntegerField(verbose_name="操作类型", choices=oper_type_choices)
+
+    article = models.ForeignKey(to='zgld_article', verbose_name='归属哪篇文章', null=True, blank=True)
+    click_dialog_num = models.IntegerField(verbose_name='点击对话框次数', default=0)
+    customer = models.ForeignKey('zgld_customer', verbose_name='客户ID', null=True, blank=True)
+
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 
