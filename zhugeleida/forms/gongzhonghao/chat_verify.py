@@ -88,6 +88,12 @@ class ChatPostForm(forms.Form):
         }
     )
 
+    article_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "文章ID类型错误"
+        }
+    )
 
     # msg = request.POST.get('msg')
     # send_type = request.POST.get('send_type')

@@ -866,9 +866,9 @@ class zgld_chatinfo(models.Model):
     is_last_msg = models.BooleanField(default=True, verbose_name='是否为最后一次的消息')
     userprofile = models.ForeignKey('zgld_userprofile', verbose_name='用户', null=True, blank=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True, blank=True)
-    msg = models.TextField(u'消息', null=True, blank=True)
+    msg = models.TextField(verbose_name='微信消息唯一ID', null=True, blank=True)
     content = models.TextField(verbose_name='消息', null=True, blank=True)
-
+    article = models.ForeignKey(to='zgld_article', verbose_name='归属哪篇文章', null=True, blank=True)  # 如果该字段有值 为文章咨询
     create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:

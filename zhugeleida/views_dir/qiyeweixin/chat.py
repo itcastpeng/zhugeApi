@@ -240,13 +240,27 @@ def chat_oper(request, oper_type, o_id):
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id,is_last_msg=True).update(is_last_msg=False)
 
+                # ----------------查询最近一次该用户和该客户聊天 的 文章 判断是否为 文章聊天
+                zgld_chatinfo_obj = models.zgld_chatinfo.objects.filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    send_type=2,
+                    article__isnull=False
+                ).order_by('-create_date')
+
+                article_id = None
+                if zgld_chatinfo_obj:
+                    article_id = zgld_chatinfo_obj[0].article_id # 如果最后一次聊天有文章ID 那么是从文章过来的 (雷达首页统计数据用)
+                # ----------------------------------------------------
+
                 obj = models.zgld_chatinfo.objects.create(
                         content=Content,
                         userprofile_id=user_id,
                         customer_id=customer_id,
                         send_type=1,
                         is_user_new_msg=False,
-                        msg=int(time.time())
+                        msg=int(time.time()),
+                        article_id=article_id
                 )
 
                 user_type = obj.customer.user_type # 客户类型
