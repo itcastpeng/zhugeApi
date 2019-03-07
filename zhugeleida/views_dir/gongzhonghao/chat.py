@@ -180,7 +180,7 @@ def chat_oper(request, oper_type, o_id):
                 user_id =  request.POST.get('u_id')
                 content = request.POST.get('content')
                 article_id = request.POST.get('article_id')
-
+                print('article_id---article_id--article_id---article_id---article_id---article_id-----article_id---article_id-> ', article_id)
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
 
