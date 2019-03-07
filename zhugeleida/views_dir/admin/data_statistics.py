@@ -50,7 +50,6 @@ def data_statistics(request):
             forward_count = 0
 
             for obj in objs:
-                print('obj.id----> ', obj.id)
                 copy_nickname = models.ZgldUserOperLog.objects.filter(user_id=obj.id).count()  # 复制昵称次数
 
                 read_count_obj = models.zgld_article_to_customer_belonger.objects.values('user_id').annotate(
@@ -61,6 +60,22 @@ def data_statistics(request):
 
                 phone_call_num = models.zgld_accesslog.objects.filter(user_id=obj.id, action=10).count() # 拨打电话次数
 
+                #  ----------------------------用戶主动发送消息--------------------------
+                data_list = []
+                [data_list.append({'customer_id':i.get('customer_id'), 'article_id':i.get('article_id')}) for i in
+                 models.zgld_chatinfo.objects.filter(userprofile_id=obj.id, send_type=2, article__isnull=False).values('customer_id', 'article_id').distinct()]
+
+                user_active_send_num = 0
+                for i in data_list:
+                    objs = models.zgld_chatinfo.objects.filter(
+                        customer_id=i.get('customer_id'),
+                        article_id=i.get('article_id'),
+                        userprofile_id=obj.id).order_by('-create_date')
+                    if objs:
+                        if int(objs[0].send_type) == 2:
+                            user_active_send_num += 1
+                # ---------------------------------------------------------------------
+
 
 
                 ret_data.append({
@@ -70,7 +85,10 @@ def data_statistics(request):
                     'read_count':read_count,
                     'forward_count':forward_count,
                     'phone_call_num':phone_call_num,
+                    'user_active_send_num':user_active_send_num,
                 })
+
+
 
             response.code = 200
             response.msg = '查询成功'
@@ -80,11 +98,12 @@ def data_statistics(request):
             }
 
             response.note = {
-                'username': '咨询名称',
+                'username': '咨询用户名称',
                 'copy_nickname': '复制昵称次数',
                 'read_count': '点击量',
                 'forward_count': '转发量',
                 'phone_call_num': '拨打电话次数',
+                'user_active_send_num': '客户主动发送消息数量',
             }
 
         else:

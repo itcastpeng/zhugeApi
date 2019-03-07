@@ -179,6 +179,7 @@ def chat_oper(request, oper_type, o_id):
                 customer_id = int(request.GET.get('user_id'))
                 user_id =  request.POST.get('u_id')
                 content = request.POST.get('content')
+                article_id = request.POST.get('article_id')
 
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
                                                     is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
@@ -197,13 +198,18 @@ def chat_oper(request, oper_type, o_id):
                         _content['msg'] = msg
                         content = json.dumps(_content)
 
-                models.zgld_chatinfo.objects.create(
+                chatinfo_obj = models.zgld_chatinfo.objects.create(
                     content=content,
                     userprofile_id=user_id,
                     customer_id=customer_id,
                     send_type=2,
-                    is_customer_new_msg=False  # 代表此条客户已经读取了
+                    is_customer_new_msg=False,  # 代表此条客户已经读取了
+                    msg=int(time.time()),
                 )
+
+                if article_id:
+                    chatinfo_obj.article_id = article_id # 判断是否为文章咨询 发送的消息
+                    chatinfo_obj.save()
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
                 redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
