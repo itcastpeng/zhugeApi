@@ -456,11 +456,10 @@ class ZgldUserOperLog(models.Model):
     click_dialog_num = models.IntegerField(verbose_name='点击对话框次数', default=0)
 
     # -------------------------查看文章视频时长参数-------------------
-    start_time = models.DateTimeField(verbose_name='开始查看视频时间', max_length=128, null=True, blank=True)
-    stop_time = models.DateTimeField(verbose_name='结束查看时间', max_length=128, null=True, blank=True)
+    video_time = models.IntegerField(verbose_name='查看视频时长', default=0)
 
     # -------------------------文章阅读时长记录----------------------
-    reading_time = models.CharField(verbose_name='阅读文章时长', max_length=64, null=True, blank=True)
+    reading_time = models.IntegerField(verbose_name='阅读文章时长', default=0)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

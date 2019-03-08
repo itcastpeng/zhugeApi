@@ -77,17 +77,25 @@ def update_click_dialog_num(request, oper_type):
 
     # 记录查看文章视频时长
     elif oper_type == 'article_video_duration':
-        start_time = request.GET.get('start_time')
-        stop_time = request.GET.get('stop_time')
-        if start_time and stop_time:
-            models.ZgldUserOperLog.objects.create(
+        video_time = request.GET.get('video_time')
+        if video_time:
+            objs = models.ZgldUserOperLog.objects.filter(
                 article_id=article_id,
                 customer_id=customer_id,
                 user_id=u_id,
-                oper_type=3,
-                start_time=start_time,
-                stop_time=stop_time,
+                oper_type=3
             )
+            if objs:
+                datetime = int(objs[0].video_time) + int(video_time)
+                objs.update(video_time=datetime)
+            else:
+                models.ZgldUserOperLog.objects.create(
+                    article_id=article_id,
+                    customer_id=customer_id,
+                    user_id=u_id,
+                    oper_type=3,
+                    video_time=video_time,
+                )
 
     # 记录文章阅读时长
     elif oper_type == 'article_reading_time':
