@@ -21,6 +21,7 @@ def data_statistics(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             user_id = request.GET.get('user_id')
+            company_id = request.GET.get('company_id')
             order = request.GET.get('order', '-create_date')
 
             field_dict = {
@@ -31,9 +32,6 @@ def data_statistics(request):
             print('------q------>>', q)
 
             # 获取用户信息
-            admin_userobj = models.zgld_userprofile.objects.get(id=user_id)
-            company_id = admin_userobj.company_id
-
             objs = models.zgld_userprofile.objects.filter(
                 q,
                 company_id=company_id,
