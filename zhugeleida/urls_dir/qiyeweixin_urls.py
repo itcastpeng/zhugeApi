@@ -95,6 +95,6 @@ urlpatterns = [
 
     # 记录用户(咨询)操作日志
     url(r'^oper_log/(?P<oper_type>\w+)/(?P<o_id>\d+)$', oper_log.oper_log_oper),
-    url(r'^update_click_dialog_num$', oper_log.update_click_dialog_num), # 记录客户点击咨询对话框 次数(文章分享里)
+    url(r'^customer_oper_article/(?P<oper_type>\w+)$', oper_log.update_click_dialog_num), # 记录客户点击咨询对话框 次数(文章分享里)
     # url(r'^oper_log$', oper_log.oper_log),
 ]

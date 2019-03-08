@@ -46,31 +46,71 @@ def oper_log_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-# 客户点击咨询对话框次数
+# 用户咨询 / 文章客户 操作日志
 @csrf_exempt
 @account.is_token(models.zgld_customer)
-def update_click_dialog_num(request):
+def update_click_dialog_num(request, oper_type):
     response = Response.ResponseObj()
-    customer_id = request.GET.get('user_id')
     u_id = request.GET.get('u_id')
     article_id = request.GET.get('article_id')
-    objs = models.ZgldUserOperLog.objects.filter(
-        article_id=article_id,
-        customer_id=customer_id,
-        user_id=u_id,
-        oper_type=2,
-    )
-    if objs:
-        objs[0].click_dialog_num = objs[0].click_dialog_num + 1
-        objs[0].save()
-    else:
-        models.ZgldUserOperLog.objects.create(
+    customer_id = request.GET.get('user_id')
+
+    # 客户点击咨询对话框次数
+    if oper_type == 'update_click_dialog_num':
+        objs = models.ZgldUserOperLog.objects.filter(
             article_id=article_id,
             customer_id=customer_id,
             user_id=u_id,
             oper_type=2,
-            click_dialog_num=1
         )
+        if objs:
+            objs[0].click_dialog_num = objs[0].click_dialog_num + 1
+            objs[0].save()
+        else:
+            models.ZgldUserOperLog.objects.create(
+                article_id=article_id,
+                customer_id=customer_id,
+                user_id=u_id,
+                oper_type=2,
+                click_dialog_num=1
+            )
+
+    # 记录查看文章视频时长
+    elif oper_type == 'article_video_duration':
+        start_time = request.GET.get('start_time')
+        stop_time = request.GET.get('stop_time')
+        if start_time and stop_time:
+            models.ZgldUserOperLog.objects.create(
+                article_id=article_id,
+                customer_id=customer_id,
+                user_id=u_id,
+                oper_type=3,
+                start_time=start_time,
+                stop_time=stop_time,
+            )
+
+    # 记录文章阅读时长
+    elif oper_type == 'article_reading_time':
+        reading_time = request.GET.get('reading_time')
+        if reading_time:
+            objs = models.ZgldUserOperLog.objects.filter(
+                article_id=article_id,
+                customer_id=customer_id,
+                user_id=u_id,
+                oper_type=4
+            )
+            if objs:
+                readTime = int(objs[0].reading_time) + int(reading_time)
+                objs.update(reading_time=readTime)
+            else:
+                models.ZgldUserOperLog.objects.create(
+                    article_id=article_id,
+                    customer_id=customer_id,
+                    user_id=u_id,
+                    oper_type=4,
+                    reading_time=reading_time
+                )
+
     response.code = 200
     return JsonResponse(response.__dict__)
 

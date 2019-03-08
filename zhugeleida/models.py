@@ -444,12 +444,23 @@ class ZgldUserOperLog(models.Model):
     oper_type_choices = (
         (1, "复制名字"),
         (2, "客户点击咨询对话框"),
+        (3, "查看文章时长"),
+        (4, "文章阅读时长"),
     )
     oper_type = models.SmallIntegerField(verbose_name="操作类型", choices=oper_type_choices)
 
     article = models.ForeignKey(to='zgld_article', verbose_name='归属哪篇文章', null=True, blank=True)
-    click_dialog_num = models.IntegerField(verbose_name='点击对话框次数', default=0)
     customer = models.ForeignKey('zgld_customer', verbose_name='客户ID', null=True, blank=True)
+
+    # --------------------------客户点击对话框参数------------------
+    click_dialog_num = models.IntegerField(verbose_name='点击对话框次数', default=0)
+
+    # -------------------------查看文章视频时长参数-------------------
+    start_time = models.DateTimeField(verbose_name='开始查看视频时间', max_length=128, null=True, blank=True)
+    stop_time = models.DateTimeField(verbose_name='结束查看时间', max_length=128, null=True, blank=True)
+
+    # -------------------------文章阅读时长记录----------------------
+    reading_time = models.CharField(verbose_name='阅读文章时长', max_length=64, null=True, blank=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

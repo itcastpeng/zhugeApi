@@ -60,7 +60,7 @@ def login(request):
             user_type = forms_obj.cleaned_data.get('user_type')
             company_id = forms_obj.cleaned_data.get('company_id')
             user_id = forms_obj.cleaned_data.get('uid')
-            xcx_type = request.GET.get('xcx_type')
+            xcx_type = request.GET.get('xcx_type') # 是否是米扬丽格
 
             company_id = int(company_id) if company_id else ''
 
