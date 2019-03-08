@@ -86,8 +86,7 @@ def update_click_dialog_num(request, oper_type):
                 oper_type=3
             )
             if objs:
-                datetime = int(objs[0].video_time) + int(video_time)
-                objs.update(video_time=datetime)
+                objs.update(video_time=video_time)
             else:
                 models.ZgldUserOperLog.objects.create(
                     article_id=article_id,
@@ -108,8 +107,7 @@ def update_click_dialog_num(request, oper_type):
                 oper_type=4
             )
             if objs:
-                readTime = int(objs[0].reading_time) + int(reading_time)
-                objs.update(reading_time=readTime)
+                objs.update(reading_time=reading_time)
             else:
                 models.ZgldUserOperLog.objects.create(
                     article_id=article_id,
