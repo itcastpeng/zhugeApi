@@ -71,12 +71,12 @@ def data_statistics(request):
 
                 user_active_send_num = 0
                 for i in data_list:
-                    objs = models.zgld_chatinfo.objects.filter(
+                    infoObjs = models.zgld_chatinfo.objects.filter(
                         customer_id=i.get('customer_id'),
                         article_id=i.get('article_id'),
                         userprofile_id=obj.id).order_by('-create_date')
-                    if objs:
-                        if int(objs[0].send_type) == 2:
+                    if infoObjs:
+                        if int(infoObjs[0].send_type) == 2:
                             user_active_send_num += 1
 
                 # -------------------------------客户点击对话框次数-----------------------
@@ -185,10 +185,20 @@ def data_statistics(request):
                 if len_video > 0:
                     for i in video_time_num_list:
                         num += i
-                    print(num, len_video)
                     video_average_playing_time = int(num / len_video)
 
-
+                # ------------------------------统计文章查看时长----------------------
+                article_reading_time = 0
+                article_reading_time_objs = models.ZgldUserOperLog.objects.filter(
+                    user_id=obj.id,
+                    oper_type=4,
+                    reading_time__isnull=False
+                )
+                num = 0
+                for article_reading_time_obj in article_reading_time_objs:
+                    num += int(article_reading_time_obj.reading_time)
+                if article_reading_time_objs.count() > 0:
+                    article_reading_time = int(num / article_reading_time_objs.count())
 
 
 
@@ -204,11 +214,8 @@ def data_statistics(request):
                     'effective_dialogue': effective_dialogue,
                     'average_response': average_response,
                     'video_average_playing_time': video_average_playing_time,
+                    'article_reading_time': article_reading_time,
                 })
-
-            models.ZgldUserOperLog.objects.filter(
-
-            )
 
 
             response.code = 200
@@ -229,6 +236,7 @@ def data_statistics(request):
                 'effective_dialogue': '有效对话',
                 'average_response': '平均响应时长',
                 'video_average_playing_time': '文章视频查看平均时长',
+                'article_reading_time': '文章查看时长',
             }
 
         else:
