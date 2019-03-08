@@ -266,7 +266,7 @@ def leida_websocket(request, oper_type):
                     # data = uwsgi.websocket_recv()
                     data = uwsgi.websocket_recv_nb()
 
-                    print('------[雷达【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
+                    # print('------[雷达【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
 
                         continue
