@@ -161,24 +161,11 @@ def data_statistics(request):
                 time_objs = models.ZgldUserOperLog.objects.filter(
                     user_id=obj.id,
                     oper_type=3,
-                    start_time__isnull=False,
-                    stop_time__isnull=False,
-                ).values(
-                    'customer_id',
-                    'article_id'
-                ).distinct()
+                    video_time__isnull=False
+                )
+
                 for time_obj in time_objs:
-                    datetime_objs = models.ZgldUserOperLog.objects.filter(
-                        user_id=obj.id,
-                        oper_type=3,
-                        customer_id=time_obj.get('customer_id'),
-                        article_id=time_obj.get('article_id'),
-                    )
-                    date_time = 0
-                    for datetime_obj in datetime_objs:
-                        date_s = (datetime_obj.stop_time - datetime_obj.start_time).seconds
-                        date_time += date_s
-                    video_time_num_list.append(date_time)
+                    video_time_num_list.append(time_obj.video_time)
 
                 num = 0
                 len_video = len(video_time_num_list)
