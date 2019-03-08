@@ -43,10 +43,9 @@ def data_statistics(request):
                 objs = objs[start_line: stop_line]
 
             ret_data = []
-            read_count = 0
-            forward_count = 0
-
             for obj in objs:
+                read_count = 0
+                forward_count = 0
 
                 # --------------------------复制昵称次数---------------------------
                 copy_nickname = models.ZgldUserOperLog.objects.filter(user_id=obj.id).count()
@@ -95,7 +94,7 @@ def data_statistics(request):
                     stop_date_time = zgld_chatinfo_obj.cdt + ' 23:59:59'
 
                     msg_objs = models.zgld_chatinfo.objects.filter(
-                        userprofile_id=zgld_chatinfo_obj.id,
+                        userprofile_id=obj.id,
                         article_id=zgld_chatinfo_obj.article_id,
                         customer_id=zgld_chatinfo_obj.customer_id,
                         create_date__gte=start_date_time,
@@ -127,7 +126,7 @@ def data_statistics(request):
                 ).values('customer_id', 'article_id').distinct()
                 for info_obj in info_objs:
                     chatinfo_objs = models.zgld_chatinfo.objects.filter(
-                        userprofile_id=1,
+                        userprofile_id=obj.id,
                         article_id=info_obj.get('article_id'),
                         customer_id=info_obj.get('customer_id'),
                     ).order_by('create_date')
