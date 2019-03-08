@@ -713,10 +713,22 @@ def company_oper(request, oper_type, o_id):
                 response.msg = '体现金额不能为空'
 
 
-
-
     else:
-        response.code = 402
-        response.msg = "请求异常"
+
+        # 只查询公司ID 和 公司名称(雷达后台统计数据)
+        if oper_type == 'get_company':
+            objs = models.zgld_company.objects.filter(create_date__isnull=False)
+            data_list = []
+            for obj in objs:
+                data_list.append({
+                    'id':obj.id,
+                    'name':obj.name
+                })
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = data_list
+        else:
+            response.code = 402
+            response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)
