@@ -50,7 +50,8 @@ def follow_up_data(user_id, request, data_type=None):
         article_conditions = models.ZgldUserOperLog.objects.filter(
             oper_type=3,
             article__isnull=False
-        ).values('article__tags', 'customer_id', 'customer__username', 'customer__headimgurl'
+        ).values('customer_id', 'customer__username', 'customer__headimgurl'
+        # ).values('article__tags', 'customer_id', 'customer__username', 'customer__headimgurl'
         ).annotate(Count('id')).distinct()
         # 是否以标签分类↑
 
