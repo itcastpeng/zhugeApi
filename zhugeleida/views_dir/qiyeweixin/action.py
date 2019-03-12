@@ -12,7 +12,7 @@ from django.db.models import Q
 from datetime import datetime, timedelta
 import json
 from publicFunc.base64 import b64encode, b64decode
-
+import base64
 # 跟进数据
 def follow_up_data(user_id, request, data_type=None):
     response = Response.ResponseObj()
@@ -200,7 +200,7 @@ def action(request, oper_type):
                 ret_data = []
                 for obj in objs:
                     try:
-                        username = b64decode(obj.customer.username)
+                        username = base64.b64decode(obj.customer.username)
                         username = str(username, 'utf-8')
                         # print('----- 解密b64decode User_id username----->', username)
                     except Exception as e:
@@ -390,7 +390,7 @@ def action(request, oper_type):
 
                     try:
                         print('----- 解密b64decode 客户的username----->', customer_username)
-                        customer_name = b64decode(customer_username)
+                        customer_name = base64.b64decode(customer_username)
                         customer_name = str(customer_name, 'utf-8')
 
                     except Exception as e:
