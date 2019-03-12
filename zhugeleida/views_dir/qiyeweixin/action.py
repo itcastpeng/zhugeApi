@@ -68,8 +68,9 @@ def follow_up_data(user_id, request, data_type=None):
                         result_data.append({
                             'customer_id': i.get('customer_id'),
                             'customer__username': b64decode(i.get('customer__username')),
+                            'customer__headimgurl': article_tag.customer.headimgurl,
                             'id__count': i.get('id__count'),
-                            'type':'article'
+                            'num': article_tag.reading_time,
                         })
 
                 if count >= 3:
@@ -88,6 +89,7 @@ def follow_up_data(user_id, request, data_type=None):
                     ).order_by('-create_date')[0]
                     data_list.append({
                         'id': objs.id,
+                        'customer__headimgurl': objs.customer.headimgurl,
                         'customer_id': click_dialog_obj.get('customer_id'),
                         'customer__username': b64decode(click_dialog_obj.get('customer__username')),
                         'time': objs.create_date.strftime('%Y-%m-%d %H:%M:%S')
@@ -102,6 +104,7 @@ def follow_up_data(user_id, request, data_type=None):
                     ).order_by('-create_date')[0]
                     data_list.append({
                         'id': objs.id,
+                        'customer__headimgurl': objs.customer.headimgurl,
                         'customer_id': make_phone_call_obj.get('customer_id'),
                         'customer__username': b64decode(make_phone_call_obj.get('customer__username')),
                         'time': objs.create_date.strftime('%Y-%m-%d %H:%M:%S')
