@@ -50,7 +50,8 @@ def follow_up_data(user_id, request, data_type=None):
         article_conditions = models.ZgldUserOperLog.objects.filter(
             oper_type=3,
             article__isnull=False
-        ).values('article__tags', 'customer_id', 'customer__username').annotate(Count('id'))
+        ).values('article__tags', 'customer_id', 'customer__username', 'customer__headimgurl'
+        ).annotate(Count('id')).distinct()
         # 是否以标签分类↑
 
         result_data = []
@@ -69,21 +70,18 @@ def follow_up_data(user_id, request, data_type=None):
                         num += article_tag.reading_time
                         count += 1
 
-                print('num---> ', num)
-                for article_tag in article_tags:
-                    if article_tag.reading_time >= 60:  # 该人查看文章总时长 大于60秒
-                        eval_num = 0
-                        if num > 0:
-                            eval_num = int(num / article_tag.reading_time)
+                eval_num = 0
+                if num > 0:
+                    eval_num = int(num / count)
 
-                        result_data.append({
-                            'customer_id': i.get('customer_id'),
-                            'customer__username': b64decode(i.get('customer__username')),
-                            'customer__headimgurl': article_tag.customer.headimgurl,
-                            'id__count': i.get('id__count'),
-                            'reading_time': article_tag.reading_time,  # 阅读时长
-                            'eval_num': eval_num,                      # 平均时长
-                        })
+                result_data.append({
+                    'customer_id': i.get('customer_id'),
+                    'customer__username': b64decode(i.get('customer__username')),
+                    'customer__headimgurl':i.get('customer__headimgurl'),
+                    'id__count': i.get('id__count'),
+                    'reading_time': num,  # 阅读时长
+                    'eval_num': eval_num,                      # 平均时长
+                })
 
                 if count >= 3:
                     if_article_conditions += 1
