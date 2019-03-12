@@ -4,15 +4,139 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.xiaochengxu.action_verify import ActionSelectForm, ActionCountForm, ActionCustomerForm
+from zhugeleida.forms.xiaochengxu.action_verify import ActionSelectForm, ActionCountForm, ActionCustomerForm, SelectForm
 from zhugeleida import models
-
 from django.db.models import Count
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
 from datetime import datetime, timedelta
-import base64
 import json
+from publicFunc.base64 import b64encode, b64decode
+
+# 跟进数据
+def follow_up_data(user_id, request, data_type=None):
+    response = Response.ResponseObj()
+    forms_obj = SelectForm(request.GET)
+    if forms_obj.is_valid():
+        current_page = forms_obj.cleaned_data['current_page']
+        length = forms_obj.cleaned_data['length']
+
+        q = Q()
+        deletionTime = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+        start_time = deletionTime + ' 00:00:00'
+        q.add(Q(create_date__gte=start_time) & Q(user_id=user_id), Q.AND)
+        print('q--------> ', q)
+
+        # ----------------------------点击对话框次数-----------------------------------
+        click_dialog_objs = models.ZgldUserOperLog.objects.filter(
+            q,
+            oper_type=2,
+            article__isnull=False
+        ).order_by('-create_date')
+        click_dialog_num = 0
+        for i in click_dialog_objs:
+            click_dialog_num += i.click_dialog_num
+
+        # ------------------------------拨打电话次数----------------------------------
+        make_phone_call_objs = models.zgld_accesslog.objects.filter(
+            q,
+            action=10,
+        ).order_by('-create_date')
+        make_phone_call_count = make_phone_call_objs.count()
+
+        # ----------------------------符合匹配条件查询文章数据------------------------------
+        article_conditions = models.ZgldUserOperLog.objects.filter(
+            oper_type=3,
+        ).values('article__tags', 'customer_id', 'customer__username').annotate(Count('id'))
+        # 是否以标签分类↑
+        print('article_conditions----> ', article_conditions)
+        result_list = []
+        if_article_conditions = 0
+        for i in article_conditions:
+            if i.get('id__count') >= 3: # 条数大于等于3
+                article_tags = models.ZgldUserOperLog.objects.filter(
+                    q,
+                    oper_type=3,
+                    customer_id=i.get('customer_id'),
+                )
+                count = 0
+                num = 0
+                for article_tag in article_tags:
+                    num += article_tag.reading_time
+                if num > 60: # 该人查看文章总时长 大于60秒
+                    count += 1
+                    if_article_conditions += 1
+
+                    result_list.append({
+                        'customer_id': i.get('customer_id'),
+                        'customer__username': b64decode(i.get('customer__username')),
+                        'article__tags': i.get('article__tags'),
+                        'id__count': i.get('id__count'),
+                        'num': num,
+                    })
+        print('result_list------> ', result_list)
+
+        data_list = []
+        count = 0
+        if data_type: # 查询详情
+            if data_type == 'article_reading': # 客户阅读文章
+                objs = click_dialog_objs
+            elif data_type == 'make_phone': # 拨打电话次数
+                objs = make_phone_call_objs.values('customer_id', 'customer__username').annotate(Count('id'))
+            else:                           # 点击对话框次数
+                objs = click_dialog_objs.values('customer_id', 'customer__username').annotate(Count('id'))
+
+            count = objs.count()
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
+
+
+            if data_type == 'article_reading':  # 客户阅读文章
+                data_list = result_list
+                response.note = {
+                    'customer__username':'客户名称',
+                    'article__tags':'文章标签',
+                    'id__count':'查看总数',
+                    'num':'查看总时长 S',
+                }
+            elif data_type == 'make_phone':     # 拨打电话次数
+                for obj in objs:
+                    data_list.append({
+                        'customer_id': obj.get('customer_id'),
+                        'customer__username':b64decode(obj.get('customer__username')),
+                        'id__count': obj.get('id__count'),
+                    })
+            else:                               # 点击对话框次数
+                for obj in objs:
+                    data_list.append({
+                        'customer_id': obj.get('customer_id'),
+                        'customer__username': b64decode(obj.get('customer__username')),
+                        'id__count': obj.get('id__count'),
+                    })
+
+
+        response.code = 200
+        response.msg = '查询成功'
+        response.data = {
+            'click_dialog_num':click_dialog_num,
+            'make_phone_call_count':make_phone_call_count,
+            'if_article_conditions':if_article_conditions,
+
+            'ret_data':data_list,
+            'data_count':count
+        }
+        response.note['click_dialog_num'] = '点击对话框次数'
+        response.note['make_phone_call_count'] = '拨打电话次数'
+        response.note['if_article_conditions'] = '满足搜索条件数量'
+
+    else:
+        response.code = 301
+        response.data = json.loads(forms_obj.errors.as_json())
+
+    return response
+
 
 # 访问日志操作
 @csrf_exempt
@@ -24,14 +148,16 @@ def action(request, oper_type):
     :return:
     '''
     if request.method == 'GET':
+        user_id = request.GET.get('user_id')
+        response = Response.ResponseObj()
 
         # 雷达-时间
         if oper_type == 'time':
             forms_obj = ActionSelectForm(request.GET)
             if forms_obj.is_valid():
-                response = Response.ResponseObj()
-                user_id = request.GET.get('user_id')
                 customer_id = request.GET.get('customer_id')
+
+                response_data = follow_up_data(user_id, request)  # 统计数据
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -76,7 +202,7 @@ def action(request, oper_type):
                 ret_data = []
                 for obj in objs:
                     try:
-                        username = base64.b64decode(obj.customer.username)
+                        username = b64decode(obj.customer.username)
                         username = str(username, 'utf-8')
                         # print('----- 解密b64decode User_id username----->', username)
                     except Exception as e:
@@ -99,8 +225,15 @@ def action(request, oper_type):
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
+                    'click_dialog_num': response_data.data.get('click_dialog_num'),
+                    'make_phone_call_count': response_data.data.get('make_phone_call_count'),
+                    'if_article_conditions': response_data.data.get('if_article_conditions'),
                 }
-
+                response.note = {
+                    'click_dialog_num': '点击对话框次数',
+                    'make_phone_call_count': '拨打电话次数',
+                    'if_article_conditions': '满足条件查询数量',
+                }
                 return JsonResponse(response.__dict__)
 
         # # 获取新的日志信息
@@ -266,7 +399,7 @@ def action(request, oper_type):
 
                     try:
                         print('----- 解密b64decode 客户的username----->', customer_username)
-                        customer_name = base64.b64decode(customer_username)
+                        customer_name = b64decode(customer_username)
                         customer_name = str(customer_name, 'utf-8')
 
                     except Exception as e:
@@ -368,3 +501,13 @@ def action(request, oper_type):
             response.data = ret_data
 
             return JsonResponse(response.__dict__)
+
+        # 雷达--时间--统计数据 详情
+        elif oper_type =='time_data_detail':
+            data_type= request.GET.get('data_type')
+            data = follow_up_data(user_id, request, data_type)
+            response.code = data.code
+            response.msg = data.msg
+            response.data = data.data
+            response.note = data.note
+        return JsonResponse(response.__dict__)
