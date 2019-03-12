@@ -24,98 +24,97 @@ def follow_up_data(user_id, request, data_type=None):
         q = Q()
         deletionTime = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
         start_time = deletionTime + ' 00:00:00'
+        stop_time = deletionTime + ' 23:59:59'
         q.add(Q(create_date__gte=start_time) & Q(user_id=user_id), Q.AND)
-        print('q--------> ', q)
+        q.add(Q(create_date__lte=stop_time), Q.AND)
+        print('q--------> ', q)        
 
         # ----------------------------点击对话框次数-----------------------------------
         click_dialog_objs = models.ZgldUserOperLog.objects.filter(
             q,
             oper_type=2,
             article__isnull=False
-        ).order_by('-create_date')
-        click_dialog_num = 0
-        for i in click_dialog_objs:
-            click_dialog_num += i.click_dialog_num
+        ).values('customer_id', 'customer__username').distinct()
+        click_dialog_num = click_dialog_objs.count()
+
 
         # ------------------------------拨打电话次数----------------------------------
         make_phone_call_objs = models.zgld_accesslog.objects.filter(
             q,
             action=10,
-        ).order_by('-create_date')
+        ).values('customer_id', 'customer__username').distinct()
         make_phone_call_count = make_phone_call_objs.count()
 
-        # ----------------------------符合匹配条件查询文章数据------------------------------
+
+        # # ----------------------------符合匹配条件查询文章数据------------------------------
         article_conditions = models.ZgldUserOperLog.objects.filter(
             oper_type=3,
-        ).values('article__tags', 'customer_id', 'customer__username').annotate(Count('id'))
+            article__isnull=False
+        ).values('customer_id', 'customer__username').annotate(Count('id'))
         # 是否以标签分类↑
-        print('article_conditions----> ', article_conditions)
-        result_list = []
+
+        result_data = []
         if_article_conditions = 0
         for i in article_conditions:
-            if i.get('id__count') >= 3: # 条数大于等于3
+            if i.get('id__count') >= 3:  # 条数大于等于
                 article_tags = models.ZgldUserOperLog.objects.filter(
-                    q,
                     oper_type=3,
                     customer_id=i.get('customer_id'),
                 )
                 count = 0
-                num = 0
                 for article_tag in article_tags:
-                    num += article_tag.reading_time
-                if num > 60: # 该人查看文章总时长 大于60秒
-                    count += 1
+                    if article_tag.reading_time >= 60:  # 该人查看文章总时长 大于60秒
+                        count += 1
+                        result_data.append({
+                            'customer_id': i.get('customer_id'),
+                            'customer__username': b64decode(i.get('customer__username')),
+                            'id__count': i.get('id__count'),
+                            'type':'article'
+                        })
+
+                if count >= 3:
                     if_article_conditions += 1
 
-                    result_list.append({
-                        'customer_id': i.get('customer_id'),
-                        'customer__username': b64decode(i.get('customer__username')),
-                        'article__tags': i.get('article__tags'),
-                        'id__count': i.get('id__count'),
-                        'num': num,
-                    })
-        print('result_list------> ', result_list)
-
         data_list = []
-        count = 0
-        if data_type: # 查询详情
-            if data_type == 'article_reading': # 客户阅读文章
-                objs = click_dialog_objs
-            elif data_type == 'make_phone': # 拨打电话次数
-                objs = make_phone_call_objs.values('customer_id', 'customer__username').annotate(Count('id'))
-            else:                           # 点击对话框次数
-                objs = click_dialog_objs.values('customer_id', 'customer__username').annotate(Count('id'))
-
-            count = objs.count()
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
-
-
-            if data_type == 'article_reading':  # 客户阅读文章
-                data_list = result_list
-                response.note = {
-                    'customer__username':'客户名称',
-                    'article__tags':'文章标签',
-                    'id__count':'查看总数',
-                    'num':'查看总时长 S',
-                }
-            elif data_type == 'make_phone':     # 拨打电话次数
-                for obj in objs:
+        if data_type:
+            if data_type == 'dialog':
+                # 点击对话框 详情
+                for click_dialog_obj in click_dialog_objs:
+                    objs = models.ZgldUserOperLog.objects.filter(
+                        q,
+                        oper_type=2,
+                        article__isnull=False,
+                        customer_id=click_dialog_obj.get('customer_id')
+                    ).order_by('-create_date')[0]
                     data_list.append({
-                        'customer_id': obj.get('customer_id'),
-                        'customer__username':b64decode(obj.get('customer__username')),
-                        'id__count': obj.get('id__count'),
+                        'id': objs.id,
+                        'customer_id': click_dialog_obj.get('customer_id'),
+                        'customer__username': b64decode(click_dialog_obj.get('customer__username')),
+                        'time': objs.create_date.strftime('%Y-%m-%d %H:%M:%S')
                     })
-            else:                               # 点击对话框次数
-                for obj in objs:
+            elif data_type == 'phone_call':
+                # 拨打电话次数详情
+                for make_phone_call_obj in make_phone_call_objs:
+                    objs = models.zgld_accesslog.objects.filter(
+                        q,
+                        action=10,
+                        customer_id=make_phone_call_obj.get('customer_id')
+                    ).order_by('-create_date')[0]
                     data_list.append({
-                        'customer_id': obj.get('customer_id'),
-                        'customer__username': b64decode(obj.get('customer__username')),
-                        'id__count': obj.get('id__count'),
+                        'id': objs.id,
+                        'customer_id': make_phone_call_obj.get('customer_id'),
+                        'customer__username': b64decode(make_phone_call_obj.get('customer__username')),
+                        'time': objs.create_date.strftime('%Y-%m-%d %H:%M:%S')
                     })
+            else:
+                data_list = result_data
 
+        count = len(data_list)  # 总数
+
+        if length != 0:
+            start_line = (current_page - 1) * length
+            stop_line = start_line + length
+            data_list = data_list[start_line: stop_line]
 
         response.code = 200
         response.msg = '查询成功'
@@ -123,13 +122,13 @@ def follow_up_data(user_id, request, data_type=None):
             'click_dialog_num':click_dialog_num,
             'make_phone_call_count':make_phone_call_count,
             'if_article_conditions':if_article_conditions,
-
             'ret_data':data_list,
             'data_count':count
         }
         response.note['click_dialog_num'] = '点击对话框次数'
         response.note['make_phone_call_count'] = '拨打电话次数'
         response.note['if_article_conditions'] = '满足搜索条件数量'
+        response.note['type'] = 'article=条件查询 / dialog=点击对话框 / phone_call=拨打电话次数'
 
     else:
         response.code = 301
@@ -493,26 +492,28 @@ def action(request, oper_type):
 
             return JsonResponse(response.__dict__)
 
-        # 雷达--时间--统计数据 详情
-        elif oper_type =='time_data_detail':
+        # 雷达--时间--统计数据
+        elif oper_type =='time_data':
             data_type= request.GET.get('data_type')
-            response_data = follow_up_data(user_id, request)  # 统计数据
-            response.code = response_data.code
-            response.msg = response_data.msg
-            response.data = {
-                'click_dialog_num': response_data.data.get('click_dialog_num'),
-                'make_phone_call_count': response_data.data.get('make_phone_call_count'),
-                'if_article_conditions': response_data.data.get('if_article_conditions'),
-                }
-            response.note = {
-                'click_dialog_num': '点击对话框次数',
-                'make_phone_call_count': '拨打电话次数',
-                'if_article_conditions': '满足条件查询数量',
-            }
+
             if data_type:
                 data = follow_up_data(user_id, request, data_type)
                 response.code = data.code
                 response.msg = data.msg
                 response.data = data.data
                 response.note = data.note
+            else:
+                response_data = follow_up_data(user_id, request)  # 统计数据
+                response.code = response_data.code
+                response.msg = response_data.msg
+                response.data = {
+                    'click_dialog_num': response_data.data.get('click_dialog_num'),
+                    'make_phone_call_count': response_data.data.get('make_phone_call_count'),
+                    'if_article_conditions': response_data.data.get('if_article_conditions'),
+                }
+                response.note = {
+                    'click_dialog_num': '点击对话框次数',
+                    'make_phone_call_count': '拨打电话次数',
+                    'if_article_conditions': '满足条件查询数量',
+                }
         return JsonResponse(response.__dict__)
