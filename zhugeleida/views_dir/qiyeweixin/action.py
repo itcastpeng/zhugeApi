@@ -157,8 +157,6 @@ def action(request, oper_type):
             if forms_obj.is_valid():
                 customer_id = request.GET.get('customer_id')
 
-                response_data = follow_up_data(user_id, request)  # 统计数据
-
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
@@ -225,15 +223,8 @@ def action(request, oper_type):
                 response.data = {
                     'ret_data': ret_data,
                     'data_count': count,
-                    'click_dialog_num': response_data.data.get('click_dialog_num'),
-                    'make_phone_call_count': response_data.data.get('make_phone_call_count'),
-                    'if_article_conditions': response_data.data.get('if_article_conditions'),
                 }
-                response.note = {
-                    'click_dialog_num': '点击对话框次数',
-                    'make_phone_call_count': '拨打电话次数',
-                    'if_article_conditions': '满足条件查询数量',
-                }
+
                 return JsonResponse(response.__dict__)
 
         # # 获取新的日志信息
@@ -505,9 +496,21 @@ def action(request, oper_type):
         # 雷达--时间--统计数据 详情
         elif oper_type =='time_data_detail':
             data_type= request.GET.get('data_type')
-            data = follow_up_data(user_id, request, data_type)
-            response.code = data.code
-            response.msg = data.msg
-            response.data = data.data
-            response.note = data.note
+            response_data = follow_up_data(user_id, request)  # 统计数据
+            response.data = {
+                'click_dialog_num': response_data.data.get('click_dialog_num'),
+                'make_phone_call_count': response_data.data.get('make_phone_call_count'),
+                'if_article_conditions': response_data.data.get('if_article_conditions'),
+                }
+            response.note = {
+                'click_dialog_num': '点击对话框次数',
+                'make_phone_call_count': '拨打电话次数',
+                'if_article_conditions': '满足条件查询数量',
+            }
+            if data_type:
+                data = follow_up_data(user_id, request, data_type)
+                response.code = data.code
+                response.msg = data.msg
+                response.data = data.data
+                response.note = data.note
         return JsonResponse(response.__dict__)
