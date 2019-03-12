@@ -497,6 +497,8 @@ def action(request, oper_type):
         elif oper_type =='time_data_detail':
             data_type= request.GET.get('data_type')
             response_data = follow_up_data(user_id, request)  # 统计数据
+            response.code = response_data.code
+            response.msg = response_data.msg
             response.data = {
                 'click_dialog_num': response_data.data.get('click_dialog_num'),
                 'make_phone_call_count': response_data.data.get('make_phone_call_count'),
