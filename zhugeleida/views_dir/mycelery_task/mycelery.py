@@ -137,6 +137,7 @@ def action_record(data):
         models.zgld_accesslog.objects.create(
             user_id=user_id,
             customer_id=customer_id,
+            article_id=article_id,
             remark=remark,
             action=action
         )

@@ -155,6 +155,7 @@ def mingpian_oper(request, oper_type):
 
         forms_obj = UserSelectForm(request.GET)
         if forms_obj.is_valid():
+            # 记录拨打手机
             if oper_type == 'calling':
                 remark = '拨打您的手机'
                 data = request.GET.copy()
