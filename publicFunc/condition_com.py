@@ -11,7 +11,7 @@ def conditionCom(request, field_dict):
     q = Q()
     for k, v in field_dict.items():
         value = request.GET.get(k)
-        print('value ---->', value)
+        # print('value ---->', value)
         if value:
             if v == '__contains':
                 # 模糊查询

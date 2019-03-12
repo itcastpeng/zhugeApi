@@ -106,6 +106,9 @@ def img_merge(request):
         elif img_source == 'case':
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'case')
 
+        elif img_source == 'logo':
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'logo')
+
 
 
         fileData = ''
