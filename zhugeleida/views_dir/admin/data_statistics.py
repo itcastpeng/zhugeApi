@@ -18,24 +18,24 @@ def data_statistics(request):
     if request.method == "GET":
         forms_obj = UserSelectForm(request.GET)
         if forms_obj.is_valid():
+            user_id = request.GET.get('user_id')
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            user_id = request.GET.get('user_id')
-            company_id = request.GET.get('company_id')
             order = request.GET.get('order', '-create_date')
 
-            field_dict = {
-                'id': '',
-            }
-            q = conditionCom(request, field_dict)
 
-            print('------q------>>', q)
+
+            q = Q()
+
+            id = request.GET.get('id')                          # 区分用户
+            if id:
+                q.add(Q(id=id), Q.AND)
+            company_id = request.GET.get('company_id')          # 区分公司
+            if company_id:
+                q.add(Q(company_id=company_id), Q.AND)
 
             # 获取用户信息
-            objs = models.zgld_userprofile.objects.filter(
-                q,
-                company_id=company_id,
-            )
+            objs = models.zgld_userprofile.objects.filter(q)
             count = objs.count()
             if length != 0:
                 start_line = (current_page - 1) * length
@@ -43,6 +43,12 @@ def data_statistics(request):
                 objs = objs[start_line: stop_line]
 
             ret_data = []
+
+            article_id = request.GET.get('article_id')                          # 区分文章
+            q = Q()
+            if article_id:
+                q.add(Q(article_id=article_id), Q.AND)
+
             for obj in objs:
                 read_count = 0
                 forward_count = 0
@@ -51,19 +57,19 @@ def data_statistics(request):
                 copy_nickname = models.ZgldUserOperLog.objects.filter(user_id=obj.id).count()
 
                 # ----------------------------点击量 转发量------------------------------
-                read_count_obj = models.zgld_article_to_customer_belonger.objects.values('user_id').annotate(
+                read_count_obj = models.zgld_article_to_customer_belonger.objects.filter(q).values('user_id').annotate(
                     read_count=Sum('read_count'), forward_count=Sum('forward_count')).filter(user_id=obj.id)
                 if read_count_obj:
                     read_count = read_count_obj[0].get('read_count')
                     forward_count = read_count_obj[0].get('forward_count')
 
                 # --------------------------拨打电话次数------------------------
-                phone_call_num = models.zgld_accesslog.objects.filter(user_id=obj.id, action=10).count()
+                phone_call_num = models.zgld_accesslog.objects.filter(q, article__isnull=False, user_id=obj.id, action=10).count()
 
                 #  ----------------------------用戶主动发送消息--------------------------
                 data_list = []
                 [data_list.append({'customer_id': i.get('customer_id'), 'article_id': i.get('article_id')}) for i in
-                 models.zgld_chatinfo.objects.filter(userprofile_id=obj.id, send_type=2, article__isnull=False).values(
+                 models.zgld_chatinfo.objects.filter(q, userprofile_id=obj.id, send_type=2, article__isnull=False).values(
                      'customer_id', 'article_id').distinct()]
 
                 user_active_send_num = 0
@@ -77,7 +83,9 @@ def data_statistics(request):
                             user_active_send_num += 1
 
                 # -------------------------------客户点击对话框次数-----------------------
-                click_dialog_obj = models.ZgldUserOperLog.objects.filter(user_id=obj.id, oper_type=2,
+                click_dialog_obj = models.ZgldUserOperLog.objects.filter(q,
+                    user_id=obj.id,
+                    oper_type=2,
                     article__isnull=False)
                 click_dialog_num = 0
                 for i in click_dialog_obj:
@@ -85,9 +93,16 @@ def data_statistics(request):
 
                 # --------------------------------有效对话次数--------------------------
                 effective_dialogue = 0
-                zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(
-                    """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
-                    from zhugeleida_zgld_chatinfo where userprofile_id={} and article_id is not null group by cdt, article_id, customer_id;""".format(obj.id))
+                if article_id:
+                    zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(
+                        """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
+                        from zhugeleida_zgld_chatinfo where article_id = {article_id} and userprofile_id={userprofile_id} and article_id is not null group by cdt, article_id, customer_id;""".format(
+                            article_id=article_id, userprofile_id=obj.id))
+                else:
+                    zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(
+                        """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
+                        from zhugeleida_zgld_chatinfo where userprofile_id={} and article_id is not null group by cdt, article_id, customer_id;""".format(
+                            obj.id))
 
                 for zgld_chatinfo_obj in zgld_chatinfo_objs:
                     start_date_time = zgld_chatinfo_obj.cdt + ' 00:00:00'
@@ -121,6 +136,7 @@ def data_statistics(request):
                 average_response = 0
                 data_list = []
                 info_objs = models.zgld_chatinfo.objects.filter(
+                    q,
                     userprofile_id=obj.id,
                     article_id__isnull=False,
                 ).values('customer_id', 'article_id').distinct()
@@ -156,6 +172,7 @@ def data_statistics(request):
                 video_average_playing_time = 0
                 video_time_num_list = []
                 time_objs = models.ZgldUserOperLog.objects.filter(
+                    q,
                     user_id=obj.id,
                     oper_type=3,
                     video_time__isnull=False
@@ -174,6 +191,7 @@ def data_statistics(request):
                 # ------------------------------统计文章查看时长----------------------
                 article_reading_time = 0
                 article_reading_time_objs = models.ZgldUserOperLog.objects.filter(
+                    q,
                     user_id=obj.id,
                     oper_type=4,
                     reading_time__isnull=False
@@ -227,20 +245,3 @@ def data_statistics(request):
             response.code = 301
             response.data = json.loads(forms_obj.errors.as_json())
     return JsonResponse(response.__dict__)
-
-
-@csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
-def data_statistics_oper(request, oper_type, o_id):
-    response = Response.ResponseObj()
-
-    if request.method == "GET":
-        pass
-
-
-    else:
-        response.code = 402
-        response.msg = "请求异常"
-
-    return JsonResponse(response.__dict__)
-#

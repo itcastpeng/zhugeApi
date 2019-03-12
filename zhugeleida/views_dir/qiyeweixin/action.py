@@ -27,7 +27,7 @@ def follow_up_data(user_id, request, data_type=None):
         stop_time = deletionTime + ' 23:59:59'
         q.add(Q(create_date__gte=start_time) & Q(user_id=user_id), Q.AND)
         q.add(Q(create_date__lte=stop_time), Q.AND)
-        print('q--------> ', q)        
+        print('q--------> ', q)
 
         # ----------------------------点击对话框次数-----------------------------------
         click_dialog_objs = models.ZgldUserOperLog.objects.filter(
@@ -50,7 +50,7 @@ def follow_up_data(user_id, request, data_type=None):
         article_conditions = models.ZgldUserOperLog.objects.filter(
             oper_type=3,
             article__isnull=False
-        ).values('customer_id', 'customer__username').annotate(Count('id'))
+        ).values('article__tags', 'customer_id', 'customer__username').annotate(Count('id'))
         # 是否以标签分类↑
 
         result_data = []
@@ -128,7 +128,7 @@ def follow_up_data(user_id, request, data_type=None):
         response.note['click_dialog_num'] = '点击对话框次数'
         response.note['make_phone_call_count'] = '拨打电话次数'
         response.note['if_article_conditions'] = '满足搜索条件数量'
-        response.note['type'] = 'article=条件查询 / dialog=点击对话框 / phone_call=拨打电话次数'
+        response.note['data_type'] = 'article=条件查询 / dialog=点击对话框 / phone_call=拨打电话次数'
 
     else:
         response.code = 301
