@@ -371,7 +371,7 @@ def mingpian_oper(request, oper_type):
             elif oper_type == 'save_poster':
 
                 remark = '保存了您的名片海报'
-                data = request.GET.copy()
+                data = request.GET.copy() # request.GET是不可变类型  copy一份
                 data['action'] = 1
                 action_record(data, remark)
 

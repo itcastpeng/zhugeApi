@@ -240,9 +240,9 @@ def leida_websocket(request, oper_type):
             time.sleep(1)
 
             redis_user_query_info_key_flag = rc.get(redis_user_query_info_key)
-            print('---- 雷达【消息数量】 循环 | uid: %s --->>' % str(user_id))
+            # print('---- 雷达【消息数量】 循环 | uid: %s --->>' % str(user_id))
             if redis_user_query_info_key_flag == 'True':
-                print('---- 雷达【消息数量】 Flag 为 True  --->>', redis_user_query_info_key_flag)
+                # print('---- 雷达【消息数量】 Flag 为 True  --->>', redis_user_query_info_key_flag)
 
                 contact_data = {
                     'user_id' : user_id
@@ -257,7 +257,7 @@ def leida_websocket(request, oper_type):
                     'msg': '实时获取雷达【消息数量】成功',
                 }
 
-                print('------ 有新消息, 实时推送给【雷达】 的数据：---->', response_data)
+                # print('------ 有新消息, 实时推送给【雷达】 的数据：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
                 rc.set(redis_user_query_info_key, False)
 
@@ -300,7 +300,7 @@ def leida_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '注册成功返回【消息数量】成功',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
 
                             elif  type == 'query_num':
@@ -317,7 +317,7 @@ def leida_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '实时获取雷达【消息数量】成功',
                                 }
-                                print('------ 分页获取获取雷达【消息数量】成功---->', response_data)
+                                # print('------ 分页获取获取雷达【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
 
                             elif type == 'closed':
@@ -431,7 +431,7 @@ def leida_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '注册成功返回【消息数量】成功',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
 
                             elif type == 'query_num':
@@ -455,7 +455,7 @@ def leida_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '实时获取雷达【消息数量】成功',
                                 }
-                                print('------ 分页获取获取雷达【消息数量】成功---->', response_data)
+                                # print('------ 分页获取获取雷达【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
 
                             elif type == 'closed':
@@ -521,10 +521,10 @@ def xiaochengxu_websocket(request, oper_type):
             time.sleep(1)
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
+            # print('---- 小程序 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
             if redis_customer_id_key_flag == 'True' and user_id and customer_id:
-                print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
-                print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
+                # print('---- 小程序 Flag 为 True  --->>', redis_customer_id_key_flag)
+                # print('---- 【小程序】 user_id | customer_id ------>>',customer_id,user_id)
 
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
@@ -680,7 +680,7 @@ def xiaochengxu_websocket(request, oper_type):
                                     'code': 270,
                                     'msg': '为了新中国的胜利向我开炮',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 continue
 
@@ -690,7 +690,7 @@ def xiaochengxu_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '注册成功',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 rc.set(customer_id_position_key, 'input')
                                 continue
@@ -952,7 +952,7 @@ def gongzhonghao_websocket(request, oper_type):
                                     'code': 270,
                                     'msg': '为了新中国的胜利向我开炮',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 continue
 
@@ -961,7 +961,7 @@ def gongzhonghao_websocket(request, oper_type):
                                     'code': 199,
                                     'msg': '注册成功',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 rc.set(customer_id_position_key, 'input')
                                 continue
@@ -1136,7 +1136,7 @@ def gongzhonghao_websocket(request, oper_type):
                                     'code': 270,
                                     'msg': '为了新中国的胜利向我开炮',
                                 }
-                                print('------ 注册成功返回【消息数量】成功---->', response_data)
+                                # print('------ 注册成功返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 continue
 
