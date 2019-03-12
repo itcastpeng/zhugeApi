@@ -61,16 +61,28 @@ def follow_up_data(user_id, request, data_type=None):
                     oper_type=3,
                     customer_id=i.get('customer_id'),
                 )
-                count = 0
+
+                num = 0 # 该人查看的所有文章总时长
+                count = 0 # 该人满足条件总数
                 for article_tag in article_tags:
                     if article_tag.reading_time >= 60:  # 该人查看文章总时长 大于60秒
+                        num += article_tag.reading_time
                         count += 1
+
+                print('num---> ', num)
+                for article_tag in article_tags:
+                    if article_tag.reading_time >= 60:  # 该人查看文章总时长 大于60秒
+                        eval_num = 0
+                        if num > 0:
+                            eval_num = int(num / article_tag.reading_time)
+
                         result_data.append({
                             'customer_id': i.get('customer_id'),
                             'customer__username': b64decode(i.get('customer__username')),
                             'customer__headimgurl': article_tag.customer.headimgurl,
                             'id__count': i.get('id__count'),
-                            'num': article_tag.reading_time,
+                            'reading_time': article_tag.reading_time,  # 阅读时长
+                            'eval_num': eval_num,                      # 平均时长
                         })
 
                 if count >= 3:
