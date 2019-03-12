@@ -71,18 +71,17 @@ def follow_up_data(user_id, request, data_type=None):
                         num += article_tag.reading_time
                         count += 1
 
-                eval_num = 0
                 if num > 0:
                     eval_num = int(num / count)
 
-                result_data.append({
-                    'customer_id': i.get('customer_id'),
-                    'customer__username': b64decode(i.get('customer__username')),
-                    'customer__headimgurl':i.get('customer__headimgurl'),
-                    'id__count': i.get('id__count'),
-                    'reading_time': num,  # 阅读时长
-                    'eval_num': eval_num,                      # 平均时长
-                })
+                    result_data.append({
+                        'customer_id': i.get('customer_id'),
+                        'customer__username': b64decode(i.get('customer__username')),
+                        'customer__headimgurl':i.get('customer__headimgurl'),
+                        'id__count': i.get('id__count'),
+                        'reading_time': num,  # 阅读时长
+                        'eval_num': eval_num,                      # 平均时长
+                    })
 
                 if count >= 3:
                     if_article_conditions += 1
