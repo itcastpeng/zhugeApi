@@ -78,12 +78,14 @@ def update_click_dialog_num(request, oper_type):
     # 记录查看文章视频时长
     elif oper_type == 'article_video_duration':
         video_time = request.GET.get('video_time')
+        timestamp = request.GET.get('timestamp')
         if video_time:
             objs = models.ZgldUserOperLog.objects.filter(
                 article_id=article_id,
                 customer_id=customer_id,
                 user_id=u_id,
-                oper_type=3
+                oper_type=3,
+                timestamp=timestamp,
             )
             if objs:
                 objs.update(video_time=video_time)
@@ -94,17 +96,20 @@ def update_click_dialog_num(request, oper_type):
                     user_id=u_id,
                     oper_type=3,
                     video_time=video_time,
+                    timestamp=timestamp,
                 )
 
     # 记录文章阅读时长
     elif oper_type == 'article_reading_time':
         reading_time = request.GET.get('reading_time')
+        timestamp = request.GET.get('timestamp')
         if reading_time:
             objs = models.ZgldUserOperLog.objects.filter(
                 article_id=article_id,
                 customer_id=customer_id,
                 user_id=u_id,
-                oper_type=4
+                oper_type=4,
+                timestamp = timestamp,
             )
             if objs:
                 objs.update(reading_time=reading_time)
@@ -114,7 +119,8 @@ def update_click_dialog_num(request, oper_type):
                     customer_id=customer_id,
                     user_id=u_id,
                     oper_type=4,
-                    reading_time=reading_time
+                    reading_time=reading_time,
+                    timestamp=timestamp,
                 )
 
     response.code = 200
