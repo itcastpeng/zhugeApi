@@ -239,3 +239,26 @@ class SelectForm(forms.Form):
         else:
             length = int(self.data['length'])
         return length
+
+
+# 修改客户管理设置
+class UpdateCustomerForm(forms.Form):
+    articles_read_customers = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "客户累计阅读文章数不能为空"
+        }
+    )
+    article_reading_time = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "每篇文章阅读时长不能为空"
+        }
+    )
+    is_same_label = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "是否匹配相同标签的文章类型错误"
+        }
+    )
+

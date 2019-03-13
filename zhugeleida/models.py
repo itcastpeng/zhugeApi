@@ -52,6 +52,12 @@ class zgld_company(models.Model):
     bossleida_data_tongji =  models.TextField(verbose_name='BOSS雷达数据统计[公司]',default='{}')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    # ------------------用于雷达AI首页统计数据 -- 判断条件 --  后台--企业管理-用户管理 修改该字段
+    articles_read_customers = models.IntegerField(verbose_name='客户累计阅读文章数', default=3)
+    article_reading_time = models.IntegerField(verbose_name='每篇文章阅读时长', default=60)
+    is_same_label = models.IntegerField(verbose_name='是否匹配相同标签的文章', default=0) # 默认不匹配
+    # -------------------------------------------------------------------------------------------------
+
 
     class Meta:
         verbose_name_plural = "公司表"
