@@ -468,7 +468,7 @@ class ZgldUserOperLog(models.Model):
     reading_time = models.IntegerField(verbose_name='阅读文章时长', default=0)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-
+    timestamp = models.CharField(verbose_name='时间戳', max_length=128, null=True, blank=True) # 视频查看时长 同一篇文章 同一个查看人 同一个转发人 第二次查看时间戳不同
 
 # 企业用户临时表
 class zgld_temp_userprofile(models.Model):
