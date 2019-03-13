@@ -5,9 +5,9 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.user_verify import UserSelectForm
-import json
 from django.db.models import Q, Count, Sum
-
+import json, datetime
+from publicFunc.time_screen import time_screen
 
 # cerf  token验证
 # 雷达后台首页 数据统计
@@ -22,11 +22,7 @@ def data_statistics(request):
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
             order = request.GET.get('order', '-create_date')
-
-
-
             q = Q()
-
             id = request.GET.get('id')                          # 区分用户
             if id:
                 q.add(Q(id=id), Q.AND)
@@ -48,6 +44,15 @@ def data_statistics(request):
             q = Q()
             if article_id:
                 q.add(Q(article_id=article_id), Q.AND)
+
+            number_days = request.GET.get('number_days')  # 天数
+            start_time = request.GET.get('start_time')  # 天数 开始时间
+            stop_time = request.GET.get('stop_time')  # 天数 结束时间
+
+            if not start_time and not stop_time:
+                start_time, stop_time = time_screen(number_days)
+            q.add(Q(create_date__gte=start_time, create_date__lte=stop_time), Q.AND)
+
 
             for obj in objs:
                 read_count = 0

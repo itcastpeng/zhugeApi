@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import time
 import datetime
 from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.admin.admin_userprofile import AddForm, UpdateForm, SelectForm,SwitchAdminUserForm
+from zhugeleida.forms.admin.admin_userprofile import AddForm, UpdateForm, SelectForm,SwitchAdminUserForm, UpdateCustomerForm
 import json
 
 
@@ -83,6 +83,8 @@ def admin_userprofile(request):
 @account.is_token(models.zgld_admin_userprofile)
 def admin_userprofile_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
+
     if request.method == "POST":
         # 添加用户
         if oper_type == "add":
@@ -242,11 +244,52 @@ def admin_userprofile_oper(request, oper_type, o_id):
 
             # 修改用户启用状态
 
+        # 修改顾客管理设置(企业管理-用户管理-顾客管理)
+        elif oper_type == 'update_customer_settings':
+            form_obj = UpdateCustomerForm(request.POST)
+            if form_obj.is_valid():
+                articles_read_customers = form_obj.cleaned_data.get('articles_read_customers')
+                article_reading_time = form_obj.cleaned_data.get('article_reading_time')
+                is_same_label = form_obj.cleaned_data.get('is_same_label')
+                obj = models.zgld_admin_userprofile.objects.get(id=user_id)
 
+                company_objs = models.zgld_company.objects.filter(id=obj.company_id)
+                company_objs.update(
+                    articles_read_customers=articles_read_customers,
+                    article_reading_time=article_reading_time,
+                    is_same_label=is_same_label
+                )
 
+                response.code = 200
+                response.msg = '修改成功'
 
+            else:
+                response.code = 301
+                response.msg = json.loads(form_obj.errors.as_json())
     else:
-        response.code = 402
-        response.msg = "请求异常"
+
+        # 查询顾客管理设置
+        if oper_type == 'get_customer_settings':
+            obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+
+            data = {
+                'articles_read_customers': obj.company.articles_read_customers,
+                'article_reading_time': obj.company.article_reading_time,
+                'is_same_label': obj.company.is_same_label,
+            }
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': data
+            }
+            response.note = {
+                'articles_read_customers': '客户累计阅读文章数',
+                'article_reading_time': '每篇文章阅读时长',
+                'is_same_label': '是否匹配相同标签的文章',
+            }
+
+        else:
+            response.code = 402
+            response.msg = "请求异常"
 
     return JsonResponse(response.__dict__)

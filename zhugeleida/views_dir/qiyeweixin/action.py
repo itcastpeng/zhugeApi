@@ -12,7 +12,9 @@ from django.db.models import Q
 from datetime import datetime, timedelta
 import json
 from publicFunc.base64 import b64encode, b64decode
-import base64
+import base64, datetime
+from publicFunc.time_screen import time_screen
+
 # 跟进数据
 def follow_up_data(user_id, request, data_type=None):
     response = Response.ResponseObj()
@@ -22,12 +24,17 @@ def follow_up_data(user_id, request, data_type=None):
         length = forms_obj.cleaned_data['length']
 
         q = Q()
-        deletionTime = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
-        start_time = deletionTime + ' 00:00:00'
-        stop_time = deletionTime + ' 23:59:59'
-        q.add(Q(create_date__gte=start_time) & Q(user_id=user_id), Q.AND)
-        q.add(Q(create_date__lte=stop_time), Q.AND)
-        print('q--------> ', q)
+        q.add(Q(user_id=user_id), Q.AND)
+
+        number_days = request.GET.get('number_days')  # 天数
+        start_time = request.GET.get('start_time')  # 天数 开始时间
+        stop_time = request.GET.get('stop_time')  # 天数 结束时间
+
+        if not start_time and not stop_time:
+            start_time, stop_time = time_screen(number_days)
+        q.add(Q(create_date__gte=start_time, create_date__lte=stop_time), Q.AND)
+
+        print('q-----------------> ', q)
 
         # ----------------------------点击对话框次数-----------------------------------
         click_dialog_objs = models.ZgldUserOperLog.objects.filter(
@@ -529,4 +536,5 @@ def action(request, oper_type):
                     'make_phone_call_count': '拨打电话次数',
                     'if_article_conditions': '满足条件查询数量',
                 }
+
         return JsonResponse(response.__dict__)
