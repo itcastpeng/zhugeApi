@@ -57,7 +57,7 @@ class zgld_company(models.Model):
     article_reading_time = models.IntegerField(verbose_name='每篇文章阅读时长', default=60)
     is_same_label = models.IntegerField(verbose_name='是否匹配相同标签的文章', default=0) # 默认不匹配
     # -------------------------------------------------------------------------------------------------
-    sadjjas = models.IntegerField(verbose_name='測試', default=0)
+
 
     class Meta:
         verbose_name_plural = "公司表"
