@@ -1305,7 +1305,7 @@ def public_websocket(request, oper_type):
                         uwsgi.websocket_send(json.dumps(ret_data))
                         return JsonResponse(ret_data)
 
-                elif type == 'closed':
+                elif _type == 'closed':
                     msg = '确认关闭'
                     ret_data = {
                         'code': 200,
@@ -1314,7 +1314,7 @@ def public_websocket(request, oper_type):
                     # uwsgi.websocket_send(json.dumps(ret_data))
                     return JsonResponse(ret_data)
 
-                elif type == 'register':
+                elif _type == 'register':
 
                     response_data = {
                         'code': 200,
