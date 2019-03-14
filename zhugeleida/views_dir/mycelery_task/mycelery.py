@@ -34,7 +34,7 @@ def action_record(data):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('customer_id', '')  # 客户 id
-    article_id = data.get('article_id')  # 客户 id
+    article_id = data.get('article_id')  # 文章 id
     action = data.get('action')
     if action:
         action = int(action)
@@ -108,7 +108,7 @@ def action_record(data):
             article_id=article_id,
             customer_id=customer_id,
             remark=remark,
-            action=action
+            action=action,
         )
         content = '%s%s' % (customer_name, remark)
         print('------ 客户姓名 + 访问日志信息------->>', customer_name, 'action:', action, content)
@@ -139,7 +139,7 @@ def action_record(data):
             customer_id=customer_id,
             article_id=article_id,
             remark=remark,
-            action=action
+            action=action,
         )
         content = '%s%s' % (customer_name, remark)
         print('------ 客户姓名 + 访问日志信息------->>', customer_name, '+', 'action:', action, content)
