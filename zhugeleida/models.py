@@ -450,7 +450,7 @@ class ZgldUserOperLog(models.Model):
     oper_type_choices = (
         (1, "复制名字"),
         (2, "客户点击咨询对话框"),
-        (3, "查看文章时长"),
+        (3, "查看文章视频时长"),
         (4, "文章阅读时长"),
     )
     oper_type = models.SmallIntegerField(verbose_name="操作类型", choices=oper_type_choices)
@@ -1013,9 +1013,10 @@ class zgld_article_comment(models.Model):
     from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='FromCustomer',null=True) ## 关联的客户
     to_customer = models.ForeignKey('zgld_customer', verbose_name="回复的客户", related_name='ToCustomer', null=True) ## 关联的客户
     content = models.TextField(verbose_name="评论内容", null=True)
-    is_audit_pass_choices = ((0, '未进行审核'),
-                             (1, '审核通过'),
-                             )
+    is_audit_pass_choices = (
+        (0, '未进行审核'),
+        (1, '审核通过'),
+    )
     is_audit_pass = models.SmallIntegerField(default=0, verbose_name='是否通过审核', choices=is_audit_pass_choices)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)

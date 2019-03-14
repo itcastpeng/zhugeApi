@@ -33,7 +33,7 @@ def action_record(data):
     response = Response.ResponseObj()
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('customer_id')  # 客户 id
-    article_id = data.get('article_id')  # 客户 id
+    article_id = data.get('article_id')  # 文章 id
     action = data.get('action')
     if action:
         action = int(action)
@@ -102,7 +102,8 @@ def action_record(data):
             user_id=user_id,
             customer_id=customer_id,
             remark=remark,
-            action=action
+            action=action,
+            article_id=article_id
         )
 
         # 查询客户与用户是否已经建立关系

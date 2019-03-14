@@ -177,5 +177,5 @@ urlpatterns = [
     url(r'^wx_pay/(?P<oper_type>\w+)$', money_manage.wx_pay_option),
 
     # 数据统计
-    url(r'^data_statistics$', data_statistics.data_statistics),
+    url(r'^data_statistics/(?P<oper_type>\w+)$', data_statistics.data_statistics),
 ]
