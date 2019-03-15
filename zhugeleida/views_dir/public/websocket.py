@@ -786,6 +786,7 @@ def xiaochengxu_websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
                     print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
+                    print('ret_data--------------------> ', type(ret_data), ret_data)
                     uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)

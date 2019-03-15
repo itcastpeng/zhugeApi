@@ -57,23 +57,23 @@ def update_click_dialog_num(request, oper_type):
 
     # 客户点击咨询对话框次数
     if oper_type == 'update_click_dialog_num':
-        objs = models.ZgldUserOperLog.objects.filter(
+        # objs = models.ZgldUserOperLog.objects.filter(
+        #     article_id=article_id,
+        #     customer_id=customer_id,
+        #     user_id=u_id,
+        #     oper_type=2,
+        # )
+        # if objs:
+        #     objs[0].click_dialog_num = objs[0].click_dialog_num + 1
+        #     objs[0].save()
+        # else:
+        models.ZgldUserOperLog.objects.create(
             article_id=article_id,
             customer_id=customer_id,
             user_id=u_id,
             oper_type=2,
+            click_dialog_num=1
         )
-        if objs:
-            objs[0].click_dialog_num = objs[0].click_dialog_num + 1
-            objs[0].save()
-        else:
-            models.ZgldUserOperLog.objects.create(
-                article_id=article_id,
-                customer_id=customer_id,
-                user_id=u_id,
-                oper_type=2,
-                click_dialog_num=1
-            )
 
     # 记录查看文章视频时长
     elif oper_type == 'article_video_duration':

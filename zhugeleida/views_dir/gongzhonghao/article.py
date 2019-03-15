@@ -543,6 +543,7 @@ def article_oper(request, oper_type, o_id):
                             print('---- 公众号查看文章[消息提醒]--->>', remark)
                             data = request.GET.copy()
                             data['action'] = 14
+                            data['article_id'] = obj.id
                             action_record(data, remark)  # 此步骤封装到 异步中。
 
                     ## 记录一个用户查看文章的日志
