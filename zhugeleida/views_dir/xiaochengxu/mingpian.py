@@ -383,11 +383,13 @@ def mingpian_oper(request, oper_type):
 
                 qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
 
+                print('---------------------------生成海报---------------------------')
                 poster_url = ''
                 if qr_obj:
                     poster_url = qr_obj[0].poster_url
                 else:
                     pass
+                print('poster_url----poster_url---poster_url---poster_url> ',  poster_url)
                 # if not poster_url:
 
                 ret_data = {
