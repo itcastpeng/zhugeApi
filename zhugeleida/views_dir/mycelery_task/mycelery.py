@@ -635,91 +635,91 @@ def create_poster_process(data):
 
         driver.implicitly_wait(10)
         print('----------------------1')
-        try:
-            print('值 driver 开始 ----->>', poster_url)
-            driver.get(poster_url)
-            print('值 driver 结束 ----->>', poster_url)
+        # try:
+        print('值 driver 开始 ----->>', poster_url)
+        driver.get(poster_url)
+        print('值 driver 结束 ----->>', poster_url)
 
-            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-            if customer_id:
-                user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
-                user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
-            else:
-                user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
-                user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
+        if customer_id:
+            user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
+            user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
+        else:
+            user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
+            user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
 
-            driver.save_screenshot(BASE_DIR + user_poster_file_temp)
-            driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
+        driver.save_screenshot(BASE_DIR + user_poster_file_temp)
+        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
 
-            element = driver.find_element_by_id("jietu")
-            print("值 element.location -->", element.location)  # 打印元素坐标
-            print("值 element.size -->", element.size)  # 打印元素大小
+        element = driver.find_element_by_id("jietu")
+        print("值 element.location -->", element.location)  # 打印元素坐标
+        print("值 element.size -->", element.size)  # 打印元素大小
 
-            left = element.location['x']
-            top = element.location['y']
-            right = element.location['x'] + element.size['width']
-            bottom = element.location['y'] + element.size['height']
+        left = element.location['x']
+        top = element.location['y']
+        right = element.location['x'] + element.size['width']
+        bottom = element.location['y'] + element.size['height']
 
-            im = Image.open(BASE_DIR + user_poster_file_temp)
-            im = im.crop((left, top, right, bottom))
+        im = Image.open(BASE_DIR + user_poster_file_temp)
+        im = im.crop((left, top, right, bottom))
 
-            print("create_user_or_customer_poster -->", len(im.split()))  # test
-            if len(im.split()) == 4:
-                # prevent IOError: cannot write mode RGBA as BMP
-                r, g, b, a = im.split()
-                im = Image.merge("RGB", (r, g, b))
-                im.save(BASE_DIR + user_poster_file)
-            else:
-                im.save(BASE_DIR + user_poster_file)
+        print("create_user_or_customer_poster -->", len(im.split()))  # test
+        if len(im.split()) == 4:
+            # prevent IOError: cannot write mode RGBA as BMP
+            r, g, b, a = im.split()
+            im = Image.merge("RGB", (r, g, b))
+            im.save(BASE_DIR + user_poster_file)
+        else:
+            im.save(BASE_DIR + user_poster_file)
 
-            print('值 driver.page_source -->', driver.page_source)
+        print('值 driver.page_source -->', driver.page_source)
 
-            _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
+        _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
 
-            # print('临时截图 ------->>',BASE_DIR + user_poster_file_temp)
-            if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-            print('生成海报URL -------->', poster_url)
+        # print('临时截图 ------->>',BASE_DIR + user_poster_file_temp)
+        if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
+        print('生成海报URL -------->', poster_url)
 
-            if poster_url:
+        if poster_url:
 
-                case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                    user_customer_belonger_id=user_customer_belonger_id,
-                    case_id=case_id
-                )
-                if case_poster_belonger_objs:
-                    case_poster_belonger_objs.update(
-                        poster_url=_poster_url
-                    )
-
-                else:
-                    models.zgld_customer_case_poster_belonger.objects.create(
-                        user_customer_belonger_id=user_customer_belonger_id,
-                        case_id=case_id,
-                        poster_url=_poster_url
-                    )
-
-
-            else:
-                objs.update(
+            case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                user_customer_belonger_id=user_customer_belonger_id,
+                case_id=case_id
+            )
+            if case_poster_belonger_objs:
+                case_poster_belonger_objs.update(
                     poster_url=_poster_url
                 )
 
-            ret_data = {
-                'user_id': user_id,
-                'poster_url': _poster_url,
-            }
+            else:
+                models.zgld_customer_case_poster_belonger.objects.create(
+                    user_customer_belonger_id=user_customer_belonger_id,
+                    case_id=case_id,
+                    poster_url=_poster_url
+                )
 
-            print('结果 ret_data ----->>', ret_data)
-            response.data = ret_data
-            response.msg = "请求成功"
-            response.code = 200
 
-        except Exception as e:
-            response.msg = "PhantomJS截图失败"
-            response.code = 400
-            driver.quit()
-            print('----------------------1错误----------------', e)
+        else:
+            objs.update(
+                poster_url=_poster_url
+            )
+
+        ret_data = {
+            'user_id': user_id,
+            'poster_url': _poster_url,
+        }
+
+        print('结果 ret_data ----->>', ret_data)
+        response.data = ret_data
+        response.msg = "请求成功"
+        response.code = 200
+
+        # except Exception as e:
+        #     response.msg = "PhantomJS截图失败"
+        #     response.code = 400
+        #     driver.quit()
+        #     print('----------------------1错误----------------', e)
     return JsonResponse(response.__dict__)
 
 
