@@ -679,7 +679,7 @@ def create_poster_process(data):
 
         # print('临时截图 ------->>',BASE_DIR + user_poster_file_temp)
         if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
-        print('生成海报URL -------->', poster_url)
+        print('生成海报URL -------->', poster_url, 'case_id--,> ', case_id)
 
         if poster_url:
 
