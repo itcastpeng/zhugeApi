@@ -690,7 +690,6 @@ def create_poster_process(data):
             else:
                 case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                     user_customer_belonger_id=user_customer_belonger_id,
-                    case_id=case_id
                 )
 
             if case_poster_belonger_objs:
