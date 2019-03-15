@@ -617,8 +617,10 @@ def create_poster_process(data):
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
+        print('-----------生成海报-------传参异常-----传参异常-------==传参异常===========》 ' )
 
     else:
+        print('-------====正常生成海报===========正常生成海报============正常生成海报')
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
         platform = sys.platform  # 获取平台
