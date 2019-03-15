@@ -324,7 +324,8 @@ def mingpian_oper(request, oper_type):
                     response.code = 200
                     response.msg = '已经点过赞'
 
-            elif oper_type == 'create_poster': # 前端先用于生成海报的页面。用了用户体验度更高。
+            # 前端先用于生成海报的页面。用了用户体验度更高。
+            elif oper_type == 'create_poster':
 
                 customer_id = request.GET.get('user_id')
                 user_id = request.GET.get('uid')  # 用户 id
@@ -369,6 +370,7 @@ def mingpian_oper(request, oper_type):
 
                 # return render(request, 'create_poster.html',locals())
 
+            # 保存名片海报
             elif oper_type == 'save_poster':
 
                 remark = '保存了您的名片海报'
@@ -381,8 +383,11 @@ def mingpian_oper(request, oper_type):
 
                 qr_obj = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
 
-                poster_url = qr_obj[0].poster_url
-
+                poster_url = ''
+                if qr_obj:
+                    poster_url = qr_obj[0].poster_url
+                else:
+                    pass
                 # if not poster_url:
 
                 ret_data = {
