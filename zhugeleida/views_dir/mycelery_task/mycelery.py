@@ -617,7 +617,6 @@ def create_poster_process(data):
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
-        print('-----------生成海报-------传参异常-----传参异常-------==传参异常===========》 ' )
 
     else:
         print('-------====正常生成海报===========正常生成海报============正常生成海报')
@@ -635,7 +634,7 @@ def create_poster_process(data):
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
 
         driver.implicitly_wait(10)
-
+        print('----------------------1')
         try:
             print('值 driver 开始 ----->>', poster_url)
             driver.get(poster_url)
@@ -720,7 +719,7 @@ def create_poster_process(data):
             response.msg = "PhantomJS截图失败"
             response.code = 400
             driver.quit()
-
+            print('----------------------1错误----------------', e)
     return JsonResponse(response.__dict__)
 
 
