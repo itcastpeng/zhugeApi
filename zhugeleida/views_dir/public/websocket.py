@@ -634,7 +634,7 @@ def xiaochengxu_websocket(request, oper_type):
 
                     if login_flag:
 
-                        type = _data.get('type')
+                        type_data = _data.get('type')
                         customer_id = _data.get('user_id')
                         user_id = _data.get('u_id')
                         Content = _data.get('content')
@@ -646,7 +646,7 @@ def xiaochengxu_websocket(request, oper_type):
                             redis_customer_id_key = 'message_customer_id_{cid}'.format(cid=customer_id)
                             customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)  # 小程序 在聊天还是聊天页外面
 
-                            if  type == 'query_num':
+                            if  type_data == 'query_num':
                                 print('小程序已经output query_num ----------->>')
                                 rc.set(customer_id_position_key, 'output')
 
@@ -675,7 +675,7 @@ def xiaochengxu_websocket(request, oper_type):
 
                                 continue
 
-                            elif type == 'lived':
+                            elif type_data == 'lived':
                                 response_data = {
                                     'code': 270,
                                     'msg': '为了新中国的胜利向我开炮',
@@ -684,7 +684,7 @@ def xiaochengxu_websocket(request, oper_type):
                                 uwsgi.websocket_send(json.dumps(response_data))
                                 continue
 
-                            elif  type == 'register': # 当进入聊天页面时
+                            elif  type_data == 'register': # 当进入聊天页面时
 
                                 response_data = {
                                     'code': 200,
@@ -695,7 +695,7 @@ def xiaochengxu_websocket(request, oper_type):
                                 rc.set(customer_id_position_key, 'input')
                                 continue
 
-                            elif type == 'closed':
+                            elif type_data == 'closed':
                                 msg = '确认关闭  customer_id | uid | ' + str(customer_id) + "|" + str(user_id)
                                 ret_data = {
                                     'code': 200,
@@ -785,8 +785,8 @@ def xiaochengxu_websocket(request, oper_type):
                         'code': 400,
                         'msg': '报错:%s 终止连接' % (e)
                     }
-                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     print('ret_data--------------------> ', type(ret_data), ret_data)
+                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
