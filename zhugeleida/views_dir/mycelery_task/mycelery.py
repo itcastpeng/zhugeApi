@@ -682,22 +682,20 @@ def create_poster_process(data):
         print('生成海报URL -------->', poster_url, 'case_id--,> ', case_id)
 
         if poster_url:
-            if case_id:
+            flag = True
+            if case_id and user_customer_belonger_id:
                 case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                     user_customer_belonger_id=user_customer_belonger_id,
                     case_id=case_id
                 )
-            else:
-                case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                    user_customer_belonger_id=user_customer_belonger_id,
-                )
 
-            if case_poster_belonger_objs:
-                case_poster_belonger_objs.update(
-                    poster_url=_poster_url
-                )
+                if case_poster_belonger_objs:
+                    case_poster_belonger_objs.update(
+                        poster_url=_poster_url
+                    )
+                    flag = False
 
-            else:
+            if flag:
                 models.zgld_customer_case_poster_belonger.objects.create(
                     user_customer_belonger_id=user_customer_belonger_id,
                     case_id=case_id,
