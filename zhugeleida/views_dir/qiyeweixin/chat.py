@@ -180,6 +180,13 @@ def chat_oper(request, oper_type, o_id):
                         Content = json.dumps(_content)
 
                     elif info_type == 6:
+                        # 创建日志-- 发送小程序
+                        models.zgld_accesslog.objects.create(
+                            action=23,
+                            user_id=user_id,
+                            customer_id=customer_id,
+                            remark='发送小程序',
+                        )
                         msg = '官方商城，可点击进入购买'
                         _content['msg'] = msg
                         Content = json.dumps(_content)

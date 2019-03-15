@@ -459,7 +459,7 @@ class ZgldUserOperLog(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name='客户ID', null=True, blank=True)
 
     # --------------------------客户点击对话框参数------------------
-    click_dialog_num = models.IntegerField(verbose_name='点击对话框次数', default=0)
+    # click_dialog_num = models.IntegerField(verbose_name='点击对话框次数', default=0)
 
     # -------------------------查看文章视频时长参数-------------------
     video_time = models.IntegerField(verbose_name='查看视频时长', default=0)
@@ -857,6 +857,7 @@ class zgld_accesslog(models.Model):
 
         (21, '查看日记首页'),  # 记录查看日记首页
         (22, '查看日记详情'),  # 记录查看日记列表页
+        (23, '发送小程序'),  # 点击发送小程序
 
     )
 
