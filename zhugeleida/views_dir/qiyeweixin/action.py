@@ -73,7 +73,7 @@ def follow_up_data(user_id, request, data_type=None):
 
                 num = 0 # 该人查看的所有文章总时长
                 count = 0 # 该人满足条件总数
-                print('article_tags----article_tags----article_tags---article_tags-> ', article_tags)
+                # print('article_tags----article_tags----article_tags---article_tags-> ', article_tags)
                 for article_tag in article_tags:
                     if article_tag.reading_time >= 60:  # 该人查看文章总时长 大于60秒
                         num += article_tag.reading_time

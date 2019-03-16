@@ -725,7 +725,7 @@ class zgld_user_customer_belonger(models.Model):
     )
     source = models.SmallIntegerField(u'客户来源', choices=source_type_choices)
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
-    poster_url = models.CharField(verbose_name='用户-客户-对应的二维码', max_length=128, null=True)
+    poster_url = models.CharField(verbose_name='海报名片链接', max_length=128, null=True)
     customer_parent = models.ForeignKey('zgld_customer', verbose_name='客户所属父级',related_name="customer_parent" ,null=True, blank=True)
     expected_time = models.DateField(verbose_name='预计成交时间', blank=True, null=True)
     expedted_pr = models.IntegerField(verbose_name='预计成交概率', default=0, null=True)
