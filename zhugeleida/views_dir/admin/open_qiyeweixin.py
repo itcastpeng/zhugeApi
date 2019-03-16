@@ -66,7 +66,7 @@ def open_qiyeweixin(request, oper_type):
 
         # 企业微信服务器会定时（每十分钟）推送ticket。https://work.weixin.qq.com/api/doc#10982/推送suite_ticket
         if oper_type == 'get_ticket':
-            print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
+            # print('------ 第三方 request.body 企业微信服务器 推送suite_ticket ------>>', request.body.decode(encoding='UTF-8'))
 
             msg_signature = request.GET.get('msg_signature')
             timestamp = request.GET.get('timestamp')

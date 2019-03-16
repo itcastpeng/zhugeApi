@@ -683,8 +683,9 @@ def create_poster_process(data):
 
         if poster_url:
             print('-------------------------------------> ')
-            flag = True
-            if case_id and user_customer_belonger_id:
+
+            if case_id and user_customer_belonger_id: # 案例的生成海报
+
                 case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                     user_customer_belonger_id=user_customer_belonger_id,
                     case_id=case_id
@@ -694,20 +695,20 @@ def create_poster_process(data):
                     case_poster_belonger_objs.update(
                         poster_url=_poster_url
                     )
-                    flag = False
 
-            if flag:
-                models.zgld_customer_case_poster_belonger.objects.create(
-                    user_customer_belonger_id=user_customer_belonger_id,
-                    case_id=case_id,
+                else:
+
+                    models.zgld_customer_case_poster_belonger.objects.create(
+                        user_customer_belonger_id=user_customer_belonger_id,
+                        case_id=case_id,
+                        poster_url=_poster_url
+                    )
+
+
+            else:   # 名片海报
+                objs.update(
                     poster_url=_poster_url
                 )
-
-
-        else:
-            objs.update(
-                poster_url=_poster_url
-            )
 
         ret_data = {
             'user_id': user_id,
