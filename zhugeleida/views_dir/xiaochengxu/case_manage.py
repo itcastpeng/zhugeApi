@@ -128,7 +128,7 @@ def case_manage(request, oper_type):
 
                     if case_id:
                         print('case_id------------> ', case_id)
-                        diary_objs = models.zgld_diary.objects.filter(case_id=case_id)
+                        diary_objs = models.zgld_diary.objects.filter(id=case_id)
                         # 查询详情记录操作
                         if diary_objs:
                             ##记录客户查看单个案例的操作
