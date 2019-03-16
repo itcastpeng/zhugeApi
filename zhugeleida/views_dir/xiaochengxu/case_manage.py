@@ -42,18 +42,16 @@ def case_manage(request, oper_type):
                 order = request.GET.get('order', '-update_date')
 
                 ## 搜索条件
-                search_tag_id = request.GET.get('search_tag_id')  #
-                case_id = request.GET.get('case_id')  #
-                search_activity_status = request.GET.get('status')  #
-                customer_name = request.GET.get('customer_name')  #
+                search_tag_id = request.GET.get('search_tag_id')    # 案例标签
+                case_id = request.GET.get('case_id')                # 案例ID 相当于查询详情
+                search_activity_status = request.GET.get('status')  # 案列状态(1已发、2未发、3删除)
+                customer_name = request.GET.get('customer_name')    # 发布某个客户的名称
 
                 q1 = Q()
                 q1.connector = 'and'
                 q1.children.append(('company_id', company_id))
 
-                if customer_name:
-                    q1.children.append(('customer_name__contains', customer_name))
-
+                # 查询详情记录操作
                 if case_id:
                     q1.children.append(('id', case_id))
 
@@ -69,10 +67,13 @@ def case_manage(request, oper_type):
                             read_count=F('read_count') + 1
                         )
 
-                # now_date_time = datetime.datetime.now()
+                if customer_name:
+                    q1.children.append(('customer_name__contains', customer_name))
+
                 if search_activity_status:
                     q1.children.append(('status', search_activity_status))  #
 
+                # 如果有案例标签 则记录 热门搜索的标签--
                 if search_tag_id:
                     tag_ids_list = []
                     tag_ids_list.append(int(search_tag_id))
@@ -129,32 +130,26 @@ def case_manage(request, oper_type):
                     objs = objs[start_line: stop_line]
 
                 ret_data = []
-                if objs:
+                if not objs:
+                    response.code = 302
+                    response.msg = '数据不存在'
+
+                else:
                     last_diary_data = ''
-                    is_open_comment = ''
-                    is_open_comment_text = ''
+                    is_open_comment = ''        # 是否开启了自动打标签 ID
+                    is_open_comment_text = ''   # 是否开启了自动打标签 内容
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
                     if gongzhonghao_app_objs:
                         is_open_comment = gongzhonghao_app_objs[0].is_open_comment
                         is_open_comment_text = gongzhonghao_app_objs[0].get_is_open_comment_display()
 
                     for obj in objs:
-
-                        status = obj.status
-                        status_text = obj.get_status_display()
-
-                        cover_picture = obj.cover_picture
-                        if cover_picture:
-                            cover_picture = json.loads(cover_picture)
-
-                        _case_id = obj.id
-
                         ## 查找出最新更新的日记
+                        _case_id = obj.id
                         if not case_id:  # 当满足 不是查询单个的情况
                             diary_objs = models.zgld_diary.objects.filter(case_id=_case_id).order_by('-create_date')
-                            if diary_objs:
+                            for diary_obj in diary_objs:
 
-                                diary_obj = diary_objs[0]
                                 _status = diary_obj.status
                                 _status_text = diary_obj.get_status_display()
                                 _cover_picture = diary_obj.cover_picture
@@ -191,7 +186,17 @@ def case_manage(request, oper_type):
                                         '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
                                 }
 
+                        print('obj.id---------> ', obj.id)
+                        status = obj.status
+                        status_text = obj.get_status_display()
+
+                        cover_picture = ''
+                        if obj.cover_picture:
+                            cover_picture = json.loads(obj.cover_picture)
+
+
                         tag_list = list(obj.tags.values('id', 'name'))
+
                         diary_up_down_objs = models.zgld_diary_action.objects.filter(case_id=obj.id,
                                                                                      customer_id=customer_id, action=4)
                         if diary_up_down_objs:
@@ -227,9 +232,9 @@ def case_manage(request, oper_type):
 
                         ret_data.append({
                             'case_id': _case_id,
-                            'case_name': obj.case_name,
-                            'company_id': obj.company_id,
-                            'customer_name': obj.customer_name,
+                            'case_name': obj.case_name,                 #
+                            'company_id': obj.company_id,               # 公司ID
+                            'customer_name': obj.customer_name,         # 客户名称
 
                             'headimgurl': obj.headimgurl,
                             'cover_picture': cover_picture,
@@ -294,10 +299,6 @@ def case_manage(request, oper_type):
                         'data_count': count,
 
                     }
-                else:
-                    response.code = 302
-                    response.msg = '数据不存在'
-
 
             else:
 

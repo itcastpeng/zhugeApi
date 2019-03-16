@@ -1477,7 +1477,7 @@ class zgld_case_tag(models.Model):
         app_label = "zhugeleida"
 
 
-#案例库数据表
+#案例库数据表 / 鹏----日记库 记录分类
 class zgld_case(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
@@ -1513,7 +1513,7 @@ class zgld_case(models.Model):
         app_label = "zhugeleida"
 
 
-#案例日记表
+#案例日记表 / 鹏---日记列表(小程序显示 列表页)
 class zgld_diary(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
