@@ -122,7 +122,6 @@ def case_manage(request, oper_type):
 
                 print('-----q1---->>', q1)
                 objs = models.zgld_case.objects.select_related('company').filter(q1).order_by(order).exclude(status=3)
-                count = objs.count()
 
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -143,61 +142,55 @@ def case_manage(request, oper_type):
                         is_open_comment = gongzhonghao_app_objs[0].is_open_comment
                         is_open_comment_text = gongzhonghao_app_objs[0].get_is_open_comment_display()
 
-                    for obj in objs:
-                        ## 查找出最新更新的日记
-                        _case_id = obj.id
+                    case_id_list = []
+                    [case_id_list.append(i.id) for i in objs]
+
+                    diary_objs = models.zgld_diary.objects.filter(case_id__in=case_id_list)
+                    
+                    count = diary_objs.count()
+                    for diary_obj in diary_objs:
+
+                        ## 查询详情
+                        _case_id = diary_obj.id
                         if not case_id:  # 当满足 不是查询单个的情况
-                            diary_objs = models.zgld_diary.objects.filter(case_id=_case_id).order_by('-create_date')
-                            for diary_obj in diary_objs:
+                            _status = diary_obj.status
+                            _status_text = diary_obj.get_status_display()
+                            _cover_picture = diary_obj.cover_picture
+                            _content = diary_obj.content
 
-                                _status = diary_obj.status
-                                _status_text = diary_obj.get_status_display()
-                                _cover_picture = diary_obj.cover_picture
-                                _content = diary_obj.content
+                            if _cover_picture:
+                                _cover_picture = json.loads(_cover_picture)
 
-                                if _cover_picture:
-                                    _cover_picture = json.loads(_cover_picture)
-                                # if _content:
-                                #     _content = json.loads(_content)
+                            last_diary_data = {
+                                'diary_id': diary_obj.id,
+                                'case_id': diary_obj.case_id,
 
-                                last_diary_data = {
-                                    'diary_id': diary_obj.id,
-                                    'case_id': diary_obj.case_id,
+                                'company_id': diary_obj.company_id,
 
-                                    'company_id': diary_obj.company_id,
+                                'title': diary_obj.title,
+                                'diary_date': diary_obj.diary_date.strftime(
+                                    '%Y-%m-%d') if diary_obj.diary_date else '',
 
-                                    # 'is_praise_diary': is_praise_diary,
-                                    # 'is_praise_diary_text': is_praise_diary_text,
+                                'cover_picture': _cover_picture,
+                                'content': _content,
 
-                                    'title': diary_obj.title,
-                                    'diary_date': diary_obj.diary_date.strftime(
-                                        '%Y-%m-%d') if diary_obj.diary_date else '',
-                                    # '%Y-%m-%d %H:%M:%S'
-                                    'cover_picture': _cover_picture,
-                                    'content': _content,
+                                'status': _status,
+                                'status_text': _status_text,
 
-                                    'status': _status,
-                                    'status_text': _status_text,
+                                'cover_show_type': diary_obj.cover_show_type,
+                                'cover_show_type_text': diary_obj.get_cover_show_type_display(),
 
-                                    'cover_show_type': diary_obj.cover_show_type,
-                                    'cover_show_type_text': diary_obj.get_cover_show_type_display(),
-
-                                    'create_date': diary_obj.create_date.strftime(
-                                        '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
-                                }
-
-                        print('obj.id---------> ', obj.id)
-                        status = obj.status
-                        status_text = obj.get_status_display()
+                                'create_date': diary_obj.create_date.strftime(
+                                    '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
+                            }
 
                         cover_picture = ''
-                        if obj.cover_picture:
-                            cover_picture = json.loads(obj.cover_picture)
+                        if diary_obj.case.cover_picture:
+                            cover_picture = json.loads(diary_obj.case.cover_picture)
 
 
-                        tag_list = list(obj.tags.values('id', 'name'))
-
-                        diary_up_down_objs = models.zgld_diary_action.objects.filter(case_id=obj.id,
+                        tag_list = list(diary_obj.case.tags.values('id', 'name'))  # 标签列表
+                        diary_up_down_objs = models.zgld_diary_action.objects.filter(case_id=_case_id,
                                                                                      customer_id=customer_id, action=4)
                         if diary_up_down_objs:
                             is_praise_diary = 1
@@ -206,7 +199,7 @@ def case_manage(request, oper_type):
                             is_praise_diary = 0
                             is_praise_diary_text = '没有赞过此日记'
 
-                        case_up_down_objs = models.zgld_diary_action.objects.filter(action=2, case_id=obj.id,
+                        case_up_down_objs = models.zgld_diary_action.objects.filter(action=2, case_id=_case_id,
                                                                                     customer_id=customer_id)
                         if case_up_down_objs:
                             case_up_down_obj = case_up_down_objs[0]
@@ -218,55 +211,43 @@ def case_manage(request, oper_type):
                             is_collection_case = 0
                             is_collection_case_text = '没有收藏此案例'
 
-                        become_beautiful_cover = obj.become_beautiful_cover
+                        become_beautiful_cover = diary_obj.case.become_beautiful_cover     # 变美封面
                         if become_beautiful_cover:
                             become_beautiful_cover = json.loads(become_beautiful_cover)
                         else:
                             become_beautiful_cover = ''
 
-                        poster_cover = obj.poster_cover
-                        if poster_cover:
-                            poster_cover = json.loads(poster_cover)
+                        if diary_obj.case.poster_cover:
+                            poster_cover = json.loads(diary_obj.case.poster_cover)
                         else:
                             poster_cover = []
 
                         ret_data.append({
                             'case_id': _case_id,
-                            'case_name': obj.case_name,                 #
-                            'company_id': obj.company_id,               # 公司ID
-                            'customer_name': obj.customer_name,         # 客户名称
-
-                            'headimgurl': obj.headimgurl,
-                            'cover_picture': cover_picture,
-
-                            'read_count': obj.read_count,  #
-                            'comment_count': obj.comment_count,  #
-                            'up_count': obj.up_count,  #
-
-                            'is_praise_diary': is_praise_diary,
-                            'is_praise_diary_text': is_praise_diary_text,
-
-
-                            'is_open_comment': is_open_comment,
-                            'is_open_comment_text': is_open_comment_text,
-
-                            'become_beautiful_cover': become_beautiful_cover,
-
-                            'is_collection_case': is_collection_case,
-                            'is_collection_case_text': is_collection_case_text,
-
-                            'status': status,
-                            'status_text': status_text,
-                            'tag_list': tag_list,
-
-                            'poster_cover' : poster_cover,
-
-                            'case_type': obj.case_type,
-                            'case_type_text': obj.get_case_type_display(),
-
-                            'last_diary_data': last_diary_data,  # 最后日记的内容
-                            'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
-                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                            'case_name': diary_obj.case.case_name,                              # 案例名称
+                            'company_id': diary_obj.case.company_id,                            # 公司ID
+                            'customer_name': diary_obj.case.customer_name,                      # 客户名称
+                            'headimgurl': diary_obj.case.headimgurl,                            # 客户头像
+                            'cover_picture': cover_picture,                                     # 封面图片URL
+                            'read_count': diary_obj.case.read_count,                            # 阅读数量
+                            'comment_count': diary_obj.case.comment_count,                      # 被评论数量
+                            'up_count': diary_obj.case.up_count,                                # 点赞次数
+                            'is_praise_diary': is_praise_diary,                                 # 是否赞过该日记 ID
+                            'is_praise_diary_text': is_praise_diary_text,                       # 是否赞过该日记 内容
+                            'is_open_comment': is_open_comment,                                 # 是否开启了自动打标签 ID
+                            'is_open_comment_text': is_open_comment_text,                       # 是否开启了自动打标签 内容
+                            'become_beautiful_cover': become_beautiful_cover,                   # 变美封面
+                            'is_collection_case': is_collection_case,                           # 是否收藏该案例ID
+                            'is_collection_case_text': is_collection_case_text,                 # 是否收藏该案例内容
+                            'status': diary_obj.case.status,                                    # 日记状态ID
+                            'status_text': diary_obj.case.get_status_display(),                 # 日记状态内容
+                            'tag_list': tag_list,                                               # 标签列表
+                            'poster_cover' : poster_cover,                                      # 海报封面图片URL
+                            'case_type': diary_obj.case.case_type,                              # 案例类型ID
+                            'case_type_text': diary_obj.case.get_case_type_display(),           # 案例类型内容
+                            'last_diary_data': last_diary_data,                                 # 最后日记的内容
+                            'update_date': diary_obj.case.update_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.case.update_date else '', # 日记最后修改时间
+                            'create_date': diary_obj.case.create_date.strftime('%Y-%m-%d %H:%M:%S') if diary_obj.case.create_date else '', # 创建时间
                         })
 
                     # 记录该客户 点击查看日记首页日志
