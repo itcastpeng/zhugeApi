@@ -134,7 +134,7 @@ def case_manage(request, oper_type):
                     response.msg = '数据不存在'
 
                 else:
-                    last_diary_data = ''
+                    # last_diary_data = ''
                     is_open_comment = ''        # 是否开启了自动打标签 ID
                     is_open_comment_text = ''   # 是否开启了自动打标签 内容
                     gongzhonghao_app_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
@@ -152,37 +152,33 @@ def case_manage(request, oper_type):
 
                         ## 查询详情
                         _case_id = diary_obj.id
-                        if not case_id:  # 当满足 不是查询单个的情况
-                            _status = diary_obj.status
-                            _status_text = diary_obj.get_status_display()
-                            _cover_picture = diary_obj.cover_picture
-                            _content = diary_obj.content
+                        # if not case_id:  # 当满足 不是查询单个的情况
+                        _cover_picture = diary_obj.cover_picture
+                        if _cover_picture:
+                            _cover_picture = json.loads(_cover_picture)
 
-                            if _cover_picture:
-                                _cover_picture = json.loads(_cover_picture)
+                        last_diary_data = {
+                            'diary_id': diary_obj.id,
+                            'case_id': diary_obj.case_id,
 
-                            last_diary_data = {
-                                'diary_id': diary_obj.id,
-                                'case_id': diary_obj.case_id,
+                            'company_id': diary_obj.company_id,
 
-                                'company_id': diary_obj.company_id,
+                            'title': diary_obj.title,
+                            'diary_date': diary_obj.diary_date.strftime(
+                                '%Y-%m-%d') if diary_obj.diary_date else '',
 
-                                'title': diary_obj.title,
-                                'diary_date': diary_obj.diary_date.strftime(
-                                    '%Y-%m-%d') if diary_obj.diary_date else '',
+                            'cover_picture': _cover_picture,
+                            'content': diary_obj.content,
 
-                                'cover_picture': _cover_picture,
-                                'content': _content,
+                            'status': diary_obj.status,
+                            'status_text': diary_obj.get_status_display(),
 
-                                'status': _status,
-                                'status_text': _status_text,
+                            'cover_show_type': diary_obj.cover_show_type,
+                            'cover_show_type_text': diary_obj.get_cover_show_type_display(),
 
-                                'cover_show_type': diary_obj.cover_show_type,
-                                'cover_show_type_text': diary_obj.get_cover_show_type_display(),
-
-                                'create_date': diary_obj.create_date.strftime(
-                                    '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
-                            }
+                            'create_date': diary_obj.create_date.strftime(
+                                '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
+                        }
 
                         cover_picture = ''
                         if diary_obj.case.cover_picture:
