@@ -51,22 +51,6 @@ def case_manage(request, oper_type):
                 q1.connector = 'and'
                 q1.children.append(('company_id', company_id))
 
-                # 查询详情记录操作
-                if case_id:
-                    q1.children.append(('id', case_id))
-
-                    ##记录客户查看单个案例的操作
-                    models.zgld_diary_action.objects.create(
-                        case_id=case_id, customer_id=customer_id, action=3
-                    )
-
-                    ## 记录单个案例浏览量
-                    case_objs = models.zgld_case.objects.filter(id=case_id)
-                    if case_objs:
-                        case_objs.update(
-                            read_count=F('read_count') + 1
-                        )
-
                 if customer_name:
                     q1.children.append(('customer_name__contains', customer_name))
 
@@ -142,11 +126,29 @@ def case_manage(request, oper_type):
                         is_open_comment = gongzhonghao_app_objs[0].is_open_comment
                         is_open_comment_text = gongzhonghao_app_objs[0].get_is_open_comment_display()
 
-                    case_id_list = []
-                    [case_id_list.append(i.id) for i in objs]
+                    if case_id:
+                        print('case_id------------> ', case_id)
+                        diary_objs = models.zgld_diary.objects.filter(id=case_id)
+                        # 查询详情记录操作
+                        if diary_objs:
+                            ##记录客户查看单个案例的操作
+                            models.zgld_diary_action.objects.create(
+                                case_id=diary_objs[0].case_id, customer_id=customer_id, action=3
+                            )
 
-                    diary_objs = models.zgld_diary.objects.filter(case_id__in=case_id_list)
-                    
+                            ## 记录单个案例浏览量
+                            case_objs = models.zgld_case.objects.filter(id=case_id)
+                            if case_objs:
+                                case_objs.update(
+                                    read_count=F('read_count') + 1
+                                )
+
+                    else:
+                        case_id_list = []
+                        [case_id_list.append(i.id) for i in objs]
+                        diary_objs = models.zgld_diary.objects.filter(case_id__in=case_id_list)
+
+
                     count = diary_objs.count()
                     for diary_obj in diary_objs:
 
@@ -268,6 +270,7 @@ def case_manage(request, oper_type):
                         customer_id=customer_id,
                         remark=remark
                     )
+
                     #  查询成功 返回200 状态码
                     response.code = 200
                     response.msg = '查询成功'
