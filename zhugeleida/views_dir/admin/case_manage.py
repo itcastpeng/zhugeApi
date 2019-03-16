@@ -145,6 +145,7 @@ def case_manage_oper(request, oper_type, o_id):
             objs = models.zgld_case.objects.filter(id=o_id,company_id=company_id)
 
             if objs:
+                models.zgld_diary.objects.filter(case_id=objs[0].id).update(status=3) # 删除该日记库下所有日记
                 objs.update(
                     status=3
                 )
