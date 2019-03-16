@@ -522,51 +522,52 @@ def case_manage(request, oper_type):
             if user_customer_belonger_objs:
                 user_customer_belonger_id = user_customer_belonger_objs[0].id
             print('user_customer_belonger_objs ------->>',user_customer_belonger_objs)
+            objs = models.zgld_diary.objects.filter(id=case_id)
+            if objs:
+                case_objs = models.zgld_case.objects.filter(id=objs[0].case_id)
+                if case_objs:
+                    poster_cover = case_objs[0].poster_cover
 
-            case_objs = models.zgld_case.objects.filter(id=case_id)
-            if case_objs:
-                poster_cover = case_objs[0].poster_cover
+                    if poster_cover:
+                        poster_cover = json.loads(poster_cover)
+                    else:
+                        poster_cover = []
 
-                if poster_cover:
-                    poster_cover = json.loads(poster_cover)
-                else:
-                    poster_cover = []
-
-                _data = {
-                    'user_id': uid,
-                    'customer_id': customer_id,
-                    'case_id': case_id,
-                    'company_id': company_id,
-                    'user_customer_belonger_id': user_customer_belonger_id
-                }
-                print('_data ------>>',_data)
-
-                _response = create_user_customer_case_poster_qr_code(_data)
-
-                qr_code = ''
-                if _response.code == 200:
-                    qr_code = _response.data.get('qr_code')
-
-
-
-                ret_data.append(
-                    {
+                    _data = {
+                        'user_id': uid,
+                        'customer_id': customer_id,
                         'case_id': case_id,
-                        'poster_cover': poster_cover,
-                        'poster_company_logo': poster_company_logo or '',
-                        'qr_code': qr_code or ''
+                        'company_id': company_id,
+                        'user_customer_belonger_id': user_customer_belonger_id
                     }
-                )
+                    print('_data ------>>',_data)
 
-                response.data = ret_data
-                response.note = {
-                    'case_id': '案例ID',
-                    'poster_cover': '海报封面',
-                    'poster_company_logo': '海报公司log'
-                }
+                    _response = create_user_customer_case_poster_qr_code(_data)
 
-                response.code = 200
-                response.msg = "返回成功"
+                    qr_code = ''
+                    if _response.code == 200:
+                        qr_code = _response.data.get('qr_code')
+
+
+
+                    ret_data.append(
+                        {
+                            'case_id': case_id,
+                            'poster_cover': poster_cover,
+                            'poster_company_logo': poster_company_logo or '',
+                            'qr_code': qr_code or ''
+                        }
+                    )
+
+                    response.data = ret_data
+                    response.note = {
+                        'case_id': '案例ID',
+                        'poster_cover': '海报封面',
+                        'poster_company_logo': '海报公司log'
+                    }
+
+                    response.code = 200
+                    response.msg = "返回成功"
 
 
             else:
