@@ -622,10 +622,10 @@ def case_manage(request, oper_type):
             if poster_belonger_objs:
                 poster_belonger_obj = poster_belonger_objs[0]
                 poster_url = poster_belonger_obj.poster_url
-
+                source = 1 # 生成 扫码的海报
                 if not  poster_url:
-                    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
-                        customer_id, uid, case_id, company_id,user_customer_belonger_id)
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s&source=%s' % (
+                        customer_id, uid, case_id, company_id,user_customer_belonger_id, source)
 
                     data_dict = {
                         'user_id': uid,
