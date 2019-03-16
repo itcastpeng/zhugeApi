@@ -191,6 +191,7 @@ def login_oper(request, oper_type):
 
     if request.method == "GET":
         if oper_type == 'binding':
+            print('=-----======================================*****************************************************************=================================')
             print('request.GET -->', request.GET)
 
             forms_obj = LoginBindingForm(request.GET)
@@ -220,8 +221,10 @@ def login_oper(request, oper_type):
                     if user_customer_belonger_obj:
                         response.code = 302
                         response.msg = "关系存在"
+                        print('关系存在------------------------关系存在----------------------关系存在------------------------关系存在')
 
                     else:
+                        print('--------关系不存在创建-------------------------关系不存在创建-------------------关系不存在创建----------------------关系不存在创建')
                         if not source or source == 'undefined':
                             source = 1
 
