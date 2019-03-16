@@ -56,13 +56,24 @@ def diary_manage(request, oper_type):
                         diary_objs.update(  # 阅读次数
                             read_count=F('read_count') + 1
                         )
+                q1.children.append(('status__in', [1]))  #
 
                 if case_id:
-                    q1.children.append(('case_id', case_id))
-
-                q1.children.append(('status__in', [1]))  #
+                    objs = models.zgld_diary.objects.select_related('company').filter(
+                        q1,
+                        id=case_id
+                    ).order_by(order)
+                    if objs:
+                        obj = objs[0]
+                        if int(obj.case.case_type) == 2:
+                            print('===========时间轴', obj.case_id)
+                            objs = models.zgld_diary.objects.select_related('company').filter(
+                                q1,
+                                case_id=obj.case_id
+                            )
+                else:
+                    objs = models.zgld_diary.objects.select_related('company').filter(q1).order_by(order)
                 print('-----q1---->>', q1)
-                objs = models.zgld_diary.objects.select_related('company').filter(q1).order_by(order)
                 count = objs.count()
 
                 if length != 0:
