@@ -646,39 +646,39 @@ def data_statistics(request, oper_type):
 
                         'forward_num': forwarding_article_data.get('forwarding_article_count'),       # 文章转发数量
                         'forward_data': forwarding_article_data.get('data_list'),                       # 文章转发数据
-                        'forward_count': forwarding_article_data.get('count'),
+                        'count': forwarding_article_data.get('count'),
 
                         'click_num': click_quantity_data.get('click_count'),                          # 文章点击数量
                         'click_data': click_quantity_data.get('data_list'),                             # 文章点击数据
-                        'click_count': click_quantity_data.get('count'),
+                        'count': click_quantity_data.get('count'),
 
                         'avg_reading_info': the_reading_data.get('text'),                               # 文章阅读信息
                         'avg_reading_data': the_reading_data.get('data_list'),                          # 文章阅读数据
-                        'avg_reading_count': the_reading_data.get('count'),
+                        'count': the_reading_data.get('count'),
 
                         'len_video_text': video_view_data.get('video_num_count_avg'),                   # 视频信息
                         'len_video_data': video_view_data.get('data_list'),                             # 视频数据
-                        'len_video_count': video_view_data.get('count'),
+                        'count': video_view_data.get('count'),
 
                         'click_dialog_num': click_dialog_data.get('click_dialog_num'),                  # 点击对话框
                         'click_dialog_data': click_dialog_data.get('data_list'),                        # 点击对话框
-                        'click_dialog_count': click_dialog_data.get('count'),
+                        'count': click_dialog_data.get('count'),
 
                         'user_active_send_num': user_active_send_data.get('user_active_send_num'),      # 主动发送消息数量
                         'user_active_send_data': user_active_send_data.get('data_list'),                # 主动发送消息数据
-                        'user_active_send_count': user_active_send_data.get('count'),
+                        'count': user_active_send_data.get('count'),
 
                         'call_phone_num': call_phone_data.get('call_phone_num'),                        # 拨打电话次数
                         'call_phone_data': call_phone_data.get('data_list'),                            # 拨打电话数据
-                        'call_phone_count': call_phone_data.get('count'),
+                        'count': call_phone_data.get('count'),
 
                         'click_thumb_num': click_thumb_data.get('click_thumb_num'),                     # 文章点赞次数
                         'click_thumb_data': click_thumb_data.get('data_list'),                          # 文章点赞数据
-                        'click_thumb_count': click_thumb_data.get('count'),
+                        'count': click_thumb_data.get('count'),
 
                         'article_comments_num': article_comments_data.get('article_comments_num'),      # 文章评论次数
                         'article_comments_data': article_comments_data.get('data_list'),                # 文章评论数据
-                        'article_comments_count': article_comments_data.get('count'),
+                        'count': article_comments_data.get('count'),
                     })
 
                 response.code = 200
@@ -695,7 +695,7 @@ def data_statistics(request, oper_type):
                         "customer_username": "客户名称",
                         "user_username": "员工名称",
                         "create_date": "点击时间",
-                        'forward_count': '详情总数'
+                        # 'forward_count': '详情总数'
                     },
 
                     'click_count': '文章点击量',
@@ -703,7 +703,7 @@ def data_statistics(request, oper_type):
                         "customer_username": "客户名称",
                         "user_username": "员工名称",
                         "create_date": "点击时间",
-                        'click_count': '详情总数'
+                        # 'count': '详情总数'
                     },
 
                     'avg_reading_info': '文章阅读信息',
@@ -711,7 +711,7 @@ def data_statistics(request, oper_type):
                         "customer__username": "客户名称",
                         "reading_time": '阅读时长',
                         "create_date": "阅读时间",
-                        'avg_reading_count': '详情总数'
+                        # 'avg_reading_count': '详情总数'
                     },
 
                     'len_video_text': '视频信息',
@@ -720,14 +720,14 @@ def data_statistics(request, oper_type):
                         'id__count': '播放次数',
                         'video_time__sum': '总时长',
                         'avg': '平均时长',
-                        'len_video_count': '详情总数'
+                        # 'len_video_count': '详情总数'
                     },
 
                     'click_dialog_num': '点击对话框次数',
                     'click_dialog_data--点击对话框数据': {
                         'customer_username': '客户名称',
                         'create_date': '发送消息时间',
-                        'click_dialog_count': '详情总数'
+                        # 'click_dialog_count': '详情总数'
                     },
 
                     'user_active_send_num': '主动发送消息',
@@ -735,7 +735,7 @@ def data_statistics(request, oper_type):
                         'customer_username': '客户名称',
                         'content': '发送内容',
                         'create_date':'发送消息时间',
-                        'user_active_send_count': '详情总数'
+                        # 'user_active_send_count': '详情总数'
                     },
 
 
@@ -743,7 +743,7 @@ def data_statistics(request, oper_type):
                     'call_phone_data--拨打电话数据': {
                         'customer_name': '客户名称',
                         'create_date': '点赞时间',
-                        'call_phone_count': '详情总数'
+                        # 'call_phone_count': '详情总数'
                     },
 
 
@@ -751,7 +751,7 @@ def data_statistics(request, oper_type):
                     'click_thumb_data--文章点赞数据':{
                         'customer_name': '客户名称',
                         'create_date': '点赞时间',
-                        'click_thumb_count': '详情总数'
+                        # 'click_thumb_count': '详情总数'
                     },
 
                     'article_comments_num': '文章评论次数',
@@ -760,7 +760,7 @@ def data_statistics(request, oper_type):
                         'content': '评论内容',
                         'is_audit_pass': '是否审核',
                         'create_date': '评论时间',
-                        'article_comments_count': '详情总数'
+                    #     'article_comments_count': '详情总数'
                     },
                 }
 
@@ -802,19 +802,19 @@ def data_statistics(request, oper_type):
 
                         'copy_nickname': copy_nickname_data.get('copy_nickname_count'),                     # 复制昵称次数
                         'copy_nickname_data': copy_nickname_data.get('data_list'),                          # 复制昵称数据
-                        'copy_nickname_count': copy_nickname_data.get('count'),
+                        'count': copy_nickname_data.get('count'),
 
                         'effective_dialogue_num': effective_dialogue_data.get('effective_dialogue'),        # 有效对话数量
                         'effective_dialogue_data': effective_dialogue_data.get('data_list'),                # 有效对话数据
-                        'effective_dialogue_count': effective_dialogue_data.get('count'),
+                        'count': effective_dialogue_data.get('count'),
 
                         'average_response_avg': average_response_data.get('average_response'),            # 平均响应时长
                         'average_response_data': average_response_data.get('data_list'),                    # 平均响应时长
-                        'average_response_count': average_response_data.get('count'),
+                        'count': average_response_data.get('count'),
 
                         'sending_applet_num': sending_applet_data.get('sending_applet_num'),                # 发送小程序数量
                         'sending_applet_data': sending_applet_data.get('data_list'),                        # 发送小程序数据
-                        'sending_applet_count': sending_applet_data.get('count'),
+                        'count': sending_applet_data.get('count'),
                     })
 
                 response.code = 200
@@ -831,7 +831,7 @@ def data_statistics(request, oper_type):
                     'copy_nickname_data--复制昵称数据': {
                         'customer__username': '客户名称',
                         'create_date': '复制昵称时间',
-                        'copy_nickname_count': '详情总数'
+                        # 'copy_nickname_count': '详情总数'
                     },
 
                     'effective_dialogue_num': '有效对话数量',
@@ -839,7 +839,7 @@ def data_statistics(request, oper_type):
                         'name': '发送消息人名称',
                         'text': '发送的消息',
                         'create_date': '发送消息时间',
-                        'effective_dialogue_count': '详情总数'
+                        # 'effective_dialogue_count': '详情总数'
                     },
 
                     'average_response_avg': '平均响应时长',
@@ -848,14 +848,14 @@ def data_statistics(request, oper_type):
                         'start_date': '客户发送对话时间',
                         'stop_date': '咨询回复时间',
                         'response_time': '响应时长',
-                        'average_response_count': '详情总数'
+                        # 'average_response_count': '详情总数'
                     },
 
                     'sending_applet_num': '发送小程序数量',
                     'sending_applet_data--发送小程序数据': {
                         'customer__username': '客户名称',
                         'create_date': '创建时间',
-                        'sending_applet_count': '详情总数'
+                        # 'sending_applet_count': '详情总数'
                     },
                 }
 
