@@ -809,7 +809,6 @@ def user_oper(request, oper_type, o_id):
                         username=username,
                         url=url,
                     )
-                    print('msg--------msg------msg-------msg------msg-----', type(msg), msg)
                                                     # 尚露↓
                     openid_list = [1531186501974, 1531464629357, 1531476018476]
                     for i in openid_list:
