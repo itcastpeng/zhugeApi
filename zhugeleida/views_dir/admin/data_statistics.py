@@ -346,7 +346,9 @@ class statistical_objs():
         video_view_count = 0
         for time_obj in time_objs:
             video_view_count += time_obj.video_time
-        video_average_playing_time = int(video_view_count / len_video)
+        video_average_playing_time = 0
+        if video_view_count > 0:
+            video_average_playing_time = int(video_view_count / len_video)
 
         data_list = []
         count = len_video
