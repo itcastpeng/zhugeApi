@@ -41,11 +41,7 @@ class WorkWeixinOper():
         api_url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}".format(
             access_token=self.access_token
         )
-        try:
-            msg = json.loads(msg)
-        except Exception:
-            msg = msg
-
+        print('msg---------msg----------msg-------msg-------msg----> ', type(msg), msg)
         post_data = {
             # "touser": "UserID1|UserID2|UserID3",
             # "toparty": "PartyID1|PartyID2",
@@ -70,13 +66,20 @@ class WorkWeixinOper():
 
 if __name__ == '__main__':
     corpid = 'wx81159f52aff62388'  # 企业ID
-    corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
-    redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
-    obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
-    obj.send_message(
-        agentid=1000005,
-        msg="""小程序名称：诸葛雷达\n审核状态：审核通过\n备注：审核通过""",
-        touser="zhangcong"
-    )
+    # corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
+    # redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
+    # obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
+    # username = '赵欣鹏'
+    # url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/approval_audit'
+    # msg = """【审核用户】：{username}\n【点击链接】：{url}\n """.format(
+    #     username=username,
+    #     url=url,
+    # )
+    # obj.send_message(
+    #     agentid=1000005,
+    #     # msg="""小程序名称：诸葛雷达\n审核状态：审核通过\n备注：审核通过""",
+    #     msg=msg,
+    #     touser="1531464629357"
+    # )
 
 
