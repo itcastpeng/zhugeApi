@@ -21,7 +21,7 @@ def get_msg(info_type, content):
         content = content
 
     info_type = int(info_type)
-
+    print('content----------> ', content)
     data = {
         'msg': '',
         'product_cover_url': '',
@@ -32,7 +32,7 @@ def get_msg(info_type, content):
     }
     if content:
         if info_type in [1, 3, 6]:
-            data['msg'] = content.get('msg')
+            data['msg'] = b64decode(content.get('msg'))
 
         elif info_type == 2:
             data['product_cover_url'] = content.get('product_cover_url')
@@ -147,7 +147,12 @@ class statistical_objs():
                             'send_type': send_type,
                             'avatar': avatar,
                             'name': name,
-                            'content': text,
+                            'msg': text.get('msg'),
+                            'product_cover_url': text.get('product_cover_url'),
+                            'product_name': text.get('product_name'),
+                            'product_price': text.get('product_price'),
+                            'url': text.get('url'),
+                            'info_type': text.get('info_type'),
                             'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
                     customer__username = ''
@@ -480,7 +485,12 @@ class statistical_objs():
 
                     data_list.append({
                         'customer_username':b64decode(infoObj.customer.username),
-                        'content':text,
+                        'msg': text.get('msg'),
+                        'product_cover_url': text.get('product_cover_url'),
+                        'product_name': text.get('product_name'),
+                        'product_price': text.get('product_price'),
+                        'url': text.get('url'),
+                        'info_type': text.get('info_type'),
                         'create_date':infoObj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                     })
 
