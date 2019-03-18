@@ -10,6 +10,35 @@ import json, datetime
 from publicFunc.time_screen import time_screen
 from publicFunc.base64 import b64decode
 
+
+def get_msg(info_type, content):
+    try:
+        content = eval(content)
+    except Exception:
+        content = content
+
+    info_type = int(info_type)
+
+    data = {
+        'msg': '',
+        'product_cover_url': '',
+        'product_name': '',
+        'product_price': '',
+        'url': '',
+    }
+    if info_type in [1, 3, 6]:
+        data['msg'] = content.get('msg')
+
+    elif info_type == 2:
+        data['product_cover_url'] = content.get('product_cover_url')
+        data['product_name'] = content.get('product_name')
+        data['product_price'] = content.get('product_price')
+
+    elif info_type in [4, 5]:
+        data['url'] = content.get('url')
+
+    return data
+
 # 统计数据 调用类
 class statistical_objs():
 
@@ -95,38 +124,24 @@ class statistical_objs():
 
                     send_type = int(msg_obj.send_type)
 
+                    text = get_msg(send_type, msg_obj.content) # 获取聊天内容
+
                     if send_type == 1:
                         send_type_user += 1
                         name = msg_obj.userprofile.username     # 咨询名称
                         avatar = msg_obj.userprofile.avatar     # 头像
-                        location = 'right'
                     else:
                         send_type_customer += 1
                         name = ''
                         if msg_obj.customer.username:
                             name = b64decode(msg_obj.customer.username) # 客户名称
-                        location = 'left'
                         avatar = msg_obj.customer.headimgurl     # 头像
 
                     if number_valid_conversations: # 查询详情
-                        try:
-                            content = eval(msg_obj.content)
-                        except Exception:
-                            content = msg_obj.content
-                        text = ''
-                        if content:
-                            info_type = int(content.get('info_type'))
-
-                            if info_type == 1:  # 获取发送的消息
-                                text = b64decode(content.get('msg'))
-                            elif info_type == 2:
-                                text = content.get('product_cover_url')
-
                         result_data.append({
-                            'location': location,
                             'avatar': avatar,
                             'name': name,
-                            'text': text,
+                            'content': text,
                             'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
                     customer__username = ''
@@ -448,20 +463,20 @@ class statistical_objs():
             ).order_by('-create_date')
             if infoObjs:
                 infoObj = infoObjs[0]
-                if int(infoObj.send_type) == 2:
+                send_type = int(infoObj.send_type)
+                if send_type == 2:
                     user_active_send_num += 1
 
-                    if self.detail_data_type and self.detail_data_type == 'active_message': # 是否查看详情
-                        content = eval(infoObj.content)
-                        if int(content.get('info_type')) == 2:
-                            text = content.get('product_cover_url')
-                        else:
-                            text = b64decode(content.get('msg'))
-                        data_list.append({
-                            'customer_username':b64decode(infoObj.customer.username),
-                            'content':text,
-                            'create_date':infoObj.create_date.strftime('%Y-%m-%d %H:%M:%S')
-                        })
+                if self.detail_data_type and self.detail_data_type == 'active_message': # 是否查看详情
+
+                    content = eval(infoObj.content)
+                    text = get_msg(send_type, content)
+
+                    data_list.append({
+                        'customer_username':b64decode(infoObj.customer.username),
+                        'content':text,
+                        'create_date':infoObj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                    })
 
         data = {
             'data_list': data_list,
