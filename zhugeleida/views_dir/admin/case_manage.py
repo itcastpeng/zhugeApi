@@ -219,23 +219,30 @@ def case_manage_oper(request, oper_type, o_id):
 
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
+            case_type = request.POST.get('case_type')  # 判断是普通案例  还是 时间轴案例
 
-            case_name = request.POST.get('case_name')
-            customer_name = request.POST.get('customer_name')
+            case_name = request.POST.get('case_name')           # 案例名称
+            customer_name = request.POST.get('customer_name')   # 客户名称
 
-            headimgurl = request.POST.get('headimgurl')
-            status  = request.POST.get('status')
-            cover_picture = request.POST.get('cover_picture')  # 文章ID
-
-            become_beautiful_cover = request.POST.get('become_beautiful_cover')  # 文章ID
-            case_type = request.POST.get('case_type')
+            headimgurl = request.POST.get('headimgurl')         # 客户头像
+            status  = request.POST.get('status')                # 发布状态 / (已发/未发)
+            cover_picture = request.POST.get('cover_picture')   # 封面图片
+            become_beautiful_cover = request.POST.get('become_beautiful_cover')  # 变美图片
+            tags_id_list = request.POST.get('tags_id_list')     # 标签列表
+            """
+            普通案例： 创建列表页 不加 变美过程 封面图片
+            时间轴案例: 创建列表页 加 变美过程 封面图片
+            
+            """
 
             form_data = {
-                'case_name' : case_name,
-                'company_id': company_id,
-                'customer_name': customer_name,  # 活动名称
-                'headimgurl': headimgurl,  # 文章ID
-                'status': status,
+                'case_name' : case_name,            # 案例列表名称
+                'company_id': company_id,           # 公司ID
+                'customer_name': customer_name,     # 客户名称
+                'headimgurl': headimgurl,           # 头像图片
+                'status': status,                   # 发布状态 / (已发/未发)
+                'case_type': case_type,             # 案例类型
+                'tags_id_list': tags_id_list,       # 标签
 
             }
 
@@ -254,10 +261,9 @@ def case_manage_oper(request, oper_type, o_id):
                     case_type=case_type
                 )
 
-                tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
-                if tags_id_list:
-                    obj.tags = tags_id_list
-                    obj.save()
+                # if tags_id_list:
+                #     obj.tags = tags_id_list
+                #     obj.save()
 
                 response.code = 200
                 response.msg = "添加成功"

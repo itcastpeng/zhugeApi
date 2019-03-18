@@ -139,6 +139,21 @@ class CaseAddForm(forms.Form):
             'required': "头像不能为空"
         }
     )
+
+    case_type  = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "案例类型不能为空"
+        }
+    )
+
+    tags_id_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "案例标签不能为空"
+        }
+    )
+
     def clean_case_name(self):
 
         company_id = self.data['company_id']
@@ -152,6 +167,9 @@ class CaseAddForm(forms.Form):
             self.add_error('case_name', '不能存在相同的案例名')
         else:
             return case_name
+
+
+
 
 
 # 修改案例
