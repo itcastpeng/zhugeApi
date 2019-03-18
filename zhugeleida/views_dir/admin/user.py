@@ -27,7 +27,7 @@ def user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
         forms_obj = UserSelectForm(request.GET)
-        type = request.GET.get('type')
+        _type = request.GET.get('type')
 
         if forms_obj.is_valid():
             current_page = forms_obj.cleaned_data['current_page']
@@ -63,7 +63,7 @@ def user(request):
             # else:  #管理员，展示出自己公司的用户
             q.add(Q(**{"company_id": company_id}), Q.AND)
 
-            if type == 'temp_user':
+            if _type == 'temp_user':
                 objs = models.zgld_temp_userprofile.objects.select_related('company').filter(q).order_by(order)
                 count = objs.count()
 
@@ -376,9 +376,9 @@ def user_oper(request, oper_type, o_id):
         # 删除用户
         elif oper_type == "delete":
             # 删除 ID
-            type = request.GET.get('type')
+            _type = request.GET.get('type')
 
-            if type == 'temp_user':
+            if _type == 'temp_user':
                 user_objs = models.zgld_temp_userprofile.objects.filter(id=o_id)
                 if user_objs:
                     user_objs.delete()
@@ -440,7 +440,7 @@ def user_oper(request, oper_type, o_id):
         elif oper_type == "update":
 
             print('-------->>',request.POST)
-            type = request.GET.get('type')
+            _type = request.GET.get('type')
 
             user_id =  request.GET.get('user_id')
             wechat =  request.POST.get('wechat')
@@ -478,7 +478,7 @@ def user_oper(request, oper_type, o_id):
                 wechat_phone =   forms_obj.cleaned_data.get('wechat_phone')
                 mingpian_phone = forms_obj.cleaned_data.get('mingpian_phone')
 
-                if type == 'temp_user':
+                if _type == 'temp_user':
 
                     temp_userprofile_objs = models.zgld_temp_userprofile.objects.filter(id=o_id)
                     if temp_userprofile_objs:
@@ -809,6 +809,7 @@ def user_oper(request, oper_type, o_id):
                         username=username,
                         url=url,
                     )
+                    print('msg--------msg------msg-------msg------msg-----', type(msg), msg)
                                                     # 尚露↓
                     openid_list = [1531186501974, 1531464629357, 1531476018476]
                     for i in openid_list:
@@ -833,7 +834,7 @@ def user_oper(request, oper_type, o_id):
         elif oper_type == 'approval_storage_user_info':
             print('---- 审核de 批量 ----->>')
             user_id_list = request.POST.get('user_id_list')
-            type = request.GET.get('type')
+            _type = request.GET.get('type')
 
             print('---- 审核de user_id_list 1  ----->>', user_id_list)
 
@@ -925,7 +926,7 @@ def user_oper(request, oper_type, o_id):
                                     department_id_list = []
 
                                 obj.department = department_id_list
-                                if type == 'phone_audit':
+                                if _type == 'phone_audit':
                                     obj.status = 1
 
                                 obj.save()
