@@ -94,14 +94,19 @@ class statistical_objs():
                 for msg_obj in msg_objs:
 
                     send_type = int(msg_obj.send_type)
+
                     if send_type == 1:
                         send_type_user += 1
                         name = msg_obj.userprofile.username     # 咨询名称
+                        avatar = msg_obj.userprofile.avatar     # 头像
+                        location = 'right'
                     else:
                         send_type_customer += 1
                         name = ''
                         if msg_obj.customer.username:
                             name = b64decode(msg_obj.customer.username) # 客户名称
+                        location = 'left'
+                        avatar = msg_obj.customer.headimgurl     # 头像
 
                     if number_valid_conversations: # 查询详情
                         try:
@@ -118,6 +123,8 @@ class statistical_objs():
                                 text = content.get('product_cover_url')
 
                         result_data.append({
+                            'location': location,
+                            'avatar': avatar,
                             'name': name,
                             'text': text,
                             'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
