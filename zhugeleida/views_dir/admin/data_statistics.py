@@ -35,8 +35,8 @@ def get_msg(content):
                     data['msg'] = b64decode(content.get('msg'))
 
             elif info_type in [2]:
-                print('content---> ', content)
-                print("content.get('product_cover_url')-------> ", content.get('product_cover_url'))
+                # print('content---> ', content)
+                # print("content.get('product_cover_url')-------> ", content.get('product_cover_url'))
                 data['product_cover_url'] = content.get('product_cover_url')
                 data['product_name'] = content.get('product_name')
                 data['product_price'] = content.get('product_price')
@@ -70,6 +70,8 @@ class statistical_objs():
                 stop_line = start_line + self.length
                 copy_nickname_obj = copy_nickname_obj[start_line: stop_line]
             for obj in copy_nickname_obj:
+                # print('obj.id--------> ', obj.id)
+                # print('obj.cusstomer-------> ', obj.customer)
                 customer__username = ''
                 if obj.customer:
                     customer__username = b64decode(obj.customer.username)
