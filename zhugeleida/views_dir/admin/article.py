@@ -119,6 +119,7 @@ def article(request, oper_type):
     if request.method == "GET":
         # 获取参数 页数 默认1
 
+        # 查询文章列表 / 详情
         if oper_type == 'myarticle_list':
 
             forms_obj = ArticleSelectForm(request.GET)
@@ -160,9 +161,12 @@ def article(request, oper_type):
 
                     # 找出可以不能选择的.  未开始的,进行中的
                     already_choice_article_list = list(
-                        models.zgld_article_activity.objects.filter(q1).filter(q1).values_list('article_id', flat=True))
+                        models.zgld_article_activity.objects.filter(q1).values_list('article_id', flat=True))
 
-                objs = models.zgld_article.objects.filter(q).order_by(order).exclude(id__in=already_choice_article_list)
+                objs = models.zgld_article.objects.filter(q).order_by(order).exclude(
+                    id__in=already_choice_article_list,
+                    status=3
+                )
                 count = objs.count()
 
                 if length != 0:
