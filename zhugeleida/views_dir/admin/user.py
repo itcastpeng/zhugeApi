@@ -162,53 +162,55 @@ def get_audit_user(request):
         company_id = request.GET.get('company_id')
         order = request.GET.get('order', '-create_date')
         forms_obj = UserSelectForm(request.GET)
-        objs = models.zgld_temp_userprofile.objects.select_related('company').filter(company_id=company_id).order_by(order)
-        count = objs.count()
-        current_page = forms_obj.cleaned_data['current_page']
-        length = forms_obj.cleaned_data['length']
+        if forms_obj.is_valid():
 
-        if length != 0:
-            start_line = (current_page - 1) * length
-            stop_line = start_line + length
-            objs = objs[start_line: stop_line]
+            current_page = forms_obj.cleaned_data['current_page']
+            length = forms_obj.cleaned_data['length']
+            objs = models.zgld_temp_userprofile.objects.select_related('company').filter(company_id=company_id).order_by(order)
+            count = objs.count()
 
-        ret_data = []
-        department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id', 'name')
-        department_list_all = list(department_objs) if department_objs else []
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                objs = objs[start_line: stop_line]
 
-        for obj in objs:
-            departmane_list = obj.department
-            if departmane_list:
-                departmane_list = json.loads(departmane_list)
-                if len(departmane_list) != 0:
-                    departmane_list = [int(i) for i in departmane_list]
-                else:
-                    departmane_list = []
-                department_name_list = []
-                for department_dict in department_list_all:
-                    id = department_dict.get('id')
-                    name = department_dict.get('name')
-                    if int(id) in departmane_list:
-                        department_name_list.append(name)
-                department = ', '.join(department_name_list)
-                ret_data.append({
-                    'temp_user_id': obj.id,
+            ret_data = []
+            department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id', 'name')
+            department_list_all = list(department_objs) if department_objs else []
 
-                    'username': obj.username,
-                    'create_date': obj.create_date,
+            for obj in objs:
+                departmane_list = obj.department
+                if departmane_list:
+                    departmane_list = json.loads(departmane_list)
+                    if len(departmane_list) != 0:
+                        departmane_list = [int(i) for i in departmane_list]
+                    else:
+                        departmane_list = []
+                    department_name_list = []
+                    for department_dict in department_list_all:
+                        id = department_dict.get('id')
+                        name = department_dict.get('name')
+                        if int(id) in departmane_list:
+                            department_name_list.append(name)
+                    department = ', '.join(department_name_list)
+                    ret_data.append({
+                        'temp_user_id': obj.id,
 
-                    'position': obj.position,
-                    'wechat': obj.wechat,  # 代表注册企业微信注册时的电话
-                    'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
-                    'wechat_phone': obj.wechat_phone,  # 代表注册企业微信注册时的电话
+                        'username': obj.username,
+                        'create_date': obj.create_date,
 
-                    'company': obj.company.name,
-                    'company_id': obj.company_id,
-                    'department': department,
-                    'department_id': departmane_list,
+                        'position': obj.position,
+                        'wechat': obj.wechat,  # 代表注册企业微信注册时的电话
+                        'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
+                        'wechat_phone': obj.wechat_phone,  # 代表注册企业微信注册时的电话
 
-                })
-                #  查询成功 返回200 状态码
+                        'company': obj.company.name,
+                        'company_id': obj.company_id,
+                        'department': department,
+                        'department_id': departmane_list,
+
+                    })
+                    #  查询成功 返回200 状态码
 
             response.code = 200
             response.msg = '查询成功'
@@ -217,6 +219,9 @@ def get_audit_user(request):
                 'data_count': count,
                 'department_list': department_list_all
             }
+        else:
+            response.code = 301
+            response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
 
