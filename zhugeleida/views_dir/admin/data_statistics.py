@@ -105,7 +105,9 @@ class statistical_objs():
                             'text': text,
                             'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
-                    customer__username = b64decode(msg_obj.customer.username)
+                    customer__username = ''
+                    if msg_obj.customer.username:
+                        customer__username = b64decode(msg_obj.customer.username)
                 if send_type_user < send_type_customer:
                     num = int(send_type_user / 3)
                 else:

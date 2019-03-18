@@ -52,6 +52,10 @@ def follow_up_data(user_id, request, data_type=None):
         ).values('customer_id', 'customer__username').distinct()
         make_phone_call_count = make_phone_call_objs.count()
 
+        compay_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+        compay_obj = models.zgld_company.objects.get(compay_id)
+        articles_read_customers = compay_obj.articles_read_customers    # 累计阅读文章数
+        article_reading_time = compay_obj.article_reading_time          # 每篇文章阅读时长
 
         # # ----------------------------符合匹配条件查询文章数据------------------------------
         article_conditions = models.ZgldUserOperLog.objects.filter(
@@ -65,7 +69,7 @@ def follow_up_data(user_id, request, data_type=None):
         result_data = []
         if_article_conditions = 0
         for i in article_conditions:
-            if i.get('id__count') >= 3:  # 条数大于等于
+            if i.get('id__count') >= articles_read_customers:  # 条数大于等于
                 article_tags = models.ZgldUserOperLog.objects.filter(
                     oper_type=3,
                     customer_id=i.get('customer_id'),
@@ -75,7 +79,7 @@ def follow_up_data(user_id, request, data_type=None):
                 count = 0 # 该人满足条件总数
                 # print('article_tags----article_tags----article_tags---article_tags-> ', article_tags)
                 for article_tag in article_tags:
-                    if article_tag.reading_time >= 60:  # 该人查看文章总时长 大于60秒
+                    if article_tag.reading_time >= article_reading_time:  # 该人查看文章总时长
                         num += article_tag.reading_time
                         count += 1
 
