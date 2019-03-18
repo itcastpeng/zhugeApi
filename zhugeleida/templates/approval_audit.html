@@ -79,6 +79,12 @@
 
 
           },
+          getQueryString (name) {
+             let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+              let r = window.location.search.substr(1).match(reg);
+                if (r != null) return unescape(r[2]);
+                return null;
+          },
          initData () {
             let url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/user?company_id=' + this.company_id;
             let _this = this;
@@ -105,7 +111,7 @@
       },
 
       created() {
-          this.company_id = this.$route.query.company_id;
+          this.company_id = this.getQueryString('company_id');
              this.initData()
 
          }
