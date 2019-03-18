@@ -35,7 +35,7 @@ class statistical_objs():
                 copy_nickname_obj = copy_nickname_obj[start_line: stop_line]
             for obj in copy_nickname_obj:
                 customer__username = ''
-                if obj.customer.username:
+                if obj.customer:
                     customer__username = b64decode(obj.customer.username)
                 data_list.append({
                     'customer__username': customer__username,
