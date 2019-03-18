@@ -86,7 +86,7 @@
                 return null;
           },
          initData () {
-            let url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/user?company_id=' + this.company_id;
+            let url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/get_audit_user?company_id=' + this.company_id;
             let _this = this;
              axios.get(url)
                 .then(function (response) {
