@@ -346,6 +346,7 @@ class statistical_objs():
         video_average_playing_time = int(video_view_count / len_video)
 
         data_list = []
+        count = len_video
         if self.detail_data_type and self.detail_data_type == 'video_view_duration':
             video_objs = models.ZgldUserOperLog.objects.filter(
                 self.q,
@@ -353,7 +354,7 @@ class statistical_objs():
                 oper_type=3,
                 video_time__isnull=False
             ).select_related('customer').values('customer_id', 'customer__username').annotate(Sum('video_time'), Count('id'))
-            video_objs.count()
+            count = video_objs.count()
             if self.length != 0:
                 start_line = (self.current_page - 1) * self.length
                 stop_line = start_line + self.length
@@ -375,7 +376,8 @@ class statistical_objs():
         text = str(len_video)+ '次/' + str(video_view_count) + '秒/' + str(video_average_playing_time) + '秒'
         data = {
             'video_num_count_avg': text,
-            'data_list': data_list
+            'data_list': data_list,
+            'count': count
         }
 
         return data
@@ -392,6 +394,10 @@ class statistical_objs():
         click_dialog_num = click_dialog_obj.count()
 
         if self.detail_data_type and self.detail_data_type == 'click_the_dialog_box':
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                click_dialog_obj = click_dialog_obj[start_line: stop_line]
             for i in click_dialog_obj:
                 data_list.append({
                     'customer_username': b64decode(i.customer.username),
@@ -401,6 +407,7 @@ class statistical_objs():
         data = {
             'click_dialog_num': str(click_dialog_num) + '次',
             'data_list': data_list,
+            'count': click_dialog_num,
         }
 
         return data
@@ -414,6 +421,14 @@ class statistical_objs():
              'customer_id', 'article_id').distinct()]
         data_list = []
         user_active_send_num = 0
+
+        count = len(result_data)
+        if self.length != 0:
+            start_line = (self.current_page - 1) * self.length
+            stop_line = start_line + self.length
+            result_data = result_data[start_line: stop_line]
+
+
         for i in result_data:
             infoObjs = models.zgld_chatinfo.objects.filter(
                 customer_id=i.get('customer_id'),
@@ -439,6 +454,7 @@ class statistical_objs():
         data = {
             'data_list': data_list,
             'user_active_send_num': str(user_active_send_num) + '次',
+            'count': count,
         }
         return data
 
@@ -453,6 +469,12 @@ class statistical_objs():
 
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'call_phone':
+
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
+
             for obj in objs:
                 data_list.append({
                     'customer_username': b64decode(obj.customer.username),
@@ -462,6 +484,7 @@ class statistical_objs():
         data = {
             'call_phone_num': str(call_phone_num) + '次',
             'data_list': data_list,
+            'count': call_phone_num,
         }
         return data
 
@@ -477,6 +500,10 @@ class statistical_objs():
         data_list = []
 
         if self.detail_data_type and self.detail_data_type == 'thumb_up_number':
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
             for obj in objs:
                 data_list.append({
                     'customer_name': b64decode(obj.customer.username),
@@ -484,7 +511,8 @@ class statistical_objs():
                 })
         data = {
             'click_thumb_num': str(click_thumb_num) + '次',
-            'data_list': data_list
+            'data_list': data_list,
+            'count': click_thumb_num
         }
 
         return data
@@ -498,6 +526,10 @@ class statistical_objs():
         )
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'article_comments': # 点击详情 避免无用数据
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
             for obj in objs:
                 is_audit_pass = '未审核'
                 if int(obj.is_audit_pass) == 1:
@@ -514,6 +546,7 @@ class statistical_objs():
         data = {
             'article_comments_num': str(article_comments_num) + '条',
             'data_list': data_list,
+            'count': article_comments_num,
         }
         return data
 
@@ -649,21 +682,24 @@ def data_statistics(request, oper_type):
                     'forward_data--文章转发数据': {
                         "customer_username": "客户名称",
                         "user_username": "员工名称",
-                        "create_date": "点击时间"
+                        "create_date": "点击时间",
+                        'count': '详情总数'
                     },
 
                     'click_count': '文章点击量',
                     'click_data--文章点击数据': {
                         "customer_username": "客户名称",
                         "user_username": "员工名称",
-                        "create_date": "点击时间"
+                        "create_date": "点击时间",
+                        'count': '详情总数'
                     },
 
                     'avg_reading_info': '文章阅读信息',
                     'avg_reading_data': {
                         "customer__username": "客户名称",
                         "reading_time": '阅读时长',
-                        "create_date": "阅读时间"
+                        "create_date": "阅读时间",
+                        'count': '详情总数'
                     },
 
                     'len_video_text': '视频信息',
@@ -672,19 +708,22 @@ def data_statistics(request, oper_type):
                         'id__count': '播放次数',
                         'video_time__sum': '总时长',
                         'avg': '平均时长',
+                        'count': '详情总数'
                     },
 
                     'click_dialog_num': '点击对话框次数',
                     'click_dialog_data--点击对话框数据': {
                         'customer_username': '客户名称',
-                        'create_date': '发送消息时间'
+                        'create_date': '发送消息时间',
+                        'count': '详情总数'
                     },
 
                     'user_active_send_num': '主动发送消息',
                     'user_active_send_data--主动发送数据': {
                         'customer_username': '客户名称',
                         'content': '发送内容',
-                        'create_date':'发送消息时间'
+                        'create_date':'发送消息时间',
+                        'count': '详情总数'
                     },
 
 
@@ -692,6 +731,7 @@ def data_statistics(request, oper_type):
                     'call_phone_data--拨打电话数据': {
                         'customer_name': '客户名称',
                         'create_date': '点赞时间',
+                        'count': '详情总数'
                     },
 
 
@@ -699,6 +739,7 @@ def data_statistics(request, oper_type):
                     'click_thumb_data--文章点赞数据':{
                         'customer_name': '客户名称',
                         'create_date': '点赞时间',
+                        'count': '详情总数'
                     },
 
                     'article_comments_num': '文章评论次数',
@@ -707,6 +748,7 @@ def data_statistics(request, oper_type):
                         'content': '评论内容',
                         'is_audit_pass': '是否审核',
                         'create_date': '评论时间',
+                        'count': '详情总数'
                     },
                 }
 
@@ -772,7 +814,8 @@ def data_statistics(request, oper_type):
                     'copy_nickname': '复制昵称次数',
                     'copy_nickname_data--复制昵称数据': {
                         'customer__username': '客户名称',
-                        'create_date': '复制昵称时间'
+                        'create_date': '复制昵称时间',
+                        'count': '详情总数'
                     },
 
                     'effective_dialogue_num': '有效对话数量',
@@ -780,6 +823,7 @@ def data_statistics(request, oper_type):
                         'name': '发送消息人名称',
                         'text': '发送的消息',
                         'create_date': '发送消息时间',
+                        'count': '详情总数'
                     },
 
                     'average_response_count': '平均响应时长',
@@ -787,13 +831,15 @@ def data_statistics(request, oper_type):
                         'customer__username': '客户名称',
                         'start_date': '客户发送对话时间',
                         'stop_date': '咨询回复时间',
-                        'response_time': '响应时长'
+                        'response_time': '响应时长',
+                        'count': '详情总数'
                     },
 
                     'sending_applet_num': '发送小程序数量',
                     'sending_applet_data--发送小程序数据': {
                         'customer__username': '客户名称',
                         'create_date': '创建时间',
+                        'count': '详情总数'
                     },
                 }
 
