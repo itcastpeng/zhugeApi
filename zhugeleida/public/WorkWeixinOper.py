@@ -41,7 +41,7 @@ class WorkWeixinOper():
         api_url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}".format(
             access_token=self.access_token
         )
-        print('msg---------msg----------msg-------msg-------msg----> ', type(msg), msg)
+        print('msg---------msg----------msg-------msg-------msg----> ', type(msg), msg, json.dumps(msg))
         post_data = {
             # "touser": "UserID1|UserID2|UserID3",
             # "toparty": "PartyID1|PartyID2",
@@ -49,7 +49,7 @@ class WorkWeixinOper():
             "msgtype": "text",
             "agentid": agentid,
             "text": {
-                "content": msg
+                "content": json.dumps(msg)
             },
         }
 
