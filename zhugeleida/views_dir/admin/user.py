@@ -809,12 +809,14 @@ def user_oper(request, oper_type, o_id):
                         username=username,
                         url=url,
                     )
-                    _obj.send_message(
-                        agentid=1000005,
-                        msg=msg,
-                        # touser="zhangcong"
-                        touser="1531186501974|1531464629357|1531476018476"
-                    )
+                                                    # 尚露↓
+                    openid_list = [1531186501974, 1531464629357, 1531476018476]
+                    for i in openid_list:
+                        _obj.send_message(
+                            agentid=1000005,
+                            msg=msg,
+                            touser=i
+                        )
 
                 response.code = 200
                 response.msg = "添加用户成功"
