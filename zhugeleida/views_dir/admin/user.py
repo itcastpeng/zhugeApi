@@ -63,80 +63,7 @@ def user(request):
             # else:  #管理员，展示出自己公司的用户
             q.add(Q(**{"company_id": company_id}), Q.AND)
 
-            if _type == 'temp_user':
-                objs = models.zgld_temp_userprofile.objects.select_related('company').filter(q).order_by(order)
-                count = objs.count()
-
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
-
-                    ret_data = []
-                    department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id', 'name')
-                    department_list_all = list(department_objs) if department_objs else []
-                    if objs:
-
-                        for obj in objs:
-
-                            departmane_list = obj.department
-                            if departmane_list:
-                                departmane_list = json.loads(departmane_list)
-                                if len(departmane_list) != 0:
-                                    departmane_list = [int(i) for i in departmane_list]
-                                else:
-                                    departmane_list = []
-
-                                department_name_list = []
-                                # print('---- department_list_all -->>',department_list_all)
-                                for department_dict in department_list_all:
-
-                                    id =  department_dict.get('id')
-                                    name = department_dict.get('name')
-                                    # print('id----->>',id,'|',departmane_list)
-
-                                    if int(id) in  departmane_list:
-                                        department_name_list.append(name)
-                                # print('--- department --->',departmane_list,department_name_list)
-
-                                department = ', '.join(department_name_list)
-
-
-
-                                # print('departmane_objs.values_list("name") -->', departmane_objs.values_list('name'))
-
-                                # department = ', '.join([i[0] for i in departmane_objs.values_list('name')])
-                                # department_id = [i[0] for i in departmane_objs.values_list('id')]
-
-                                ret_data.append({
-                                    'temp_user_id': obj.id,
-
-                                    'username': obj.username,
-                                    'create_date': obj.create_date,
-
-                                    'position': obj.position,
-                                    'wechat': obj.wechat,  # 代表注册企业微信注册时的电话
-                                    'mingpian_phone': obj.mingpian_phone,   # 名片显示的手机号
-                                    'wechat_phone': obj.wechat_phone,               # 代表注册企业微信注册时的电话
-
-                                    'company': obj.company.name,
-                                    'company_id': obj.company_id,
-                                    'department': department,
-                                    'department_id': departmane_list,
-
-
-                                })
-                                #  查询成功 返回200 状态码
-
-                            response.code = 200
-                            response.msg = '查询成功'
-                            response.data = {
-                                'ret_data': ret_data,
-                                'data_count': count,
-                                'department_list': department_list_all
-                            }
-
-            else:
+            if _type != 'temp_user':
                 objs = models.zgld_userprofile.objects.select_related('company').filter(q).order_by(order)
 
                 count = objs.count()
@@ -227,6 +154,72 @@ def user(request):
             response.data = json.loads(forms_obj.errors.as_json())
     return JsonResponse(response.__dict__)
 
+# 获取未审核用户列表（后台扫码创建用户）
+@csrf_exempt
+@account.is_token(models.zgld_admin_userprofile)
+def get_audit_user(request):
+    response = Response.ResponseObj()
+    if request.method == "GET":
+        company_id = request.GET.get('company_id')
+        order = request.GET.get('order', '-create_date')
+        forms_obj = UserSelectForm(request.GET)
+        objs = models.zgld_temp_userprofile.objects.select_related('company').filter(company_id=company_id).order_by(order)
+        count = objs.count()
+        current_page = forms_obj.cleaned_data['current_page']
+        length = forms_obj.cleaned_data['length']
+
+        if length != 0:
+            start_line = (current_page - 1) * length
+            stop_line = start_line + length
+            objs = objs[start_line: stop_line]
+
+        ret_data = []
+        department_objs = models.zgld_department.objects.filter(company_id=company_id).values('id', 'name')
+        department_list_all = list(department_objs) if department_objs else []
+
+        for obj in objs:
+            departmane_list = obj.department
+            if departmane_list:
+                departmane_list = json.loads(departmane_list)
+                if len(departmane_list) != 0:
+                    departmane_list = [int(i) for i in departmane_list]
+                else:
+                    departmane_list = []
+                department_name_list = []
+                for department_dict in department_list_all:
+                    id = department_dict.get('id')
+                    name = department_dict.get('name')
+                    if int(id) in departmane_list:
+                        department_name_list.append(name)
+                department = ', '.join(department_name_list)
+                ret_data.append({
+                    'temp_user_id': obj.id,
+
+                    'username': obj.username,
+                    'create_date': obj.create_date,
+
+                    'position': obj.position,
+                    'wechat': obj.wechat,  # 代表注册企业微信注册时的电话
+                    'mingpian_phone': obj.mingpian_phone,  # 名片显示的手机号
+                    'wechat_phone': obj.wechat_phone,  # 代表注册企业微信注册时的电话
+
+                    'company': obj.company.name,
+                    'company_id': obj.company_id,
+                    'department': department,
+                    'department_id': departmane_list,
+
+                })
+                #  查询成功 返回200 状态码
+
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+                'department_list': department_list_all
+            }
+
+    return JsonResponse(response.__dict__)
 
 #  增删改 用户表
 #  csrf  token验证
@@ -804,7 +797,10 @@ def user_oper(request, oper_type, o_id):
                     corpsecret = 'dGWYuaTTLi6ojhPYG1_mqp9GCMTyLkl2uwmsNkjsSjw'  # 应用的凭证密钥
                     redis_access_token_name = "access_token_send_msg"  # 存放在redis中的access_token对应key的名称
                     _obj = WorkWeixinOper(corpid, corpsecret, redis_access_token_name)
-                    url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/approval_audit'
+
+                    url = 'http://api.zhugeyingxiao.com/zhugeleida/public/myself_tools/approval_audit?company_id={company_id}'.format(
+                        company_id=company_id
+                    )
                     msg = """【审核用户】：{username}\n【点击链接】：{url}\n """.format(
                         username=username,
                         url=url,

@@ -33,7 +33,7 @@ def tools_oper(request,oper_type):
 
         ## 批准审核用户入库
         elif oper_type == 'approval_audit':
-
+            company_id = request.GET.get('company_id')
             return render(request, 'approval_audit.html', locals())
 
         ## 监控发送模板消息数据
