@@ -49,7 +49,7 @@ class WorkWeixinOper():
             "msgtype": "text",
             "agentid": agentid,
             "text": {
-                "content": json.dumps(msg)
+                "content": msg.encode
             },
         }
 
@@ -60,7 +60,7 @@ class WorkWeixinOper():
         if totag:
             post_data['totag'] = totag
 
-        ret = requests.post(url=api_url, data=json.dumps(post_data))
+        ret = requests.post(url=api_url, data=bytes(json.dumps(post_data, ensure_ascii=False), encoding='utf-8'))
         print(ret.text)
 
 
