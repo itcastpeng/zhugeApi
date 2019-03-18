@@ -11,39 +11,39 @@ from publicFunc.time_screen import time_screen
 from publicFunc.base64 import b64decode
 
 
-def get_msg(info_type, content):
-    if content:
-
-        content = content.replace('null', '\'\'')
-    try:
-        content = eval(content)
-    except Exception:
-        content = content
-
-    info_type = int(info_type)
-    # print('content----------> ', content)
+def get_msg(content):
     data = {
         'msg': '',
         'product_cover_url': '',
         'product_name': '',
         'product_price': '',
         'url': '',
-        'info_type': info_type,
     }
     if content:
-        if info_type in [1, 3, 6]:
-            print("content.get('msg')-------> ", content.get('msg'))
-            if content.get('msg'):
-                data['msg'] = b64decode(content.get('msg'))
 
-        elif info_type == 2:
-            data['product_cover_url'] = content.get('product_cover_url')
-            data['product_name'] = content.get('product_name')
-            data['product_price'] = content.get('product_price')
+        content = content.replace('null', '\'\'')
+        try:
+            content = eval(content)
+        except Exception:
+            content = content
 
-        elif info_type in [4, 5]:
-            data['url'] = content.get('url')
+        info_type = int(content.get('info_type'))
+        # print('content----------> ', content)
+        if content:
+            if info_type in [1, 3, 6]:
+                if content.get('msg'):
+                    data['msg'] = b64decode(content.get('msg'))
 
+            elif info_type in [2]:
+                print('content---> ', content)
+                print("content.get('product_cover_url')-------> ", content.get('product_cover_url'))
+                data['product_cover_url'] = content.get('product_cover_url')
+                data['product_name'] = content.get('product_name')
+                data['product_price'] = content.get('product_price')
+
+            elif info_type in [4, 5]:
+                data['url'] = content.get('url')
+        data['info_type'] = info_type
     return data
 
 # 统计数据 调用类
@@ -131,7 +131,7 @@ class statistical_objs():
 
                     send_type = int(msg_obj.send_type)
 
-                    text = get_msg(send_type, msg_obj.content) # 获取聊天内容
+                    text = get_msg(msg_obj.content) # 获取聊天内容
 
                     if send_type == 1:
                         send_type_user += 1
@@ -483,7 +483,7 @@ class statistical_objs():
                 if self.detail_data_type and self.detail_data_type == 'active_message': # 是否查看详情
 
                     content = eval(infoObj.content)
-                    text = get_msg(send_type, content)
+                    text = get_msg(content)
 
                     data_list.append({
                         'customer_username':b64decode(infoObj.customer.username),
