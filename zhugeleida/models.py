@@ -1477,7 +1477,7 @@ class zgld_case_tag(models.Model):
         app_label = "zhugeleida"
 
 
-#案例库数据表 / 鹏----日记库 记录分类
+# 日记 列表页 (原 案例)
 class zgld_case(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
@@ -1485,15 +1485,16 @@ class zgld_case(models.Model):
     headimgurl = models.CharField(verbose_name="客户头像url", max_length=256, default='statics/imgs/Avator.jpg')
 
     case_name = models.CharField(verbose_name='案例名称', max_length=128)
-    cover_picture = models.TextField(verbose_name="封面图片URL",null=True)
-    poster_cover = models.TextField(verbose_name="海报封面图片URL",null=True)
-    become_beautiful_cover = models.TextField(verbose_name="变美封面图片URL",null=True)
+    cover_picture = models.TextField(verbose_name="封面图片",null=True)
+    poster_cover = models.TextField(verbose_name="海报封面图片",null=True)
+    become_beautiful_cover = models.TextField(verbose_name="变美过程图片",null=True)
 
     tags = models.ManyToManyField('zgld_case_tag', verbose_name="文章关联的标签")
-    status_choices = ((1, '已发'),
-                      (2, '未发'),
-                      (3, '删除'),  # 逻辑删除
-                      )
+    status_choices = (
+        (1, '已发'),
+        (2, '未发'),
+        (3, '删除'),  # 逻辑删除
+    )
     status = models.SmallIntegerField(default=2, verbose_name='案例状态', choices=status_choices)
 
     read_count = models.IntegerField(verbose_name="阅读数量", default=0)
@@ -1513,7 +1514,7 @@ class zgld_case(models.Model):
         app_label = "zhugeleida"
 
 
-#案例日记表 / 鹏---日记列表(小程序显示 列表页)
+# 日记 详情页  (原 案例)
 class zgld_diary(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
