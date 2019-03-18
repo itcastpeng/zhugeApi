@@ -41,6 +41,10 @@ class WorkWeixinOper():
         api_url = "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}".format(
             access_token=self.access_token
         )
+        try:
+            msg = json.loads(msg)
+        except Exception:
+            msg = msg
 
         post_data = {
             # "touser": "UserID1|UserID2|UserID3",
@@ -74,4 +78,5 @@ if __name__ == '__main__':
         msg="""小程序名称：诸葛雷达\n审核状态：审核通过\n备注：审核通过""",
         touser="zhangcong"
     )
+
 
