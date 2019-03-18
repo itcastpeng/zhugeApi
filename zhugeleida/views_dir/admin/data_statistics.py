@@ -691,7 +691,6 @@ def data_statistics(request, oper_type):
                     effective_dialogue_data = statistical_obj.number_valid_conversations()      # 有效对话
                     average_response_data = statistical_obj.average_response_time()             # 咨询平均响应时长
                     sending_applet_data = statistical_obj.sending_applet()                      # 发送小程序
-                    print('sending_applet_data--------> ', sending_applet_data)
 
 
                     ret_data.append({
@@ -736,7 +735,16 @@ def data_statistics(request, oper_type):
 
                     'average_response_count': '平均响应时长',
                     'average_response_data--平均响应时长数据': {
+                        'customer__username': '客户名称',
+                        'start_date': '客户发送对话时间',
+                        'stop_date': '咨询回复时间',
+                        'response_time': '响应时长'
+                    },
 
+                    'sending_applet_num': '发送小程序数量',
+                    'sending_applet_data--发送小程序数据': {
+                        'customer__username': '客户名称',
+                        'create_date': '创建时间',
                     },
                 }
 
