@@ -797,7 +797,7 @@ def user_oper(request, oper_type, o_id):
                 obj.department = json.dumps(depart_id_list)
                 obj.save()
 
-                if int(company_id) == 2: # 当给医美雷达公司添加的时候，才给提示
+                if int(company_id) in [1, 2]: # 当给医美雷达公司添加的时候，才给提示
 
                     ### 提醒董庆豪和尚露 审核用户
                     corpid = 'wx81159f52aff62388'  # 企业ID
