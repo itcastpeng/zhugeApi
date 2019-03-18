@@ -13,10 +13,12 @@ from publicFunc.base64 import b64decode
 # 统计数据 调用类
 class statistical_objs():
 
-    def __init__(self, q, o_id, detail_data_type):
+    def __init__(self, q, o_id, detail_data_type, current_page, length):
         self.q = q
         self.o_id = o_id
         self.detail_data_type = detail_data_type
+        self.current_page = current_page
+        self.length = length
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
@@ -27,6 +29,10 @@ class statistical_objs():
         count = copy_nickname_obj.count()
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                copy_nickname_obj = copy_nickname_obj[start_line: stop_line]
             for obj in copy_nickname_obj:
                 data_list.append({
                     'customer__username': b64decode(obj.customer.username),
@@ -35,7 +41,8 @@ class statistical_objs():
 
         data = {
             'copy_nickname_count': str(count) + '次',
-            'data_list': data_list
+            'data_list': data_list,
+            'count': count
         }
         return data
 
@@ -71,6 +78,11 @@ class statistical_objs():
                 create_date__lte=stop_date_time,
             ).order_by('create_date')
 
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                msg_objs = msg_objs[start_line: stop_line]
+
             dialogue_count = msg_objs.count()       # 查询出该用户和该客户聊天总数
             if dialogue_count >= 6:  # 判断该客户在该文章中 对话 低于六次不达有效对话标准
                 send_type_user = 0      # 咨询发送消息
@@ -84,7 +96,9 @@ class statistical_objs():
                         name = msg_obj.userprofile.username     # 咨询名称
                     else:
                         send_type_customer += 1
-                        name = b64decode(msg_obj.customer.username) # 客户名称
+                        name = ''
+                        if msg_obj.customer.username:
+                            name = b64decode(msg_obj.customer.username) # 客户名称
 
                     if number_valid_conversations: # 查询详情
                         try:
@@ -128,6 +142,7 @@ class statistical_objs():
         data = {
             'effective_dialogue': str(effective_dialogue) + '次',
             'data_list': data_list,
+            'count': effective_dialogue,
         }
 
         return data
@@ -173,6 +188,11 @@ class statistical_objs():
 
         num = 0
         len_data = len(result_data)
+        if self.length != 0:
+            start_line = (self.current_page - 1) * self.length
+            stop_line = start_line + self.length
+            result_data = result_data[start_line: stop_line]
+
         for i in result_data:
             date = i.get('stop_date') - i.get('start_date')
             num += date.seconds
@@ -182,6 +202,7 @@ class statistical_objs():
         data = {
             'average_response': str(average_response) + '次',
             'data_list': data_list,
+            'count': len_data,
         }
 
         return data
@@ -194,6 +215,10 @@ class statistical_objs():
             action=23
         )
         if self.detail_data_type and self.detail_data_type == 'sending_applet':
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
             for obj in objs:
                 data_list.append({
                     'customer__username': b64decode(obj.customer.username),
@@ -204,6 +229,7 @@ class statistical_objs():
         data = {
             'sending_applet_num': str(sending_applet_num) + '次',
             'data_list': data_list,
+            'count': sending_applet_num,
         }
 
         return data
@@ -219,6 +245,10 @@ class statistical_objs():
         forwarding_article_count = objs.count()
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'forwarding_article':
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
             for obj in objs:
                 data_list.append({
                     'customer_username': b64decode(obj.customer.username),
@@ -228,21 +258,26 @@ class statistical_objs():
 
         data = {
             'forwarding_article_count': str(forwarding_article_count) + '次',
-            'data_list': data_list
+            'data_list': data_list,
+            'count': forwarding_article_count
         }
         return data
 
     # 点击量（文章）
     def click_the_quantity(self):
-        read_count_objs = models.zgld_accesslog.objects.filter(
+        objs = models.zgld_accesslog.objects.filter(
             self.q,
             article_id=self.o_id,
             action=14
         )
         data_list = []
-        click_count = read_count_objs.count()
+        click_count = objs.count()
         if self.detail_data_type and self.detail_data_type == 'click_the_quantity':
-            for obj in read_count_objs:
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
+            for obj in objs:
                 data_list.append({
                     'customer_username': b64decode(obj.customer.username),
                     'user_username': obj.user.username,
@@ -251,7 +286,8 @@ class statistical_objs():
 
         data = {
             'click_count': str(click_count) + '次',     # 点击量
-            'data_list': data_list
+            'data_list': data_list,
+            'count': click_count
         }
 
         return data
@@ -269,6 +305,10 @@ class statistical_objs():
             objs = models.ZgldUserOperLog.objects.filter(
                 self.q, article_id=self.o_id, oper_type=4
             )
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                objs = objs[start_line: stop_line]
             for obj in objs:
                 data_list.append({
                     'customer__username': b64decode(obj.customer.username),
@@ -283,7 +323,8 @@ class statistical_objs():
         text = str(article_reading_time_count) + '秒/' + str(avg) + '秒'
         data = {
             'text': text,
-            'data_list': data_list
+            'data_list': data_list,
+            'count': count
         }
 
         return data
@@ -312,6 +353,12 @@ class statistical_objs():
                 oper_type=3,
                 video_time__isnull=False
             ).select_related('customer').values('customer_id', 'customer__username').annotate(Sum('video_time'), Count('id'))
+            video_objs.count()
+            if self.length != 0:
+                start_line = (self.current_page - 1) * self.length
+                stop_line = start_line + self.length
+                video_objs = video_objs[start_line: stop_line]
+
             for video_obj in video_objs:
                 avg = 0
                 if int(video_obj.get('video_time__sum')) > 0:
@@ -545,7 +592,7 @@ def data_statistics(request, oper_type):
                         detail_data_type = detail_type
                 for obj in objs:
 
-                    statistical_obj = statistical_objs(q, obj.id, detail_data_type)         # 实例化 数据统计
+                    statistical_obj = statistical_objs(q, obj.id, detail_data_type, current_page, length)         # 实例化 数据统计
 
                     forwarding_article_data = statistical_obj.forwarding_article()                          # 转发量
                     click_quantity_data = statistical_obj.click_the_quantity()                              # 点击量
@@ -688,7 +735,7 @@ def data_statistics(request, oper_type):
                     sending_applet              发送小程序详情
                     
                     """
-                    statistical_obj = statistical_objs(q, obj.id, detail_type)
+                    statistical_obj = statistical_objs(q, obj.id, detail_type, current_page, length)
                     copy_nickname_data = statistical_obj.copy_the_nickname()                    # 复制昵称
                     effective_dialogue_data = statistical_obj.number_valid_conversations()      # 有效对话
                     average_response_data = statistical_obj.average_response_time()             # 咨询平均响应时长
