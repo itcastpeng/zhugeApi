@@ -11,7 +11,7 @@ from publicFunc.time_screen import time_screen
 from publicFunc.base64 import b64decode
 
 
-def get_msg(info_type, content, send_type):
+def get_msg(info_type, content):
     if content:
 
         content = content.replace('null', '\'\'')
@@ -28,7 +28,6 @@ def get_msg(info_type, content, send_type):
         'product_name': '',
         'product_price': '',
         'url': '',
-        'send_type': send_type,
         'info_type': info_type,
     }
     if content:
@@ -130,7 +129,7 @@ class statistical_objs():
 
                     send_type = int(msg_obj.send_type)
 
-                    text = get_msg(send_type, msg_obj.content, send_type) # 获取聊天内容
+                    text = get_msg(send_type, msg_obj.content) # 获取聊天内容
 
                     if send_type == 1:
                         send_type_user += 1
@@ -145,6 +144,7 @@ class statistical_objs():
 
                     if number_valid_conversations: # 查询详情
                         result_data.append({
+                            'send_type': send_type,
                             'avatar': avatar,
                             'name': name,
                             'content': text,
@@ -476,7 +476,7 @@ class statistical_objs():
                 if self.detail_data_type and self.detail_data_type == 'active_message': # 是否查看详情
 
                     content = eval(infoObj.content)
-                    text = get_msg(send_type, content, send_type)
+                    text = get_msg(send_type, content)
 
                     data_list.append({
                         'customer_username':b64decode(infoObj.customer.username),
