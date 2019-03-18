@@ -21,7 +21,7 @@ def get_msg(info_type, content):
         content = content
 
     info_type = int(info_type)
-    print('content----------> ', content)
+    # print('content----------> ', content)
     data = {
         'msg': '',
         'product_cover_url': '',
@@ -32,7 +32,9 @@ def get_msg(info_type, content):
     }
     if content:
         if info_type in [1, 3, 6]:
-            data['msg'] = b64decode(content.get('msg'))
+            print("content.get('msg')-------> ", content.get('msg'))
+            if content.get('msg'):
+                data['msg'] = b64decode(content.get('msg'))
 
         elif info_type == 2:
             data['product_cover_url'] = content.get('product_cover_url')
