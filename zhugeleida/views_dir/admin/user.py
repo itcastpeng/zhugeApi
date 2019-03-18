@@ -156,7 +156,6 @@ def user(request):
 
 # 获取未审核用户列表（后台扫码创建用户）
 @csrf_exempt
-@account.is_token(models.zgld_admin_userprofile)
 def get_audit_user(request):
     response = Response.ResponseObj()
     if request.method == "GET":
