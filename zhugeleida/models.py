@@ -1543,6 +1543,8 @@ class zgld_diary(models.Model):
     cover_show_type = models.SmallIntegerField(default=2, verbose_name='封面展示类型', choices=cover_show_type_choices)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
+    poster_cover = models.TextField(verbose_name="海报封面图片", null=True)
+    become_beautiful_cover = models.TextField(verbose_name="变美过程图片", null=True)
 
     class Meta:
         verbose_name_plural = "案例日记表"
