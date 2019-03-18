@@ -12,6 +12,9 @@ from publicFunc.base64 import b64decode
 
 
 def get_msg(info_type, content):
+    if content:
+
+        content = content.replace('null', '\'\'')
     try:
         content = eval(content)
     except Exception:
@@ -795,7 +798,6 @@ def data_statistics(request, oper_type):
 
             # 员工数据分析
             elif oper_type == 'employee_data_analysis':
-                print('-----------------------------=')
                 id = request.GET.get('id') # 查询单个员工
                 if id:
                     public_q.add(Q(id=id), Q.AND)
