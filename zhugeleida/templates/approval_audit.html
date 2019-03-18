@@ -80,7 +80,7 @@
 
           },
          initData () {
-            let url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/user?type=temp_user&length=20&current_page=1&rand_str=a3bab5a140482756d28c23920f62377e&timestamp=1544515022966&user_id=14';
+            let url = 'http://api.zhugeyingxiao.com/zhugeleida/admin/user?company_id={{ company_id }}';
             let _this = this;
              axios.get(url)
                 .then(function (response) {
