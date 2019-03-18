@@ -34,8 +34,11 @@ class statistical_objs():
                 stop_line = start_line + self.length
                 copy_nickname_obj = copy_nickname_obj[start_line: stop_line]
             for obj in copy_nickname_obj:
+                customer__username = ''
+                if obj.customer.username:
+                    customer__username = b64decode(obj.customer.username)
                 data_list.append({
-                    'customer__username': b64decode(obj.customer.username),
+                    'customer__username': customer__username,
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
