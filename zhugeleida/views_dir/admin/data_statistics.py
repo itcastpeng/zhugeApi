@@ -26,16 +26,17 @@ def get_msg(info_type, content):
         'product_price': '',
         'url': '',
     }
-    if info_type in [1, 3, 6]:
-        data['msg'] = content.get('msg')
+    if content:
+        if info_type in [1, 3, 6]:
+            data['msg'] = content.get('msg')
 
-    elif info_type == 2:
-        data['product_cover_url'] = content.get('product_cover_url')
-        data['product_name'] = content.get('product_name')
-        data['product_price'] = content.get('product_price')
+        elif info_type == 2:
+            data['product_cover_url'] = content.get('product_cover_url')
+            data['product_name'] = content.get('product_name')
+            data['product_price'] = content.get('product_price')
 
-    elif info_type in [4, 5]:
-        data['url'] = content.get('url')
+        elif info_type in [4, 5]:
+            data['url'] = content.get('url')
 
     return data
 
@@ -794,6 +795,7 @@ def data_statistics(request, oper_type):
 
             # 员工数据分析
             elif oper_type == 'employee_data_analysis':
+                print('-----------------------------=')
                 id = request.GET.get('id') # 查询单个员工
                 if id:
                     public_q.add(Q(id=id), Q.AND)
@@ -809,6 +811,7 @@ def data_statistics(request, oper_type):
 
                 q = Q()
                 q.add(Q(create_date__gte=start_time) & Q(create_date__lte=stop_time), Q.AND) # 时间筛选
+
                 for obj in objs:
                     """
                     copy_the_nickname           复制昵称详情
@@ -887,8 +890,8 @@ def data_statistics(request, oper_type):
                         'create_date': '创建时间',
                     },
                 }
-
         else:
             response.code = 301
             response.data = json.loads(forms_obj.errors.as_json())
+
     return JsonResponse(response.__dict__)
