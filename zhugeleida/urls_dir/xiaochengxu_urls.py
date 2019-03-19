@@ -69,7 +69,8 @@ urlpatterns = [
     # 查询分类
     url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
-    # 案例管理
+    # --------------------------------------日记------------------------------------
+    # 日记列表管理
     url(r'^case_manage/(?P<oper_type>\w+)$', case_manage.case_manage),
 
     # 案例标签管理
