@@ -70,18 +70,20 @@ urlpatterns = [
     url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
     # --------------------------------------日记------------------------------------
-    # 日记列表管理
-    url(r'^case_manage/(?P<oper_type>\w+)$', case_manage.case_manage),
-
-    # 案例标签管理
-    url(r'^case_tag/(?P<oper_type>\w+)$', case_tag.case_tag),
+    # 日记列表
+    url(r'^case_manage$', case_manage.case_manage),
 
     # 日记的海报
     url(r'^diary_manage/poster_html$', diary_manage.diary_poster_html),
 
-    # 日记管理
+    # 案例标签管理
+    url(r'^case_tag/(?P<oper_type>\w+)$', case_tag.case_tag),
+
+    # 日记详情
+    url(r'^diary_manage$', diary_manage.diary_manage),
+
+    # 日记操作
     url(r'^diary_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', diary_manage.diary_manage_oper),
-    url(r'^diary_manage/(?P<oper_type>\w+)$', diary_manage.diary_manage),
 
 
 

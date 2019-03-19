@@ -683,3 +683,73 @@ class PraiseDiaryForm(forms.Form):
         }
     )
 
+class BrowseCaseSelectForm(forms.Form):
+
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
+
+
+# 点赞
+class CollectionDiaryForm(forms.Form):
+    case_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '日记ID不能为空'
+        }
+    )
+
+    customer_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "客户不能为空"
+        }
+    )
+    case_type = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "日记类型不能为空"
+        }
+    )
+    diary_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "时间轴ID类型错误"
+        }
+    )
+
+    def clean_diary_id(self):
+        diary_id = self.data.get('diary_id')
+        if diary_id:
+            objs = models.zgld_diary.objects.filter(id=diary_id)
+            if objs:
+                obj = objs[0]
+                if int(obj.case.case_type) == 2:
+                    return diary_id
+                else:
+                    self.add_error('diary_id', '此日记不是时间轴日记')
+            else:
+                self.add_error('diary_id', '时间轴ID错误')
