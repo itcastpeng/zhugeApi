@@ -184,10 +184,16 @@ class diaryAddForm(forms.Form):
 
 # 修改案例
 class diaryUpdateForm(forms.Form):
+    diary_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "修改日记不能为空"
+        }
+    )
     case_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "案例ID不能为空"
+            'required': "日记列表ID不能为空"
         }
     )
 
@@ -259,8 +265,13 @@ class diaryUpdateForm(forms.Form):
             self.add_error('diary_name', '不能存在相同的文章名')
         else:
             return diary_name
-
-
+    def clean_diary_id(self):
+        diary_id = self.data.get('diary_id')
+        objs = models.zgld_diary.objects.filter(id=diary_id)
+        if objs:
+            return diary_id
+        else:
+            self.add_error('diary_id', '修改日记不存在')
 
 #修改活动
 class ActivityUpdateForm(forms.Form):
