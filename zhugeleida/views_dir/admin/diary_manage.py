@@ -130,7 +130,7 @@ def diary_manage(request, oper_type):
 
                         poster_cover = []
                         if obj.poster_cover:
-                            poster_cover = json.loads(obj.poster_cover)
+                            poster_cover = eval(obj.poster_cover)
 
                         ret_data.append({
                             'diary_id': obj.id,
@@ -336,7 +336,7 @@ def diary_manage_oper(request, oper_type, o_id):
             print('poster_cover-------> ', poster_cover)
             objs = models.zgld_diary.objects.filter(id=o_id)
             if objs:
-                objs.update(poster_cover = json.dumps(poster_cover))
+                objs.update(poster_cover = poster_cover)
                 response.code = 200
                 response.msg = '设置日记海报成功'
             else:
