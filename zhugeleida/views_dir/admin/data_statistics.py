@@ -825,7 +825,7 @@ def data_statistics(request, oper_type):
                     public_q.add(Q(id=id), Q.AND)
 
                 # 获取该公司所有员工信息
-                objs = models.zgld_userprofile.objects.filter(public_q).order('-create_date')
+                objs = models.zgld_userprofile.objects.filter(public_q).order_by('-create_date')
                 data_count = objs.count()
                 if length != 0:
                     start_line = (current_page - 1) * length
