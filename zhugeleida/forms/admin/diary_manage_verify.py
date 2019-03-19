@@ -180,12 +180,13 @@ class diaryAddForm(forms.Form):
         objs = models.zgld_case.objects.filter(id=case_id, company_id=company_id)
         if objs:
             obj = objs[0]
+            case_type = obj.case_type
             if int(obj.case_type) == 1:
                 if not cover_picture:
                     self.add_error('cover_picture', '轮播图不能为空')
                 else:
-                    return case_id
-            return case_id
+                    return case_id, case_type
+            return case_id, case_type
         else:
             self.add_error('case_id', '权限不足')
 
