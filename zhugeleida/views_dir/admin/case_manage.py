@@ -283,7 +283,7 @@ def case_manage_oper(request, oper_type, o_id):
             poster_company_logo = request.POST.get('poster_company_logo')
 
             print('request.POST ------>>',poster_cover)
-            if poster_company_logo:
+            if poster_company_logo:   # 设置logo
                 xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
                 if xiaochengxu_app_objs:
                     xiaochengxu_app_objs.update(
@@ -295,7 +295,7 @@ def case_manage_oper(request, oper_type, o_id):
                 else:
                     response.code = 301
                     response.msg = "小程序不存在"
-            else:
+            else:   # 上传海报(最多九张)
 
                 tag_data = {
                     'case_id' : o_id,
@@ -318,7 +318,7 @@ def case_manage_oper(request, oper_type, o_id):
                     )
 
                     response.code = 200
-                    response.msg = "修改成功"
+                    response.msg = "设置海报成功"
 
 
                 else:

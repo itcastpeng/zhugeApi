@@ -32,6 +32,9 @@ def follow_up_data(user_id, request, data_type=None):
 
         if not start_time and not stop_time:
             start_time, stop_time = time_screen(number_days)
+
+        start_time = '2019-03-19 00:00:00'
+        stop_time = '2019-03-19 23:59:59'
         q.add(Q(create_date__gte=start_time, create_date__lte=stop_time), Q.AND)
 
         print('q-----------------> ', q)
@@ -52,32 +55,40 @@ def follow_up_data(user_id, request, data_type=None):
         ).values('customer_id', 'customer__username').distinct()
         make_phone_call_count = make_phone_call_objs.count()
 
+
+        # # ----------------------------符合匹配条件查询文章数据------------------------------
         compay_id = models.zgld_userprofile.objects.get(id=user_id).company_id
         compay_obj = models.zgld_company.objects.get(id=int(compay_id))
         articles_read_customers = int(compay_obj.articles_read_customers)    # 累计阅读文章数
         article_reading_time = int(compay_obj.article_reading_time)          # 每篇文章阅读时长
 
-        # # ----------------------------符合匹配条件查询文章数据------------------------------
-        article_conditions = models.ZgldUserOperLog.objects.filter(
-            oper_type=3,
-            article__isnull=False
-        ).values('customer_id', 'customer__username', 'customer__headimgurl'
-        # ).values('article__tags', 'customer_id', 'customer__username', 'customer__headimgurl'
-        ).annotate(Count('id')).distinct()
+        if int(compay_obj.is_same_label) == 0: # 默认不匹配 文章标签
+            article_conditions = models.ZgldUserOperLog.objects.filter(
+                oper_type=3,
+                article__isnull=False
+            ).values(
+                'customer_id', 'customer__username', 'customer__headimgurl'
+            ).annotate(Count('id')).distinct()
+        else:
+            article_conditions = models.ZgldUserOperLog.objects.filter(
+                oper_type=3,
+                article__isnull=False
+            ).values(
+                'article__tags', 'customer_id', 'customer__username', 'customer__headimgurl'
+            ).annotate(Count('id')).distinct()
         # 是否以标签分类↑
 
         result_data = []
         if_article_conditions = 0
         for i in article_conditions:
+            print("i.get('id__count')-------> ", i.get('id__count'))
             if i.get('id__count') >= articles_read_customers:  # 条数大于等于
                 article_tags = models.ZgldUserOperLog.objects.filter(
                     oper_type=3,
                     customer_id=i.get('customer_id'),
                 )
-
                 num = 0 # 该人查看的所有文章总时长
                 count = 0 # 该人满足条件总数
-                # print('article_tags----article_tags----article_tags---article_tags-> ', article_tags)
                 for article_tag in article_tags:
                     if article_tag.reading_time >= article_reading_time:  # 该人查看文章总时长
                         num += article_tag.reading_time

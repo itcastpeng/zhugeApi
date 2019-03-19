@@ -255,7 +255,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     )
 
                 response.code = 200
-                response.msg = "添加成功"
+                response.msg = "修改成功"
 
             else:
                 response.code = 301
@@ -324,6 +324,17 @@ def diary_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
-
+        ## 海报-设置(普通案列)
+        elif oper_type == "poster_setting":
+            poster_cover = request.POST.get('poster_cover')
+            print('poster_cover-------> ', poster_cover)
+            objs = models.zgld_diary.objects.filter(id=o_id)
+            if objs:
+                objs.update(poster_cover = poster_cover)
+                response.code = 200
+                response.msg = '设置日记海报成功'
+            else:
+                response.code = 301
+                response.msg = '日记ID错误'
 
     return JsonResponse(response.__dict__)
