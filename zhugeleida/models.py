@@ -1525,7 +1525,7 @@ class zgld_diary(models.Model):
     summary = models.CharField(verbose_name='日记摘要', max_length=255,null=True)
 
     diary_date = models.DateTimeField(verbose_name="日记时间")
-    cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True) # 普通案例获取内容图片
+    cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True) # 普通案例 上传轮播图/时间轴案例取变美图片
     content = models.TextField(verbose_name='日记内容', null=True)
 
     read_count = models.IntegerField(verbose_name="阅读数量", default=0)
