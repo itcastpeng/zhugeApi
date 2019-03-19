@@ -49,19 +49,23 @@ def get_msg(content):
 # 统计数据 调用类
 class statistical_objs():
 
-    def __init__(self, q, o_id, detail_data_type, current_page, length):
+    def __init__(self, q, o_id, detail_data_type, current_page, length, start_date=None, stop_date=None):
         self.q = q
         self.o_id = o_id
         self.detail_data_type = detail_data_type
         self.current_page = current_page
         self.length = length
+        self.start_date = start_date
+        self.stop_date = stop_date
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
+            self.q,
             user_id=self.o_id,
             oper_type=1
         )
+        print('self.o_id------> ', self.o_id, self.q)
         count = copy_nickname_obj.count()
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
@@ -70,8 +74,6 @@ class statistical_objs():
                 stop_line = start_line + self.length
                 copy_nickname_obj = copy_nickname_obj[start_line: stop_line]
             for obj in copy_nickname_obj:
-                # print('obj.id--------> ', obj.id)
-                # print('obj.cusstomer-------> ', obj.customer)
                 customer__username = ''
                 if obj.customer:
                     customer__username = b64decode(obj.customer.username)
@@ -99,11 +101,14 @@ class statistical_objs():
         number_valid_conversations = False # 判断是否查询了详情
         if self.detail_data_type and self.detail_data_type == 'number_valid_conversations':  #
             number_valid_conversations = True
-
+        print('self.start_date, self.stop_date==========> ', self.start_date, self.stop_date)
         zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(          # 查询出符合条件的用户和客户 已天为单位
             """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
-            from zhugeleida_zgld_chatinfo where userprofile_id={} group by cdt, customer_id;""".format(
-                self.o_id)
+            from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id} and create_date >= '{start_date}' and create_date <= '{stop_date}' group by cdt, customer_id;""".format(
+                userprofile_id=self.o_id,
+                start_date=self.start_date,
+                stop_date=self.stop_date
+            )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
 
@@ -251,6 +256,7 @@ class statistical_objs():
     def sending_applet(self):
         data_list = []
         objs = models.zgld_accesslog.objects.filter(
+            self.q,
             user_id=self.o_id,
             action=23
         )
@@ -652,7 +658,7 @@ def data_statistics(request, oper_type):
                 if article_id:
                     public_q.add(Q(id=article_id), Q.AND)
 
-                objs = models.zgld_article.objects.filter(public_q)
+                objs = models.zgld_article.objects.filter(public_q).order_by('-create_date')
 
                 data_count = objs.count()
                 if length != 0:
@@ -819,7 +825,7 @@ def data_statistics(request, oper_type):
                     public_q.add(Q(id=id), Q.AND)
 
                 # 获取该公司所有员工信息
-                objs = models.zgld_userprofile.objects.filter(public_q)
+                objs = models.zgld_userprofile.objects.filter(public_q).order('-create_date')
                 data_count = objs.count()
                 if length != 0:
                     start_line = (current_page - 1) * length
@@ -838,7 +844,7 @@ def data_statistics(request, oper_type):
                     sending_applet              发送小程序详情
                     
                     """
-                    statistical_obj = statistical_objs(q, obj.id, detail_type, current_page, length)
+                    statistical_obj = statistical_objs(q, obj.id, detail_type, current_page, length, start_time, stop_time)
                     copy_nickname_data = statistical_obj.copy_the_nickname()                    # 复制昵称
                     effective_dialogue_data = statistical_obj.number_valid_conversations()      # 有效对话
                     average_response_data = statistical_obj.average_response_time()             # 咨询平均响应时长
@@ -908,6 +914,8 @@ def data_statistics(request, oper_type):
                         'create_date': '创建时间',
                     },
                 }
+
+
         else:
             response.code = 301
             response.data = json.loads(forms_obj.errors.as_json())

@@ -101,13 +101,13 @@ class SetFocusGetRedPacketForm(forms.Form):
 
 
 
-#增加活动
+#增加日记
 class diaryAddForm(forms.Form):
 
     case_id = forms.IntegerField(
         required=True,
         error_messages={
-            'required': "案例ID不能为空"
+            'required': "日记ID不能为空"
         }
     )
 
@@ -124,12 +124,6 @@ class diaryAddForm(forms.Form):
             'required': "标题不能为空"
         }
     )
-    summary = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "摘要不能为空"
-        }
-    )
 
     diary_date = forms.DateTimeField(
         required=True,
@@ -138,12 +132,12 @@ class diaryAddForm(forms.Form):
         }
     )
 
-    cover_picture  = forms.CharField(
-        required=False,
-        error_messages={
-            'required': "封面不能为空"
-        }
-    )
+    # cover_picture  = forms.CharField(
+    #     required=False,
+    #     error_messages={
+    #         'required': "封面不能为空"
+    #     }
+    # )
     content  = forms.CharField(
         required=True,
         error_messages={
@@ -164,7 +158,6 @@ class diaryAddForm(forms.Form):
             'required': "展示类型不能为空"
         }
     )
-
     def clean_diary_name(self):
 
         company_id = self.data['company_id']
@@ -178,6 +171,15 @@ class diaryAddForm(forms.Form):
             self.add_error('diary_name', '不能存在相同的文章名')
         else:
             return diary_name
+
+    def clean_case_id(self):
+        case_id = self.data.get('case_id')
+        company_id = self.data.get('company_id')
+        objs = models.zgld_case.objects.filter(id=case_id, company_id=company_id)
+        if objs:
+            return case_id
+        else:
+            self.add_error('case_id', '权限不足')
 
 
 # 修改案例

@@ -177,14 +177,13 @@ def diary_manage_oper(request, oper_type, o_id):
 
         # 删除-案例
         if oper_type == "delete":
-
             company_id = request.GET.get('company_id')
             objs = models.zgld_diary.objects.filter(id=o_id,company_id=company_id)
-
             if objs:
-                objs.update(
-                    status=3
-                )
+                obj = objs[0]
+                models.zgld_diary_action.objects.filter(diary_id=obj.id).delete()
+                models.zgld_diary_comment.objects.filter(diary_id=obj.id).delete()
+                objs.delete()
                 response.code = 200
                 response.msg = "删除成功"
 
@@ -195,33 +194,24 @@ def diary_manage_oper(request, oper_type, o_id):
         # 修改-案例
         elif oper_type == 'update':
 
+            diary_id = o_id
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
-
-            diary_id = o_id
             case_id = request.POST.get('case_id')
             title = request.POST.get('title')
-            summary = request.POST.get('summary')
             diary_date = request.POST.get('diary_date')
-            cover_picture = request.POST.get('cover_picture')  # 文章ID
             content = request.POST.get('content')
-
             status = request.POST.get('status')
             cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
 
             form_data = {
-
-                'case_id': case_id,
                 'company_id': company_id,
-
-                'title': title,
-                # 'summary' : summary,
+                'case_id': case_id,  # 日记列表ID
+                'title': title,  # 日记标题
                 'diary_date': diary_date,  # 活动名称
-                # 'cover_picture': cover_picture,  # 活动名称
-                'content': content,  # 活动名称
-
-                'status': status,
-                'cover_show_type': cover_show_type,
+                'content': content,  # 日记内容
+                'status': status,  # 日记状态(是否删除)
+                'cover_show_type': cover_show_type,  # 展示图片封面或视频封面
             }
 
             forms_obj = diaryUpdateForm(form_data)
@@ -234,32 +224,14 @@ def diary_manage_oper(request, oper_type, o_id):
                     user_id = user_id,
                     case_id = case_id,
                     company_id = company_id,
-
                     title = title,
-                    # summary=summary,
-
                     diary_date = diary_date,
-                    # cover_picture = cover_picture,
                     content = content,
-
                     status = status,
                     cover_show_type = cover_show_type
                 )
 
-
-                if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
-                    pass
-
-                    # _cover_picture_list = []
-                    # video_url = json.loads(cover_picture)[0]
-                    # obj =  diary_objs[0]
-                    #
-                    # t1 = threading.Thread(target=create_video_coverURL, args=(obj,video_url))  # 创建一个线程对象t1 子线程
-                    # t1.start()
-
-
-                elif int(cover_show_type) == 1: # (1,'只展示图片')
-                    # _content = json.loads(content)
+                if int(cover_show_type) == 1: # (1,'只展示图片')
                     _cover_picture = []
                     print('值 content ----->>',content)
 
@@ -276,19 +248,6 @@ def diary_manage_oper(request, oper_type, o_id):
                         cover_picture=json.dumps(_cover_picture)
                     )
 
-                if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
-                    # _content = json.loads(content)
-                    soup = BeautifulSoup(content, 'html.parser')
-                    img_tags = soup.find_all('p')
-                    data_text = ''
-                    for img_tag in img_tags:
-                        data_src = img_tag.text
-                        if data_src:
-                            data_text += data_src
-
-                    print('简介内容------>>',data_text[0:50])
-                    diary_objs.update(summary = data_text)
-
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
                     case_objs.update(
@@ -304,70 +263,40 @@ def diary_manage_oper(request, oper_type, o_id):
 
         # 增加-案例
         elif oper_type == "add":
-
-
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
-
-            case_id = request.POST.get('case_id')
-
-            title = request.POST.get('title')
-            summary = request.POST.get('summary')
-
-            diary_date = request.POST.get('diary_date')
-            cover_picture = request.POST.get('cover_picture')  # 文章ID
-            content = request.POST.get('content')
-
-            status = request.POST.get('status')
-            cover_show_type  = request.POST.get('cover_show_type') # (1,'只展示图片'),  (2,'只展示视频'),
-
+            case_id = request.POST.get('case_id')               # 日记列表ID
+            title = request.POST.get('title')                   # 日记标题
+            diary_date = request.POST.get('diary_date')         # 日记时间
+            content = request.POST.get('content')               # 日记内容
+            status = request.POST.get('status')                 # 日记状态(是否删除)
+            cover_show_type  = request.POST.get('cover_show_type') # (1,'封面展示图片'),  (2,'封面展示视频'),
 
             form_data = {
-
-                'case_id' : case_id,
                 'company_id' :company_id,
-
-                'title': title,
-                # 'summary': summary,
-                # 'cover_picture': cover_picture,  # 活动名称
-
-                'diary_date': diary_date,  # 活动名称
-                'content': content,  # 活动名称
-
-                'status': status,
-                'cover_show_type' : cover_show_type,
+                'case_id' : case_id,                # 日记列表ID
+                'title': title,                     # 日记标题
+                'diary_date': diary_date,           # 活动名称
+                'content': content,                 # 日记内容
+                'status': status,                   # 日记状态(是否删除)
+                'cover_show_type' : cover_show_type,# 展示图片封面或视频封面
             }
 
             forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
-
-
+                forms_data = forms_obj.cleaned_data
                 obj = models.zgld_diary.objects.create(
                     user_id=user_id,
-                    case_id=case_id,
-                    company_id=company_id,
-
-                    title=title,
-                    # summary=summary,
-                    # cover_picture=cover_picture,
-                    diary_date=diary_date,
-                    content=content,
-
-                    status=status,
-                    cover_show_type=cover_show_type
+                    company_id=forms_data.get('company_id'),
+                    case_id=forms_data.get('case_id'),
+                    title=forms_data.get('title'),
+                    diary_date=forms_data.get('diary_date'),
+                    content=forms_data.get('content'),
+                    status=forms_data.get('status'),
+                    cover_show_type=forms_data.get('cover_show_type'),
                 )
 
-
-                if int(cover_show_type) == 2:  # (1,'只展示图片'), (2,'只展示视频'),
-                    pass
-                    # _cover_picture_list = []
-                    # video_url = json.loads(cover_picture)[0]
-                    #
-                    # t1 = threading.Thread(target=create_video_coverURL, args=(obj, video_url))  # 创建一个线程对象t1 子线程
-                    # t1.start()
-
-                elif int(cover_show_type) == 1:
-                    # _content = json.loads(content)
+                if int(cover_show_type) == 1:  # 获取内容图片 作为封面
                     _cover_picture = []
                     print('值 content cover_show_type----->>', content)
                     soup = BeautifulSoup(content, 'html.parser')
@@ -381,25 +310,6 @@ def diary_manage_oper(request, oper_type, o_id):
 
                     obj.cover_picture =  json.dumps(_cover_picture)
                     obj.save()
-
-                if not summary:  # (1,'只展示图片'), (2,'只展示视频'),
-                    # _content = json.loads(content)
-                    print('值 content summary ----->>', content)
-
-                    soup = BeautifulSoup(content, 'html.parser')
-
-                    img_tags = soup.find_all('p')
-                    data_text = ''
-                    for img_tag in img_tags:
-                        data_src = img_tag.text
-                        if data_src:
-                            data_text += data_src
-
-                    print('简介内容------>>', data_text[0:50])
-                    obj.summary = data_text
-                    obj.save()
-
-
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
