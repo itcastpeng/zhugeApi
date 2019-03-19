@@ -85,8 +85,8 @@ def case_manage(request, oper_type):
                             become_beautiful_cover = json.loads(become_beautiful_cover)
                             # become_beautiful_cover = become_beautiful_cover
 
-                        poster_cover = obj.poster_cover
-                        if poster_cover:
+                        poster_cover = []
+                        if obj.poster_cover:
                             poster_cover = json.loads(poster_cover)
 
                         tag_list = list(obj.tags.values('id', 'name'))

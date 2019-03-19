@@ -1464,6 +1464,7 @@ class zgld_money_record(models.Model):
         app_label = "zhugeleida"
 
 
+# ============================================日记================================================
 
 #公众号-案例标签表
 class zgld_case_tag(models.Model):
@@ -1591,6 +1592,8 @@ class zgld_diary_action(models.Model):
         verbose_name_plural = "客户-日记行为记录表"
         app_label = "zhugeleida"
 
+# 搜索历史标签
+
 
 # 客户所属用户-关系绑定表
 class zgld_customer_case_poster_belonger(models.Model):
@@ -1607,3 +1610,4 @@ class zgld_customer_case_poster_belonger(models.Model):
         verbose_name_plural = "雷达用户|客户-生成海报关系表"
         app_label = "zhugeleida"
 
+# ================================================================================================================
