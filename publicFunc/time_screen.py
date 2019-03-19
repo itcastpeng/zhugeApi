@@ -19,6 +19,9 @@ def time_screen(number_days):
         else:  # 默认昨天
             # if number_days == 'yesterday':  # 昨天
             days = 1
+            deletion = datetime.datetime.strftime((now_datetime - datetime.timedelta(days=days)), '%Y-%m-%d')
+            stop_time = deletion + ' 23:59:59'
+
         deletionTime = (now_datetime - datetime.timedelta(days=days))
         now_date = datetime.datetime.strftime(deletionTime, '%Y-%m-%d')
         start_time = now_date + ' 00:00:00'

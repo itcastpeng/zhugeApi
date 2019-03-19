@@ -101,7 +101,7 @@ class SetFocusGetRedPacketForm(forms.Form):
 
 
 
-#增加活动
+#增加日记列表
 class CaseAddForm(forms.Form):
 
 
@@ -153,7 +153,18 @@ class CaseAddForm(forms.Form):
             'required': "案例标签不能为空"
         }
     )
-
+    become_beautiful_cover = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "变美图片类型错误"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "封面图片类型错误"
+        }
+    )
     def clean_case_name(self):
 
         company_id = self.data['company_id']
@@ -168,11 +179,26 @@ class CaseAddForm(forms.Form):
         else:
             return case_name
 
+    def clean_tags_id_list(self):
+        tags_id_list = self.data.get('tags_id_list')
+        tags_id_list = json.loads(tags_id_list)
+        if len(tags_id_list) <= 0:
+            self.add_error('tags_id_list', '标签不能为空')
+        else:
+            return tags_id_list
 
+    def clean_case_type(self):
+        case_type = int(self.data.get('case_type'))          # 日记列表类型
+        become_beautiful_cover = self.data.get('become_beautiful_cover')  # 变美图片
+        cover_picture = self.data.get('cover_picture')  # 封面
+        if case_type == 2: # 时间轴日记
+            if not become_beautiful_cover:
+                self.add_error('become_beautiful_cover', '变美图片不能为空')
+            if not cover_picture:
+                self.add_error('cover_picture', '封面图片不能为空')
+        return case_type
 
-
-
-# 修改案例
+# 修改日记列表
 class CaseUpdateForm(forms.Form):
 
     case_id = forms.IntegerField(
@@ -216,6 +242,31 @@ class CaseUpdateForm(forms.Form):
             'required': "头像不能为空"
         }
     )
+    case_type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "案例类型不能为空"
+        }
+    )
+
+    tags_id_list = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "案例标签不能为空"
+        }
+    )
+    become_beautiful_cover = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "变美图片类型错误"
+        }
+    )
+    cover_picture = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "封面图片类型错误"
+        }
+    )
 
     def clean_case_name(self):
 
@@ -231,6 +282,26 @@ class CaseUpdateForm(forms.Form):
             self.add_error('case_name', '不能存在相同的案例名')
         else:
             return case_name
+
+    def clean_case_type(self):
+        case_type = int(self.data.get('case_type'))  # 日记列表类型
+        become_beautiful_cover = self.data.get('become_beautiful_cover')  # 变美图片
+        cover_picture = self.data.get('cover_picture')  # 封面
+        if case_type == 2:  # 时间轴日记
+            if not become_beautiful_cover:
+                self.add_error('become_beautiful_cover', '变美图片不能为空')
+            if not cover_picture:
+                self.add_error('cover_picture', '封面图片不能为空')
+        return case_type
+
+    def clean_tags_id_list(self):
+        tags_id_list = self.data.get('tags_id_list')
+        tags_id_list = json.loads(tags_id_list)
+        if len(tags_id_list) <= 0:
+            self.add_error('tags_id_list', '标签不能为空')
+        else:
+            return tags_id_list
+
 
 class PosterSettingForm(forms.Form):
     case_id = forms.IntegerField(

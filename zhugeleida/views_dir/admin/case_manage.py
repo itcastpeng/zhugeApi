@@ -74,6 +74,7 @@ def case_manage(request, oper_type):
                         cover_picture = obj.cover_picture
                         if cover_picture:
                             cover_picture =  json.loads(cover_picture)
+                            # cover_picture =  cover_picture
 
                         gongzhonghao_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
                         if gongzhonghao_app_obj:
@@ -82,6 +83,7 @@ def case_manage(request, oper_type):
                         become_beautiful_cover = obj.become_beautiful_cover
                         if become_beautiful_cover:
                             become_beautiful_cover = json.loads(become_beautiful_cover)
+                            # become_beautiful_cover = become_beautiful_cover
 
                         poster_cover = obj.poster_cover
                         if poster_cover:
@@ -140,15 +142,16 @@ def case_manage_oper(request, oper_type, o_id):
 
         # 删除-案例
         if oper_type == "delete":
-
             company_id = request.GET.get('company_id')
             objs = models.zgld_case.objects.filter(id=o_id,company_id=company_id)
 
             if objs:
-                models.zgld_diary.objects.filter(case_id=objs[0].id).update(status=3) # 删除该日记库下所有日记
-                objs.update(
-                    status=3
-                )
+                diary_objs = models.zgld_diary.objects.filter(case_id=objs[0].id)
+                for diary_obj in diary_objs:
+                    models.zgld_diary_action.objects.filter(diary_id=diary_obj.id).delete()             # 删除日记被赞或者收藏
+                    models.zgld_diary_comment.objects.filter(diary_id=diary_obj.id).delete()            # 删除日记评论
+                diary_objs.delete()  # 删除该日记库下所有日记
+                objs.delete()        # 删除日记库
                 response.code = 200
                 response.msg = "删除成功"
 
@@ -167,10 +170,10 @@ def case_manage_oper(request, oper_type, o_id):
             customer_name = request.POST.get('customer_name')
             headimgurl = request.POST.get('headimgurl')
             status = request.POST.get('status')
-            case_type = request.POST.get('case_type') #'case_type': obj.case_type,
-
-            cover_picture = request.POST.get('cover_picture')  # 文章ID
-            become_beautiful_cover = request.POST.get('become_beautiful_cover')  # 文章ID
+            case_type = request.POST.get('case_type')                               # 案例类型
+            cover_picture = request.POST.get('cover_picture')                       # 封面
+            become_beautiful_cover = request.POST.get('become_beautiful_cover')     # 变美图片
+            tags_id_list = request.POST.get('tags_id_list')                         # 日记标签
 
 
             form_data = {
@@ -179,29 +182,31 @@ def case_manage_oper(request, oper_type, o_id):
                 'company_id': company_id,
                 'customer_name': customer_name,  # 活动名称
                 'headimgurl': headimgurl,  # 文章ID
+                'case_type': case_type,
                 'status': status,
+                'become_beautiful_cover': become_beautiful_cover,
+                'cover_picture': cover_picture,
+                'tags_id_list': tags_id_list,
             }
 
             forms_obj = CaseUpdateForm(form_data)
             if forms_obj.is_valid():
-
+                form_data = forms_obj.cleaned_data
                 objs = models.zgld_case.objects.filter(company_id=company_id,id=case_id)
                 if objs:
                     objs.update(
                         user_id=user_id,
-                        case_name=case_name,
-                        customer_name=customer_name.strip(),
-                        headimgurl=headimgurl,
-                        cover_picture=cover_picture,
-                        status=status,
-                        case_type=case_type,
-                        become_beautiful_cover=become_beautiful_cover
+                        case_name=form_data.get('case_name'),
+                        customer_name=form_data.get('customer_name'),
+                        headimgurl=form_data.get('headimgurl'),
+                        cover_picture=form_data.get('cover_picture'),
+                        status=form_data.get('status'),
+                        case_type=form_data.get('case_type'),
+                        become_beautiful_cover=form_data.get('become_beautiful_cover')
                     )
-
-                    obj =objs[0]
-                    tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
-                    if tags_id_list:
-                        obj.tags = tags_id_list
+                    tags_id_list = forms_obj.cleaned_data.get('tags_id_list')
+                    objs[0].tags = tags_id_list
+                    objs[0].save()
 
                     response.code = 200
                     response.msg = "修改成功"
@@ -219,20 +224,18 @@ def case_manage_oper(request, oper_type, o_id):
 
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
-            case_type = request.POST.get('case_type')  # 判断是普通案例  还是 时间轴案例
+            case_type = request.POST.get('case_type')                               # 判断是普通案例/时间轴案例
+            case_name = request.POST.get('case_name')                               # 案例名称
+            customer_name = request.POST.get('customer_name')                       # 客户名称
+            headimgurl = request.POST.get('headimgurl')                             # 客户头像
+            status  = request.POST.get('status')                                    # 发布状态 | (已发/未发)
+            cover_picture = request.POST.get('cover_picture')                       # 封面图片
+            become_beautiful_cover = request.POST.get('become_beautiful_cover')     # 变美图片
+            tags_id_list = request.POST.get('tags_id_list')                         # 标签列表
 
-            case_name = request.POST.get('case_name')           # 案例名称
-            customer_name = request.POST.get('customer_name')   # 客户名称
-
-            headimgurl = request.POST.get('headimgurl')         # 客户头像
-            status  = request.POST.get('status')                # 发布状态 / (已发/未发)
-            cover_picture = request.POST.get('cover_picture')   # 封面图片
-            become_beautiful_cover = request.POST.get('become_beautiful_cover')  # 变美图片
-            tags_id_list = request.POST.get('tags_id_list')     # 标签列表
             """
-            普通案例： 创建列表页 不加 变美过程 封面图片
+            普通案例： 列表页 不加 变美过程 封面图片
             时间轴案例: 创建列表页 加 变美过程 封面图片
-            
             """
 
             form_data = {
@@ -243,27 +246,27 @@ def case_manage_oper(request, oper_type, o_id):
                 'status': status,                   # 发布状态 / (已发/未发)
                 'case_type': case_type,             # 案例类型
                 'tags_id_list': tags_id_list,       # 标签
-
+                'cover_picture': cover_picture,     # 封面
+                'become_beautiful_cover': become_beautiful_cover,# 变美图片
             }
 
             forms_obj = CaseAddForm(form_data)
             if forms_obj.is_valid():
-
+                form_data = forms_obj.cleaned_data
                 obj = models.zgld_case.objects.create(
                     user_id=user_id,
-                    case_name=case_name,
                     company_id=company_id,
-                    customer_name=customer_name.strip(),
-                    headimgurl=headimgurl,
+                    case_name=form_data.get('case_name'),
+                    customer_name=form_data.get('customer_name'),
+                    headimgurl=form_data.get('headimgurl'),
                     cover_picture=cover_picture,
-                    status=status,
+                    status=form_data.get('status'),
                     become_beautiful_cover=become_beautiful_cover,
-                    case_type=case_type
+                    case_type=form_data.get('case_type')
                 )
-
-                # if tags_id_list:
-                #     obj.tags = tags_id_list
-                #     obj.save()
+                tags_id_list = forms_obj.cleaned_data.get('tags_id_list')
+                obj.tags = tags_id_list
+                obj.save()
 
                 response.code = 200
                 response.msg = "添加成功"
@@ -275,8 +278,6 @@ def case_manage_oper(request, oper_type, o_id):
 
         ## 海报-设置
         elif oper_type == "poster_setting":
-
-
             company_id = request.GET.get('company_id')
             poster_cover = request.POST.get('poster_cover')
             poster_company_logo = request.POST.get('poster_company_logo')
