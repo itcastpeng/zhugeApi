@@ -80,14 +80,13 @@ def case_manage(request, oper_type):
                         if gongzhonghao_app_obj:
                             poster_company_logo = gongzhonghao_app_obj.poster_company_logo
 
-                        become_beautiful_cover = obj.become_beautiful_cover
-                        if become_beautiful_cover:
-                            become_beautiful_cover = json.loads(become_beautiful_cover)
-                            # become_beautiful_cover = become_beautiful_cover
+                        become_beautiful_cover = []
+                        if obj.become_beautiful_cover:
+                            become_beautiful_cover = json.loads(obj.become_beautiful_cover)
 
                         poster_cover = []
                         if obj.poster_cover:
-                            poster_cover = json.loads(poster_cover)
+                            poster_cover = json.loads(obj.poster_cover)
 
                         tag_list = list(obj.tags.values('id', 'name'))
                         ret_data.append({
@@ -97,17 +96,13 @@ def case_manage(request, oper_type):
                             'customer_name': obj.customer_name,
                             'headimgurl': obj.headimgurl,
                             'cover_picture' : cover_picture,
-
                             'status': status,
                             'status_text': status_text,
-
                             'tag_list': tag_list,
                             'case_type': obj.case_type,
                             'poster_cover': poster_cover,
                             'become_beautiful_cover': become_beautiful_cover,
-
                             'case_type_text': obj.get_case_type_display(),
-
                             'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
