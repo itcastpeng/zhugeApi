@@ -72,7 +72,7 @@ def update_click_dialog_num(request, oper_type):
             customer_id=customer_id,
             user_id=u_id,
             oper_type=2,
-            click_dialog_num=1
+            # click_dialog_num=1
         )
 
     # 记录查看文章视频时长

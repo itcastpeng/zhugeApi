@@ -132,12 +132,6 @@ class diaryAddForm(forms.Form):
         }
     )
 
-    # cover_picture  = forms.CharField(
-    #     required=False,
-    #     error_messages={
-    #         'required': "封面不能为空"
-    #     }
-    # )
     content  = forms.CharField(
         required=True,
         error_messages={
@@ -158,6 +152,13 @@ class diaryAddForm(forms.Form):
             'required': "展示类型不能为空"
         }
     )
+
+    cover_picture = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "普通日记-轮播图/日记类型错误"
+        }
+    )
     def clean_diary_name(self):
 
         company_id = self.data['company_id']
@@ -174,9 +175,16 @@ class diaryAddForm(forms.Form):
 
     def clean_case_id(self):
         case_id = self.data.get('case_id')
+        cover_picture = self.data.get('cover_picture')
         company_id = self.data.get('company_id')
         objs = models.zgld_case.objects.filter(id=case_id, company_id=company_id)
         if objs:
+            obj = objs[0]
+            if int(obj.case_type) == 1:
+                if not cover_picture:
+                    self.add_error('cover_picture', '轮播图不能为空')
+                else:
+                    return case_id
             return case_id
         else:
             self.add_error('case_id', '权限不足')

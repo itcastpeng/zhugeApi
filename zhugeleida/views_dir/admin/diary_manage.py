@@ -277,6 +277,7 @@ def diary_manage_oper(request, oper_type, o_id):
             content = request.POST.get('content')               # 日记内容
             status = request.POST.get('status')                 # 日记状态(是否删除)
             cover_show_type  = request.POST.get('cover_show_type') # (1,'封面展示图片'),  (2,'封面展示视频'),
+            cover_picture  = request.POST.get('cover_picture')  # 普通日记 上传(图片/视频)
 
             form_data = {
                 'company_id' :company_id,
@@ -286,12 +287,13 @@ def diary_manage_oper(request, oper_type, o_id):
                 'content': content,                 # 日记内容
                 'status': status,                   # 日记状态(是否删除)
                 'cover_show_type' : cover_show_type,# 展示图片封面或视频封面
+                'cover_picture' : cover_picture,    # 图片/视频 普通日记轮播图
             }
 
             forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
                 forms_data = forms_obj.cleaned_data
-                obj = models.zgld_diary.objects.create(
+                models.zgld_diary.objects.create(
                     user_id=user_id,
                     company_id=forms_data.get('company_id'),
                     case_id=forms_data.get('case_id'),
@@ -300,24 +302,25 @@ def diary_manage_oper(request, oper_type, o_id):
                     content=forms_data.get('content'),
                     status=forms_data.get('status'),
                     cover_show_type=forms_data.get('cover_show_type'),
+                    cover_picture=forms_data.get('cover_picture'),
                 )
 
-                if int(cover_show_type) == 1:  # 获取内容图片 作为封面
-                    _cover_picture = []
-                    print('值 content cover_show_type----->>', content)
-                    soup = BeautifulSoup(content, 'html.parser')
+                # if int(cover_show_type) == 1:  # 获取内容图片 作为封面
+                #     _cover_picture = []
+                #     print('值 content cover_show_type----->>', content)
+                #     soup = BeautifulSoup(content, 'html.parser')
+                #
+                #     img_tags = soup.find_all('img')
+                #     for img_tag in img_tags:
+                #         data_src = img_tag.attrs.get('src')
+                #         if data_src:
+                #             print(data_src)
+                #             _cover_picture.append(data_src)
+                #
+                #     obj.cover_picture =  json.dumps(_cover_picture)
+                #     obj.save()
 
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
-                            _cover_picture.append(data_src)
-
-                    obj.cover_picture =  json.dumps(_cover_picture)
-                    obj.save()
-
-                case_objs = models.zgld_case.objects.filter(id=case_id)
+                case_objs = models.zgld_case.objects.filter(id=case_id) # 该 日记列表 更新时间
                 if case_objs:
                     case_objs.update(
                         update_date=datetime.datetime.now()

@@ -64,14 +64,16 @@ def follow_up_data(user_id, request, data_type=None):
 
         if int(compay_obj.is_same_label) == 0: # 默认不匹配 文章标签
             article_conditions = models.ZgldUserOperLog.objects.filter(
-                oper_type=3,
+                q,
+                oper_type=4,
                 article__isnull=False
             ).values(
                 'customer_id', 'customer__username', 'customer__headimgurl'
             ).annotate(Count('id')).distinct()
         else:
             article_conditions = models.ZgldUserOperLog.objects.filter(
-                oper_type=3,
+                q,
+                oper_type=4,
                 article__isnull=False
             ).values(
                 'article__tags', 'customer_id', 'customer__username', 'customer__headimgurl'
@@ -81,10 +83,9 @@ def follow_up_data(user_id, request, data_type=None):
         result_data = []
         if_article_conditions = 0
         for i in article_conditions:
-            print("i.get('id__count')-------> ", i.get('id__count'))
             if i.get('id__count') >= articles_read_customers:  # 条数大于等于
                 article_tags = models.ZgldUserOperLog.objects.filter(
-                    oper_type=3,
+                    oper_type=4,
                     customer_id=i.get('customer_id'),
                 )
                 num = 0 # 该人查看的所有文章总时长
@@ -93,7 +94,6 @@ def follow_up_data(user_id, request, data_type=None):
                     if article_tag.reading_time >= article_reading_time:  # 该人查看文章总时长
                         num += article_tag.reading_time
                         count += 1
-
                 if num > 0:
                     eval_num = int(num / count)
 
@@ -105,8 +105,7 @@ def follow_up_data(user_id, request, data_type=None):
                         'reading_time': num,  # 阅读时长
                         'eval_num': eval_num,                      # 平均时长
                     })
-
-                if count >= 3:
+                if count >= articles_read_customers:
                     if_article_conditions += 1
 
         data_list = []
