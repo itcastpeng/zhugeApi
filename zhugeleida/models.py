@@ -1472,7 +1472,7 @@ class zgld_case_tag(models.Model):
     name = models.CharField(verbose_name='标签名称', max_length=32)
     search_amount  = models.IntegerField(verbose_name="搜索数量", default=0)
     # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
-
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
     class Meta:
         verbose_name_plural = "案例标签表"
         app_label = "zhugeleida"
@@ -1525,7 +1525,7 @@ class zgld_diary(models.Model):
     summary = models.CharField(verbose_name='日记摘要', max_length=255,null=True)
 
     diary_date = models.DateTimeField(verbose_name="日记时间")
-    cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True) # 普通案例 上传轮播图/时间轴案例取变美图片
+    cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True) # 普通案例为轮播图/时间轴案例为时间轴列表页点击进去展示图片（获取文章内容）
     content = models.TextField(verbose_name='日记内容', null=True)
 
     read_count = models.IntegerField(verbose_name="阅读数量", default=0)
@@ -1575,16 +1575,10 @@ class zgld_diary_action(models.Model):
     case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')
     action_choices = ((1, '点赞日记'),
-                      (2, '收藏案例'),
-                      (3, '浏览案例'),
-                      (4, '点赞案例')
+                      (2, '收藏日记'),
+                      (3, '浏览日记'),
                       )
     action = models.SmallIntegerField(verbose_name='客户动作', choices=action_choices,null=True)
-
-    status_choices = ((0, '未点赞|未收藏'),
-                      (1, '已点赞|已收藏')
-                      )
-    status = models.SmallIntegerField(verbose_name='状态', choices=status_choices,null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
@@ -1594,7 +1588,7 @@ class zgld_diary_action(models.Model):
 
 # 搜索历史标签
 class zgld_search_history(models.Model):
-    user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表')
+    user_customer_belonger = models.ForeignKey('zgld_customer', verbose_name='用户|客户关系表')
     history_tag = models.CharField(verbose_name='搜索历史', max_length=64)
     company = models.ForeignKey('zgld_company', verbose_name='日记所属公司', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)

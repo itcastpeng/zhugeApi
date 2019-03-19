@@ -19,7 +19,7 @@ def diary_manage(request, oper_type):
 
     if request.method == "GET":
 
-        # 查询 文章-活动(任务)--张炬 / 鹏 ：查询案例详情
+        # 查询案例详情
         if oper_type == 'diary_list':
 
             print('request.GET----->', request.GET)

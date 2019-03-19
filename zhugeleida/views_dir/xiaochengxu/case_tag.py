@@ -21,33 +21,39 @@ def case_tag(request,oper_type):
         if oper_type == 'case_list':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
-            name = request.GET.get('name')
+            name__contains = request.GET.get('name__contains')
 
-            if name: # 搜索tag创建 搜索日志
+            if name__contains: # 搜索tag创建 搜索日志
+                if len(name__contains) > 60:
+                    response.code = 301
+                    response.msg = '搜索过长'
+                    return JsonResponse(response.__dict__)
+
                 now = datetime.datetime.today()
                 tag_objs = models.zgld_search_history.objects.filter(
                     company_id=company_id,
                     user_customer_belonger_id=user_id,
-                    history_tag=name,
+                    history_tag=name__contains,
                 )
                 if tag_objs:
                     tag_objs.update(create_date=now)
                 else:
                     models.zgld_search_history.objects.create(
                         user_customer_belonger_id=user_id,
-                        history_tag=name,
+                        history_tag=name__contains,
                         company_id=company_id,
                     )
 
             field_dict = {
                 'tag_id': '',
-                'name': '__contains', #标签搜索
+                'name__contains': '', #标签搜索
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
             q.add(Q(**{'company_id': company_id}), Q.AND)
 
             tag_list = models.zgld_case_tag.objects.filter(q).values('id','name').order_by('-create_date')
+            print('tag_list--------> ', tag_list)
             tag_data = list(tag_list)
 
             response.code = 200
@@ -62,29 +68,30 @@ def case_tag(request,oper_type):
             company_id = request.GET.get('company_id')
 
             field_dict = {
-                'tag_id': '',
-                'name': '__contains',  # 标签搜索
+                'history_tag': '__contains',  # 标签搜索
             }
             q = conditionCom(request, field_dict)
             print('q -->', q)
-            q.add(Q(**{'company_id': company_id}), Q.AND)
-            q.add(Q(**{'id': user_id}), Q.AND)
-            print(q)
-            customer_objs = models.zgld_customer.objects.filter(q)
-            if customer_objs:
-                customer_obj = customer_objs[0]
-                history_tags_record = customer_obj.history_tags_record
-                if history_tags_record:
-                    history_tags_record = json.loads(history_tags_record)
 
-                response.code = 200
-                response.data = {
-                    'ret_data': history_tags_record[0:13],
+            objs = models.zgld_search_history.objects.filter(
+                company_id=company_id,
+                user_customer_belonger_id=user_id
+            ).order_by('-create_date')
 
-                }
-            else:
-                response.code = 302
-                response.msg = '暂无数据'
+            data_list = []
+            if objs:
+                objs = objs[0:13]
+                for obj in objs:
+                    data_list.append(obj.history_tag)
+
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'data_list': data_list
+            }
+            response.note = {
+
+            }
 
         # 热门搜索
         elif oper_type == 'top_search_tag_list':
