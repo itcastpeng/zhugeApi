@@ -33,8 +33,6 @@ def follow_up_data(user_id, request, data_type=None):
         if not start_time and not stop_time:
             start_time, stop_time = time_screen(number_days)
 
-        start_time = '2019-03-19 00:00:00'
-        stop_time = '2019-03-19 23:59:59'
         q.add(Q(create_date__gte=start_time, create_date__lte=stop_time), Q.AND)
 
         print('q-----------------> ', q)
