@@ -208,6 +208,7 @@ def diary_manage_oper(request, oper_type, o_id):
             content = request.POST.get('content')
             status = request.POST.get('status')
             cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
+            cover_picture = request.POST.get('cover_picture')  # 普通日记 上传(图片/视频)
 
             form_data = {
                 'diary_id': diary_id,
@@ -218,14 +219,12 @@ def diary_manage_oper(request, oper_type, o_id):
                 'content': content,  # 日记内容
                 'status': status,  # 日记状态(是否删除)
                 'cover_show_type': cover_show_type,  # 展示图片封面或视频封面
+                'cover_picture': cover_picture,  # 展示图片封面或视频封面
             }
 
             forms_obj = diaryUpdateForm(form_data)
             if forms_obj.is_valid():
-
                 diary_objs = models.zgld_diary.objects.filter(id=diary_id)
-
-
                 diary_objs.update(
                     user_id = user_id,
                     case_id = case_id,
@@ -236,23 +235,27 @@ def diary_manage_oper(request, oper_type, o_id):
                     status = status,
                     cover_show_type = cover_show_type
                 )
+                cover_picture = forms_obj.cleaned_data.get('cover_picture')
+                if cover_picture:
+                    cover_picture = json.loads(cover_picture)
+                    diary_objs.update(cover_picture = json.dumps(cover_picture))
 
-                if int(cover_show_type) == 1: # (1,'只展示图片')
-                    _cover_picture = []
-                    print('值 content ----->>',content)
-
-                    soup = BeautifulSoup(content, 'html.parser')
-
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
-                            _cover_picture.append(data_src)
-
-                    diary_objs.update(
-                        cover_picture=json.dumps(_cover_picture)
-                    )
+                # if int(cover_show_type) == 1: # (1,'只展示图片')
+                #     _cover_picture = []
+                #     print('值 content ----->>',content)
+                #
+                #     soup = BeautifulSoup(content, 'html.parser')
+                #
+                #     img_tags = soup.find_all('img')
+                #     for img_tag in img_tags:
+                #         data_src = img_tag.attrs.get('src')
+                #         if data_src:
+                #             print(data_src)
+                #             _cover_picture.append(data_src)
+                #
+                #     diary_objs.update(
+                #         cover_picture=json.dumps(_cover_picture)
+                #     )
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
                 if case_objs:
@@ -293,7 +296,7 @@ def diary_manage_oper(request, oper_type, o_id):
             forms_obj = diaryAddForm(form_data)
             if forms_obj.is_valid():
                 forms_data = forms_obj.cleaned_data
-                models.zgld_diary.objects.create(
+                obj = models.zgld_diary.objects.create(
                     user_id=user_id,
                     company_id=forms_data.get('company_id'),
                     case_id=forms_data.get('case_id'),
@@ -302,8 +305,10 @@ def diary_manage_oper(request, oper_type, o_id):
                     content=forms_data.get('content'),
                     status=forms_data.get('status'),
                     cover_show_type=forms_data.get('cover_show_type'),
-                    cover_picture=forms_data.get('cover_picture'),
                 )
+                if forms_data.get('cover_picture'):
+                    obj.cover_picture = json.dumps(json.loads(forms_data.get('cover_picture')))
+                    obj.save()
 
                 # if int(cover_show_type) == 1:  # 获取内容图片 作为封面
                 #     _cover_picture = []

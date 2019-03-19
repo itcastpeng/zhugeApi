@@ -280,7 +280,21 @@ class diaryUpdateForm(forms.Form):
             return diary_id
         else:
             self.add_error('diary_id', '修改日记不存在')
-
+    def clean_case_id(self):
+        case_id = self.data.get('case_id')
+        cover_picture = self.data.get('cover_picture')
+        company_id = self.data.get('company_id')
+        objs = models.zgld_case.objects.filter(id=case_id, company_id=company_id)
+        if objs:
+            obj = objs[0]
+            if int(obj.case_type) == 1:
+                if not cover_picture:
+                    self.add_error('cover_picture', '轮播图不能为空')
+                else:
+                    return case_id
+            return case_id
+        else:
+            self.add_error('case_id', '权限不足')
 #修改活动
 class ActivityUpdateForm(forms.Form):
     article_id = forms.IntegerField(
