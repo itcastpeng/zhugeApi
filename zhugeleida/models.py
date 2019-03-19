@@ -1487,7 +1487,7 @@ class zgld_case(models.Model):
 
     case_name = models.CharField(verbose_name='案例名称', max_length=128)
     cover_picture = models.TextField(verbose_name="封面图片",null=True)
-    poster_cover = models.TextField(verbose_name="海报封面图片",null=True)
+    poster_cover = models.TextField(verbose_name="海报图片",null=True)
     become_beautiful_cover = models.TextField(verbose_name="变美过程图片",null=True)
 
     tags = models.ManyToManyField('zgld_case_tag', verbose_name="文章关联的标签")
@@ -1541,7 +1541,7 @@ class zgld_diary(models.Model):
     cover_show_type_choices = ( (1,'只展示图片'),
                                 (2,'只展示视频')
                                )
-    poster_cover = models.TextField(verbose_name="海报封面图片", null=True)
+    poster_cover = models.TextField(verbose_name="海报图片", null=True)
     cover_show_type = models.SmallIntegerField(default=2, verbose_name='封面展示类型', choices=cover_show_type_choices)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
@@ -1593,7 +1593,10 @@ class zgld_diary_action(models.Model):
         app_label = "zhugeleida"
 
 # 搜索历史标签
-
+class zgld_search_history(models.Model):
+    user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表')
+    history_tag = models.CharField(verbose_name='搜索历史', max_length=64)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 # 客户所属用户-关系绑定表
 class zgld_customer_case_poster_belonger(models.Model):

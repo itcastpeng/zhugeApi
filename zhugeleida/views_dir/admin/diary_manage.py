@@ -122,11 +122,15 @@ def diary_manage(request, oper_type):
                     for obj in objs:
                         status = obj.status
                         status_text = obj.get_status_display()
-                        cover_picture = obj.cover_picture
                         content = obj.content
 
-                        if cover_picture:
-                            cover_picture =  json.loads(cover_picture)
+                        cover_picture = []
+                        if obj.cover_picture:
+                            cover_picture =  json.loads(obj.cover_picture)
+
+                        poster_cover = []
+                        if obj.poster_cover:
+                            poster_cover = json.loads(obj.poster_cover)
 
                         ret_data.append({
                             'diary_id': obj.id,
@@ -138,6 +142,7 @@ def diary_manage(request, oper_type):
                             'cover_picture': cover_picture,
                             'summary': obj.summary,
                             'content': content,
+                            'poster_cover': poster_cover,
 
                             'status': status,
                             'status_text': status_text,

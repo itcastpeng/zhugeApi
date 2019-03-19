@@ -21,6 +21,10 @@ def case_tag(request,oper_type):
         if oper_type == 'case_list':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
+            name = request.GET.get('name')
+
+            if name: # 搜索tag创建 搜索日志
+                models.zgld_search_history
 
             field_dict = {
                 'tag_id': '',
