@@ -1596,6 +1596,7 @@ class zgld_diary_action(models.Model):
 class zgld_search_history(models.Model):
     user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表')
     history_tag = models.CharField(verbose_name='搜索历史', max_length=64)
+    company = models.ForeignKey('zgld_company', verbose_name='日记所属公司', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 # 客户所属用户-关系绑定表

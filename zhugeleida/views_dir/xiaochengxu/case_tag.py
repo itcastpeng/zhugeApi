@@ -24,10 +24,18 @@ def case_tag(request,oper_type):
             name = request.GET.get('name')
 
             if name: # 搜索tag创建 搜索日志
+                now = datetime.datetime.today()
                 tag_objs = models.zgld_search_history.objects.filter(
                     company_id=user_id,
                     history_tag=name
                 )
+                if tag_objs:
+                    tag_objs.update(create_date=now)
+                else:
+                    models.zgld_search_history.objects.create(
+                        company_id=user_id,
+                        history_tag=name
+                    )
 
             field_dict = {
                 'tag_id': '',
@@ -37,7 +45,7 @@ def case_tag(request,oper_type):
             print('q -->', q)
             q.add(Q(**{'company_id': company_id}), Q.AND)
 
-            tag_list = models.zgld_case_tag.objects.filter(q).values('id','name')
+            tag_list = models.zgld_case_tag.objects.filter(q).values('id','name').order_by('-create_date')
             tag_data = list(tag_list)
 
             response.code = 200
