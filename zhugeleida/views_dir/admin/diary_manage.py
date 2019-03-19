@@ -205,6 +205,7 @@ def diary_manage_oper(request, oper_type, o_id):
             cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
 
             form_data = {
+                'diary_id': diary_id,
                 'company_id': company_id,
                 'case_id': case_id,  # 日记列表ID
                 'title': title,  # 日记标题
@@ -330,7 +331,7 @@ def diary_manage_oper(request, oper_type, o_id):
             print('poster_cover-------> ', poster_cover)
             objs = models.zgld_diary.objects.filter(id=o_id)
             if objs:
-                objs.update(poster_cover = poster_cover)
+                objs.update(poster_cover = json.loads(poster_cover))
                 response.code = 200
                 response.msg = '设置日记海报成功'
             else:
