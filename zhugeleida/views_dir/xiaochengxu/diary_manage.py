@@ -705,6 +705,10 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 # 按时间排序
                 ret_data = sorted(ret_data, key=lambda x: x['create_date'], reverse=True)
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    ret_data = ret_data[start_line: stop_line]
 
                 #  查询成功 返回200 状态码
                 response.code = 200
