@@ -193,8 +193,10 @@ def comment_manage(request, oper_type):
                 response.msg = "数据不存在"
 
         # 审核案例-日记评论
-        elif oper_type == '':
-            pass
+        elif oper_type == 'audit_diary':
+            diary_id = request.POST.get('diary_id')
+
+
 
         ## 评论是否开启
         elif oper_type == 'setting_open_comment':
