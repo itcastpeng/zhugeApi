@@ -167,7 +167,7 @@ def diary_manage(request):
                     zgld_case_obj = zgld_case_objs[0]
                     tag_list = list(zgld_case_obj.tags.values('id', 'name'))  # 标签列表
                     customer_name = zgld_case_obj.customer_name
-                    create_date = zgld_case_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                    create_date = zgld_case_obj.create_date.strftime('%Y-%m-%d')
                     become_beautiful_cover = json.loads(zgld_case_obj.become_beautiful_cover)
                     customer_headimgurl = zgld_case_obj.headimgurl
                     zgld_case_objs.update(
@@ -207,7 +207,8 @@ def diary_manage(request):
                         'content': obj.content,
                         'diary_give_like': diary_give_like,     # 点赞数量
                         'diary_read_num': obj.read_count,       # 阅读数量
-                        # 'comment_count': obj.comment_count,     # 评论数量
+                        'cover_show_type': obj.cover_show_type, # 阅读数量
+                        'comment_count': obj.comment_count,     # 评论数量
                         'case_type': 2,                         # 日记类型
                     })
 
