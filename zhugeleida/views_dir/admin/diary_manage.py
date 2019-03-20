@@ -161,9 +161,7 @@ def diary_manage(request, oper_type):
                     'data_count': count
                 }
 
-
             else:
-
                 response.code = 301
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
@@ -209,7 +207,7 @@ def diary_manage_oper(request, oper_type, o_id):
             status = request.POST.get('status')
             cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
             cover_picture = request.POST.get('cover_picture')  # 普通日记 上传(图片/视频)
-
+            print('cover_picture---cover_picture-cover_picture-cover_picture---> ', cover_picture)
             form_data = {
                 'diary_id': diary_id,
                 'company_id': company_id,
@@ -226,7 +224,6 @@ def diary_manage_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 forms_data = forms_obj.cleaned_data
                 case_id, case_type = forms_data.get('case_id')
-                print('case_id-========> ', case_id)
                 diary_objs = models.zgld_diary.objects.filter(id=diary_id)
                 diary_objs.update(
                     user_id = user_id,
@@ -248,7 +245,6 @@ def diary_manage_oper(request, oper_type, o_id):
                         diary_objs.update(cover_picture = json.dumps(cover_picture))
                     else:
                         _cover_picture = []
-                        print('值 content cover_show_type----->>', content)
                         soup = BeautifulSoup(content, 'html.parser')
 
                         img_tags = soup.find_all('img')
