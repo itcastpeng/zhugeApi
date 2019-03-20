@@ -80,6 +80,15 @@ def diary_manage(request):
                 if obj.cover_picture:  # 封面（取第一张）
                     cover_picture = json.loads(obj.cover_picture)
 
+                is_diary_give_like = False
+                zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
+                    action=1,
+                    customer_id=user_id,
+                    diary_id=obj.id
+                )
+                if zgld_diary_action_obj:
+                    is_diary_give_like = True
+
                 models.zgld_diary_action.objects.create(
                     action=3,
                     customer_id=user_id,
@@ -96,8 +105,22 @@ def diary_manage(request):
                     'up_count': obj.up_count,  # 点赞数量
                     'comment_count': obj.comment_count,  # 评论数量
                     'case_type': 2,  # 日记类型
+                    'is_diary_give_like': is_diary_give_like,  # 是否点赞
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                 }
+            response.note = {
+                'cover_picture': '封面',
+                'customer_headimgurl': '头像',
+                'customer_name': '客户名称',
+                'title': '日记标题',
+                'content': '日记内容',
+                'read_count': '阅读数量',
+                'up_count': '点赞数量',
+                'comment_count': '评论数量',
+                'case_type': '日记类型',
+                'is_diary_give_like': '是否点赞',
+                'create_date': '创建时间',
+            }
         else:
             # 普通日记
             if case_type == 1:
@@ -116,6 +139,15 @@ def diary_manage(request):
 
                     for diary_obj in diary_objs:
 
+                        is_diary_give_like = False
+                        zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
+                            action=1,
+                            customer_id=user_id,
+                            diary_id=diary_obj.id
+                        )
+                        if zgld_diary_action_obj:
+                            is_diary_give_like = True
+
                         cover_picture = ''
                         if diary_obj.cover_picture:  # 封面（取第一张）
                             cover_picture = json.loads(diary_obj.cover_picture)
@@ -132,6 +164,7 @@ def diary_manage(request):
                             'read_count': diary_obj.read_count,                 # 阅读数量
                             'up_count': diary_obj.up_count,                     # 点赞数量
                             'comment_count': diary_obj.comment_count,           # 评论数量
+                            'is_diary_give_like': is_diary_give_like,           # 是否点赞
                             'case_type': 1,                                     # 日记类型
                             'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
@@ -147,6 +180,7 @@ def diary_manage(request):
                     'read_count': '阅读数量',
                     'case_type': '日记类型',
                     'create_date': '创建时间',
+                    'is_diary_give_like': '是否点赞',
                 }
 
             # 时间轴
@@ -193,9 +227,19 @@ def diary_manage(request):
                     objs = objs[start_line: stop_line]
 
                 for obj in objs:
+
                     cover_picture = ''
                     if obj.cover_picture:  # 封面
                         cover_picture = json.loads(obj.cover_picture)
+
+                    is_diary_give_like = False
+                    zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
+                        action=1,
+                        customer_id=user_id,
+                        diary_id=obj.id
+                    )
+                    if zgld_diary_action_obj:
+                        is_diary_give_like = True
 
                     diary_give_like = models.zgld_diary_action.objects.filter(diary_id=obj.id, action=1).count() # 点赞数量统计
 
@@ -217,6 +261,7 @@ def diary_manage(request):
                         'cover_show_type': obj.cover_show_type, # 阅读数量
                         'comment_count': obj.comment_count,     # 评论数量
                         'case_type': 2,                         # 日记类型
+                        'is_diary_give_like': is_diary_give_like,# 是否点赞
                     })
 
                 top_data = {
