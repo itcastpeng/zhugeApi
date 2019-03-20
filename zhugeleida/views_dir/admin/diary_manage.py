@@ -130,7 +130,7 @@ def diary_manage(request, oper_type):
 
                         poster_cover = []
                         if obj.poster_cover:
-                            poster_cover = eval(obj.poster_cover)
+                            poster_cover = json.loads(obj.poster_cover)
 
                         ret_data.append({
                             'diary_id': obj.id,
@@ -311,18 +311,21 @@ def diary_manage_oper(request, oper_type, o_id):
                     obj.save()
 
                 else:
-                    _cover_picture = []
-                    print('值 content cover_show_type----->>', content)
-                    soup = BeautifulSoup(content, 'html.parser')
+                    if cover_picture:
+                        obj.cover_picture = json.dumps(cover_picture)
+                    else:
+                        _cover_picture = []
+                        print('值 content cover_show_type----->>', content)
+                        soup = BeautifulSoup(content, 'html.parser')
 
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            print(data_src)
-                            _cover_picture.append(data_src)
+                        img_tags = soup.find_all('img')
+                        for img_tag in img_tags:
+                            data_src = img_tag.attrs.get('src')
+                            if data_src:
+                                print(data_src)
+                                _cover_picture.append(data_src)
 
-                    obj.cover_picture =  json.dumps(_cover_picture)
+                        obj.cover_picture =  json.dumps(_cover_picture)
                     obj.save()
 
                 case_objs = models.zgld_case.objects.filter(id=case_id) # 该 日记列表 更新时间

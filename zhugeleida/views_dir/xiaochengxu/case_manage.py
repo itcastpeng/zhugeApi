@@ -116,11 +116,13 @@ def case_manage(request):
 
                 is_give_like = False
                 # 判断是否点赞
-                models.zgld_diary_action.objects.filter(
+                is_give_like_obj = models.zgld_diary_action.objects.filter(
                     case_id=obj.id,
                     customer_id=customer_id,
                     action=1
                 )
+                if is_give_like_obj:
+                    is_give_like = True
 
                 data_list.append({
                     'diary_list_id': obj.id,
@@ -130,6 +132,7 @@ def case_manage(request):
                     'customer_headimgurl': obj.headimgurl,  # 客户头像
                     'diary_give_like': diary_give_like,  # 点赞数量
                     'case_type': 2,  # 日记类型(1普通/2时间轴)
+                    'is_give_like': is_give_like,  # 是否点赞
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
@@ -139,6 +142,15 @@ def case_manage(request):
                 # case_type = int(diary_obj.case.case_type) # 日记类型
                 # print('case_type------> ', case_type)
                 # if case_type == 1:
+                # 判断是否点赞
+                is_give_like = False
+                is_give_like_obj = models.zgld_diary_action.objects.filter(
+                    diary_id=diary_obj.id,
+                    customer_id=customer_id,
+                    action=1
+                )
+                if is_give_like_obj:
+                    is_give_like = True
                 cover_picture = []
                 if diary_obj.cover_picture: # 封面（取第一张）
                     cover_picture = json.loads(diary_obj.cover_picture)
@@ -156,6 +168,7 @@ def case_manage(request):
                     'customer_headimgurl': headimgurl,                  # 客户头像
                     'diary_give_like': diary_give_like,                 # 点赞数量
                     'case_type': 1,                                     # 日记类型(1普通/2时间轴)
+                    'is_give_like': is_give_like,                       # 是否点赞
                     'cover_show_type': diary_obj.cover_show_type,       # 封面类型 视频/图片
                     'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
@@ -187,6 +200,8 @@ def case_manage(request):
             'customer_headimgurl': '客户头像',
             'diary_give_like': '点赞数量',
             'case_type': '日记类型(1普通/2时间轴)',
+            'cover_show_type': '封面类型 视频/图片',
+            'is_give_like': '是否点赞',
         }
 
     else:
