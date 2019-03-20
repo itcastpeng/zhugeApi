@@ -199,11 +199,18 @@ def diary_manage(request):
 
                     diary_give_like = models.zgld_diary_action.objects.filter(diary_id=obj.id, action=1).count() # 点赞数量统计
 
+                    if len(obj.title) >= 50:
+                        summary = obj.title[:50]
+                    elif len(obj.title) >= 30:
+                        summary = obj.title[:30]
+                    else:
+                        summary = obj.title[:10]
+
                     result_data.append({
                         'timeline_id': obj.id,      # 时间轴详情ID
                         'cover_picture': cover_picture,
                         'diary_date': obj.diary_date.strftime('%Y-%m-%d %H:%M:%S'), # 发布时间
-                        'title': obj.title,
+                        'summary': summary,
                         'content': obj.content,
                         'diary_give_like': diary_give_like,     # 点赞数量
                         'diary_read_num': obj.read_count,       # 阅读数量
@@ -592,29 +599,32 @@ def diary_manage_oper(request, oper_type, o_id):
                     customer_id=customer_id,
                     action=2
                 )
-
+                if objs:
+                    objs.delete()
+                    response.msg = '已取消收藏'
+                else:
+                    models.zgld_diary_action.objects.create(
+                        diary_id=case_id,
+                        customer_id=customer_id,
+                        action=2
+                    )
+                    response.msg = '收藏成功'
             else:
                 objs = models.zgld_diary_action.objects.filter(
                     case_id=case_id,
                     customer_id=customer_id,
                     action=2
                 )
-            if objs:
-                response.msg = '已经收藏过此日记'
-            else:
-                if case_type == 1:
-                    models.zgld_diary_action.objects.create(
-                        diary_id=case_id,
-                        customer_id=customer_id,
-                        action=2
-                    )
+                if objs:
+                    objs.delete()
+                    response.msg = '已取消收藏'
                 else:
                     models.zgld_diary_action.objects.create(
                         case_id=case_id,
                         customer_id=customer_id,
                         action=2
                     )
-                response.msg = '收藏成功'
+                    response.msg = '收藏成功'
 
             response.code = 200
 
@@ -707,20 +717,29 @@ def diary_manage_oper(request, oper_type, o_id):
                     case_objs = case_objs[start_line: stop_line]
 
                 for obj in case_objs:
+                    cover_picture = []
+                    if obj.case.cover_picture:
+                        cover_picture = json.loads(obj.case.cover_picture)
+
                     ret_data.append({
                         'case_type': 2, # 时间轴
                         'diary_id':obj.case_id,
                         'case_name':obj.case.case_name,
-                        'cover_picture':obj.case.cover_picture,
+                        'cover_picture':cover_picture,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                     })
 
                 for obj in diary_objs:
+
+                    cover_picture = []
+                    if obj.diary.cover_picture:
+                        cover_picture = json.loads(obj.diary.cover_picture)
+
                     ret_data.append({
                         'case_type': 1,  # 普通案例
                         'diary_id': obj.diary_id,
                         'case_name': obj.diary.title,
-                        'cover_picture': obj.diary.cover_picture,
+                        'cover_picture': cover_picture,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                     })
 
