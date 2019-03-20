@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.diary_manage_verify import PraiseDiaryForm, diarySelectForm, \
-    ReviewDiaryForm, DiaryReviewSelectForm, BrowseCaseSelectForm, CollectionDiaryForm
+    ReviewDiaryForm, DiaryReviewSelectForm, SelectForm, CollectionDiaryForm
 from django.db.models import F, Q
 import json, datetime, base64,requests
 from publicFunc.condition_com import conditionCom
@@ -16,7 +16,7 @@ from publicFunc.Response import ResponseObj
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
 from django.shortcuts import render
 import os, redis, requests
-
+from publicFunc.base64 import b64encode, b64decode
 
 # 记录查询日志 (动能日志/ diary_manage调用)
 def record_view_log(data):
@@ -101,6 +101,7 @@ def diary_manage(request):
                         'read_count': diary_obj.read_count,                 # 阅读数量
                         'up_count': diary_obj.up_count,                     # 点赞数量
                         'comment_count': diary_obj.comment_count,           # 评论数量
+                        'case_type': 1,                                     # 日记类型
                         'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                     })
 
@@ -113,6 +114,7 @@ def diary_manage(request):
                 'up_count': '点赞数量',
                 'comment_count': '评论数量',
                 'read_count': '阅读数量',
+                'case_type': '日记类型',
                 'create_date': '创建时间',
             }
 
@@ -168,6 +170,7 @@ def diary_manage(request):
                     'diary_give_like': diary_give_like,     # 点赞数量
                     'diary_read_num': obj.read_count,       # 阅读数量
                     'comment_count': obj.comment_count,     # 评论数量
+                    'case_type': 2,                         # 日记类型
                 })
 
             data_list = {
@@ -190,6 +193,7 @@ def diary_manage(request):
                     'comment_count': '评论数量',
                 },
                 'create_date': '创建时间',
+                'case_type': '日记类型',
                 'count': '该时间轴 日记总数 /可做分页',
             }
 
@@ -212,6 +216,7 @@ def diary_manage(request):
     else:
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
+
     return JsonResponse(response.__dict__)
 
 
@@ -410,449 +415,15 @@ def create_user_customer_case_poster_qr_code(data):
 @account.is_token(models.zgld_customer)
 def diary_manage_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    customer_id = request.GET.get('user_id')
 
     if request.method == "POST":
-
-        # 评论日记
-        if oper_type == 'review_diary':
-
-            from_customer_id = request.GET.get('user_id')
-            content = request.POST.get('content')
-
-            request_data_dict = {
-                'diary_id': o_id,
-                'content': content,  # 文章所属用户的ID
-                'customer_id': from_customer_id,  # 文章所属用户的ID
-            }
-
-            forms_obj = ReviewDiaryForm(request_data_dict)
-            if forms_obj.is_valid():
-
-                encodestr = base64.b64encode(content.encode('utf-8'))
-                msg = str(encodestr, 'utf-8')
-
-                create_data = {
-                    'diary_id': o_id,
-                    'content': msg,
-                    'from_customer_id': from_customer_id
-                }
-                models.zgld_diary_comment.objects.create(**create_data)
-                diary_objs = models.zgld_diary.objects.filter(id=o_id)
-                if diary_objs:
-                    diary_objs.update(
-                        comment_count=F('comment_count') + 1
-                    )
-                ## 记录单个案例浏览量
-                case_objs = models.zgld_case.objects.filter(id=diary_objs[0].case_id)
-                if case_objs:
-                    case_objs.update(
-                        comment_count=F('comment_count') + 1
-                    )
-
-                response.code = 200
-                response.msg = "记录成功"
-            else:
-
-                print('-------未能通过------->>', forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-
-        ## 点赞日记
-        elif oper_type == 'praise_diary':
+        # 点赞
+        if oper_type == 'praise_case':
             customer_id = request.GET.get('user_id')
-            # status = request.POST.get('status')
-
-            request_data_dict = {
-                'diary_id': o_id,
-                'status': 1,  # 文章所属用户的ID
-
-            }
-
-            forms_obj = PraiseDiaryForm(request_data_dict)
-            if forms_obj.is_valid():
-
-                create_data = {
-                    'diary_id': o_id,
-                    'customer_id': customer_id,
-                    'status': 1,
-                    'action': 1  # 点赞
-                }
-                diary_objs = models.zgld_diary.objects.filter(id=o_id)
-                diary_up_down_objs = models.zgld_diary_action.objects.filter(action=1, diary_id=o_id,
-                                                                             customer_id=customer_id)
-                if diary_up_down_objs:
-                    diary_up_down_objs.update(
-                        status=1
-                    )
-                    response.code = 302
-                    response.msg = "已经点过赞了"
-                    response.data = {
-                        'up_count': diary_objs[0].up_count,
-                        'is_praise_diary': 1,
-                        'is_praise_diary_text': '已赞过此日记'
-                    }
-                else:
-                    models.zgld_diary_action.objects.create(**create_data)
-
-                    if diary_objs:
-                        diary_objs.update(
-                            up_count=F('up_count') + 1
-                        )
-                    response.data = {
-                        'up_count': diary_objs[0].up_count,
-                        'is_praise_diary': 1,
-                        'is_praise_diary_text': '已赞此案例'
-                    }
-                    response.code = 200
-                    response.msg = "记录成功"
-            else:
-
-                print('-------未能通过------->>', forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-        # 浏览案例记录(我-我的足迹)
-        elif oper_type == 'browse_case_list_record':
-            print('request.GET----->', request.GET)
-
-            forms_obj = BrowseCaseSelectForm(request.GET)
-            if forms_obj.is_valid():
-                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-
-                order = request.GET.get('order', '-create_date')
-                customer_id = request.GET.get('user_id')
-
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-
-                q1 = Q()
-                q1.connector = 'and'
-                q1.children.append(('customer_id', customer_id))
-                q1.children.append(('action', 3))
-
-                print('-----q1---->>', q1)
-                objs = models.zgld_diary_action.objects.select_related('case', 'customer').filter(q1).order_by(order)
-                count = objs.count()
-
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
-
-                ret_data = []
-                for obj in objs:
-
-                    status = obj.case.status
-                    status_text = obj.case.get_status_display()
-
-                    cover_picture = obj.case.cover_picture
-                    if cover_picture:
-                        cover_picture = json.loads(cover_picture)
-
-                    _case_id = obj.case_id
-                    ## 查找出最新更新的日记
-                    last_diary_data = ''
-                    diary_objs = models.zgld_diary.objects.filter(case_id=_case_id).order_by('-create_date')
-                    if diary_objs:
-
-                        diary_obj = diary_objs[0]
-                        _status = diary_obj.status
-                        _status_text = diary_obj.get_status_display()
-                        _cover_picture = diary_obj.cover_picture
-                        _content = diary_obj.content
-
-                        if _cover_picture:
-                            _cover_picture = json.loads(_cover_picture)
-                        # if _content:
-                        #     _content = json.loads(_content)
-
-                        last_diary_data = {
-                            'diary_id': diary_obj.id,
-                            'case_id': diary_obj.case_id,
-                            'company_id': diary_obj.company_id,
-
-                            'title': diary_obj.title,
-                            'diary_date': diary_obj.diary_date.strftime(
-                                '%Y-%m-%d %H:%M:%S') if diary_obj.diary_date else '',
-                            'cover_picture': _cover_picture,
-                            'content': _content,
-
-                            'status': _status,
-                            'status_text': _status_text,
-
-                            'cover_show_type': diary_obj.cover_show_type,
-                            'cover_show_type_text': diary_obj.get_cover_show_type_display(),
-
-                            'create_date': diary_obj.create_date.strftime('%Y-%m-%d') if diary_obj.create_date else '',
-                        }
-
-                    tag_list = list(obj.case.tags.values('id', 'name'))
-                    ret_data.append({
-                        'case_id': _case_id,
-                        'company_id': obj.case.company_id,
-                        'customer_name': obj.case.customer_name,
-
-                        'headimgurl': obj.case.headimgurl,
-                        'cover_picture': cover_picture,
-
-                        'status': status,
-                        'status_text': status_text,
-                        'tag_list': tag_list,
-
-                        'last_diary_data': last_diary_data,  # 最后日记的内容
-
-                        'create_date': obj.create_date.strftime('%Y-%m-%d') if obj.create_date else '',
-                    })
-
-                    #  查询成功 返回200 状态码
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count
-                    }
-
-
-            else:
-
-                response.code = 301
-                response.msg = "验证未通过"
-                response.data = json.loads(forms_obj.errors.as_json())
-
-        # 收藏(我-我的收藏)
-        elif oper_type == 'collection_case_list_record':
-            print('request.GET----->', request.GET)
-
-            forms_obj = BrowseCaseSelectForm(request.GET)
-            if forms_obj.is_valid():
-                print('----forms_obj.cleaned_data -->', forms_obj.cleaned_data)
-
-                order = request.GET.get('order', '-create_date')
-                customer_id = request.GET.get('user_id')
-
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-
-                q1 = Q()
-                q1.connector = 'and'
-                q1.children.append(('customer_id', customer_id))
-                q1.children.append(('action', 2))  # (2, '收藏日记'),
-                q1.children.append(('status', 1))  # (1, '已点赞|已收藏')
-
-                print('-----q1---->>', q1)
-                objs = models.zgld_diary_action.objects.select_related('case', 'customer').filter(q1).order_by(order)
-                count = objs.count()
-
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
-
-                ret_data = []
-                for obj in objs:
-
-                    status = obj.case.status
-                    status_text = obj.case.get_status_display()
-
-                    cover_picture = obj.case.cover_picture
-                    if cover_picture:
-                        cover_picture = json.loads(cover_picture)
-
-                    _case_id = obj.case_id
-                    ## 查找出最新更新的日记
-                    last_diary_data = ''
-                    diary_objs = models.zgld_diary.objects.filter(case_id=_case_id).order_by('-create_date')
-                    if diary_objs:
-
-                        diary_obj = diary_objs[0]
-                        _status = diary_obj.status
-                        _status_text = diary_obj.get_status_display()
-                        _cover_picture = diary_obj.cover_picture
-                        _content = diary_obj.content
-
-                        if _cover_picture:
-                            _cover_picture = json.loads(_cover_picture)
-
-                        last_diary_data = {
-                            'diary_id': diary_obj.id,
-                            'case_id': diary_obj.case_id,
-                            'company_id': diary_obj.company_id,
-
-                            'title': diary_obj.title,
-                            'diary_date': diary_obj.diary_date.strftime(
-                                '%Y-%m-%d %H:%M:%S') if diary_obj.diary_date else '',
-                            'cover_picture': _cover_picture,
-                            'content': _content,
-
-                            'status': _status,
-                            'status_text': _status_text,
-
-                            'cover_show_type': diary_obj.cover_show_type,
-                            'cover_show_type_text': diary_obj.get_cover_show_type_display(),
-
-                            'create_date': diary_obj.create_date.strftime(
-                                '%Y-%m-%d %H:%M:%S') if diary_obj.create_date else '',
-                        }
-
-                    tag_list = list(obj.case.tags.values('id', 'name'))
-                    ret_data.append({
-                        'case_id': _case_id,
-                        'company_id': obj.case.company_id,
-                        'customer_name': obj.case.customer_name,
-
-                        'headimgurl': obj.case.headimgurl,
-                        'cover_picture': cover_picture,
-
-                        'status': status,
-                        'status_text': status_text,
-                        'tag_list': tag_list,
-
-                        'last_diary_data': last_diary_data,  # 最后日记的内容
-
-                        'create_date': obj.create_date.strftime('%Y-%m-%d') if obj.create_date else '',
-                    })
-
-                    #  查询成功 返回200 状态码
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count
-                    }
-
-
-            else:
-
-                response.code = 301
-                response.msg = "验证未通过"
-                response.data = json.loads(forms_obj.errors.as_json())
-
-    elif request.method == 'GET':
-
-        ## 文章评论列表展示
-        if oper_type == 'diary_review_list':
-
-            customer_id = request.GET.get('user_id')
-            form_data = {
-                'diary_id': o_id
-            }
-            forms_obj = DiaryReviewSelectForm(form_data)
-
-            if forms_obj.is_valid():
-                current_page = forms_obj.cleaned_data['current_page']
-                length = forms_obj.cleaned_data['length']
-
-                objs = models.zgld_diary_comment.objects.select_related('from_customer', 'to_customer').filter(diary_id=o_id).filter(Q(is_audit_pass=1) | Q(from_customer=customer_id)).order_by('-create_date')
-
-                count = objs.count()
-                if objs:
-
-                    # if length != 0:
-                    #     start_line = (current_page - 1) * length
-                    #     stop_line = start_line + length
-                    #     objs = objs[start_line: stop_line]
-
-                    ret_data = []
-                    for obj in objs:
-
-                        try:
-                            username = base64.b64decode(obj.from_customer.username)
-                            customer_name = str(username, 'utf-8')
-                            print('----- 解密b64decode username----->', username)
-                        except Exception as e:
-                            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.from_customer_id, "|", e)
-                            customer_name = '客户ID%s' % (obj.from_customer_id)
-
-                        _content = base64.b64decode(obj.content)
-                        content = str(_content, 'utf-8')
-                        print('----- 解密b64decode 内容content----->', content)
-
-                        ret_data.append({
-                            'from_customer_id': obj.from_customer_id,
-                            'from_customer_name': customer_name,
-                            'from_customer_headimgurl': obj.from_customer.headimgurl,
-                            'content': content,
-                            'create_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
-                        })
-
-                    response.code = 200
-                    response.msg = '查询成功'
-                    response.data = {
-                        'ret_data': ret_data,
-                        'data_count': count,
-                    }
-
-                else:
-                    response.code = 302
-                    response.msg = '没有数据'
-
-            else:
-                response.code = 402
-                response.msg = "请求异常"
-                response.data = json.loads(forms_obj.errors.as_json())
-
-        # 收藏案例
-        elif oper_type == 'collection_case':
-            customer_id = request.GET.get('user_id')
-            case_id = request.POST.get('case_id')
-            status = request.POST.get('status')
-
-            request_data_dict = {
-                'case_id': case_id,
-                'status': status,  # 文章所属用户的ID
-            }
-
-            forms_obj = CollectionDiaryForm(request_data_dict)
-            if forms_obj.is_valid():
-
-                create_data = {
-                    'case_id': case_id,
-                    'customer_id': customer_id,
-                    'status': status,
-                    'action': 2  # 收藏
-                }
-
-                case_up_down_objs = models.zgld_diary_action.objects.filter(action=2, case_id=case_id,
-                    customer_id=customer_id)
-                if case_up_down_objs:
-
-                    case_up_down_objs.update(
-                        status=status
-                    )
-                    case_up_down_obj = case_up_down_objs[0]
-                    status = case_up_down_obj.status
-                    status_text = case_up_down_obj.get_status_display()
-
-                    response.data = {
-                        'status': status,
-                        'status_text': status_text
-                    }
-                    response.code = 200
-                    response.msg = "记录成功"
-
-                else:
-                    case_up_down_obj = models.zgld_diary_action.objects.create(**create_data)
-                    response.data = {
-                        'status': case_up_down_obj.status,
-                        'status_text': '已收藏此案例'
-                    }
-                    response.code = 200
-                    response.msg = "记录成功"
-            else:
-
-                print('-------未能通过------->>', forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
-
-            ## 点赞案例
-
-        # 时间轴日记列表 和 普通日记 点赞
-        elif oper_type == 'praise_case':
-            customer_id = request.GET.get('user_id')
-            case_id = o_id                                  # 日记ID
-            case_type = request.GET.get('case_type')        # 日记类型
-            diary_id = request.GET.get('diary_id')          # 时间轴详情ID
+            case_id = o_id  # 日记ID
+            case_type = request.GET.get('case_type')  # 日记类型
+            diary_id = request.GET.get('diary_id')  # 时间轴详情ID
             if case_type:
                 case_type = int(case_type)
 
@@ -884,6 +455,7 @@ def diary_manage_oper(request, oper_type, o_id):
                             customer_id=formData.get('customer_id')
                         )
                         response.msg = '点赞成功'
+
                 else:
                     # 普通日记点赞
                     if case_type == 1:
@@ -927,9 +499,264 @@ def diary_manage_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 评论日记
+        elif oper_type == 'review_diary':
+
+            from_customer_id = request.GET.get('user_id')
+            comments = request.POST.get('comments')
+            # reply_comment = request.POST.get('reply_comment') # 回复评论(评论别人的评论)
+
+            request_data_dict = {
+                'diary_id': o_id,
+                'comments': comments,                 # 评论内容
+                'customer_id': from_customer_id,      # 文章所属用户的ID
+                # 'reply_comment': reply_comment,      # 回复评论
+            }
+
+            forms_obj = ReviewDiaryForm(request_data_dict)
+            if forms_obj.is_valid():
+                cleaned_data = forms_obj.cleaned_data
+                msg = b64encode(cleaned_data.get('comments'))
+
+                create_data = {
+                    'diary_id': cleaned_data.get('o_id'),
+                    'content': msg,
+                    'from_customer_id': cleaned_data.get('customer_id'),
+                    # 'reply_comment_id': reply_comment
+                }
+
+                models.zgld_diary_comment.objects.create(**create_data)
+                response.code = 200
+                response.msg = "评论成功"
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 收藏日记
+        elif oper_type == 'collect_diary':
+            case_id = o_id
+            case_type = int(request.POST.get('case_type'))
+            if case_type == 1:
+                objs = models.zgld_diary_action.objects.filter(
+                    diary_id=case_id,
+                    customer_id=customer_id,
+                    action=2
+                )
+
+            else:
+                objs = models.zgld_diary_action.objects.filter(
+                    case_id=case_id,
+                    customer_id=customer_id,
+                    action=2
+                )
+            if objs:
+                response.msg = '已经收藏过次日记'
+            else:
+                if case_type == 1:
+                    models.zgld_diary_action.objects.create(
+                        diary_id=case_id,
+                        customer_id=customer_id,
+                        action=2
+                    )
+                else:
+                    models.zgld_diary_action.objects.create(
+                        case_id=case_id,
+                        customer_id=customer_id,
+                        action=2
+                    )
+                response.msg = '收藏成功'
+
+            response.code = 200
+
+    elif request.method == 'GET':
 
 
-        ## 小程序-案例-海报内容
+        ## 查询评论
+        if oper_type == 'diary_review_list':
+
+            customer_id = request.GET.get('user_id')
+            form_data = {
+                'diary_id': o_id
+            }
+            forms_obj = DiaryReviewSelectForm(form_data)
+
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+
+                objs = models.zgld_diary_comment.objects.select_related(
+                    'from_customer',
+                ).filter(diary_id=o_id).filter(
+                    Q(is_audit_pass=1) & Q(from_customer=customer_id)
+                ).order_by('-create_date')
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                ret_data = []
+                for obj in objs:
+                    customer_name = b64decode(obj.from_customer.username)
+                    content = b64decode(obj.content)
+                    ret_data.append({
+                        'from_customer_id': obj.from_customer_id,
+                        'from_customer_name': customer_name,
+                        'from_customer_headimgurl': obj.from_customer.headimgurl,
+                        'content': content,
+                        'create_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                    })
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count,
+                }
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+        # (我-我的足迹)
+        elif oper_type == 'browse_case_list_record':
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                order = request.GET.get('order', '-create_date')
+                customer_id = request.GET.get('user_id')
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                ## 搜索条件
+                field_dict = {
+                    'id': '',
+                }
+                q = conditionCom(request, field_dict)
+                q.add(Q(action=3) & Q(customer_id=customer_id), Q.AND)
+
+                objs = models.zgld_diary_action.objects.select_related('case', 'customer').filter(q).order_by(order)
+                count = objs.count()
+                ret_data = []
+                case_objs = objs.exclude(case_id__isnull=True)
+                diary_objs = objs.exclude(diary_id__isnull=True)
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    diary_objs = diary_objs[start_line: stop_line]
+                    case_objs = case_objs[start_line: stop_line]
+
+
+                for obj in case_objs:
+                    ret_data.append({
+                        'case_type': 2, # 时间轴
+                        'diary_id':obj.case_id,
+                        'case_name':obj.case.case_name,
+                        'cover_picture':obj.case.cover_picture,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
+
+                for obj in diary_objs:
+                    ret_data.append({
+                        'case_type': 1,  # 普通案例
+                        'diary_id': obj.diary_id,
+                        'case_name': obj.diary.title,
+                        'cover_picture': obj.diary.cover_picture,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
+
+                # 按时间排序
+                ret_data = sorted(ret_data, key=lambda x: x['create_date'], reverse=True)
+
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count
+                }
+                response.note = {
+                    'case_type': '案例类型',  # 普通案例
+                    'diary_id': '案例ID/日记ID',
+                    'case_name': '案例名称/日记名称',
+                    'cover_picture': '封面图',
+                    'create_date':'创建时间'
+                }
+            else:
+                response.code = 301
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
+
+        # (我-收藏日记)
+        elif oper_type == 'collection_case':
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                order = request.GET.get('order', '-create_date')
+                customer_id = request.GET.get('user_id')
+
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                ## 搜索条件
+                field_dict = {
+                    'id': '',
+                }
+                q = conditionCom(request, field_dict)
+                q.add(Q(action=2) & Q(customer_id=customer_id), Q.AND)
+
+                objs = models.zgld_diary_action.objects.select_related('case', 'customer').filter(q).order_by(order)
+                count = objs.count()
+                ret_data = []
+                case_objs = objs.exclude(case_id__isnull=True)
+                diary_objs = objs.exclude(diary_id__isnull=True)
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    diary_objs = diary_objs[start_line: stop_line]
+                    case_objs = case_objs[start_line: stop_line]
+
+                for obj in case_objs:
+                    ret_data.append({
+                        'case_type': 2,  # 时间轴
+                        'diary_id': obj.case_id,
+                        'case_name': obj.case.case_name,
+                        'cover_picture': obj.case.cover_picture,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
+
+                for obj in diary_objs:
+                    ret_data.append({
+                        'case_type': 1,  # 普通案例
+                        'diary_id': obj.diary_id,
+                        'case_name': obj.diary.title,
+                        'cover_picture': obj.diary.cover_picture,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
+
+                # 按时间排序
+                ret_data = sorted(ret_data, key=lambda x: x['create_date'], reverse=True)
+
+                #  查询成功 返回200 状态码
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'data_count': count
+                }
+                response.note = {
+                    'case_type': '案例类型',  # 普通案例
+                    'diary_id': '案例ID/日记ID',
+                    'case_name': '案例名称/日记名称',
+                    'cover_picture': '封面图',
+                    'create_date': '创建时间'
+                }
+            else:
+                response.code = 301
+                response.msg = "验证未通过"
+                response.data = json.loads(forms_obj.errors.as_json())
+
+        ## 小程序-案例-海报内容×
         elif oper_type == 'xcx_case_poster':
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
@@ -1001,7 +828,7 @@ def diary_manage_oper(request, oper_type, o_id):
 
             ## 小程序获取案例海报截图
 
-
+        # ×
         elif oper_type == 'xcx_get_case_poster_screenshots':
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')

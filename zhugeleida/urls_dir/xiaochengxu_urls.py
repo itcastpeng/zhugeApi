@@ -70,7 +70,7 @@ urlpatterns = [
     url(r'^goodsClass$', goodsClassification.goodsClass),  # 商品分类管理查询
 
     # --------------------------------------日记------------------------------------
-    # 日记列表
+    # 案例管理
     url(r'^case_manage$', case_manage.case_manage),
 
     # 日记的海报
@@ -79,7 +79,7 @@ urlpatterns = [
     # 案例标签管理
     url(r'^case_tag/(?P<oper_type>\w+)$', case_tag.case_tag),
 
-    # 日记详情
+    # 日记管理
     url(r'^diary_manage$', diary_manage.diary_manage),
 
     # 日记操作

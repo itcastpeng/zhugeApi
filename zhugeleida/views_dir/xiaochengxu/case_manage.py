@@ -106,7 +106,7 @@ def case_manage(request):
 
             count = diary_objs.count() + objs_exc_case_obj.count() # 列表页总数
 
-            # 时间轴日记列表页
+            # # 时间轴日记列表页
             for obj in objs_exc_case_obj:
 
                 cover_picture = []
@@ -122,27 +122,33 @@ def case_manage(request):
                     'customer_headimgurl': obj.headimgurl,  # 客户头像
                     'diary_give_like': diary_give_like,  # 点赞数量
                     'case_type': 2,  # 日记类型(1普通/2时间轴)
+                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
             # 普通日记列表页
             for diary_obj in diary_objs:
                 # tag_list = list(diary_obj.case.tags.values('id', 'name'))  # 标签列表
                 # case_type = int(diary_obj.case.case_type) # 日记类型
-
+                # print('case_type------> ', case_type)
+                # if case_type == 1:
                 cover_picture = []
                 if diary_obj.cover_picture: # 封面（取第一张）
                     cover_picture = json.loads(diary_obj.cover_picture)
-
                 diary_give_like = models.zgld_diary_action.objects.filter(diary_id=diary_obj.id).count()
+                diary_list_id = diary_obj.id
+                case_name = diary_obj.title
+                customer_name = diary_obj.case.customer_name
+                headimgurl = diary_obj.case.headimgurl
 
                 data_list.append({
-                    'diary_list_id': diary_obj.id,
+                    'diary_list_id': diary_list_id,
                     'cover_picture': cover_picture,                     # 如果为图片取第一张 / 如果是视频 就取视频
-                    'case_name': diary_obj.title,                       # 案例名称(普通案例 为标题)
-                    'customer_name': diary_obj.case.customer_name,      # 客户名称
-                    'customer_headimgurl': diary_obj.case.headimgurl,   # 客户头像
+                    'case_name': case_name,                             # 案例名称(普通案例 为标题)
+                    'customer_name': customer_name,                     # 客户名称
+                    'customer_headimgurl': headimgurl,                  # 客户头像
                     'diary_give_like': diary_give_like,                 # 点赞数量
                     'case_type': 1,                                     # 日记类型(1普通/2时间轴)
+                    'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
 
@@ -154,6 +160,8 @@ def case_manage(request):
             }
             record_view_log(data)
 
+            # 按时间排序
+            data_list = sorted(data_list, key=lambda x: x['create_date'], reverse=True)
 
         #  查询成功 返回200 状态码
         response.code = 200
