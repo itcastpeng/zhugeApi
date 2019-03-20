@@ -54,6 +54,7 @@ def diary_manage(request):
         u_id = request.GET.get('u_id')
         case_id = request.GET.get('case_id')    # 列表ID 判断日记类型 时间轴展示所有数据/普通展示详情
         user_id = request.GET.get('user_id')    # 客户ID
+        timeline_id = request.GET.get('timeline_id')    # 时间轴日记ID  (传此参数 查询时间轴详情 内容)
 
         case_type = int(request.GET.get('case_type')) # 日记类型(1普通/2时间轴)
 
@@ -67,135 +68,166 @@ def diary_manage(request):
 
         data_list = []
         count = 0
-
-        # 普通日记
-        if case_type == 1:
-
-            # 普通日记 阅读量增加
-            diary_objs = models.zgld_diary.objects.filter(id=case_id)
-            if diary_objs:
-                diary_objs.update(  # 阅读次数
+        if timeline_id:
+            objs = models.zgld_diary.objects.filter(id=timeline_id)
+            if objs:
+                objs.update(  # 阅读次数
                     read_count=F('read_count') + 1
                 )
+
+                obj = objs[0]
+                cover_picture = ''
+                if obj.cover_picture:  # 封面（取第一张）
+                    cover_picture = json.loads(obj.cover_picture)
+
                 models.zgld_diary_action.objects.create(
                     action=3,
                     customer_id=user_id,
                     diary_id=case_id
                 )
 
-                for diary_obj in diary_objs:
-
-                    cover_picture = ''
-                    if diary_obj.cover_picture:  # 封面（取第一张）
-                        cover_picture = json.loads(diary_obj.cover_picture)
-
-                    customer_name = diary_obj.case.customer_name
-                    customer_headimgurl = diary_obj.case.headimgurl
-                    content = diary_obj.content
-                    data_list.append({
-                        'cover_picture': cover_picture,
-                        'customer_headimgurl': customer_headimgurl,
-                        'customer_name': customer_name,
-                        'title': diary_obj.title,
-                        'content': content,
-                        'read_count': diary_obj.read_count,                 # 阅读数量
-                        'up_count': diary_obj.up_count,                     # 点赞数量
-                        'comment_count': diary_obj.comment_count,           # 评论数量
-                        'case_type': 1,                                     # 日记类型
-                        'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    })
-
-            response.note = {
-                'cover_picture': '轮播图',
-                'customer_headimgurl': '客户头像',
-                'customer_name': '客户名称',
-                'content': '日记内容',
-                'title': '日记标题',
-                'up_count': '点赞数量',
-                'comment_count': '评论数量',
-                'read_count': '阅读数量',
-                'case_type': '日记类型',
-                'create_date': '创建时间',
-            }
-
-        # 时间轴
-        else:
-
-            # 时间轴 阅读量增加
-            zgld_case_objs = models.zgld_case.objects.filter(id=case_id)
-
-            customer_name = ''          # 客户名称
-            create_date = ''            # 创建时间
-            become_beautiful_cover = '' # 变美图片
-            if zgld_case_objs:
-                zgld_case_obj = zgld_case_objs[0]
-                customer_name = zgld_case_obj.customer_name
-                create_date = zgld_case_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
-                become_beautiful_cover = json.loads(zgld_case_obj.become_beautiful_cover)
-
-                zgld_case_objs.update(
-                    read_count=F('read_count') + 1
-                )
-                models.zgld_diary_action.objects.create(
-                    action=3,
-                    customer_id=user_id,
-                    case_id=case_id
-                )
-
-            objs = models.zgld_diary.objects.filter(
-                case_id=case_id,
-                diary_date__lte=datetime.datetime.today(), # 添加日记时 会选择发布日期 发布日期小于今天才展示
-            ).order_by('-diary_date')
-
-            count = objs.count()
-            result_data = []
-
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                objs = objs[start_line: stop_line]
-
-            for obj in objs:
-                cover_picture = ''
-                if obj.cover_picture:  # 封面
-                    cover_picture = json.loads(obj.cover_picture)
-
-                diary_give_like = models.zgld_diary_action.objects.filter(diary_id=obj.id, action=1).count() # 点赞数量统计
-
-                result_data.append({
+                data_list = {
                     'cover_picture': cover_picture,
-                    'diary_date': obj.diary_date.strftime('%Y-%m-%d %H:%M:%S'), # 发布时间
+                    'customer_headimgurl': obj.case.headimgurl,
+                    'customer_name': obj.case.customer_name,
                     'title': obj.title,
                     'content': obj.content,
-                    'diary_give_like': diary_give_like,     # 点赞数量
-                    'diary_read_num': obj.read_count,       # 阅读数量
-                    'comment_count': obj.comment_count,     # 评论数量
-                    'case_type': 2,                         # 日记类型
-                })
+                    'read_count': obj.read_count,  # 阅读数量
+                    'up_count': obj.up_count,  # 点赞数量
+                    'comment_count': obj.comment_count,  # 评论数量
+                    'case_type': 2,  # 日记类型
+                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                }
+        else:
+            # 普通日记
+            if case_type == 1:
 
-            data_list = {
-                'become_beautiful_cover': become_beautiful_cover,
-                'customer_name': customer_name,
-                'result_data': result_data,
-                'create_date': create_date,
-                'count': count,
-            }
-            response.note = {
-                'become_beautiful_cover': '变美图片',
-                'customer_name': '客户名称',
-                'result_data': {
-                    'cover_picture': '封面图片',
-                    'diary_date': '发布时间',
-                    'title': '日记标题',
+                # 普通日记 阅读量增加
+                diary_objs = models.zgld_diary.objects.filter(id=case_id)
+                if diary_objs:
+                    diary_objs.update(  # 阅读次数
+                        read_count=F('read_count') + 1
+                    )
+                    models.zgld_diary_action.objects.create(
+                        action=3,
+                        customer_id=user_id,
+                        diary_id=case_id
+                    )
+
+                    for diary_obj in diary_objs:
+
+                        cover_picture = ''
+                        if diary_obj.cover_picture:  # 封面（取第一张）
+                            cover_picture = json.loads(diary_obj.cover_picture)
+
+                        customer_name = diary_obj.case.customer_name
+                        customer_headimgurl = diary_obj.case.headimgurl
+                        content = diary_obj.content
+                        data_list.append({
+                            'cover_picture': cover_picture,
+                            'customer_headimgurl': customer_headimgurl,
+                            'customer_name': customer_name,
+                            'title': diary_obj.title,
+                            'content': content,
+                            'read_count': diary_obj.read_count,                 # 阅读数量
+                            'up_count': diary_obj.up_count,                     # 点赞数量
+                            'comment_count': diary_obj.comment_count,           # 评论数量
+                            'case_type': 1,                                     # 日记类型
+                            'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        })
+
+                response.note = {
+                    'cover_picture': '轮播图',
+                    'customer_headimgurl': '客户头像',
+                    'customer_name': '客户名称',
                     'content': '日记内容',
-                    'diary_give_like': '点赞数量',
-                    'diary_read_num': '阅读数量',
+                    'title': '日记标题',
+                    'up_count': '点赞数量',
                     'comment_count': '评论数量',
-                },
-                'create_date': '创建时间',
-                'case_type': '日记类型',
-                'count': '该时间轴 日记总数 /可做分页',
-            }
+                    'read_count': '阅读数量',
+                    'case_type': '日记类型',
+                    'create_date': '创建时间',
+                }
+
+            # 时间轴
+            else:
+
+                # 时间轴 阅读量增加
+                zgld_case_objs = models.zgld_case.objects.filter(id=case_id)
+
+                customer_name = ''          # 客户名称
+                create_date = ''            # 创建时间
+                become_beautiful_cover = '' # 变美图片
+                if zgld_case_objs:
+                    zgld_case_obj = zgld_case_objs[0]
+                    customer_name = zgld_case_obj.customer_name
+                    create_date = zgld_case_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                    become_beautiful_cover = json.loads(zgld_case_obj.become_beautiful_cover)
+
+                    zgld_case_objs.update(
+                        read_count=F('read_count') + 1
+                    )
+                    models.zgld_diary_action.objects.create(
+                        action=3,
+                        customer_id=user_id,
+                        case_id=case_id
+                    )
+
+                objs = models.zgld_diary.objects.filter(
+                    case_id=case_id,
+                    diary_date__lte=datetime.datetime.today(), # 添加日记时 会选择发布日期 发布日期小于今天才展示
+                ).order_by('-diary_date')
+
+                count = objs.count()
+                result_data = []
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                for obj in objs:
+                    cover_picture = ''
+                    if obj.cover_picture:  # 封面
+                        cover_picture = json.loads(obj.cover_picture)
+
+                    diary_give_like = models.zgld_diary_action.objects.filter(diary_id=obj.id, action=1).count() # 点赞数量统计
+
+                    result_data.append({
+                        'timeline_id': obj.id,      # 时间轴详情ID
+                        'cover_picture': cover_picture,
+                        'diary_date': obj.diary_date.strftime('%Y-%m-%d %H:%M:%S'), # 发布时间
+                        'title': obj.title,
+                        'content': obj.content,
+                        'diary_give_like': diary_give_like,     # 点赞数量
+                        'diary_read_num': obj.read_count,       # 阅读数量
+                        # 'comment_count': obj.comment_count,     # 评论数量
+                        'case_type': 2,                         # 日记类型
+                    })
+
+                data_list = {
+                    'become_beautiful_cover': become_beautiful_cover,
+                    'customer_name': customer_name,
+                    'result_data': result_data,
+                    'create_date': create_date,
+                    'count': count,
+                }
+                response.note = {
+                    'become_beautiful_cover': '变美图片',
+                    'customer_name': '客户名称',
+                    'result_data': {
+                        'cover_picture': '封面图片',
+                        'diary_date': '发布时间',
+                        'title': '日记标题',
+                        'content': '日记内容',
+                        'diary_give_like': '点赞数量',
+                        'diary_read_num': '阅读数量',
+                        # 'comment_count': '评论数量',
+                    },
+                    'create_date': '创建时间',
+                    'case_type': '日记类型',
+                    'count': '该时间轴 日记总数 /可做分页',
+                }
 
         # 记录该客户 点击查看日记详情日志 (动能记录)
         data = {
@@ -218,8 +250,6 @@ def diary_manage(request):
         response.msg = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
-
-
 
 
 
@@ -517,13 +547,17 @@ def diary_manage_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 cleaned_data = forms_obj.cleaned_data
                 msg = b64encode(cleaned_data.get('comments'))
-
+                diary_id, objs = cleaned_data.get('diary_id')
                 create_data = {
-                    'diary_id': cleaned_data.get('o_id'),
+                    'diary_id': diary_id,
                     'content': msg,
-                    'from_customer_id': cleaned_data.get('customer_id'),
+                    'from_customer_id': from_customer_id,
                     # 'reply_comment_id': reply_comment
                 }
+
+                objs.update(  # 评论次数
+                    comment_count=F('comment_count') + 1
+                )
 
                 models.zgld_diary_comment.objects.create(**create_data)
                 response.code = 200
@@ -583,11 +617,13 @@ def diary_manage_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-
+                q = Q()
+                q.add(Q(is_audit_pass=1) | Q(from_customer_id=customer_id) & Q(is_audit_pass__isnull=False), Q.AND)
+                print('q-----> ', q)
                 objs = models.zgld_diary_comment.objects.select_related(
                     'from_customer',
                 ).filter(diary_id=o_id).filter(
-                    Q(is_audit_pass=1) & Q(from_customer=customer_id)
+                    q
                 ).order_by('-create_date')
                 count = objs.count()
 
