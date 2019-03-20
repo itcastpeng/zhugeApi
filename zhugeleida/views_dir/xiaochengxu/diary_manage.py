@@ -69,7 +69,7 @@ def diary_manage(request):
         data_list = []
         count = 0
         if timeline_id:
-            objs = models.zgld_diary.objects.filter(id=timeline_id)
+            objs = models.zgld_diary.objects.filter(id=timeline_id).order_by(order)
             if objs:
                 objs.update(  # 阅读次数
                     read_count=F('read_count') + 1
@@ -182,7 +182,7 @@ def diary_manage(request):
                 objs = models.zgld_diary.objects.filter(
                     case_id=case_id,
                     diary_date__lte=datetime.datetime.today(), # 添加日记时 会选择发布日期 发布日期小于今天才展示
-                ).order_by('-diary_date')
+                ).order_by(order)
 
                 count = objs.count()
                 result_data = []
