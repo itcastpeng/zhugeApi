@@ -209,9 +209,9 @@ def diary_manage(request):
                     result_data.append({
                         'timeline_id': obj.id,      # 时间轴详情ID
                         'cover_picture': cover_picture,
-                        'diary_date': obj.diary_date.strftime('%Y-%m-%d %H:%M:%S'), # 发布时间
+                        'diary_date': obj.diary_date.strftime('%Y-%m-%d'), # 发布时间
                         'summary': summary,
-                        'content': obj.content,
+                        'title': obj.title,
                         'diary_give_like': diary_give_like,     # 点赞数量
                         'diary_read_num': obj.read_count,       # 阅读数量
                         'cover_show_type': obj.cover_show_type, # 阅读数量
@@ -798,20 +798,28 @@ def diary_manage_oper(request, oper_type, o_id):
                     case_objs = case_objs[start_line: stop_line]
 
                 for obj in case_objs:
+                    cover_picture = []
+                    if obj.case.cover_picture:
+                        cover_picture = json.loads(obj.case.cover_picture)
+
                     ret_data.append({
                         'case_type': 2,  # 时间轴
                         'diary_id': obj.case_id,
                         'case_name': obj.case.case_name,
-                        'cover_picture': obj.case.cover_picture,
+                        'cover_picture': cover_picture,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                     })
 
                 for obj in diary_objs:
+                    cover_picture = ''
+                    if obj.diary.cover_picture:
+                        cover_picture = json.loads(obj.diary.cover_picture)
+
                     ret_data.append({
                         'case_type': 1,  # 普通案例
                         'diary_id': obj.diary_id,
                         'case_name': obj.diary.title,
-                        'cover_picture': obj.diary.cover_picture,
+                        'cover_picture': cover_picture,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                     })
 
