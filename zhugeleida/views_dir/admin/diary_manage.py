@@ -118,40 +118,39 @@ def diary_manage(request, oper_type):
 
                 ret_data = []
 
-                if objs:
-                    for obj in objs:
-                        status = obj.status
-                        status_text = obj.get_status_display()
-                        content = obj.content
+                for obj in objs:
+                    status = obj.status
+                    status_text = obj.get_status_display()
+                    content = obj.content
 
-                        cover_picture = []
-                        if obj.cover_picture:
-                            cover_picture =  json.loads(obj.cover_picture)
+                    cover_picture = []
+                    if obj.cover_picture:
+                        cover_picture =  json.loads(obj.cover_picture)
 
-                        poster_cover = []
-                        if obj.poster_cover:
-                            poster_cover = json.loads(obj.poster_cover)
+                    poster_cover = []
+                    if obj.poster_cover:
+                        poster_cover = json.loads(obj.poster_cover)
 
-                        ret_data.append({
-                            'diary_id': obj.id,
-                            'case_id': obj.case_id,
-                            'company_id': obj.company_id,
+                    ret_data.append({
+                        'diary_id': obj.id,
+                        'case_id': obj.case_id,
+                        'company_id': obj.company_id,
 
-                            'title': obj.title,
-                            'diary_date' : obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
-                            'cover_picture': cover_picture,
-                            'summary': obj.summary,
-                            'content': content,
-                            'poster_cover': poster_cover,
+                        'title': obj.title,
+                        'diary_date' : obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else '',
+                        'cover_picture': cover_picture,
+                        'summary': obj.summary,
+                        'content': content,
+                        'poster_cover': poster_cover,
 
-                            'status': status,
-                            'status_text': status_text,
+                        'status': status,
+                        'status_text': status_text,
 
-                            'cover_show_type' : obj.cover_show_type,
-                            'cover_show_type_text' : obj.get_cover_show_type_display(),
+                        'cover_show_type' : obj.cover_show_type,
+                        'cover_show_type_text' : obj.get_cover_show_type_display(),
 
-                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
-                        })
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
 
                 #  查询成功 返回200 状态码
                 response.code = 200
@@ -207,7 +206,6 @@ def diary_manage_oper(request, oper_type, o_id):
             status = request.POST.get('status')
             cover_show_type = request.POST.get('cover_show_type')  # (1,'只展示图片'),  (2,'只展示视频'),
             cover_picture = request.POST.get('cover_picture')  # 普通日记 上传(图片/视频)
-            print('cover_picture---cover_picture-cover_picture-cover_picture---> ', cover_picture)
             form_data = {
                 'diary_id': diary_id,
                 'company_id': company_id,
@@ -238,11 +236,11 @@ def diary_manage_oper(request, oper_type, o_id):
                 cover_picture = forms_obj.cleaned_data.get('cover_picture')
                 if int(case_type) == 1:  # 普通案例
                     cover_picture = json.loads(cover_picture)
-                    diary_objs.update(cover_picture = json.dumps(cover_picture))
+                    diary_objs.update(cover_picture = cover_picture)
 
                 else:
                     if cover_picture:
-                        diary_objs.update(cover_picture = json.dumps(cover_picture))
+                        diary_objs.update(cover_picture = cover_picture)
                     else:
                         _cover_picture = []
                         soup = BeautifulSoup(content, 'html.parser')
