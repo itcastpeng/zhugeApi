@@ -158,12 +158,18 @@ def diary_manage(request):
                 customer_name = ''          # 客户名称
                 create_date = ''            # 创建时间
                 become_beautiful_cover = '' # 变美图片
+                customer_headimgurl = ''    # 客戶头像
+                is_collection = False       # 是否收藏
+                if models.zgld_diary_action.objects.filter(case_id=case_id, customer_id=user_id, action=2):
+                    is_collection = True
+                tag_list = []
                 if zgld_case_objs:
                     zgld_case_obj = zgld_case_objs[0]
+                    tag_list = list(zgld_case_obj.tags.values('id', 'name'))  # 标签列表
                     customer_name = zgld_case_obj.customer_name
                     create_date = zgld_case_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                     become_beautiful_cover = json.loads(zgld_case_obj.become_beautiful_cover)
-
+                    customer_headimgurl = zgld_case_obj.headimgurl
                     zgld_case_objs.update(
                         read_count=F('read_count') + 1
                     )
@@ -205,15 +211,22 @@ def diary_manage(request):
                         'case_type': 2,                         # 日记类型
                     })
 
-                data_list = {
+                top_data = {
                     'become_beautiful_cover': become_beautiful_cover,
                     'customer_name': customer_name,
-                    'result_data': result_data,
+                    'tag_list': tag_list,
                     'create_date': create_date,
+                    'is_collection': is_collection,
+                    'customer_headimgurl': customer_headimgurl,
                     'count': count,
+                }
+                data_list = {
+                    'result_data': result_data,
+                    'top_data':top_data,
                 }
                 response.note = {
                     'become_beautiful_cover': '变美图片',
+                    'customer_headimgurl': '客户头像',
                     'customer_name': '客户名称',
                     'result_data': {
                         'cover_picture': '封面图片',
@@ -225,6 +238,7 @@ def diary_manage(request):
                         # 'comment_count': '评论数量',
                     },
                     'create_date': '创建时间',
+                    'tag_list': '标签',
                     'case_type': '日记类型',
                     'count': '该时间轴 日记总数 /可做分页',
                 }

@@ -114,6 +114,14 @@ def case_manage(request):
                     cover_picture = json.loads(obj.cover_picture)
                 diary_give_like = models.zgld_diary_action.objects.filter(case_id=obj.id).count()
 
+                is_give_like = False
+                # 判断是否点赞
+                models.zgld_diary_action.objects.filter(
+                    case_id=obj.id,
+                    customer_id=customer_id,
+                    action=1
+                )
+
                 data_list.append({
                     'diary_list_id': obj.id,
                     'cover_picture': cover_picture,
@@ -148,6 +156,7 @@ def case_manage(request):
                     'customer_headimgurl': headimgurl,                  # 客户头像
                     'diary_give_like': diary_give_like,                 # 点赞数量
                     'case_type': 1,                                     # 日记类型(1普通/2时间轴)
+                    'cover_show_type': diary_obj.cover_show_type,       # 封面类型 视频/图片
                     'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
