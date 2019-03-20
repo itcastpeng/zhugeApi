@@ -463,10 +463,11 @@ def diary_manage_oper(request, oper_type, o_id):
                 'diary_id': diary_id,
                 'case_type': case_type,
             }
+            print('============================================')
             forms_obj = CollectionDiaryForm(form_data)
             if forms_obj.is_valid():
                 formData = forms_obj.cleaned_data
-
+                print('验证通过----')
                 # 时间轴日记详情点赞
                 if diary_id:
                     diary_id = formData.get('diary_id')
@@ -584,7 +585,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     action=2
                 )
             if objs:
-                response.msg = '已经收藏过次日记'
+                response.msg = '已经收藏过此日记'
             else:
                 if case_type == 1:
                     models.zgld_diary_action.objects.create(
@@ -704,6 +705,10 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 # 按时间排序
                 ret_data = sorted(ret_data, key=lambda x: x['create_date'], reverse=True)
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    ret_data = ret_data[start_line: stop_line]
 
                 #  查询成功 返回200 状态码
                 response.code = 200

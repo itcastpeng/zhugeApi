@@ -55,7 +55,7 @@ def is_token(table_obj):
                 else:
                     flag = False
 
-                print('flag -->', flag)
+                # print('flag -->', flag)
             else:
                 flag = False
 
