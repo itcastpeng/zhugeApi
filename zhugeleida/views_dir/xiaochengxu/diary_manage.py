@@ -624,6 +624,7 @@ def diary_manage_oper(request, oper_type, o_id):
         ## 查询评论
         if oper_type == 'diary_review_list':
 
+            company_id = request.GET.get('company_id')
             customer_id = request.GET.get('user_id')
             form_data = {
                 'diary_id': o_id
@@ -638,7 +639,10 @@ def diary_manage_oper(request, oper_type, o_id):
                 print('q-----> ', q)
                 objs = models.zgld_diary_comment.objects.select_related(
                     'from_customer',
-                ).filter(diary_id=o_id).filter(
+                ).filter(
+                    diary_id=o_id,
+                    diary__case__company_id=company_id
+                ).filter(
                     q
                 ).order_by('-create_date')
                 count = objs.count()
@@ -680,7 +684,7 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
-
+                company_id = request.GET.get('company_id')
                 ## 搜索条件
                 field_dict = {
                     'id': '',
@@ -691,8 +695,8 @@ def diary_manage_oper(request, oper_type, o_id):
                 objs = models.zgld_diary_action.objects.select_related('case', 'customer').filter(q).order_by(order)
                 count = objs.count()
                 ret_data = []
-                case_objs = objs.exclude(case_id__isnull=True)
-                diary_objs = objs.exclude(diary_id__isnull=True)
+                case_objs = objs.filter(case__company_id=company_id).exclude(case_id__isnull=True)
+                diary_objs = objs.filter(diary__case__company_id=company_id).exclude(diary_id__isnull=True)
 
                 start_line = 0
                 stop_line = 10
@@ -753,6 +757,8 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
+                company_id = request.GET.get('company_id')
+
                 ## 搜索条件
                 field_dict = {
                     'id': '',
@@ -763,8 +769,8 @@ def diary_manage_oper(request, oper_type, o_id):
                 objs = models.zgld_diary_action.objects.select_related('case', 'customer').filter(q).order_by(order)
                 count = objs.count()
                 ret_data = []
-                case_objs = objs.exclude(case_id__isnull=True)
-                diary_objs = objs.exclude(diary_id__isnull=True)
+                case_objs = objs.filter(case__company_id=company_id).exclude(case_id__isnull=True)
+                diary_objs = objs.filter(diary__case__company_id=company_id).exclude(diary_id__isnull=True)
 
                 if length != 0:
                     start_line = (current_page - 1) * length
