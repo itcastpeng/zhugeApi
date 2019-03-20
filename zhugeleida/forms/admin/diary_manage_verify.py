@@ -742,7 +742,7 @@ class PraiseDiaryForm(forms.Form):
 # 点赞
 class CollectionDiaryForm(forms.Form):
     case_id = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': '日记ID不能为空'
         }
