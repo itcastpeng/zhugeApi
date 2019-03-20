@@ -6,6 +6,36 @@ import re
 import json
 from django.core.exceptions import ValidationError
 
+# 查询
+class SelectForm(forms.Form):
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
+
+
 # 添加企业的产品
 class SetFocusGetRedPacketForm(forms.Form):
 
@@ -99,9 +129,7 @@ class SetFocusGetRedPacketForm(forms.Form):
                 self.add_error('focus_get_money', '固定金额不能为空')
 
 
-
-
-#增加日记
+# 增加日记
 class diaryAddForm(forms.Form):
 
     case_id = forms.IntegerField(
@@ -296,7 +324,9 @@ class diaryUpdateForm(forms.Form):
             return case_id
         else:
             self.add_error('case_id', '权限不足')
-#修改活动
+
+
+# 修改活动
 class ActivityUpdateForm(forms.Form):
     article_id = forms.IntegerField(
         required=False,
@@ -600,7 +630,7 @@ class ArticleRedPacketSelectForm(forms.Form):
             length = int(self.data['length'])
         return length
 
-
+# 客户评论
 class ReviewDiaryForm(forms.Form):
     diary_id = forms.CharField(
         required=True,
@@ -609,14 +639,19 @@ class ReviewDiaryForm(forms.Form):
         }
     )
 
-    content = forms.CharField(
+    comments = forms.CharField(
         required=True,
         error_messages={
             'required': '内容不能为空'
         }
     )
-
-    def clean_article_id(self):
+    # reply_comment = forms.IntegerField(
+    #     required=False,
+    #     error_messages={
+    #         'required': '回复评论类型错误'
+    #     }
+    # )
+    def clean_diary_id(self):
         diary_id = self.data['diary_id']
 
         objs = models.zgld_diary.objects.filter(
@@ -624,11 +659,22 @@ class ReviewDiaryForm(forms.Form):
         )
 
         if not objs:
-            self.add_error('diary_id', '文章不存在')
+            self.add_error('diary_id', '日记不存在')
         else:
             return diary_id
 
+    # def clean_reply_comment(self):
+    #     reply_comment = self.data.get('reply_comment')  # 回复评论ID
+    #     diary_id = self.data.get('diary_id')
+    #     if reply_comment:
+    #         objs = models.zgld_diary_comment.objects.filter(diary_id=diary_id, id=reply_comment)
+    #         if objs:
+    #             return reply_comment
+    #         else:
+    #             self.add_error('reply_comment', '评论失败')
 
+
+# 查询评论
 class DiaryReviewSelectForm(forms.Form):
 
     diary_id = forms.IntegerField(
@@ -666,6 +712,14 @@ class DiaryReviewSelectForm(forms.Form):
             length = int(self.data['length'])
         return length
 
+    def clean_diary_id(self):
+        diary_id = self.data.get('diary_id')
+        objs = models.zgld_diary.objects.filter(id=diary_id)
+        if objs:
+            return diary_id
+        else:
+            self.add_error('diary_id', '日记不存在')
+
 
 class PraiseDiaryForm(forms.Form):
 
@@ -683,34 +737,6 @@ class PraiseDiaryForm(forms.Form):
         }
     )
 
-class BrowseCaseSelectForm(forms.Form):
-
-    current_page = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': "页码数据类型错误",
-        }
-    )
-    length = forms.IntegerField(
-        required=False,
-        error_messages={
-            'required': "页显示数量类型错误"
-        }
-    )
-
-    def clean_current_page(self):
-        if 'current_page' not in self.data:
-            current_page = 1
-        else:
-            current_page = int(self.data['current_page'])
-        return current_page
-
-    def clean_length(self):
-        if 'length' not in self.data:
-            length = 20
-        else:
-            length = int(self.data['length'])
-        return length
 
 
 # 点赞
