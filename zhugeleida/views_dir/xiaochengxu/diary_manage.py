@@ -665,6 +665,7 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
+
                 ## 搜索条件
                 field_dict = {
                     'id': '',
@@ -678,12 +679,13 @@ def diary_manage_oper(request, oper_type, o_id):
                 case_objs = objs.exclude(case_id__isnull=True)
                 diary_objs = objs.exclude(diary_id__isnull=True)
 
+                start_line = 0
+                stop_line = 10
                 if length != 0:
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
                     diary_objs = diary_objs[start_line: stop_line]
                     case_objs = case_objs[start_line: stop_line]
-
 
                 for obj in case_objs:
                     ret_data.append({
@@ -705,10 +707,8 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 # 按时间排序
                 ret_data = sorted(ret_data, key=lambda x: x['create_date'], reverse=True)
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    ret_data = ret_data[start_line: stop_line]
+
+                ret_data = ret_data[start_line: stop_line]
 
                 #  查询成功 返回200 状态码
                 response.code = 200
