@@ -661,7 +661,7 @@ class ReviewDiaryForm(forms.Form):
         if not objs:
             self.add_error('diary_id', '日记不存在')
         else:
-            return diary_id
+            return diary_id, objs
 
     # def clean_reply_comment(self):
     #     reply_comment = self.data.get('reply_comment')  # 回复评论ID
