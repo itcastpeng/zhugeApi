@@ -98,165 +98,191 @@ class SetFocusGetRedPacketForm(forms.Form):
             if mode == 2:  # 固定金额
                 self.add_error('focus_get_money', '固定金额不能为空')
 
+# 查询
+class SelectForm(forms.Form):
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误",
+        }
+    )
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+    def clean_current_page(self):
+        if 'current_page' not in self.data:
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
 
+    def clean_length(self):
+        if 'length' not in self.data:
+            length = 20
+        else:
+            length = int(self.data['length'])
+        return length
 
 
 #增加活动
-class commentAddForm(forms.Form):
-
-    case_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "案例ID不能为空"
-        }
-    )
-
-    company_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "公司ID不能为空"
-        }
-    )
-
-    title = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "标题不能为空"
-        }
-    )
-    summary = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "摘要不能为空"
-        }
-    )
-
-    comment_date = forms.DateTimeField(
-        required=True,
-        error_messages={
-            'required': "日记日期不能为空"
-        }
-    )
-
-    cover_picture  = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "封面不能为空"
-        }
-    )
-    content  = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "内容不能为空"
-        }
-    )
-
-    status = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "状态不能为空"
-        }
-    )
-
-    cover_show_type = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "展示类型不能为空"
-        }
-    )
-
-    def clean_comment_name(self):
-
-        company_id = self.data['company_id']
-        comment_name =  self.data['comment_name']
-
-        objs = models.zgld_comment.objects.filter(
-            comment_name=comment_name, company_id=company_id
-        )
-
-        if objs:
-            self.add_error('comment_name', '不能存在相同的文章名')
-        else:
-            return comment_name
+# class commentAddForm(forms.Form):
+#
+#     case_id = forms.IntegerField(
+#         required=True,
+#         error_messages={
+#             'required': "案例ID不能为空"
+#         }
+#     )
+#
+#     company_id = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "公司ID不能为空"
+#         }
+#     )
+#
+#     title = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "标题不能为空"
+#         }
+#     )
+#     summary = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "摘要不能为空"
+#         }
+#     )
+#
+#     comment_date = forms.DateTimeField(
+#         required=True,
+#         error_messages={
+#             'required': "日记日期不能为空"
+#         }
+#     )
+#
+#     cover_picture  = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "封面不能为空"
+#         }
+#     )
+#     content  = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "内容不能为空"
+#         }
+#     )
+#
+#     status = forms.IntegerField(
+#         required=True,
+#         error_messages={
+#             'required': "状态不能为空"
+#         }
+#     )
+#
+#     cover_show_type = forms.IntegerField(
+#         required=True,
+#         error_messages={
+#             'required': "展示类型不能为空"
+#         }
+#     )
+#
+#     def clean_comment_name(self):
+#
+#         company_id = self.data['company_id']
+#         comment_name =  self.data['comment_name']
+#
+#         objs = models.zgld_comment.objects.filter(
+#             comment_name=comment_name, company_id=company_id
+#         )
+#
+#         if objs:
+#             self.add_error('comment_name', '不能存在相同的文章名')
+#         else:
+#             return comment_name
 
 
 # 修改案例
-class commentUpdateForm(forms.Form):
-    case_id = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "案例ID不能为空"
-        }
-    )
-
-    company_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "公司ID不能为空"
-        }
-    )
-
-    title = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "标题不能为空"
-        }
-    )
-
-    summary = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "摘要不能为空"
-        }
-    )
-
-    comment_date = forms.DateTimeField(
-        required=True,
-        error_messages={
-            'required': "日记日期不能为空"
-        }
-    )
-
-    cover_picture = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "封面不能为空"
-        }
-    )
-    content = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "内容不能为空"
-        }
-    )
-
-    status = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "状态不能为空"
-        }
-    )
-
-    cover_show_type = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': "展示类型不能为空"
-        }
-    )
-
-    def clean_comment_name(self):
-        comment_id = self.data['comment_id']
-        company_id = self.data['company_id']
-        comment_name = self.data['comment_name']
-
-        objs = models.zgld_comment.objects.filter(
-            comment_name=comment_name, company_id=company_id
-        ).exclude(id=comment_id)
-
-        if objs:
-            self.add_error('comment_name', '不能存在相同的文章名')
-        else:
-            return comment_name
+# class commentUpdateForm(forms.Form):
+#     case_id = forms.IntegerField(
+#         required=True,
+#         error_messages={
+#             'required': "案例ID不能为空"
+#         }
+#     )
+#
+#     company_id = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "公司ID不能为空"
+#         }
+#     )
+#
+#     title = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "标题不能为空"
+#         }
+#     )
+#
+#     summary = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "摘要不能为空"
+#         }
+#     )
+#
+#     comment_date = forms.DateTimeField(
+#         required=True,
+#         error_messages={
+#             'required': "日记日期不能为空"
+#         }
+#     )
+#
+#     cover_picture = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "封面不能为空"
+#         }
+#     )
+#     content = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': "内容不能为空"
+#         }
+#     )
+#
+#     status = forms.IntegerField(
+#         required=True,
+#         error_messages={
+#             'required': "状态不能为空"
+#         }
+#     )
+#
+#     cover_show_type = forms.IntegerField(
+#         required=True,
+#         error_messages={
+#             'required': "展示类型不能为空"
+#         }
+#     )
+#
+#     def clean_comment_name(self):
+#         comment_id = self.data['comment_id']
+#         company_id = self.data['company_id']
+#         comment_name = self.data['comment_name']
+#
+#         objs = models.zgld_comment.objects.filter(
+#             comment_name=comment_name, company_id=company_id
+#         ).exclude(id=comment_id)
+#
+#         if objs:
+#             self.add_error('comment_name', '不能存在相同的文章名')
+#         else:
+#             return comment_name
 
 
 
@@ -572,32 +598,32 @@ class ArticleRedPacketSelectForm(forms.Form):
         return length
 
 
-class ReviewcommentForm(forms.Form):
-    comment_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '日记ID不能为空'
-        }
-    )
-
-    content = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '内容不能为空'
-        }
-    )
-
-    def clean_article_id(self):
-        comment_id = self.data['comment_id']
-
-        objs = models.zgld_comment.objects.filter(
-            id=comment_id
-        )
-
-        if not objs:
-            self.add_error('comment_id', '文章不存在')
-        else:
-            return comment_id
+# class ReviewcommentForm(forms.Form):
+#     comment_id = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': '日记ID不能为空'
+#         }
+#     )
+#
+#     content = forms.CharField(
+#         required=True,
+#         error_messages={
+#             'required': '内容不能为空'
+#         }
+#     )
+#
+#     def clean_article_id(self):
+#         comment_id = self.data['comment_id']
+#
+#         objs = models.zgld_comment.objects.filter(
+#             id=comment_id
+#         )
+#
+#         if not objs:
+#             self.add_error('comment_id', '文章不存在')
+#         else:
+#             return comment_id
 
 
 class commentReviewSelectForm(forms.Form):
