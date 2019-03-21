@@ -967,7 +967,7 @@ def diary_manage_oper(request, oper_type, o_id):
                 _data = {
                     'user_id': uid,
                     'customer_id': customer_id,
-                    'case_id': case_id,
+                    'case_id': obj.case_id,
                     'company_id': company_id,
                     'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
                 }
