@@ -219,7 +219,7 @@ class zgld_xiaochengxu_app(models.Model):
         (2, '小程序(案例库)第三方平台')
     )
     three_services_type = models.SmallIntegerField(verbose_name='三方类型区分', choices=type_choice, null=True)
-    poster_company_logo =  models.CharField(verbose_name="公司海报logo", max_length=1024,null=True)
+    poster_company_logo =  models.CharField(verbose_name="公司海报logo", max_length=1024,null=True) # 案例上传logo 后台案例
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
@@ -1602,7 +1602,7 @@ class zgld_customer_case_poster_belonger(models.Model):
     user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表', null=True)
 
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)
-    poster_url = models.CharField(verbose_name='用户-客户-对应的二维码', max_length=128, null=True)
+    poster_url = models.CharField(verbose_name='生成的二维码海报', max_length=128, null=True)
 
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 

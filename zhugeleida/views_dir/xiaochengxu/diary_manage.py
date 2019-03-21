@@ -395,15 +395,20 @@ def diary_poster_html(request):
 @csrf_exempt
 def create_user_customer_case_poster_qr_code(data):
     response = ResponseObj()
-
+    print('data-----> ', data)
     user_id = data.get('user_id')
     customer_id = data.get('customer_id')
-    user_customer_belonger_id = data.get('user_customer_belonger_id')
+    user_customer_belonger_id = data.get('user_customer_belonger_id') # 关系绑定表ID
     case_id = data.get('case_id')
     company_id = data.get('company_id')
 
-    poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(user_customer_belonger_id=user_customer_belonger_id,case_id=case_id)
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
+    poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+        user_customer_belonger_id=user_customer_belonger_id,
+        case_id=case_id
+    )
+
+    # url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
+    url = 'http://127.0.0.1:8001/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
         customer_id, user_id, case_id,company_id,user_customer_belonger_id)
 
     qr_code = ''
@@ -444,9 +449,6 @@ def create_user_customer_case_poster_qr_code(data):
 
             get_qr_data = {}
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
-
-            # userprofile_obj = models.zgld_userprofile.objects.get(id=user_id)
-            # company_id = userprofile_obj.company_id
 
             authorizer_refresh_token = xiaochengxu_app_objs[0].authorizer_refresh_token
             authorizer_appid = xiaochengxu_app_objs[0].authorization_appid
@@ -917,89 +919,88 @@ def diary_manage_oper(request, oper_type, o_id):
                 response.msg = "验证未通过"
                 response.data = json.loads(forms_obj.errors.as_json())
 
-        ## 小程序-案例-海报内容×
+        ## 小程序-案例-生成关系二维码
         elif oper_type == 'xcx_case_poster':
             customer_id = request.GET.get('user_id')
-            uid = request.GET.get('uid')
             company_id = request.GET.get('company_id')
-            case_id = request.GET.get('case_id')
+            uid = request.GET.get('uid')             # 用户ID
 
-            ret_data = []
-            app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            poster_company_logo = app_obj.poster_company_logo
+            case_id = request.GET.get('case_id')     # 日记ID
+            case_type = request.GET.get('case_type') # 案例类型
 
-            print('值customer_id------>>', customer_id)
-            print('值customer_id------>>', customer_id)
-            user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
-                user_id=uid)
+            # 获取 logo
+            poster_company_logo = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).poster_company_logo
+
+            # 判断该用户和客户是否绑定关系
+            user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(
+                customer_id=customer_id,
+                user_id=uid
+            )
 
             user_customer_belonger_id = ''
             if user_customer_belonger_objs:
                 user_customer_belonger_id = user_customer_belonger_objs[0].id
-            print('user_customer_belonger_objs ------->>', user_customer_belonger_objs)
+
+            case_type = int(case_type)
             objs = models.zgld_diary.objects.filter(id=case_id)
             if objs:
-                case_objs = models.zgld_case.objects.filter(id=objs[0].case_id)
-                if case_objs:
-                    poster_cover = case_objs[0].poster_cover
+                obj = objs[0]
 
-                    if poster_cover:
-                        poster_cover = json.loads(poster_cover)
-                    else:
-                        poster_cover = []
+                if case_type == 1: # 普通案例
+                    poster_cover = obj.poster_cover
+                else:           # 时间轴
+                    poster_cover = obj.case.poster_cover
 
-                    _data = {
-                        'user_id': uid,
-                        'customer_id': customer_id,
-                        'case_id': case_id,
-                        'company_id': company_id,
-                        'user_customer_belonger_id': user_customer_belonger_id
-                    }
-                    print('_data ------>>', _data)
+                if poster_cover:  # 海报图片
+                    poster_cover = json.loads(poster_cover)
+                else:
+                    poster_cover = []
 
-                    _response = create_user_customer_case_poster_qr_code(_data)
+                _data = {
+                    'user_id': uid,
+                    'customer_id': customer_id,
+                    'case_id': case_id,
+                    'company_id': company_id,
+                    'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
+                }
 
-                    qr_code = ''
-                    if _response.code == 200:
-                        qr_code = _response.data.get('qr_code')
+                _response = create_user_customer_case_poster_qr_code(_data)
 
-                    ret_data.append(
-                        {
-                            'case_id': case_id,
-                            'poster_cover': poster_cover,
-                            'poster_company_logo': poster_company_logo or '',
-                            'qr_code': qr_code or ''
-                        }
-                    )
+                qr_code = ''
+                if _response.code == 200:
+                    qr_code = _response.data.get('qr_code')
 
-                    response.data = ret_data
-                    response.note = {
-                        'case_id': '案例ID',
-                        'poster_cover': '海报封面',
-                        'poster_company_logo': '海报公司log'
-                    }
+                ret_data = {
+                    'case_id': case_id,
+                    'poster_cover': poster_cover,
+                    'poster_company_logo': poster_company_logo or '',
+                    'qr_code': qr_code or ''
+                }
 
-                    response.code = 200
-                    response.msg = "返回成功"
+                response.data = ret_data
+                response.note = {
+                    'case_id': '案例ID',
+                    'poster_cover': '海报封面',
+                    'poster_company_logo': '海报公司log'
+                }
 
-
+                response.code = 200
+                response.msg = "返回成功"
             else:
                 response.code = 301
                 response.msg = "案例不存在"
 
-            ## 小程序获取案例海报截图
-
-        # ×
+        ## 小程序获取 案例海报截图
         elif oper_type == 'xcx_get_case_poster_screenshots':
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
             company_id = request.GET.get('company_id')
             case_id = request.GET.get('case_id')
 
-            ret_data = []
-
-            user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
-                user_id=uid)
+            user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(
+                customer_id=customer_id,
+                user_id=uid
+            )
 
             user_customer_belonger_id = ''
             if user_customer_belonger_objs:
@@ -1038,13 +1039,11 @@ def diary_manage_oper(request, oper_type, o_id):
                     # _response = create_user_customer_case_poster_qr_code(_data)
                     poster_url = poster_belonger_obj.poster_url
 
-            ret_data.append(
-                {
-                    'case_id': case_id,
-                    'poster_url': poster_url,
+            ret_data = {
+                'case_id': case_id,
+                'poster_url': poster_url,
 
-                }
-            )
+            }
 
             response.data = ret_data
             response.note = {
