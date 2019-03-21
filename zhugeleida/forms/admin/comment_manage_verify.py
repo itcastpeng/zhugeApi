@@ -682,3 +682,76 @@ class PraisecommentForm(forms.Form):
 
 
 # 审核评论
+class AuditDiaryForm(forms.Form):
+    comments_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '评论ID不能为空'
+        }
+    )
+    # user_id = forms.IntegerField(
+    #     required=True,
+    #     error_messages={
+    #         'required': '评论ID不能为空'
+    #     }
+    # )
+    is_audit = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '审核状态不能为空'
+        }
+    )
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '公司不能为空'
+        }
+    )
+    def clean_comments_id(self):
+        company_id = self.data.get('company_id')
+        comments_id = self.data.get('comments_id')
+        objs = models.zgld_diary_comment.objects.filter(
+            diary__case__company_id=company_id,
+            id=comments_id
+        )
+        if objs:
+            if int(objs[0].is_audit_pass) == 0:
+                return comments_id, objs
+            else:
+                self.add_error('comments_id', '该评论已审核')
+        else:
+            self.add_error('comments_id', '评论不存在')
+
+    def clean_is_audit(self):
+        is_audit = int(self.data.get('is_audit'))
+        if is_audit in [0, 1]:
+            return is_audit
+        else:
+            self.add_error('is_audit', '审核状态码错误')
+
+# 删除评论
+class DeleteDiaryForm(forms.Form):
+    comments_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '评论ID不能为空'
+        }
+    )
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '公司不能为空'
+        }
+    )
+    def clean_comments_id(self):
+        company_id = self.data.get('company_id')
+        comments_id = self.data.get('comments_id')
+        objs = models.zgld_diary_comment.objects.filter(
+            diary__case__company_id=company_id,
+            id=comments_id
+        )
+        if objs:
+            objs.delete()
+        else:
+            self.add_error('comments_id', '评论不存在')

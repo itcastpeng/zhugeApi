@@ -3,7 +3,7 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.comment_manage_verify import commentSelectForm, SelectForm
+from zhugeleida.forms.admin.comment_manage_verify import commentSelectForm, SelectForm, AuditDiaryForm, DeleteDiaryForm
 import json,datetime,base64
 from django.db.models import Q, Sum, Count
 from publicFunc.base64 import b64decode
@@ -192,13 +192,41 @@ def comment_manage(request, oper_type):
                 response.code = 302
                 response.msg = "数据不存在"
 
+        # 审核案例-删除评论
+        elif oper_type == 'delete_diary':
+            form_data = {
+                'comments_id': request.POST.get('comments_id'),
+                'company_id': request.GET.get('company_id'),
+            }
+            form_objs = DeleteDiaryForm(form_data)
+            if form_objs.is_valid():
+                response.code = 200
+                response.msg = '删除成功'
+
+            else:
+                response.code = 301
+                response.msg = json.loads(form_objs.errors.as_json())
+
         # 审核案例-日记评论
         elif oper_type == 'audit_diary':
-            diary_id = request.POST.get('diary_id')
+            form_objs = AuditDiaryForm(request.GET)
+            if form_objs.is_valid():
+                comments_id, objs = form_objs.cleaned_data.get('comments_id')
+                is_audit = form_objs.cleaned_data.get('is_audit') # 该参数为1审核通过 为0审核不通过
+                if int(is_audit) == 1:
+                    is_audit_pass = 1
+                    response.msg = '审核成功, 已发布!'
+                else:
+                    is_audit_pass = 2
+                    response.msg = '审核成功, 已拒绝!'
 
+                objs.update(is_audit_pass=is_audit_pass)
+                response.code = 200
+            else:
+                response.code = 301
+                response.msg = json.loads(form_objs.errors.as_json())
 
-
-        ## 评论是否开启
+        ## 评论是否开启(控制公众号文章)
         elif oper_type == 'setting_open_comment':
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
