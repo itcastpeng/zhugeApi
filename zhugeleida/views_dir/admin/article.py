@@ -500,7 +500,10 @@ def article(request, oper_type):
                         'content': content,
                         'source': 2  # (2,'转载')
                     }
-                    article_objs = models.zgld_article.objects.filter(source_url=source_url)
+                    article_objs = models.zgld_article.objects.filter(
+                        source_url=source_url,
+                        company_id=company_id
+                    )
 
                     if article_objs:
                         article_objs.update(**dict_data)
