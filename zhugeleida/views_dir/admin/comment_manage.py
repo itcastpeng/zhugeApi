@@ -117,7 +117,7 @@ def comment_manage(request, oper_type):
                 data_list = []
                 for obj in objs:
                     data_list.append({
-                        'diary_id': obj.diary_id,
+                        'id': obj.id,
                         'title': obj.diary.title,
                         'is_audit_pass': obj.is_audit_pass,
                         'is_audit_pass_text': obj.get_is_audit_pass_display(),
@@ -136,7 +136,7 @@ def comment_manage(request, oper_type):
                 }
                 response.note = {
                     'data_list': {
-                        'diary_id': '日记ID',
+                        'id': 'ID',
                         'title': '日记标题',
                         'is_audit_pass': '是否审核(0未审核 1已审核)',
                         'is_audit_pass_text': '审核信息',
