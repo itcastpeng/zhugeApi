@@ -235,12 +235,12 @@ def diary_manage_oper(request, oper_type, o_id):
                 )
                 cover_picture = forms_obj.cleaned_data.get('cover_picture')
                 if int(case_type) == 1:  # 普通案例
-                    cover_picture = json.loads(cover_picture)
-                    diary_objs.update(cover_picture = json.dumps(cover_picture))
+                    diary_objs.update(cover_picture = json.dumps(json.loads(cover_picture)))
 
                 else:
-                    if cover_picture:
-                        diary_objs.update(cover_picture = cover_picture)
+                    if cover_picture and len(json.loads(cover_picture) > 0):
+                        cover_picture = json.loads(cover_picture)
+                        diary_objs.update(cover_picture = json.dumps(cover_picture))
                     else:
                         _cover_picture = []
                         soup = BeautifulSoup(content, 'html.parser')
@@ -309,7 +309,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     obj.save()
 
                 else:
-                    if cover_picture:
+                    if cover_picture and len(json.loads(cover_picture) > 0):
+                        cover_picture = json.loads(cover_picture)
                         obj.cover_picture = json.dumps(cover_picture)
                     else:
                         _cover_picture = []
