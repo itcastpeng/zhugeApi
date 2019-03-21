@@ -54,7 +54,7 @@ def case_manage(request):
 
         field_dict = {
             'company_id': '',
-            'customer_name__contains': '',  # 发布某个客户的名称
+            'customer_name': '',            # 发布某个客户的名称
             'status': '',                   # 案列状态(1已发、2未发、3删除)
         }
         q = conditionCom(request, field_dict)
