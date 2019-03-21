@@ -76,7 +76,7 @@ def diary_manage(request):
                 )
 
                 obj = objs[0]
-                cover_picture = ''
+                cover_picture = []
                 if obj.cover_picture:  # 封面（取第一张）
                     cover_picture = json.loads(obj.cover_picture)
 
@@ -92,7 +92,7 @@ def diary_manage(request):
                 models.zgld_diary_action.objects.create(
                     action=3,
                     customer_id=user_id,
-                    diary_id=case_id
+                    diary_id=timeline_id
                 )
 
                 data_list = {
