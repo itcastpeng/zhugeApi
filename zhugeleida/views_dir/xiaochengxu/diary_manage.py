@@ -428,9 +428,9 @@ def create_user_customer_case_poster_qr_code(data):
 
     url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?' \
           'user_id={user_id}&uid={uid}&case_id={case_id}&company_id={company_id}&' \
-          'user_customer_belonger_id={user_customer_belonger_id}&case_type={case_type}'.format(
+          'user_customer_belonger_id={user_customer_belonger_id}'.format(
         user_id=customer_id, uid=user_id, case_id=case_id,company_id=company_id,
-        user_customer_belonger_id=user_customer_belonger_id, case_type=case_type)
+        user_customer_belonger_id=user_customer_belonger_id)
 
     qr_code = ''
     if poster_belonger_objs:
@@ -1056,22 +1056,23 @@ def diary_manage_oper(request, oper_type, o_id):
                         'case_id': case_id
 
                     }
+                    print('data_dict---data_dict---> ', data_dict)
                     tasks.create_user_or_customer_small_program_poster(json.dumps(data_dict))
 
                     # _response = create_user_customer_case_poster_qr_code(_data)
                     poster_url = poster_belonger_obj.poster_url
 
             ret_data = {
-                'case_id': case_id,
+                # 'case_id': case_id,
                 'poster_url': poster_url,
 
             }
 
             response.data = ret_data
             response.note = {
-                'case_id': '案例ID',
+                # 'case_id': '案例ID',
                 'poster_cover': '海报封面',
-                'poster_company_logo': '海报公司log'
+                # 'poster_company_logo': '海报公司log'
             }
 
             response.code = 200
