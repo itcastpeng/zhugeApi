@@ -117,7 +117,7 @@ def comment_manage(request, oper_type):
                 data_list = []
                 for obj in objs:
                     data_list.append({
-                        'diary_id': obj.diary_id,
+                        'diary_id': obj.id,
                         'title': obj.diary.title,
                         'is_audit_pass': obj.is_audit_pass,
                         'is_audit_pass_text': obj.get_is_audit_pass_display(),
