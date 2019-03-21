@@ -94,18 +94,18 @@ def diary_manage(request):
                     customer_id=user_id,
                     diary_id=timeline_id
                 )
-
                 data_list = {
                     'cover_picture': cover_picture,
                     'customer_headimgurl': obj.case.headimgurl,
                     'customer_name': obj.case.customer_name,
                     'title': obj.title,
                     'content': obj.content,
-                    'read_count': obj.read_count,  # 阅读数量
-                    'up_count': obj.up_count,  # 点赞数量
-                    'comment_count': obj.comment_count,  # 评论数量
-                    'case_type': 2,  # 日记类型
-                    'is_diary_give_like': is_diary_give_like,  # 是否点赞
+                    'read_count': obj.read_count,               # 阅读数量
+                    'up_count': obj.up_count,                   # 点赞数量
+                    'comment_count': obj.comment_count,         # 评论数量
+                    'case_type': 2,                             # 日记类型
+                    'is_diary_give_like': is_diary_give_like,   # 是否点赞
+                    'cover_show_type': obj.cover_show_type,     # 封面类型
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                 }
             response.note = {
