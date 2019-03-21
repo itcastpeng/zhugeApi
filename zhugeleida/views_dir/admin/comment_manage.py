@@ -121,7 +121,7 @@ def comment_manage(request, oper_type):
                         'title': obj.diary.title,
                         'is_audit_pass': obj.is_audit_pass,
                         'is_audit_pass_text': obj.get_is_audit_pass_display(),
-                        'content': obj.diary.content,
+                        'content': b64decode(obj.content),
                         'customer_name': b64decode(obj.from_customer.username),
                         'customer_headimgurl': obj.from_customer.headimgurl,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
