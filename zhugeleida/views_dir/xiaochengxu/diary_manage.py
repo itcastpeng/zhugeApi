@@ -585,7 +585,8 @@ def diary_manage_oper(request, oper_type, o_id):
                         customer_id=formData.get('customer_id')
                     )
                     if objs:
-                        response.msg = '已赞过此日记'
+                        objs.delete()
+                        response.msg = '已取消点赞'
 
                     else:
                         models.zgld_diary_action.objects.create(
