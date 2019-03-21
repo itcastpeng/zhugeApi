@@ -321,9 +321,16 @@ class PosterSettingForm(forms.Form):
     poster_cover = forms.CharField(
         required=True,
         error_messages={
-            'required': "海报封面不能为空"
+            'required': "海报图片不能为空"
         }
     )
+    def clean_poster_cover(self):
+        poster_cover = self.data.get('poster_cover')
+        json_poster_cover = json.loads(poster_cover)
+        if len(json_poster_cover) in [1, 2, 9]:
+            return poster_cover
+        else:
+            self.add_error('poster_cover', '请控制图片 在1张 2张 9张')
 
 
 
