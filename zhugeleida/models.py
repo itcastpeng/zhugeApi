@@ -1598,7 +1598,9 @@ class zgld_search_history(models.Model):
 # 客户所属用户-关系绑定表
 class zgld_customer_case_poster_belonger(models.Model):
 
-    case = models.ForeignKey('zgld_case', verbose_name="关联的案例", null=True)
+    case = models.ForeignKey('zgld_case', verbose_name="关联的时间轴案例", null=True)
+    diary = models.ForeignKey('zgld_diary', verbose_name="关联的普通日记", null=True)
+
     user_customer_belonger = models.ForeignKey('zgld_user_customer_belonger', verbose_name='用户|客户关系表', null=True)
 
     qr_code = models.CharField(verbose_name='用户-客户-对应二维码', max_length=128, null=True)

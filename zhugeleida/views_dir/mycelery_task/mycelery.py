@@ -576,6 +576,7 @@ def create_user_or_customer_poster(request):
     poster_url = data.get('poster_url', '')
     user_customer_belonger_id = data.get('user_customer_belonger_id', '')
     case_id = data.get('case_id', '')
+    case_type = data.get('case_type', '')
 
     # user_id = request.GET.get('user_id')
     # customer_id = request.GET.get('customer_id', '')
@@ -595,6 +596,7 @@ def create_user_or_customer_poster(request):
         'customer_id': customer_id,
         'poster_url': url,
         'user_customer_belonger_id': user_customer_belonger_id,
+        'case_type': case_type,
         'case_id': case_id
     }
     create_poster_process(_data)
@@ -610,6 +612,7 @@ def create_poster_process(data):
     poster_url = data.get('poster_url')
     user_customer_belonger_id = data.get('user_customer_belonger_id')
     case_id = data.get('case_id')
+    case_type = int(data.get('case_type'))
 
     print('传递的值 ------>>', data)
 
@@ -685,11 +688,17 @@ def create_poster_process(data):
             print('-------------------------------------> ')
 
             if case_id and user_customer_belonger_id: # 案例的生成海报
+                if case_type == 1:
+                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                        user_customer_belonger_id=user_customer_belonger_id,
+                        diary_id=case_id
+                    )
+                else:
+                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                        user_customer_belonger_id=user_customer_belonger_id,
+                        case_id=case_id
+                    )
 
-                case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                    user_customer_belonger_id=user_customer_belonger_id,
-                    case_id=case_id
-                )
 
                 if case_poster_belonger_objs:
                     case_poster_belonger_objs.update(
@@ -697,13 +706,18 @@ def create_poster_process(data):
                     )
 
                 else:
-
-                    models.zgld_customer_case_poster_belonger.objects.create(
-                        user_customer_belonger_id=user_customer_belonger_id,
-                        case_id=case_id,
-                        poster_url=_poster_url
-                    )
-
+                    if case_type == 1:
+                        models.zgld_customer_case_poster_belonger.objects.create(
+                            user_customer_belonger_id=user_customer_belonger_id,
+                            diary_id=case_id,
+                            poster_url=_poster_url
+                        )
+                    else:
+                        models.zgld_customer_case_poster_belonger.objects.create(
+                            user_customer_belonger_id=user_customer_belonger_id,
+                            case_id=case_id,
+                            poster_url=_poster_url
+                        )
 
             else:   # 名片海报
                 objs.update(
