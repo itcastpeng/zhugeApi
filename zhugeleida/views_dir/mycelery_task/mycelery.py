@@ -688,16 +688,16 @@ def create_poster_process(data):
             print('-------------------------------------> ')
 
             if case_id and user_customer_belonger_id: # 案例的生成海报
+                case_type_q = Q()
                 if case_type == 1:
-                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                        user_customer_belonger_id=user_customer_belonger_id,
-                        diary_id=case_id
-                    )
+                    case_type_q.add(Q(diary_id=case_id), Q.AND)
                 else:
-                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                        user_customer_belonger_id=user_customer_belonger_id,
-                        case_id=case_id
-                    )
+                    case_type_q.add(Q(case_id=case_id), Q.AND)
+
+                case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                    case_type_q,
+                    user_customer_belonger_id=user_customer_belonger_id,
+                )
 
 
                 if case_poster_belonger_objs:
