@@ -238,7 +238,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     diary_objs.update(cover_picture = json.dumps(json.loads(cover_picture)))
 
                 else:
-                    if cover_picture and len(json.loads(cover_picture) > 0):
+                    if cover_picture and len(json.loads(cover_picture)) > 0:
                         cover_picture = json.loads(cover_picture)
                         diary_objs.update(cover_picture = json.dumps(cover_picture))
                     else:
@@ -309,7 +309,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     obj.save()
 
                 else:
-                    if cover_picture and len(json.loads(cover_picture) > 0):
+                    if cover_picture and len(json.loads(cover_picture)) > 0:
                         cover_picture = json.loads(cover_picture)
                         obj.cover_picture = json.dumps(cover_picture)
                     else:
