@@ -63,7 +63,7 @@ def case_manage(request):
 
         # 如果有案例标签 则记录热门搜索的标签
         if search_tag_id:
-            q.add(Q(tags_id=search_tag_id), Q.AND)
+            q.add(Q(tags=search_tag_id), Q.AND)
 
             case_tag_objs = models.zgld_case_tag.objects.filter(id=search_tag_id)
             if case_tag_objs:
