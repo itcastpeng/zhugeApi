@@ -123,6 +123,8 @@ def comment_manage(request, oper_type):
                         'is_audit_pass_text': obj.get_is_audit_pass_display(),
                         'content': obj.diary.content,
                         'customer_name': b64decode(obj.from_customer.username),
+                        'customer_headimgurl': obj.from_customer.headimgurl,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                     })
 
                 response.code = 200
@@ -139,6 +141,7 @@ def comment_manage(request, oper_type):
                         'is_audit_pass': '是否审核(0未审核 1已审核)',
                         'is_audit_pass_text': '审核信息',
                         'content': '评论内容',
+                        'customer_headimgurl': '评论人头像',
                         'customer_name': '评论人名称',
                     },
                     'count': '总数',
