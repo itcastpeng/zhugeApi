@@ -780,3 +780,33 @@ class CollectionDiaryForm(forms.Form):
                     self.add_error('diary_id', '此日记不是时间轴日记')
             else:
                 self.add_error('diary_id', '时间轴ID错误')
+
+# 上传海报图片
+class  PosterSettingForm(forms.Form):
+    diary_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "日记ID不能为空"
+        }
+    )
+
+    company_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "公司ID不能为空"
+        }
+    )
+
+    poster_cover = forms.CharField(
+        required=True,
+        error_messages={
+            'required': "海报图片不能为空"
+        }
+    )
+    def clean_poster_cover(self):
+        poster_cover = self.data.get('poster_cover')
+        json_poster_cover = json.loads(poster_cover)
+        if len(json_poster_cover) in [1, 2, 9]:
+            return poster_cover
+        else:
+            self.add_error('poster_cover', '请控制图片 在1张 2张 9张')

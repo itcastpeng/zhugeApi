@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from bs4 import BeautifulSoup
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.forms.admin.diary_manage_verify import SetFocusGetRedPacketForm, diaryAddForm, diarySelectForm, diaryUpdateForm, \
-    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm
+from zhugeleida.forms.admin.diary_manage_verify import diaryAddForm, diarySelectForm, diaryUpdateForm, \
+    ActivityUpdateForm, ArticleRedPacketSelectForm,QueryFocusCustomerSelectForm, PosterSettingForm
 import requests,cv2,os
 import json,datetime
 from django.db.models import Q, Sum, Count
@@ -342,17 +342,27 @@ def diary_manage_oper(request, oper_type, o_id):
 
         ## 海报-设置(普通案列)
         elif oper_type == "poster_setting":
-            poster_cover = request.POST.get('poster_cover')
-            print('poster_cover-------> ', poster_cover)
-            objs = models.zgld_diary.objects.filter(id=o_id)
-            if poster_cover:
-                poster_cover = json.loads(poster_cover)
-            if objs:
-                objs.update(poster_cover = json.dumps(poster_cover))
-                response.code = 200
-                response.msg = '设置日记海报成功'
+            form_data = {
+                'poster_cover': request.POST.get('poster_cover'),
+                'company_id': request.GET.get('company_id'),
+                'diary_id': o_id
+            }
+            form_obj = PosterSettingForm(form_data)
+            if form_obj.is_valid():
+                clean_data = form_obj.cleaned_data
+                poster_cover = clean_data.get('poster_cover')
+
+                objs = models.zgld_diary.objects.filter(id=clean_data.get('diary_id'))
+                if poster_cover:
+                    poster_cover = json.loads(poster_cover)
+                if objs:
+                    objs.update(poster_cover = json.dumps(poster_cover))
+                    response.code = 200
+                    response.msg = '设置日记海报成功'
+                else:
+                    response.code = 301
+                    response.msg = '日记ID错误'
             else:
                 response.code = 301
-                response.msg = '日记ID错误'
-
+                response.msg = json.loads(form_obj.errors.as_json())
     return JsonResponse(response.__dict__)
