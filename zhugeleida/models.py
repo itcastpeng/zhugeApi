@@ -1556,7 +1556,7 @@ class zgld_diary_comment(models.Model):
     from_customer = models.ForeignKey('zgld_customer', verbose_name="评论的客户", related_name='from_customer',null=True) ## 关联的客户
     is_audit_pass_choices = ( (0, '未进行审核'),
                               (1, '审核通过'),
-                              (2, '未通过审核'),
+                              # (2, '未通过审核'),
                             )
     is_audit_pass = models.SmallIntegerField(default=0, verbose_name='是否通过审核', choices=is_audit_pass_choices)
 
