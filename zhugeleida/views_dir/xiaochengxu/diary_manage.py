@@ -369,12 +369,12 @@ def diary_poster_html(request):
         user_customer_belonger_id = request.GET.get('user_customer_belonger_id')
         case_id = request.GET.get('case_id')
         company_id = request.GET.get('company_id')
-        case_type = request.GET.get('case_type', 1)
+        # case_type = request.GET.get('case_type', 1)
 
-        case_type = int(case_type)
-        if case_type == 1:
-            diary_obj = models.zgld_diary.objects.filter(id=case_id)
-            case_id =diary_obj[0].case_id
+        # case_type = int(case_type)
+        # if case_type == 1:
+        #     diary_obj = models.zgld_diary.objects.filter(id=case_id)
+        #     case_id =diary_obj[0].case_id
 
         poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
             user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
