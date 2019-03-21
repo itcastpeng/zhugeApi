@@ -728,7 +728,7 @@ class AuditDiaryForm(forms.Form):
 
     def clean_is_audit(self):
         is_audit = int(self.data.get('is_audit'))
-        if is_audit in [0, 1]:
+        if is_audit in [1]:
             return is_audit
         else:
             self.add_error('is_audit', '审核状态码错误')
