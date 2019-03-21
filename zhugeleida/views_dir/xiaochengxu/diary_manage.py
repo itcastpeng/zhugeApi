@@ -948,11 +948,14 @@ def diary_manage_oper(request, oper_type, o_id):
                 user_customer_belonger_id = user_customer_belonger_objs[0].id
 
             case_type = int(case_type)
-            objs = models.zgld_diary.objects.filter(id=case_id)
+            if case_type == 1: # 普通案例
+                objs = models.zgld_diary.objects.filter(id=case_id)
+            else:
+                objs = models.zgld_case.objects.filter(id=case_id)
+
             if objs:
                 obj = objs[0]
-
-                if case_type == 1: # 普通案例
+                if case_type == 1:
                     poster_cover = obj.poster_cover
                 else:           # 时间轴
                     poster_cover = obj.case.poster_cover
@@ -963,11 +966,14 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 else:
                     poster_cover = []
-
+                if case_type == 1:
+                    case_id = obj.case_id
+                else:
+                    case_id = obj.id
                 _data = {
                     'user_id': uid,
                     'customer_id': customer_id,
-                    'case_id': obj.case_id,
+                    'case_id': case_id,
                     'company_id': company_id,
                     'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
                 }
@@ -1004,12 +1010,16 @@ def diary_manage_oper(request, oper_type, o_id):
             customer_id = request.GET.get('user_id')
             uid = request.GET.get('uid')
             company_id = request.GET.get('company_id')
+            case_type = request.GET.get('case_type')
             case_id = request.GET.get('case_id')
 
             user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(
                 customer_id=customer_id,
                 user_id=uid
             )
+            case_type = int(case_type)
+            if case_type == 1:
+                case_id = models.zgld_diary.objects.filter(id=case_id)[0].case_id
 
             user_customer_belonger_id = ''
             if user_customer_belonger_objs:
