@@ -212,7 +212,14 @@ def comment_manage(request, oper_type):
 
         # 审核案例-日记评论
         elif oper_type == 'audit_diary':
-            form_objs = AuditDiaryForm(request.GET)
+            comments_id = request.POST.get('comments_id')
+            is_audit = request.POST.get('is_audit')
+            form_data = {
+                'company_id':company_id,
+                'is_audit': is_audit,
+                'comments_id':comments_id
+            }
+            form_objs = AuditDiaryForm(form_data)
             if form_objs.is_valid():
                 comments_id, objs = form_objs.cleaned_data.get('comments_id')
                 is_audit = form_objs.cleaned_data.get('is_audit') # 该参数为1审核通过 为0审核不通过
