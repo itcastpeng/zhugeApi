@@ -369,6 +369,12 @@ def diary_poster_html(request):
         user_customer_belonger_id = request.GET.get('user_customer_belonger_id')
         case_id = request.GET.get('case_id')
         company_id = request.GET.get('company_id')
+        case_type = request.GET.get('case_type', 1)
+
+        case_type = int(case_type)
+        if case_type == 1:
+            diary_obj = models.zgld_diary.objects.filter(id=case_id)
+            case_id =diary_obj[0].case_id
 
         poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
             user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
@@ -411,6 +417,7 @@ def create_user_customer_case_poster_qr_code(data):
     customer_id = data.get('customer_id')
     user_customer_belonger_id = data.get('user_customer_belonger_id') # 关系绑定表ID
     case_id = data.get('case_id')
+    case_type = data.get('case_type')
     company_id = data.get('company_id')
 
     # 判断案例关系是否存在
@@ -419,8 +426,11 @@ def create_user_customer_case_poster_qr_code(data):
         case_id=case_id
     )
 
-    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
-        customer_id, user_id, case_id,company_id,user_customer_belonger_id)
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?' \
+          'user_id={user_id}&uid={uid}&case_id={case_id}&company_id={company_id}&' \
+          'user_customer_belonger_id={user_customer_belonger_id}&case_type={case_type}'.format(
+        user_id=customer_id, uid=user_id, case_id=case_id,company_id=company_id,
+        user_customer_belonger_id=user_customer_belonger_id, case_type=case_type)
 
     qr_code = ''
     if poster_belonger_objs:
@@ -975,6 +985,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     'customer_id': customer_id,
                     'case_id': case_id,
                     'company_id': company_id,
+                    'case_type': case_type,
                     'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
                 }
 
