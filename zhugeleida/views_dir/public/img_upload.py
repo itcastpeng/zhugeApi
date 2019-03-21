@@ -155,7 +155,8 @@ def img_merge(request):
 
             if  _img_path:
                 img_path =  _img_path
-
+        if 'http://api.zhugeyingxiao.com/' in img_path:
+            img_path = img_path.replace('http://api.zhugeyingxiao.com/', '')
         response.data = {
             'picture_url': img_path,
         }
