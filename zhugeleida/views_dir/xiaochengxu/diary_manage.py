@@ -408,15 +408,15 @@ def create_user_customer_case_poster_qr_code(data):
         case_id=case_id
     )
 
-    # url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
-    url = 'http://127.0.0.1:8001/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/xiaochengxu/diary_manage/poster_html?user_id=%s&uid=%s&case_id=%s&company_id=%s&user_customer_belonger_id=%s' % (
         customer_id, user_id, case_id,company_id,user_customer_belonger_id)
 
     qr_code = ''
     if poster_belonger_objs:
         poster_belonger_obj = poster_belonger_objs[0]
-        qr_code =  poster_belonger_obj.qr_code
-        poster_url =  poster_belonger_obj.poster_url
+        qr_code =  poster_belonger_obj.qr_code          # 关系二维码
+
+        poster_url =  poster_belonger_obj.poster_url    # 判断 二维码海报截图是否存在 不存在异步创建
 
         # 生成海报截图
         if not  poster_url:
@@ -429,16 +429,8 @@ def create_user_customer_case_poster_qr_code(data):
             }
             tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-    if  qr_code:
-        response.data = {'qr_code': qr_code}
-        response.code = 200
-        response.msg = "存在二维码"
-
-    else:
-        print('海报不存在二维码 ------>>', qr_code)
-
+    if not qr_code: # 海报二维码不存在 生成
         xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
-
         if xiaochengxu_app_objs:
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -488,14 +480,11 @@ def create_user_customer_case_poster_qr_code(data):
             with open('%s' % (IMG_PATH), 'wb') as f:
                 f.write(qr_ret.content)
 
-            user_obj = ''
             if customer_id:
-                user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
                 qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
 
-
-                print('----celery生成用户-客户对应的小程序二维码成功-->>',
-                      'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
+                # print('----celery生成用户-客户对应的小程序二维码成功-->>',
+                #     'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 
                 # # 一并生成案例海报
 
@@ -503,8 +492,8 @@ def create_user_customer_case_poster_qr_code(data):
                     'user_id': user_id,
                     'customer_id': customer_id,
                     'poster_url': url,
-                    'user_customer_belonger_id' : user_customer_belonger_id,
-                    'case_id' : case_id
+                    'user_customer_belonger_id': user_customer_belonger_id,
+                    'case_id': case_id
 
                 }
 
@@ -527,11 +516,14 @@ def create_user_customer_case_poster_qr_code(data):
 
                 tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-
             response.data = {'qr_code': qr_code}
             response.code = 200
             response.msg = "生成小程序二维码成功"
 
+    else:
+        response.data = {'qr_code': qr_code}
+        response.code = 200
+        response.msg = "存在二维码"
     return response
 
 
@@ -928,7 +920,11 @@ def diary_manage_oper(request, oper_type, o_id):
             case_type = request.GET.get('case_type') # 案例类型
 
             # 获取 logo
-            poster_company_logo = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).poster_company_logo
+            poster_company_logo = ''
+            xiaochengxu_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+            if xiaochengxu_obj.poster_company_logo:
+                poster_company_logo = xiaochengxu_obj.poster_company_logo
+
 
             # 判断该用户和客户是否绑定关系
             user_customer_belonger_objs = models.zgld_user_customer_belonger.objects.filter(
@@ -952,6 +948,8 @@ def diary_manage_oper(request, oper_type, o_id):
 
                 if poster_cover:  # 海报图片
                     poster_cover = json.loads(poster_cover)
+
+
                 else:
                     poster_cover = []
 
@@ -972,15 +970,16 @@ def diary_manage_oper(request, oper_type, o_id):
                 ret_data = {
                     'case_id': case_id,
                     'poster_cover': poster_cover,
-                    'poster_company_logo': poster_company_logo or '',
-                    'qr_code': qr_code or ''
+                    'poster_company_logo': poster_company_logo,
+                    'qr_code': qr_code
                 }
 
                 response.data = ret_data
                 response.note = {
                     'case_id': '案例ID',
                     'poster_cover': '海报封面',
-                    'poster_company_logo': '海报公司log'
+                    'poster_company_logo': '海报公司log',
+                    'qr_code': '小程序关系二维码'
                 }
 
                 response.code = 200
@@ -1004,14 +1003,6 @@ def diary_manage_oper(request, oper_type, o_id):
             user_customer_belonger_id = ''
             if user_customer_belonger_objs:
                 user_customer_belonger_id = user_customer_belonger_objs[0].id
-
-            # _data = {
-            #     'user_id': uid,
-            #     'customer_id': customer_id,
-            #     'case_id': case_id,
-            #     'company_id': company_id,
-            #     'user_customer_belonger_id': user_customer_belonger_id
-            # }
 
             poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                 user_customer_belonger_id=user_customer_belonger_id, case_id=case_id)
