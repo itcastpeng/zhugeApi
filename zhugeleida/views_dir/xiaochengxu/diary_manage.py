@@ -75,12 +75,18 @@ def diary_manage(request):
                     read_count=F('read_count') + 1
                 )
 
+                models.zgld_diary_action.objects.create(
+                    action=3,
+                    customer_id=user_id,
+                    diary_id=timeline_id
+                ) # 创建浏览日志
+
                 obj = objs[0]
                 cover_picture = []
                 if obj.cover_picture:  # 封面（取第一张）
                     cover_picture = json.loads(obj.cover_picture)
 
-                is_diary_give_like = False
+                is_diary_give_like = False # 是否点赞
                 zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
                     action=1,
                     customer_id=user_id,
@@ -89,11 +95,15 @@ def diary_manage(request):
                 if zgld_diary_action_obj:
                     is_diary_give_like = True
 
-                models.zgld_diary_action.objects.create(
-                    action=3,
+                is_collection = False   # 是否收藏
+                is_collection_obj = models.zgld_diary_action.objects.filter(
+                    action=2,
                     customer_id=user_id,
-                    diary_id=timeline_id
+                    diary_id=obj.id
                 )
+                if is_collection_obj:
+                    is_collection = True
+
                 data_list = {
                     'cover_picture': cover_picture,
                     'customer_headimgurl': obj.case.headimgurl,
@@ -106,6 +116,7 @@ def diary_manage(request):
                     'case_type': 2,                             # 日记类型
                     'is_diary_give_like': is_diary_give_like,   # 是否点赞
                     'cover_show_type': obj.cover_show_type,     # 封面类型
+                    'is_collection': is_collection,             # 是否收藏
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                 }
             response.note = {
