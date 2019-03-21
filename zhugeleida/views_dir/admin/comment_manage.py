@@ -198,7 +198,7 @@ def comment_manage(request, oper_type):
         # 审核案例-删除评论
         elif oper_type == 'delete_diary':
             form_data = {
-                'comments_id': request.POST.get('comments_id'),
+                'comments_id': request.POST.get('comments_id', []),
                 'company_id': request.GET.get('company_id'),
             }
             form_objs = DeleteDiaryForm(form_data)
@@ -218,12 +218,12 @@ def comment_manage(request, oper_type):
                 is_audit = form_objs.cleaned_data.get('is_audit') # 该参数为1审核通过 为0审核不通过
                 if int(is_audit) == 1:
                     is_audit_pass = 1
-                    response.msg = '审核成功, 已发布!'
-                else:
-                    is_audit_pass = 2
-                    response.msg = '审核成功, 已拒绝!'
+                    response.msg = '审核成功!'
+                # else:
+                #     is_audit_pass = 2
+                #     response.msg = '审核成功, 已拒绝!'
 
-                objs.update(is_audit_pass=is_audit_pass)
+                    objs.update(is_audit_pass=is_audit_pass)
                 response.code = 200
             else:
                 response.code = 301

@@ -127,47 +127,74 @@ def diary_manage(request):
 
                 # 普通日记 阅读量增加
                 diary_objs = models.zgld_diary.objects.filter(id=case_id)
-                if diary_objs:
-                    diary_objs.update(  # 阅读次数
-                        read_count=F('read_count') + 1
-                    )
-                    models.zgld_diary_action.objects.create(
-                        action=3,
-                        customer_id=user_id,
-                        diary_id=case_id
-                    )
 
-                    for diary_obj in diary_objs:
+                diary_objs.update(  # 阅读次数
+                    read_count=F('read_count') + 1
+                )
+                models.zgld_diary_action.objects.create(
+                    action=3,
+                    customer_id=user_id,
+                    diary_id=case_id
+                )
 
-                        is_diary_give_like = False
-                        zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
-                            action=1,
-                            customer_id=user_id,
-                            diary_id=diary_obj.id
-                        )
-                        if zgld_diary_action_obj:
-                            is_diary_give_like = True
+                diary_obj = diary_objs[0]
 
-                        cover_picture = ''
-                        if diary_obj.cover_picture:  # 封面（取第一张）
-                            cover_picture = json.loads(diary_obj.cover_picture)
+                # 该客户的 普通案例总数
+                customer_name = diary_obj.case.customer_name
+                case_type_one = diary_objs.filter(
+                    case__customer_name=customer_name,
+                    case__case_type=1
+                ).count()
+                # 该客户的 时间轴案例总数
+                case_type_two = models.zgld_case.objects.filter(
+                    customer_name=customer_name,
+                    case_type=2
+                ).count()
+                customer_count = case_type_one + case_type_two
 
-                        customer_name = diary_obj.case.customer_name
-                        customer_headimgurl = diary_obj.case.headimgurl
-                        content = diary_obj.content
-                        data_list.append({
-                            'cover_picture': cover_picture,
-                            'customer_headimgurl': customer_headimgurl,
-                            'customer_name': customer_name,
-                            'title': diary_obj.title,
-                            'content': content,
-                            'read_count': diary_obj.read_count,                 # 阅读数量
-                            'up_count': diary_obj.up_count,                     # 点赞数量
-                            'comment_count': diary_obj.comment_count,           # 评论数量
-                            'is_diary_give_like': is_diary_give_like,           # 是否点赞
-                            'case_type': 1,                                     # 日记类型
-                            'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                        })
+                # 是否点赞
+                is_diary_give_like = False
+                zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
+                    action=1,
+                    customer_id=user_id,
+                    diary_id=diary_obj.id
+                )
+                if zgld_diary_action_obj:
+                    is_diary_give_like = True
+
+                # 是否收藏
+                is_collection= False
+                zgld_diary_action_obj = models.zgld_diary_action.objects.filter(
+                    action=2,
+                    customer_id=user_id,
+                    diary_id=diary_obj.id
+                )
+                if zgld_diary_action_obj:
+                    is_collection = True
+
+                cover_picture = ''
+                if diary_obj.cover_picture:  # 封面（取第一张）
+                    cover_picture = json.loads(diary_obj.cover_picture)
+
+                customer_name = diary_obj.case.customer_name
+                customer_headimgurl = diary_obj.case.headimgurl
+                content = diary_obj.content
+                data_list = {
+                    'cover_picture': cover_picture,
+                    'customer_headimgurl': customer_headimgurl,
+                    'customer_name': customer_name,
+                    'title': diary_obj.title,
+                    'content': content,
+                    'read_count': diary_obj.read_count,                 # 阅读数量
+                    'up_count': diary_obj.up_count,                     # 点赞数量
+                    'comment_count': diary_obj.comment_count,           # 评论数量
+                    'is_diary_give_like': is_diary_give_like,           # 是否点赞
+                    'case_type': 1,                                     # 日记类型
+                    'is_collection': is_collection,                     # 是否收藏
+                    'cover_show_type': diary_obj.cover_show_type,       # 封面类型
+                    'customer_count': customer_count,                   # 客户发布案例总数
+                    'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                }
 
                 response.note = {
                     'cover_picture': '轮播图',

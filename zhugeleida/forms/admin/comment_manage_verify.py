@@ -683,7 +683,7 @@ class PraisecommentForm(forms.Form):
 
 # 审核评论
 class AuditDiaryForm(forms.Form):
-    comments_id = forms.IntegerField(
+    comments_id = forms.CharField(
         required=True,
         error_messages={
             'required': '评论ID不能为空'
@@ -711,17 +711,20 @@ class AuditDiaryForm(forms.Form):
     def clean_comments_id(self):
         company_id = self.data.get('company_id')
         comments_id = self.data.get('comments_id')
+
         objs = models.zgld_diary_comment.objects.filter(
             diary__case__company_id=company_id,
-            id=comments_id
+            id__in=json.loads(comments_id)
         )
-        if objs:
-            if int(objs[0].is_audit_pass) == 0:
-                return comments_id, objs
-            else:
-                self.add_error('comments_id', '该评论已审核')
+        count = objs.count()
+        num = 0
+        for obj in objs:
+            if int(obj.is_audit_pass) == 0:
+                num += 1
+        if int(num) == int(count):
+            return comments_id, objs
         else:
-            self.add_error('comments_id', '评论不存在')
+            self.add_error('comments_id', '选择的评论已审核')
 
     def clean_is_audit(self):
         is_audit = int(self.data.get('is_audit'))
@@ -732,7 +735,7 @@ class AuditDiaryForm(forms.Form):
 
 # 删除评论
 class DeleteDiaryForm(forms.Form):
-    comments_id = forms.IntegerField(
+    comments_id = forms.CharField(
         required=True,
         error_messages={
             'required': '评论ID不能为空'
@@ -749,7 +752,7 @@ class DeleteDiaryForm(forms.Form):
         comments_id = self.data.get('comments_id')
         objs = models.zgld_diary_comment.objects.filter(
             diary__case__company_id=company_id,
-            id=comments_id
+            id__in=json.loads(comments_id)
         )
         if objs:
             objs.delete()
