@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
     ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm, \
-    GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm,LocalArticleAddForm,SyncTemplateArticleForm
+    GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm,LocalArticleAddForm,SyncTemplateArticleForm,SelectForm
 
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 import datetime
@@ -463,8 +463,33 @@ def article(request, oper_type):
 
         # 查询该公司所有文章
         elif oper_type == 'get_article_title':
-            company_id = request.GET.get('company_id')
+            form_obj = SelectForm(request.GET)
+            if form_obj.is_valid():
+                company_id = request.GET.get('company_id')
+                current_page = form_obj.cleaned_data['current_page']
+                length = form_obj.cleaned_data['length']
+                objs = models.zgld_article.objects.filter(company_id=company_id)
+                count = objs.count()
+                data_list = []
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+                for obj in objs:
+                    data_list.append({
+                        'id': obj.id,
+                        'title': obj.title
+                    })
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data':data_list,
+                    'count': count
+                }
 
+            else:
+                response.code = 301
+                response.msg = json.loads(form_obj.errors.as_json())
 
     elif request.method == "POST":
 
