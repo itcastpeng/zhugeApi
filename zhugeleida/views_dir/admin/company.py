@@ -108,6 +108,8 @@ def company(request):
                     'product_function_type_text' : obj.get_product_function_type_display(),
                     'xcx_qr_code' : obj.xcx_qr_code,
 
+                    'admin_is_hidden_id': obj.admin_is_hidden,              # 是否隐藏ID
+                    'admin_is_hidden': obj.get_admin_is_hidden_display(),   # 是否隐藏
                 })
             response.code = 200
             response.data = {
@@ -728,6 +730,22 @@ def company_oper(request, oper_type, o_id):
             response.code = 200
             response.msg = '查询成功'
             response.data = data_list
+
+        # 隐藏显示公司(后台)
+        elif oper_type == 'hidden_company':
+            company_id = o_id
+            obj = models.zgld_company.objects.get(id=company_id)
+            admin_is_hidden = int(obj.admin_is_hidden)
+            if admin_is_hidden == 0:
+                obj.admin_is_hidden = 1
+                msg = '隐藏成功'
+            else:
+                obj.admin_is_hidden = 0
+                msg = '显示成功'
+            obj.save()
+            response.code = 200
+            response.msg = msg
+
         else:
             response.code = 402
             response.msg = "请求异常"
