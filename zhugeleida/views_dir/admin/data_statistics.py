@@ -325,7 +325,7 @@ class statistical_objs():
                 objs = objs[start_line: stop_line]
             for obj in objs:
                 data_list.append({
-                    'customer_username': b64decode(obj.customer.username),
+                    'customer__username': b64decode(obj.customer.username),
                     'user_username': obj.user.username,
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                 })
@@ -559,7 +559,7 @@ class statistical_objs():
                 objs = objs[start_line: stop_line]
             for obj in objs:
                 data_list.append({
-                    'customer_name': b64decode(obj.customer.username),
+                    'customer__name': b64decode(obj.customer.username),
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
         data = {
