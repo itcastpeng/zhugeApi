@@ -16,7 +16,7 @@ from zhugeleida.public.condition_com  import conditionCom,validate_agent,datetim
 from zhugeleida.views_dir.mycelery_task.mycelery import record_money_process
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token, \
     create_component_access_token
-
+from django.db.models import Q
 # 查询公司
 @csrf_exempt
 @account.is_token(models.zgld_admin_userprofile)
@@ -36,12 +36,12 @@ def company(request):
                 'id': '',
                 'name': '__contains',
                 'create_date': '',
+                'admin_is_hidden': '', # 在后台 是否隐藏
             }
 
             data = request.GET.copy()
             q = conditionCom(data, field_dict)
             print('q -->', q )
-
             objs = models.zgld_company.objects.filter(q).order_by(order)
             count = objs.count()
 
@@ -113,6 +113,7 @@ def company(request):
             response.data = {
                 'ret_data': ret_data,
                 'data_count': count,
+                'admin_is_hidden_choices': models.zgld_company.admin_is_hidden_choices
             }
         return JsonResponse(response.__dict__)
 

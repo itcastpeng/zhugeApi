@@ -40,7 +40,10 @@ def xcx_app(request):
             q = conditionCom(request, field_dict)
             q.add(Q(**{'verify_type_info': True}), Q.AND)
 
-            objs = models.zgld_xiaochengxu_app.objects.select_related('user','company').filter(q).order_by(order)
+            objs = models.zgld_xiaochengxu_app.objects.select_related('user','company').filter(
+                q,
+                company__admin_is_hidden=1, # 不隐藏的查询出来
+            ).order_by(order)
             count = objs.count()
 
             if length != 0:

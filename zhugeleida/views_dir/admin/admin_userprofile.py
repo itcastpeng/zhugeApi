@@ -33,7 +33,10 @@ def admin_userprofile(request):
             q = conditionCom(request, field_dict)
             print('q -->', q)
 
-            objs = models.zgld_admin_userprofile.objects.select_related('company', 'role').filter(q).order_by(order)
+            objs = models.zgld_admin_userprofile.objects.select_related('company', 'role').filter(
+                q,
+                company__admin_is_hidden=1,     # 后台不隐藏的查询出来
+            ).order_by(order)
             count = objs.count()
 
             if length != 0:
@@ -48,21 +51,21 @@ def admin_userprofile(request):
                 #  将查询出来的数据 加入列表
 
                 ret_data.append({
-                    'id': obj.id,
-                    'avatar': obj.avatar,
-                    'login_user': obj.login_user,
-                    'username': obj.username,
-                    'position' : obj.position,
-                    'password' : '',
-                    'company_name': obj.company.name,
-                    'company_id': obj.company_id,
-                    'role_id': obj.role_id,
-                    'role_name': obj.role.name,
-                    'status': obj.status,
-                    'status_text': obj.get_status_display(),
-                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    # 'last_login_date': obj.last_login_date.strftime('%Y-%m-%d %H:%M:%S')
-                })
+                        'id': obj.id,
+                        'avatar': obj.avatar,
+                        'login_user': obj.login_user,
+                        'username': obj.username,
+                        'position' : obj.position,
+                        'password' : '',
+                        'company_name': obj.company.name,
+                        'company_id': obj.company_id,
+                        'role_id': obj.role_id,
+                        'role_name': obj.role.name,
+                        'status': obj.status,
+                        'status_text': obj.get_status_display(),
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        # 'last_login_date': obj.last_login_date.strftime('%Y-%m-%d %H:%M:%S')
+                    })
 
             #  查询成功 返回200 状态码
             response.code = 200

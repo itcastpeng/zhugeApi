@@ -57,7 +57,11 @@ class zgld_company(models.Model):
     article_reading_time = models.IntegerField(verbose_name='每篇文章阅读时长', default=60)
     is_same_label = models.IntegerField(verbose_name='是否匹配相同标签的文章', default=0) # 默认不匹配
     # -------------------------------------------------------------------------------------------------
-
+    admin_is_hidden_choices = (
+        (0, "显示"),
+        (1, "隐藏"),
+    )
+    admin_is_hidden = models.SmallIntegerField(choices=admin_is_hidden_choices, default=0)  # 该字段只用于后台是否隐藏该公司所有数据
 
     class Meta:
         verbose_name_plural = "公司表"
@@ -80,6 +84,8 @@ class zgld_three_service_setting(models.Model):
         (1, "通过"),
     )
     status = models.SmallIntegerField(choices=status_choices, verbose_name="状态", default=0)
+
+
 
 ##公司官网模板
 class zgld_website_template(models.Model):
