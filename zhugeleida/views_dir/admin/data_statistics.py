@@ -10,7 +10,7 @@ import json, datetime
 from publicFunc.time_screen import time_screen
 from publicFunc.base64 import b64decode
 
-
+# 获取 发送的消息
 def get_msg(content):
     data = {
         'msg': '',
@@ -413,7 +413,7 @@ class statistical_objs():
                 if int(video_obj.get('video_time__sum')) > 0:
                     avg = int(video_obj.get('video_time__sum') / video_obj.get('id__count'))
                 data_list.append({
-                    'customer__username': video_obj.get('customer__username'),
+                    'customer__username': b64decode(video_obj.get('customer__username')),
                     'id__count': video_obj.get('id__count'),
                     'video_time__sum': video_obj.get('video_time__sum'),
                     'avg': avg,
@@ -448,7 +448,7 @@ class statistical_objs():
                 click_dialog_obj = click_dialog_obj[start_line: stop_line]
             for i in click_dialog_obj:
                 data_list.append({
-                    'customer_username': b64decode(i.customer.username),
+                    'customer__username': b64decode(i.customer.username),
                     'create_date': i.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
