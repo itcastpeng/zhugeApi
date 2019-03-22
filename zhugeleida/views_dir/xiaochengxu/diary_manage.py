@@ -827,12 +827,13 @@ def diary_manage_oper(request, oper_type, o_id):
                     cover_picture = []
                     if obj.diary.cover_picture:
                         cover_picture = json.loads(obj.diary.cover_picture)
-
+                    cover_show_type = obj.diary.cover_show_type
                     ret_data.append({
                         'case_type': 1,  # 普通案例
                         'diary_id': obj.diary_id,
                         'case_name': obj.diary.title,
                         'cover_picture': cover_picture,
+                        'cover_show_type': cover_show_type,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                     })
 
@@ -853,7 +854,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     'diary_id': '案例ID/日记ID',
                     'case_name': '案例名称/日记名称',
                     'cover_picture': '封面图',
-                    'create_date':'创建时间'
+                    'create_date':'创建时间',
+                    'cover_show_type':'封面类型',
                 }
             else:
                 response.code = 301
@@ -894,7 +896,6 @@ def diary_manage_oper(request, oper_type, o_id):
                     cover_picture = []
                     if obj.case.cover_picture:
                         cover_picture = json.loads(obj.case.cover_picture)
-
                     ret_data.append({
                         'case_type': 2,  # 时间轴
                         'diary_id': obj.case_id,
@@ -907,12 +908,13 @@ def diary_manage_oper(request, oper_type, o_id):
                     cover_picture = ''
                     if obj.diary.cover_picture:
                         cover_picture = json.loads(obj.diary.cover_picture)
-
+                    cover_show_type = obj.diary.cover_show_type
                     ret_data.append({
                         'case_type': 1,  # 普通案例
                         'diary_id': obj.diary_id,
                         'case_name': obj.diary.title,
                         'cover_picture': cover_picture,
+                        'cover_show_type': cover_show_type,
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                     })
 
@@ -931,7 +933,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     'diary_id': '案例ID/日记ID',
                     'case_name': '案例名称/日记名称',
                     'cover_picture': '封面图',
-                    'create_date': '创建时间'
+                    'create_date': '创建时间',
+                    'cover_show_type': '封面类型'
                 }
             else:
                 response.code = 301
