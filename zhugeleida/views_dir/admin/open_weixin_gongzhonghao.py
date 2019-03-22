@@ -1689,7 +1689,7 @@ def gzh_auth_process_oper(request, oper_type):
                 response.data = {
                     'ret_data' : ret_data
                 }
-                response.code = 200
+                response.code = 302
                 response.msg = "获取成功"
 
 
