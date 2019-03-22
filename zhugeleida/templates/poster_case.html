@@ -101,14 +101,14 @@
             <div class="pictures-2">
                 {% for i in ret_data.poster_cover %}
                     <div >
-                        <img  src="http://api.zhugeyingxiao.com/ + {{ i }}" />
+                        <img  src="http://api.zhugeyingxiao.com/{{ i }}" />
                     </div>
                 {% endfor %}
             </div>
         {% else %}
             <div  class="pictures-9">
                 {% for i in ret_data.poster_cover %}
-                    <img src="http://api.zhugeyingxiao.com/ + {{ i }}" />
+                    <img src="http://api.zhugeyingxiao.com/{{ i }}" />
                 {% endfor %}
             </div>
 
@@ -121,11 +121,11 @@
                     <div style="margin-top: 30px">查看她的变美过程</div>
                 </div>
                 <div class="code" >
-                    <img src="http://api.zhugeyingxiao.com/ + {{ ret_data.qr_code_url }}"/>
+                    <img src="http://api.zhugeyingxiao.com/{{ ret_data.qr_code_url }}"/>
                 </div>
             </div>
             <div class="logo">
-                <img src="http://api.zhugeyingxiao.com/ + {{ ret_data.poster_company_logo }}" />
+                <img src="http://api.zhugeyingxiao.com/{{ ret_data.poster_company_logo }}" />
             </div>
         </div>
     </div>
