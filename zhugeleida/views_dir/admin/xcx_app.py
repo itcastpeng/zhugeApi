@@ -42,7 +42,7 @@ def xcx_app(request):
 
             objs = models.zgld_xiaochengxu_app.objects.select_related('user','company').filter(
                 q,
-                company__admin_is_hidden=1, # 不隐藏的查询出来
+                company__admin_is_hidden=0, # 不隐藏的查询出来
             ).order_by(order)
             count = objs.count()
 
