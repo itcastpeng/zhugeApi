@@ -1696,7 +1696,7 @@ def gzh_auth_process_oper(request, oper_type):
 
             else:
                 response.msg = '公众号不存在'
-                response.code = 302
+                response.code = 200
 
     else:
 
