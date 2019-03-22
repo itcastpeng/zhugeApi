@@ -1647,19 +1647,15 @@ def deal_gzh_picture_url(leixing, url):
 
     if leixing == 'only_url':
         ### 匹配出标题 描述 和 封面URL
-        pattern1 = re.compile(r'var msg_title = (.*);', re.I)  # 通过 re.compile 获得一个正则表达式对象
-        pattern2 = re.compile(r'var msg_desc = (.*);', re.I)  # 通过 re.compile 获得一个正则表达式对象
-        pattern3 = re.compile(r'var msg_cdn_url = (.*);', re.I)  # 通过 re.compile 获得一个正则表达式对象
-
-        results_url_list_1 = pattern1.findall(ret.text)
-        results_url_list_2 = pattern2.findall(ret.text)
-        results_url_list_3 = pattern3.findall(ret.text)
+        results_url_list_1 = re.compile(r'var msg_title = (.*);').findall(ret.text)   # 标题
+        results_url_list_2 = re.compile(r'var msg_desc = (.*);').findall(ret.text)    # 封面摘要
+        results_url_list_3 = re.compile(r'var msg_cdn_url = (.*);').findall(ret.text) # 封面图片
 
         msg_title = results_url_list_1[0].replace('"', '')
         msg_desc = results_url_list_2[0].replace('"', '')
         cover_url = results_url_list_3[0].replace('"', '')
 
-        ## 把图片下载到本地
+        ## 把封面图片下载到本地
         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
         html = s.get(cover_url)
         if 'wx_fmt=gif' in cover_url:
@@ -1672,18 +1668,14 @@ def deal_gzh_picture_url(leixing, url):
             file.write(html.content)
         print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
         #######
-        cover_url = file_dir
+        cover_url = file_dir # 封面图片
 
     style_tags = soup.find_all('style')
-    # print('style_tags -->', style_tags)
-    # style_html = " ".join(style_tags)
 
     style = ""
     for style_tag in style_tags:
         print('style_tag -->', style_tag)
         style += str(style_tag)
-
-    print(style)
 
     body = soup.find('div', id="js_content")
 
@@ -1715,23 +1707,12 @@ def deal_gzh_picture_url(leixing, url):
 
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
-    # video = body.find_all('video')
-    print(' iframe ------>>\n', iframe)
 
     for iframe_tag in iframe:
         shipin_url = iframe_tag.get('data-src')
         data_cover_url = iframe_tag.get('data-cover')
         if data_cover_url:
             data_cover_url = unquote(data_cover_url, 'utf-8')
-            # s = requests.session()
-            # s.keep_alive = False  # 关闭多余连接
-            # html = s.get(data_cover_url)
-            # now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            # filename = "/gzh_article_%s.jpg" % (now_time)
-            #
-            # data_cover_url = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
-            # with open(data_cover_url, 'wb') as file:
-            #     file.write(html.content)
 
         print('封面URL data_cover_url ------->>', data_cover_url)
 
