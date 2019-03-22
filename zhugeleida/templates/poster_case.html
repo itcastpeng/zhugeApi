@@ -2,97 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>名片海报</title>
 </head>
 <style type="text/css">
     .container{
         background:#fff;
-        width: 604px;
-        height: 920px;
+        width: 375px;
+        height: 668px;
         overflow: hidden;
         margin:0 auto;
         padding:0;
     }
-    .pictures{
+    .poster-card{
+        background:#fff;
+        width: 375px;
+        height:668px;
+    }
+    .pictures-1 img{
+        width: 100%;
+        height: 500px;
+        display: block;
+        object-fit: cover;
+    }
+    .pictures-2 img{
+        width: 100%;
+        height: 250px;
+        display: block;
+        object-fit: cover;
+    }
+    .pictures-9 {
+        display: flex;
+        flex-flow:row wrap;
+        overflow:hidden;
+    }
+    .pictures-9 img{
+        width: 33.33%;
+        height: 166.66px;
         display: flex;
         flex-wrap: wrap;
-        width:604px;
-        height:482px;
+        object-fit: cover;
     }
-    .pictures img{
-        width: 33.33%;
-        height: 160px;
-        display: block;
-        float: left;
-    }
-    .content{
-        height: 232px;
+    .poster-content{
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        height: 168px;
         margin-top: 10px;
     }
-    .desc{
-        text-align: center;
-        font-size: 26px;
-    }
-    .code{
+    .poster-top {
         display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+        align-items: center;
+    }
+    .poster-desc{
+        flex-direction: column;
+        flex-grow: 1;
+        text-align: center;
+        font-size: 14px;
+    }
+    .poster-card .code {
         flex-grow: 1;
     }
-    .codediv {
-        width: 100%;
-        text-align: center;
-    }
-    .codediv img{
-        width:160px;
-        height: 160px;
+    .poster-card .code img{
+        width:114px;
+        height: 114px;
         margin-left: 10px;
+        object-fit: cover;
     }
-    .logo {
+    .poster-card .logo {
         display: flex;
-        flex-grow: 1;
-        margin-top: 20px;
-        margin-bottom: 8px;
+        justify-content: center;
+        margin-top: 2px;
+        margin-bottom: 2px;
     }
-    .logodiv {
-        width: 100%;
-        text-align: center;
-    }
-    .logodiv img{
-        width: 530px;
-        height: 150px;
+    .poster-card .logo img{
+        width: 228px;
+        height: 36px;
+        object-fit: cover;
     }
 </style>
 
 <body style="background: #000; height: 1000px">
+
 <div class="container" id="container">
-    <div id="jietu" style="height: 100%">
+    <div id="jietu" class="poster-card">
 
-
-        <div class="pictures">
-
-              {% for iterm in poster_cover %}
-                 <img src= '/{{ iterm }}'>
-              {% endfor %}
-
-        </div>
-        <div class="content">
-            <div class="desc">
-                <div>长按识别图中二维码</div>
-                <div style="margin: 10px 0">查看她的变美过程</div>
+        {% if ret_data.len_poster_cover == 1 %}
+            <div class="pictures-1">
+                {% for i in ret_data.poster_cover %}
+                <div >
+                    <img  src="{{ i }}" />
+                </div>
+                {% endfor %}
             </div>
-            <div class="code">
 
-                <div class="codediv">
-                    <img src='/{{ ret_data.qr_code_url }}'>
+        {% elif ret_data.len_poster_cover == 2 %}
+            <div class="pictures-2">
+                {% for i in ret_data.poster_cover %}
+                    <div >
+                        <img  src="{{ i }}" />
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div  class="pictures-9">
+                {% for i in ret_data.poster_cover %}
+                    <img src= {{ i }} />
+                {% endfor %}
+            </div>
 
+        {% endif %}
+
+        <div class="poster-content">
+            <div class='poster-top'>
+                <div class="poster-desc">
+                    <div>长按识别图中二维码</div>
+                    <div style="margin-top: 30px">查看她的变美过程</div>
+                </div>
+                <div class="code" >
+                    <img src="{{ ret_data.qr_code_url }}"/>
                 </div>
             </div>
             <div class="logo">
-                <div class="logodiv">
-                    <img src='/{{ ret_data.poster_company_logo }}'>
-
-                </div>
+                <img src="{{ ret_data.poster_company_logo }}" />
             </div>
-
         </div>
     </div>
 </div>
