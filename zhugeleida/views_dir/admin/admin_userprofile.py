@@ -35,7 +35,7 @@ def admin_userprofile(request):
 
             objs = models.zgld_admin_userprofile.objects.select_related('company', 'role').filter(
                 q,
-                company__admin_is_hidden=1,     # 后台不隐藏的查询出来
+                company__admin_is_hidden=0,     # 后台不隐藏的查询出来
             ).order_by(order)
             count = objs.count()
 
