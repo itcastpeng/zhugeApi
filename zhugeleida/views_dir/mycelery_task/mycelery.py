@@ -622,7 +622,7 @@ def create_poster_process(data):
         response.msg = "传参异常"
 
     else:
-        print('-------====正常生成海报===========正常生成海报============正常生成海报')
+        print('-------====正常生成海报===========正常生成海报============正常生成海报', poster_url)
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
         platform = sys.platform  # 获取平台
