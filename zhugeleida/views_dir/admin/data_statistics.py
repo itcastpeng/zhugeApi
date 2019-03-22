@@ -530,7 +530,7 @@ class statistical_objs():
 
             for obj in objs:
                 data_list.append({
-                    'customer_username': b64decode(obj.customer.username),
+                    'customer__username': b64decode(obj.customer.username),
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                 })
 
@@ -543,15 +543,15 @@ class statistical_objs():
 
     # 文章点赞次数（文章）
     def thumb_up_number(self):
-        objs = models.zgld_accesslog.objects.filter(
+        objs = models.zgld_article_action.objects.filter(
             self.q,
             article_id=self.o_id,
-            action=19
+            status=1
         )
 
         click_thumb_num = objs.count()
         data_list = []
-
+        print('click_thumb_num----------> ', click_thumb_num)
         if self.detail_data_type and self.detail_data_type == 'thumb_up_number':
             if self.length != 0:
                 start_line = (self.current_page - 1) * self.length
@@ -589,7 +589,7 @@ class statistical_objs():
                     is_audit_pass = '已审核'
 
                 data_list.append({
-                    'customer_username':b64decode(obj.from_customer.username),
+                    'customer__username':b64decode(obj.from_customer.username),
                     'content': b64decode(obj.content),
                     'is_audit_pass': is_audit_pass,
                     'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),

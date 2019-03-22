@@ -991,7 +991,7 @@ class zgld_article(models.Model):
         app_label = "zhugeleida"
 
 
-# 文章被赞
+# 文章点赞
 class zgld_article_action(models.Model):
     article = models.ForeignKey('zgld_article', verbose_name='被赞的文章',null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='赞或踩的客户')

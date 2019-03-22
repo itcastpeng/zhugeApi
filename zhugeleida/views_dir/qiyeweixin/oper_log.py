@@ -21,12 +21,13 @@ def oper_log_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
     if request.method == "POST":
-
+        customer_id = request.POST.get('customer_id')
         # 客户复制咨询名称(记录次数)
         if oper_type == "add":
             form_data = {
                 'oper_type': o_id,
                 'user_id': user_id,
+                'customer_id': customer_id,
             }
             forms_obj = OperLogAddForm(form_data)
 

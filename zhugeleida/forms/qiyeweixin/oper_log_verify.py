@@ -20,3 +20,9 @@ class OperLogAddForm(forms.Form):
             "invalid": "参数类型错误"
         }
     )
+    customer_id = forms.IntegerField(
+        required=False,
+        error_messages={
+            'invalid': "复制哪个客户ID不能为空",
+        }
+    )
