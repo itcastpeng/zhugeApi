@@ -461,6 +461,9 @@ def article(request, oper_type):
                     response.code = 302
                     response.msg = '模板文章无数据'
 
+        # 查询该公司所有文章
+        elif oper_type == 'get_article_title':
+            company_id = request.GET.get('company_id')
 
 
     elif request.method == "POST":

@@ -65,7 +65,6 @@ class statistical_objs():
             user_id=self.o_id,
             oper_type=1
         )
-        print('self.o_id------> ', self.o_id, self.q)
         count = copy_nickname_obj.count()
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
@@ -93,15 +92,9 @@ class statistical_objs():
     def number_valid_conversations(self):
         data_list = []
         effective_dialogue = 0
-        # zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(
-        #     """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt
-        #     from zhugeleida_zgld_chatinfo where userprofile_id={} and article_id is not null group by cdt, article_id, customer_id;""".format(
-        #         self.o_id)
-        # )
-        number_valid_conversations = False # 判断是否查询了详情
+        is_number_valid_conversations = False # 判断是否查询了详情
         if self.detail_data_type and self.detail_data_type == 'number_valid_conversations':  #
-            number_valid_conversations = True
-        print('self.start_date, self.stop_date==========> ', self.start_date, self.stop_date)
+            is_number_valid_conversations = True
         zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(          # 查询出符合条件的用户和客户 已天为单位
             """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
             from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id} and create_date >= '{start_date}' and create_date <= '{stop_date}' group by cdt, customer_id;""".format(
@@ -111,25 +104,23 @@ class statistical_objs():
             )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
-
             customer__username = ''
             result_data = []
             start_date_time = zgld_chatinfo_obj.cdt + ' 00:00:00'  # 按天区分
             stop_date_time = zgld_chatinfo_obj.cdt + ' 23:59:59'
-
             msg_objs = models.zgld_chatinfo.objects.filter(
                 userprofile_id=self.o_id,
                 customer_id=zgld_chatinfo_obj.customer_id,
                 create_date__gte=start_date_time,
                 create_date__lte=stop_date_time,
             ).order_by('create_date')
-
-            if self.length != 0:
-                start_line = (self.current_page - 1) * self.length
-                stop_line = start_line + self.length
-                msg_objs = msg_objs[start_line: stop_line]
-
             dialogue_count = msg_objs.count()       # 查询出该用户和该客户聊天总数
+            if is_number_valid_conversations:
+                if self.length != 0:
+                    start_line = (self.current_page - 1) * self.length
+                    stop_line = start_line + self.length
+                    msg_objs = msg_objs[start_line: stop_line]
+
             if dialogue_count >= 6:  # 判断该客户在该文章中 对话 低于六次不达有效对话标准
                 send_type_user = 0      # 咨询发送消息
                 send_type_customer = 0  # 客户发送消息
@@ -151,7 +142,7 @@ class statistical_objs():
                             name = b64decode(msg_obj.customer.username) # 客户名称
                         avatar = msg_obj.customer.headimgurl     # 头像
 
-                    if number_valid_conversations: # 查询详情
+                    if is_number_valid_conversations: # 查询详情
                         result_data.append({
                             'send_type': send_type,
                             'avatar': avatar,
@@ -167,16 +158,18 @@ class statistical_objs():
                     customer__username = ''
                     if msg_obj.customer.username:
                         customer__username = b64decode(msg_obj.customer.username)
+                # print('send_type_user, send_type_customer---> ', send_type_user, send_type_customer)
                 if send_type_user < send_type_customer:
                     num = int(send_type_user / 3)
                 else:
                     num = int(send_type_customer / 3)
+                # print('num0-0000000-0-------> ', num)
                 if num > 0:
                     flag = True
 
                 effective_dialogue += num
 
-                if number_valid_conversations:  # 查询详情
+                if is_number_valid_conversations:  # 查询详情
                     if flag:
                         data_list.append({
                             'customer__username': customer__username,
@@ -202,6 +195,13 @@ class statistical_objs():
             article_id__isnull=False,
         ).values('customer_id', 'customer__username', 'article_id').distinct()
         data_list = []
+        num = 0
+        start_line = 0
+        stop_line = 9
+        if self.length != 0:
+            start_line = (self.current_page - 1) * self.length
+            stop_line = start_line + self.length
+
         for info_obj in info_objs:
             chatinfo_objs = models.zgld_chatinfo.objects.filter(
                 userprofile_id=self.o_id,
@@ -224,28 +224,28 @@ class statistical_objs():
                     result_data.append(data_dict)
                     date = data_dict['stop_date'] - data_dict['start_date']
                     if self.detail_data_type and self.detail_data_type == 'average_response_time':
+                        num += 1
                         data_list.append({
                             'customer__username': b64decode(info_obj.get('customer__username')),
                             'start_date': data_dict['start_date'].strftime('%Y-%m-%d %H:%M:%S'),
                             'stop_date': data_dict['stop_date'].strftime('%Y-%m-%d %H:%M:%S'),
                             'response_time': date.seconds
                         })
+            if self.detail_data_type and self.detail_data_type == 'average_response_time':
+                if num >= stop_line:
+                    break
+                elif num <= start_line:
+                    continue
 
         num = 0
         len_data = len(result_data)
-        if self.length != 0:
-            start_line = (self.current_page - 1) * self.length
-            stop_line = start_line + self.length
-            result_data = result_data[start_line: stop_line]
-
         for i in result_data:
             date = i.get('stop_date') - i.get('start_date')
             num += date.seconds
         if num != 0 and len_data != 0:
             average_response = int(num / len_data)
-
         data = {
-            'average_response': str(average_response) + '次',
+            'average_response': str(average_response) + '秒',
             'data_list': data_list,
             'count': len_data,
         }
@@ -619,7 +619,7 @@ def data_statistics(request, oper_type):
             order = request.GET.get('order', '-create_date')
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-
+            print(current_page, length)
             number_days = request.GET.get('number_days')  # 天数
             start_time = request.GET.get('start_time')  # 天数 开始时间
             stop_time = request.GET.get('stop_time')  # 天数 结束时间
@@ -870,7 +870,7 @@ def data_statistics(request, oper_type):
                         'effective_dialogue_num': effective_dialogue_data.get('effective_dialogue'),        # 有效对话数量
                         'effective_dialogue_data': effective_dialogue_data.get('data_list'),                # 有效对话数据
 
-                        'average_response_avg': average_response_data.get('average_response'),            # 平均响应时长
+                        'average_response_avg': average_response_data.get('average_response'),              # 平均响应时长
                         'average_response_data': average_response_data.get('data_list'),                    # 平均响应时长
 
                         'sending_applet_num': sending_applet_data.get('sending_applet_num'),                # 发送小程序数量
