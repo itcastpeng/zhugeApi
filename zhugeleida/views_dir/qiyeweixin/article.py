@@ -26,6 +26,7 @@ def article(request, oper_type):
     response = Response.ResponseObj()
     # oper_type=myarticle_list
     if request.method == "GET":
+        user_id = request.GET.get('user_id')
 
         # 雷达AI 查询我的文章  (我--我的文章)
         if oper_type == 'myarticle_list':
@@ -135,6 +136,19 @@ def article(request, oper_type):
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+
+        elif oper_type == 'get_article_tags':
+            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+
+            tag_list = models.zgld_article_tag.objects.filter(user__company_id=company_id).values('id', 'name')
+            tag_data = list(tag_list)
+
+            response.code = 200
+            response.data = {
+                'ret_data': tag_data,
+                'data_count': tag_list.count(),
+            }
 
     else:
         response.code = 402
