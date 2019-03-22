@@ -78,7 +78,7 @@ def diary_manage(request):
 
         data_list = []
         count = 0
-
+        diary_name = ''
         if timeline_id:
             objs = models.zgld_diary.objects.filter(id=timeline_id).order_by(order)
             objs.update(  # 阅读次数
