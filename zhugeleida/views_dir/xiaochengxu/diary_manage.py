@@ -23,7 +23,11 @@ def record_view_log(data):
     diary_name = data.get('diary_name')
     u_id = data.get('user_id')
     customer_id = data.get('customer_id')
-    log_count = models.zgld_accesslog.objects.filter(**data).count()
+    log_count = models.zgld_accesslog.objects.filter(
+        customer_id=customer_id,
+        user=u_id,
+        action=22
+    ).count()
     if int(log_count) == 0:
         remark = '首次查看您的日记{diary_name}, 沟通从此刻开始'.format(diary_name=diary_name)
     elif int(log_count) == 1:
@@ -78,7 +82,6 @@ def diary_manage(request):
 
         data_list = []
         count = 0
-
         if timeline_id:
             objs = models.zgld_diary.objects.filter(id=timeline_id).order_by(order)
             objs.update(  # 阅读次数
