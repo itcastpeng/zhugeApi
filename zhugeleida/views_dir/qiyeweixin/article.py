@@ -44,6 +44,7 @@ def article(request, oper_type):
                     'id': '',
                     'status': '',  # 按状态搜索, (1,'已发'),  (2,'未发')
                     'title': '__contains',  # 按文章标题搜索
+                    'tags': '',     # 按标签查询
                 }
 
                 request_data = request.GET.copy()
@@ -60,10 +61,6 @@ def article(request, oper_type):
                 q = conditionCom(request_data, field_dict)
                 q.add(Q(**{'company_id': company_id}), Q.AND)
                 q.add(Q(**{'status': _status }), Q.AND)
-
-                tag_list = json.loads(request.GET.get('tags_list')) if request.GET.get('tags_list') else [] # 按标签查询
-                if tag_list:
-                    q.add(Q(**{'tags__in': tag_list}), Q.AND)
 
                 objs = models.zgld_article.objects.select_related('company', 'user').filter(q).order_by(order)
                 count = objs.count()
