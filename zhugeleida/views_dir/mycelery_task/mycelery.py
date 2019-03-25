@@ -29,6 +29,7 @@ import base64
 from zhugeleida.public.common import create_qiyeweixin_access_token
 import random
 
+from selenium.webdriver.chrome.options import Options
 
 def action_record(data):
     response = Response.ResponseObj()
@@ -626,57 +627,65 @@ def create_poster_process(data):
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
         platform = sys.platform  # 获取平台
-        phantomjs_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
+        base_dir_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
         if 'linux' in platform:
-            phantomjs_path = phantomjs_path + '/phantomjs'
-
+            phantomjs_path = base_dir_path + '/phantomjs'
+            chromedriver_path = base_dir_path + '/chromedriver_2.36'
         else:
-            phantomjs_path = phantomjs_path + '/phantomjs.exe'
+            phantomjs_path = base_dir_path + '/phantomjs.exe'
+            chromedriver_path = base_dir_path + '/chromedriver_2.36.exe'
 
-        driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-
-        driver.implicitly_wait(10)
-        print('----------------------1')
-        # try:
-        print('值 driver 开始 ----->>', poster_url)
-        driver.get(poster_url)
-        print('值 driver 结束 ----->>', poster_url)
-
+        # # 截图名称
         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
+        user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
+        user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
         if customer_id:
             user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
             user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
+
+        print(phantomjs_path)
+        print('chromedriver_path--> ', chromedriver_path)
+        if not case_type:
+            driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+
+            driver.implicitly_wait(10)
+            driver.get(poster_url)
+
+            # driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
+            driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
+            element = driver.find_element_by_id("jietu")
+            print("值 element.location -->", element.location)  # 打印元素坐标
+            print("值 element.size -->", element.size)  # 打印元素大小
+
+            left = element.location['x']
+            top = element.location['y']
+            right = element.location['x'] + element.size['width']
+            bottom = element.location['y'] + element.size['height']
+
+            im = Image.open(BASE_DIR + user_poster_file_temp)
+            im = im.crop((left, top, right, bottom))
+
+            if len(im.split()) == 4:
+                r, g, b, a = im.split()
+                im = Image.merge("RGB", (r, g, b))
+                im.save(BASE_DIR + user_poster_file) # 绝对路径保存
+            else:
+                im.save(BASE_DIR + user_poster_file)
+
         else:
-            user_poster_file_temp = '/%s_poster_temp.png' % (user_id)
-            user_poster_file = '/%s_%s_poster.png' % (user_id, now_time)
+            chrome_options = Options()
+            chrome_options.add_argument('--headless')
+            driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
+            driver.implicitly_wait(10)
+            print('poster_url----> ', poster_url)
+            driver.get(poster_url)
+            driver.save_screenshot(BASE_DIR + user_poster_file_temp)
 
-        driver.save_screenshot(BASE_DIR + user_poster_file_temp)
-        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp)
-
-        element = driver.find_element_by_id("jietu")
-        print("值 element.location -->", element.location)  # 打印元素坐标
-        print("值 element.size -->", element.size)  # 打印元素大小
-
-        left = element.location['x']
-        top = element.location['y']
-        right = element.location['x'] + element.size['width']
-        bottom = element.location['y'] + element.size['height']
-
-        im = Image.open(BASE_DIR + user_poster_file_temp)
-        im = im.crop((left, top, right, bottom))
-
-        print("create_user_or_customer_poster -->", len(im.split()))  # test
-        if len(im.split()) == 4:
-            # prevent IOError: cannot write mode RGBA as BMP
-            r, g, b, a = im.split()
-            im = Image.merge("RGB", (r, g, b))
-            im.save(BASE_DIR + user_poster_file)
-        else:
+            im = Image.open(BASE_DIR + user_poster_file_temp)
             im.save(BASE_DIR + user_poster_file)
 
-        print('值 driver.page_source -->', driver.page_source)
+
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
 
