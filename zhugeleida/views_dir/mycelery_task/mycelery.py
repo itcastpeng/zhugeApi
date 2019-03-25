@@ -629,7 +629,6 @@ def create_poster_process(data):
         platform = sys.platform  # 获取平台
         base_dir_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
-        # chromedriver_path = base_dir_path + '/chromedriver'
         if 'linux' in platform:
             phantomjs_path = base_dir_path + '/phantomjs'
         else:
@@ -648,8 +647,10 @@ def create_poster_process(data):
         print('poster_url------------> ', poster_url)
         driver.implicitly_wait(10)
         driver.get(poster_url)
+        time.sleep(2)
+        # print("page_source -->", driver.page_source)
         driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
-        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
+        # driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
 
         element = driver.find_element_by_id("jietu")
         print("值 element.location -->", element.location)  # 打印元素坐标
@@ -670,8 +671,6 @@ def create_poster_process(data):
         else:
             im.save(BASE_DIR + user_poster_file)
 
-
-
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
 
         # print('临时截图 ------->>',BASE_DIR + user_poster_file_temp)
@@ -679,8 +678,6 @@ def create_poster_process(data):
         print('生成海报URL -------->', poster_url, 'case_id--,> ', case_id)
 
         if poster_url:
-            print('-------------------------------------> ')
-
             if case_id and user_customer_belonger_id: # 案例的生成海报
                 case_type_q = Q()
                 if case_type == 1:
