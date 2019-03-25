@@ -34,6 +34,7 @@
         display: flex;
         display: -webkit-flex;
         flex-flow:row wrap;
+        -webkit-flex-flow:row wrap;
         overflow:hidden;
     }
     .pictures-9 img{
@@ -42,6 +43,7 @@
         display: flex;
         display: -webkit-flex;
         flex-wrap: wrap;
+        -webkit-flex-wrap: wrap;
         object-fit: cover;
     }
     .poster-content{
@@ -59,6 +61,7 @@
         flex-direction: row;
         -webkit-flex-direction: row;
         flex-grow: 1;
+        -webkit-align-items: center;
         align-items: center;
     }
     .poster-desc{
@@ -80,13 +83,14 @@
     .poster-card .logo {
         display: flex;
         display: -webkit-flex;
+        -webkit-justify-content: center;
         justify-content: center;
         margin-top: 2px;
         margin-bottom: 2px;
     }
     .poster-card .logo img{
         width: 228px;
-        height: 36px;
+        min-height: 36px;
         object-fit: cover;
     }
 </style>
