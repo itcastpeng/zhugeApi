@@ -674,9 +674,10 @@ def create_poster_process(data):
                 im.save(BASE_DIR + user_poster_file)
 
         else:
-            chrome_options = Options()
-            chrome_options.add_argument('--headless')
-            driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
+            # chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            # driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
+            driver = webdriver.Chrome(chromedriver_path) # 无头模式
             driver.implicitly_wait(10)
             print('poster_url----> ', poster_url)
             driver.get(poster_url)
