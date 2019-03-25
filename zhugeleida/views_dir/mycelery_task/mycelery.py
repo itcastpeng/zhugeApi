@@ -673,18 +673,21 @@ def create_poster_process(data):
                 im.save(BASE_DIR + user_poster_file)
 
         else:
-            # chrome_options = Options()
-            # chrome_options.add_argument('--headless')
-            # driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
-            driver = webdriver.Chrome(chromedriver_path) # 无头模式
-            driver.implicitly_wait(10)
             print('poster_url----> ', poster_url)
+            chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--no-sandbox')
+            chrome_options.add_argument('--disable-dev-shm-usage')
+            chrome_options.add_argument('--disable-gpu')
+            driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
+            driver.implicitly_wait(10)
             driver.get(poster_url)
             driver.save_screenshot(BASE_DIR + user_poster_file_temp)
 
             im = Image.open(BASE_DIR + user_poster_file_temp)
             im.save(BASE_DIR + user_poster_file)
-            driver.quit()
+            # driver.quit()
 
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
