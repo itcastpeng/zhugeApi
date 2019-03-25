@@ -480,7 +480,7 @@ def create_user_customer_case_poster_qr_code(data):
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-            path = '/pages/detail/detail?uid=%s&case_id=%s&source=1&case_type=%s' % (user_id, case_id, case_type)
+            path = '/pages/detail/detail?uid=%s&case_id=%s&source=1&case_type=%s' % (user_id, case_id, case_type)  # 小程序路由
             user_qr_code = '/case_%s_customer_%s_user_%s_%s_qrcode.jpg' % (case_id, customer_id, user_id, now_time)
 
             get_qr_data = {}
@@ -523,14 +523,14 @@ def create_user_customer_case_poster_qr_code(data):
             if customer_id:
                 qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
 
-                data_dict = {
-                    'user_id': user_id,
-                    'customer_id': customer_id,
-                    'poster_url': url,
-                    'user_customer_belonger_id': user_customer_belonger_id,
-                    'case_id': case_id,
-                    'case_type': case_type
-                }
+                # data_dict = {
+                #     'user_id': user_id,
+                #     'customer_id': customer_id,
+                #     'poster_url': url,
+                #     'user_customer_belonger_id': user_customer_belonger_id,
+                #     'case_id': case_id,
+                #     'case_type': case_type
+                # }
 
                 if qr_code:
                     case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
@@ -557,7 +557,7 @@ def create_user_customer_case_poster_qr_code(data):
                                 qr_code=qr_code
                             )
 
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                # tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict)) # 生成截图
 
             response.data = {'qr_code': qr_code}
             response.code = 200
