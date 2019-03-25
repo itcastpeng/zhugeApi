@@ -629,7 +629,7 @@ def create_poster_process(data):
         platform = sys.platform  # 获取平台
         base_dir_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
-        chromedriver_path = base_dir_path + '/chromedriver_2.36.exe'
+        chromedriver_path = base_dir_path + '/chromedriver.exe'
         if 'linux' in platform:
             phantomjs_path = base_dir_path + '/phantomjs'
         else:
@@ -684,7 +684,7 @@ def create_poster_process(data):
 
             im = Image.open(BASE_DIR + user_poster_file_temp)
             im.save(BASE_DIR + user_poster_file)
-
+            driver.quit()
 
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
