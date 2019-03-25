@@ -645,42 +645,42 @@ def create_poster_process(data):
         if customer_id:
             user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
             user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
-        if not case_type:
-            driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-            print('poster_url------------> ', poster_url)
-            driver.implicitly_wait(10)
-            driver.get(poster_url)
+        # if not case_type:
+        driver = webdriver.PhantomJS(executable_path=phantomjs_path)
+        print('poster_url------------> ', poster_url)
+        driver.implicitly_wait(10)
+        driver.get(poster_url)
 
-            # driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
-            driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
-            element = driver.find_element_by_id("jietu")
-            print("值 element.location -->", element.location)  # 打印元素坐标
-            print("值 element.size -->", element.size)  # 打印元素大小
+        # driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
+        driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
+        element = driver.find_element_by_id("jietu")
+        print("值 element.location -->", element.location)  # 打印元素坐标
+        print("值 element.size -->", element.size)  # 打印元素大小
 
-            left = element.location['x']
-            top = element.location['y']
-            right = element.location['x'] + element.size['width']
-            bottom = element.location['y'] + element.size['height']
+        left = element.location['x']
+        top = element.location['y']
+        right = element.location['x'] + element.size['width']
+        bottom = element.location['y'] + element.size['height']
 
-            im = Image.open(BASE_DIR + user_poster_file_temp)
-            im = im.crop((left, top, right, bottom))
+        im = Image.open(BASE_DIR + user_poster_file_temp)
+        im = im.crop((left, top, right, bottom))
 
-            if len(im.split()) == 4:
-                r, g, b, a = im.split()
-                im = Image.merge("RGB", (r, g, b))
-                im.save(BASE_DIR + user_poster_file) # 绝对路径保存
-            else:
-                im.save(BASE_DIR + user_poster_file)
-
-
-
+        if len(im.split()) == 4:
+            r, g, b, a = im.split()
+            im = Image.merge("RGB", (r, g, b))
+            im.save(BASE_DIR + user_poster_file) # 绝对路径保存
         else:
-            chrome_options = Options()
-            chrome_options.add_argument('--headless')
-            driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
-            driver.implicitly_wait(10)
-            driver.get(poster_url)
-            driver.save_screenshot(BASE_DIR + user_poster_file_temp)
+            im.save(BASE_DIR + user_poster_file)
+
+
+
+        # else:
+        #     chrome_options = Options()
+        #     chrome_options.add_argument('--headless')
+        #     driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
+        #     driver.implicitly_wait(10)
+        #     driver.get(poster_url)
+        #     driver.save_screenshot(BASE_DIR + user_poster_file_temp)
 
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
