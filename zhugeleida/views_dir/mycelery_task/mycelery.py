@@ -618,11 +618,13 @@ def create_poster_process(data):
     print('传递的值 ------>>', data)
 
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
+
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
-
     else:
+        poster_url = 'https://blog.csdn.net/zwq912318834/article/details/79215400'
+
         print('-------====正常生成海报===========正常生成海报============正常生成海报', poster_url)
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
@@ -670,6 +672,8 @@ def create_poster_process(data):
             else:
                 im.save(BASE_DIR + user_poster_file)
 
+
+
         else:
             chrome_options = Options()
             chrome_options.add_argument('--headless')
@@ -677,8 +681,6 @@ def create_poster_process(data):
             driver.implicitly_wait(10)
             driver.get(poster_url)
             driver.save_screenshot(BASE_DIR + user_poster_file_temp)
-            im = Image.open(BASE_DIR + user_poster_file_temp)
-            im.save(BASE_DIR + user_poster_file)
 
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
