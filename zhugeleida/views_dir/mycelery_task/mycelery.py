@@ -629,12 +629,11 @@ def create_poster_process(data):
         platform = sys.platform  # 获取平台
         base_dir_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
+        chromedriver_path = base_dir_path + '/chromedriver_2.36.exe'
         if 'linux' in platform:
             phantomjs_path = base_dir_path + '/phantomjs'
-            chromedriver_path = base_dir_path + '/chromedriver_2.36'
         else:
             phantomjs_path = base_dir_path + '/phantomjs.exe'
-            chromedriver_path = base_dir_path + '/chromedriver_2.36.exe'
 
         # # 截图名称
         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
