@@ -623,15 +623,13 @@ def create_poster_process(data):
         response.code = 500
         response.msg = "传参异常"
     else:
-        poster_url = 'https://blog.csdn.net/zwq912318834/article/details/79215400'
-
         print('-------====正常生成海报===========正常生成海报============正常生成海报', poster_url)
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
         platform = sys.platform  # 获取平台
         base_dir_path = os.path.join(settings.BASE_DIR, 'zhugeleida', 'views_dir', 'tools')
 
-        chromedriver_path = base_dir_path + '/chromedriver'
+        # chromedriver_path = base_dir_path + '/chromedriver'
         if 'linux' in platform:
             phantomjs_path = base_dir_path + '/phantomjs'
         else:
@@ -645,14 +643,14 @@ def create_poster_process(data):
         if customer_id:
             user_poster_file_temp = '/%s_%s_poster_temp.png' % (user_id, customer_id)
             user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
-        # if not case_type:
+
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
         print('poster_url------------> ', poster_url)
         driver.implicitly_wait(10)
         driver.get(poster_url)
-
-        # driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
+        driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
         driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
+
         element = driver.find_element_by_id("jietu")
         print("值 element.location -->", element.location)  # 打印元素坐标
         print("值 element.size -->", element.size)  # 打印元素大小
@@ -672,15 +670,6 @@ def create_poster_process(data):
         else:
             im.save(BASE_DIR + user_poster_file)
 
-
-
-        # else:
-        #     chrome_options = Options()
-        #     chrome_options.add_argument('--headless')
-        #     driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_options) # 无头模式
-        #     driver.implicitly_wait(10)
-        #     driver.get(poster_url)
-        #     driver.save_screenshot(BASE_DIR + user_poster_file_temp)
 
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
