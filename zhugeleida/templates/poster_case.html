@@ -16,7 +16,7 @@
     .poster-card{
         background:#fff;
         width: 375px;
-        height:668px;
+        min-height:668px;
     }
     .pictures-1 img{
         width: 100%;
@@ -32,6 +32,7 @@
     }
     .pictures-9 {
         display: flex;
+        display: -webkit-flex;
         flex-flow:row wrap;
         overflow:hidden;
     }
@@ -39,24 +40,30 @@
         width: 33.33%;
         height: 166.66px;
         display: flex;
+        display: -webkit-flex;
         flex-wrap: wrap;
         object-fit: cover;
     }
     .poster-content{
         display: flex;
+        display: -webkit-flex;
         flex-direction: column;
+        -webkit-flex-direction: column;
         flex-grow: 1;
         height: 168px;
         margin-top: 10px;
     }
     .poster-top {
         display: flex;
+        display: -webkit-flex;
         flex-direction: row;
+        -webkit-flex-direction: row;
         flex-grow: 1;
         align-items: center;
     }
     .poster-desc{
         flex-direction: column;
+        -webkit-flex-direction: column;
         flex-grow: 1;
         text-align: center;
         font-size: 14px;
@@ -72,6 +79,7 @@
     }
     .poster-card .logo {
         display: flex;
+        display: -webkit-flex;
         justify-content: center;
         margin-top: 2px;
         margin-bottom: 2px;
@@ -92,7 +100,7 @@
             <div class="pictures-1">
                 {% for i in ret_data.poster_cover %}
                 <div >
-                    <img  src="{{ i }}" />
+                    <img  src="http://api.zhugeyingxiao.com/{{ i }}" />
                 </div>
                 {% endfor %}
             </div>
