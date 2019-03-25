@@ -702,7 +702,7 @@ def create_poster_process(data):
 
                 if case_poster_belonger_objs:
                     case_poster_belonger_objs.update(
-                        poster_url=poster_url
+                        poster_url=_poster_url
                     )
 
                 else:
@@ -710,13 +710,13 @@ def create_poster_process(data):
                         models.zgld_customer_case_poster_belonger.objects.create(
                             user_customer_belonger_id=user_customer_belonger_id,
                             diary_id=case_id,
-                            poster_url=poster_url
+                            poster_url=_poster_url
                         )
                     else:
                         models.zgld_customer_case_poster_belonger.objects.create(
                             user_customer_belonger_id=user_customer_belonger_id,
                             case_id=case_id,
-                            poster_url=poster_url
+                            poster_url=_poster_url
                         )
 
             else:   # 名片海报
