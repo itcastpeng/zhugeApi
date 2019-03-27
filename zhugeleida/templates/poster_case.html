@@ -35,7 +35,7 @@
         display: -webkit-flex;
         flex-flow:row wrap;
         -webkit-flex-flow:row wrap;
-        {#overflow:hidden;#}
+        overflow:hidden;
     }
     .pictures-9 .pictures-9-first{
         width: 33.3333%;
@@ -120,29 +120,29 @@
                     </div>
                 {% endfor %}
             </div>
-{#        {% else %}#}
-{#            <div  class="pictures-9">#}
-{#                {% for i in ret_data.poster_cover %}#}
-{#                    <div>#}
-{#                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />#}
-{#                    </div>#}
-{#                {% endfor %}#}
-{#            </div>#}
-{##}
-{#        {% endif %}#}
-
         {% else %}
             <div  class="pictures-9">
                 {% for i in ret_data.poster_cover %}
                     <div class="pictures-9-first">
-                        <div style="width:100%; height:100%;background-size: cover; background: url(http://api.zhugeyingxiao.com/{{ i }})no-repeat center center">
-{#                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />#}
-                        </div>
+                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />
                     </div>
                 {% endfor %}
             </div>
 
         {% endif %}
+
+{#        {% else %}#}
+{#            <div  class="pictures-9">#}
+{#                {% for i in ret_data.poster_cover %}#}
+{#                    <div class="pictures-9-first">#}
+{#                        <div style="width:100%; height:100%;background-size: cover; background: url(http://api.zhugeyingxiao.com/{{ i }})no-repeat center center">#}
+{#                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />#}
+{#                        </div>#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{##}
+{#        {% endif %}#}
 
         <div class="poster-content">
             <div class='poster-top'>
