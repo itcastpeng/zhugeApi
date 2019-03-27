@@ -644,38 +644,40 @@ def create_poster_process(data):
             user_poster_file = '/%s_%s_%s_poster.png' % (user_id, customer_id, now_time)
 
         driver = webdriver.PhantomJS(executable_path=phantomjs_path)
-        print('poster_url------------> ', poster_url)
         driver.implicitly_wait(10)
+        driver.maximize_window()
         driver.get(poster_url)
-        time.sleep(2)
-        # print("page_source -->", driver.page_source)
-        driver.save_screenshot(BASE_DIR + user_poster_file_temp)       # 截图
-        # driver.get_screenshot_as_file(BASE_DIR + user_poster_file_temp) # 截图
 
         element = driver.find_element_by_id("jietu")
-        print("值 element.location -->", element.location)  # 打印元素坐标
-        print("值 element.size -->", element.size)  # 打印元素大小
+        locations = element.location
+        sizes = element.size
+        rangle = (int(locations['x']), int(locations['y']), int(locations['x'] + sizes['width']), int(locations['y'] + sizes['height']))
+        driver.save_screenshot(BASE_DIR + user_poster_file_temp)  # 截图
+        img = Image.open(str(BASE_DIR + user_poster_file_temp))
+        jpg = img.crop(rangle)
+        jpg.save(str(BASE_DIR + user_poster_file))
 
-        left = element.location['x']
-        top = element.location['y']
-        right = element.location['x'] + element.size['width']
-        bottom = element.location['y'] + element.size['height']
 
-        im = Image.open(BASE_DIR + user_poster_file_temp)
-        im = im.crop((left, top, right, bottom))
-
-        if len(im.split()) == 4:
-            r, g, b, a = im.split()
-            im = Image.merge("RGB", (r, g, b))
-            im.save(BASE_DIR + user_poster_file) # 绝对路径保存
-        else:
-            im.save(BASE_DIR + user_poster_file)
+        # left = element.location['x']
+        # top = element.location['y']
+        # right = element.location['x'] + element.size['width']
+        # bottom = element.location['y'] + element.size['height']
+        #
+        # im = Image.open(BASE_DIR + user_poster_file_temp)
+        # im = im.crop((left, top, right, bottom))
+        #
+        # if len(im.split()) == 4:
+        #     r, g, b, a = im.split()
+        #     im = Image.merge("RGB", (r, g, b))
+        #     im.save(BASE_DIR + user_poster_file) # 绝对路径保存
+        # else:
+        #     im.save(BASE_DIR + user_poster_file)
 
         _poster_url = 'statics/zhugeleida/imgs/xiaochengxu/user_poster%s' % user_poster_file
 
-        # print('临时截图 ------->>',BASE_DIR + user_poster_file_temp)
         if os.path.exists(BASE_DIR + user_poster_file_temp): os.remove(BASE_DIR + user_poster_file_temp)
         print('生成海报URL -------->', poster_url, 'case_id--,> ', case_id)
+        driver.quit() # 退出
 
         if poster_url:
             if case_id and user_customer_belonger_id: # 案例的生成海报
