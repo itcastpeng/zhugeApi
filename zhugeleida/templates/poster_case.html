@@ -42,9 +42,9 @@
         height: 166.66px;
     }
     .pictures-9 img{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        {#width: 100%;#}
+        {#height: 100%;#}
+        {#object-fit: cover;#}
     }
     .poster-content{
         display: flex;
@@ -134,7 +134,7 @@
         {% else %}
             <div  class="pictures-9">
                 {% for i in ret_data.poster_cover %}
-                    <div style="background-size: cover; background: url(http://api.zhugeyingxiao.com/{{ i }})no-repeat 5px 5px">
+                    <div style="background-size: contain; background: url(http://api.zhugeyingxiao.com/{{ i }})no-repeat">
 {#                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />#}
                     </div>
                 {% endfor %}
