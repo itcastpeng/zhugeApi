@@ -120,11 +120,22 @@
                     </div>
                 {% endfor %}
             </div>
+{#        {% else %}#}
+{#            <div  class="pictures-9">#}
+{#                {% for i in ret_data.poster_cover %}#}
+{#                    <div>#}
+{#                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{##}
+{#        {% endif %}#}
+
         {% else %}
             <div  class="pictures-9">
                 {% for i in ret_data.poster_cover %}
-                    <div>
-                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />
+                    <div style="background-size: cover; background: url(http://api.zhugeyingxiao.com/{{ i }})no-repeat">
+{#                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />#}
                     </div>
                 {% endfor %}
             </div>
