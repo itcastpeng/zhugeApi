@@ -209,7 +209,7 @@ def login_oper(request, oper_type):
                     is_customer_unique = user_objs[0].company.is_customer_unique
 
                     user_customer_belonger_obj = ''
-                    if is_customer_unique and str(is_customer_unique) != '0':  # 唯一性
+                    if is_customer_unique:  # 唯一性
 
                         user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                                user__company_id=company_id)
