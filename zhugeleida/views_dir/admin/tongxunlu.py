@@ -362,14 +362,14 @@ def tongxunlu_oper(request, oper_type):
             old_uid = request.POST.get('old_uid')
             new_uid = request.POST.get('new_uid')
             company_id =  request.POST.get('company_id')
-            type =  request.POST.get('type')
+            action =  request.POST.get('type')
 
             form_data = {
                 'company_id' : company_id,
                 'customer_id_list' : customer_id_list,
                 'old_uid' : old_uid,
                 'new_uid' : new_uid,
-                'type' : type,
+                'type' : action,
             }
 
             forms_obj = TongxunluUserListSelectForm(form_data)
@@ -377,38 +377,38 @@ def tongxunlu_oper(request, oper_type):
             if forms_obj.is_valid():
 
                 ## 工作交接
-                if type == 'all_customer':
+                if action == 'all_customer': # 判断关系绑定
+                    print('old_uid, company_id----------> ', old_uid, company_id)
                     customer_objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
                         user_id=old_uid,user__company_id=company_id)
+                    if customer_objs: #如果关系表 有原用户
+                        for obj in customer_objs:
+                            _customer_id =obj.customer_id
+                            # 判断 新交接人 是否有该客户
+                            validate_customer_objs = models.zgld_user_customer_belonger.objects.filter(user_id=new_uid,customer_id=_customer_id)
+                            chat_objs = models.zgld_chatinfo.objects.filter(customer_id=_customer_id, userprofile_id=old_uid)  # 查询老交接人 聊天表
 
-                    for obj in customer_objs:
+                            if validate_customer_objs: # 如果新交接人有该客户 删除原来数据
+                                obj.delete() # 删除旧数据
+                                chat_objs.update(
+                                    userprofile_id=new_uid,
+                                    is_last_msg=False
+                                )
 
-                        _customer_id =obj.customer_id
-                        validate_customer_objs = models.zgld_user_customer_belonger.objects.filter(user_id=new_uid,customer_id=_customer_id)
-                        chat_objs = models.zgld_chatinfo.objects.filter(customer_id=_customer_id, userprofile_id=old_uid)  #
+                            else:
+                                chat_objs.update(
+                                    userprofile_id=new_uid
+                                )
 
-                        if validate_customer_objs:
-                            obj.delete() # 删除旧数据
-                            chat_objs.update(
-                                userprofile_id=new_uid,
-                                is_last_msg=False
-                            )
-
-                        else:
-                            chat_objs.update(
-                                userprofile_id=new_uid
-                            )
-
-                            obj.user_id=new_uid
-                            obj.save()
-
+                                obj.user_id=new_uid
+                                obj.save()
 
                         response.code = 200
                         response.msg = '交接成功'
 
                     else:
                         response.code = 301
-                        response.msg = '没有数据'
+                        response.msg = '关系不存在'
 
                 else:
 
