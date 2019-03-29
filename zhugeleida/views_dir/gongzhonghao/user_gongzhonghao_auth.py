@@ -22,10 +22,11 @@ def get_user_info(access_token, openid):
         'openid': openid,
         'lang': 'zh_CN',
     }
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    ret = s.get(get_user_info_url, params=get_user_info_data)
+    # s = requests.session()
+    # s.keep_alive = False  # 关闭多余连接
+    ret = requests.get(get_user_info_url, params=get_user_info_data)
     ret.encoding = 'utf-8'
+    print('----------************************************************------> ', ret.json())
     return ret.json()
 
 # 从微信公众号接口中获取openid等信息
