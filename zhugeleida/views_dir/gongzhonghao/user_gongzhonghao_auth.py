@@ -191,8 +191,7 @@ def user_gongzhonghao_auth(request):
                         customer_username = base64.b64decode(customer_username)
                         customer_username = str(customer_username, 'utf-8')
 
-                    print(
-                        '--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (
+                    print('静默--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (
                         uid, client_id, customer_username), '|', json.dumps(data))
                     tasks.binding_article_customer_relate.delay(data)
 
@@ -285,7 +284,7 @@ def user_gongzhonghao_auth(request):
                 pid = int(pid) if pid else ''
                 customer_id = int(client_id)
                 if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
-                    print('--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
+                    print('非静默--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
                         uid, client_id, customer_name), '|', json.dumps(data))
                     tasks.binding_article_customer_relate.delay(data)
 
