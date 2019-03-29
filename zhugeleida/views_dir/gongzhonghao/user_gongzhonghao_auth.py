@@ -202,6 +202,7 @@ def user_gongzhonghao_auth(request):
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
 
             if 'errcode' not in ret_json:
+                print('---errcode---errcode**********************--------++++++++++++++++++++++++++++++++++++++++++++++---')
                 openid = ret_json['openid']  # 用户唯一标识
                 nickname = ret_json['nickname']  # 会话密钥
 
@@ -214,7 +215,7 @@ def user_gongzhonghao_auth(request):
                 country = ret_json['country']  #
                 headimgurl = ret_json['headimgurl']  #
                 token = account.get_token(account.str_encrypt(openid))
-
+                print('====================***************************************************************************', headimgurl)
                 customer_objs = models.zgld_customer.objects.filter(openid=openid)
                 if customer_objs:
                     customer_objs.update(
