@@ -80,7 +80,7 @@ def update_click_dialog_num(request, oper_type):
     elif oper_type == 'article_video_duration':
         video_time = request.GET.get('video_time')
         time_stamp = request.GET.get('time_stamp')
-        if video_time >= 1:
+        if video_time and int(video_time) >= 1:
             objs = models.ZgldUserOperLog.objects.filter(
                 article_id=article_id,
                 customer_id=customer_id,
