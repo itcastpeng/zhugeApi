@@ -613,7 +613,7 @@ def create_poster_process(data):
     poster_url = data.get('poster_url')
     user_customer_belonger_id = data.get('user_customer_belonger_id')
     case_id = data.get('case_id')
-    case_type = int(data.get('case_type'))
+    case_type = data.get('case_type')
 
     print('传递的值 ------>>', data)
 
@@ -682,7 +682,7 @@ def create_poster_process(data):
         if poster_url:
             if case_id and user_customer_belonger_id: # 案例的生成海报
                 case_type_q = Q()
-                if case_type == 1:
+                if case_type and int(case_type) == 1:
                     case_type_q.add(Q(diary_id=case_id), Q.AND)
                 else:
                     case_type_q.add(Q(case_id=case_id), Q.AND)
