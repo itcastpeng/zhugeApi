@@ -211,7 +211,7 @@ def user_gongzhonghao_auth(request):
         # 非静默
         else:
             ret_json = get_user_info(access_token, openid) # 获取用户信息
-            print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
+            print('----------- 【公众号】拉取用户信息 接口返回拉取用户信息 接口返回拉取用户信息 接口返回 ---------->>', ret_json)
             if 'errcode' not in ret_json:
                 openid = ret_json['openid']  # 用户唯一标识
                 nickname = ret_json['nickname']  # 会话密钥
