@@ -22,10 +22,11 @@ def get_user_info(access_token, openid):
         'openid': openid,
         'lang': 'zh_CN',
     }
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    ret = s.get(get_user_info_url, params=get_user_info_data)
+    # s = requests.session()
+    # s.keep_alive = False  # 关闭多余连接
+    ret = requests.get(get_user_info_url, params=get_user_info_data)
     ret.encoding = 'utf-8'
+    print('----------************************************************------> ', ret.json())
     return ret.json()
 
 # 从微信公众号接口中获取openid等信息
@@ -211,7 +212,7 @@ def user_gongzhonghao_auth(request):
         # 非静默
         else:
             ret_json = get_user_info(access_token, openid) # 获取用户信息
-            print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
+            print('----------- 【公众号】拉取用户信息 接口返回拉取用户信息 接口返回拉取用户信息 接口返回 ---------->>', ret_json)
             if 'errcode' not in ret_json:
                 openid = ret_json['openid']  # 用户唯一标识
                 nickname = ret_json['nickname']  # 会话密钥
