@@ -144,10 +144,10 @@ def img_merge(request):
             user_id = request.GET.get('user_id')
             company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
 
-            if img_source == 'case': # 给案例的图片加水印
-                watermark_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
+            if company_id and int(company_id) == 12: # 米扬丽格 水印文字
+                watermark_name = '米扬丽格医疗美容'
             else:
-                watermark_name = models.zgld_gongzhonghao_app.objects.get(company_id=company_id).name
+                watermark_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
             obj = watermark()
 
             watermark_path = obj.generate_watermark_img(watermark_name) # 生成水印图片
