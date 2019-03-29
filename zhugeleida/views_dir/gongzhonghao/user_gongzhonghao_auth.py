@@ -13,6 +13,20 @@ from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorize
 from urllib.parse import unquote,quote
 import base64, random, json, string, redis, requests, time
 
+# 获取用户信息
+def get_user_info(access_token, openid):
+    get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
+    # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
+    get_user_info_data = {
+        'access_token': access_token,
+        'openid': openid,
+        'lang': 'zh_CN',
+    }
+    s = requests.session()
+    s.keep_alive = False  # 关闭多余连接
+    ret = s.get(get_user_info_url, params=get_user_info_data)
+    ret.encoding = 'utf-8'
+    return ret.json()
 
 # 从微信公众号接口中获取openid等信息
 def get_openid_info(get_token_data):
@@ -55,10 +69,8 @@ def user_gongzhonghao_auth(request):
         _type = relate.split('|')[0].split('_')[1]
         if _type == 'BindingUserNotify':
             redirect_url = binding_gzh_user_notify(request)
-
             return redirect(redirect_url)
 
-        print('---errcode---errcode**********************--------++++++++++++++++++++++++++++++++++++++++++++++---')
         article_id = relate.split('|')[0].split('_')[2]
         pid = relate.split('|')[1].split('_')[1]
         level = relate.split('|')[2].split('_')[1]
@@ -112,7 +124,6 @@ def user_gongzhonghao_auth(request):
 
         url = qywx_config_dict.get('authorization_url')
         api_url = qywx_config_dict.get('api_url')
-        print('====================***************************************************************************')
         headimgurl = ''
         if state == 'snsapi_base':
 
@@ -120,10 +131,29 @@ def user_gongzhonghao_auth(request):
                 openid=openid,
                 user_type=1,  # 公众号
             )
-
-            # openid 存在数据库中
+            # 获取用户信息
+            ret_json = get_user_info(access_token, openid)
+            openid = ret_json['openid']  # 用户唯一标识
+            nickname = ret_json['nickname']  # 客户名称
+            encodestr = base64.b64encode(nickname.encode('utf-8'))  # 加密客户名称
+            customer_name = str(encodestr, 'utf-8') # 字符串化
+            sex = ret_json['sex']  # 客户性别
+            province = ret_json['province']  # 客户
+            city = ret_json['city']  #
+            country = ret_json['country']  #
+            headimgurl = ret_json['headimgurl']  # 客户头像
 
             if customer_objs:
+                # 更新客户基本信息
+                customer_objs.update(
+                    username=customer_name,
+                    sex=sex,
+                    province=province,
+                    city=city,
+                    country=country,
+                    headimgurl=headimgurl
+                )
+
                 token = customer_objs[0].token
                 client_id = customer_objs[0].id
                 if not uid:  # 代表预览的后台分享出去的链接
@@ -138,7 +168,6 @@ def user_gongzhonghao_auth(request):
                     article_id=article_id,
                     token=token,
                     client_id=client_id,
-
                     uid=uid,  # 文章作者-ID
                     level=level,  # 所在层级
                     pid=pid,  # 目前所在的父级ID
@@ -181,25 +210,8 @@ def user_gongzhonghao_auth(request):
 
         # 非静默
         else:
-            print('ret_data -->', ret_data)
-            get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo'
-            # get_user_info_url = 'https://api.weixin.qq.com/cgi-bin/user/info'
-            get_user_info_data = {
-                'access_token': access_token,
-                'openid': openid,
-                'lang': 'zh_CN',
-            }
-
-            s = requests.session()
-            s.keep_alive = False  # 关闭多余连接
-            ret = s.get(get_user_info_url, params=get_user_info_data)
-
-            # ret = requests.get(get_user_info_url, params=get_user_info_data)
-
-            ret.encoding = 'utf-8'
-            ret_json = ret.json()
+            ret_json = get_user_info(access_token, openid) # 获取用户信息
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
-
             if 'errcode' not in ret_json:
                 openid = ret_json['openid']  # 用户唯一标识
                 nickname = ret_json['nickname']  # 会话密钥
