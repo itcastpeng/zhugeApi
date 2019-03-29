@@ -133,6 +133,7 @@ def user_gongzhonghao_auth(request):
             )
             # 获取用户信息
             ret_json = get_user_info(access_token, openid)
+            print('ret_json============ret_json---ret_json---ret_json--ret_json--ret_json--->', ret_json)
             openid = ret_json['openid']  # 用户唯一标识
             nickname = ret_json['nickname']  # 客户名称
             encodestr = base64.b64encode(nickname.encode('utf-8'))  # 加密客户名称
