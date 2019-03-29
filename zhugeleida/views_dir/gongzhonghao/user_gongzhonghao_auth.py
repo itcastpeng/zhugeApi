@@ -54,13 +54,11 @@ def user_gongzhonghao_auth(request):
 
         _type = relate.split('|')[0].split('_')[1]
         if _type == 'BindingUserNotify':
-            print('==================_type==BindingUserNotify', _type)
             redirect_url = binding_gzh_user_notify(request)
 
             return redirect(redirect_url)
 
-
-
+        print('---errcode---errcode**********************--------++++++++++++++++++++++++++++++++++++++++++++++---')
         article_id = relate.split('|')[0].split('_')[2]
         pid = relate.split('|')[1].split('_')[1]
         level = relate.split('|')[2].split('_')[1]
@@ -114,7 +112,7 @@ def user_gongzhonghao_auth(request):
 
         url = qywx_config_dict.get('authorization_url')
         api_url = qywx_config_dict.get('api_url')
-
+        print('====================***************************************************************************')
         headimgurl = ''
         if state == 'snsapi_base':
 
@@ -203,7 +201,6 @@ def user_gongzhonghao_auth(request):
             print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
 
             if 'errcode' not in ret_json:
-                print('---errcode---errcode**********************--------++++++++++++++++++++++++++++++++++++++++++++++---')
                 openid = ret_json['openid']  # 用户唯一标识
                 nickname = ret_json['nickname']  # 会话密钥
 
@@ -216,7 +213,6 @@ def user_gongzhonghao_auth(request):
                 country = ret_json['country']  #
                 headimgurl = ret_json['headimgurl']  #
                 token = account.get_token(account.str_encrypt(openid))
-                print('====================***************************************************************************', headimgurl)
                 customer_objs = models.zgld_customer.objects.filter(openid=openid)
                 if customer_objs:
                     customer_objs.update(
