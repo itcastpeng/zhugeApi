@@ -493,7 +493,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         ret.encoding = 'utf-8'
         ret_json = ret.json()
-        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+        print('----------- 【公众号】拉取用户信息 get_weixin_api接口返回 ---------->>', json.dumps(ret_json))
 
         return ret_json
 
@@ -503,7 +503,7 @@ class get_customer_gongzhonghao_userinfo(object):
 
         ret_json = self.get_weixin_api()
 
-        print('----------- whole_info【公众号】拉取用户信息 接口返回 ---------->>', ret_json)
+        print('----------- whole_info【公众号】拉取用户信息get_gzh_user_whole_info 接口返回 ---------->>', ret_json)
 
         if 'errcode' not in ret_json:
             openid = ret_json['openid']  # 用户唯一标识
