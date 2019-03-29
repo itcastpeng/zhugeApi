@@ -54,6 +54,7 @@ def user_gongzhonghao_auth(request):
 
         _type = relate.split('|')[0].split('_')[1]
         if _type == 'BindingUserNotify':
+            print('==================_type==BindingUserNotify', _type)
             redirect_url = binding_gzh_user_notify(request)
 
             return redirect(redirect_url)
