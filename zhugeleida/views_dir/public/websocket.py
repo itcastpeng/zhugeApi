@@ -553,7 +553,7 @@ def xiaochengxu_websocket(request, oper_type):
 
                         customer_id = obj.customer_id
                         customer_username =obj.customer.username
-                        print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
+                        # print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
                         customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
 
                         content = obj.content
@@ -604,7 +604,7 @@ def xiaochengxu_websocket(request, oper_type):
                     }
 
 
-                    print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
+                    # print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
                 print('--- list(msg_obj) -->>', ret_data_list)
@@ -623,12 +623,12 @@ def xiaochengxu_websocket(request, oper_type):
                     # data = uwsgi.websocket_recv()
                     data = uwsgi.websocket_recv_nb()
 
-                    print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
+                    # print('------[小程序-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
-                    print('------ 【小程序】发送过来的 数据:  ----->>', _data)
+                    # print('------ 【小程序】发送过来的 数据:  ----->>', _data)
 
                     login_flag = account.socket_is_token(models.zgld_customer, _data)
 
@@ -647,7 +647,7 @@ def xiaochengxu_websocket(request, oper_type):
                             customer_id_position_key = 'customer_id_{cid}_position'.format(cid=customer_id)  # 小程序 在聊天还是聊天页外面
 
                             if  type_data == 'query_num':
-                                print('小程序已经output query_num ----------->>')
+                                # print('小程序已经output query_num ----------->>')
                                 rc.set(customer_id_position_key, 'output')
 
                                 phone = ''
@@ -670,7 +670,7 @@ def xiaochengxu_websocket(request, oper_type):
                                     'code': 200,
                                     'msg': '查询成功-获取聊天数量',
                                 }
-                                print('------ 查询数量返回【消息数量】成功---->', response_data)
+                                # print('------ 查询数量返回【消息数量】成功---->', response_data)
                                 uwsgi.websocket_send(json.dumps(response_data))
 
                                 continue
@@ -773,7 +773,7 @@ def xiaochengxu_websocket(request, oper_type):
                             'msg': '小程序token验证未通过'
                         }
 
-                        print('----  【小程序验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id, _data)
+                        # print('----  【小程序验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id, _data)
                         uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
@@ -810,10 +810,10 @@ def gongzhonghao_websocket(request, oper_type):
             time.sleep(1)
 
             redis_customer_id_key_flag = rc.get(redis_customer_id_key)
-            print('---- 公众号 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
+            # print('---- 公众号 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)),redis_customer_id_key_flag)
             if redis_customer_id_key_flag == 'True' and user_id and customer_id:
-                print('---- 公众号 修改 Flag 为 True  --->>', redis_customer_id_key_flag)
-                print('---- 【公众号】 user_id | customer_id ------>>',customer_id,user_id)
+                # print('---- 公众号 修改 Flag 为 True  --->>', redis_customer_id_key_flag)
+                # print('---- 【公众号】 user_id | customer_id ------>>',customer_id,user_id)
 
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
@@ -907,12 +907,12 @@ def gongzhonghao_websocket(request, oper_type):
                     # data = uwsgi.websocket_recv()
                     data = uwsgi.websocket_recv_nb()
 
-                    print('------[公众号-非阻塞] websocket_recv_nb ----->>', data)
+                    # print('------[公众号-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
-                    print('------ 【公众号】发送过来的 数据:  ----->>', _data)
+                    # print('------ 【公众号】发送过来的 数据:  ----->>', _data)
 
                     login_flag = account.socket_is_token(models.zgld_customer, _data)
 
@@ -1045,7 +1045,7 @@ def gongzhonghao_websocket(request, oper_type):
                             'code': 400,
                             'msg': '公众号token验证未通过'
                         }
-                        print('----  【公众号验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id, _data)
+                        # print('----  【公众号验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id, _data)
                         uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
@@ -1057,7 +1057,7 @@ def gongzhonghao_websocket(request, oper_type):
                         'code': 400,
                         'msg': '报错:%s 终止连接' % (e)
                     }
-                    print('----  报错:%s [公众号] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
+                    # print('----  报错:%s [公众号] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
@@ -1075,9 +1075,9 @@ def gongzhonghao_websocket(request, oper_type):
 
             try:
                 redis_customer_query_info_key_flag = rc.get(redis_customer_query_info_key)
-                print('---- 公众号【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
+                # print('---- 公众号【消息数量】 循环 customer_id: %s | uid: %s --->>' % (str(customer_id), str(user_id)))
                 if redis_customer_query_info_key_flag == 'True':
-                    print('---- 公众号【消息数量】 Flag 为 True  --->>', redis_customer_query_info_key_flag)
+                    # print('---- 公众号【消息数量】 Flag 为 True  --->>', redis_customer_query_info_key_flag)
                     chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,send_type=1, is_customer_new_msg=True).count()
 
                     response_data = {
@@ -1088,7 +1088,7 @@ def gongzhonghao_websocket(request, oper_type):
                         'msg': '实时获取公众号【消息数量】成功',
                     }
 
-                    print('------ 有新消息, 实时推送给【公众号】 的数据：---->', response_data)
+                    # print('------ 有新消息, 实时推送给【公众号】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
                     rc.set(redis_customer_query_info_key, False)
 
@@ -1098,13 +1098,13 @@ def gongzhonghao_websocket(request, oper_type):
                         # data = uwsgi.websocket_recv()
                         data = uwsgi.websocket_recv_nb()
 
-                        print('------[公众号【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
+                        # print('------[公众号【消息数量】-非阻塞] websocket_recv_nb ----->>', data)
                         if not data:
 
                             continue
 
                         _data = json.loads(data.decode("utf-8"))
-                        print('------ 【公众号-【消息数量】】发送过来的 数据:  ----->>', _data)
+                        # print('------ 【公众号-【消息数量】】发送过来的 数据:  ----->>', _data)
 
                         type = _data.get('type')
                         customer_id = _data.get('user_id')
