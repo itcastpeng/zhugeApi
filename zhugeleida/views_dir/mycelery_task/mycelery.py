@@ -2331,7 +2331,7 @@ def get_customer_gongzhonghao_userinfo(request):
 
         ret.encoding = 'utf-8'
         ret_json = ret.json()
-        print('----------- 【公众号】拉取用户信息 接口返回 ---------->>', json.dumps(ret_json))
+        print('----------- 【公众号】拉取用户信息 接口返回get_customer_gongzhonghao_userinfo ---------->>', json.dumps(ret_json))
 
         if 'errcode' not in ret_json:
             openid = ret_json['openid']  # 用户唯一标
@@ -2402,7 +2402,7 @@ def get_customer_gongzhonghao_userinfo(request):
             customer_objs.update(
                 is_subscribe=subscribe
             )
-            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+            print('---------- 公众号客户ID：%s 修改关注的状态成功get_customer_gongzhonghao_userinfo| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
 
         # 保存头像到本地的数据库
         if headimgurl:

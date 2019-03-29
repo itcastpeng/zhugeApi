@@ -606,7 +606,7 @@ class get_customer_gongzhonghao_userinfo(object):
             customer_objs.update(
                 is_subscribe=subscribe
             )
-            print('---------- 公众号客户ID：%s 修改关注的状态成功| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
+            print('---------- 公众号客户ID：%s 修改关注的状态成功get_gzh_customer_is_focus_info| openid | subscribe ---->' % (customer_id), openid, "|", subscribe)
             response.code = 200
 
         else:
