@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.admin.case_manage_verify import CaseSelectForm
-
+from zhugeleida.public.common import action_record
 import json, datetime
 from django.db.models import Q, F, Sum, Count
 
@@ -32,7 +32,8 @@ def record_view_log(data):
         customer_id=customer_id,
         remark=remark
     )
-
+    data['action'] = 21
+    action_record(data, remark)  # 记录访问动作
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
