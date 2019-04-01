@@ -63,174 +63,97 @@ def user_gongzhonghao_auth(request):
         print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
 
         js_code = request.GET.get('code')
-        state = request.GET.get('state')
-        appid = request.GET.get('appid')
-        relate = request.GET.get('relate')
-
-        _type = relate.split('|')[0].split('_')[1]
-        if _type == 'BindingUserNotify':
-            redirect_url = binding_gzh_user_notify(request)
-            return redirect(redirect_url)
-
-        article_id = relate.split('|')[0].split('_')[2]
-        pid = relate.split('|')[1].split('_')[1]
-        level = relate.split('|')[2].split('_')[1]
-        uid = relate.split('|')[3].split('_')[1]
-        company_id = relate.split('|')[4].split('_')[2]
-
-        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-        qywx_config_dict = ''
-        if three_service_objs:
-            three_service_obj = three_service_objs[0]
-            qywx_config_dict = three_service_obj.config
-            if qywx_config_dict:
-                qywx_config_dict = json.loads(qywx_config_dict)
-
-        component_appid = qywx_config_dict.get('app_id')
-        app_secret = qywx_config_dict.get('app_secret')
-
-        # component_appid = 'wx6ba07e6ddcdc69b3'
-
-        data_dict = {
-            'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
-            'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
-        }
-
-        component_access_token_ret = create_component_access_token(data_dict)
-        component_access_token = component_access_token_ret.data.get('component_access_token')
-
-        get_token_data = {
-            'appid': appid,
-            'code': js_code,
-            'grant_type': 'authorization_code',
-            'component_appid': component_appid,
-            'component_access_token': component_access_token
-        }
-
-        ret_data = get_openid_info(get_token_data)
-        openid = ret_data['openid']
-        access_token = ret_data['access_token']
-        redirect_url = ''
-
-        # 判断静默和非静默方式
-        # 静默方式
-        client_id = ''
-        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-        qywx_config_dict = ''
-        if three_service_objs:
-            three_service_obj = three_service_objs[0]
-            qywx_config_dict = three_service_obj.config
-            if qywx_config_dict:
-                qywx_config_dict = json.loads(qywx_config_dict)
-
-        url = qywx_config_dict.get('authorization_url')
-        api_url = qywx_config_dict.get('api_url')
-        headimgurl = ''
-        if state == 'snsapi_base':
-
-            customer_objs = models.zgld_customer.objects.filter(
-                openid=openid,
-                user_type=1,  # 公众号
+        code_objs = models.save_code.objects.filter(code=js_code)
+        if not code_objs:
+            models.save_code.objects.create(
+                code=js_code
             )
-            # 获取用户信息
-            ret_json = get_user_info(access_token, openid)
-            print('ret_json============ret_json---ret_json---ret_json--ret_json--ret_json--->', ret_json)
-            openid = ret_json['openid']  # 用户唯一标识
-            nickname = ret_json['nickname']  # 客户名称
-            encodestr = base64.b64encode(nickname.encode('utf-8'))  # 加密客户名称
-            customer_name = str(encodestr, 'utf-8') # 字符串化
-            sex = ret_json['sex']  # 客户性别
-            province = ret_json['province']  # 客户
-            city = ret_json['city']  #
-            country = ret_json['country']  #
-            headimgurl = ret_json['headimgurl']  # 客户头像
 
-            if customer_objs:
-                # 更新客户基本信息
-                customer_objs.update(
-                    username=customer_name,
-                    sex=sex,
-                    province=province,
-                    city=city,
-                    country=country,
-                    headimgurl=headimgurl
+            state = request.GET.get('state')
+            appid = request.GET.get('appid')
+            relate = request.GET.get('relate')
+
+            _type = relate.split('|')[0].split('_')[1]
+            if _type == 'BindingUserNotify':
+                redirect_url = binding_gzh_user_notify(request)
+                return redirect(redirect_url)
+
+            article_id = relate.split('|')[0].split('_')[2]
+            pid = relate.split('|')[1].split('_')[1]
+            level = relate.split('|')[2].split('_')[1]
+            uid = relate.split('|')[3].split('_')[1]
+            company_id = relate.split('|')[4].split('_')[2]
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            component_appid = qywx_config_dict.get('app_id')
+            app_secret = qywx_config_dict.get('app_secret')
+
+            # component_appid = 'wx6ba07e6ddcdc69b3'
+
+            data_dict = {
+                'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
+                'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
+            }
+
+            component_access_token_ret = create_component_access_token(data_dict)
+            component_access_token = component_access_token_ret.data.get('component_access_token')
+
+            get_token_data = {
+                'appid': appid,
+                'code': js_code,
+                'grant_type': 'authorization_code',
+                'component_appid': component_appid,
+                'component_access_token': component_access_token
+            }
+
+            ret_data = get_openid_info(get_token_data)
+            openid = ret_data['openid']
+            access_token = ret_data['access_token']
+            redirect_url = ''
+
+            # 判断静默和非静默方式
+            # 静默方式
+            client_id = ''
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                qywx_config_dict = three_service_obj.config
+                if qywx_config_dict:
+                    qywx_config_dict = json.loads(qywx_config_dict)
+
+            url = qywx_config_dict.get('authorization_url')
+            api_url = qywx_config_dict.get('api_url')
+            headimgurl = ''
+            if state == 'snsapi_base':
+
+                customer_objs = models.zgld_customer.objects.filter(
+                    openid=openid,
+                    user_type=1,  # 公众号
                 )
-
-                token = customer_objs[0].token
-                client_id = customer_objs[0].id
-                if not uid:  # 代表预览的后台分享出去的链接
-                    article_url = '/gongzhonghao/yulanneirong/'
-                else:  # 代表是雷达用户分享出去的。
-                    article_url = '/gongzhonghao/leidawenzhang/'
-
-
-                redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
-                    url=url,
-                    article_url=article_url,
-                    article_id=article_id,
-                    token=token,
-                    client_id=client_id,
-                    uid=uid,  # 文章作者-ID
-                    level=level,  # 所在层级
-                    pid=pid,  # 目前所在的父级ID
-                    company_id=company_id,
-                )
-
-                data = {
-                    'article_id': article_id,
-                    'user_id': uid,  # 文章作者-ID
-                    'customer_id': client_id,
-                    'level': level,
-                    'pid': pid,
-                    'company_id': company_id,
-                }
-                pid = int(pid) if pid else ''
-                customer_id = int(client_id)
-
-                if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。
-                    customer_username = customer_objs[0].username
-                    if customer_username:
-                        customer_username = base64.b64decode(customer_username)
-                        customer_username = str(customer_username, 'utf-8')
-
-                    print('静默--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (
-                        uid, client_id, customer_username), '|', json.dumps(data))
-                    tasks.binding_article_customer_relate.delay(data)
-
-            else:
-
-                redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
-                api_url, article_id, pid, level, uid, company_id)
-                redirect_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={scope}&component_appid={component_appid}#wechat_redirect'.format(
-                    appid=appid,
-                    redirect_uri=redirect_uri,
-                    scope='snsapi_userinfo',
-                    component_appid=component_appid
-                )
-                print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', redirect_url)
-
-        # 非静默
-        else:
-            ret_json = get_user_info(access_token, openid) # 获取用户信息
-            print('----------- 【公众号】拉取用户信息 接口返回拉取用户信息 接口返回拉取用户信息 接口返回 ---------->>', ret_json)
-            if 'errcode' not in ret_json:
+                # 获取用户信息
+                ret_json = get_user_info(access_token, openid)
+                print('ret_json============ret_json---ret_json---ret_json--ret_json--ret_json--->', ret_json)
                 openid = ret_json['openid']  # 用户唯一标识
-                nickname = ret_json['nickname']  # 会话密钥
-
-                encodestr = base64.b64encode(nickname.encode('utf-8'))
-                customer_name = str(encodestr, 'utf-8')
-
-                sex = ret_json['sex']  #
-                province = ret_json['province']  #
+                nickname = ret_json['nickname']  # 客户名称
+                encodestr = base64.b64encode(nickname.encode('utf-8'))  # 加密客户名称
+                customer_name = str(encodestr, 'utf-8') # 字符串化
+                sex = ret_json['sex']  # 客户性别
+                province = ret_json['province']  # 客户
                 city = ret_json['city']  #
                 country = ret_json['country']  #
-                headimgurl = ret_json['headimgurl']  #
-                token = account.get_token(account.str_encrypt(openid))
-                customer_objs = models.zgld_customer.objects.filter(openid=openid)
+                headimgurl = ret_json['headimgurl']  # 客户头像
+
                 if customer_objs:
+                    # 更新客户基本信息
                     customer_objs.update(
-                        company_id=company_id,
-                        user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
                         username=customer_name,
                         sex=sex,
                         province=province,
@@ -238,80 +161,163 @@ def user_gongzhonghao_auth(request):
                         country=country,
                         headimgurl=headimgurl
                     )
+
+                    token = customer_objs[0].token
                     client_id = customer_objs[0].id
-                    print('---------- 公众号-新用户修改成功 update successful ---->',client_id)
+                    if not uid:  # 代表预览的后台分享出去的链接
+                        article_url = '/gongzhonghao/yulanneirong/'
+                    else:  # 代表是雷达用户分享出去的。
+                        article_url = '/gongzhonghao/leidawenzhang/'
+
+
+                    redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                        url=url,
+                        article_url=article_url,
+                        article_id=article_id,
+                        token=token,
+                        client_id=client_id,
+                        uid=uid,  # 文章作者-ID
+                        level=level,  # 所在层级
+                        pid=pid,  # 目前所在的父级ID
+                        company_id=company_id,
+                    )
+
+                    data = {
+                        'article_id': article_id,
+                        'user_id': uid,  # 文章作者-ID
+                        'customer_id': client_id,
+                        'level': level,
+                        'pid': pid,
+                        'company_id': company_id,
+                    }
+                    pid = int(pid) if pid else ''
+                    customer_id = int(client_id)
+
+                    if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。
+                        customer_username = customer_objs[0].username
+                        if customer_username:
+                            customer_username = base64.b64decode(customer_username)
+                            customer_username = str(customer_username, 'utf-8')
+
+                        print('静默--------- 企业雷达用户ID：%s 分享出去的,【已完成注册的公众号ID: %s,customer_name: %s】客户要绑定自己到文章 | json.dumps(data) ---------->' % (
+                            uid, client_id, customer_username), '|', json.dumps(data))
+                        tasks.binding_article_customer_relate.delay(data)
 
                 else:
-                    obj = models.zgld_customer.objects.create(
-                        company_id=company_id,
-                        token=token,
-                        openid=openid,
-                        user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                        username=customer_name,
-                        sex=sex,
-                        province=province,
-                        city=city,
-                        country=country,
-                        headimgurl=headimgurl,
+
+                    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+                    api_url, article_id, pid, level, uid, company_id)
+                    redirect_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope={scope}&state={scope}&component_appid={component_appid}#wechat_redirect'.format(
+                        appid=appid,
+                        redirect_uri=redirect_uri,
+                        scope='snsapi_userinfo',
+                        component_appid=component_appid
                     )
-                    client_id = obj.id
-                    print('---------- 公众号-新用户创建成功 crete successful ---->',client_id)
+                    print('--------- 当认证登录时判断是首次登录, 返回非静默方式 snsapi_userinfo URL 登录------>>', redirect_url)
 
-                if not uid:  # 代表预览的后台分享出去的链接
-                    article_url = '/gongzhonghao/yulanneirong/'
-                else:  # 代表是雷达用户分享出去的。
-                    article_url = '/gongzhonghao/leidawenzhang/'
-
-
-                redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
-                    url=url,
-                    article_url=article_url,
-                    article_id=article_id,
-                    token=token,
-                    client_id=client_id,
-
-                    uid=uid,  # 文章作者-ID
-                    level=level,  # 所在层级
-                    pid=pid,  # 目前所在的父级ID
-                    company_id=company_id,
-                )
-                data = {
-                    'article_id': article_id,
-                    'user_id': uid,  # 文章作者-ID
-                    'customer_id': client_id,
-                    'level': level,
-                    'pid': pid,
-                    'company_id': company_id,
-                }
-                pid = int(pid) if pid else ''
-                customer_id = int(client_id)
-                if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
-                    print('非静默--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
-                        uid, client_id, customer_name), '|', json.dumps(data))
-                    tasks.binding_article_customer_relate.delay(data)
-
+            # 非静默
             else:
-                errcode = ret_json.get('errcode')
-                errmsg = ret_json.get('errmsg')
-                print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+                ret_json = get_user_info(access_token, openid) # 获取用户信息
+                print('----------- 【公众号】拉取用户信息 接口返回拉取用户信息 接口返回拉取用户信息 接口返回 ---------->>', ret_json)
+                if 'errcode' not in ret_json:
+                    openid = ret_json['openid']  # 用户唯一标识
+                    nickname = ret_json['nickname']  # 会话密钥
 
-        print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
+                    encodestr = base64.b64encode(nickname.encode('utf-8'))
+                    customer_name = str(encodestr, 'utf-8')
 
-        if openid:
-            _data = {
-                'openid': openid,
-                'authorizer_appid': appid,
-                'headimgurl': headimgurl,
-                'user_id' : uid,
-                'company_id': company_id,
-                'client_id' : client_id
-            }
-            # 获取 公众号的用户信息
-            tasks.get_customer_gongzhonghao_userinfo.delay(_data)
-        else:
-            print('没有获取到 openid------->>')
+                    sex = ret_json['sex']  #
+                    province = ret_json['province']  #
+                    city = ret_json['city']  #
+                    country = ret_json['country']  #
+                    headimgurl = ret_json['headimgurl']  #
+                    token = account.get_token(account.str_encrypt(openid))
+                    customer_objs = models.zgld_customer.objects.filter(openid=openid)
+                    if customer_objs:
+                        customer_objs.update(
+                            company_id=company_id,
+                            user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                            username=customer_name,
+                            sex=sex,
+                            province=province,
+                            city=city,
+                            country=country,
+                            headimgurl=headimgurl
+                        )
+                        client_id = customer_objs[0].id
+                        print('---------- 公众号-新用户修改成功 update successful ---->',client_id)
 
-        return redirect(redirect_url)
+                    else:
+                        obj = models.zgld_customer.objects.create(
+                            company_id=company_id,
+                            token=token,
+                            openid=openid,
+                            user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                            username=customer_name,
+                            sex=sex,
+                            province=province,
+                            city=city,
+                            country=country,
+                            headimgurl=headimgurl,
+                        )
+                        client_id = obj.id
+                        print('---------- 公众号-新用户创建成功 crete successful ---->',client_id)
+
+                    if not uid:  # 代表预览的后台分享出去的链接
+                        article_url = '/gongzhonghao/yulanneirong/'
+                    else:  # 代表是雷达用户分享出去的。
+                        article_url = '/gongzhonghao/leidawenzhang/'
+
+
+                    redirect_url = '{url}/zhugeleidaArticleShare#{article_url}{article_id}?token={token}&user_id={client_id}&uid={uid}&level={level}&pid={pid}&company_id={company_id}'.format(
+                        url=url,
+                        article_url=article_url,
+                        article_id=article_id,
+                        token=token,
+                        client_id=client_id,
+
+                        uid=uid,  # 文章作者-ID
+                        level=level,  # 所在层级
+                        pid=pid,  # 目前所在的父级ID
+                        company_id=company_id,
+                    )
+                    data = {
+                        'article_id': article_id,
+                        'user_id': uid,  # 文章作者-ID
+                        'customer_id': client_id,
+                        'level': level,
+                        'pid': pid,
+                        'company_id': company_id,
+                    }
+                    pid = int(pid) if pid else ''
+                    customer_id = int(client_id)
+                    if uid and pid != customer_id:  # 说明不是从后台预览的,是企业用户分享出去的,要绑定关系的。并且不是自己看了这种情况下
+                        print('非静默--------- 企业雷达用户ID：%s 分享出去的,【新公众号ID: %s,customer_name: %s】客户要关联自己到文章 | json.dumps(data) ---------->' % (
+                            uid, client_id, customer_name), '|', json.dumps(data))
+                        tasks.binding_article_customer_relate.delay(data)
+
+                else:
+                    errcode = ret_json.get('errcode')
+                    errmsg = ret_json.get('errmsg')
+                    print('---------【公众号】拉取用户信息 报错：errcode | errmsg----------->>', errcode, "|", errmsg)
+
+            print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
+
+            if openid:
+                _data = {
+                    'openid': openid,
+                    'authorizer_appid': appid,
+                    'headimgurl': headimgurl,
+                    'user_id' : uid,
+                    'company_id': company_id,
+                    'client_id' : client_id
+                }
+                # 获取 公众号的用户信息
+                tasks.get_customer_gongzhonghao_userinfo.delay(_data)
+            else:
+                print('没有获取到 openid------->>')
+
+            return redirect(redirect_url)
 
 
     else:

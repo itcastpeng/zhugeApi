@@ -1621,4 +1621,8 @@ class zgld_customer_case_poster_belonger(models.Model):
         verbose_name_plural = "雷达用户|客户-生成海报关系表"
         app_label = "zhugeleida"
 
+# 保存微信回调code用 (获取用户信息 微信会回调多次 code一致 多次请求微信同样code获取不到用户信息)
+class save_code(models.Model):
+    save_code = models.CharField(verbose_name='存在的code', max_length=128, null=True, blank=True)
+    create_datetime = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 # ================================================================================================================
