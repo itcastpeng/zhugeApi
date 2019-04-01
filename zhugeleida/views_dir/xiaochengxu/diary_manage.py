@@ -17,6 +17,8 @@ from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
 from django.shortcuts import render
 import os, redis, requests
 from publicFunc.base64 import b64encode, b64decode
+from zhugeleida.public.common import action_record
+
 
 # 记录查询日志 (动能日志/ diary_manage调用)
 def record_view_log(data):
@@ -52,7 +54,8 @@ def record_view_log(data):
         customer_id=customer_id,
         remark=remark
     )
-
+    data['action'] = 22
+    action_record(data, remark)  # 记录访问动作
 
 # 查询日记
 @csrf_exempt
