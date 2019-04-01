@@ -114,6 +114,7 @@ def user_gongzhonghao_auth(request):
             }
 
             ret_data = get_openid_info(get_token_data)
+            print('ret_data----ret_data----ret_data----ret_data---------------ret_data->< ', ret_data)
             openid = ret_data['openid']
             access_token = ret_data['access_token']
             redirect_url = ''
