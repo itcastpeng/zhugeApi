@@ -210,7 +210,7 @@ def work_weixin_auth_oper(request,oper_type):
                 redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (api_url,article_id,pid,level,uid,company_id)
 
                 print('--------  【雷达企业用户】嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
-                scope = 'snsapi_base'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+                scope = 'snsapi_userinfo'   # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
                 state = 'snsapi_base'
 
                 three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
