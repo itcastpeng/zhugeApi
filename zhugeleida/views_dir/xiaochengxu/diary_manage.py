@@ -54,6 +54,8 @@ def record_view_log(data):
         customer_id=customer_id,
         remark=remark
     )
+    data['uid'] = u_id
+    data['user_id'] = customer_id
     data['action'] = 22
     action_record(data, remark)  # 记录访问动作
 
