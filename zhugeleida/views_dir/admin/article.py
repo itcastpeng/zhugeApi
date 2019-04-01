@@ -1712,8 +1712,7 @@ def deal_gzh_picture_url(leixing, url):
     img_tags = soup.find_all('img')
     for img_tag in img_tags:
         if img_tag.attrs.get('style'):
-            print("str(img_tag.attrs.get('style'))---------> ", str(img_tag.attrs.get('style')))
-            # img_tag = img_tag.replace(, '')  # 去除行内样式
+            img_tag.attrs['style'] = ''
 
         data_src = img_tag.attrs.get('data-src')
         if data_src:
