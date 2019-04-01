@@ -26,12 +26,12 @@ def record_view_log(data):
     else:
         remark = '查看您的日记首页/第{}次, 成交在望'.format(log_count)
 
-    models.zgld_accesslog.objects.create(
-        action=21,
-        user_id=u_id,
-        customer_id=customer_id,
-        remark=remark
-    )
+    # models.zgld_accesslog.objects.create(
+    #     action=21,
+    #     user_id=u_id,
+    #     customer_id=customer_id,
+    #     remark=remark
+    # )
     data['uid'] = u_id
     data['user_id'] = customer_id
     data['action'] = 21

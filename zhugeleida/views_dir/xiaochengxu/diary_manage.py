@@ -48,12 +48,12 @@ def record_view_log(data):
             log_count=log_count,
         )
 
-    models.zgld_accesslog.objects.create(
-        action=22,
-        user_id=u_id,
-        customer_id=customer_id,
-        remark=remark
-    )
+    # models.zgld_accesslog.objects.create(
+    #     action=22,
+    #     user_id=u_id,
+    #     customer_id=customer_id,
+    #     remark=remark
+    # )
     data['uid'] = u_id
     data['user_id'] = customer_id
     data['action'] = 22
