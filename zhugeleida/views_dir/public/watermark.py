@@ -37,7 +37,7 @@ class watermark(object):
         font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体，第二个参数表示字符大小
         # 文字rgb颜色
         if int(company_id) == 12: # 米扬丽格
-            rgb_color = (132,127,131, 10)
+            rgb_color = (105,105,105, 80)
         else:
             rgb_color = (233, 233, 233, 30) # 白色
 
