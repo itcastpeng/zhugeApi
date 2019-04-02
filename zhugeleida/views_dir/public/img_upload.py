@@ -150,7 +150,7 @@ def img_merge(request):
                 watermark_name = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).name
             obj = watermark()
 
-            watermark_path = obj.generate_watermark_img(watermark_name) # 生成水印图片
+            watermark_path = obj.generate_watermark_img(company_id, watermark_name) # 生成水印图片
             _img_path = obj.cover_watermark(img_path, watermark_path)  # 覆盖水印
 
             if  _img_path:
