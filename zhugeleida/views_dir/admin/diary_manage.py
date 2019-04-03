@@ -254,8 +254,8 @@ def diary_manage_oper(request, oper_type, o_id):
                             if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
                                 print(data_src)
                                 _cover_picture.append(data_src)
-                                if len(_cover_picture) >= 9:
-                                    break
+                        if len(_cover_picture) >= 9:
+                            break
                     diary_objs.update(cover_picture = json.dumps(_cover_picture))
 
                 case_objs = models.zgld_case.objects.filter(id=case_id)
@@ -328,8 +328,8 @@ def diary_manage_oper(request, oper_type, o_id):
                                 if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
                                     print(data_src)
                                     _cover_picture.append(data_src)
-                                    if len(_cover_picture) >= 9:
-                                        break
+                            if len(_cover_picture) >= 9:
+                                break
                         # if len(_cover_picture) <= 0:
                         #     _cover_picture.append(cover()) # 默认图片
                         obj.cover_picture =  json.dumps(_cover_picture)
