@@ -159,6 +159,7 @@ def login(request):
                     customer_id=client_id,
                     user__company_id=company_id
                 ).order_by('-last_follow_time')
+                print('user_customer_belonger_obj--------> ', user_customer_belonger_obj)
                 if user_customer_belonger_obj:  # 上一次进入的咨询 后期登录还是该咨询
                     user_customer_obj = user_customer_belonger_obj[0]
                     user_id = user_customer_obj.user_id
