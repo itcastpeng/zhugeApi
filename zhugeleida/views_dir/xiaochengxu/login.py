@@ -158,7 +158,7 @@ def login(request):
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
                     customer_id=client_id,
                     user__company_id=company_id
-                ).order_by('-last_follow_time')
+                ).order_by('-last_activity_time')
                 for i in user_customer_belonger_obj:
                     print('i.user.username--------> ', i.user.username)
                 if user_customer_belonger_obj:  # 上一次进入的咨询 后期登录还是该咨询
