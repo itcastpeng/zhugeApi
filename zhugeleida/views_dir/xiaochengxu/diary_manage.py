@@ -301,12 +301,13 @@ def diary_manage(request):
 
                     diary_give_like = models.zgld_diary_action.objects.filter(diary_id=obj.id, action=1).count() # 点赞数量统计
 
+                    content = obj.content
                     if len(obj.title) >= 50:
-                        summary = obj.title[:50]
-                    elif len(obj.title) >= 30:
-                        summary = obj.title[:30]
+                        summary = content[:50]
+                    elif len(content) >= 30:
+                        summary = content[:30]
                     else:
-                        summary = obj.title[:10]
+                        summary = content[:10]
 
                     result_data.append({
                         'timeline_id': obj.id,      # 时间轴详情ID
