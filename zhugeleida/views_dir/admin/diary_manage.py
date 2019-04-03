@@ -12,7 +12,7 @@ import requests,cv2,os
 import json,datetime
 from django.db.models import Q, Sum, Count
 import threading
-
+from publicFunc.cover import cover
 
 
 
@@ -304,12 +304,12 @@ def diary_manage_oper(request, oper_type, o_id):
                     status=forms_data.get('status'),
                     cover_show_type=forms_data.get('cover_show_type'),
                 )
-                if int(case_type) == 1: # 普通案例
+                if int(case_type) == 1: # 普通日记
                     obj.cover_picture = json.dumps(json.loads(forms_data.get('cover_picture')))
                     obj.save()
 
-                else:
-                    if cover_picture and len(json.loads(cover_picture)) > 0:
+                else: # 时间轴日记
+                    if cover_picture and len(json.loads(cover_picture)) > 0: # 如果上传了 封面
                         cover_picture = json.loads(cover_picture)
                         obj.cover_picture = json.dumps(cover_picture)
                     else:
@@ -321,9 +321,11 @@ def diary_manage_oper(request, oper_type, o_id):
                         for img_tag in img_tags:
                             data_src = img_tag.attrs.get('src')
                             if data_src:
-                                print(data_src)
-                                _cover_picture.append(data_src)
-
+                                if 'http://img.baidu.com' not in data_src:
+                                    print(data_src)
+                                    _cover_picture.append(data_src)
+                        if len(_cover_picture) <= 0:
+                            _cover_picture.append(cover()) # 默认图片
                         obj.cover_picture =  json.dumps(_cover_picture)
                     obj.save()
 
