@@ -467,29 +467,28 @@ def create_user_customer_case_poster_qr_code(data):
         user_customer_belonger_id=user_customer_belonger_id, case_type=case_type)
 
     qr_code = ''
-    if user_customer_belonger_id:
-        poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-            case_type_q,
-            user_customer_belonger_id=user_customer_belonger_id,
-        )
+    poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+        case_type_q,
+        user_customer_belonger_id=user_customer_belonger_id,
+    )
 
-        if poster_belonger_objs:
-            poster_belonger_obj = poster_belonger_objs[0]
-            qr_code =  poster_belonger_obj.qr_code          # 关系二维码
+    if poster_belonger_objs:
+        poster_belonger_obj = poster_belonger_objs[0]
+        qr_code =  poster_belonger_obj.qr_code          # 关系二维码
 
-            # poster_url =  poster_belonger_obj.poster_url    # 判断 二维码海报截图是否存在 不存在异步创建
+        # poster_url =  poster_belonger_obj.poster_url    # 判断 二维码海报截图是否存在 不存在异步创建
 
-            # 生成海报截图
-            # if not  poster_url:
-            data_dict = {
-                'user_id': user_id,
-                'customer_id': customer_id,
-                'poster_url': url,
-                'user_customer_belonger_id': user_customer_belonger_id,
-                'case_id': case_id,
-                'case_type': case_type
-            }
-            tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+        # 生成海报截图
+        # if not  poster_url:
+        data_dict = {
+            'user_id': user_id,
+            'customer_id': customer_id,
+            'poster_url': url,
+            'user_customer_belonger_id': user_customer_belonger_id,
+            'case_id': case_id,
+            'case_type': case_type
+        }
+        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
     if not qr_code: # 海报二维码不存在 生成
         xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
