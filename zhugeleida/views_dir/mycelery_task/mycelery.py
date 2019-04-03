@@ -600,7 +600,7 @@ def create_user_or_customer_poster(request):
         'case_type': case_type,
         'case_id': case_id
     }
-    create_poster_process(_data)
+    response = create_poster_process(_data)
 
     return JsonResponse(response.__dict__)
 
@@ -615,14 +615,14 @@ def create_poster_process(data):
     case_id = data.get('case_id')
     case_type = data.get('case_type')
 
-    print('传递的值 ------>>', data)
-
+    # print('传递的值 ------>>', data)
+    print('user_id, customer_id-------> ', user_id, customer_id)
     objs = models.zgld_user_customer_belonger.objects.filter(user_id=user_id, customer_id=customer_id)
-
     if not objs:  # 如果没有找到则表示异常
         response.code = 500
         response.msg = "传参异常"
     else:
+        poster_url = poster_url.replace('http://api.zhugeyingxiao.com', 'http:127.0.0.1:8001')
         print('-------====正常生成海报===========正常生成海报============正常生成海报', poster_url)
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
@@ -732,7 +732,8 @@ def create_poster_process(data):
         #     response.code = 400
         #     driver.quit()
         #     print('----------------------1错误----------------', e)
-    return JsonResponse(response.__dict__)
+
+    return response
 
 
 # 小程序生成token，并然后发送模板消息

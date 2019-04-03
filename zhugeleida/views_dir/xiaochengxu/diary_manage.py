@@ -408,14 +408,12 @@ def diary_poster_html(request):
                 user_customer_belonger_id=user_customer_belonger_id,
                 diary_id=case_id
             )
-            print('-------------------', case_id)
             case_objs = models.zgld_diary.objects.get(id=case_id)
         else:
             poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
                 user_customer_belonger_id=user_customer_belonger_id,
                 case_id=case_id
             )
-            print('=========')
             case_objs = models.zgld_case.objects.get(id=case_id)
 
         qr_code = ''
