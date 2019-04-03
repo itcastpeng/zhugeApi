@@ -287,7 +287,9 @@ def login_oper(request, oper_type):
 
                         response.code = 200
                         response.msg = "绑定关系成功"
-
+                else:
+                    response.code = 301
+                    response.msg = '用户不存在'
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
