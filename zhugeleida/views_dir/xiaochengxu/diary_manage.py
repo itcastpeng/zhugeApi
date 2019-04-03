@@ -464,72 +464,72 @@ def create_user_customer_case_poster_qr_code(data):
         user_id=customer_id, uid=user_id, case_id=case_id,company_id=company_id,
         user_customer_belonger_id=user_customer_belonger_id, case_type=case_type)
 
-    qr_code = ''
-    poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-        case_type_q,
-        user_customer_belonger_id=user_customer_belonger_id,
-    )
-
-    if poster_belonger_objs:
-        poster_belonger_obj = poster_belonger_objs[0]
-        qr_code =  poster_belonger_obj.qr_code          # 关系二维码
+    # poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+    #     case_type_q,
+    #     user_customer_belonger_id=user_customer_belonger_id,
+    # )
+    #
+    # if poster_belonger_objs:
+    #     poster_belonger_obj = poster_belonger_objs[0]
+    #     qr_code =  poster_belonger_obj.qr_code          # 关系二维码
 
         # poster_url =  poster_belonger_obj.poster_url    # 判断 二维码海报截图是否存在 不存在异步创建
 
-        # 生成海报截图
-        # if not  poster_url:
-        data_dict = {
-            'user_id': user_id,
-            'customer_id': customer_id,
-            'poster_url': url,
-            'user_customer_belonger_id': user_customer_belonger_id,
-            'case_id': case_id,
-            'case_type': case_type
-        }
-        tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+    # 生成海报截图
+    data_dict = {
+        'user_id': user_id,
+        'customer_id': customer_id,
+        'poster_url': url,
+        'user_customer_belonger_id': user_customer_belonger_id,
+        'case_id': case_id,
+        'case_type': case_type
+    }
+    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
-    if not qr_code: # 海报二维码不存在 生成
-        xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
-        if xiaochengxu_app_objs:
-            BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    qr_code = ''
+    # if not qr_code: # 海报二维码不存在 生成
+    xiaochengxu_app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+    if xiaochengxu_app_objs:
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
-            path = '/pages/detail/detail?uid=%s&case_id=%s&source=1&case_type=%s' % (user_id, case_id, case_type)  # 小程序路由
-            user_qr_code = '/case_%s_customer_%s_user_%s_%s_qrcode.jpg' % (case_id, customer_id, user_id, now_time)
+        path = '/pages/detail/detail?uid=%s&case_id=%s&source=1&case_type=%s' % (user_id, case_id, case_type)  # 小程序路由
+        user_qr_code = '/case_%s_customer_%s_user_%s_%s_qrcode.jpg' % (case_id, customer_id, user_id, now_time)
 
-            get_qr_data = {}
-            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+        get_qr_data = {}
+        rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
-            authorizer_refresh_token = xiaochengxu_app_objs[0].authorizer_refresh_token
-            authorizer_appid = xiaochengxu_app_objs[0].authorization_appid
+        authorizer_refresh_token = xiaochengxu_app_objs[0].authorizer_refresh_token
+        authorizer_appid = xiaochengxu_app_objs[0].authorization_appid
 
-            key_name = '%s_authorizer_access_token' % (authorizer_appid)
+        key_name = '%s_authorizer_access_token' % (authorizer_appid)
 
-            authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
+        authorizer_access_token = rc.get(key_name)  # 不同的 小程序使用不同的 authorizer_access_token，缓存名字要不一致。
 
-            if not authorizer_access_token:
-                data = {
-                    'key_name': key_name,
-                    'authorizer_refresh_token': authorizer_refresh_token,
-                    'authorizer_appid': authorizer_appid,
-                    'company_id': company_id
-                }
-                authorizer_access_token_ret = create_authorizer_access_token(data)
-                authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
+        if not authorizer_access_token:
+            data = {
+                'key_name': key_name,
+                'authorizer_refresh_token': authorizer_refresh_token,
+                'authorizer_appid': authorizer_appid,
+                'company_id': company_id
+            }
+            authorizer_access_token_ret = create_authorizer_access_token(data)
+            authorizer_access_token = authorizer_access_token_ret.data  # 调用生成 authorizer_access_token 授权方接口调用凭据, 也简称为令牌。
 
-            get_qr_data['access_token'] = authorizer_access_token
+        get_qr_data['access_token'] = authorizer_access_token
 
-            post_qr_data = {'path': path, 'width': 430}
+        post_qr_data = {'path': path, 'width': 430}
 
-            s = requests.session()
-            s.keep_alive = False  # 关闭多余连接
-            qr_ret = s.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
+        s = requests.session()
+        s.keep_alive = False  # 关闭多余连接
+        qr_ret = s.post(Conf['qr_code_url'], params=get_qr_data, data=json.dumps(post_qr_data))
 
-            if not qr_ret.content:
-                rc.delete('xiaochengxu_token')
-                response.msg = "生成小程序二维码未验证通过"
-                return response
+        if not qr_ret.content:
+            rc.delete('xiaochengxu_token')
+            response.code = 301
+            response.msg = "生成小程序二维码未验证通过"
 
+        else:
             IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'qr_code') + user_qr_code
             with open('%s' % (IMG_PATH), 'wb') as f:
                 f.write(qr_ret.content)
@@ -537,41 +537,29 @@ def create_user_customer_case_poster_qr_code(data):
             if customer_id:
                 qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
 
-                # data_dict = {
-                #     'user_id': user_id,
-                #     'customer_id': customer_id,
-                #     'poster_url': url,
-                #     'user_customer_belonger_id': user_customer_belonger_id,
-                #     'case_id': case_id,
-                #     'case_type': case_type
-                # }
+                case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                    case_type_q,
+                    user_customer_belonger_id=user_customer_belonger_id,
+                )
 
-                if qr_code:
-                    case_poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
-                        case_type_q,
-                        user_customer_belonger_id=user_customer_belonger_id,
+                if case_poster_belonger_objs:
+                    case_poster_belonger_objs.update(
+                        qr_code=qr_code
                     )
 
-                    if case_poster_belonger_objs:
-                        case_poster_belonger_objs.update(
+                else:
+                    if case_type == 1:
+                        models.zgld_customer_case_poster_belonger.objects.create(
+                            user_customer_belonger_id=user_customer_belonger_id,
+                            diary_id=case_id,
                             qr_code=qr_code
                         )
-
                     else:
-                        if case_type == 1:
-                            models.zgld_customer_case_poster_belonger.objects.create(
-                                user_customer_belonger_id=user_customer_belonger_id,
-                                diary_id=case_id,
-                                qr_code=qr_code
-                            )
-                        else:
-                            models.zgld_customer_case_poster_belonger.objects.create(
-                                user_customer_belonger_id=user_customer_belonger_id,
-                                case_id=case_id,
-                                qr_code=qr_code
-                            )
-
-                # tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict)) # 生成截图
+                        models.zgld_customer_case_poster_belonger.objects.create(
+                            user_customer_belonger_id=user_customer_belonger_id,
+                            case_id=case_id,
+                            qr_code=qr_code
+                        )
 
             response.data = {'qr_code': qr_code}
             response.code = 200

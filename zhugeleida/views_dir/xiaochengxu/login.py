@@ -214,8 +214,13 @@ def login_oper(request, oper_type):
                         user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                                user__company_id=company_id)
                     else:
-
-                        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+                        if user_id:
+                            user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
+                        else:
+                            user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
+                                customer_id=customer_id,
+                                user__company_id=company_id
+                            )
 
 
                     if user_customer_belonger_obj:
