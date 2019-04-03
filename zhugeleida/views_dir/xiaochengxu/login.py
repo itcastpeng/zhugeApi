@@ -158,7 +158,7 @@ def login(request):
                 user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
                     customer_id=client_id,
                     user__company_id=company_id
-                )
+                ).order_by('-last_follow_time')
                 if user_customer_belonger_obj:
                     user_customer_obj = user_customer_belonger_obj[0]
                     user_id = user_customer_obj.user_id
