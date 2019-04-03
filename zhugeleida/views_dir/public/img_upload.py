@@ -142,7 +142,10 @@ def img_merge(request):
         ## 给文章的图片加水印
         if  img_source in ['article', 'cover_picture', 'case']:
             user_id = request.GET.get('user_id')
-            company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
+            if user_id:
+                company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
+            else:
+                company_id = request.GET.get('company_id')
 
             if company_id and int(company_id) == 12: # 米扬丽格 水印文字
                 watermark_name = '米扬丽格医疗美容'
