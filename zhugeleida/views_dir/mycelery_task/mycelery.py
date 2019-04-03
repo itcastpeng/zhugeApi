@@ -622,7 +622,6 @@ def create_poster_process(data):
         response.code = 500
         response.msg = "传参异常"
     else:
-        poster_url = poster_url.replace('http://api.zhugeyingxiao.com', 'http:127.0.0.1:8001')
         print('-------====正常生成海报===========正常生成海报============正常生成海报', poster_url)
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'user_poster', )
 
