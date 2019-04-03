@@ -155,7 +155,15 @@ def login(request):
                 print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
 
             if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
-                user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
+                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
+                    customer_id=client_id,
+                    user__company_id=company_id
+                )
+                if user_customer_belonger_obj:
+                    user_customer_obj = user_customer_belonger_obj[0]
+                    user_id = user_customer_obj.user_id
+                else:
+                    user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
                 print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
 
 
@@ -213,15 +221,7 @@ def login_oper(request, oper_type):
                         user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                                user__company_id=company_id)
                     else:
-                        print('-------user_id---user_id---user-id--', user_id, company_id)
-                        if user_id:
-                            user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
-                        else:
-                            user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
-                                customer_id=customer_id,
-                                user__company_id=company_id
-                            )
-
+                        user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
 
                     if user_customer_belonger_obj:
                         response.code = 302
