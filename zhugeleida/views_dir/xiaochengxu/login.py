@@ -203,17 +203,17 @@ def login_oper(request, oper_type):
                 customer_id = forms_obj.cleaned_data.get('user_id')  # 小程序用户ID
                 parent_id = request.GET.get('pid', '')  # 所属的父级的客户ID，为空代表直接扫码企业用户的二维码过来的。
                 user_objs = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)
-                company_id = ''
                 if user_objs:
                     company_id = user_objs[0].company_id
                     is_customer_unique = user_objs[0].company.is_customer_unique
 
-                    user_customer_belonger_obj = ''
+                    print('--is_customer_unique------is_customer_unique------------is_customer_unique--', is_customer_unique)
                     if is_customer_unique:  # 唯一性
 
                         user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,
                                                                                                user__company_id=company_id)
                     else:
+                        print('-------user_id---user_id---user-id--', user_id, company_id)
                         if user_id:
                             user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(customer_id=customer_id,user_id=user_id)
                         else:
