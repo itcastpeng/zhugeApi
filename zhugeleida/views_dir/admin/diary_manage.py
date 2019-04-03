@@ -324,8 +324,8 @@ def diary_manage_oper(request, oper_type, o_id):
                                 if 'http://img.baidu.com' not in data_src:
                                     print(data_src)
                                     _cover_picture.append(data_src)
-                        if len(_cover_picture) <= 0:
-                            _cover_picture.append(cover()) # 默认图片
+                        # if len(_cover_picture) <= 0:
+                        #     _cover_picture.append(cover()) # 默认图片
                         obj.cover_picture =  json.dumps(_cover_picture)
                     obj.save()
 
