@@ -1095,6 +1095,13 @@ def diary_manage_oper(request, oper_type, o_id):
                     }
                     print('data_dict---data_dict---> ', data_dict)
                     tasks.create_user_or_customer_small_program_poster(json.dumps(data_dict))
+                    poster_belonger_objs = models.zgld_customer_case_poster_belonger.objects.filter(
+                        case_type_q,
+                        user_customer_belonger_id=user_customer_belonger_id,
+                    )
+                    if poster_belonger_objs:
+                        poster_belonger_obj = poster_belonger_objs[0]
+
                 poster_url = poster_belonger_obj.poster_url
 
             ret_data = {
