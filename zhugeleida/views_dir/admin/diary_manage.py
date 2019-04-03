@@ -11,7 +11,7 @@ from zhugeleida.forms.admin.diary_manage_verify import diaryAddForm, diarySelect
 import requests,cv2,os
 import json,datetime
 from django.db.models import Q, Sum, Count
-import threading
+import threading, time
 from publicFunc.cover import cover
 
 
@@ -239,7 +239,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     diary_objs.update(cover_picture = json.dumps(json.loads(cover_picture)))
 
                 else:
-                    print('-------------------------------------------------------------时间轴案例')
+                    print('-------------------------------------------------------------时间轴案例', time.time())
                     # if cover_picture and len(json.loads(cover_picture)) > 0:
                     #     cover_picture = json.loads(cover_picture)
                     #     diary_objs.update(cover_picture = json.dumps(cover_picture))
