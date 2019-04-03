@@ -321,7 +321,7 @@ def diary_manage_oper(request, oper_type, o_id):
                         for img_tag in img_tags:
                             data_src = img_tag.attrs.get('src')
                             if data_src:
-                                if 'http://img.baidu.com' not in data_src:
+                                if 'statics' in data_src:
                                     print(data_src)
                                     _cover_picture.append(data_src)
                         # if len(_cover_picture) <= 0:
