@@ -79,9 +79,9 @@ def follow_up_data(user_id, request, data_type=None):
         # 是否以标签分类↑
 
         result_data = []
-        if_article_conditions = 0
+        if_article_conditions = 0 # 满足添加查询数量
         for i in article_conditions:
-            if i.get('id__count') >= articles_read_customers:  # 条数大于等于
+            if i.get('id__count') >= articles_read_customers:  # 如果该用户阅读条数大于等于该公司设置的总数
                 article_tags = models.ZgldUserOperLog.objects.filter(
                     oper_type=4,
                     customer_id=i.get('customer_id'),
@@ -89,7 +89,7 @@ def follow_up_data(user_id, request, data_type=None):
                 num = 0 # 该人查看的所有文章总时长
                 count = 0 # 该人满足条件总数
                 for article_tag in article_tags:
-                    if article_tag.reading_time >= article_reading_time:  # 该人查看文章总时长
+                    if article_tag.reading_time >= article_reading_time:  # 该人查看文章总时长大于等于该公司后台设置的总时长
                         num += article_tag.reading_time
                         count += 1
                 if num > 0:
@@ -103,7 +103,7 @@ def follow_up_data(user_id, request, data_type=None):
                         'reading_time': num,  # 阅读时长
                         'eval_num': eval_num,                      # 平均时长
                     })
-                if count >= articles_read_customers:
+                if count >= articles_read_customers and num > 0:
                     if_article_conditions += 1
 
         data_list = []
@@ -527,7 +527,7 @@ def action(request, oper_type):
 
         # 雷达--时间--统计数据
         elif oper_type =='time_data':
-            data_type= request.GET.get('data_type')
+            data_type= request.GET.get('data_type') # 查看详情
 
             if data_type:
                 data = follow_up_data(user_id, request, data_type)
