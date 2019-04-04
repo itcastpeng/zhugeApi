@@ -75,6 +75,7 @@ def action_record(data):
         return response
 
     customer_name = models.zgld_customer.objects.get(id=customer_id).username
+    print('-=customer_name----customer_name---customer_name---> ', customer_name)
     customer_name = base64.b64decode(customer_name)
     customer_name = str(customer_name, 'utf-8')
 
