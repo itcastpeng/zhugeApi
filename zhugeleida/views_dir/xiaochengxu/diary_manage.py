@@ -372,6 +372,7 @@ def diary_manage(request):
             'user_id': u_id,
             'diary_name': diary_name
         }
+        print('***记录日志********record_view_log********记录日志*****************record_view_log******************记录日志', user_id, diary_name)
         record_view_log(data)
 
         #  查询成功 返回200 状态码
