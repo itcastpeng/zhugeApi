@@ -30,22 +30,23 @@ def record_view_log(data):
         user=u_id,
         action=22
     ).count()
+    num = int(log_count) + 1
     if int(log_count) == 0:
         remark = '首次查看您的日记{diary_name}, 沟通从此刻开始'.format(diary_name=diary_name)
     elif int(log_count) == 1:
         remark = '查看您的日记{diary_name}/第{log_count}次, 把握深度交流的机会'.format(
             diary_name=diary_name,
-            log_count=log_count
+            log_count=num
         )
     elif int(log_count) == 2:
         remark = '查看您的日记{diary_name}/第{log_count}次, 建议标注重点客户'.format(
             diary_name=diary_name,
-            log_count=log_count,
+            log_count=num
         )
     else:
         remark = '查看您的日记{diary_name}/第{log_count}次, 成交在望'.format(
             diary_name=diary_name,
-            log_count=log_count,
+            log_count=num
         )
 
     # models.zgld_accesslog.objects.create(
