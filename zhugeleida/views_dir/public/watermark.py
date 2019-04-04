@@ -23,6 +23,8 @@ class watermark(object):
 
     # 生成水印图片
     def generate_watermark_img(self, company_id, mark_text):
+        # imageFile = './mylg_reproduction.png'
+        # save_path = './1.png'
         if __name__ == "__main__":
             imageFile = 'wuzi.png'
             save_path = 'test/wz.png'
@@ -37,7 +39,8 @@ class watermark(object):
         # 文字rgb颜色
         if int(company_id) == 12: # 米扬丽格
             rgb_color = (0,0,0, 80)
-            font = ImageFont.truetype('/usr/share/fonts/chinese/MSYHBD.TTC', 24)  # 使用自定义的字体，第二个参数表示字符大小 黑体
+            font = ImageFont.truetype('/usr/share/fonts/chinese/MSYHBD.TTC', 18)  # 使用自定义的字体，第二个参数表示字符大小 黑体
+            # font = ImageFont.truetype('C:\Windows\Fonts\微软雅黑/msyhbd.ttc', 18)  # 使用自定义的字体，第二个参数表示字符大小 黑体
         else:
             rgb_color = (233, 233, 233, 30) # 白色
             font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体
@@ -57,11 +60,11 @@ class watermark(object):
                 y += 280
 
             for i in range(5):
-                draw.line([(x - 60, y - 100), (x + 30, y - 10)], fill=rgb_color, width=2)
-                draw.line([(x + 150, y - 100), (x + 60, y - 10)], fill=rgb_color, width=2)
+                draw.line([(x - 60, y - 100), (x + 30, y - 10)], fill=rgb_color, width=1)
+                draw.line([(x + 150, y - 100), (x + 60, y - 10)], fill=rgb_color, width=1)
                 if num > 4:
-                    draw.line([(x - 60, y + 113), (x + 23, y + 30)], fill=rgb_color, width=2)
-                    draw.line([(x + 156, y + 113), (x + 73, y + 30)], fill=rgb_color, width=2)
+                    draw.line([(x - 60, y + 113), (x + 23, y + 30)], fill=rgb_color, width=1)
+                    draw.line([(x + 156, y + 113), (x + 73, y + 30)], fill=rgb_color, width=1)
                 draw.text((x, y) , mark_text, rgb_color, font=font)       # 绘图
                 x += 280
             num += 1
@@ -78,7 +81,7 @@ class watermark(object):
         image.paste(shuiyin, mask=a)
 
         if __name__ == "__main__":
-            lujing = 'test/tttt.png'
+            lujing = '9.png'
         else:
             lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark',
                 encryption() + '.png')  # 已打水印图片路径
@@ -90,6 +93,6 @@ class watermark(object):
 if __name__ == '__main__':
     obj = watermark()
     mark_text = '米扬丽格'
-    path = obj.generate_watermark_img(mark_text)
+    path = obj.generate_watermark_img(12, mark_text)
     print(path)
-    obj.cover_watermark('test/111.jpg', path)
+    obj.cover_watermark('5.jpg', path)
