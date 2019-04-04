@@ -33,6 +33,7 @@ from selenium.webdriver.chrome.options import Options
 
 def action_record(data):
     response = Response.ResponseObj()
+    print('data-data-data-data-data-data-data-data-data-data-data-data-data-data-data----> ', data)
     user_id = data.get('uid')  # 用户 id
     customer_id = data.get('customer_id', '')  # 客户 id
     article_id = data.get('article_id')  # 文章 id
