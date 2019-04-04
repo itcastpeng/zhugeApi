@@ -169,6 +169,7 @@ def action_record(data):
 # 小程序访问动作日志的发送到企业微信
 @csrf_exempt
 def user_send_action_log(request):
+    print('user_send_action_log-------------------------------小程序访问动作日志的发送到企业微信--', request.GET)
     response = ResponseObj()
     customer_id = request.GET.get('user_id')  # 客户 id
     user_id = request.GET.get('uid')
@@ -185,7 +186,7 @@ def user_send_action_log(request):
     # user_id = objs[0].user_id  # 找到那个建立唯一关系的人。
 
     send_token_data = {}
-    user_obj = models.zgld_userprofile.objects.select_related('company').filter(id=user_id)[0]
+    user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
 
     corp_id = user_obj.company.corp_id
     company_id = user_obj.company_id
