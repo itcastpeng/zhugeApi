@@ -308,6 +308,7 @@ def login_oper(request, oper_type):
         if oper_type == 'send_user_info':
             # 前端把小程序授权的用户信息入库。
             customer_id = request.GET.get('user_id')
+            uid = request.GET.get('uid') # 用户ID
             headimgurl = request.POST.get('avatarUrl')
             city = request.POST.get('city')
             country = request.POST.get('country')
@@ -383,6 +384,7 @@ def login_oper(request, oper_type):
                 data = request.GET.copy()
                 print('data --> request.GET.copy() -->', data)
                 data['action'] = 13  # 代表用客户授权访问
+                data['uid'] = uid
                 action_record(data, remark)
 
                 response.data = {'ret_data': username + ' 已向您授权登录页面'}
