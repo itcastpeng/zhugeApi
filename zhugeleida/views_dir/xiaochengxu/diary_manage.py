@@ -67,6 +67,7 @@ def diary_manage(request):
     response = Response.ResponseObj()
     forms_obj = diarySelectForm(request.GET)
     if forms_obj.is_valid():
+        print('-=------------------------------------验证通过')
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
         order = request.GET.get('order', '-create_date')
@@ -385,6 +386,7 @@ def diary_manage(request):
         }
 
     else:
+        print('------json.loads(forms_obj.errors.as_json())---------------', json.loads(forms_obj.errors.as_json()))
         response.code = 301
         response.msg = json.loads(forms_obj.errors.as_json())
 
