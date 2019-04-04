@@ -17,14 +17,15 @@ def record_view_log(data):
     customer_id = data.get('customer_id')
     u_id = data.get('user_id')
     log_count = models.zgld_accesslog.objects.filter(**data).count()
+    num = int(log_count) + 1
     if int(log_count) == 0:
         remark = '首次查看您的日记首页, 沟通从此刻开始'
     elif int(log_count) == 1:
-        remark = '查看您的日记首页/第{}次, 把握深度交流的机会'.format(log_count)
+        remark = '查看您的日记首页/第{}次, 把握深度交流的机会'.format(num)
     elif int(log_count) == 2:
-        remark = '查看您的日记首页/第{}次, 建议标注重点客户'.format(log_count)
+        remark = '查看您的日记首页/第{}次, 建议标注重点客户'.format(num)
     else:
-        remark = '查看您的日记首页/第{}次, 成交在望'.format(log_count)
+        remark = '查看您的日记首页/第{}次, 成交在望'.format(num)
 
     # models.zgld_accesslog.objects.create(
     #     action=21,
