@@ -316,7 +316,7 @@ def diary_manage(request):
                             if flag == True:
                                 break
 
-                    if len(obj.title) >= 50:
+                    if len(content) >= 50:
                         summary = content_tag[:50]
                     elif len(content) >= 30:
                         summary = content_tag[:30]
