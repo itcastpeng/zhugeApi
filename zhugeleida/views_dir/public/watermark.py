@@ -37,13 +37,13 @@ class watermark(object):
         draw = ImageDraw.Draw(im1)               # 绘图句柄
 
         # 文字rgb颜色
-        if int(company_id) == 12: # 米扬丽格
-            rgb_color = (0,0,0, 80)
-            font = ImageFont.truetype('/usr/share/fonts/chinese/MSYHBD.TTC', 18)  # 使用自定义的字体，第二个参数表示字符大小 黑体
+        # if int(company_id) == 12: # 米扬丽格
+        rgb_color = (0,0,0, 80)
+        font = ImageFont.truetype('/usr/share/fonts/chinese/MSYHBD.TTC', 18)  # 使用自定义的字体，第二个参数表示字符大小 黑体
             # font = ImageFont.truetype('C:\Windows\Fonts\微软雅黑/msyhbd.ttc', 18)  # 使用自定义的字体，第二个参数表示字符大小 黑体
-        else:
-            rgb_color = (233, 233, 233, 30) # 白色
-            font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体
+        # else:
+        #     rgb_color = (233, 233, 233, 30) # 白色
+        #     font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体
 
         num = 1
         for i in range(10): # Y轴

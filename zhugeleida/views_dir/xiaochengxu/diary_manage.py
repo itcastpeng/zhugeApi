@@ -9,7 +9,7 @@ from zhugeleida.forms.admin.diary_manage_verify import PraiseDiaryForm, diarySel
 from django.db.models import F, Q
 import json, datetime, base64,requests
 from publicFunc.condition_com import conditionCom
-from zhugeapi_celery_project import tasks
+from bs4 import  BeautifulSoup
 from zhugeleida.views_dir.conf import Conf
 from zhugeapi_celery_project import tasks
 from publicFunc.Response import ResponseObj
@@ -18,6 +18,7 @@ from django.shortcuts import render
 import os, redis, requests
 from publicFunc.base64 import b64encode, b64decode
 from zhugeleida.public.common import action_record
+from lxml import etree
 
 
 # 记录查询日志 (动能日志/ diary_manage调用)
@@ -303,22 +304,26 @@ def diary_manage(request):
 
                     diary_give_like = models.zgld_diary_action.objects.filter(diary_id=obj.id, action=1).count() # 点赞数量统计
 
-                    content = obj.content  # 获取简介
                     content_tag = ''
-                    flag = False
-                    for ch in content:  # 判断是否为中文 否则有样式
-                        if u'\u4e00' <= ch <= u'\u9fff':
-                            if '微软雅黑' in ch:
-                                continue
-                            flag = True
-                            content_tag += ch
-                        else:
-                            if flag == True:
-                                break
+                    # flag = False
+                    # for ch in content:  # 判断是否为中文 否则有样式
+                    #     if u'\u4e00' <= ch <= u'\u9fff':
+                    #         print('ch--------> ', ch)
+                    #         if '微软雅黑' in ch:
+                    #             continue
+                    #         flag = True
+                    #         content_tag += ch
+                    #     else:
+                    #         if flag == True:
+                    #             break
 
-                    if len(content) >= 50:
+                    soup = BeautifulSoup(obj.content, 'html.parser')
+                    content_tag = soup.get_text()
+
+
+                    if len(content_tag) >= 50:
                         summary = content_tag[:50]
-                    elif len(content) >= 30:
+                    elif len(content_tag) >= 30:
                         summary = content_tag[:30]
                     else:
                         summary = content_tag[:10]
