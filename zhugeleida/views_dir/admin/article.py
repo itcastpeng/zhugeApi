@@ -1712,7 +1712,13 @@ def deal_gzh_picture_url(leixing, url):
     img_tags = soup.find_all('img')
     for img_tag in img_tags:
         if img_tag.attrs.get('style'):
-            img_tag.attrs['style'] = 'width:677px'
+            style_list = img_tag.attrs.get('style').split(';')
+            style_tag = ''
+            for i in style_list:
+                if i and i.split(':')[0] == 'width':
+                    style_tag = i.split(':')[1]
+
+            img_tag.attrs['style'] = style_tag
 
         data_src = img_tag.attrs.get('data-src')
         if data_src:
