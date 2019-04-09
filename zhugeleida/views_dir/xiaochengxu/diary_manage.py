@@ -308,6 +308,8 @@ def diary_manage(request):
                     flag = False
                     for ch in content:  # 判断是否为中文 否则有样式
                         if u'\u4e00' <= ch <= u'\u9fff':
+                            if '微软雅黑' in ch:
+                                continue
                             flag = True
                             content_tag += ch
                         else:
