@@ -85,9 +85,9 @@ class watermark(object):
         if __name__ == "__main__":
             lujing = '9.png'
         else:
-            # lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark',
-            #     encryption() + '.png')  # 已打水印图片路径
-            lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', '1.png')  # 已打水印图片路径
+            lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark',
+                encryption() + '.png')  # 已打水印图片路径
+            # lujing = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', '1.png')  # 已打水印图片路径
         image.save(lujing)
         os.remove(watermark_path) # 删除水印
         return lujing
