@@ -880,6 +880,8 @@ class zgld_accesslog(models.Model):
     is_new_msg = models.BooleanField(default=True, verbose_name='是否为新日志')
     create_date = models.DateTimeField(auto_now_add=True)
 
+    diary = models.ForeignKey('zgld_diary', verbose_name='日记', null=True)
+
     class Meta:
         verbose_name_plural = "访问动能日志记录表"
         app_label = "zhugeleida"

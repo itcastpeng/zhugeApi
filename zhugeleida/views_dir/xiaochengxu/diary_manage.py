@@ -18,16 +18,18 @@ from django.shortcuts import render
 import os, redis, requests
 from publicFunc.base64 import b64encode, b64decode
 from zhugeleida.public.common import action_record
-from lxml import etree
+
 
 
 # 记录查询日志 (动能日志/ diary_manage调用)
 def record_view_log(data):
     diary_name = data.get('diary_name')
+    diary_id = data.get('diary_id')
     u_id = data.get('user_id')
     customer_id = data.get('customer_id')
     log_count = models.zgld_accesslog.objects.filter(
         customer_id=customer_id,
+        diary_id=diary_id,
         user=u_id,
         action=22
     ).count()
@@ -58,6 +60,7 @@ def record_view_log(data):
     # )
     data['uid'] = u_id
     data['user_id'] = customer_id
+    data['diary_id'] = diary_id
     data['action'] = 22
     action_record(data, remark)  # 记录访问动作
 
@@ -125,6 +128,7 @@ def diary_manage(request):
             if is_collection_obj:
                 is_collection = True
             diary_name = obj.title # 记录动能日志
+            diary_id = obj.id
             data_list = {
                 'cover_picture': cover_picture,
                 'customer_headimgurl': obj.case.headimgurl,
@@ -212,6 +216,7 @@ def diary_manage(request):
                 customer_headimgurl = diary_obj.case.headimgurl
                 content = diary_obj.content
                 diary_name = diary_obj.title # 记录动能日志
+                diary_id = diary_obj.id
                 data_list = {
                     'cover_picture': cover_picture,
                     'customer_headimgurl': customer_headimgurl,
@@ -249,6 +254,7 @@ def diary_manage(request):
                 # 时间轴 阅读量增加
                 zgld_case_objs = models.zgld_case.objects.filter(id=case_id)
                 diary_name = ''
+                diary_id = ''
                 customer_name = ''          # 客户名称
                 create_date = ''            # 创建时间
                 become_beautiful_cover = '' # 变美图片
@@ -259,6 +265,7 @@ def diary_manage(request):
                 tag_list = []
                 if zgld_case_objs:
                     zgld_case_obj = zgld_case_objs[0]
+                    diary_id = zgld_case_obj.id
                     diary_name = zgld_case_obj.case_name
                     tag_list = list(zgld_case_obj.tags.values('id', 'name'))  # 标签列表
                     customer_name = zgld_case_obj.customer_name
@@ -379,7 +386,8 @@ def diary_manage(request):
             'action': 22,
             'customer_id': user_id,
             'user_id': u_id,
-            'diary_name': diary_name
+            'diary_name': diary_name,
+            'diary_id': diary_id
         }
         print('***记录日志********record_view_log********记录日志*****************record_view_log******************记录日志', user_id, diary_name)
         record_view_log(data)
