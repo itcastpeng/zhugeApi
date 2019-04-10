@@ -166,14 +166,14 @@ def case_manage(request):
                 diary_give_like = models.zgld_diary_action.objects.filter(diary_id=diary_obj.id).count()
                 diary_list_id = diary_obj.id
                 case_name = diary_obj.title
-                customer_name = diary_obj.case.customer_name
+                customer = diary_obj.case.customer_name
                 headimgurl = diary_obj.case.headimgurl
 
                 data_list.append({
                     'diary_list_id': diary_list_id,
                     'cover_picture': cover_picture,                     # 如果为图片取第一张 / 如果是视频 就取视频
                     'case_name': case_name,                             # 案例名称(普通案例 为标题)
-                    'customer_name': customer_name,                     # 客户名称
+                    'customer_name': customer,                     # 客户名称
                     'customer_headimgurl': headimgurl,                  # 客户头像
                     'diary_give_like': diary_give_like,                 # 点赞数量
                     'case_type': 1,                                     # 日记类型(1普通/2时间轴)
@@ -182,14 +182,15 @@ def case_manage(request):
                     'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
-
-            # 记录该客户 点击查看日记首页日志
-            data = {
-                'action': 21,
-                'customer_id': customer_id,
-                'user_id': u_id
-            }
-            record_view_log(data)
+            customer_name = request.GET.get('customer_name')
+            if not customer_name: # 查询该用户所有 案例
+                # 记录该客户 点击查看日记首页日志
+                data = {
+                    'action': 21,
+                    'customer_id': customer_id,
+                    'user_id': u_id
+                }
+                record_view_log(data)
 
             # 按时间排序
             data_list = sorted(data_list, key=lambda x: x['create_date'], reverse=True)
