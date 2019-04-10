@@ -26,7 +26,6 @@ def record_view_log(data):
         remark = '查看您的日记首页/第{}次, 建议标注重点客户'.format(num)
     else:
         remark = '查看您的日记首页/第{}次, 成交在望'.format(num)
-
     # models.zgld_accesslog.objects.create(
     #     action=21,
     #     user_id=u_id,
@@ -36,6 +35,7 @@ def record_view_log(data):
     data['uid'] = u_id
     data['user_id'] = customer_id
     data['action'] = 21
+    print('--------------------------------------==============================================', data)
     action_record(data, remark)  # 记录访问动作
 
 @csrf_exempt
