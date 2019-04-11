@@ -383,92 +383,97 @@ def binding_gzh_user_notify(request):
     print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
 
     js_code = request.GET.get('code')
-    state = request.GET.get('state')
-    appid = request.GET.get('appid')
-    relate = request.GET.get('relate')
-    company_id = relate.split('|')[1].split('_')[2]
-
-    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-    qywx_config_dict = ''
-    if three_service_objs:
-        three_service_obj = three_service_objs[0]
-        qywx_config_dict = three_service_obj.config
-        if qywx_config_dict:
-            qywx_config_dict = json.loads(qywx_config_dict)
-
-    component_appid = qywx_config_dict.get('app_id')
-    app_secret = qywx_config_dict.get('app_secret')
-
-    # component_appid = 'wx6ba07e6ddcdc69b3'
-
-    data_dict = {
-        'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
-        'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
-    }
-
-    component_access_token_ret = create_component_access_token(data_dict)
-    component_access_token = component_access_token_ret.data.get('component_access_token')
-
-    get_token_data = {
-        'appid': appid,
-        'code': js_code,
-        'grant_type': 'authorization_code',
-        'component_appid': component_appid,
-        'component_access_token': component_access_token
-    }
-
-    ret_data = get_openid_info(get_token_data)
-    openid = ret_data['openid']
-    access_token = ret_data['access_token']
-    redirect_url = ''
-
-    # 静默方式
-    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-    qywx_config_dict = ''
-    if three_service_objs:
-        three_service_obj = three_service_objs[0]
-        qywx_config_dict = three_service_obj.config
-        if qywx_config_dict:
-            qywx_config_dict = json.loads(qywx_config_dict)
-
-    url = qywx_config_dict.get('authorization_url')
-
-    if state == 'snsapi_base':
-
-        customer_objs = models.zgld_customer.objects.filter(openid=openid)
-        if customer_objs:
-            customer_objs.update(
-                session_key='notifier'  # 通知者
-            )
-            client_id = customer_objs[0].id
-
-        else:
-            obj = models.zgld_customer.objects.create(
-                company_id=company_id,
-                openid=openid,
-                user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序')
-                session_key='notifier'  # 通知者
-            )
-            print('---------- 公众号-新用户创建成功 crete successful ---->')
-            client_id = obj.id
-
-        fanhui_url = url + '/#/gzh_success/index'
-        gzh_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=appid)
-        qrcode_url = ''
-        if gzh_objs:
-            qrcode_url = gzh_objs[0].qrcode_url
-
-        redirect_url = '{fanhui_url}?user_id={client_id}&qrcode_url={qrcode_url}&company_id={company_id}'.format(
-            fanhui_url=fanhui_url,
-            qrcode_url=qrcode_url,
-            client_id=client_id,
-            company_id=company_id,
+    code_objs = models.save_code.objects.filter(code=js_code)
+    if not code_objs:
+        models.save_code.objects.create(
+            code=js_code
         )
+        state = request.GET.get('state')
+        appid = request.GET.get('appid')
+        relate = request.GET.get('relate')
+        company_id = relate.split('|')[1].split('_')[2]
 
-    print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        component_appid = qywx_config_dict.get('app_id')
+        app_secret = qywx_config_dict.get('app_secret')
+
+        # component_appid = 'wx6ba07e6ddcdc69b3'
+
+        data_dict = {
+            'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
+            'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
+        }
+
+        component_access_token_ret = create_component_access_token(data_dict)
+        component_access_token = component_access_token_ret.data.get('component_access_token')
+
+        get_token_data = {
+            'appid': appid,
+            'code': js_code,
+            'grant_type': 'authorization_code',
+            'component_appid': component_appid,
+            'component_access_token': component_access_token
+        }
+
+        ret_data = get_openid_info(get_token_data)
+        openid = ret_data['openid']
+        access_token = ret_data['access_token']
+        redirect_url = ''
+
+        # 静默方式
+        three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+        qywx_config_dict = ''
+        if three_service_objs:
+            three_service_obj = three_service_objs[0]
+            qywx_config_dict = three_service_obj.config
+            if qywx_config_dict:
+                qywx_config_dict = json.loads(qywx_config_dict)
+
+        url = qywx_config_dict.get('authorization_url')
+
+        if state == 'snsapi_base':
+
+            customer_objs = models.zgld_customer.objects.filter(openid=openid)
+            if customer_objs:
+                customer_objs.update(
+                    session_key='notifier'  # 通知者
+                )
+                client_id = customer_objs[0].id
+
+            else:
+                obj = models.zgld_customer.objects.create(
+                    company_id=company_id,
+                    openid=openid,
+                    user_type=1,  # (1 代表'微信公众号'),  (2 代表'微信小程序')
+                    session_key='notifier'  # 通知者
+                )
+                print('---------- 公众号-新用户创建成功 crete successful ---->')
+                client_id = obj.id
+
+            fanhui_url = url + '/#/gzh_success/index'
+            gzh_objs = models.zgld_gongzhonghao_app.objects.filter(authorization_appid=appid)
+            qrcode_url = ''
+            if gzh_objs:
+                qrcode_url = gzh_objs[0].qrcode_url
+
+            redirect_url = '{fanhui_url}?user_id={client_id}&qrcode_url={qrcode_url}&company_id={company_id}'.format(
+                fanhui_url=fanhui_url,
+                qrcode_url=qrcode_url,
+                client_id=client_id,
+                company_id=company_id,
+            )
+
+        print('-----------  微信-本次回调给我code后, 让其跳转的 redirect_url是： -------->>', redirect_url)
 
 
-    return redirect_url
+        return redirect_url
 
 
 # 公众号文章生成分享的url
