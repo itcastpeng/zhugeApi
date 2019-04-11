@@ -55,6 +55,7 @@ def case_manage(request):
 
         ## 搜索条件
         search_tag_id = request.GET.get('search_tag_id')    # 案例标签
+        customer_name = request.GET.get('customer_name')    # 按个人查询全部文章
 
         field_dict = {
             'company_id': '',
@@ -63,7 +64,6 @@ def case_manage(request):
         }
         q = conditionCom(request, field_dict)
 
-        print('q -->', q)
 
         # 如果有案例标签 则记录热门搜索的标签
         if search_tag_id:
@@ -75,11 +75,12 @@ def case_manage(request):
                     search_amount=F('search_amount') + 1
                 )
 
-        print('-----q---->>', q)
-        objs = models.zgld_case.objects.select_related('company').filter(
+        print('q -->', q)
+        objs = models.zgld_case.objects.filter(
             q,
             status=1
         ).order_by(order).exclude(status=3)
+
         objs_exc_case_obj = objs.exclude(case_type=1)
 
         if length != 0:
@@ -105,7 +106,8 @@ def case_manage(request):
             zgld_diary_q = Q()
             if search_tag_id:
                 zgld_diary_q.add(Q(case__tags=search_tag_id), Q.AND)
-
+            if customer_name:
+                zgld_diary_q.add(Q(case__customer_name=customer_name), Q.AND)
             diary_objs = models.zgld_diary.objects.filter(
                 zgld_diary_q,
                 company_id=company_id,
@@ -191,7 +193,7 @@ def case_manage(request):
                     'user_id': u_id
                 }
                 record_view_log(data)
-
+            print('data_list--< ', len(data_list))
             # 按时间排序
             data_list = sorted(data_list, key=lambda x: x['create_date'], reverse=True)
 
