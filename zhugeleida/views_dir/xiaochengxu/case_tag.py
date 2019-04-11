@@ -4,12 +4,11 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.case_tag_verify import CaseTagAddForm,CaseTagUpdateAddForm,CaseTagSingleAddForm
-import time
 import datetime
-import json
 from django.db.models import Q
 from publicFunc.condition_com import conditionCom
+from zhugeleida.views_dir.xiaochengxu.case_manage import case_manage_public
+
 
 # 文章的标签查询
 @csrf_exempt
@@ -24,6 +23,7 @@ def case_tag(request,oper_type):
             name__contains = request.GET.get('name__contains')
 
             if name__contains: # 搜索tag创建 搜索日志
+                print('name__contains--> ', name__contains, company_id)
                 if len(name__contains) > 60:
                     response.code = 301
                     response.msg = '搜索过长'
@@ -53,11 +53,15 @@ def case_tag(request,oper_type):
             q.add(Q(**{'company_id': company_id}), Q.AND)
 
             tag_list = models.zgld_case_tag.objects.filter(q).values('id','name').order_by('-create_date')
-            print('tag_list--------> ', tag_list)
             tag_data = list(tag_list)
+            search_tag_list = []
+            for tag_id in tag_list:
+                search_tag_list.append(tag_id['id'])
 
+            response_data = case_manage_public(request, is_search=1, tag_list=search_tag_list) # 搜索出来所有数据
             response.code = 200
             response.data = {
+                'data_list': response_data.data,
                 'ret_data': tag_data,
                 'data_count': tag_list.count(),
             }
