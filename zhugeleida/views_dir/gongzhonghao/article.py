@@ -1073,7 +1073,7 @@ def create_gongzhonghao_share_auth_url(data):
 
     print('--------  嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
 
-    scope = 'snsapi_base'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
     state = 'snsapi_base'
 
     three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
