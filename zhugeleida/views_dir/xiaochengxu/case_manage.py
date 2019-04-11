@@ -24,6 +24,7 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
         company_id = request.GET.get('company_id')  # 公司ID
         customer_id = request.GET.get('user_id')  # 客户ID
         u_id = request.GET.get('u_id')  # 查询谁的小程序 用户ID
+        exclude_id = request.GET.get('exclude_id')  # 排除哪个ID
 
         ## 搜索条件
         search_tag_id = request.GET.get('search_tag_id')  # 案例标签
@@ -87,7 +88,7 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
                 company_id=company_id,
                 diary_date__lte=stop,  # 添加日记时 会选择发布日期 发布日期小于今天才展示
                 status=1,
-            ).exclude(case__case_type=2)
+            ).exclude(case__case_type=2, id=exclude_id)
 
             count = diary_objs.count() + objs_exc_case_obj.count()  # 列表页总数
 
