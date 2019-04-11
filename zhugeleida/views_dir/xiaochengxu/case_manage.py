@@ -160,7 +160,7 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
                 })
 
             customer_name = request.GET.get('customer_name')
-            if not customer_name or is_search:  # 查询该用户所有 案例
+            if not customer_name or is_search or exclude_id:  # 查询该用户所有 案例
                 # 记录该客户 点击查看日记首页日志
                 data = {
                     'action': 21,
