@@ -88,7 +88,7 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
                 company_id=company_id,
                 diary_date__lte=stop,  # 添加日记时 会选择发布日期 发布日期小于今天才展示
                 status=1,
-            ).exclude(case__case_type=2, id=exclude_id)
+            ).exclude(case__case_type=2)
 
             count = diary_objs.count() + objs_exc_case_obj.count()  # 列表页总数
 
