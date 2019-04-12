@@ -58,11 +58,6 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
 
         objs_exc_case_obj = objs.exclude(case_type=1)
 
-        if length != 0:
-            start_line = (current_page - 1) * length
-            stop_line = start_line + length
-            objs = objs[start_line: stop_line]
-
         count = 0
         data_list = []
         if not objs:
@@ -171,9 +166,15 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
                 }
                 record_view_log(data)
             print('data_list--< ', len(data_list))
+
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                data_list = data_list[start_line: stop_line]
+
             # 按时间排序
             data_list = sorted(data_list, key=lambda x: x['create_date'], reverse=True)
-
+        print('len(data_list)------->', len(data_list))
         #  查询成功 返回200 状态码
         response.code = 200
         response.msg = '查询成功'
