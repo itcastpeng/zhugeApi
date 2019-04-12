@@ -83,6 +83,8 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search æ˜¯å
                 zgld_diary_q.add(Q(case__tags=search_tag_id), Q.AND)
             if customer_name:
                 zgld_diary_q.add(Q(case__customer_name=customer_name), Q.AND)
+            if tag_list:
+                zgld_diary_q.add(Q(case__tags__in=tag_list), Q.AND)
             diary_objs = models.zgld_diary.objects.filter(
                 zgld_diary_q,
                 company_id=company_id,
