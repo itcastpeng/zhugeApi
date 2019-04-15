@@ -401,11 +401,16 @@ def article_oper(request, oper_type, o_id):
 
                     for _obj in _objs:
                         article_id = _obj.get('article_id')
-                        last_access_date = models.zgld_article_access_log.objects.filter(article_id=article_id,
+                        last_access_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
                                                                                          customer_id=customer_id).order_by('-last_access_date')
-                        if last_access_date:
-                            last_access_date = last_access_date[0].last_access_date
+                        print('v-last_access_objs--------------------> ', last_access_objs)
+                        if last_access_objs:
+                            last_access_date = last_access_objs[0].last_access_date
+                            print('v-last_access_date--------------------> ', last_access_date.id)
+                        else:
+                            last_access_date = '00:00:00 00:00:00'
 
+                        print(last_access_date)
                         level = list(objs.filter(article_id=article_id).values_list('level', flat=True).distinct())
                         print('--- last_access_date ---->>',last_access_date)
                         stay_time = _obj.get('stay_time__sum')
