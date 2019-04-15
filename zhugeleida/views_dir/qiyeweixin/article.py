@@ -405,7 +405,7 @@ def article_oper(request, oper_type, o_id):
                                                                                          customer_id=customer_id).order_by('-last_access_date')
                         print('v-last_access_objs--------------------> ', last_access_objs)
                         if last_access_objs:
-                            last_access_date = last_access_objs[0].last_access_date
+                            last_access_date = last_access_objs[0].last_access_date.strftime('%Y-%m-%d %H:%M:%S')
                         else:
                             last_access_date = '00:00:00 00:00:00'
 
@@ -421,7 +421,7 @@ def article_oper(request, oper_type, o_id):
                             'read_count': _obj.get('read_count__sum'),
                             'forward_count': _obj.get('forward_count__sum'),
                             'level': sorted(level),
-                            'create_date': last_access_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            'create_date': last_access_date,
                         })
 
                     response.code = 200
