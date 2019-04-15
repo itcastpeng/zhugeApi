@@ -311,6 +311,7 @@ class statistical_objs():
 
     # 点击量（文章）
     def click_the_quantity(self):
+        print('============================================')
         objs = models.zgld_accesslog.objects.filter(
             self.q,
             article_id=self.o_id,
@@ -684,6 +685,7 @@ def data_statistics(request, oper_type):
 
                     forwarding_article_data = statistical_obj.forwarding_article()                          # 转发量
                     click_quantity_data = statistical_obj.click_the_quantity()                              # 点击量
+                    print('--------------------------------------')
                     the_reading_data = statistical_obj.the_reading_time()                                   # 文章阅读数据
                     video_view_data = statistical_obj.video_view_duration()                                 # 视频数据
                     click_dialog_data = statistical_obj.click_the_dialog_box()                              # 点击对话框数据
