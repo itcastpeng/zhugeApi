@@ -406,7 +406,6 @@ def article_oper(request, oper_type, o_id):
                         print('v-last_access_objs--------------------> ', last_access_objs)
                         if last_access_objs:
                             last_access_date = last_access_objs[0].last_access_date
-                            print('v-last_access_date--------------------> ', last_access_date)
                         else:
                             last_access_date = '00:00:00 00:00:00'
 
