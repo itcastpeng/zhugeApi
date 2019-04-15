@@ -409,7 +409,6 @@ def article_oper(request, oper_type, o_id):
                         else:
                             last_access_date = '00:00:00 00:00:00'
 
-                        print(last_access_date)
                         level = list(objs.filter(article_id=article_id).values_list('level', flat=True).distinct())
                         print('--- last_access_date ---->>',last_access_date)
                         stay_time = _obj.get('stay_time__sum')
