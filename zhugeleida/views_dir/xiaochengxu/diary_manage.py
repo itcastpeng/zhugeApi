@@ -1015,6 +1015,8 @@ def diary_manage_oper(request, oper_type, o_id):
                 objs = models.zgld_case.objects.filter(id=case_id)
 
             if objs:
+                show_poster_company_logo = models.zgld_company.objects.get(id=company_id).is_show_logo
+
                 obj = objs[0]
                 poster_cover = []
                 if obj.poster_cover:  # 海报图片
@@ -1039,7 +1041,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     'case_id': case_id,
                     'poster_cover': poster_cover,
                     'poster_company_logo': poster_company_logo,
-                    'qr_code': qr_code
+                    'qr_code': qr_code,
+                    'show_poster_company_logo': show_poster_company_logo
                 }
 
                 response.data = ret_data
