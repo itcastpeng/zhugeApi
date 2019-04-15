@@ -1015,12 +1015,33 @@ def diary_manage_oper(request, oper_type, o_id):
                 objs = models.zgld_case.objects.filter(id=case_id)
 
             if objs:
-                show_poster_company_logo = models.zgld_company.objects.get(id=company_id).is_show_logo
+                show_poster_company_logo = models.zgld_company.objects.get(id=company_id).is_show_logo # 生成小程序 名片海报 是否展示logo
 
                 obj = objs[0]
                 poster_cover = []
                 if obj.poster_cover:  # 海报图片
                     poster_cover = json.loads(obj.poster_cover)
+                else: # 没有设置海报   获取 案例/日记 第一张图
+                    print('没有设置海报   获取 案例/日记 第一张图')
+                    content = ''
+                    if case_type == 1: # 普通案例
+                        content = obj.content
+                    else: # 时间轴案例
+                        diary_objs = models.zgld_diary.objects.filter(case_id=case_id).order_by('-create_date')
+                        if diary_objs:
+                            print('diary_objs-----> ', diary_objs)
+                            diary_obj = diary_objs[0]
+                            content = diary_obj.content
+                            print('diary_objs-----> ', diary_obj.id)
+                    soup = BeautifulSoup(content, 'html.parser')
+                    img_tags = soup.find_all('img')
+                    for img_tag in img_tags:
+                        data_src = img_tag.attrs.get('src')
+                        if data_src:
+                            if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
+                                poster_cover.append(data_src)
+                                break
+
 
                 _data = {
                     'user_id': uid,
