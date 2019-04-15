@@ -327,6 +327,7 @@ class statistical_objs():
                 stop_line = start_line + self.length
                 objs = objs[start_line: stop_line]
             for obj in objs:
+                print(obj.user.username)
                 data_list.append({
                     'customer__username': b64decode(obj.customer.username),
                     'user_username': obj.user.username,
@@ -662,12 +663,13 @@ def data_statistics(request, oper_type):
                     public_q.add(Q(id=article_id), Q.AND)
 
                 objs = models.zgld_article.objects.filter(public_q).order_by('-create_date')
-
+                print('objs---------> ', objs)
                 data_count = objs.count()
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
+                if not article_id:
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
 
                 ret_data = []
 
