@@ -41,7 +41,18 @@ class SmallProgramAddForm(forms.Form):
             'required': "公司id不能为空"
         }
     )
-
+    # def clean_uid(self):
+    #     uid = self.data.get('uid')
+    #     objs = models.zgld_userprofile.objects.filter(id=uid)
+    #     if objs:
+    #         now = datetime.datetime.today()
+    #         compay_objs = models.zgld_company.objects.filter(id=objs[0].company_id)
+    #         if compay_objs[0].account_expired_time >= now:
+    #             return uid
+    #         else:
+    #             self.add_error('uid', '已过期')
+    #     else:
+    #         self.add_error('uid', '该用户不存在')
     # def clean_company_id(self):
     #     company_id = self.data['company_id']
     #     company_obj = models.zgld_company.objects.filter(id=company_id)
