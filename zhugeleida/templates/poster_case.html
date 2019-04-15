@@ -154,9 +154,11 @@
                     <img src="http://api.zhugeyingxiao.com/{{ ret_data.qr_code_url }}"/>
                 </div>
             </div>
+            {% if ret_data.is_show_logo %}
             <div class="logo">
                 <img src="http://api.zhugeyingxiao.com/{{ ret_data.poster_company_logo }}" />
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -107,6 +107,8 @@ def case_manage(request, oper_type):
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
                         })
 
+                show_poster_company_logo = models.zgld_company.objects.get(id=company_id).is_show_logo
+
                 #  查询成功 返回200 状态码
                 response.code = 200
                 response.msg = '查询成功'
@@ -114,6 +116,7 @@ def case_manage(request, oper_type):
                     'ret_data': ret_data,
                     'data_count': count,
                     'poster_company_logo': poster_company_logo,
+                    'show_poster_company_logo': show_poster_company_logo,
                 }
 
 
@@ -132,12 +135,11 @@ def case_manage(request, oper_type):
 @account.is_token(models.zgld_admin_userprofile)
 def case_manage_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-
+    company_id = request.GET.get('company_id')
     if request.method == "POST":
 
         # 删除-案例
         if oper_type == "delete":
-            company_id = request.GET.get('company_id')
             objs = models.zgld_case.objects.filter(id=o_id,company_id=company_id)
 
             if objs:
@@ -320,5 +322,16 @@ def case_manage_oper(request, oper_type, o_id):
                     response.code = 303
                     response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 设置 名片二维码 是否使用logo
+        elif oper_type == 'show_poster_company_logo':
+            objs = models.zgld_company.objects.get(id=company_id)
+            is_show_logo = True
+            if objs.is_show_logo:
+                is_show_logo = False
+
+            objs.is_show_logo = is_show_logo
+            objs.save()
+            response.code = 200
+            response.msg = '设置成功'
 
     return JsonResponse(response.__dict__)
