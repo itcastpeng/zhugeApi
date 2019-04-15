@@ -287,7 +287,7 @@ class statistical_objs():
             self.q,
             article_id=self.o_id,
             action__in=[15, 16]
-        )
+        ).order_by('-create_date')
         forwarding_article_count = objs.count()
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'forwarding_article':
@@ -315,9 +315,11 @@ class statistical_objs():
             self.q,
             article_id=self.o_id,
             action=14
-        )
+        ).order_by('-create_date')
         data_list = []
         click_count = objs.count()
+        print('objs-------> ', objs.count(), objs)
+        print(')self.current_page, self.length---------------------> ', self.current_page, self.length)
         if self.detail_data_type and self.detail_data_type == 'click_the_quantity':
             if self.length != 0:
                 start_line = (self.current_page - 1) * self.length
