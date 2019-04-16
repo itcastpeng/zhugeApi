@@ -1041,7 +1041,7 @@ def diary_manage_oper(request, oper_type, o_id):
                             if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
                                 poster_cover.append(data_src)
                                 break
-                    obj.update(poster_cover=poster_cover)
+                    objs.update(poster_cover=poster_cover)
 
                 _data = {
                     'user_id': uid,
