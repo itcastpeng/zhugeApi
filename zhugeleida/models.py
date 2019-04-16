@@ -1486,6 +1486,7 @@ class zgld_case_tag(models.Model):
     search_amount  = models.IntegerField(verbose_name="搜索数量", default=0)
     # parent_id = models.ForeignKey('self',verbose_name="父级ID",null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    use_number = models.IntegerField(verbose_name='使用次数', default=0)
     class Meta:
         verbose_name_plural = "案例标签表"
         app_label = "zhugeleida"

@@ -172,7 +172,6 @@ def case_manage_oper(request, oper_type, o_id):
             become_beautiful_cover = request.POST.get('become_beautiful_cover')     # 变美图片
             tags_id_list = request.POST.get('tags_id_list')                         # 日记标签
 
-
             form_data = {
                 'case_id' : case_id,
                 'case_name' : case_name,
@@ -190,6 +189,18 @@ def case_manage_oper(request, oper_type, o_id):
             if forms_obj.is_valid():
                 form_data = forms_obj.cleaned_data
                 objs = models.zgld_case.objects.filter(company_id=company_id,id=case_id)
+                obj = objs[0]
+
+                # 原标签使用次数 减一 新标签加一
+                old_tags_id_list = [i.id for i in obj.tags.all()]
+                old_obj = models.zgld_case_tag.objects.filter(id__in=old_tags_id_list)
+                old_obj.update(
+                    use_number=F('use_number') - 1
+                )
+                tags_objs = models.zgld_case_tag.objects.filter(id__in=json.loads(tags_id_list))
+                tags_objs.update(
+                    use_number=F('use_number') + 1
+                )
                 if objs:
                     objs.update(
                         user_id=user_id,
@@ -229,11 +240,11 @@ def case_manage_oper(request, oper_type, o_id):
             cover_picture = request.POST.get('cover_picture')                       # 封面图片
             become_beautiful_cover = request.POST.get('become_beautiful_cover')     # 变美图片
             tags_id_list = request.POST.get('tags_id_list')                         # 标签列表
-            # print('tags_id_list-----> ', type(tags_id_list), tags_id_list)
-            # tags_objs = models.zgld_case_tag.objects.filter(id__in=list(tags_id_list))
-            # tags_objs.update(
-            #     F('use_number')+1
-            # )
+
+            tags_objs = models.zgld_case_tag.objects.filter(id__in=json.loads(tags_id_list))
+            tags_objs.update(
+                use_number=F('use_number')+1
+            )
             """
             普通案例： 列表页 不加 变美过程 封面图片
             时间轴案例: 创建列表页 加 变美过程 封面图片

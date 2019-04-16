@@ -29,7 +29,7 @@ def case_tag(request):
         q = conditionCom(request, field_dict)
         print('q -->', q)
 
-        tag_list = models.zgld_case_tag.objects.filter(q, company_id=company_id).values('id','name')
+        tag_list = models.zgld_case_tag.objects.filter(q, company_id=company_id).values('id','name').order_by('-use_number')
         tag_data = list(tag_list)
 
         response.code = 200
