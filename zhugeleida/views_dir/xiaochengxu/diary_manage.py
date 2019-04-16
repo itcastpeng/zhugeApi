@@ -1023,58 +1023,62 @@ def diary_manage_oper(request, oper_type, o_id):
                     poster_cover = json.loads(obj.poster_cover)
                 else: # 没有设置海报   获取 案例/日记 第一张图
                     print('没有设置海报   获取 案例/日记 第一张图')
-                    content = ''
+                    cover_picture_list = ''
                     if case_type == 1: # 普通案例
-                        content = obj.content
+                        cover_picture_list = json.loads(obj.cover_picture)
                     else: # 时间轴案例
                         diary_objs = models.zgld_diary.objects.filter(case_id=case_id).order_by('-create_date')
                         if diary_objs:
                             diary_obj = diary_objs[0]
-                            content = diary_obj.content
-                    soup = BeautifulSoup(content, 'html.parser')
-                    img_tags = soup.find_all('img')
-                    for img_tag in img_tags:
-                        data_src = img_tag.attrs.get('src')
-                        if data_src:
-                            if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
-                                if 'http://api.zhugeyingxiao.com/' in data_src:
-                                    print('data_src--------> ', type(data_src))
-                                    data_src = data_src.replace('http://api.zhugeyingxiao.com/', '')
-                                poster_cover.append(data_src)
-                                break
-                    objs.update(poster_cover=json.dumps(poster_cover))
+                            cover_picture_list = json.loads(diary_obj.cover_picture)
+                    if len(cover_picture_list) >= 1:
+                        data_src = cover_picture_list[0]
+                        if 'http://api.zhugeyingxiao.com/' in data_src:
+                            data_src = data_src.replace('http://api.zhugeyingxiao.com/', '')
+                        poster_cover.append(data_src)
+                        objs.update(poster_cover=json.dumps(poster_cover))
+                    else:
+                        response.code = 301
+                        response.msg = '轮播图图片为空'
+                    # soup = BeautifulSoup(cover_picture_list, 'html.parser')
+                    # img_tags = soup.find_all('img')
+                    # for img_tag in img_tags:
+                    #     data_src = img_tag.attrs.get('src')
+                    #     if data_src:
+                    #         if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
+                    #             break
 
-                _data = {
-                    'user_id': uid,
-                    'customer_id': customer_id,
-                    'case_id': case_id,
-                    'company_id': company_id,
-                    'case_type': case_type,
-                    'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
-                }
-                print('_data--------------> ', _data)
-                _response = create_user_customer_case_poster_qr_code(_data)
-
-                qr_code = ''
-                if _response.code == 200:
-                    qr_code = _response.data.get('qr_code')
-
-                ret_data = {
-                    'case_id': case_id,
-                    'poster_cover': poster_cover,
-                    'poster_company_logo': poster_company_logo,
-                    'qr_code': qr_code,
-                    'show_poster_company_logo': show_poster_company_logo
-                }
-
-                response.data = ret_data
-                response.note = {
-                    'case_id': '案例ID',
-                    'poster_cover': '海报封面',
-                    'poster_company_logo': '海报公司log',
-                    'qr_code': '小程序关系二维码'
-                }
-
+                # _data = {
+            #         'user_id': uid,
+            #         'customer_id': customer_id,
+            #         'case_id': case_id,
+            #         'company_id': company_id,
+            #         'case_type': case_type,
+            #         'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
+            #     }
+            #     print('_data--------------> ', _data)
+            #     _response = create_user_customer_case_poster_qr_code(_data)
+            #
+            #     qr_code = ''
+            #     if _response.code == 200:
+            #         qr_code = _response.data.get('qr_code')
+            #
+            #     ret_data = {
+            #         'case_id': case_id,
+            #         'poster_cover': poster_cover,
+            #         'poster_company_logo': poster_company_logo,
+            #         'qr_code': qr_code,
+            #         'show_poster_company_logo': show_poster_company_logo
+            #     }
+            #
+            #     response.data = ret_data
+            #     response.note = {
+            #         'case_id': '案例ID',
+            #         'poster_cover': '海报封面',
+            #         'poster_company_logo': '海报公司log',
+            #         'qr_code': '小程序关系二维码'
+            #     }
+            #
                 response.code = 200
                 response.msg = "返回成功"
             else:
