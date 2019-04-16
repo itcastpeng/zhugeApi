@@ -156,17 +156,6 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
                     'create_date': diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                 })
 
-            customer_name = request.GET.get('customer_name')
-            if not customer_name or is_search or exclude_id:  # 查询该用户所有 案例
-                # 记录该客户 点击查看日记首页日志
-                data = {
-                    'action': 21,
-                    'customer_id': customer_id,
-                    'user_id': u_id
-                }
-                record_view_log(data)
-            print('data_list--< ', len(data_list))
-
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
@@ -176,11 +165,19 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
             data_list = sorted(data_list, key=lambda x: x['create_date'], reverse=True)
         print('len(data_list)------->', len(data_list))
         #  查询成功 返回200 状态码
+
+        # 记录该客户 点击查看日记首页日志
+        data = {
+            'action': 21,
+            'customer_id': customer_id,
+            'user_id': u_id
+        }
         response.code = 200
         response.msg = '查询成功'
         response.data = {
             'ret_data': data_list,
             'data_count': count,
+            'data': data,
         }
         response.note = {
             'diary_list_id': '(普通日记为日记ID/时间轴日记为日记列表ID)',
@@ -231,6 +228,8 @@ def record_view_log(data):
 @account.is_token(models.zgld_customer)
 def case_manage(request):
     response = case_manage_public(request)
+    print(response.data.get('data'))
+    record_view_log(response.data.get('data'))
     return JsonResponse(response.__dict__)
 
 
