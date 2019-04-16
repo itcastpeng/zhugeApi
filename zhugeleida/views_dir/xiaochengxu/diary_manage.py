@@ -1029,10 +1029,8 @@ def diary_manage_oper(request, oper_type, o_id):
                     else: # 时间轴案例
                         diary_objs = models.zgld_diary.objects.filter(case_id=case_id).order_by('-create_date')
                         if diary_objs:
-                            print('diary_objs-----> ', diary_objs)
                             diary_obj = diary_objs[0]
                             content = diary_obj.content
-                            print('diary_objs-----> ', diary_obj.id)
                     soup = BeautifulSoup(content, 'html.parser')
                     img_tags = soup.find_all('img')
                     for img_tag in img_tags:
