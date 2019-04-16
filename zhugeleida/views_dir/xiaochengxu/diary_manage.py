@@ -1037,6 +1037,8 @@ def diary_manage_oper(request, oper_type, o_id):
                         data_src = img_tag.attrs.get('src')
                         if data_src:
                             if 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
+                                if 'http://api.zhugeyingxiao.com/' in data_src:
+                                    data_src = data_src.replase('http://api.zhugeyingxiao.com/', '')
                                 poster_cover.append(data_src)
                                 break
                     objs.update(poster_cover=json.dumps(poster_cover))
