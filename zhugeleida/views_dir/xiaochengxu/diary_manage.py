@@ -1049,7 +1049,7 @@ def diary_manage_oper(request, oper_type, o_id):
                     'case_type': case_type,
                     'user_customer_belonger_id': user_customer_belonger_id, # 关系绑定表ID
                 }
-
+                print('_data--------------> ', _data)
                 _response = create_user_customer_case_poster_qr_code(_data)
 
                 qr_code = ''
