@@ -10,19 +10,16 @@ import qiniu
 def qiniu_oper(request, oper_type):
     response = Response.ResponseObj()
     if oper_type == 'qiniu_token':
-
-        AccessKey = '6gFyUrgwDoEgWMH-6QbZUxDnn7yy6ZggiyiuqOt3'
-        SecretKey = 'sS6fCaFOIAHJfzBhRjYvYnGhzS5buAxThUUfWyfR'
-        suffix = request.GET.get('suffix')  # 后缀
+        SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
+        AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
         q = qiniu.Auth(AccessKey, SecretKey)
-
-        bucket_name = 'bucket_name'
-        key = '{}.{}'.format(encryption(), suffix)  # 图片名称
-
-        token = q.upload_token(bucket_name, key, 3600)
+        bucket_name = 'bjhzkq_tianyan'
+        token = q.upload_token(bucket_name)
         response.code = 200
         response.msg = 'token生成完成'
-        response.data = {'token': token}
+        response.data = {
+            'token': token,
+        }
 
     return JsonResponse(response.__dict__)
 
