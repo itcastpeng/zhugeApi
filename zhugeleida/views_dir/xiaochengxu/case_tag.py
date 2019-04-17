@@ -52,13 +52,15 @@ def case_tag(request,oper_type):
             print('q -->', q)
             q.add(Q(**{'company_id': company_id}), Q.AND)
 
-            tag_list = models.zgld_case_tag.objects.filter(q).values('id','name').order_by('-create_date')
+            tag_list = models.zgld_case_tag.objects.filter(q).values('id','name').order_by('-search_amount')
             tag_data = list(tag_list)
             search_tag_list = []
             for tag_id in tag_list:
                 search_tag_list.append(tag_id['id'])
 
-            response_data = case_manage_public(request, is_search=1, tag_list=search_tag_list) # 搜索出来所有数据
+            response_data = {}
+            if name__contains:
+                response_data = case_manage_public(request, tag_list=search_tag_list) # 搜索出来所有数据
             response.code = 200
             response.data = {
                 'data_list': response_data.data,

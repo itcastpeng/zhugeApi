@@ -12,7 +12,7 @@ from django.db.models import Q, F, Sum, Count
 
 
 # 查询公共函数 搜索需要
-def case_manage_public(request, is_search=None, tag_list=None): # is_search 是否为搜索 如果为搜索不记录日志 tag_list搜索传进标签列表
+def case_manage_public(request, tag_list=None): # is_search 是否为搜索 如果为搜索不记录日志 tag_list搜索传进标签列表
     response = Response.ResponseObj()
     forms_obj = CaseSelectForm(request.GET)
     if forms_obj.is_valid():
@@ -56,7 +56,7 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
             status=1
         ).order_by(order).exclude(status=3)
 
-        objs_exc_case_obj = objs.exclude(case_type=1)
+        objs_exc_case_obj = objs.exclude(case_type=1).distinct()
 
         count = 0
         data_list = []
@@ -80,13 +80,14 @@ def case_manage_public(request, is_search=None, tag_list=None): # is_search 是�
                 zgld_diary_q.add(Q(case__customer_name=customer_name), Q.AND)
             if tag_list:
                 zgld_diary_q.add(Q(case__tags__in=tag_list), Q.AND) # 搜索查询
+            print('zgld_diary_q--> ', zgld_diary_q)
             diary_objs = models.zgld_diary.objects.filter(
                 zgld_diary_q,
                 company_id=company_id,
                 diary_date__lte=stop,  # 添加日记时 会选择发布日期 发布日期小于今天才展示
                 status=1,
-            ).exclude(case__case_type=2).exclude(id=exclude_id) # 相关文章 排除自己 只有普通日记排除
-
+            ).exclude(case__case_type=2).exclude(id=exclude_id).distinct() # 相关文章 排除自己 只有普通日记排除
+            print('diary_objs-------> ', diary_objs)
             count = diary_objs.count() + objs_exc_case_obj.count()  # 列表页总数
 
             # # 时间轴日记列表页

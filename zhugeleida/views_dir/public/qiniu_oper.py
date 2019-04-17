@@ -14,7 +14,7 @@ def qiniu_oper(request, oper_type):
         AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
         q = qiniu.Auth(AccessKey, SecretKey)
         bucket_name = 'bjhzkq_tianyan'
-        token = q.upload_token(bucket_name)
+        token = q.upload_token(bucket_name)  # 可以指定key 图片名称
         response.code = 200
         response.msg = 'token生成完成'
         response.data = {
