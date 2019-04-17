@@ -46,52 +46,53 @@ def login(request):
         # forms_obj = SmallProgramAddForm(request.GET)
         #
         # if forms_obj.is_valid():
-
         js_code = request.GET.get('code')
+        code_objs = models.save_code.objects.filter(code=js_code)
+        if not code_objs:
+            models.save_code.objects.create(code=js_code)
+            get_token_data = {
+                'appid': 'wx13dd9e1b8940d0a1',
+                'secret': '522daa0c0e27d27f226feb078500b979',
+                'js_code': js_code,
+                'grant_type': 'authorization_code',
+            }
 
-        get_token_data = {
-            'appid': 'wx13dd9e1b8940d0a1',
-            'secret': '522daa0c0e27d27f226feb078500b979',
-            'js_code': js_code,
-            'grant_type': 'authorization_code',
-        }
+            ret_data = get_openid_info(get_token_data)
+            openid = ret_data['openid']
+            # session_key = ret_data['session_key']
+            # unionid = ret_data['unionid']
 
-        ret_data = get_openid_info(get_token_data)
-        openid = ret_data['openid']
-        # session_key = ret_data['session_key']
-        # unionid = ret_data['unionid']
-
-        customer_objs = models.zgld_customer.objects.filter(
-            openid=openid,
-            user_type=2,
-        )
-        # 如果openid存在一条数据
-        if customer_objs:
-            token = customer_objs[0].token
-            client_id = customer_objs[0].id
-
-        else:
-            token = account.get_token(account.str_encrypt(openid))
-            obj = models.zgld_customer.objects.create(
-                token=token,
+            customer_objs = models.zgld_customer.objects.filter(
                 openid=openid,
-
-                user_type=2,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                # superior=customer_id,  #上级人。
+                user_type=2,
             )
+            # 如果openid存在一条数据
+            if customer_objs:
+                token = customer_objs[0].token
+                client_id = customer_objs[0].id
 
-            #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
-            # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
-            client_id = obj.id
-            print('---------- [创建用户成功] openid | client_id ---->',openid,"|",client_id)
+            else:
+                token = account.get_token(account.str_encrypt(openid))
+                obj = models.zgld_customer.objects.create(
+                    token=token,
+                    openid=openid,
 
-        ret_data = {
-            'cid': client_id,
-            'token': token
-        }
-        response.code = 200
-        response.msg = "返回成功"
-        response.data = ret_data
+                    user_type=2,   #  (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                    # superior=customer_id,  #上级人。
+                )
+
+                #models.zgld_information.objects.filter(customer_id=obj.id,source=source)
+                # models.zgld_user_customer_belonger.objects.create(customer_id=obj.id,user_id=user_id,source=source)
+                client_id = obj.id
+                print('---------- [创建用户成功] openid | client_id ---->',openid,"|",client_id)
+
+            ret_data = {
+                'cid': client_id,
+                'token': token
+            }
+            response.code = 200
+            response.msg = "返回成功"
+            response.data = ret_data
 
 
     else:

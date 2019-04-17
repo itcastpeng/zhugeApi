@@ -55,133 +55,135 @@ def login(request):
 
         forms_obj = SmallProgramAddForm(request.GET)
         if forms_obj.is_valid():
-
             js_code = forms_obj.cleaned_data.get('code')
-            user_type = forms_obj.cleaned_data.get('user_type')
-            company_id = forms_obj.cleaned_data.get('company_id')
-            user_id = forms_obj.cleaned_data.get('uid')
-            xcx_type = request.GET.get('xcx_type') # 是否是米扬丽格
+            code_objs = models.save_code.objects.filter(code=js_code)
+            if not code_objs:
+                models.save_code.objects.create(code=js_code)
+                user_type = forms_obj.cleaned_data.get('user_type')
+                company_id = forms_obj.cleaned_data.get('company_id')
+                user_id = forms_obj.cleaned_data.get('uid')
+                xcx_type = request.GET.get('xcx_type') # 是否是米扬丽格
 
-            company_id = int(company_id) if company_id else ''
+                company_id = int(company_id) if company_id else ''
 
-            is_release_version_num = True
-            if xcx_type == 'case_type' and not company_id: # 案例类型的话
-                company_id = 13
-                is_release_version_num = False
-                print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
-                      user_id, company_id)
-
-
-            elif not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
-                # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
-                company_id = 1
-                is_release_version_num = False
-                print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
+                is_release_version_num = True
+                if xcx_type == 'case_type' and not company_id: # 案例类型的话
+                    company_id = 13
+                    is_release_version_num = False
+                    print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',
+                          user_id, company_id)
 
 
+                elif not company_id:  # 说明 ext里没有company_id 此时要让它看到默认公司。。
+                    # 注意的是小程序审核者 ，生成的体验码，既没有UID，也没有 company_id ，所以 需要默认的处理下。
+                    company_id = 1
+                    is_release_version_num = False
+                    print('--------- [没有company_id], ext里没有company_id或小程序审核者自己生成的体验码 。 uid | company_id(默认) 是： -------->>',user_id, company_id)
 
-            app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
-            services_type = app_objs[0].three_services_type
-            three_services_type = ''
-            if services_type == 1:     # (1, '小程序(名片版)第三方平台'),
-                three_services_type=3
 
-            elif services_type == 2:   # (2, '小程序(案例库)第三方平台')
-                three_services_type=4
 
-            component_appid = ''
-            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type)  # 小程序
-            if three_service_objs:
-                three_service_obj = three_service_objs[0]
-                qywx_config_dict = three_service_obj.config
-                if qywx_config_dict:
-                    qywx_config_dict = json.loads(qywx_config_dict)
+                app_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=company_id)
+                services_type = app_objs[0].three_services_type
+                three_services_type = ''
+                if services_type == 1:     # (1, '小程序(名片版)第三方平台'),
+                    three_services_type=3
 
-                component_appid = qywx_config_dict.get('app_id')
+                elif services_type == 2:   # (2, '小程序(案例库)第三方平台')
+                    three_services_type=4
 
-            else:
-                print('------ 【公众号第三方-无配置信息】component_appid ------>>')
+                component_appid = ''
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=three_services_type)  # 小程序
+                if three_service_objs:
+                    three_service_obj = three_service_objs[0]
+                    qywx_config_dict = three_service_obj.config
+                    if qywx_config_dict:
+                        qywx_config_dict = json.loads(qywx_config_dict)
 
-            obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-            authorizer_appid = obj.authorization_appid
-            # component_appid = 'wx67e2fde0f694111c'
+                    component_appid = qywx_config_dict.get('app_id')
 
-            # if  version_num: # 有版本号(从ext 里读取的)
-            online_version_num = obj.version_num
-            print('---- Ext里的版本号: ---->',version_num)
-
-            if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
-                is_release_version_num = False  # 不相等说明要隐藏按钮。
-                print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',
-                      (company_id, online_version_num, version_num))
-
-            component_access_token = create_component_access_token(company_id)
-            get_token_data = {
-                'appid': authorizer_appid,  # 授权小程序的AppID
-                'js_code': js_code,  # 登录时获取的 code
-                'grant_type': 'authorization_code',
-                'component_appid': component_appid,  # 第三方平台appid
-                'component_access_token': component_access_token  # 第三方平台的 component_access_token
-            }
-
-            ret_data = get_openid_info(get_token_data)
-            openid = ret_data['openid']
-            session_key = ret_data['session_key']
-
-            customer_objs = models.zgld_customer.objects.filter(
-                openid=openid,
-                user_type=user_type
-            )
-            # 如果openid存在一条数据
-            if customer_objs:
-                token = customer_objs[0].token
-                client_id = customer_objs[0].id
-                customer_objs.update(
-                    session_key= session_key
-                )
-
-            else:
-                token = account.get_token(account.str_encrypt(openid))
-                obj = models.zgld_customer.objects.create(
-                    session_key=session_key,
-                    company_id=company_id,
-                    token=token,
-                    openid=openid,
-                    user_type=user_type,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
-                    # superior=customer_id,  #上级人。
-                )
-
-                client_id = obj.id
-                print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
-
-            if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
-                user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
-                    customer_id=client_id,
-                    user__company_id=company_id
-                ).order_by('-last_activity_time')
-                for i in user_customer_belonger_obj:
-                    print('i.user.username--------> ', i.user.username)
-                if user_customer_belonger_obj:  # 上一次进入的咨询 后期登录还是该咨询
-                    user_customer_obj = user_customer_belonger_obj[0]
-                    user_id = user_customer_obj.user_id
                 else:
-                    user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
-                print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
+                    print('------ 【公众号第三方-无配置信息】component_appid ------>>')
+
+                obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+                authorizer_appid = obj.authorization_appid
+                # component_appid = 'wx67e2fde0f694111c'
+
+                # if  version_num: # 有版本号(从ext 里读取的)
+                online_version_num = obj.version_num
+                print('---- Ext里的版本号: ---->',version_num)
+
+                if version_num != online_version_num:  # ext 里的版本号是否等于目前已经上线的版本号，如果相等代表已经发布同步，不必隐藏转发按钮
+                    is_release_version_num = False  # 不相等说明要隐藏按钮。
+                    print('-------- 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',
+                          (company_id, online_version_num, version_num))
+
+                component_access_token = create_component_access_token(company_id)
+                get_token_data = {
+                    'appid': authorizer_appid,  # 授权小程序的AppID
+                    'js_code': js_code,  # 登录时获取的 code
+                    'grant_type': 'authorization_code',
+                    'component_appid': component_appid,  # 第三方平台appid
+                    'component_access_token': component_access_token  # 第三方平台的 component_access_token
+                }
+
+                ret_data = get_openid_info(get_token_data)
+                openid = ret_data['openid']
+                session_key = ret_data['session_key']
+
+                customer_objs = models.zgld_customer.objects.filter(
+                    openid=openid,
+                    user_type=user_type
+                )
+                # 如果openid存在一条数据
+                if customer_objs:
+                    token = customer_objs[0].token
+                    client_id = customer_objs[0].id
+                    customer_objs.update(
+                        session_key= session_key
+                    )
+
+                else:
+                    token = account.get_token(account.str_encrypt(openid))
+                    obj = models.zgld_customer.objects.create(
+                        session_key=session_key,
+                        company_id=company_id,
+                        token=token,
+                        openid=openid,
+                        user_type=user_type,  # (1 代表'微信公众号'),  (2 代表'微信小程序'),
+                        # superior=customer_id,  #上级人。
+                    )
+
+                    client_id = obj.id
+                    print('---------- 【小程序】用户第一次注册、创建成功 | openid入库 -------->')
+
+                if not user_id:  # 如果没有user_id 说明是搜索进来 或者 审核者自己生成的二维码。
+                    user_customer_belonger_obj = models.zgld_user_customer_belonger.objects.filter(
+                        customer_id=client_id,
+                        user__company_id=company_id
+                    ).order_by('-last_activity_time')
+                    for i in user_customer_belonger_obj:
+                        print('i.user.username--------> ', i.user.username)
+                    if user_customer_belonger_obj:  # 上一次进入的咨询 后期登录还是该咨询
+                        user_customer_obj = user_customer_belonger_obj[0]
+                        user_id = user_customer_obj.user_id
+                    else:
+                        user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
+                    print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
 
 
 
-            ret_data = {
-                'cid': client_id,
-                'token': token,
-                'uid': user_id,
-                'company_id': company_id,
-                'is_release_version_num': is_release_version_num
-            }
+                ret_data = {
+                    'cid': client_id,
+                    'token': token,
+                    'uid': user_id,
+                    'company_id': company_id,
+                    'is_release_version_num': is_release_version_num
+                }
 
-            print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
-            response.code = 200
-            response.msg = "返回成功"
-            response.data = ret_data
+                print('-------- 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
+                response.code = 200
+                response.msg = "返回成功"
+                response.data = ret_data
 
         else:
             response.code = 301
