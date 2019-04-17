@@ -58,14 +58,13 @@ def case_tag(request,oper_type):
             for tag_id in tag_list:
                 search_tag_list.append(tag_id['id'])
 
-            response_data = {
-                'data':''
-            }
+            response_data = {}
             if name__contains:
                 response_data = case_manage_public(request, tag_list=search_tag_list) # 搜索出来所有数据
+                response_data = response_data.data
             response.code = 200
             response.data = {
-                'data_list': response_data.data,
+                'data_list': response_data,
                 'ret_data': tag_data,
                 'data_count': tag_list.count(),
             }
