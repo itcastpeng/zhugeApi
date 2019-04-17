@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.public import img_upload, fild_upload,websocket,open_weixin_api,myself_tools
+from zhugeleida.views_dir.public import img_upload, fild_upload,websocket,open_weixin_api,myself_tools, qiniu_oper
 
 urlpatterns = [
 
@@ -18,5 +18,10 @@ urlpatterns = [
     url(r'^websocket/(?P<oper_type>\w+)$', websocket.public_websocket),
 
     url(r'^create_token/(?P<oper_type>\w+)$', open_weixin_api.crate_token),
-    url(r'^myself_tools/(?P<oper_type>\w+)$',myself_tools.tools_oper) #内部工具的链接
+    url(r'^myself_tools/(?P<oper_type>\w+)$',myself_tools.tools_oper), #内部工具的链接
+
+    # 获取七牛云token
+    url(r'^qiniu/(?P<oper_type>\w+)$',qiniu_oper.qiniu_oper)   # 七牛云操作
+
+
 ]
