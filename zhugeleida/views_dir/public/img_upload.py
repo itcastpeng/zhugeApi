@@ -166,7 +166,7 @@ def img_merge(request):
             img_path = img_path.replace('http://api.zhugeyingxiao.com/', '')
 
         # 上传到七牛云
-        if qiniu:
+        if qiniu and int(qiniu) == 1:
             token = qiniu_oper.qiniu_get_token()
             url = 'https://up-z1.qiniup.com/'
             data = {
