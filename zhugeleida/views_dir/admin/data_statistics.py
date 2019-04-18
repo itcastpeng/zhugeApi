@@ -1023,7 +1023,8 @@ def update_qiniu(request):
                 else:
                     img_tag.attrs['src'] = data_src
             print(img_tag.attrs['src'])
-        diary_obj.content = soup
+
+        diary_obj.content = str(soup)
         diary_obj.save()
 
     response.code = 200
