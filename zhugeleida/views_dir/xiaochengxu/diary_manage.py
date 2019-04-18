@@ -123,7 +123,7 @@ def diary_manage(request):
             is_collection_obj = models.zgld_diary_action.objects.filter(
                 action=2,
                 customer_id=user_id,
-                diary_id=obj.id
+                case_id=obj.case_id
             )
             if is_collection_obj:
                 is_collection = True

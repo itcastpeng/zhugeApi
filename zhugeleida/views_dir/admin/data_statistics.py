@@ -1000,6 +1000,8 @@ def update_qiniu(request):
     diary_objs = models.zgld_diary.objects.filter(company_id=13).exclude(status=3)
     for diary_obj in diary_objs:
         print('diary_obj.id-----> ', diary_obj.id)
+
+        # 封面
     #     cover_picture = diary_obj.cover_picture
     #     if cover_picture:
     #         cover_picture = json.loads(cover_picture)
@@ -1012,7 +1014,7 @@ def update_qiniu(request):
     #                 cover_picture_list.append(i)
     #         diary_obj.cover_picture = json.dumps(cover_picture_list)
 
-
+        # 内容
         content = diary_obj.content
         soup = BeautifulSoup(content, 'html.parser')
         img_tags = soup.find_all('img')
