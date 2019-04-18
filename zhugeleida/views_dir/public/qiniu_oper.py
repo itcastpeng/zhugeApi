@@ -7,6 +7,18 @@ import datetime as dt, time, json, uuid, os, base64
 from zhugeleida.views_dir.public.watermark import encryption
 import qiniu
 
+
+
+# 内部调用
+def qiniu_get_token():
+    SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
+    AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
+    q = qiniu.Auth(AccessKey, SecretKey)
+    bucket_name = 'bjhzkq_tianyan'
+    token = q.upload_token(bucket_name)  # 可以指定key 图片名称
+    return token
+
+# 前端请求
 def qiniu_oper(request, oper_type):
     response = Response.ResponseObj()
     if oper_type == 'qiniu_token':

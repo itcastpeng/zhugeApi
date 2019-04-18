@@ -13,6 +13,8 @@ from zhugeleida import models
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from subprocess import Popen, PIPE
 from zhugeleida.views_dir.public.watermark import watermark
+import requests
+from zhugeleida.views_dir.public import qiniu_oper
 
 # 上传图片（分片上传）
 @csrf_exempt
@@ -63,6 +65,7 @@ def img_merge(request):
         expanded_name = img_name.split('.')[-1]  # 扩展名
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
+        qiniu = forms_obj.cleaned_data.get('qiniu')  # 是否上传七牛云
 
         print('-----img_source----->', img_source)
 
@@ -158,8 +161,24 @@ def img_merge(request):
 
             if  _img_path:
                 img_path =  _img_path
+
         if 'http://api.zhugeyingxiao.com/' in img_path:
             img_path = img_path.replace('http://api.zhugeyingxiao.com/', '')
+
+        # 上传到七牛云
+        if qiniu:
+            token = qiniu_oper.qiniu_get_token()
+            url = 'https://up-z1.qiniup.com/'
+            data = {
+                'token': token,
+            }
+            files = {
+                'file': open(img_path, 'rb')
+            }
+            ret = requests.post(url, data=data, files=files)
+            img_path = ret.json().get('key')
+
+
         response.data = {
             'picture_url': img_path,
         }
