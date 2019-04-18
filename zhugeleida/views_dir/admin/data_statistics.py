@@ -934,7 +934,7 @@ import qiniu, requests
 from bs4 import BeautifulSoup
 
 def get_token(imgurl):
-    if 'statics' not in imgurl:
+    if 'statics/zhugeleida' not in imgurl:
         if 'http://tianyan.zhugeyingxiao.com/' not in imgurl:
             if 'http://api.zhugeyingxiao.com/' in imgurl:
                 imgurl = imgurl.replace('http://api.zhugeyingxiao.com/', '')
