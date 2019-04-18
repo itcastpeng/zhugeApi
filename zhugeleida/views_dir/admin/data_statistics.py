@@ -955,10 +955,8 @@ def get_token(headimgurl):
 @csrf_exempt
 def update_qiniu(request):
     response = Response.ResponseObj()
-    objs = models.zgld_case.objects.filter(company_id=13)
-    if objs:
-        obj = objs[0]
-
+    objs = models.zgld_case.objects.filter(company_id=13).exclude(status=3)
+    for obj in objs:
         print('obj.id-------> ', obj.id)
         # 封面图片
         cover_picture = obj.cover_picture
