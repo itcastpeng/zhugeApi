@@ -934,25 +934,26 @@ import qiniu, requests
 from bs4 import BeautifulSoup
 
 def get_token(imgurl):
-    if 'http://tianyan.zhugeyingxiao.com/' not in imgurl:
-        if 'http://api.zhugeyingxiao.com/' in imgurl:
-            imgurl = imgurl.replace('http://api.zhugeyingxiao.com/', '')
+    if 'statics' not in imgurl:
+        if 'http://tianyan.zhugeyingxiao.com/' not in imgurl:
+            if 'http://api.zhugeyingxiao.com/' in imgurl:
+                imgurl = imgurl.replace('http://api.zhugeyingxiao.com/', '')
 
-        SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
-        AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
-        q = qiniu.Auth(AccessKey, SecretKey)
-        bucket_name = 'bjhzkq_tianyan'
-        token = q.upload_token(bucket_name)  # 可以指定key 图片名称
-        url = 'https://up-z1.qiniup.com/'
-        data = {
-            'token': token,
-        }
-        files = {
-            'file': open(imgurl, 'rb')
-        }
-        ret = requests.post(url, data=data, files=files)
-        filename = ret.json().get('key')
-        return 'http://tianyan.zhugeyingxiao.com/' + filename
+            SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
+            AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
+            q = qiniu.Auth(AccessKey, SecretKey)
+            bucket_name = 'bjhzkq_tianyan'
+            token = q.upload_token(bucket_name)  # 可以指定key 图片名称
+            url = 'https://up-z1.qiniup.com/'
+            data = {
+                'token': token,
+            }
+            files = {
+                'file': open(imgurl, 'rb')
+            }
+            ret = requests.post(url, data=data, files=files)
+            filename = ret.json().get('key')
+            return 'http://tianyan.zhugeyingxiao.com/' + filename
 
 @csrf_exempt
 def update_qiniu(request):
