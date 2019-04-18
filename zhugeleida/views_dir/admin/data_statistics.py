@@ -993,9 +993,7 @@ def update_qiniu(request):
 
 
     diary_objs = models.zgld_diary.objects.filter(company_id=13).exclude(status=3)
-    if diary_objs:
-        diary_obj = diary_objs[0]
-        print('diary_obj-------------> ', diary_obj.id)
+    for diary_obj in diary_objs:
         cover_picture = diary_obj.cover_picture
         if cover_picture:
             cover_picture = json.loads(cover_picture)
