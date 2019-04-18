@@ -924,3 +924,88 @@ def data_statistics(request, oper_type):
             response.data = json.loads(forms_obj.errors.as_json())
 
     return JsonResponse(response.__dict__)
+
+import qiniu, requests
+
+
+
+
+
+
+
+
+def get_token(headimgurl):
+    if 'http://tianyan.zhugeyingxiao.com/' not in headimgurl:
+        SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
+        AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
+        q = qiniu.Auth(AccessKey, SecretKey)
+        bucket_name = 'bjhzkq_tianyan'
+        token = q.upload_token(bucket_name)  # 可以指定key 图片名称
+        url = 'https://up-z1.qiniup.com/'
+        data = {
+            'token': token,
+        }
+        files = {
+            'file': open(headimgurl, 'rb')
+        }
+        ret = requests.post(url, data=data, files=files)
+        filename = ret.json().get('key')
+        return filename
+
+@csrf_exempt
+def update_qiniu(request):
+    response = Response.ResponseObj()
+    objs = models.zgld_case.objects.filter(company_id=13)
+    if objs:
+        obj = objs[0]
+
+        print('obj.id-------> ', obj.id)
+        # 封面图片
+        cover_picture = obj.cover_picture
+        if cover_picture:
+            cover_picture = json.loads(cover_picture)
+            cover_picture_list = []
+            for i in cover_picture:
+                filename = get_token(i)
+                if filename:
+                    cover_picture_list.append(filename)
+                else:
+                    cover_picture_list.append(i)
+            obj.cover_picture = cover_picture_list
+
+        # 头像
+        headimgurl = obj.headimgurl
+        headimgurl_file = get_token(headimgurl)
+        if headimgurl_file:
+            obj.headimgurl = headimgurl_file
+
+        # 变美图片
+        become_beautiful_cover = obj.become_beautiful_cover
+        if become_beautiful_cover:
+            become_beautiful_cover = json.loads(become_beautiful_cover)
+            become_beautiful_cover_list = []
+            for i in become_beautiful_cover:
+                filename = get_token(i)
+                if filename:
+                    become_beautiful_cover_list.append(filename)
+                else:
+                    become_beautiful_cover_list.append(i)
+            obj.become_beautiful_cover = become_beautiful_cover_list
+
+        obj.save()
+
+    response.code = 200
+    return JsonResponse(response.__dict__)
+
+
+
+
+
+
+
+
+
+
+
+
+

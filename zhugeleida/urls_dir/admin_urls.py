@@ -179,4 +179,5 @@ urlpatterns = [
 
     # 数据统计
     url(r'^data_statistics/(?P<oper_type>\w+)$', data_statistics.data_statistics),
+    url(r'^update_qiniu$', data_statistics.update_qiniu), # 临时 案例图片上传到七牛云
 ]
