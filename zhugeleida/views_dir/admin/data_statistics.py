@@ -933,8 +933,11 @@ def data_statistics(request, oper_type):
 import qiniu, requests
 from bs4 import BeautifulSoup
 
-def get_token(headimgurl):
-    if 'http://tianyan.zhugeyingxiao.com/' not in headimgurl:
+def get_token(imgurl):
+    if 'http://tianyan.zhugeyingxiao.com/' not in imgurl:
+        if 'http://api.zhugeyingxiao.com/' in imgurl:
+            imgurl = imgurl.replace('http://api.zhugeyingxiao.com/', '')
+
         SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
         AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
         q = qiniu.Auth(AccessKey, SecretKey)
@@ -945,7 +948,7 @@ def get_token(headimgurl):
             'token': token,
         }
         files = {
-            'file': open(headimgurl, 'rb')
+            'file': open(imgurl, 'rb')
         }
         ret = requests.post(url, data=data, files=files)
         filename = ret.json().get('key')
