@@ -925,14 +925,13 @@ def data_statistics(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
+
+
+
+
+
 import qiniu, requests
-
-
-
-
-
-
-
+from bs4 import BeautifulSoup
 
 def get_token(headimgurl):
     if 'http://tianyan.zhugeyingxiao.com/' not in headimgurl:
@@ -991,6 +990,26 @@ def update_qiniu(request):
             obj.become_beautiful_cover = json.dumps(become_beautiful_cover_list)
 
         obj.save()
+
+
+    diary_objs = models.zgld_diary.objects.filter(company_id=13).exclude(status=3)
+    if diary_objs:
+        diary_obj = diary_objs[0]
+        print('diary_obj-------------> ', diary_obj.id)
+        cover_picture = diary_obj.cover_picture
+        if cover_picture:
+            cover_picture = json.loads(cover_picture)
+            cover_picture_list = []
+            for i in cover_picture:
+                filename = get_token(i)
+                if filename:
+                    cover_picture_list.append(filename)
+                else:
+                    cover_picture_list.append(i)
+            diary_obj.cover_picture = json.dumps(cover_picture_list)
+
+
+        diary_obj.save()
 
     response.code = 200
     return JsonResponse(response.__dict__)
