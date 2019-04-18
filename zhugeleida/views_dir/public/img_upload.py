@@ -65,7 +65,7 @@ def img_merge(request):
         expanded_name = img_name.split('.')[-1]  # 扩展名
         img_name = timestamp + '.' + expanded_name
         img_source = forms_obj.cleaned_data.get('img_source')  # user_photo 代表用户上传的照片  user_avtor 代表用户的头像。
-        qiniu = request.GET.get('qiniu')  # 是否上传七牛云
+        qiniu = request.POST.get('qiniu')  # 是否上传七牛云
 
         print('-----img_source----->', img_source)
 
