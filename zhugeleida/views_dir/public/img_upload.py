@@ -176,8 +176,8 @@ def img_merge(request):
                 'file': open(img_path, 'rb')
             }
             ret = requests.post(url, data=data, files=files)
+            os.remove(img_path) #删除本地图片
             img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
-
 
         response.data = {
             'picture_url': img_path,
