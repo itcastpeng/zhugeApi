@@ -999,6 +999,7 @@ def update_qiniu(request):
 
     diary_objs = models.zgld_diary.objects.filter(company_id=13).exclude(status=3)
     for diary_obj in diary_objs:
+        print('diary_obj.id-----> ', diary_obj.id)
     #     cover_picture = diary_obj.cover_picture
     #     if cover_picture:
     #         cover_picture = json.loads(cover_picture)
@@ -1023,8 +1024,6 @@ def update_qiniu(request):
                     img_tag.attrs['src'] = filename
                 else:
                     img_tag.attrs['src'] = data_src
-            print(img_tag.attrs['src'])
-
         diary_obj.content = str(soup)
         diary_obj.save()
 
