@@ -950,7 +950,7 @@ def get_token(headimgurl):
         }
         ret = requests.post(url, data=data, files=files)
         filename = ret.json().get('key')
-        return filename
+        return 'http://tianyan.zhugeyingxiao.com/' + filename
 
 @csrf_exempt
 def update_qiniu(request):
@@ -969,7 +969,7 @@ def update_qiniu(request):
                     cover_picture_list.append(filename)
                 else:
                     cover_picture_list.append(i)
-            obj.cover_picture = cover_picture_list
+            obj.cover_picture = json.dumps(cover_picture_list)
 
         # 头像
         headimgurl = obj.headimgurl
@@ -988,7 +988,7 @@ def update_qiniu(request):
                     become_beautiful_cover_list.append(filename)
                 else:
                     become_beautiful_cover_list.append(i)
-            obj.become_beautiful_cover = become_beautiful_cover_list
+            obj.become_beautiful_cover = json.dumps(become_beautiful_cover_list)
 
         obj.save()
 
