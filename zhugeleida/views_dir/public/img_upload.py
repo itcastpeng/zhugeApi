@@ -176,7 +176,7 @@ def img_merge(request):
                 'file': open(img_path, 'rb')
             }
             ret = requests.post(url, data=data, files=files)
-            img_path = ret.json().get('key')
+            img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
 
 
         response.data = {
