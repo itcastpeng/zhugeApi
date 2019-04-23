@@ -1002,31 +1002,31 @@ def update_qiniu(request):
         print('diary_obj.id-----> ', diary_obj.id)
 
         # 封面
-        cover_picture = diary_obj.cover_picture
-        if cover_picture:
-            cover_picture = json.loads(cover_picture)
-            cover_picture_list = []
-            for i in cover_picture:
-                filename = get_token(i)
-                if filename:
-                    cover_picture_list.append(filename)
-                else:
-                    cover_picture_list.append(i)
-            diary_obj.cover_picture = json.dumps(cover_picture_list)
+        # cover_picture = diary_obj.cover_picture
+        # if cover_picture:
+        #     cover_picture = json.loads(cover_picture)
+        #     cover_picture_list = []
+        #     for i in cover_picture:
+        #         filename = get_token(i)
+        #         if filename:
+        #             cover_picture_list.append(filename)
+        #         else:
+        #             cover_picture_list.append(i)
+        #     diary_obj.cover_picture = json.dumps(cover_picture_list)
 
         # 内容
-        # content = diary_obj.content
-        # soup = BeautifulSoup(content, 'html.parser')
-        # img_tags = soup.find_all('img')
-        # for img_tag in img_tags:
-        #     data_src = img_tag.attrs.get('src')
-        #     if data_src:
-        #         filename = get_token(data_src)
-        #         if filename:
-        #             img_tag.attrs['src'] = filename
-        #         else:
-        #             img_tag.attrs['src'] = data_src
-        # diary_obj.content = str(soup)
+        content = diary_obj.content
+        soup = BeautifulSoup(content, 'html.parser')
+        img_tags = soup.find_all('img')
+        for img_tag in img_tags:
+            data_src = img_tag.attrs.get('src')
+            if data_src:
+                filename = get_token(data_src)
+                if filename:
+                    img_tag.attrs['src'] = filename
+                else:
+                    img_tag.attrs['src'] = data_src
+        diary_obj.content = str(soup)
         diary_obj.save()
 
     response.code = 200
