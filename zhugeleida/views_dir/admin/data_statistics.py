@@ -994,7 +994,7 @@ def update_qiniu(request):
     #                 become_beautiful_cover_list.append(i)
     #         obj.become_beautiful_cover = json.dumps(become_beautiful_cover_list)
     #
-    #     obj.save()
+        obj.save()
     #
     #
     # diary_objs = models.zgld_diary.objects.filter(company_id=13).exclude(status=3)
