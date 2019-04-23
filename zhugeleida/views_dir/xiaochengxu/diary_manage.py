@@ -444,15 +444,22 @@ def diary_poster_html(request):
         if case_objs.poster_cover:
             poster_cover = json.loads(case_objs.poster_cover)
 
+        poster_cover_list = []
+        for i in poster_cover:
+            if 'tianyan.zhugeyingxiao.com' in i:
+                content = i
+            else:
+                content = 'http://api.zhugeyingxiao.com/' + i
+            poster_cover_list.append(content)
 
         poster_company_logo = models.zgld_xiaochengxu_app.objects.get(company_id=company_id).poster_company_logo
-        len_poster_cover = len(poster_cover)
+        len_poster_cover = len(poster_cover_list)
         is_show_logo = models.zgld_company.objects.get(id=company_id).is_show_logo
 
         ret_data = {
             'poster_company_logo' :poster_company_logo,
             'qr_code_url': qr_code,
-            'poster_cover' : poster_cover,
+            'poster_cover' : poster_cover_list,
             'len_poster_cover' : len_poster_cover,
             'is_show_logo' : is_show_logo
         }

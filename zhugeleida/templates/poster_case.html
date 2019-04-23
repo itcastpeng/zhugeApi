@@ -107,7 +107,7 @@
             <div class="pictures-1">
                 {% for i in ret_data.poster_cover %}
                 <div>
-                    <img  src="http://api.zhugeyingxiao.com/{{ i }}" />
+                    <img  src="{{ i }}" />
                 </div>
                 {% endfor %}
             </div>
@@ -116,7 +116,7 @@
             <div class="pictures-2">
                 {% for i in ret_data.poster_cover %}
                     <div>
-                        <img  src="http://api.zhugeyingxiao.com/{{ i }}" />
+                        <img  src="{{ i }}" />
                     </div>
                 {% endfor %}
             </div>
@@ -124,7 +124,7 @@
             <div  class="pictures-9">
                 {% for i in ret_data.poster_cover %}
                     <div class="pictures-9-first">
-                        <img src="http://api.zhugeyingxiao.com/{{ i }}" />
+                        <img src="{{ i }}" />
                     </div>
                 {% endfor %}
             </div>
