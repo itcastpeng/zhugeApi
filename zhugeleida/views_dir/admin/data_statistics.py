@@ -959,7 +959,7 @@ def get_token(imgurl):
 def update_qiniu(request):
     response = Response.ResponseObj()
 
-    objs = models.zgld_case.objects.filter(company_id=13).exclude(status=3)
+    objs = models.zgld_case.objects.filter(company_id=12).exclude(status=3)
     for obj in objs:
         print('obj.id-------> ', obj.id)
         # 封面图片
