@@ -930,6 +930,8 @@ def data_statistics(request, oper_type):
 
 
 
+
+# 临时转存雷达 案例 日记 图片 到七牛云
 import qiniu, requests
 from bs4 import BeautifulSoup
 
@@ -997,9 +999,9 @@ def update_qiniu(request):
         # obj.save()
     #
     #
-    diary_objs = models.zgld_diary.objects.filter(company_id=12).exclude(status=3)
-    for diary_obj in diary_objs:
-        print('diary_obj.id-----> ', diary_obj.id)
+    # diary_objs = models.zgld_diary.objects.filter(company_id=12).exclude(status=3)
+    # for diary_obj in diary_objs:
+    #     print('diary_obj.id-----> ', diary_obj.id)
 
         # 封面
         # cover_picture = diary_obj.cover_picture
@@ -1015,19 +1017,19 @@ def update_qiniu(request):
         #     diary_obj.cover_picture = json.dumps(cover_picture_list)
 
         # 内容
-        content = diary_obj.content
-        soup = BeautifulSoup(content, 'html.parser')
-        img_tags = soup.find_all('img')
-        for img_tag in img_tags:
-            data_src = img_tag.attrs.get('src')
-            if data_src:
-                filename = get_token(data_src)
-                if filename:
-                    img_tag.attrs['src'] = filename
-                else:
-                    img_tag.attrs['src'] = data_src
-        diary_obj.content = str(soup)
-        diary_obj.save()
+        # content = diary_obj.content
+        # soup = BeautifulSoup(content, 'html.parser')
+        # img_tags = soup.find_all('img')
+        # for img_tag in img_tags:
+        #     data_src = img_tag.attrs.get('src')
+        #     if data_src:
+        #         filename = get_token(data_src)
+        #         if filename:
+        #             img_tag.attrs['src'] = filename
+        #         else:
+        #             img_tag.attrs['src'] = data_src
+        # diary_obj.content = str(soup)
+        # diary_obj.save()
 
     response.code = 200
     return JsonResponse(response.__dict__)

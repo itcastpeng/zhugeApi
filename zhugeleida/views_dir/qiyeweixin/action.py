@@ -330,7 +330,7 @@ def action(request, oper_type):
                 create_date__gte = request.GET.get('create_date__gte')
                 create_date__lt = request.GET.get('create_date__lt')
                 if not create_date__gte:
-                    now_time = datetime.now()
+                    now_time = datetime.datetime.now()
                     create_date__gte = (now_time - timedelta(days=7)).strftime("%Y-%m-%d")
                     q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
 
