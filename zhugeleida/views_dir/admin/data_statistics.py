@@ -959,27 +959,27 @@ def get_token(imgurl):
 def update_qiniu(request):
     response = Response.ResponseObj()
 
-    objs = models.zgld_case.objects.filter(company_id=12).exclude(status=3)
-    for obj in objs:
-        print('obj.id-------> ', obj.id)
-        # 封面图片
-        cover_picture = obj.cover_picture
-        if cover_picture:
-            cover_picture = json.loads(cover_picture)
-            cover_picture_list = []
-            for i in cover_picture:
-                filename = get_token(i)
-                if filename:
-                    cover_picture_list.append(filename)
-                else:
-                    cover_picture_list.append(i)
-            obj.cover_picture = json.dumps(cover_picture_list)
-
-        # 头像
-        headimgurl = obj.headimgurl
-        headimgurl_file = get_token(headimgurl)
-        if headimgurl_file:
-            obj.headimgurl = headimgurl_file
+    # objs = models.zgld_case.objects.filter(company_id=12).exclude(status=3)
+    # for obj in objs:
+    #     print('obj.id-------> ', obj.id)
+    #     # 封面图片
+    #     cover_picture = obj.cover_picture
+    #     if cover_picture:
+    #         cover_picture = json.loads(cover_picture)
+    #         cover_picture_list = []
+    #         for i in cover_picture:
+    #             filename = get_token(i)
+    #             if filename:
+    #                 cover_picture_list.append(filename)
+    #             else:
+    #                 cover_picture_list.append(i)
+    #         obj.cover_picture = json.dumps(cover_picture_list)
+    #
+    #     # 头像
+    #     headimgurl = obj.headimgurl
+    #     headimgurl_file = get_token(headimgurl)
+    #     if headimgurl_file:
+    #         obj.headimgurl = headimgurl_file
 
         # 变美图片
     #     become_beautiful_cover = obj.become_beautiful_cover
@@ -994,25 +994,25 @@ def update_qiniu(request):
     #                 become_beautiful_cover_list.append(i)
     #         obj.become_beautiful_cover = json.dumps(become_beautiful_cover_list)
     #
-        obj.save()
+        # obj.save()
     #
     #
-    # diary_objs = models.zgld_diary.objects.filter(company_id=13).exclude(status=3)
-    # for diary_obj in diary_objs:
-    #     print('diary_obj.id-----> ', diary_obj.id)
+    diary_objs = models.zgld_diary.objects.filter(company_id=12).exclude(status=3)
+    for diary_obj in diary_objs:
+        print('diary_obj.id-----> ', diary_obj.id)
 
         # 封面
-        # cover_picture = diary_obj.cover_picture
-        # if cover_picture:
-        #     cover_picture = json.loads(cover_picture)
-        #     cover_picture_list = []
-        #     for i in cover_picture:
-        #         filename = get_token(i)
-        #         if filename:
-        #             cover_picture_list.append(filename)
-        #         else:
-        #             cover_picture_list.append(i)
-        #     diary_obj.cover_picture = json.dumps(cover_picture_list)
+        cover_picture = diary_obj.cover_picture
+        if cover_picture:
+            cover_picture = json.loads(cover_picture)
+            cover_picture_list = []
+            for i in cover_picture:
+                filename = get_token(i)
+                if filename:
+                    cover_picture_list.append(filename)
+                else:
+                    cover_picture_list.append(i)
+            diary_obj.cover_picture = json.dumps(cover_picture_list)
 
         # 内容
         # content = diary_obj.content
@@ -1027,7 +1027,7 @@ def update_qiniu(request):
         #         else:
         #             img_tag.attrs['src'] = data_src
         # diary_obj.content = str(soup)
-        # diary_obj.save()
+        diary_obj.save()
 
     response.code = 200
     return JsonResponse(response.__dict__)
