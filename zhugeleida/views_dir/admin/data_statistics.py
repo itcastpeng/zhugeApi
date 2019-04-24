@@ -159,7 +159,7 @@ class statistical_objs():
                     customer__username = ''
                     if msg_obj.customer.username:
                         customer__username = b64decode(msg_obj.customer.username)
-
+                print('send_type_user-send_type_user-send_type_user-send_type_user-send_type_user------------> ', send_type_user, send_type_customer)
                 send_type_user = int(send_type_user / 3)
                 send_type_customer = int(send_type_customer / 3)
                 if send_type_user < send_type_customer:
