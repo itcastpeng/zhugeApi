@@ -496,7 +496,7 @@ class statistical_objs():
                     text = get_msg(content)
 
                     data_list.append({
-                        'customer_name':b64decode(infoObj.customer.username),
+                        'customer__name':b64decode(infoObj.customer.username),
                         'msg': text.get('msg'),
                         'product_cover_url': text.get('product_cover_url'),
                         'product_name': text.get('product_name'),
