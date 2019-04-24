@@ -124,6 +124,7 @@ def update_click_dialog_num(request, oper_type):
                         video_time=video_time,
                         timestamp=time_stamp,
                     )
+                break
 
     # 记录文章阅读时长
     elif oper_type == 'article_reading_time':
