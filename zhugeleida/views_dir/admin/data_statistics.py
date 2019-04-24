@@ -828,20 +828,21 @@ def data_statistics(request, oper_type):
                 id = request.GET.get('id') # 查询单个员工
                 if id:
                     public_q.add(Q(id=id), Q.AND)
-
+                print('public_q=========> ', public_q)
                 # 获取该公司所有员工信息
                 objs = models.zgld_userprofile.objects.filter(public_q).order_by('-create_date')
                 data_count = objs.count()
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
+                print('data_count-----> ', data_count, objs)
+                if not id:
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
                 ret_data = []
-
                 q = Q()
                 q.add(Q(create_date__gte=start_time) & Q(create_date__lte=stop_time), Q.AND) # 时间筛选
-
                 for obj in objs:
+                    print(obj.id)
                     """
                     copy_the_nickname           复制昵称详情
                     number_valid_conversations  有效对话详情
