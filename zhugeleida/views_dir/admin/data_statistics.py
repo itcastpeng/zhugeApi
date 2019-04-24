@@ -159,16 +159,19 @@ class statistical_objs():
                     customer__username = ''
                     if msg_obj.customer.username:
                         customer__username = b64decode(msg_obj.customer.username)
-                # print('send_type_user, send_type_customer---> ', send_type_user, send_type_customer)
+
+                send_type_user = int(send_type_user / 3)
+                send_type_customer = int(send_type_customer / 3)
                 if send_type_user < send_type_customer:
-                    num = int(send_type_user / 3)
+                    num = send_type_user
                 else:
-                    num = int(send_type_customer / 3)
-                # print('num0-0000000-0-------> ', num)
+                    num = send_type_customer
+
                 if num > 0:
                     flag = True
 
-                effective_dialogue += num
+                if send_type_user >= 1 and send_type_customer >= 1:
+                    effective_dialogue += num
 
                 if is_number_valid_conversations:  # 查询详情
                     if flag:
