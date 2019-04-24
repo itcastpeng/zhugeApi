@@ -22,7 +22,7 @@ def get_msg(content):
     }
     if content:
 
-        content = content.replace('null', '\'\'')
+        # content = content.replace('null', '\'\'')
         try:
             content = eval(content)
         except Exception:
