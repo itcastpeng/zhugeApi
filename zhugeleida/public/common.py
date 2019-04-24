@@ -29,17 +29,11 @@ def create_qrcode(data):
     article_id = data.get('article_id')
     type_status = data.get('type')
 
-
     response = Response.ResponseObj()
     qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3) # 生成二维码
-    qr.clear()
-    print('-------------生成二维码--------======88888888888888888888888888》 ', url)
-    url = 'http://www.baidu.com'
     qr.add_data(url)
     qr.make(fit=True)
     img = qr.make_image()
-    print('qr.data_list-=---------> ', qr.data_list)
-    # img.show()
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
 
@@ -80,25 +74,25 @@ def create_qrcode(data):
 
     else:
         article_objs = models.zgld_article.objects.filter(id=article_id)
-        qr_url = ''
-        if article_objs:
-            qr_url = article_objs[0].qrcode_url
+        # qr_url = ''
+        # if article_objs:
+        #     qr_url = article_objs[0].qrcode_url
+        #
+        # if not qr_url:
 
-        if not qr_url:
-
-            BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
-            qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
-            path_qr_code_name = BASE_DIR + qr_code_name
-            qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
-            img.save(path_qr_code_name)
-            article_objs.update(
-                qrcode_url=qr_url
-            )
+        BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'gongzhonghao', 'article')
+        qr_code_name = '/article_%s_%s_qrCode.jpg' % (article_id, now_time)
+        path_qr_code_name = BASE_DIR + qr_code_name
+        qr_url = 'statics/zhugeleida/imgs/gongzhonghao/article%s' % (qr_code_name)
+        img.save(path_qr_code_name)
+        article_objs.update(
+            qrcode_url=qr_url
+        )
 
     response.data = {'pre_qrcode_url': qr_url}
     response.code = 200
     response.msg = '生成文章体验二维码成功'
-    print('---------生成文章体验二维码成功--------->>', qr_url)
+    print('---------生成文章体验二维码成功--------->>', url, qr_url)
 
     return response
 

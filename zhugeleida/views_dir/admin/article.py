@@ -952,7 +952,7 @@ def article_oper(request, oper_type, o_id):
                     'level': 1,
                 }
 
-                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)  # 生成预览二维码
+                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)  # 生成跳转链接
                 authorize_url = auth_url_ret.data.get('authorize_url')
                 qrcode_data = {
                     'url': authorize_url,
