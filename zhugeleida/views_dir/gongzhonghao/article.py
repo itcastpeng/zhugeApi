@@ -423,7 +423,12 @@ def article_oper(request, oper_type, o_id):
                         insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
                         insert_ads['position'] = zgld_userprofile_obj.position
                         insert_ads['webchat_code'] = webchat_code  # 展示小程序的二维码
-
+                    else:
+                        insert_ads['username'] = '张三'
+                        insert_ads['avatar'] = ''
+                        insert_ads['phone'] = '18888888888'
+                        insert_ads['position'] = '经理'              # 职位
+                        insert_ads['webchat_code'] = webchat_code    # 展示小程序的二维码
                 # 获取所有数据
                 ret_data = []
                 # 获取第几页的数据
