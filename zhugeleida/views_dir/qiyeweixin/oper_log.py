@@ -81,35 +81,47 @@ def update_click_dialog_num(request, oper_type):
         video_time = request.GET.get('video_time')
         time_stamp = request.GET.get('time_stamp')
         if video_time and int(video_time) >= 1:
-            objs = models.ZgldUserOperLog.objects.filter(
-                article_id=article_id,
-                customer_id=customer_id,
-                user_id=u_id,
-                oper_type=3,
-                timestamp=time_stamp,
-            ).order_by('-create_date')
-            if objs:
-                obj = objs[0]
-                if int(video_time) < int(obj.video_time):  # 如果本次传递的 视频时长小于上次时长 则为重新播放 创建数据
+            for i in range(10):
+                objs = models.ZgldUserOperLog.objects.filter(
+                    article_id=article_id,
+                    customer_id=customer_id,
+                    user_id=u_id,
+                    oper_type=3,
+                    timestamp=time_stamp,
+                ).order_by('-create_date')
+                if objs:
+                    obj = objs[0]
+                    if int(video_time) < int(obj.video_time):  # 如果本次传递的 视频时长小于上次时长 则为重新播放 创建数据
+                        time_stamp = time_stamp + str(1)
+                        objs = models.ZgldUserOperLog.objects.filter(
+                            article_id=article_id,
+                            customer_id=customer_id,
+                            user_id=u_id,
+                            oper_type=3,
+                            timestamp=time_stamp,
+                        ).order_by('-create_date')
+                        if objs:
+                            continue
+                        else:
+                            models.ZgldUserOperLog.objects.create(
+                                article_id=article_id,
+                                customer_id=customer_id,
+                                user_id=u_id,
+                                oper_type=3,
+                                video_time=video_time,
+                                timestamp=time_stamp,
+                            )
+                    else:
+                        objs.update(video_time=video_time)
+                else:
                     models.ZgldUserOperLog.objects.create(
                         article_id=article_id,
                         customer_id=customer_id,
                         user_id=u_id,
                         oper_type=3,
                         video_time=video_time,
-                        timestamp=int(time.time()),
+                        timestamp=time_stamp,
                     )
-                else:
-                    objs.update(video_time=video_time)
-            else:
-                models.ZgldUserOperLog.objects.create(
-                    article_id=article_id,
-                    customer_id=customer_id,
-                    user_id=u_id,
-                    oper_type=3,
-                    video_time=video_time,
-                    timestamp=time_stamp,
-                )
 
     # 记录文章阅读时长
     elif oper_type == 'article_reading_time':
