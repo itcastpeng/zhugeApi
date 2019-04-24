@@ -447,7 +447,7 @@ def article_oper(request, oper_type, o_id):
                     'author': obj.user.username,  # 如果为原创显示,文章作者
                     'avatar': obj.user.avatar,  # 用户的头像
                     'summary': obj.summary,  # 摘要
-                    'create_date': obj.create_date,  # 文章创建时间
+                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
                     'cover_url': obj.cover_picture,  # 文章图片链接
                     'up_count': obj.up_count,  # 文章内容
                     'is_praise_article_text' : is_praise_article_text,
@@ -458,7 +458,7 @@ def article_oper(request, oper_type, o_id):
                 })
 
                 article_access_log_id = ''
-                if customer_id and uid:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
+                if customer_id:  ## 说明是客户查看了这个雷达用户分享出来的，uid为空说明是后台预览分享的，不要做消息提示了
 
                     q = Q()
                     q.add(Q(**{'article_id': article_id}), Q.AND)
@@ -607,8 +607,8 @@ def article_oper(request, oper_type, o_id):
                     }
 
                 else:
-                    response.code = 403
-                    response.msg = '没有uid或者customer_id'
+                    response.code = 200
+                    response.msg = '或者customer_id'
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
