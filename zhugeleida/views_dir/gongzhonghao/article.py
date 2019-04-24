@@ -608,7 +608,7 @@ def article_oper(request, oper_type, o_id):
 
                 else:
                     response.code = 200
-                    response.msg = '或者customer_id'
+                    response.msg = '没有customer_id'
                     response.data = {
                         'ret_data': ret_data,
                         'article_access_log_id': article_access_log_id,
