@@ -32,11 +32,13 @@ def create_qrcode(data):
 
     response = Response.ResponseObj()
     qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3) # 生成二维码
+    qr.clear()
     print('-------------生成二维码--------======88888888888888888888888888》 ', url)
     url = 'http://www.baidu.com'
     qr.add_data(url)
     qr.make(fit=True)
     img = qr.make_image()
+    print('qr.data_list-=---------> ', qr.data_list)
     # img.show()
 
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
