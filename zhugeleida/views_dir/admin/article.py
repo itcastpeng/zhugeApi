@@ -863,7 +863,7 @@ def article_oper(request, oper_type, o_id):
         # 修改文章
         elif oper_type == "update":
             status = request.POST.get('status')
-            type = request.POST.get('type')
+            type_class = request.POST.get('type')
 
             is_auto_tagging = request.POST.get('is_auto_tagging')  # (0,'不开启'),   (1,'开启'),
             tags_time_count = request.POST.get('tags_time_count')  # 达到几秒实现打标签
@@ -899,7 +899,7 @@ def article_oper(request, oper_type, o_id):
                 )
                 objs.update(**dict_data)
 
-                insert_ads = request.POST.get('insert_ads')
+                insert_ads = request.POST.get('insert_ads')  # 是否显示名片 显示报名
                 if insert_ads:
                     obj = objs[0]
                     insert_ads = json.loads(insert_ads)
@@ -909,6 +909,7 @@ def article_oper(request, oper_type, o_id):
                         obj.plugin_report_id = plugin_id
                         obj.save()
 
+                # 标签列表
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
                 if tags_id_list:
                     objs[0].tags = tags_id_list
@@ -917,7 +918,7 @@ def article_oper(request, oper_type, o_id):
 
                 status = int(status)
                 # 消息提示给雷达用户
-                if status == 1 and type != 'yulan':
+                if status == 1 and type_class != 'yulan':    # 不是预览 通知发表新文章
                     user_objs = models.zgld_userprofile.objects.filter(company_id=company_id, status=1)
                     data = {}
 
@@ -951,14 +952,14 @@ def article_oper(request, oper_type, o_id):
                     'level': 1,
                 }
 
-                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
+                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)  # 生成预览二维码
                 authorize_url = auth_url_ret.data.get('authorize_url')
 
                 qrcode_data = {
                     'url': authorize_url,
                     'article_id': objs[0].id,
                 }
-                response_ret = create_qrcode(qrcode_data)
+                response_ret = create_qrcode(qrcode_data)  # 生成体验二维码
                 pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
 
                 if pre_qrcode_url:

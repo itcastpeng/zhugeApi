@@ -27,11 +27,11 @@ def action_record(data,remark):
 def create_qrcode(data):
     url = data.get('url')
     article_id = data.get('article_id')
-    type = data.get('type')
+    type_status = data.get('type')
 
 
     response = Response.ResponseObj()
-    qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3)
+    qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3) # 生成二维码
     qr.add_data(url)
     qr.make(fit=True)
     img = qr.make_image()
@@ -40,7 +40,7 @@ def create_qrcode(data):
     now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
 
     qr_url = ''
-    if type == 'web_scan_authorize_qrcode':
+    if type_status == 'web_scan_authorize_qrcode':
 
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'qiyeweixin', 'webLogin')
         qr_code_name = '/uid_%s_qrCode.jpg' % (now_time)
@@ -51,7 +51,7 @@ def create_qrcode(data):
 
         return qr_url_dict
 
-    elif type == 'payment_qrcode_url':
+    elif type_status == 'payment_qrcode_url':
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
         qr_code_name = '/pay_%s_qrCode.jpg' % (now_time)
         path_qr_code_name = BASE_DIR + qr_code_name
@@ -61,7 +61,7 @@ def create_qrcode(data):
 
         return qr_url_dict
 
-    elif type == 'binding_gzh_user_notify':
+    elif type_status == 'binding_gzh_user_notify':
 
         BASE_DIR = os.path.join(settings.BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'admin', 'qr_code')
         qr_code_name = '/gzh_user_notify_%s_qrCode.jpg' % (now_time)
