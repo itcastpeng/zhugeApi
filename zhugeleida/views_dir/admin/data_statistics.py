@@ -12,7 +12,7 @@ from publicFunc.base64 import b64decode
 
 # 获取 发送的消息
 def get_msg(content):
-    print('content-----content---------------content---> ', content)
+    # print('content-----content---------------content---> ', content)
     data = {
         'msg': '',
         'product_cover_url': '',
@@ -325,7 +325,6 @@ class statistical_objs():
                 stop_line = start_line + self.length
                 objs = objs[start_line: stop_line]
             for obj in objs:
-                print(obj.user.username)
                 data_list.append({
                     'customer__username': b64decode(obj.customer.username),
                     'user_username': obj.user.username,
@@ -553,7 +552,7 @@ class statistical_objs():
 
         click_thumb_num = objs.count()
         data_list = []
-        print('click_thumb_num----------> ', click_thumb_num)
+        # print('click_thumb_num----------> ', click_thumb_num)
         if self.detail_data_type and self.detail_data_type == 'thumb_up_number':
             if self.length != 0:
                 start_line = (self.current_page - 1) * self.length
@@ -621,7 +620,6 @@ def data_statistics(request, oper_type):
             order = request.GET.get('order', '-create_date')
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            print(current_page, length)
             number_days = request.GET.get('number_days')  # 天数
             start_time = request.GET.get('start_time')  # 天数 开始时间
             stop_time = request.GET.get('stop_time')  # 天数 结束时间
@@ -661,7 +659,6 @@ def data_statistics(request, oper_type):
                     public_q.add(Q(id=article_id), Q.AND)
 
                 objs = models.zgld_article.objects.filter(public_q).order_by('-create_date')
-                print('objs---------> ', objs)
                 data_count = objs.count()
                 if not article_id:
                     if length != 0:
@@ -685,7 +682,6 @@ def data_statistics(request, oper_type):
 
                     forwarding_article_data = statistical_obj.forwarding_article()                          # 转发量
                     click_quantity_data = statistical_obj.click_the_quantity()                              # 点击量
-                    print('--------------------------------------')
                     the_reading_data = statistical_obj.the_reading_time()                                   # 文章阅读数据
                     video_view_data = statistical_obj.video_view_duration()                                 # 视频数据
                     click_dialog_data = statistical_obj.click_the_dialog_box()                              # 点击对话框数据
