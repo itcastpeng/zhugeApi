@@ -246,6 +246,7 @@ def user_gongzhonghao_auth(request):
                             headimgurl=headimgurl
                         )
                         client_id = customer_objs[0].id
+                        token = customer_objs[0].token
                         print('---------- 公众号-新用户修改成功 update successful ---->',client_id)
 
                     else:
@@ -262,6 +263,7 @@ def user_gongzhonghao_auth(request):
                             headimgurl=headimgurl,
                         )
                         client_id = obj.id
+                        token = obj.token
                         print('---------- 公众号-新用户创建成功 crete successful ---->',client_id)
 
                     if not uid:  # 代表预览的后台分享出去的链接
