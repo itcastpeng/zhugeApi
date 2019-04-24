@@ -365,8 +365,8 @@ def create_gongzhonghao_yulan_auth_url(data):
     state = 'snsapi_userinfo'
     # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
-    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=snsapi_userinfo&component_appid=%s#wechat_redirect' % (
-    appid, redirect_uri, scope, component_appid)
+    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect' % (
+    appid, redirect_uri, scope, state)
     print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>', authorize_url)
     response.data = {'authorize_url': authorize_url}
     response.code = 200
