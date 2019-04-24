@@ -32,6 +32,7 @@ def create_qrcode(data):
 
     response = Response.ResponseObj()
     qr=qrcode.QRCode(version =7,error_correction = qrcode.constants.ERROR_CORRECT_L,box_size=4,border=3) # 生成二维码
+    print('-------------生成二维码--------======88888888888888888888888888》 ', url)
     qr.add_data(url)
     qr.make(fit=True)
     img = qr.make_image()

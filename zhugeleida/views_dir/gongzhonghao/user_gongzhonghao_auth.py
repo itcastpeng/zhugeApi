@@ -356,7 +356,7 @@ def create_gongzhonghao_yulan_auth_url(data):
     component_appid = qywx_config_dict.get('app_id')
     app_secret = qywx_config_dict.get('app_secret')
 
-    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?test=1&relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
         api_url,article_id, pid, level, uid, company_id)
 
 
