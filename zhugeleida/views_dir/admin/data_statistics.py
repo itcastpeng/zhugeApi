@@ -119,11 +119,11 @@ class statistical_objs():
                 create_date__lte=stop_date_time,
             ).order_by('create_date')
             dialogue_count = msg_objs.count()       # 查询出该用户和该客户聊天总数
-            if is_number_valid_conversations:
-                if self.length != 0:
-                    start_line = (self.current_page - 1) * self.length
-                    stop_line = start_line + self.length
-                    msg_objs = msg_objs[start_line: stop_line]
+            # if is_number_valid_conversations:
+            #     if self.length != 0:
+            #         start_line = (self.current_page - 1) * self.length
+            #         stop_line = start_line + self.length
+            #         msg_objs = msg_objs[start_line: stop_line]
 
             if dialogue_count >= 6:  # 判断该客户在该文章中 对话 低于六次不达有效对话标准
                 send_type_user = 0      # 咨询发送消息
