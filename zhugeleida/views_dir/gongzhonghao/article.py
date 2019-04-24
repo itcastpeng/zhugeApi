@@ -424,8 +424,9 @@ def article_oper(request, oper_type, o_id):
                         insert_ads['position'] = zgld_userprofile_obj.position
                         insert_ads['webchat_code'] = webchat_code  # 展示小程序的二维码
                     else:
+                        # 如果是预览默认写死
                         insert_ads['username'] = '张三'
-                        insert_ads['avatar'] = ''
+                        insert_ads['avatar'] = 'statics/imgs/setAvator.jpg'
                         insert_ads['phone'] = '18888888888'
                         insert_ads['position'] = '经理'              # 职位
                         insert_ads['webchat_code'] = webchat_code    # 展示小程序的二维码
