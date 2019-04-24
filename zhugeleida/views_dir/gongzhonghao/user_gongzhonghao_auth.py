@@ -60,7 +60,7 @@ def user_gongzhonghao_auth(request):
     if request.method == "GET":
         # <QueryDict: {'code': ['071uPB5w1EudCa0g6b5w1ZAt5w1uPB5U'], 'state': ['snsapi_base'], 'relate': ['article_id_2|pid_|level_1'], 'appid': ['wxa77213c591897a13']}>
 
-        print('-------- 公众号-登录验证 request.GET 数据 ----****-->', request.GET)
+        print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
 
         js_code = request.GET.get('code')
         code_objs = models.save_code.objects.filter(code=js_code)
@@ -356,7 +356,7 @@ def create_gongzhonghao_yulan_auth_url(data):
     component_appid = qywx_config_dict.get('app_id')
     app_secret = qywx_config_dict.get('app_secret')
 
-    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?&relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
+    redirect_uri = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate=article_id_%s|pid_%s|level_%s|uid_%s|company_id_%s' % (
         api_url,article_id, pid, level, uid, company_id)
 
 
@@ -365,8 +365,8 @@ def create_gongzhonghao_yulan_auth_url(data):
     state = 'snsapi_userinfo'
     # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
-    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect' % (
-    appid, redirect_uri, scope, state)
+    authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+    appid, redirect_uri, scope, state, component_appid)
     print('------ 【默认】生成的静默方式登录的 snsapi_base URL：------>>', authorize_url)
     response.data = {'authorize_url': authorize_url}
     response.code = 200
