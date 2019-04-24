@@ -60,7 +60,7 @@ def user_gongzhonghao_auth(request):
     if request.method == "GET":
         # <QueryDict: {'code': ['071uPB5w1EudCa0g6b5w1ZAt5w1uPB5U'], 'state': ['snsapi_base'], 'relate': ['article_id_2|pid_|level_1'], 'appid': ['wxa77213c591897a13']}>
 
-        print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
+        print('-------- 公众号-登录验证 request.GET 数据 ----****-->', request.GET)
 
         js_code = request.GET.get('code')
         code_objs = models.save_code.objects.filter(code=js_code)
