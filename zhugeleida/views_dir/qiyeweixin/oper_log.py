@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.oper_log_verify import OperLogAddForm
-import json
+import json, time
 
 
 
@@ -87,9 +87,20 @@ def update_click_dialog_num(request, oper_type):
                 user_id=u_id,
                 oper_type=3,
                 timestamp=time_stamp,
-            )
+            ).order_by('-create_date')
             if objs:
-                objs.update(video_time=video_time)
+                obj = objs[0]
+                if int(video_time) < int(obj.video_time):  # 如果本次传递的 视频时长小于上次时长 则为重新播放 创建数据
+                    models.ZgldUserOperLog.objects.create(
+                        article_id=article_id,
+                        customer_id=customer_id,
+                        user_id=u_id,
+                        oper_type=3,
+                        video_time=video_time,
+                        timestamp=int(time.time()),
+                    )
+                else:
+                    objs.update(video_time=video_time)
             else:
                 models.ZgldUserOperLog.objects.create(
                     article_id=article_id,

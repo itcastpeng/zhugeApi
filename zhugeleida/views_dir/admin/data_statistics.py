@@ -106,8 +106,6 @@ class statistical_objs():
             )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
-            print('zgld_chatinfo_obj.customer_id--------------> ', zgld_chatinfo_obj.customer_id)
-            print('zgld_chatinfo_obj.customer_id--------------> ', is_number_valid_conversations)
             customer__username = ''
             result_data = []
             start_date_time = zgld_chatinfo_obj.cdt + ' 00:00:00'  # 按天区分
@@ -162,7 +160,6 @@ class statistical_objs():
                     customer__username = ''
                     if msg_obj.customer.username:
                         customer__username = b64decode(msg_obj.customer.username)
-                print('send_type_user-send_type_user-send_type_user-send_type_user-send_type_user------------> ', send_type_user, send_type_customer)
                 send_type_user = int(send_type_user / 3)
                 send_type_customer = int(send_type_customer / 3)
                 if send_type_user < send_type_customer:
