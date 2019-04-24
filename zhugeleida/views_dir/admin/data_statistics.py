@@ -61,12 +61,14 @@ class statistical_objs():
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
+        print('--------------==========> ', self.q, self.current_page, self.length)
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
             self.q,
             user_id=self.o_id,
             oper_type=1
         )
         count = copy_nickname_obj.count()
+        print('count========--------------count>', count)
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
             if self.length != 0:
