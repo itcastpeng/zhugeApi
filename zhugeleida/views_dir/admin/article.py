@@ -724,7 +724,7 @@ def article(request, oper_type):
 @account.is_token(models.zgld_admin_userprofile)
 def article_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
-
+    user_id = request.GET.get('user_id')
     if request.method == "POST":
 
         # 添加文章
@@ -947,7 +947,7 @@ def article_oper(request, oper_type, o_id):
                 data = {
                     'company_id': company_id,
                     'article_id': objs[0].id,
-                    'uid': '',
+                    'uid': user_id,
                     'pid': '',
                     'level': 1,
                 }

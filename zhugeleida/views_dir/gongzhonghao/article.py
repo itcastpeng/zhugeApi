@@ -395,35 +395,34 @@ def article_oper(request, oper_type, o_id):
                                 customer_id=customer_id,
                                 user__company_id=company_id)
                             uid = objs[0].user_id  # 找到那个建立关系的人。
-                    if uid:
 
-                        mingpian_avatar_objs = models.zgld_user_photo.objects.select_related(
-                            'user'
-                        ).filter(
-                            user_id=uid,
-                            photo_type=2
-                        ).order_by(
-                            '-create_date')
-                        mingpian_avatar = ''
-                        zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
+                    mingpian_avatar_objs = models.zgld_user_photo.objects.select_related(
+                        'user'
+                    ).filter(
+                        user_id=uid,
+                        photo_type=2
+                    ).order_by(
+                        '-create_date')
+                    mingpian_avatar = ''
+                    zgld_userprofile_obj = models.zgld_userprofile.objects.get(id=uid)  # 获取企业微信中雷达AI分享出来文章对应用户的信息
 
-                        if mingpian_avatar_objs:
-                            mingpian_avatar = mingpian_avatar_objs[0].photo_url
+                    if mingpian_avatar_objs:
+                        mingpian_avatar = mingpian_avatar_objs[0].photo_url
 
-                        else:
-                            mingpian_avatar = zgld_userprofile_obj.avatar
+                    else:
+                        mingpian_avatar = zgld_userprofile_obj.avatar
 
-                        if product_function_type == 3:  #
-                            webchat_code = company_obj.xcx_qr_code
+                    if product_function_type == 3:  #
+                        webchat_code = company_obj.xcx_qr_code
 
-                        else:
-                            webchat_code = zgld_userprofile_obj.qr_code
+                    else:
+                        webchat_code = zgld_userprofile_obj.qr_code
 
-                        insert_ads['username'] = zgld_userprofile_obj.username
-                        insert_ads['avatar'] = mingpian_avatar
-                        insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
-                        insert_ads['position'] = zgld_userprofile_obj.position
-                        insert_ads['webchat_code'] = webchat_code  # 展示小程序的二维码
+                    insert_ads['username'] = zgld_userprofile_obj.username
+                    insert_ads['avatar'] = mingpian_avatar
+                    insert_ads['phone'] = zgld_userprofile_obj.mingpian_phone
+                    insert_ads['position'] = zgld_userprofile_obj.position
+                    insert_ads['webchat_code'] = webchat_code  # 展示小程序的二维码
 
                 # 获取所有数据
                 ret_data = []
