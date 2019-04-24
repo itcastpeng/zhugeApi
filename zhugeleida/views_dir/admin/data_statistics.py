@@ -61,14 +61,12 @@ class statistical_objs():
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
-        print('--------------==========> ', self.q, self.current_page, self.length)
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
             self.q,
             user_id=self.o_id,
             oper_type=1
         )
         count = copy_nickname_obj.count()
-        print('count========--------------count>', count)
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
             if self.length != 0:
@@ -828,11 +826,9 @@ def data_statistics(request, oper_type):
                 id = request.GET.get('id') # 查询单个员工
                 if id:
                     public_q.add(Q(id=id), Q.AND)
-                print('public_q=========> ', public_q)
                 # 获取该公司所有员工信息
                 objs = models.zgld_userprofile.objects.filter(public_q).order_by('-create_date')
                 data_count = objs.count()
-                print('data_count-----> ', data_count, objs)
                 if not id:
                     if length != 0:
                         start_line = (current_page - 1) * length
@@ -842,7 +838,6 @@ def data_statistics(request, oper_type):
                 q = Q()
                 q.add(Q(create_date__gte=start_time) & Q(create_date__lte=stop_time), Q.AND) # 时间筛选
                 for obj in objs:
-                    print(obj.id)
                     """
                     copy_the_nickname           复制昵称详情
                     number_valid_conversations  有效对话详情
