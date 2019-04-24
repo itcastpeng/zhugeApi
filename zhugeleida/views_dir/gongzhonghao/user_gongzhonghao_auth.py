@@ -52,7 +52,7 @@ def get_openid_info(get_token_data):
 
     return ret_data
 
-
+# 公众号验证code 展示转发的文章 和 后台预览的文章
 @csrf_exempt
 def user_gongzhonghao_auth(request):
     response = Response.ResponseObj()
@@ -65,7 +65,6 @@ def user_gongzhonghao_auth(request):
         js_code = request.GET.get('code')
         code_objs = models.save_code.objects.filter(code=js_code)
         if not code_objs:
-            print('--------------------*****************************************************')
             models.save_code.objects.create(
                 code=js_code
             )
