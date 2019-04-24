@@ -336,7 +336,7 @@ def chat_oper(request, oper_type, o_id):
                 content = request.POST.get('content')
                 send_type = int(request.POST.get('send_type'))
                 models.zgld_chatinfo.objects.filter(userprofile_id=user_id, customer_id=customer_id,
-                                                    is_last_msg=True).update(is_last_msg=False)  # 把所有的重置为不是最后一条
+                                                    is_last_msg=True)
 
 
                 _content = json.loads(content)
