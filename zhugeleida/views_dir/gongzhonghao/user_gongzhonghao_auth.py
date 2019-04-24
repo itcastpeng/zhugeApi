@@ -65,6 +65,7 @@ def user_gongzhonghao_auth(request):
         js_code = request.GET.get('code')
         code_objs = models.save_code.objects.filter(code=js_code)
         if not code_objs:
+            print('--------------------*****************************************************')
             models.save_code.objects.create(
                 code=js_code
             )
@@ -362,7 +363,7 @@ def create_gongzhonghao_yulan_auth_url(data):
 
     print('-------- 静默方式下跳转的 需拼接的 redirect_uri ------->', redirect_uri)
     scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-    state = 'snsapi_base'
+    state = 'snsapi_userinfo'
     # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
 
     authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
