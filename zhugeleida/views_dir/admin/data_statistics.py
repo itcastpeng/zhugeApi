@@ -96,6 +96,7 @@ class statistical_objs():
         is_number_valid_conversations = False # 判断是否查询了详情
         if self.detail_data_type and self.detail_data_type == 'number_valid_conversations':  #
             is_number_valid_conversations = True
+
         zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(          # 查询出符合条件的用户和客户 已天为单位
             """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
             from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id} and create_date >= '{start_date}' and create_date <= '{stop_date}' group by cdt, customer_id;""".format(
@@ -105,6 +106,8 @@ class statistical_objs():
             )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
+            print('zgld_chatinfo_obj.customer_id--------------> ', zgld_chatinfo_obj.customer_id)
+            print('zgld_chatinfo_obj.customer_id--------------> ', is_number_valid_conversations)
             customer__username = ''
             result_data = []
             start_date_time = zgld_chatinfo_obj.cdt + ' 00:00:00'  # 按天区分
