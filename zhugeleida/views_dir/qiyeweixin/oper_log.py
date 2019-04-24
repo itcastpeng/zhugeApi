@@ -81,6 +81,7 @@ def update_click_dialog_num(request, oper_type):
         video_time = request.GET.get('video_time')
         time_stamp = request.GET.get('time_stamp')
         if video_time and int(video_time) >= 1:
+            num = 1
             for i in range(10):
                 objs = models.ZgldUserOperLog.objects.filter(
                     article_id=article_id,
@@ -89,10 +90,11 @@ def update_click_dialog_num(request, oper_type):
                     oper_type=3,
                     timestamp=time_stamp,
                 ).order_by('-create_date')
-                if objs:
+                if objs:                                        # 判断传进来的时间戳和文章ID 是否存在
                     obj = objs[0]
-                    if int(video_time) < int(obj.video_time):  # 如果本次传递的 视频时长小于上次时长 则为重新播放 创建数据
-                        time_stamp = time_stamp + str(1)
+                    if int(video_time) < int(obj.video_time):   # 如果本次传的视频查看时长 小于上一个同一时间戳
+                        num += 1
+                        time_stamp = time_stamp + str(num)        # 时间戳加一 查询是否存在  不存在创建  存在继续遍历
                         objs = models.ZgldUserOperLog.objects.filter(
                             article_id=article_id,
                             customer_id=customer_id,
