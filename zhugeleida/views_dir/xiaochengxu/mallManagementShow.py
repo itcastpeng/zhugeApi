@@ -213,7 +213,7 @@ def mallManage_oper(request, oper_type):
                 static_goods_cover_url =  "/".join(( 'statics', 'zhugeleida', 'imgs', 'chat', new_filename))
                 print('------static_goods_cover_url---->>',static_goods_cover_url)
 
-                models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id).update(is_last_msg=False)
+                # models.zgld_chatinfo.objects.filter(userprofile_id=user_id,customer_id=customer_id).update(is_last_msg=False)
 
                 _content =  {
                     'info_type' : 2,  # (2,'product_info')   #客户和用户之间的产品咨询
