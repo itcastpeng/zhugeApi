@@ -12,6 +12,7 @@ from publicFunc.base64 import b64decode
 
 # 获取 发送的消息
 def get_msg(content):
+    print('content-----content---------------content---> ', content)
     data = {
         'msg': '',
         'product_cover_url': '',
