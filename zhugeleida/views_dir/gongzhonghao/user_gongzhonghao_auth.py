@@ -133,7 +133,7 @@ def user_gongzhonghao_auth(request):
             url = qywx_config_dict.get('authorization_url')
             api_url = qywx_config_dict.get('api_url')
             headimgurl = ''
-            if state == 'snsapi_base':
+            if state == 'snsapi_base--':
 
                 customer_objs = models.zgld_customer.objects.filter(
                     openid=openid,
