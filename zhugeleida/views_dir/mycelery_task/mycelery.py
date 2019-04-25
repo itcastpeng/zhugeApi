@@ -357,23 +357,44 @@ def create_user_or_customer_qr_code(request):
             if three_services_type == 1:    #  (1, '小程序(名片版)第三方平台'),
 
                 if not customer_id:
-                    path = '/pages/mingpian/index?uid=%s&source=1' % (user_id)
-                    user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
+                    path = '/pages/mingpian/index?uid={uid}&source=1'.format(uid=user_id)
+                    user_qr_code = '/{user_id}_{now_time}_qrcode.jpg'.format(
+                        user_id=user_id,
+                        now_time=now_time
+                    )
 
                 else:
                     path = '/pages/mingpian/index?uid=%s&source=1&pid=%s' % (user_id, customer_id)  # 来源 1代表扫码 2 代表转发
-                    user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
+                    user_qr_code = '/{user_id}_{customer_id}_{now_time}_qrcode.jpg'.format(
+                        user_id=user_id,
+                        customer_id=customer_id,
+                        now_time=now_time
+                    )
 
             elif three_services_type == 2:  #  (2, '小程序(案例库)第三方平台')
 
                 _path = '/pages/index/index'
                 if not customer_id:
-                    path = '%s?uid=%s&source=1' % (_path,user_id)
-                    user_qr_code = '/%s_%s_qrcode.jpg' % (user_id, now_time)
+                    path = '{_path}?uid={user_id}&source=1'.format(
+                    _path=_path,
+                    user_id=user_id
+                    )
+                    user_qr_code = '/{user_id}_{now_time}_qrcode.jpg'.format(
+                        user_id=user_id,
+                    now_time=now_time
+                    )
 
                 else:
-                    path = '%s?uid=%s&source=1&pid=%s' % (_path,user_id, customer_id)  # 来源 1代表扫码 2 代表转发
-                    user_qr_code = '/%s_%s_%s_qrcode.jpg' % (user_id, customer_id, now_time)
+                    path = '%{_path}?uid={user_id}&source=1&pid={customer_id}'.format(
+                        _path=_path,
+                        user_id=user_id,
+                        customer_id=customer_id
+                    )  # 来源 1代表扫码 2 代表转发
+                    user_qr_code = '/{user_id}_{customer_id}_{now_time}_qrcode.jpg'.format(
+                        user_id=user_id,
+                        customer_id=customer_id,
+                        now_time=now_time
+                    )
 
             get_qr_data = {}
             rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
@@ -417,12 +438,15 @@ def create_user_or_customer_qr_code(request):
             # print('-------qr_ret---->', qr_ret.text)
 
             IMG_PATH = os.path.join(BASE_DIR, 'statics', 'zhugeleida', 'imgs', 'xiaochengxu', 'qr_code') + user_qr_code
-            with open('%s' % (IMG_PATH), 'wb') as f:
+            with open(IMG_PATH, 'wb') as f:
                 f.write(qr_ret.content)
 
             if customer_id:
-                user_obj = models.zgld_user_customer_belonger.objects.get(user_id=user_id, customer_id=customer_id)
-                user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
+                user_obj = models.zgld_user_customer_belonger.objects.get(
+                    user_id=user_id,
+                    customer_id=customer_id
+                )
+                user_qr_code_path = 'statics/zhugeleida/imgs/xiaochengxu/qr_code{}'.format(user_qr_code)
                 user_obj.qr_code = user_qr_code_path
                 user_obj.save()
                 print('----celery生成用户-客户对应的小程序二维码成功-->>',
@@ -434,7 +458,7 @@ def create_user_or_customer_qr_code(request):
 
             else:  # 没有 customer_id 说明不是在小程序中生成
                 user_obj = models.zgld_userprofile.objects.get(id=user_id)
-                user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code
+                user_obj.qr_code = 'statics/zhugeleida/imgs/xiaochengxu/qr_code{}'.format(user_qr_code)
                 user_obj.save()
                 print('----celery生成企业用户对应的小程序二维码成功-->>', 'statics/zhugeleida/imgs/xiaochengxu/qr_code%s' % user_qr_code)
 

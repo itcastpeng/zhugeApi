@@ -731,7 +731,7 @@ def company_oper(request, oper_type, o_id):
             response.msg = '查询成功'
             response.data = data_list
 
-        # 隐藏显示公司(后台)
+        # 隐藏显示公司(后台 该公司如果不合作等情况 则隐藏该公司所有数据)
         elif oper_type == 'hidden_company':
             company_id = o_id
             obj = models.zgld_company.objects.get(id=company_id)
@@ -745,6 +745,19 @@ def company_oper(request, oper_type, o_id):
             obj.save()
             response.code = 200
             response.msg = msg
+
+        # 该公司小程序 是否展示商城
+        elif oper_type == 'is_open_mall':
+            obj = models.zgld_company.objects.get(id=o_id)
+            is_open_mall = int(obj.is_open_mall)
+            if is_open_mall == 0:
+                is_open_mall = 1
+            else:
+                is_open_mall = 0
+            obj.is_open_mall = is_open_mall
+            obj.save()
+            response.code = 200
+            response.msg = '修改成功'
 
         else:
             response.code = 402

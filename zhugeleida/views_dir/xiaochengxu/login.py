@@ -530,6 +530,7 @@ def bottom_button_info(request):
         ret_data['is_show_jszc'] = is_show_jszc
         ret_data['is_show_jszc_text'] = obj.get_is_show_jszc_display()
         ret_data['is_release_version_num'] = is_release_version_num
+        ret_data['is_open_mall'] = obj.is_open_mall         # 是否展示商城
 
         print('-------- 按钮 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200

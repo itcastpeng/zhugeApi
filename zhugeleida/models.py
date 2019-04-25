@@ -65,6 +65,10 @@ class zgld_company(models.Model):
 
     # 生成案例名片二维码时 是否展示公司logo
     is_show_logo = models.BooleanField(verbose_name='是否展示公司logo', default=1)
+
+    # 平头哥类 小程序是否展示商城
+    is_open_mall = models.BooleanField(verbose_name='小程序是否展示商城', default=1)
+
     class Meta:
         verbose_name_plural = "公司表"
         app_label = "zhugeleida"
