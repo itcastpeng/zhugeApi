@@ -144,8 +144,8 @@ def editor_oper(request, oper_type, o_id):
         # 审核文章
         elif oper_type == 'audit_article':
             form_data = {
-                'status':request.GET.get('status'),
-                'reason_rejection':request.GET.get('reason_rejection')
+                'status':request.POST.get('status'),
+                'reason_rejection':request.POST.get('reason_rejection')
             }
             form_objs = AuditArticleForm(form_data)
             if form_objs.is_valid():
