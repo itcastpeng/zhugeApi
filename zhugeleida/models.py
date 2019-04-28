@@ -1681,7 +1681,7 @@ class zgld_editor_article(models.Model):
         (1, '待提交'),
         (2, '待审核'),
         (3, '被驳回'),
-        (4, '审核完成'),
+        (4, '已完成'),
     )
     status = models.SmallIntegerField(verbose_name='文章状态', choices=status_choices, default=1)
     reason_rejection = models.CharField(verbose_name='驳回理由', max_length=256, null=True)
