@@ -168,8 +168,9 @@ def editor_article_oper(request, oper_type, o_id):
         elif oper_type == "update":
             forms_obj = ArticleUpdateForm(article_form_data)
             if forms_obj.is_valid():
+                title, company_id = forms_obj.cleaned_data['title']
                 dict_data = {
-                    'title': forms_obj.cleaned_data['title'],
+                    'title': title,
                     'summary': forms_obj.cleaned_data['summary'],
                     'content': forms_obj.cleaned_data['content'],
                     'cover_picture': forms_obj.cleaned_data['cover_picture'],
