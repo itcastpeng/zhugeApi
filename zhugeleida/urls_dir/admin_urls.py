@@ -191,7 +191,5 @@ urlpatterns = [
     url(r'^editor_article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor_article.editor_article_oper),      # 员工操作文章
     url(r'^editor_article$', editor_article.editor_article),                                       # 员工查询文章
 
-    url(r'^editor_article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor_article.editor_article_oper),      # 员工操作案例
-
 
 ]
