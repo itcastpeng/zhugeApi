@@ -1677,7 +1677,7 @@ class zgld_editor_article(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     status_choices = (
-        (1, '待上传'),
+        (1, '待提交'),
         (2, '待审核'),
         (3, '被驳回'),
         (4, '已完成'),
