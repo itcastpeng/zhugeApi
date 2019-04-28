@@ -22,9 +22,8 @@ def editor(request):
 
         field_dict = {
             'id': '',
-            'name': '__contains',
+            'user_name': '__contains',
             'create_date': '',
-            'admin_is_hidden': '',  # 在后台 是否隐藏
         }
 
         q = conditionCom(request, field_dict)
@@ -39,6 +38,7 @@ def editor(request):
         data_list = []
         for obj in objs:
             data_list.append({
+                'id':obj.id,
                 'status_id': obj.status,
                 'status': obj.get_status_display(),
                 'phone': obj.phone,
