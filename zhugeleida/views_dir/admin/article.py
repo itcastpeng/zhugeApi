@@ -193,7 +193,7 @@ def article(request, oper_type):
                         'avatar': obj.user.avatar,  # 用户的头像
                         'read_count': obj.read_count,  # 被阅读数量
                         'forward_count': obj.forward_count,  # 被转发个数
-                        'create_date': obj.create_date,  # 文章创建时间
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
                         'cover_url': obj.cover_picture,  # 文章图片链接
                         'tag_list': tag_list,
                         # 'insert_ads' : json.loads(obj.insert_ads)  if obj.insert_ads else '' # 插入的广告语

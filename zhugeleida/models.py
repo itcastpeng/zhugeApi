@@ -987,7 +987,7 @@ class zgld_article(models.Model):
     forward_count = models.IntegerField(verbose_name="文章转发个数",default=0)
     comment_count = models.IntegerField(default=0,verbose_name="被评论数量")
 
-    insert_ads = models.TextField(verbose_name='插入广告语',null=True)
+    insert_ads = models.TextField(verbose_name='插入广告语',null=True) # 插入广告类型 记录
     plugin_report = models.ForeignKey('zgld_plugin_report', verbose_name="报名的插件", null=True)
     qrcode_url = models.CharField(verbose_name="二维码URL", max_length=128, null=True)
     media_id = models.CharField(verbose_name="素材ID", max_length=128, null=True)
@@ -1634,4 +1634,80 @@ class zgld_customer_case_poster_belonger(models.Model):
 class save_code(models.Model):
     code = models.CharField(verbose_name='存在的code', max_length=128, null=True, blank=True)
     create_datetime = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-# ================================================================================================================
+
+
+# ============================================公司后台编辑 后台管理员自行开户================================================
+class zgld_editor(models.Model):
+    login_user = models.CharField(verbose_name="登录用户名", max_length=32)
+    user_name = models.CharField(verbose_name="成员备注名", max_length=32, null=True)
+    password = models.CharField(verbose_name="密码", max_length=32, null=True, blank=True)
+    company = models.ForeignKey('zgld_company', verbose_name='所属企业')
+    position = models.CharField(verbose_name='职位', max_length=128)
+    phone = models.CharField(verbose_name='电话', max_length=128)
+    status_choices = (
+        (1, "启用"),
+        (2, "未启用"),
+    )
+    token = models.CharField(verbose_name="token值", max_length=64, null=True, blank=True)
+    status = models.SmallIntegerField(choices=status_choices, verbose_name="成员状态", default=1)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    last_login_date = models.DateTimeField(verbose_name="最后登录时间", null=True, blank=True)
+    is_delete = models.BooleanField(verbose_name='是否删除', default=0)
+
+
+# 编辑编写的文章
+class zgld_editor_article(models.Model):
+    user = models.ForeignKey('zgld_editor', verbose_name='文章作者', null=True)
+    title = models.CharField(verbose_name='文章标题', max_length=128)
+    summary = models.CharField(verbose_name='文章摘要', max_length=255)
+    content = models.TextField(verbose_name='文章内容', null=True)
+    tags = models.ManyToManyField('zgld_article_tag', verbose_name="文章关联的标签")
+    cover_picture = models.CharField(verbose_name="封面图片URL", max_length=128)
+
+    insert_ads = models.TextField(verbose_name='插入广告语', null=True)  # 植入广告类型
+    plugin_report = models.ForeignKey('zgld_plugin_report', verbose_name="报名的插件", null=True)
+
+    auto_tagging_choices = ((0, '不开启'),
+                            (1, '开启'),
+                            )
+    is_auto_tagging = models.SmallIntegerField(default=1, verbose_name='是否开启自动打标签', choices=auto_tagging_choices)
+
+    tags_time_count = models.IntegerField(default=0, verbose_name="达到几秒实现打标签")
+
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    status_choices = (
+        (1, '待上传'),
+        (2, '待审核'),
+        (3, '被驳回'),
+        (4, '已完成'),
+    )
+    status = models.SmallIntegerField(verbose_name='文章状态', choices=status_choices, default=1)
+    reason_rejection = models.CharField(verbose_name='驳回理由', max_length=256, null=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
