@@ -5,7 +5,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     plugin_report, plugin_goods, open_weixin, dai_xcx, xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi, open_qiyeweixin, \
     theOrderManagement, tuiKuanDingDan, employeesOrders, activity_manage, tongxunlu, money_manage, case_tag, \
-    case_manage, diary_manage, comment_manage, data_statistics, editor, editor_article
+    case_manage, diary_manage, comment_manage, data_statistics, editor, editor_article, editor_case, editor_diary
 
 urlpatterns = [
 
@@ -167,6 +167,7 @@ urlpatterns = [
     url(r'^employeesOrders$', employeesOrders.employeesOrders),  # 订单管理查询
     # url(r'^theOrderOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', theOrderManagement.theOrderOper),           # 订单管理操作
 
+
     # 活动管理
     url(r'^activity_manage/(?P<oper_type>\w+)/(?P<o_id>\d+)$', activity_manage.activity_manage_oper),  # 关注领红包
     url(r'^activity_manage/(?P<oper_type>\w+)$', activity_manage.activity_manage),  # 关注领红包
@@ -186,10 +187,15 @@ urlpatterns = [
     url(r'^editor/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor.editor_oper),
     url(r'^editor$', editor.editor),
 
-    url(r'^editor_login$', editor.editor_login),                                # 员工登录
+    url(r'^editor_login$', editor.editor_login),                                                        # 员工登录
 
     url(r'^editor_article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor_article.editor_article_oper),      # 员工操作文章
-    url(r'^editor_article$', editor_article.editor_article),                                       # 员工查询文章
+    url(r'^editor_article$', editor_article.editor_article),                                            # 员工查询文章
 
+    url(r'^editor_case/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor_case.editor_case_oper),               # 员工操作案例
+    url(r'^editor_case$', editor_case.editor_case),                                                     # 员工查询案例
+
+    url(r'^editor_diary/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor_diary.editor_diary_oper),            # 员工操作日记
+    url(r'^editor_diary$', editor_diary.editor_diary),                                                  # 员工查询日记
 
 ]

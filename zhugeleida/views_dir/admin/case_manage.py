@@ -66,46 +66,43 @@ def case_manage(request, oper_type):
 
                 ret_data = []
                 poster_company_logo = ''
-                if objs:
+                gongzhonghao_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
+                if gongzhonghao_app_obj:
+                    poster_company_logo = gongzhonghao_app_obj.poster_company_logo
 
-                    for obj in objs:
-                        status = obj.status
-                        status_text = obj.get_status_display()
-                        cover_picture = obj.cover_picture
-                        if cover_picture:
-                            cover_picture =  json.loads(cover_picture)
-                            # cover_picture =  cover_picture
+                for obj in objs:
+                    cover_picture = obj.cover_picture
+                    if cover_picture:
+                        cover_picture =  json.loads(cover_picture)
+                        # cover_picture =  cover_picture
 
-                        gongzhonghao_app_obj = models.zgld_xiaochengxu_app.objects.get(company_id=company_id)
-                        if gongzhonghao_app_obj:
-                            poster_company_logo = gongzhonghao_app_obj.poster_company_logo
 
-                        become_beautiful_cover = []
-                        if obj.become_beautiful_cover:
-                            become_beautiful_cover = json.loads(obj.become_beautiful_cover)
+                    become_beautiful_cover = []
+                    if obj.become_beautiful_cover:
+                        become_beautiful_cover = json.loads(obj.become_beautiful_cover)
 
-                        poster_cover = []
-                        if obj.poster_cover:
-                            poster_cover = json.loads(obj.poster_cover)
+                    poster_cover = []
+                    if obj.poster_cover:
+                        poster_cover = json.loads(obj.poster_cover)
 
-                        tag_list = list(obj.tags.values('id', 'name'))
-                        ret_data.append({
-                            'case_id': obj.id,
-                            'case_name' : obj.case_name,
-                            'company_id': obj.company_id,
-                            'customer_name': obj.customer_name,
-                            'headimgurl': obj.headimgurl,
-                            'cover_picture' : cover_picture,
-                            'status': status,
-                            'status_text': status_text,
-                            'tag_list': tag_list,
-                            'case_type': obj.case_type,
-                            'poster_cover': poster_cover,
-                            'become_beautiful_cover': become_beautiful_cover,
-                            'case_type_text': obj.get_case_type_display(),
-                            'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
-                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
-                        })
+                    tag_list = list(obj.tags.values('id', 'name'))
+                    ret_data.append({
+                        'case_id': obj.id,
+                        'case_name' : obj.case_name,
+                        'company_id': obj.company_id,
+                        'customer_name': obj.customer_name,
+                        'headimgurl': obj.headimgurl,
+                        'cover_picture' : cover_picture,
+                        'status': obj.status,
+                        'status_text': obj.get_status_display(),
+                        'tag_list': tag_list,
+                        'case_type': obj.case_type,
+                        'poster_cover': poster_cover,
+                        'become_beautiful_cover': become_beautiful_cover,
+                        'case_type_text': obj.get_case_type_display(),
+                        'update_date': obj.update_date.strftime('%Y-%m-%d %H:%M:%S') if obj.update_date else '',
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+            })
 
                 show_poster_company_logo = models.zgld_company.objects.get(id=company_id).is_show_logo
 

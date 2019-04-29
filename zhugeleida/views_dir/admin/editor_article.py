@@ -66,11 +66,18 @@ def editor_article(request):
                 data_list[0]['tags_time_count'] = obj.tags_time_count  # 达到几秒实现打标签
                 data_list[0]['insert_ads'] = json.loads(obj.insert_ads)  # 植入广告类型
 
+        status_choices = []
+        for i in models.zgld_editor_article.status_choices:
+            status_choices.append({
+                'id': i[0],
+                'name': i[1]
+            })
         response.code = 200
         response.msg = '查询成功'
         response.data = {
             'count': count,
             'data_list': data_list,
+            'status_choices': status_choices,
         }
         response.note = {
             'id': '文章ID',

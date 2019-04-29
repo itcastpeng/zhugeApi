@@ -1687,12 +1687,57 @@ class zgld_editor_article(models.Model):
     reason_rejection = models.CharField(verbose_name='驳回理由', max_length=256, null=True)
 
 
+# 编辑编写的案例
+class zgld_editor_case(models.Model):
+    user = models.ForeignKey('zgld_editor', verbose_name='文章作者', null=True)
+    customer_name  = models.CharField(max_length=64,verbose_name='客户昵称', null=True)
+    headimgurl = models.CharField(verbose_name="客户头像url", max_length=256, default='statics/imgs/Avator.jpg')
+    case_name = models.CharField(verbose_name='案例名称', max_length=128)
+    cover_picture = models.TextField(verbose_name="封面图片",null=True)
+    poster_cover = models.TextField(verbose_name="海报图片",null=True)
+    become_beautiful_cover = models.TextField(verbose_name="变美过程图片",null=True)
 
+    tags = models.ManyToManyField('zgld_case_tag', verbose_name="文章关联的标签")
+    case_type_choices = (
+        (1, '普通案例'),
+        (2, '时间轴案例')
+    )
+    status_choices = (
+        (1, '待提交'),
+        (2, '待审核'),
+        (3, '被驳回'),
+        (4, '已完成'),
+    )
+    status = models.SmallIntegerField(verbose_name='案例状态', choices=status_choices, default=1)
+    case_type = models.SmallIntegerField(default=2, verbose_name='案例类型', choices=case_type_choices)
+    create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    reason_rejection = models.CharField(verbose_name='驳回理由', max_length=256, null=True)
 
+# 日记
+class zgld_editor_diary(models.Model):
+    user = models.ForeignKey('zgld_editor', verbose_name='文章作者', null=True)
+    case = models.ForeignKey('zgld_editor_case', verbose_name="关联的案例", null=True)
+    title = models.CharField(verbose_name='日记标题', max_length=128)
+    summary = models.CharField(verbose_name='日记摘要', max_length=255,null=True)
+    diary_date = models.DateTimeField(verbose_name="日记时间")  # 发布时间
+    cover_picture = models.TextField(verbose_name="封面图URL和视频URL",null=True) # 普通案例为轮播图/时间轴案例为时间轴列表页点击进去展示图片（获取文章内容）
+    content = models.TextField(verbose_name='日记内容', null=True)
+    status_choices = (
+        (1, '待提交'),
+        (2, '待审核'),
+        (3, '被驳回'),
+        (4, '已完成'),
+    )
+    status = models.SmallIntegerField(verbose_name='日记状态', choices=status_choices, default=1)
 
-
-
-
+    cover_show_type_choices = (
+        (1,'只展示图片'),
+        (2,'只展示视频')
+    )
+    poster_cover = models.TextField(verbose_name="海报图片", null=True)
+    cover_show_type = models.SmallIntegerField(default=2, verbose_name='封面展示类型', choices=cover_show_type_choices)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
+    reason_rejection = models.CharField(verbose_name='驳回理由', max_length=256, null=True)
 
 
 

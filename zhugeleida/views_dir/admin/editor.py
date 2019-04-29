@@ -79,6 +79,9 @@ def editor_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
     user_id = request.GET.get('user_id')
     user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
+    company_id = user_obj.company_id
+
+
     if request.method == "POST":
         editor_data = {
             'company_id': user_obj.company_id,  # 公司ID
@@ -153,58 +156,81 @@ def editor_oper(request, oper_type, o_id):
                 status = form_objs.cleaned_data.get('status')
                 obj = models.zgld_editor_article.objects.get(id=o_id)
                 if status == 4:
-                    article_obj = models.zgld_article.objects.create(
-                        user_id=user_id,
-                        company_id=user_obj.company_id,
-                        title=obj.title,
-                        summary=obj.summary,
-                        status=2,  # 未发状态
-                        source=1,  # 原创作品
-                        content=obj.content,
-                        cover_picture=obj.cover_picture,  # 封面
-                        insert_ads=obj.insert_ads,  # 插入广告类型 记录
-                        plugin_report_id=obj.plugin_report_id,  # 报名插件ID
-                        is_auto_tagging=obj.is_auto_tagging,  # 是否打标签
-                        tags_time_count=obj.tags_time_count,  # 实现几秒打标签
-                    )
-                    tags_list = [i.get('id') for i in obj.tags.all().values('id')]
-                    print('i-------------> ', tags_list)
-                    article_obj.tags = tags_list
+                    if not models.zgld_article.objects.filter(title=obj.title):
 
-                    data = {
-                        'company_id': user_obj.company_id,
-                        'article_id': article_obj.id,
-                        'uid': '',
-                        'pid': '',
-                        'level': 1,
+                        article_obj = models.zgld_article.objects.create(
+                            user_id=user_id,
+                            company_id=user_obj.company_id,
+                            title=obj.title,
+                            summary=obj.summary,
+                            status=2,  # 未发状态
+                            source=1,  # 原创作品
+                            content=obj.content,
+                            cover_picture=obj.cover_picture,  # 封面
+                            insert_ads=obj.insert_ads,  # 插入广告类型 记录
+                            plugin_report_id=obj.plugin_report_id,  # 报名插件ID
+                            is_auto_tagging=obj.is_auto_tagging,  # 是否打标签
+                            tags_time_count=obj.tags_time_count,  # 实现几秒打标签
+                        )
+                        tags_list = [i.get('id') for i in obj.tags.all().values('id')]
+                        print('i-------------> ', tags_list)
+                        article_obj.tags = tags_list
 
-                    }
+                        data = {
+                            'company_id': user_obj.company_id,
+                            'article_id': article_obj.id,
+                            'uid': '',
+                            'pid': '',
+                            'level': 1,
 
-                    auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
-                    authorize_url = auth_url_ret.data.get('authorize_url')
+                        }
 
-                    qrcode_data = {
-                        'url': authorize_url,
-                        'article_id': obj.id,
-                    }
-                    response_ret = create_qrcode(qrcode_data)
-                    pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
-                    article_obj.qrcode_url = pre_qrcode_url
+                        auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
+                        authorize_url = auth_url_ret.data.get('authorize_url')
 
-                    article_obj.save()
-                    msg = '该文章已被审核'
+                        qrcode_data = {
+                            'url': authorize_url,
+                            'article_id': obj.id,
+                        }
+                        response_ret = create_qrcode(qrcode_data)
+                        pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                        article_obj.qrcode_url = pre_qrcode_url
+
+                        article_obj.save()
+                        msg = '该文章已被审核'
+                        response.code = 200
+                        response.msg = msg
+                    else:
+                        response.code = 301
+                        response.msg = '标题重复'
                 else:
                     msg = '该文章已被驳回'
+                    response.code = 200
+                    response.msg = msg
 
                 obj.status = status
                 obj.save()
-                response.code = 200
-                response.msg = msg
+
             else:
                 response.code = 301
                 response.msg = json.loads(form_objs.errors.as_json())
 
+        # 审核案例
+        elif oper_type == 'audit_case':
+            pass
+
+        # 审核日记
+        elif oper_type == 'audit_diary':
+            pass
+
     elif request.method == 'GET':
+        status_choices = []
+        for i in models.zgld_editor_article.status_choices: # 可选状态
+            if i[0] != 1:
+                status_choices.append({
+                    'id': i[0],
+                    'name': i[1]
+                })
 
         # 查询提交的文章
         if oper_type == 'get_article':
@@ -213,9 +239,7 @@ def editor_oper(request, oper_type, o_id):
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
                 order = request.GET.get('order', '-create_date')
-                user_id = request.GET.get('user_id', '-create_date')
-                user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
-                company_id = user_obj.company_id
+
                 field_dict = {
                     'id': '',
                     'title': '__contains',
@@ -267,12 +291,153 @@ def editor_oper(request, oper_type, o_id):
                 response.msg = '查询成功'
                 response.data = {
                     'count': count,
-                    'data_list': data_list
+                    'data_list': data_list,
+                    'status_choices': status_choices,
                 }
 
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 查询提交的案例
+        elif oper_type == 'get_case':
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+
+                field_dict = {
+                    'id': '',
+                    'title': '__contains',
+                }
+                q = conditionCom(request, field_dict)
+
+                status = request.GET.get('status')
+                if not status:
+                    status = [2, 3, 4]
+                else:
+                    status = [status]
+
+                objs = models.zgld_editor_case.objects.filter(
+                    q,
+                    user__company_id=user_obj.company_id,
+                    status__in=status
+                ).order_by(order)
+
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                ret_data = []
+                for obj in objs:
+                    cover_picture = obj.cover_picture
+                    if cover_picture:
+                        cover_picture = json.loads(cover_picture)
+
+                    become_beautiful_cover = []
+                    if obj.become_beautiful_cover:
+                        become_beautiful_cover = json.loads(obj.become_beautiful_cover)
+
+                    poster_cover = []
+                    if obj.poster_cover:
+                        poster_cover = json.loads(obj.poster_cover)
+
+                    tag_list = list(obj.tags.values('id', 'name'))
+                    ret_data.append({
+                        'case_id': obj.id,
+                        'case_name': obj.case_name,
+                        'customer_name': obj.customer_name,
+                        'headimgurl': obj.headimgurl,
+                        'cover_picture': cover_picture,
+                        'status': obj.status,
+                        'status_text': obj.get_status_display(),
+                        'tag_list': tag_list,
+                        'case_type': obj.case_type,
+                        'poster_cover': poster_cover,
+                        'become_beautiful_cover': become_beautiful_cover,
+                        'case_type_text': obj.get_case_type_display(),
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'count': count,
+                    'status_choices': status_choices
+                }
+
+        # 查询提交的日记
+        elif oper_type == 'get_diary':
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+
+                field_dict = {
+                    'id': '',
+                    'title': '__contains',
+                    'case_id': '',
+                    'customer_name': '__contains',
+                }
+                q = conditionCom(request, field_dict)
+
+                status = request.GET.get('status')
+                if not status:
+                    status = [2, 3, 4]
+                else:
+                    status = [status]
+                objs = models.zgld_editor_diary.objects.filter(
+                    q,
+                    user__company_id=company_id,
+                    status__in=status
+                ).order_by(order)
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                ret_data = []
+                id = request.GET.get('id')
+                for obj in objs:
+                    cover_picture = []
+                    if obj.cover_picture:
+                        cover_picture = json.loads(obj.cover_picture)
+
+                    poster_cover = []
+                    if obj.poster_cover:
+                        poster_cover = json.loads(obj.poster_cover)
+
+                    ret_data.append({
+                        'diary_id': obj.id,
+                        'case_id': obj.case_id,
+                        'title': obj.title,
+                        'status': obj.status,
+                        'status_text': obj.get_status_display(),
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
+                    })
+                    if id:
+                        ret_data[0]['diary_date'] = obj.diary_date.strftime('%Y-%m-%d') if obj.diary_date else ''
+                        ret_data[0]['cover_picture'] = cover_picture
+                        ret_data[0]['content'] = obj.content
+                        ret_data[0]['cover_show_type'] = obj.cover_show_type
+                        ret_data[0]['cover_show_type_text'] = obj.get_cover_show_type_display()
+                        ret_data[0]['poster_cover'] = poster_cover
+                        ret_data[0]['summary'] = obj.summary
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'count': count,
+                    'status_choices': status_choices
+                }
 
         else:
             response.code = 402
@@ -293,6 +458,12 @@ def editor_login(request):
     form_objs = LoginForm(request.POST)
     if form_objs.is_valid():
         obj = form_objs.cleaned_data.get('login_user')
+
+        gzh_notice_qrcode = ''
+        gzh_objs = models.zgld_gongzhonghao_app.objects.filter(company_id=obj.company_id)
+        if gzh_objs:
+            gzh_notice_qrcode = gzh_objs[0].gzh_notice_qrcode
+
         response.code = 200
         response.msg = '登录成功'
         response.data = {
@@ -301,6 +472,8 @@ def editor_login(request):
             'company_id':obj.company_id,
             'company__name':obj.company.name,
             'user_id':obj.id,
+            'weChatQrCode':obj.company.weChatQrCode,
+            'gzh_notice_qrcode':gzh_notice_qrcode,
         }
         response.note = {
             'login_user': '登录用户',
