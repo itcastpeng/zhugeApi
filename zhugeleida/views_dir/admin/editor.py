@@ -45,6 +45,7 @@ def editor(request):
                 'position': obj.position,
                 'user_name': obj.user_name,
                 'login_user': obj.login_user,
+                'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
             })
 
         response.code = 200
