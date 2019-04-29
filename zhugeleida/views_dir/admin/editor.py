@@ -282,7 +282,7 @@ def editor_oper(request, oper_type, o_id):
                             title=obj.title,
                             diary_date=obj.diary_date,
                             content=obj.content,
-                            status=status,
+                            status=2,
                             cover_show_type=obj.cover_show_type
                         )
                         case_type = int(obj.case.case_type)
@@ -290,13 +290,13 @@ def editor_oper(request, oper_type, o_id):
                         cover_picture = obj.cover_picture
                         print('cover_picture-------> ', cover_picture)
                         if case_type == 1:  # 普通日记
-                            obj.cover_picture = json.dumps(json.loads(cover_picture))
-                            obj.save()
+                            diary_obj.cover_picture = json.dumps(json.loads(cover_picture))
+                            diary_obj.save()
 
                         else:  # 时间轴日记
                             if cover_picture and len(json.loads(cover_picture)) > 0:  # 如果上传了 封面
                                 cover_picture = json.loads(cover_picture)
-                                obj.cover_picture = json.dumps(cover_picture)
+                                diary_obj.cover_picture = json.dumps(cover_picture)
                             else:
                                 _cover_picture = []
                                 soup = BeautifulSoup(obj.content, 'html.parser')
