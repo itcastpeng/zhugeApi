@@ -103,12 +103,16 @@ class UpdateForm(forms.Form):
             'required': '电话不能为空'
         }
     )
-
+    o_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '修改ID不能为空'
+        }
+    )
     def clean_login_user(self):
         company_id = self.data.get('company_id')
-        login_user_list = self.data.get('login_user')
-        login_user = login_user_list.split('_')[0]
-        o_id = login_user_list.split('_')[1]
+        o_id = self.data.get('o_id')
+        login_user = self.data.get('login_user')
         objs = models.zgld_editor.objects.filter(
             login_user=login_user,
             company_id=company_id,
