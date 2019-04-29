@@ -148,9 +148,10 @@ def editor_oper(request, oper_type, o_id):
 
         # 审核文章
         elif oper_type == 'audit_article':
+            reason_rejection = request.POST.get('reason_rejection')
             form_data = {
                 'status':request.POST.get('status'),
-                'reason_rejection':request.POST.get('reason_rejection')
+                'reason_rejection': reason_rejection
             }
             form_objs = AuditArticleForm(form_data)
             if form_objs.is_valid():
@@ -205,10 +206,11 @@ def editor_oper(request, oper_type, o_id):
                         response.code = 301
                         response.msg = '标题重复'
                 else:
+
                     msg = '该文章已被驳回'
                     response.code = 200
                     response.msg = msg
-
+                obj.reason_rejection = reason_rejection
                 obj.status = status
                 obj.save()
 
