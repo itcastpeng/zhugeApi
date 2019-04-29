@@ -232,7 +232,7 @@ def editor_oper(request, oper_type, o_id):
                         tags_objs.update(
                             use_number=F('use_number') + 1
                         )
-                        obj = models.zgld_case.objects.create(
+                        case_obj = models.zgld_case.objects.create(
                             user_id=user_id,
                             company_id=company_id,
                             case_name=obj.case_name,
@@ -243,8 +243,8 @@ def editor_oper(request, oper_type, o_id):
                             become_beautiful_cover=obj.become_beautiful_cover,
                             case_type=obj.case_type
                         )
-                        obj.tags = tags_list
-                        obj.save()
+                        case_obj.tags = tags_list
+                        case_obj.save()
                         response.code = 200
                         response.msg = '审核已通过'
                     else:
