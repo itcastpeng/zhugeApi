@@ -210,6 +210,20 @@ def editor_diary_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 设置日记海报
+        elif oper_type == 'poster_setting':
+            poster_cover =  request.POST.get('poster_cover')
+            json_poster_cover = json.loads(poster_cover)
+            if len(json_poster_cover) in [1, 2, 9]:
+                objs = models.zgld_diary.objects.filter(id=o_id)
+
+                objs.update(poster_cover=json.dumps(json_poster_cover))
+                response.code = 200
+                response.msg = '设置日记海报成功'
+
+            else:
+                response.code = 301
+                response.msg = '请控制图片在1/2/9张'
     else:
 
         # 提交日记

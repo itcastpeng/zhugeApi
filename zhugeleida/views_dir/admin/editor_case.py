@@ -200,6 +200,25 @@ def editor_case_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(delete_form_obj.errors.as_json())
 
+        # 设置海报
+        elif oper_type == 'poster_setting':
+            poster_cover = request.POST.get('poster_cover')
+            json_poster_cover = json.loads(poster_cover)
+            if len(json_poster_cover) in [1, 2, 9]:
+
+                case_objs = models.zgld_editor_case.objects.filter(
+                    id=o_id
+                )
+                case_objs.update(
+                    poster_cover=json.dumps(json_poster_cover)
+                )
+
+                response.code = 200
+                response.msg = "设置海报成功"
+            else:
+                response.code = 301
+                response.msg = '请控制图片 在1/2/9张'
+
     else:
 
         # 获取分类标签
