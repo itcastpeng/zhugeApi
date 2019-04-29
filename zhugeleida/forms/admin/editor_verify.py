@@ -107,10 +107,13 @@ class UpdateForm(forms.Form):
     def clean_login_user(self):
         company_id = self.data.get('company_id')
         login_user = self.data.get('login_user')
+        login_user = login_user.split('_')[0]
+        o_id = login_user.split('_')[1]
         objs = models.zgld_editor.objects.filter(
             login_user=login_user,
-            company_id=company_id
-        )
+            company_id=company_id,
+            is_delete=False
+        ).exclude(id=o_id)
         if objs:
             self.add_error('login_user', '用户名存在')
         else:
