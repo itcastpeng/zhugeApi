@@ -81,7 +81,7 @@ def editor_oper(request, oper_type, o_id):
     if request.method == "POST":
         editor_data = {
             'company_id': user_obj.company_id,  # 公司ID
-            'login_user': request.POST.get('login_user'),  # 登录账号
+            'login_user': request.POST.get('login_user') + '_{}'.format(o_id),  # 登录账号
             'user_name': request.POST.get('user_name'),  # 备注
             'password': request.POST.get('password'),  # 密码
             'phone': request.POST.get('phone'),  # 电话
