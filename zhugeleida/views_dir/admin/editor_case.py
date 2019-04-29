@@ -65,12 +65,19 @@ def editor_case(request):
                 'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S') if obj.create_date else '',
             })
 
+        status_choices = []
+        for i in models.zgld_editor_case.status_choices:
+            status_choices.append({
+                'id': i[0],
+                'name': i[1]
+            })
         #  查询成功 返回200 状态码
         response.code = 200
         response.msg = '查询成功'
         response.data = {
             'ret_data': ret_data,
             'data_count': count,
+            'status_choices': status_choices,
         }
         response.note = {
             'case_id': '案例ID',

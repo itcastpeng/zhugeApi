@@ -64,12 +64,19 @@ def editor_diary(request):
                 ret_data[0]['poster_cover'] = poster_cover
                 ret_data[0]['summary'] = obj.summary
 
+        status_choices = []
+        for i in models.zgld_editor_diary.status_choices:
+            status_choices.append({
+                'id': i[0],
+                'name': i[1]
+            })
         #  查询成功 返回200 状态码
         response.code = 200
         response.msg = '查询成功'
         response.data = {
             'ret_data': ret_data,
-            'data_count': count
+            'data_count': count,
+            'status_choices': status_choices
         }
 
     else:
