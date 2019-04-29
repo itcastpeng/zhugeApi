@@ -3,11 +3,14 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.editor_verify import AddForm, UpdateForm, SelectForm, LoginForm, AuditArticleForm
+from zhugeleida.forms.admin.editor_verify import AddForm, UpdateForm, SelectForm, LoginForm, AuditArticleForm, \
+    AuditCaseForm, AuditDiaryForm
 from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
-import json, base64
+from django.db.models import F
+import json, base64, datetime
+from bs4 import BeautifulSoup
 
 # 员工管理查询
 @csrf_exempt
@@ -92,6 +95,11 @@ def editor_oper(request, oper_type, o_id):
             'position': request.POST.get('position'),  # 职位
         }
 
+        audit_data = {
+            'status': request.POST.get('status'),
+            'reason_rejection': request.POST.get('reason_rejection')# 驳回理由
+        }
+
         # 添加员工(编辑)
         if oper_type == "add":
             forms_obj = AddForm(editor_data)
@@ -148,17 +156,12 @@ def editor_oper(request, oper_type, o_id):
 
         # 审核文章
         elif oper_type == 'audit_article':
-            reason_rejection = request.POST.get('reason_rejection')
-            form_data = {
-                'status':request.POST.get('status'),
-                'reason_rejection': reason_rejection
-            }
-            form_objs = AuditArticleForm(form_data)
+            form_objs = AuditArticleForm(audit_data)
             if form_objs.is_valid():
                 status = form_objs.cleaned_data.get('status')
                 obj = models.zgld_editor_article.objects.get(id=o_id)
                 if status == 4:
-                    if not models.zgld_article.objects.filter(title=obj.title):
+                    if not models.zgld_article.objects.filter(title=obj.title, company_id=company_id):
 
                         article_obj = models.zgld_article.objects.create(
                             user_id=user_id,
@@ -199,18 +202,16 @@ def editor_oper(request, oper_type, o_id):
                         article_obj.qrcode_url = pre_qrcode_url
 
                         article_obj.save()
-                        msg = '该文章已被审核'
+
                         response.code = 200
-                        response.msg = msg
+                        response.msg = '该文章已被审核'
                     else:
                         response.code = 301
                         response.msg = '标题重复'
                 else:
-
-                    msg = '该文章已被驳回'
                     response.code = 200
-                    response.msg = msg
-                obj.reason_rejection = reason_rejection
+                    response.msg = '该文章已驳回'
+                obj.reason_rejection = audit_data.get('reason_rejection')
                 obj.status = status
                 obj.save()
 
@@ -220,11 +221,120 @@ def editor_oper(request, oper_type, o_id):
 
         # 审核案例
         elif oper_type == 'audit_case':
-            pass
+            form_objs = AuditCaseForm(audit_data)
+            if form_objs.is_valid():
+                status = form_objs.cleaned_data.get('status')
+                obj = models.zgld_editor_case.objects.get(id=o_id)
+                if status == 4: # 通过
+                    if not models.zgld_case.objects.filter(case_name=obj.case_name,  company_id=company_id):
+                        tags_list = [i.get('id') for i in obj.tags.all().values('id')]
+                        tags_objs = models.zgld_case_tag.objects.filter(id__in=tags_list)
+                        tags_objs.update(
+                            use_number=F('use_number') + 1
+                        )
+                        obj = models.zgld_case.objects.create(
+                            user_id=user_id,
+                            company_id=company_id,
+                            case_name=obj.case_name,
+                            customer_name=obj.customer_name,
+                            headimgurl=obj.headimgurl,
+                            cover_picture=obj.cover_picture,
+                            status=2,
+                            become_beautiful_cover=obj.become_beautiful_cover,
+                            case_type=obj.case_type
+                        )
+                        obj.tags = tags_list
+                        obj.save()
+                        response.code = 200
+                        response.msg = '审核已通过'
+                    else:
+                        response.code = 301
+                        response.msg = '案例名称已存在'
+                else:
+                    response.code = 200
+                    response.msg = '本案例已驳回'
+
+                obj.reason_rejection = audit_data.get('reason_rejection')
+                obj.status = status
+                obj.save()
+            else:
+                response.code = 301
+                response.msg = json.loads(form_objs.errors.as_json())
 
         # 审核日记
         elif oper_type == 'audit_diary':
-            pass
+            form_objs = AuditDiaryForm(audit_data)
+            if form_objs.is_valid():
+                status = form_objs.cleaned_data.get('status')
+                obj = models.zgld_editor_diary.objects.get(id=o_id)
+                if status == 4:  # 通过
+                    if not models.zgld_diary.objects.filter(title=obj.title, company_id=company_id):
+
+                        objs = models.zgld_case.objects.filter(
+                            case_name=obj.case.case_name,
+                            company_id=company_id
+                        )
+
+                        diary_obj = models.zgld_diary.objects.create(
+                            user_id=user_id,
+                            company_id=company_id,
+                            case_id=objs[0].id,
+                            title=obj.title,
+                            diary_date=obj.diary_date,
+                            content=obj.content,
+                            status=status,
+                            cover_show_type=obj.cover_show_type
+                        )
+                        case_type = int(obj.case.case_type)
+
+                        cover_picture = obj.cover_picture
+                        print('cover_picture-------> ', cover_picture)
+                        if case_type == 1:  # 普通日记
+                            obj.cover_picture = json.dumps(json.loads(cover_picture))
+                            obj.save()
+
+                        else:  # 时间轴日记
+                            if cover_picture and len(json.loads(cover_picture)) > 0:  # 如果上传了 封面
+                                cover_picture = json.loads(cover_picture)
+                                obj.cover_picture = json.dumps(cover_picture)
+                            else:
+                                _cover_picture = []
+                                soup = BeautifulSoup(obj.content, 'html.parser')
+
+                                img_tags = soup.find_all('img')
+                                for img_tag in img_tags:
+                                    data_src = img_tag.attrs.get('src')
+                                    if data_src:
+                                        if 'tianyan.zhugeyingxiao.com' in data_src or 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
+                                            print(data_src)
+                                            _cover_picture.append(data_src)
+                                    if len(_cover_picture) >= 9:
+                                        break
+
+                                diary_obj.cover_picture = json.dumps(_cover_picture)
+                            diary_obj.save()
+
+                        case_objs = models.zgld_case.objects.filter(id=obj.case_id)  # 该 日记列表 更新时间
+                        if case_objs:
+                            case_objs.update(
+                                update_date=datetime.datetime.now()
+                            )
+                        response.code = 200
+                        response.msg = '审核已通过'
+
+                    else:
+                        response.code = 301
+                        response.msg = '该日记名称已存在'
+                else:
+                    response.code = 200
+                    response.msg = '本案例已驳回'
+
+                obj.reason_rejection = audit_data.get('reason_rejection')
+                obj.status = status
+                obj.save()
+            else:
+                response.code = 301
+                response.msg = json.loads(form_objs.errors.as_json())
 
     elif request.method == 'GET':
         status_choices = []

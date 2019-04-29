@@ -76,7 +76,6 @@ class AddForm(forms.Form):
         else:
             self.add_error('phone', '请填写正确电话号码')
 
-
 # 更新编辑信息
 class UpdateForm(forms.Form):
     login_user = forms.CharField(
@@ -132,9 +131,6 @@ class UpdateForm(forms.Form):
         else:
             self.add_error('phone', '请填写正确电话号码')
 
-
-
-
 # 查询
 class SelectForm(forms.Form):
 
@@ -174,6 +170,7 @@ class SelectForm(forms.Form):
         return length
 
 
+
 # 编辑登录
 class LoginForm(forms.Form):
     login_user = forms.CharField(
@@ -211,6 +208,7 @@ class LoginForm(forms.Form):
             self.add_error('login_user', '用户名或密码输入错误')
 
 
+
 # 审核文章
 class AuditArticleForm(forms.Form):
     status = forms.IntegerField(
@@ -236,5 +234,63 @@ class AuditArticleForm(forms.Form):
                 return 3
         else:
             return 4
+
+# 审核案例
+class AuditCaseForm(forms.Form):
+    status = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "请选择审核状态"
+        }
+    )
+    reason_rejection = forms.CharField(
+        required=False,
+        error_messages={
+            'required': ""
+        }
+    )
+    def clean_status(self):
+        status = int(self.data.get('status'))
+        reason_rejection = self.data.get('reason_rejection')
+        if status == 0:
+            if not reason_rejection:
+                self.add_error('status', '请填写驳回理由')
+            else:
+                return 3
+        else:
+            return 4
+
+
+# 审核案例
+class AuditDiaryForm(forms.Form):
+    status = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "请选择审核状态"
+        }
+    )
+    reason_rejection = forms.CharField(
+        required=False,
+        error_messages={
+            'required': ""
+        }
+    )
+    def clean_status(self):
+        status = int(self.data.get('status'))
+        reason_rejection = self.data.get('reason_rejection')
+        if status == 0:
+            if not reason_rejection:
+                self.add_error('status', '请填写驳回理由')
+            else:
+                return 3
+        else:
+            return 4
+
+
+
+
+
+
+
 
 

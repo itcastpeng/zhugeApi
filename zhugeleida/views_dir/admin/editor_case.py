@@ -204,7 +204,13 @@ def editor_case_oper(request, oper_type, o_id):
 
         # 获取分类标签
         if oper_type == 'get_case_tags':
+            field_dict = {
+                'name': '__contains',
+            }
+            q = conditionCom(request, field_dict)
+
             objs = models.zgld_case_tag.objects.filter(
+                q,
                 company_id=company_id
             ).order_by('-use_number')
 
