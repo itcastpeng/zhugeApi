@@ -174,7 +174,7 @@ def login(request):
                     is_release_version_num = is_release_version_num
                 else:
                     is_release_version_num = False
-
+                print('is_release_version_num0000000000000000000000000000======================> ', is_release_version_num)
                 ret_data = {
                     'cid': client_id,
                     'token': token,
