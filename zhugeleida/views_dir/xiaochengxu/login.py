@@ -498,6 +498,7 @@ def bottom_button_info(request):
         print('-------- 按钮 公司ID:%s | online版本号:%s | ext里的版本号:%s ------------->>',(company_id, online_version_num, version_num))
 
 
+        is_open_mall = False  # 小程序是否展示商城
         if shopping_type == 1:  # 1、代表产品
             shopping_info_dict = {
                 "default_url": "icon_chanpin_01.png",
@@ -508,6 +509,7 @@ def bottom_button_info(request):
             }
 
         elif shopping_type == 2:  # 2、 代表商城
+            is_open_mall = True
             shangChengName = ''
             _objs = models.zgld_shangcheng_jichushezhi.objects.filter(xiaochengxucompany_id=company_id)
             if _objs:
@@ -530,7 +532,7 @@ def bottom_button_info(request):
         ret_data['is_show_jszc'] = is_show_jszc
         ret_data['is_show_jszc_text'] = obj.get_is_show_jszc_display()
         ret_data['is_release_version_num'] = is_release_version_num
-        ret_data['is_open_mall'] = obj.is_open_mall         # 是否展示商城
+        ret_data['is_open_mall'] = is_open_mall         # 是否展示商城
 
         print('-------- 按钮 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200

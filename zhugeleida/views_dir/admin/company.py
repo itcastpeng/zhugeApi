@@ -746,18 +746,18 @@ def company_oper(request, oper_type, o_id):
             response.code = 200
             response.msg = msg
 
-        # 该公司小程序 是否展示商城
-        elif oper_type == 'is_open_mall':
-            obj = models.zgld_company.objects.get(id=o_id)
-            is_open_mall = int(obj.is_open_mall)
-            if is_open_mall == 0:
-                is_open_mall = 1
-            else:
-                is_open_mall = 0
-            obj.is_open_mall = is_open_mall
-            obj.save()
-            response.code = 200
-            response.msg = '修改成功'
+        # # 该公司小程序 是否展示商城
+        # elif oper_type == 'is_open_mall':
+        #     obj = models.zgld_company.objects.get(id=o_id)
+        #     is_open_mall = int(obj.is_open_mall)
+        #     if is_open_mall == 0:
+        #         is_open_mall = 1
+        #     else:
+        #         is_open_mall = 0
+        #     obj.is_open_mall = is_open_mall
+        #     obj.save()
+        #     response.code = 200
+        #     response.msg = '修改成功'
 
         else:
             response.code = 402
