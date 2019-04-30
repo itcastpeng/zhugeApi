@@ -170,11 +170,6 @@ def login(request):
                         user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
                     print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
 
-                if company_id == 15:
-                    is_release_version_num = is_release_version_num
-                else:
-                    is_release_version_num = False
-                print('is_release_version_num0000000000000000000000000000======================> ', is_release_version_num)
                 ret_data = {
                     'cid': client_id,
                     'token': token,
@@ -527,6 +522,12 @@ def bottom_button_info(request):
                 "order": 3
             }
             ret_data['shangChengName'] = shangChengName
+
+        if company_id == 15:
+            is_release_version_num = is_release_version_num
+        else:
+            is_release_version_num = False
+        print('is_release_version_num0000000000000000000000000000======================> ', is_release_version_num)
 
         buttom_navigation_data_list.insert(2, shopping_info_dict)
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list  # 按钮
