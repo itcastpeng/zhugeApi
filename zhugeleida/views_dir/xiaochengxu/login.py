@@ -524,10 +524,10 @@ def bottom_button_info(request):
             ret_data['shangChengName'] = shangChengName
 
         if company_id == 15:
+            print('is_release_version_num0000000000000000000000000000***************************======================> ', is_release_version_num)
             is_release_version_num = is_release_version_num
         else:
             is_release_version_num = False
-        print('is_release_version_num0000000000000000000000000000======================> ', is_release_version_num)
 
         buttom_navigation_data_list.insert(2, shopping_info_dict)
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list  # 按钮
