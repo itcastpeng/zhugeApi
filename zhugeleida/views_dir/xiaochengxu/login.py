@@ -170,7 +170,10 @@ def login(request):
                         user_id = models.zgld_userprofile.objects.filter(company_id=company_id, status=1).order_by('?')[0].id
                     print('----------- [没有uid],说明是搜索进来或者审核者自己生成的二维码 。 company_id | uid ：------------>>', company_id, user_id)
 
-
+                if company_id == 15:
+                    is_release_version_num = is_release_version_num
+                else:
+                    is_release_version_num = False
 
                 ret_data = {
                     'cid': client_id,
