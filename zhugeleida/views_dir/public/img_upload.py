@@ -144,9 +144,13 @@ def img_merge(request):
 
         ## 给文章的图片加水印
         if  img_source in ['article', 'cover_picture', 'case']:
+            is_wenan = request.GET.get('is_wenan')
             user_id = request.GET.get('user_id')
             if user_id:
-                company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
+                if is_wenan:
+                    company_id = models.zgld_editor.objects.filter(id=user_id)[0].company_id
+                else:
+                    company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
             else:
                 company_id = request.GET.get('company_id')
 

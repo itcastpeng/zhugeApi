@@ -22,7 +22,7 @@ def editor(request):
         user_id = request.GET.get('user_id')
         current_page = form_objs.cleaned_data['current_page']
         length = form_objs.cleaned_data['length']
-
+        company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
         field_dict = {
             'id': '',
             'user_name': '__contains',
@@ -30,7 +30,7 @@ def editor(request):
         }
 
         q = conditionCom(request, field_dict)
-        objs = models.zgld_editor.objects.filter(q, is_delete=False).order_by('-create_date')
+        objs = models.zgld_editor.objects.filter(q, is_delete=False, company_id=company_id).order_by('-create_date')
         count = objs.count()
 
         if length != 0:
@@ -168,7 +168,7 @@ def editor_oper(request, oper_type, o_id):
                             company_id=user_obj.company_id,
                             title=obj.title,
                             summary=obj.summary,
-                            status=2,  # 未发状态
+                            status=1,  # 未发状态
                             source=1,  # 原创作品
                             content=obj.content,
                             cover_picture=obj.cover_picture,  # 封面

@@ -18,6 +18,8 @@ def editor_case(request):
         current_page = forms_obj.cleaned_data['current_page']
         length = forms_obj.cleaned_data['length']
         order = request.GET.get('order', '-create_date')
+        user_id = request.GET.get('user_id')
+
         field_dict = {
             'id': '',
             'status': '',
@@ -25,7 +27,7 @@ def editor_case(request):
         }
         q = conditionCom(request, field_dict)
 
-        objs = models.zgld_editor_case.objects.filter(q).order_by(order)
+        objs = models.zgld_editor_case.objects.filter(q, user_id=user_id).order_by(order)
         count = objs.count()
 
         if length != 0:
