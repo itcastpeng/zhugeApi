@@ -195,7 +195,9 @@ class LoginForm(forms.Form):
             login_user=login_user,
             password=account.str_encrypt(password),
             status=1
-        ).exclude(is_delete=1)
+        ).exclude(
+            is_delete=1
+        )
         if objs:
             obj = objs[0]
             if datetime.datetime.today() <= obj.company.account_expired_time:
