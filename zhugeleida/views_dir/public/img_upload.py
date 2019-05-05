@@ -144,7 +144,7 @@ def img_merge(request):
 
         ## 给文章的图片加水印
         if  img_source in ['article', 'cover_picture', 'case']:
-            is_wenan = request.GET.get('is_wenan')
+            is_wenan = request.POST.get('is_wenan')
             user_id = request.GET.get('user_id')
             if user_id:
                 if is_wenan:
