@@ -153,7 +153,7 @@ def img_merge(request):
                     company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
             else:
                 company_id = request.GET.get('company_id')
-
+            print('company_id-----------------------------> ', company_id)
             if company_id and int(company_id) == 12: # 米扬丽格 水印文字
                 watermark_name = '米扬丽格医疗美容'
             else:
