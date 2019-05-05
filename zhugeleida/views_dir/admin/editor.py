@@ -282,7 +282,7 @@ def editor_oper(request, oper_type, o_id):
                             title=obj.title,
                             diary_date=obj.diary_date,
                             content=obj.content,
-                            status=2,
+                            status=1,
                             cover_show_type=obj.cover_show_type
                         )
                         case_type = int(obj.case.case_type)
