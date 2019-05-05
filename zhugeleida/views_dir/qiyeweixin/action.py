@@ -216,7 +216,7 @@ def action(request, oper_type):
                         q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
 
                     if create_date__lt:
-                        stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                        stop_time = (timedate.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
                         q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
                 objs = models.zgld_accesslog.objects.select_related('user', 'customer').filter(q).order_by(order)
@@ -232,7 +232,7 @@ def action(request, oper_type):
                 ret_data = []
                 for obj in objs:
                     try:
-                        username = base64.b64decode(obj.customer.username)
+                        username = b64decode(obj.customer.username)
                         username = str(username, 'utf-8')
                         # print('----- 解密b64decode User_id username----->', username)
                     except Exception as e:
@@ -397,7 +397,7 @@ def action(request, oper_type):
                     q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
 
                 if create_date__lt:
-                    stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime(
+                    stop_time = (timedate.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime(
                         "%Y-%m-%d")
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
@@ -422,7 +422,7 @@ def action(request, oper_type):
 
                     try:
                         print('----- 解密b64decode 客户的username----->', customer_username)
-                        customer_name = base64.b64decode(customer_username)
+                        customer_name = b64decode(customer_username)
                         customer_name = str(customer_name, 'utf-8')
 
                     except Exception as e:
@@ -477,7 +477,7 @@ def action(request, oper_type):
                 q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
 
             if create_date__lt:
-                stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
+                stop_time = (timedate.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime("%Y-%m-%d")
                 q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 
             # print('----- 没毛病 customer_detail q --->>',q)
