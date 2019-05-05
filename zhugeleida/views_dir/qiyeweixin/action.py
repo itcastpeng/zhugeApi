@@ -9,11 +9,11 @@ from zhugeleida import models
 from django.db.models import Count
 from publicFunc.condition_com import conditionCom
 from django.db.models import Q
-from datetime import datetime, timedelta
+from datetime import datetime as timedate, timedelta
 import json
 from publicFunc.base64 import b64encode, b64decode
-import base64, datetime
 from publicFunc.time_screen import time_screen
+import datetime
 
 # 跟进数据
 def follow_up_data(user_id, request, data_type=None):
@@ -335,7 +335,7 @@ def action(request, oper_type):
                     q.add(Q(**{'create_date__gte': create_date__gte}), Q.AND)
 
                 if create_date__lt:
-                    stop_time = (datetime.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime(
+                    stop_time = (timedate.strptime(create_date__lt, '%Y-%m-%d') + timedelta(days=1)).strftime(
                         "%Y-%m-%d")
                     q.add(Q(**{'create_date__lt': stop_time}), Q.AND)
 

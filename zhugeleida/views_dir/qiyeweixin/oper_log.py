@@ -24,21 +24,25 @@ def oper_log_oper(request, oper_type, o_id):
         customer_id = request.POST.get('customer_id')
         # 客户复制咨询名称(记录次数)
         if oper_type == "add":
-            form_data = {
-                'oper_type': o_id,
-                'user_id': user_id,
-                'customer_id': customer_id,
-            }
-            forms_obj = OperLogAddForm(form_data)
+            if customer_id:
+                form_data = {
+                    'oper_type': o_id,
+                    'user_id': user_id,
+                    'customer_id': customer_id,
+                }
+                forms_obj = OperLogAddForm(form_data)
 
-            if forms_obj.is_valid():
-                models.ZgldUserOperLog.objects.create(**forms_obj.cleaned_data)
-                response.code = 200
-                response.msg = "记录成功"
+                if forms_obj.is_valid():
+                    models.ZgldUserOperLog.objects.create(**forms_obj.cleaned_data)
+                    response.code = 200
+                    response.msg = "记录成功"
 
+                else:
+                    response.code = 301
+                    response.msg = json.loads(forms_obj.errors.as_json())
             else:
                 response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
+                response.msg = '客户ID不能为空'
 
         else:
             response.code = 402

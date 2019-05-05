@@ -65,7 +65,7 @@ class statistical_objs():
             self.q,
             user_id=self.o_id,
             oper_type=1
-        )
+        ).order_by('-create_date')
         count = copy_nickname_obj.count()
         data_list = []
         if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
