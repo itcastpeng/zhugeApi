@@ -231,13 +231,7 @@ def action(request, oper_type):
 
                 ret_data = []
                 for obj in objs:
-                    try:
-                        username = b64decode(obj.customer.username)
-                        username = str(username, 'utf-8')
-                        # print('----- 解密b64decode User_id username----->', username)
-                    except Exception as e:
-                        # print('----- b64decode解密失败的 customer_id 是----->', obj.customer_id)
-                        username = '客户ID%s' % (obj.customer_id)
+                    username = b64decode(obj.customer.username)
 
                     ret_data.append({
                         'user_id': obj.user_id,
