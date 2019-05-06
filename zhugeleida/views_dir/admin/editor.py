@@ -138,7 +138,7 @@ def editor_oper(request, oper_type, o_id):
                 if objs:
                     form_cleaned_data = forms_obj.cleaned_data
                     objs.update(
-                        login_user=form_cleaned_data.get('login_user'),
+                        # login_user=form_cleaned_data.get('login_user'),
                         user_name=form_cleaned_data.get('user_name'),
                         position=form_cleaned_data.get('position'),
                         phone=form_cleaned_data.get('phone'),

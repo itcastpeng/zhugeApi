@@ -523,11 +523,13 @@ def bottom_button_info(request):
             }
             ret_data['shangChengName'] = shangChengName
 
-        if int(company_id) == 15:
-            print('is_release_version_num0000000000000000000000000000***************************======================> ', is_release_version_num)
-            is_release_version_num = is_release_version_num
-        else:
+        if int(company_id) == 12: # 米扬丽格 案例版 首次点击咨询 授权手机号  小程序上线后使用is_first_authorization控制
             is_release_version_num = False
+
+        if int(company_id) == 15:
+            is_first_authorization = is_release_version_num
+        else:
+            is_first_authorization = False
 
         buttom_navigation_data_list.insert(2, shopping_info_dict)
         ret_data['buttom_navigation_data'] = buttom_navigation_data_list  # 按钮
@@ -536,7 +538,8 @@ def bottom_button_info(request):
         ret_data['is_show_jszc'] = is_show_jszc
         ret_data['is_show_jszc_text'] = obj.get_is_show_jszc_display()
         ret_data['is_release_version_num'] = is_release_version_num
-        ret_data['is_open_mall'] = is_open_mall         # 是否展示商城
+        ret_data['is_open_mall'] = is_open_mall                         # 是否展示商城
+        ret_data['is_first_authorization'] = is_first_authorization     # 案例版首次点击咨询是否授权
 
         print('-------- 按钮 接口返回给【小程序】的数据 json.dumps(ret_data) ------------>>', json.dumps(ret_data))
         response.code = 200
