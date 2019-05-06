@@ -68,9 +68,9 @@ class CaseAddForm(forms.Form):
     def clean_case_name(self):
         company_id =  self.data['company_id']
         case_name =  self.data['case_name']
-        objs = models.zgld_editor_case.objects.filter(
+        objs = models.zgld_case.objects.filter(
             case_name=case_name,
-            user__company_id=company_id
+            company_id=company_id
         )
 
         if objs:
@@ -166,10 +166,10 @@ class CaseUpdateForm(forms.Form):
         company_id = self.data['company_id']
         case_name = self.data['case_name']
 
-        objs = models.zgld_editor_case.objects.filter(
+        objs = models.zgld_case.objects.filter(
             case_name=case_name,
-            user__company_id=company_id,
-        ).exclude(id=case_id)
+            company_id=company_id,
+        )
 
         if objs:
             self.add_error('case_name', '不能存在相同的案例名')
