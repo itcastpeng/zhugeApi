@@ -88,9 +88,9 @@ class diaryAddForm(forms.Form):
     def clean_diary_name(self):
         diary_name =  self.data.get('diary_name')
         company_id =  self.data.get('company_id')
-        objs = models.zgld_editor_diary.objects.filter(
-            diary_name=diary_name,
-            user__company_id=company_id,
+        objs = models.zgld_diary.objects.filter(
+            title=diary_name,
+            company_id=company_id,
         )
         if objs:
             self.add_error('diary_name', '不能存在相同的文章名')
@@ -181,10 +181,10 @@ class diaryUpdateForm(forms.Form):
         diary_name = self.data.get('diary_name')
 
         objs = models.zgld_editor_diary.objects.filter(
-            diary_name=diary_name,
-            user__company_id=company_id
+            title=diary_name,
+            company_id=company_id
 
-        ).exclude(id=diary_id)
+        )
 
         if objs:
             self.add_error('diary_name', '不能存在相同的文章名')
