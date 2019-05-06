@@ -206,6 +206,7 @@ def editor_oper(request, oper_type, o_id):
                         response.code = 200
                         response.msg = '该文章已被审核'
                     else:
+                        status = 2
                         response.code = 301
                         response.msg = '标题重复'
                 else:
