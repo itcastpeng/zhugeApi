@@ -323,6 +323,7 @@ def editor_oper(request, oper_type, o_id):
                         response.msg = '审核已通过'
 
                     else:
+                        status = 2
                         response.code = 301
                         response.msg = '该日记名称已存在'
                 else:
