@@ -9,8 +9,8 @@ from publicFunc.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from django.db.models import F
-import json, base64, datetime
 from bs4 import BeautifulSoup
+import json, base64, datetime, random
 
 # 员工管理查询
 @csrf_exempt
@@ -335,6 +335,31 @@ def editor_oper(request, oper_type, o_id):
             else:
                 response.code = 301
                 response.msg = json.loads(form_objs.errors.as_json())
+
+        # 生成账号
+        elif oper_type == 'generate_account':
+            num = 1
+            msg = '生成成功'
+            account = ''
+            while True:
+                num += 1
+                if num >= 50:
+                    msg = '网络异常请稍后重试'
+                    break
+
+                account = random.randint(10000000000, 99999999999)
+                objs = models.zgld_editor.objects.filter(login_user=account)
+                if objs:
+                    continue
+                else:
+                    break
+
+            response.code = 200
+            response.msg = msg
+            response.data = {
+                'account': account
+            }
+
 
     elif request.method == 'GET':
         status_choices = []
