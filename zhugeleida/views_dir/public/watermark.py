@@ -32,7 +32,6 @@ class watermark(object):
             imageFile = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', 'mylg_reproduction.png')  # 已打水印图片路径
             save_path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'watermark', encryption() + '.png')  # 已打水印图片路径
         # 打开底版图片
-        print('imageFile------------------> ', imageFile)
         im1 = Image.open(imageFile)
         draw = ImageDraw.Draw(im1)               # 绘图句柄
 
@@ -44,7 +43,6 @@ class watermark(object):
         # else:
         #     rgb_color = (233, 233, 233, 30) # 白色
         #     font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体
-        print('---------------进入循环水印')
         num = 1
         for i in range(10): # Y轴
             x = 140
@@ -71,14 +69,11 @@ class watermark(object):
                 draw.text((x, y) , mark_text, rgb_color, font=font)       # 绘图 排放文字
                 x += 280
             num += 1
-        print('---------------退出循环水印')
-
         im1.save(save_path)
         return save_path
 
     # 覆盖水印图片
     def cover_watermark(self, img_path, watermark_path):
-        print('-------------------------------------覆盖水印')
         image = Image.open(img_path)  # 原图
         shuiyin = Image.open(watermark_path)  # 水印
         r, g, b, a = shuiyin.split()

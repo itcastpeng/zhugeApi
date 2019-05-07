@@ -153,7 +153,6 @@ def img_merge(request):
                     company_id = models.zgld_admin_userprofile.objects.filter(id=user_id)[0].company_id
             else:
                 company_id = request.GET.get('company_id')
-            print('company_id-----------------------------> ', company_id)
             if company_id and int(company_id) == 12: # 米扬丽格 水印文字
                 watermark_name = '米扬丽格医疗美容'
             else:
@@ -162,27 +161,32 @@ def img_merge(request):
 
             watermark_path = obj.generate_watermark_img(company_id, watermark_name) # 生成水印图片
             _img_path = obj.cover_watermark(img_path, watermark_path)  # 覆盖水印
-            print('-----------------------------------000000000000000000000000000> 打完水印')
             if  _img_path:
                 img_path =  _img_path
 
         if 'http://api.zhugeyingxiao.com/' in img_path:
             img_path = img_path.replace('http://api.zhugeyingxiao.com/', '')
-        print('-------------------------------000000000000000000000000-----------------------上传七牛云')
         # 上传到七牛云
         if qiniu and int(qiniu) == 1:
+            print('-0----------------------------------1')
             token = qiniu_oper.qiniu_get_token()
+            print('-0----------------------------------2', token)
             url = 'https://up-z1.qiniup.com/'
             data = {
                 'token': token,
             }
+            print('-0----------------------------------3')
             files = {
                 'file': open(img_path, 'rb')
             }
+            print('-0----------------------------------4')
             ret = requests.post(url, data=data, files=files)
+            print('-0----------------------------------5', ret.text)
             os.remove(img_path) #删除本地图片
+            print('-0----------------------------------6')
+
             img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
-        print('-------------返回图片地址-=----------------------------------')
+        print('-------------返回图片地址-=----------------------------------', img_path)
         response.data = {
             'picture_url': img_path,
         }
