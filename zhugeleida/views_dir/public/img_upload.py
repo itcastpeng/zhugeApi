@@ -16,7 +16,7 @@ from zhugeleida.views_dir.public.watermark import watermark
 from publicFunc.account import randon_str
 from zhugeleida.views_dir.public import qiniu_oper
 from qiniu import put_file
-
+import qiniu.config
 
 
 # 上传图片（分片上传）
