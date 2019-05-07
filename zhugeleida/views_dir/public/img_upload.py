@@ -178,6 +178,7 @@ def img_merge(request):
             }
             print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ', qiniu_url)
             ret = requests.post(qiniu_url, data=data, files=files)
+            print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret.content)
             os.remove(img_path) #删除本地图片
 
             img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
