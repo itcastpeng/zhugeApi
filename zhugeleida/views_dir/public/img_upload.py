@@ -16,7 +16,7 @@ from zhugeleida.views_dir.public.watermark import watermark
 import requests
 from zhugeleida.views_dir.public import qiniu_oper
 from qiniu import put_file
-from publicFunc.account import randon_str
+
 
 
 # 上传图片（分片上传）
@@ -173,8 +173,8 @@ def img_merge(request):
         print('----------@@@@@@@@@@@@@@@@@@@@+================上传到七牛云============上传到七牛云==')
         # 上传到七牛云
         if qiniu and int(qiniu) == 1:
-            token = qiniu_oper.qiniu_get_token()
-            key = randon_str()
+            token, key = qiniu_oper.qiniu_get_token()
+
             print('===')
             ret, info = put_file(token, key, img_path)
             print('---------------')
