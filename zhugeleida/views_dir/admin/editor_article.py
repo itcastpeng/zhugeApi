@@ -247,12 +247,14 @@ def editor_article_oper(request, oper_type, o_id):
 
                 field_dict = {
                     'id': '',
-                    'user__company_id': company_id,
                 }
 
                 q = conditionCom(request, field_dict)
 
-                objs = models.zgld_plugin_report.objects.select_related('user').filter(q).order_by(order)
+                objs = models.zgld_plugin_report.objects.select_related('user').filter(
+                    q,
+                    user__company_id=company_id
+                ).order_by(order)
                 count = objs.count()
 
                 if length != 0:
@@ -268,9 +270,12 @@ def editor_article_oper(request, oper_type, o_id):
                 for obj in objs:
 
                     read_count = obj.read_count
-                    report_customer_objs = models.zgld_report_to_customer.objects.select_related('user',
-                        'activity').filter(
-                        activity_id=obj.id)
+                    report_customer_objs = models.zgld_report_to_customer.objects.select_related(
+                        'user',
+                        'activity'
+                    ).filter(
+                        activity_id=obj.id
+                    )
                     join_num = report_customer_objs.count()
                     if read_count == 0:
                         convert_pr = 0

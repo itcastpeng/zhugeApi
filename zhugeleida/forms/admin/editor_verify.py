@@ -199,14 +199,14 @@ class LoginForm(forms.Form):
             is_delete=1
         )
         if not objs:
-            phone_objs = models.zgld_editor.objects.filter(
+            objs = models.zgld_editor.objects.filter(
                 phone=login_user,
                 password=account.str_encrypt(password),
                 status=1
             ).exclude(
                 is_delete=1
             )
-            if not phone_objs:
+            if not objs:
                 self.add_error('login_user', '用户名或密码输入错误')
 
         obj = objs[0]
