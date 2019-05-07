@@ -13,7 +13,7 @@ from zhugeleida import models
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from subprocess import Popen, PIPE
 from zhugeleida.views_dir.public.watermark import watermark
-import requests
+from publicFunc.account import randon_str
 from zhugeleida.views_dir.public import qiniu_oper
 from qiniu import put_file
 
@@ -173,9 +173,9 @@ def img_merge(request):
         print('----------@@@@@@@@@@@@@@@@@@@@+================上传到七牛云============上传到七牛云==')
         # 上传到七牛云
         if qiniu and int(qiniu) == 1:
-            token, key = qiniu_oper.qiniu_get_token()
-
-            print('===')
+            token = qiniu_oper.qiniu_get_token()
+            key = randon_str()
+            print('===', img_path)
             ret, info = put_file(token, key, img_path)
             print('---------------')
             os.remove(img_path) #删除本地图片
