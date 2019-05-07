@@ -78,6 +78,7 @@ class watermark(object):
 
     # 覆盖水印图片
     def cover_watermark(self, img_path, watermark_path):
+        print('-------------------------------------覆盖水印')
         image = Image.open(img_path)  # 原图
         shuiyin = Image.open(watermark_path)  # 水印
         r, g, b, a = shuiyin.split()
