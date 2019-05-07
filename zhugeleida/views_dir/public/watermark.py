@@ -44,7 +44,7 @@ class watermark(object):
         # else:
         #     rgb_color = (233, 233, 233, 30) # 白色
         #     font = ImageFont.truetype('/usr/share/fonts/chinese/simsun.ttc', 24)  # 使用自定义的字体
-
+        print('---------------进入循环水印')
         num = 1
         for i in range(10): # Y轴
             x = 140
@@ -71,6 +71,7 @@ class watermark(object):
                 draw.text((x, y) , mark_text, rgb_color, font=font)       # 绘图 排放文字
                 x += 280
             num += 1
+        print('---------------退出循环水印')
 
         im1.save(save_path)
         return save_path
