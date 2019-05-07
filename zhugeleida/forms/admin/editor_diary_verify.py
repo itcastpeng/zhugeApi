@@ -257,19 +257,19 @@ class SubmitDiaryForm(forms.Form):
         if objs:
             obj = objs[0]
             case_status = int(obj.case.status)
-            if case_status in [4]: # 如果案例审核 通过
-                status = int(obj.status)
-                if status in [1, 3]:
-                    objs.update(status=2)
-                    return diary_id
-                else:
-                    if status in [2]:
-                        text = '审核状态, 不可提交'
-                    else:
-                        text = '完成状态, 请勿重复提交'
-                    self.add_error('diary_id', '{}'.format(text))
+            # if case_status in [4]: # 如果案例审核 通过
+            status = int(obj.status)
+            if status in [1, 3]:
+                objs.update(status=2)
+                return diary_id
             else:
-                self.add_error('diary_id', '请先提交审核 该日记的案例')
+                if status in [2]:
+                    text = '审核状态, 不可提交'
+                else:
+                    text = '完成状态, 请勿重复提交'
+                self.add_error('diary_id', '{}'.format(text))
+            # else:
+            #     self.add_error('diary_id', '请先提交审核 该日记的案例')
         else:
             self.add_error('diary_id', '提交日记不存在')
 

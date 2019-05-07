@@ -269,72 +269,76 @@ def editor_oper(request, oper_type, o_id):
             if form_objs.is_valid():
                 status = form_objs.cleaned_data.get('status')
                 obj = models.zgld_editor_diary.objects.get(id=o_id)
-                if status == 4:  # 通过
-                    if not models.zgld_diary.objects.filter(title=obj.title, company_id=company_id):
+                case_obj = models.zgld_editor_case.objects.get(id=obj.case_id)
+                if case_obj.status == 4:
+                    if status == 4:  # 通过
+                        if not models.zgld_diary.objects.filter(title=obj.title, company_id=company_id):
 
-                        objs = models.zgld_case.objects.filter(
-                            case_name=obj.case.case_name,
-                            company_id=company_id
-                        )
-
-                        diary_obj = models.zgld_diary.objects.create(
-                            user_id=user_id,
-                            company_id=company_id,
-                            case_id=objs[0].id,
-                            title=obj.title,
-                            diary_date=obj.diary_date,
-                            content=obj.content,
-                            status=1,
-                            cover_show_type=obj.cover_show_type
-                        )
-                        case_type = int(obj.case.case_type)
-
-                        cover_picture = obj.cover_picture
-                        print('cover_picture-------> ', cover_picture)
-                        if case_type == 1:  # 普通日记
-                            diary_obj.cover_picture = json.dumps(json.loads(cover_picture))
-                            diary_obj.save()
-
-                        else:  # 时间轴日记
-                            if cover_picture and len(json.loads(cover_picture)) > 0:  # 如果上传了 封面
-                                cover_picture = json.loads(cover_picture)
-                                diary_obj.cover_picture = json.dumps(cover_picture)
-                            else:
-                                _cover_picture = []
-                                soup = BeautifulSoup(obj.content, 'html.parser')
-
-                                img_tags = soup.find_all('img')
-                                for img_tag in img_tags:
-                                    data_src = img_tag.attrs.get('src')
-                                    if data_src:
-                                        if 'tianyan.zhugeyingxiao.com' in data_src or 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
-                                            print(data_src)
-                                            _cover_picture.append(data_src)
-                                    if len(_cover_picture) >= 9:
-                                        break
-
-                                diary_obj.cover_picture = json.dumps(_cover_picture)
-                            diary_obj.save()
-
-                        case_objs = models.zgld_case.objects.filter(id=obj.case_id)  # 该 日记列表 更新时间
-                        if case_objs:
-                            case_objs.update(
-                                update_date=datetime.datetime.now()
+                            objs = models.zgld_case.objects.filter(
+                                case_name=obj.case.case_name,
+                                company_id=company_id
                             )
-                        response.code = 200
-                        response.msg = '审核已通过'
 
+                            diary_obj = models.zgld_diary.objects.create(
+                                user_id=user_id,
+                                company_id=company_id,
+                                case_id=objs[0].id,
+                                title=obj.title,
+                                diary_date=obj.diary_date,
+                                content=obj.content,
+                                status=1,
+                                cover_show_type=obj.cover_show_type
+                            )
+                            case_type = int(obj.case.case_type)
+
+                            cover_picture = obj.cover_picture
+                            print('cover_picture-------> ', cover_picture)
+                            if case_type == 1:  # 普通日记
+                                diary_obj.cover_picture = json.dumps(json.loads(cover_picture))
+                                diary_obj.save()
+
+                            else:  # 时间轴日记
+                                if cover_picture and len(json.loads(cover_picture)) > 0:  # 如果上传了 封面
+                                    cover_picture = json.loads(cover_picture)
+                                    diary_obj.cover_picture = json.dumps(cover_picture)
+                                else:
+                                    _cover_picture = []
+                                    soup = BeautifulSoup(obj.content, 'html.parser')
+
+                                    img_tags = soup.find_all('img')
+                                    for img_tag in img_tags:
+                                        data_src = img_tag.attrs.get('src')
+                                        if data_src:
+                                            if 'tianyan.zhugeyingxiao.com' in data_src or 'statics' in data_src:  # 判断是否上传的图片  防止设为表情为封面
+                                                print(data_src)
+                                                _cover_picture.append(data_src)
+                                        if len(_cover_picture) >= 9:
+                                            break
+
+                                    diary_obj.cover_picture = json.dumps(_cover_picture)
+                                diary_obj.save()
+
+                            case_objs = models.zgld_case.objects.filter(id=obj.case_id)  # 该 日记列表 更新时间
+                            if case_objs:
+                                case_objs.update(
+                                    update_date=datetime.datetime.now()
+                                )
+                            response.code = 200
+                            response.msg = '审核已通过'
+
+                        else:
+                            status = 2
+                            response.code = 301
+                            response.msg = '该日记名称已存在'
                     else:
-                        status = 2
-                        response.code = 301
-                        response.msg = '该日记名称已存在'
+                        response.code = 200
+                        response.msg = '本案例已驳回'
+                    obj.reason_rejection = audit_data.get('reason_rejection')
+                    obj.status = status
+                    obj.save()
                 else:
-                    response.code = 200
-                    response.msg = '本案例已驳回'
-
-                obj.reason_rejection = audit_data.get('reason_rejection')
-                obj.status = status
-                obj.save()
+                    response.code = 301
+                    response.msg = '请先审核该日记案例'
             else:
                 response.code = 301
                 response.msg = json.loads(form_objs.errors.as_json())

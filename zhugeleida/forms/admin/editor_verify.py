@@ -198,16 +198,26 @@ class LoginForm(forms.Form):
         ).exclude(
             is_delete=1
         )
-        if objs:
-            obj = objs[0]
-            if datetime.datetime.today() <= obj.company.account_expired_time:
-                return obj
+        if not objs:
+            phone_objs = models.zgld_editor.objects.filter(
+                phone=login_user,
+                password=account.str_encrypt(password),
+                status=1
+            ).exclude(
+                is_delete=1
+            )
+            if not phone_objs:
+                self.add_error('login_user', '用户名或密码输入错误')
 
-            else:
-                self.add_error('login_user', '该公司已过期')
+        obj = objs[0]
+        if datetime.datetime.today() <= obj.company.account_expired_time:
+            return obj
 
         else:
-            self.add_error('login_user', '用户名或密码输入错误')
+            self.add_error('login_user', '该公司已过期')
+
+        # else:
+        #     self.add_error('login_user', '用户名或密码输入错误')
 
 
 
