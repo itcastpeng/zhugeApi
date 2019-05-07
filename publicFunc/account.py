@@ -1,12 +1,24 @@
 
-import hashlib
-import time
-
+import hashlib, time, random
 from django.http import JsonResponse
 from django.shortcuts import redirect,render
-
 from publicFunc import Response
 
+
+# 生产随机字符串
+def randon_str():
+    STR = [chr(i) for i in range(65, 91)]       # 65-91对应字符A-Z
+    str = [chr(i) for i in range(97, 123)]      # a-z
+    number = [chr(i) for i in range(48, 58)]    # 0-9
+
+    str_list = []
+    str_list.extend(STR)
+    str_list.extend(str)
+    str_list.extend(number)
+
+    random_num = random.randrange(10, 15)
+    random.shuffle(str_list)
+    return ''.join(str_list[:random_num])
 
 # 用户输入的密码加密
 def str_encrypt(pwd):
