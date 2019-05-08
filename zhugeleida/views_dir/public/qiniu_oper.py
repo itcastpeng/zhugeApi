@@ -23,7 +23,7 @@ def qiniu_get_token(img_path):
         'token': token,
     }
     headers = {
-        'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b13pre) Gecko/20110307 Firefox/4.0b13'
+        'User-Agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b13pre) Gecko/20110307 Firefox/4.0b13'
     }
     files = {
         'file': open(img_path, 'rb')
