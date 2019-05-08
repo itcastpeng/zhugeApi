@@ -16,9 +16,9 @@ def qiniu_get_token(img_path):
     q = qiniu.Auth(AccessKey, SecretKey)
     bucket_name = 'bjhzkq_tianyan'
     key = randon_str()
-    token = q.upload_token(bucket_name, key, 3600)  # 可以指定key 图片名称
-    ret, info = put_file(token, key, img_path)
-    return ret
+    token = q.upload_token(bucket_name)  # 可以指定key 图片名称
+    # ret, info = put_file(token, key, img_path)
+    return token
 # 前端请求
 def qiniu_oper(request, oper_type):
     response = Response.ResponseObj()
@@ -36,7 +36,9 @@ def qiniu_oper(request, oper_type):
 
     return JsonResponse(response.__dict__)
 
-
+if __name__ == '__main__':
+    ret = qiniu_get_token('1.jpg')
+    print('ret------> ', ret)
 
 
 

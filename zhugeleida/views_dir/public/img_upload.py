@@ -16,7 +16,7 @@ from zhugeleida.views_dir.public.watermark import watermark
 from publicFunc.account import randon_str
 from zhugeleida.views_dir.public import qiniu_oper
 from qiniu import put_file
-import qiniu.config
+import qiniu.config, requests
 
 
 # 上传图片（分片上传）
@@ -173,10 +173,21 @@ def img_merge(request):
         print('----------@@@@@@@@@@@@@@@@@@@@+================上传到七牛云============上传到七牛云==')
         # 上传到七牛云
         if qiniu and int(qiniu) == 1:
-            ret = qiniu_oper.qiniu_get_token(img_path)
-            print('---------------')
+            token = qiniu_oper.qiniu_get_token(img_path)
+            qiniu_url = 'https://up-z1.qiniup.com/'
+            data = {
+                'token': token,
+            }
+            files = {
+                'file': open(img_path, 'rb')
+            }
+            print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ', qiniu_url)
+            ret = requests.post(qiniu_url, data=data, files=files)
+            print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret.content)
+
+
             os.remove(img_path) #删除本地图片
-            img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.get('key')
+            img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
         print('-------------返回图片地址-=----------------------------------', img_path)
         response.data = {
             'picture_url': img_path,
@@ -185,16 +196,6 @@ def img_merge(request):
         response.code = 200
         response.msg = "添加图片成功"
 
-            # qiniu_url = 'https://up-z1.qiniup.com/'
-            # data = {
-            #     'token': token,
-            # }
-            # files = {
-            #     'file': open(img_path, 'rb')
-            # }
-            # print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ', qiniu_url)
-            # ret = requests.post(qiniu_url, data=data, files=files)
-            # print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret.content)
 
     else:
         response.code = 303
