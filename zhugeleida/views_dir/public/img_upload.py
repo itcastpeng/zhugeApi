@@ -174,7 +174,7 @@ def img_merge(request):
         if qiniu and int(qiniu) == 1:
             ret = qiniu_oper.qiniu_get_token(img_path)
             os.remove(img_path) #删除本地图片
-            img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
+            img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.get('key')
         print('-------------返回图片地址-=----------------------------------', img_path)
         response.data = {
             'picture_url': img_path,
