@@ -178,11 +178,14 @@ def img_merge(request):
             data = {
                 'token': token,
             }
+            headers = {
+                'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b13pre) Gecko/20110307 Firefox/4.0b13'
+            }
             files = {
                 'file': open(img_path, 'rb')
             }
             print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ', qiniu_url)
-            ret = requests.post(qiniu_url, data=data, files=files)
+            ret = requests.post(qiniu_url, data=data, files=files, headers=headers)
             print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret.content)
 
 
