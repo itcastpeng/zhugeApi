@@ -170,25 +170,9 @@ def img_merge(request):
         if 'http://api.zhugeyingxiao.com/' in img_path:
             img_path = img_path.replace('http://api.zhugeyingxiao.com/', '')
 
-        print('----------@@@@@@@@@@@@@@@@@@@@+================上传到七牛云============上传到七牛云==')
         # 上传到七牛云
         if qiniu and int(qiniu) == 1:
-            token = qiniu_oper.qiniu_get_token(img_path)
-            qiniu_url = 'https://up-z1.qiniup.com/'
-            data = {
-                'token': token,
-            }
-            headers = {
-                'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b13pre) Gecko/20110307 Firefox/4.0b13'
-            }
-            files = {
-                'file': open(img_path, 'rb')
-            }
-            print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ', qiniu_url)
-            ret = requests.post(qiniu_url, data=data, files=files, headers=headers)
-            print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret.content)
-
-
+            ret = qiniu_oper.qiniu_get_token(img_path)
             os.remove(img_path) #删除本地图片
             img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
         print('-------------返回图片地址-=----------------------------------', img_path)
