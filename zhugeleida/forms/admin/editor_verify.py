@@ -206,15 +206,15 @@ class LoginForm(forms.Form):
             ).exclude(
                 is_delete=1
             )
-            if not objs:
-                self.add_error('login_user', '用户名或密码输入错误')
-
-        obj = objs[0]
-        if datetime.datetime.today() <= obj.company.account_expired_time:
-            return obj
-
+        if not objs:
+            self.add_error('login_user', '用户名或密码输入错误')
         else:
-            self.add_error('login_user', '该公司已过期')
+            obj = objs[0]
+            if datetime.datetime.today() <= obj.company.account_expired_time:
+                return obj
+
+            else:
+                self.add_error('login_user', '该公司已过期')
 
         # else:
         #     self.add_error('login_user', '用户名或密码输入错误')
