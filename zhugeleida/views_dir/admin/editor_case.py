@@ -223,7 +223,22 @@ def editor_case_oper(request, oper_type, o_id):
 
         # 添加分类
         elif oper_type == 'add_case_tag':
-            pass
+            tag_name = request.POST.get('tag_name')
+
+            objs = models.zgld_case_tag.objects.filter(
+                company_id=company_id,
+                name=tag_name
+            )
+            if not objs:
+                models.zgld_case_tag.objects.create(
+                    company_id=company_id,
+                    name=tag_name
+                )
+                response.code = 200
+                response.msg = '添加成功'
+            else:
+                response.code = 301
+                response.msg = '标签已存在'
 
     else:
 
