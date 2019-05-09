@@ -161,7 +161,7 @@ def editor_oper(request, oper_type, o_id):
                 status = form_objs.cleaned_data.get('status')
                 obj = models.zgld_editor_article.objects.get(id=o_id)
                 if status == 4:
-                    if not models.zgld_article.objects.filter(title=obj.title, company_id=company_id):
+                    if not models.zgld_article.objects.filter(title=obj.title, company_id=company_id).exclude(status=3):
 
                         article_obj = models.zgld_article.objects.create(
                             user_id=user_id,
@@ -189,19 +189,19 @@ def editor_oper(request, oper_type, o_id):
                             'level': 1,
 
                         }
+                        if models.zgld_xiaochengxu_app.objects.filter(company_id=user_obj.company_id):
+                            auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
+                            authorize_url = auth_url_ret.data.get('authorize_url')
 
-                        auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
-                        authorize_url = auth_url_ret.data.get('authorize_url')
+                            qrcode_data = {
+                                'url': authorize_url,
+                                'article_id': obj.id,
+                            }
+                            response_ret = create_qrcode(qrcode_data)
+                            pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                            article_obj.qrcode_url = pre_qrcode_url
 
-                        qrcode_data = {
-                            'url': authorize_url,
-                            'article_id': obj.id,
-                        }
-                        response_ret = create_qrcode(qrcode_data)
-                        pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
-                        article_obj.qrcode_url = pre_qrcode_url
-
-                        article_obj.save()
+                            article_obj.save()
 
                         response.code = 200
                         response.msg = '该文章已被审核'

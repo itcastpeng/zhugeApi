@@ -221,6 +221,10 @@ def editor_case_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = '请控制图片 在1/2/9张'
 
+        # 添加分类
+        elif oper_type == 'add_case_tag':
+            pass
+
     else:
 
         # 获取分类标签

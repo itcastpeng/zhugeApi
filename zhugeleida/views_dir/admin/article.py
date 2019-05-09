@@ -817,24 +817,26 @@ def article_oper(request, oper_type, o_id):
                     'level': 1,
 
                 }
+                response.data = {'article_id': obj.id}
+                if models.zgld_xiaochengxu_app.objects.filter(company_id=company_id):
+                    auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
+                    authorize_url = auth_url_ret.data.get('authorize_url')
 
-                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
-                authorize_url = auth_url_ret.data.get('authorize_url')
+                    qrcode_data = {
+                        'url': authorize_url,
+                        'article_id': obj.id,
+                    }
+                    response_ret = create_qrcode(qrcode_data)
+                    pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                    if pre_qrcode_url:
+                        response.data['pre_qrcode_url'] = pre_qrcode_url
 
-                qrcode_data = {
-                    'url': authorize_url,
-                    'article_id': obj.id,
-                }
-                response_ret = create_qrcode(qrcode_data)
-                pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
-                if pre_qrcode_url:
-                    response.data = {'pre_qrcode_url': pre_qrcode_url, 'article_id': obj.id, }
-                    response.code = 200
-                    response.msg = "添加成功"
+                    else:
+                        response.code = 303
+                        response.msg = '生成文章体验二维码失败'
 
-                else:
-                    response.code = 303
-                    response.msg = '生成文章体验二维码失败'
+                response.code = 200
+                response.msg = "添加成功"
 
             else:
                 # print("验证不通过")
@@ -951,22 +953,22 @@ def article_oper(request, oper_type, o_id):
                     'pid': '',
                     'level': 1,
                 }
+                if models.zgld_xiaochengxu_app.objects.filter(company_id=company_id):
+                    auth_url_ret = create_gongzhonghao_yulan_auth_url(data)  # 生成跳转链接
+                    authorize_url = auth_url_ret.data.get('authorize_url')
+                    qrcode_data = {
+                        'url': authorize_url,
+                        'article_id': objs[0].id,
+                    }
+                    response_ret = create_qrcode(qrcode_data)  # 生成体验二维码
+                    pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
 
-                auth_url_ret = create_gongzhonghao_yulan_auth_url(data)  # 生成跳转链接
-                authorize_url = auth_url_ret.data.get('authorize_url')
-                qrcode_data = {
-                    'url': authorize_url,
-                    'article_id': objs[0].id,
-                }
-                response_ret = create_qrcode(qrcode_data)  # 生成体验二维码
-                pre_qrcode_url = response_ret.data.get('pre_qrcode_url')
+                    if pre_qrcode_url:
+                        response = response_ret
 
-                if pre_qrcode_url:
-                    response = response_ret
-
-                else:
-                    response.code = 303
-                    response.msg = '生成文章体验二维码失败'
+                    else:
+                        response.code = 303
+                        response.msg = '生成文章体验二维码失败'
 
 
             else:
