@@ -818,7 +818,7 @@ def article_oper(request, oper_type, o_id):
 
                 }
                 response.data = {'article_id': obj.id}
-                if models.zgld_xiaochengxu_app.objects.filter(company_id=company_id):
+                if models.zgld_gongzhonghao_app.objects.filter(company_id=company_id):
                     auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
                     authorize_url = auth_url_ret.data.get('authorize_url')
 
@@ -953,7 +953,7 @@ def article_oper(request, oper_type, o_id):
                     'pid': '',
                     'level': 1,
                 }
-                if models.zgld_xiaochengxu_app.objects.filter(company_id=company_id):
+                if models.zgld_gongzhonghao_app.objects.filter(company_id=company_id):
                     auth_url_ret = create_gongzhonghao_yulan_auth_url(data)  # 生成跳转链接
                     authorize_url = auth_url_ret.data.get('authorize_url')
                     qrcode_data = {

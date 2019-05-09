@@ -189,10 +189,8 @@ def editor_oper(request, oper_type, o_id):
                             'level': 1,
 
                         }
-                        xiaochengxu_objs = models.zgld_xiaochengxu_app.objects.filter(company_id=user_obj.company_id)
-                        print('--------------------------------------------->', user_obj.company_id, xiaochengxu_objs)
 
-                        if xiaochengxu_objs:
+                        if models.zgld_gongzhonghao_app.objects.filter(company_id=user_obj.company_id):
                             auth_url_ret = create_gongzhonghao_yulan_auth_url(data)
                             authorize_url = auth_url_ret.data.get('authorize_url')
 
