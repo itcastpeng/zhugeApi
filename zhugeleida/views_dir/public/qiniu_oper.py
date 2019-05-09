@@ -19,23 +19,24 @@ def qiniu_get_token(img_path):
     policy = {  # 指定上传文件的格式 等
 
     }
-    token = q.upload_token(bucket_name, None, 3600, policy)  # 可以指定key 图片名称
-    print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ')
-    ret, info = put_file(token, None, mime_type="text/js", file_path=img_path)
-    print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret)
+    token = q.upload_token(bucket_name)  # 可以指定key 图片名称
+    # token = q.upload_token(bucket_name, None, 3600, policy)  # 可以指定key 图片名称
+    # print('qiniu_url------qiniu_url------------qiniu_url-----------qiniu_url---------qiniu_url---------> ')
+    # ret, info = put_file(token, None, mime_type="text/js", file_path=img_path)
+    # print('ret.content-==========2@@@@@@@@@@@@@@@@@@@@!!!!!!!!!!!!!!!!!!##################$$$$$$$$$$$$$$$$$$$$$+=====》', ret)
 
     # ret, info = put_file(token, key, img_path)
-    # qiniu_url = 'https://up-z1.qiniup.com/'
-    # data = {
-    #     'token': token,
-    # }
-    # headers = {
-    #     'User-Agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b13pre) Gecko/20110307 Firefox/4.0b13'
-    # }
-    # files = {
-    #     'file': open(img_path, 'rb')
-    # }
-    # ret = requests.post(qiniu_url, data=data, files=files, headers=headers)
+    qiniu_url = 'https://up-z1.qiniup.com/'
+    data = {
+        'token': token,
+    }
+    headers = {
+        'User-Agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:2.0b13pre) Gecko/20110307 Firefox/4.0b13'
+    }
+    files = {
+        'file': open(img_path, 'rb')
+    }
+    ret = requests.post(qiniu_url, data=data, files=files, headers=headers)
 
     return ret
 
