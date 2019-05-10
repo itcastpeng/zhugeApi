@@ -493,20 +493,20 @@ class statistical_objs():
                     user_active_send_num += 1
 
                 if self.detail_data_type and self.detail_data_type == 'active_message': # 是否查看详情
+                    if send_type == 2:
+                        content = eval(infoObj.content)
+                        text = get_msg(content)
 
-                    content = eval(infoObj.content)
-                    text = get_msg(content)
-
-                    data_list.append({
-                        'customer__username':b64decode(infoObj.customer.username),
-                        'msg': text.get('msg'),
-                        'product_cover_url': text.get('product_cover_url'),
-                        'product_name': text.get('product_name'),
-                        'product_price': text.get('product_price'),
-                        'url': text.get('url'),
-                        'info_type': text.get('info_type'),
-                        'create_date':infoObj.create_date.strftime('%Y-%m-%d %H:%M:%S')
-                    })
+                        data_list.append({
+                            'customer__username':b64decode(infoObj.customer.username),
+                            'msg': text.get('msg'),
+                            'product_cover_url': text.get('product_cover_url'),
+                            'product_name': text.get('product_name'),
+                            'product_price': text.get('product_price'),
+                            'url': text.get('url'),
+                            'info_type': text.get('info_type'),
+                            'create_date':infoObj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                        })
 
         data = {
             'data_list': data_list,
@@ -930,107 +930,107 @@ def data_statistics(request, oper_type):
 
 
 # 临时转存雷达 案例 日记 图片 到七牛云
-import qiniu, requests
-from bs4 import BeautifulSoup
+# import qiniu, requests
+# from bs4 import BeautifulSoup
 
-def get_token(imgurl):
-    if 'statics/zhugeleida' in imgurl:
-        if 'http://tianyan.zhugeyingxiao.com/' not in imgurl:
-            if 'http://api.zhugeyingxiao.com/' in imgurl:
-                imgurl = imgurl.replace('http://api.zhugeyingxiao.com/', '')
-
-            SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
-            AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
-            q = qiniu.Auth(AccessKey, SecretKey)
-            bucket_name = 'bjhzkq_tianyan'
-            token = q.upload_token(bucket_name)  # 可以指定key 图片名称
-            url = 'https://up-z1.qiniup.com/'
-            data = {
-                'token': token,
-            }
-            files = {
-                'file': open(imgurl, 'rb')
-            }
-            ret = requests.post(url, data=data, files=files)
-            filename = ret.json().get('key')
-            return 'http://tianyan.zhugeyingxiao.com/' + filename
-
-@csrf_exempt
-def update_qiniu(request):
-    response = Response.ResponseObj()
-
-    # objs = models.zgld_case.objects.filter(company_id=12).exclude(status=3)
-    # for obj in objs:
-    #     print('obj.id-------> ', obj.id)
-    #     # 封面图片
-    #     cover_picture = obj.cover_picture
-    #     if cover_picture:
-    #         cover_picture = json.loads(cover_picture)
-    #         cover_picture_list = []
-    #         for i in cover_picture:
-    #             filename = get_token(i)
-    #             if filename:
-    #                 cover_picture_list.append(filename)
-    #             else:
-    #                 cover_picture_list.append(i)
-    #         obj.cover_picture = json.dumps(cover_picture_list)
-    #
-    #     # 头像
-    #     headimgurl = obj.headimgurl
-    #     headimgurl_file = get_token(headimgurl)
-    #     if headimgurl_file:
-    #         obj.headimgurl = headimgurl_file
-
-        # 变美图片
-    #     become_beautiful_cover = obj.become_beautiful_cover
-    #     if become_beautiful_cover:
-    #         become_beautiful_cover = json.loads(become_beautiful_cover)
-    #         become_beautiful_cover_list = []
-    #         for i in become_beautiful_cover:
-    #             filename = get_token(i)
-    #             if filename:
-    #                 become_beautiful_cover_list.append(filename)
-    #             else:
-    #                 become_beautiful_cover_list.append(i)
-    #         obj.become_beautiful_cover = json.dumps(become_beautiful_cover_list)
-    #
-        # obj.save()
-    #
-    #
-    # diary_objs = models.zgld_diary.objects.filter(company_id=12).exclude(status=3)
-    # for diary_obj in diary_objs:
-    #     print('diary_obj.id-----> ', diary_obj.id)
-
-        # 封面
-        # cover_picture = diary_obj.cover_picture
-        # if cover_picture:
-        #     cover_picture = json.loads(cover_picture)
-        #     cover_picture_list = []
-        #     for i in cover_picture:
-        #         filename = get_token(i)
-        #         if filename:
-        #             cover_picture_list.append(filename)
-        #         else:
-        #             cover_picture_list.append(i)
-        #     diary_obj.cover_picture = json.dumps(cover_picture_list)
-
-        # 内容
-        # content = diary_obj.content
-        # soup = BeautifulSoup(content, 'html.parser')
-        # img_tags = soup.find_all('img')
-        # for img_tag in img_tags:
-        #     data_src = img_tag.attrs.get('src')
-        #     if data_src:
-        #         filename = get_token(data_src)
-        #         if filename:
-        #             img_tag.attrs['src'] = filename
-        #         else:
-        #             img_tag.attrs['src'] = data_src
-        # diary_obj.content = str(soup)
-        # diary_obj.save()
-
-    response.code = 200
-    return JsonResponse(response.__dict__)
+# def get_token(imgurl):
+#     if 'statics/zhugeleida' in imgurl:
+#         if 'http://tianyan.zhugeyingxiao.com/' not in imgurl:
+#             if 'http://api.zhugeyingxiao.com/' in imgurl:
+#                 imgurl = imgurl.replace('http://api.zhugeyingxiao.com/', '')
+#
+#             SecretKey = 'wVig2MgDzTmN_YqnL-hxVd6ErnFhrWYgoATFhccu'
+#             AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
+#             q = qiniu.Auth(AccessKey, SecretKey)
+#             bucket_name = 'bjhzkq_tianyan'
+#             token = q.upload_token(bucket_name)  # 可以指定key 图片名称
+#             url = 'https://up-z1.qiniup.com/'
+#             data = {
+#                 'token': token,
+#             }
+#             files = {
+#                 'file': open(imgurl, 'rb')
+#             }
+#             ret = requests.post(url, data=data, files=files)
+#             filename = ret.json().get('key')
+#             return 'http://tianyan.zhugeyingxiao.com/' + filename
+#
+# @csrf_exempt
+# def update_qiniu(request):
+#     response = Response.ResponseObj()
+#
+#     # objs = models.zgld_case.objects.filter(company_id=12).exclude(status=3)
+#     # for obj in objs:
+#     #     print('obj.id-------> ', obj.id)
+#     #     # 封面图片
+#     #     cover_picture = obj.cover_picture
+#     #     if cover_picture:
+#     #         cover_picture = json.loads(cover_picture)
+#     #         cover_picture_list = []
+#     #         for i in cover_picture:
+#     #             filename = get_token(i)
+#     #             if filename:
+#     #                 cover_picture_list.append(filename)
+#     #             else:
+#     #                 cover_picture_list.append(i)
+#     #         obj.cover_picture = json.dumps(cover_picture_list)
+#     #
+#     #     # 头像
+#     #     headimgurl = obj.headimgurl
+#     #     headimgurl_file = get_token(headimgurl)
+#     #     if headimgurl_file:
+#     #         obj.headimgurl = headimgurl_file
+#
+#         # 变美图片
+#     #     become_beautiful_cover = obj.become_beautiful_cover
+#     #     if become_beautiful_cover:
+#     #         become_beautiful_cover = json.loads(become_beautiful_cover)
+#     #         become_beautiful_cover_list = []
+#     #         for i in become_beautiful_cover:
+#     #             filename = get_token(i)
+#     #             if filename:
+#     #                 become_beautiful_cover_list.append(filename)
+#     #             else:
+#     #                 become_beautiful_cover_list.append(i)
+#     #         obj.become_beautiful_cover = json.dumps(become_beautiful_cover_list)
+#     #
+#         # obj.save()
+#     #
+#     #
+#     # diary_objs = models.zgld_diary.objects.filter(company_id=12).exclude(status=3)
+#     # for diary_obj in diary_objs:
+#     #     print('diary_obj.id-----> ', diary_obj.id)
+#
+#         # 封面
+#         # cover_picture = diary_obj.cover_picture
+#         # if cover_picture:
+#         #     cover_picture = json.loads(cover_picture)
+#         #     cover_picture_list = []
+#         #     for i in cover_picture:
+#         #         filename = get_token(i)
+#         #         if filename:
+#         #             cover_picture_list.append(filename)
+#         #         else:
+#         #             cover_picture_list.append(i)
+#         #     diary_obj.cover_picture = json.dumps(cover_picture_list)
+#
+#         # 内容
+#         # content = diary_obj.content
+#         # soup = BeautifulSoup(content, 'html.parser')
+#         # img_tags = soup.find_all('img')
+#         # for img_tag in img_tags:
+#         #     data_src = img_tag.attrs.get('src')
+#         #     if data_src:
+#         #         filename = get_token(data_src)
+#         #         if filename:
+#         #             img_tag.attrs['src'] = filename
+#         #         else:
+#         #             img_tag.attrs['src'] = data_src
+#         # diary_obj.content = str(soup)
+#         # diary_obj.save()
+#
+#     response.code = 200
+#     return JsonResponse(response.__dict__)
 
 
 

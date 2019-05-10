@@ -180,8 +180,7 @@ urlpatterns = [
 
     # 数据统计
     url(r'^data_statistics/(?P<oper_type>\w+)$', data_statistics.data_statistics),
-    url(r'^update_qiniu$', data_statistics.update_qiniu), # 临时 案例图片上传到七牛云
-
+    # url(r'^update_qiniu$', data_statistics.update_qiniu), # 临时 案例图片上传到七牛云
 
     # 管理员审核 员工提交的 文章/案例
     url(r'^editor/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor.editor_oper),
