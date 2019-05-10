@@ -46,7 +46,7 @@ def contact(request):
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                chat_info_objs = chat_info_objs.order_by('-create_date')[start_line: stop_line]
+                chat_info_objs = chat_info_objs[start_line: stop_line]
 
             ret_data_list = []
             for obj in chat_info_objs:
@@ -116,7 +116,7 @@ def contact(request):
 
                 ret_data_list.append(base_info_dict)
 
-
+            ret_data_list = sorted(ret_data_list, key=lambda x: x['create_date'], reverse=True)
             response.code = 200
             response.data = {
                 'ret_data': ret_data_list,
@@ -124,20 +124,20 @@ def contact(request):
                 'unread_msg_num': chatinfo_count,
             }
 
-            # response.note = {
-            #     'customer_id': '客户ID',
-            #     'name': '客户姓名',
-            #     'customer_source': '客户访问类型ID(微信公众号 微信小程序)',
-            #     'customer_source_text': '客户访问类型',
-            #     'src': '客户头像',
-            #     'is_subscribe': '该客户是否订阅该公众号ID',
-            #     'is_subscribe_text': '该客户是否订阅该公众号 文本',
-            #     'dateTime': '消息发送时间',
-            #     'msg': '发送的消息',
-            #     'count': '该客户发送消息的数量',
-            #     'tags_list': '标签列表',
-            #     'unread_msg_num': '未读消息总数',
-            # }
+            response.note = {
+                'customer_id': '客户ID',
+                'name': '客户姓名',
+                'customer_source': '客户访问类型ID(微信公众号 微信小程序)',
+                'customer_source_text': '客户访问类型',
+                'src': '客户头像',
+                'is_subscribe': '该客户是否订阅该公众号ID',
+                'is_subscribe_text': '该客户是否订阅该公众号 文本',
+                'dateTime': '消息发送时间',
+                'msg': '发送的消息',
+                'count': '该客户发送消息的数量',
+                'tags_list': '标签列表',
+                'unread_msg_num': '未读消息总数',
+            }
 
     return JsonResponse(response.__dict__)
 
