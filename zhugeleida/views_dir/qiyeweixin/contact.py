@@ -46,7 +46,7 @@ def contact(request):
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                chat_info_objs = chat_info_objs[start_line: stop_line]
+                chat_info_objs = chat_info_objs.order_by('-create_date')[start_line: stop_line]
 
             ret_data_list = []
             for obj in chat_info_objs:
