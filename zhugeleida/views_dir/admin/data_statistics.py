@@ -106,6 +106,7 @@ class statistical_objs():
             )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
+            effective_num = 0 # 查看详情单个人次数
             customer__username = ''
             result_data = []
             start_date_time = zgld_chatinfo_obj.cdt + ' 00:00:00'  # 按天区分
@@ -171,15 +172,19 @@ class statistical_objs():
                     flag = True
 
                 if send_type_user >= 1 and send_type_customer >= 1:
-                    effective_dialogue += num
+                    effective_num += num
 
                 if is_number_valid_conversations:  # 查询详情
                     if flag:
                         data_list.append({
                             'customer__username': customer__username,
                             'create_date': result_data[0].get('create_date'),
-                            'result_data':result_data
+                            'result_data':result_data,
+                            'effective_num':effective_num # 单个人 有效次数
                         })
+
+            if effective_num >= 1:
+                effective_dialogue += 1
 
         data = {
             'effective_dialogue': str(effective_dialogue) + '次',
