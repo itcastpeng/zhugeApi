@@ -414,14 +414,7 @@ def action(request, oper_type):
                     customer_username = obj['customer__username']
                     headimgurl = obj['customer__headimgurl']
 
-                    try:
-                        print('----- 解密b64decode 客户的username----->', customer_username)
-                        customer_name = b64decode(customer_username)
-                        customer_name = str(customer_name, 'utf-8')
-
-                    except Exception as e:
-                        print('----- b64decode解密失败的 customer_id 是----->', customer_id)
-                        customer_name = '客户ID%s' % (customer_id)
+                    customer_name = b64decode(customer_username)
 
                     insert_data = {
                         'customer_id': customer_id,
