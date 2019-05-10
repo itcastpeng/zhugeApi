@@ -115,8 +115,8 @@ def contact(request):
                 }
 
                 ret_data_list.append(base_info_dict)
-
-            ret_data_list = sorted(ret_data_list, key=lambda x: x['create_date'], reverse=True)
+            # print('ret_data_list-> ', ret_data_list)
+            ret_data_list = sorted(ret_data_list, key=lambda x: x['dateTime'], reverse=True)
             response.code = 200
             response.data = {
                 'ret_data': ret_data_list,
