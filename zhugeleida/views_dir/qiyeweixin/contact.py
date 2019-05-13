@@ -38,23 +38,16 @@ def contact(request):
 
             chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,is_user_new_msg=True).count()
 
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                chat_info_objs = chat_info_objs[start_line: stop_line]
 
             ret_data_list = []
             customer_id_list = []
 
             for obj in chat_info_objs:
-                if obj.customer_id in customer_id_list:
-                    continue
-                customer_id_list.append(obj.customer_id)
-
                 customer_id = obj.customer_id
-
-                if not customer_id:  # 没有customer_id
+                if customer_id in customer_id_list:
                     continue
+                customer_id_list.append(customer_id)
+
 
                 info_objs = models.zgld_chatinfo.objects.filter(
                     userprofile_id=user_id,
@@ -116,6 +109,11 @@ def contact(request):
                 }
 
                 ret_data_list.append(base_info_dict)
+            if length != 0:
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                ret_data_list = ret_data_list[start_line: stop_line]
+
             print('ret_data_list-> ', json.dumps(ret_data_list))
             ret_data_list = sorted(ret_data_list, key=lambda x: x['crea_date'], reverse=True)
             response.code = 200
