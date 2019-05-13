@@ -49,6 +49,7 @@ def contact(request):
             for obj in chat_info_objs:
                 if obj.customer_id in customer_id_list:
                     continue
+                customer_id_list.append(obj.customer_id)
 
                 customer_id = obj.customer_id
 
