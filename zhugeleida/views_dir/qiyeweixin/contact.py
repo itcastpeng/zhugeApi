@@ -56,7 +56,7 @@ def contact(request):
                 ).order_by('-create_date')
                 if info_objs:
                     info_objs = info_objs[0]
-
+                print('--------======@==========@==========> ', customer_id, info_objs.customer.username)
                 customer_name = ''
                 if info_objs.customer.username:
                     customer_name = b64decode(info_objs.customer.username)
