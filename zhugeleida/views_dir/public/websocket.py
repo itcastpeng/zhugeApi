@@ -3,10 +3,7 @@ from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_c
 from django.http import JsonResponse, HttpResponse
 from publicFunc import deal_time
 import time
-import datetime
-from zhugeapi_celery_project import tasks
-from django.db.models import F
-import json
+from publicFunc.base64 import b64decode
 import json
 from zhugeleida import models
 import base64
@@ -498,8 +495,6 @@ def leida_websocket(request, oper_type):
                     uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
-
-
 
 
 # @csrf_exempt
@@ -1380,25 +1375,25 @@ def query_info_num_list(data):
 
     return chatinfo_count
 
-# 查询雷达通讯录列表的数量的数量
+# 查询雷达通讯录列表的数量 和数据
 def query_contact_list(data):
     user_id = data.get('user_id')
     current_page = data.get('current_page')
     length = data.get('length')
 
-    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,
+    chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,  # 总接收消息数
                                                          is_user_new_msg=True).count()
 
-
+    # 发来消息的人 做分组 每个人只展示一次
     chat_info_objs = models.zgld_chatinfo.objects.select_related(
         'userprofile',
         'customer'
     ).filter(
         userprofile_id=user_id,
         is_last_msg=True
-    ).order_by('-create_date')
+    ).order_by('-create_date').values('customer_id')
 
-    # contact_num = chat_info_objs.count()
+
 
     if length != 0:
         start_line = (current_page - 1) * length
@@ -1407,26 +1402,27 @@ def query_contact_list(data):
 
     ret_data_list = []
     for obj in chat_info_objs:
-        print('-------- obj.id -------->>', obj.id)
+        customer_id = obj.get('customer_id')
+        if not customer_id:  # 没有customer_id
+            continue
 
-        # username = base64.b64decode(obj.customer.username)
-        # customer_name = str(username, 'utf-8')
 
-        try:
-            customer_id = obj.customer_id
-            if not customer_id:  # 没有customer_id
-                continue
+        info_obj = models.zgld_chatinfo.objects.select_related(
+            'userprofile',
+            'customer'
+        ).filter(
+            userprofile_id=user_id,
+            is_last_msg=True,
+            customer_id=customer_id
+        ).order_by('-create_date')
 
-            _username = obj.customer.username
+        if info_obj:
+            info_obj = info_obj[0]
+        else:
+            continue
 
-            username = base64.b64decode(_username)
-            customer_name = str(username, 'utf-8')
-            print('----- 解密b64decode username----->', customer_id, '|', username)
-        except Exception as e:
-            print('----- b64decode解密失败的 customer_id 是 | e ----->', obj.customer_id, "|", e)
-            customer_name = '客户ID%s' % (obj.customer_id)
-
-        content = obj.content
+        customer_name = b64decode(info_obj.customer.username)
+        content = info_obj.content
 
         if not content:
             continue
@@ -1434,6 +1430,7 @@ def query_contact_list(data):
         _content = json.loads(content)
         info_type = _content.get('info_type')
         msg = ''
+
         if info_type:
             info_type = int(info_type)
             if info_type == 1:
@@ -1448,22 +1445,21 @@ def query_contact_list(data):
                 msg = _content.get('msg')
 
         _objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
-            userprofile_id=obj.userprofile_id,
-            customer_id=obj.customer_id,
+            userprofile_id=user_id,
+            customer_id=customer_id,
             is_user_new_msg=True,
             send_type=2
         )
         _count = _objs.count()
-
         base_info_dict = {
-            'customer_id': obj.customer_id,
-            'customer_source': obj.customer.user_type or '',
-            'customer_source_text': obj.customer.get_user_type_display(),
-            'is_subscribe': obj.customer.is_subscribe,
-            'is_subscribe_text': obj.customer.get_is_subscribe_display(),
-            'src': obj.customer.headimgurl,
+            'customer_id': customer_id,
+            'customer_source': info_obj.customer.user_type or '',
+            'customer_source_text': info_obj.customer.get_user_type_display(),
+            'is_subscribe': info_obj.customer.is_subscribe,
+            'is_subscribe_text': info_obj.customer.get_is_subscribe_display(),
+            'src': info_obj.customer.headimgurl,
             'name': customer_name,
-            'dateTime': deal_time.deal_time(obj.create_date),
+            'dateTime': deal_time.deal_time(info_obj.create_date),
             'msg': msg,
             'count': _count
         }

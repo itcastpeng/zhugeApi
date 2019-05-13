@@ -2,34 +2,22 @@ from django.http import HttpResponse
 from zhugeleida import models
 from zhugeleida.views_dir.conf import Conf
 from django.views.decorators.csrf import csrf_exempt
-
 from publicFunc import Response
-import json
 from publicFunc.Response import ResponseObj
 from django.http import JsonResponse
-import os
-import datetime
-import redis, time
-from collections import OrderedDict
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
     create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
-
-import sys
 from django.conf import settings
 from selenium import webdriver
-import requests
 from PIL import Image
 from zhugeapi_celery_project import tasks
 from zhugeleida.public import common
 from django.db.models import Sum
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
 from django.db.models import Q, F
-import base64
 from zhugeleida.public.common import create_qiyeweixin_access_token
-import random
-
-from selenium.webdriver.chrome.options import Options
+import datetime, json, os, sys, requests, random, redis, time, base64
 
 def action_record(data):
     response = Response.ResponseObj()
