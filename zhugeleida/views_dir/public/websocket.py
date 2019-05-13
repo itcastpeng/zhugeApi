@@ -7,12 +7,12 @@ from publicFunc.base64 import b64decode
 import json
 from zhugeleida import models
 import base64
-from zhugeleida.public.common import action_record
 from zhugeleida.forms.xiaochengxu.chat_verify import ChatGetForm as xiaochengxu_ChatGetForm, \
     ChatPostForm as xiaochengxu_ChatPostForm
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from publicFunc import account
 from zhugeleida.forms.chat_verify import LeidaQueryChatPostForm , ChatPostForm as leida_ChatPostForm
+from django.db.models import Count
+
 try:
     import uwsgi
 except ImportError as e:
@@ -496,6 +496,17 @@ def leida_websocket(request, oper_type):
 
                     return JsonResponse(ret_data)
 
+    # elif oper_type == 'test':
+    #     data = {
+    #         'current_page': 1,
+    #         'length': 10,
+    #         'user_id': 132
+    #     }
+    #     data_list, count = query_contact_list(data)
+    #
+    #     print(json.dumps(data_list))
+    #     print(count)
+    #     return HttpResponse('')
 
 # @csrf_exempt
 # @account.is_token(models.zgld_customer)
@@ -1391,38 +1402,22 @@ def query_contact_list(data):
     ).filter(
         userprofile_id=user_id,
         is_last_msg=True
-    ).order_by('-create_date').values('customer_id')
+    ).order_by('-create_date')
 
-
-
-    if length != 0:
-        start_line = (current_page - 1) * length
-        stop_line = start_line + length
-        chat_info_objs = chat_info_objs[start_line: stop_line]
-
+    customer_id_list = [] # 已经存在的客户ID
     ret_data_list = []
     for obj in chat_info_objs:
-        customer_id = obj.get('customer_id')
+        customer_id = obj.customer_id
+        if customer_id in customer_id_list:
+            continue
+
+        customer_id_list.append(customer_id)
+        print('customer_id--------> ', obj.customer_id)
         if not customer_id:  # 没有customer_id
             continue
 
-
-        info_obj = models.zgld_chatinfo.objects.select_related(
-            'userprofile',
-            'customer'
-        ).filter(
-            userprofile_id=user_id,
-            is_last_msg=True,
-            customer_id=customer_id
-        ).order_by('-create_date')
-
-        if info_obj:
-            info_obj = info_obj[0]
-        else:
-            continue
-
-        customer_name = b64decode(info_obj.customer.username)
-        content = info_obj.content
+        customer_name = b64decode(obj.customer.username)
+        content = obj.content
 
         if not content:
             continue
@@ -1453,16 +1448,20 @@ def query_contact_list(data):
         _count = _objs.count()
         base_info_dict = {
             'customer_id': customer_id,
-            'customer_source': info_obj.customer.user_type or '',
-            'customer_source_text': info_obj.customer.get_user_type_display(),
-            'is_subscribe': info_obj.customer.is_subscribe,
-            'is_subscribe_text': info_obj.customer.get_is_subscribe_display(),
-            'src': info_obj.customer.headimgurl,
+            'customer_source': obj.customer.user_type or '',
+            'customer_source_text': obj.customer.get_user_type_display(),
+            'is_subscribe': obj.customer.is_subscribe,
+            'is_subscribe_text': obj.customer.get_is_subscribe_display(),
+            'src': obj.customer.headimgurl,
             'name': customer_name,
-            'dateTime': deal_time.deal_time(info_obj.create_date),
+            'dateTime': deal_time.deal_time(obj.create_date),
             'msg': msg,
             'count': _count
         }
 
         ret_data_list.append(base_info_dict)
+    if length != 0:
+        start_line = (current_page - 1) * length
+        stop_line = start_line + length
+        ret_data_list = ret_data_list[start_line: stop_line]
     return  ret_data_list,chatinfo_count
