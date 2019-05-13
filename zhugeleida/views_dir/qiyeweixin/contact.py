@@ -8,7 +8,7 @@ from publicFunc import deal_time
 from zhugeleida.forms.contact_verify import ContactSelectForm
 from publicFunc.base64 import b64decode
 from zhugeleida import models
-import json, base64
+import json, base64, time
 
 # 获取用户聊天的信息列表
 @csrf_exempt
@@ -39,8 +39,6 @@ def contact(request):
 
             count = chat_info_objs.count()
 
-            print('chat_info_objs-------------> ', chat_info_objs)
-            print('chat_info_objs-------------> ', count)
             chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,is_user_new_msg=True).count()
 
             if length != 0:
@@ -111,12 +109,13 @@ def contact(request):
                     'dateTime': deal_time.deal_time(info_objs.create_date),
                     'msg': msg,
                     'count' :_count,
-                    'tags_list' : tags_list
+                    'tags_list' : tags_list,
+                    'crea_date' : time.mktime(info_objs.create_date.timetuple()) #  前端无需引用 时间戳排序用
                 }
 
                 ret_data_list.append(base_info_dict)
-            # print('ret_data_list-> ', ret_data_list)
-            ret_data_list = sorted(ret_data_list, key=lambda x: x['dateTime'], reverse=True)
+            print('ret_data_list-> ', json.dumps(ret_data_list))
+            ret_data_list = sorted(ret_data_list, key=lambda x: x['crea_date'], reverse=True)
             response.code = 200
             response.data = {
                 'ret_data': ret_data_list,
