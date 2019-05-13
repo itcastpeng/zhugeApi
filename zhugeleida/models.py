@@ -64,7 +64,7 @@ class zgld_company(models.Model):
     admin_is_hidden = models.SmallIntegerField(choices=admin_is_hidden_choices, default=0)  # 该字段只用于后台是否隐藏该公司所有数据
 
     # 生成案例名片二维码时 是否展示公司logo
-    is_show_logo = models.BooleanField(verbose_name='是否展示公司logo', default=1)
+    is_show_logo = models.BooleanField(verbose_name='是否展示公司logo', default=0)
 
     # 平头哥类 小程序是否展示商城
     # is_open_mall = models.BooleanField(verbose_name='小程序是否展示商城', default=1)
