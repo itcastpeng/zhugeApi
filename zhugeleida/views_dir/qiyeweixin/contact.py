@@ -32,10 +32,7 @@ def contact(request):
             ).filter(
                 userprofile_id=user_id,
                 is_last_msg=True
-            ).values(
-                'customer_id',
-                'userprofile_id'
-            ).distinct()
+            ).order_by('-create_date')
 
             count = chat_info_objs.count()
 
@@ -47,15 +44,19 @@ def contact(request):
                 chat_info_objs = chat_info_objs[start_line: stop_line]
 
             ret_data_list = []
+            customer_id_list = []
+
             for obj in chat_info_objs:
-                userprofile_id = obj.get('userprofile_id')
-                customer_id = obj.get('customer_id')
+                if obj.customer_id in customer_id_list:
+                    continue
+
+                customer_id = obj.customer_id
 
                 if not customer_id:  # 没有customer_id
                     continue
 
                 info_objs = models.zgld_chatinfo.objects.filter(
-                    userprofile_id=userprofile_id,
+                    userprofile_id=user_id,
                     customer_id=customer_id,
                     is_last_msg=True
                 ).order_by('-create_date')
@@ -64,7 +65,7 @@ def contact(request):
                 customer_name = b64decode(info_objs.customer.username)
 
                 content = info_objs.content
-            #
+
                 msg = ''
                 if  content:
                     _content = json.loads(content)
@@ -85,7 +86,7 @@ def contact(request):
                     'userprofile',
                     'customer'
                 ).filter(
-                    userprofile_id=userprofile_id,
+                    userprofile_id=user_id,
                     customer_id=customer_id,
                     is_user_new_msg=True,
                     send_type=2
