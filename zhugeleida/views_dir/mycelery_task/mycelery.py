@@ -2805,6 +2805,7 @@ def celery_statistical_content(request, oper_type):
                     'thumb_up_number': thumb_up_number,                 # 文章点赞总数据
                     'article_comments': article_comments,               # 文章评论总数据
                 })
+            print('article_redis_list---------------=============> ', article_redis_list)
             rc.hset(article_redis_name, redis_key, str(article_redis_list))
 
         response.code = 200
@@ -2815,7 +2816,7 @@ def celery_statistical_content(request, oper_type):
         company_id = request.GET.get('company_id')
         print('-=----------------------------------------------------------')
         data = rc.hget('leida_redis_data_statistics_article', 'leida_data_statistics_company_{}'.format(company_id))
-        print('json.dumps(eval(data))----------> ', json.dumps(eval(data)))
+        print('json.dumps(eval(data))----------> ', data)
 
     return JsonResponse(response.__dict__)
 
