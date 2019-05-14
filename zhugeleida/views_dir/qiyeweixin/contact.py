@@ -16,7 +16,6 @@ import json, base64, time
 def contact(request):
     response = Response.ResponseObj()
     if request.method == 'GET':
-
         forms_obj = ContactSelectForm(request.GET)
         if forms_obj.is_valid():
             print(request.GET)
@@ -24,7 +23,12 @@ def contact(request):
             user_id = request.GET.get('user_id')
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
-            print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+
+            chatinfo_count = models.zgld_chatinfo.objects.filter(
+                userprofile_id=user_id,
+                send_type=2,
+                is_user_new_msg=True
+            ).count() # 未读消息数量
 
             chat_info_objs = models.zgld_chatinfo.objects.select_related(
                 'userprofile',
@@ -34,20 +38,13 @@ def contact(request):
                 is_last_msg=True
             ).order_by('-create_date')
 
-            count = chat_info_objs.count()
-
-            chatinfo_count = models.zgld_chatinfo.objects.filter(userprofile_id=user_id, send_type=2,is_user_new_msg=True).count()
-
-
             ret_data_list = []
             customer_id_list = []
-
             for obj in chat_info_objs:
                 customer_id = obj.customer_id
                 if customer_id in customer_id_list:
                     continue
                 customer_id_list.append(customer_id)
-
 
                 info_objs = models.zgld_chatinfo.objects.filter(
                     userprofile_id=user_id,
@@ -56,7 +53,6 @@ def contact(request):
                 ).order_by('-create_date')
                 if info_objs:
                     info_objs = info_objs[0]
-                print('--------======@==========@==========> ', customer_id, info_objs.customer.username)
                 customer_name = ''
                 if info_objs.customer.username:
                     customer_name = b64decode(info_objs.customer.username)
@@ -112,6 +108,9 @@ def contact(request):
                 }
 
                 ret_data_list.append(base_info_dict)
+
+
+            count = len(ret_data_list)
             if length != 0:
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
@@ -121,9 +120,9 @@ def contact(request):
             ret_data_list = sorted(ret_data_list, key=lambda x: x['crea_date'], reverse=True)
             response.code = 200
             response.data = {
-                'ret_data': ret_data_list,
-                'data_count': count,
-                'unread_msg_num': chatinfo_count,
+                'ret_data': ret_data_list,          # 数据列表
+                'data_count': count,                # 数据总数
+                'unread_msg_num': chatinfo_count,   # 未读消息数量
             }
 
             response.note = {

@@ -17,6 +17,9 @@ from django.db.models import Sum
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
 from django.db.models import Q, F
 from zhugeleida.public.common import create_qiyeweixin_access_token
+from publicFunc.base64 import b64decode
+from publicFunc import deal_time
+
 import datetime, json, os, sys, requests, random, redis, time, base64
 
 def action_record(data):
@@ -2634,3 +2637,127 @@ def binding_article_customer_relate(request):
                 response.msg = "绑定成功"
 
     return JsonResponse(response.__dict__)
+
+
+
+
+# celery统计数据(缓存)
+@csrf_exempt
+def celery_statistical_content(request, oper_type):
+    response = Response.ResponseObj()
+    rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+    if oper_type == 'leida_redis_contact':
+        user_objs = models.zgld_userprofile.objects.filter(status=1, company_id__isnull=False)
+        for user_obj in user_objs:
+            user_id = user_obj.id
+            chat_info_objs = models.zgld_chatinfo.objects.select_related(
+                'userprofile',
+                'customer'
+            ).filter(
+                userprofile_id=user_id,
+                is_last_msg=True
+            ).order_by('-create_date')
+
+            ret_data_list = []
+            customer_id_list = []
+            for obj in chat_info_objs:
+                customer_id = obj.customer_id
+                if customer_id in customer_id_list:
+                    continue
+                customer_id_list.append(customer_id)
+
+                info_objs = models.zgld_chatinfo.objects.filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    is_last_msg=True
+                ).order_by('-create_date')
+                if info_objs:
+                    info_objs = info_objs[0]
+                customer_name = ''
+                if info_objs.customer.username:
+                    customer_name = b64decode(info_objs.customer.username)
+
+                content = info_objs.content
+
+                msg = ''
+                if content:
+                    _content = json.loads(content)
+                    info_type = _content.get('info_type')
+
+                    if info_type:
+                        info_type = int(info_type)
+                        if info_type == 1:
+                            msg = b64decode(_content.get('msg'))
+
+                        elif info_type == 2:
+                            msg = '向您咨询:' + _content.get('product_name')
+
+                        elif info_type == 3:
+                            msg = _content.get('msg')
+
+                _count = models.zgld_chatinfo.objects.select_related(
+                    'userprofile',
+                    'customer'
+                ).filter(
+                    userprofile_id=user_id,
+                    customer_id=customer_id,
+                    is_user_new_msg=True,
+                    send_type=2
+                ).count()
+
+                tags_list = []
+                if info_objs.customer.user_type == 1:
+                    tags_list = list(info_objs.customer.zgld_tag_set.filter(tag_type=1, user_id=user_id).order_by(
+                        '-create_date').values_list('name', flat=True))
+
+                elif info_objs.customer.user_type == 2:
+                    tags_list = list(info_objs.customer.zgld_tag_set.filter(tag_type=2, user_id=user_id).order_by(
+                        '-create_date').values_list('name', flat=True))
+
+                ret_data_list.append({
+                    'customer_id': customer_id,
+                    'customer_source': info_objs.customer.user_type or '',
+                    'customer_source_text': info_objs.customer.get_user_type_display(),
+                    'src': info_objs.customer.headimgurl,
+                    'is_subscribe': info_objs.customer.is_subscribe,
+                    'is_subscribe_text': info_objs.customer.get_is_subscribe_display(),
+                    'name': customer_name,
+                    'dateTime': deal_time.deal_time(info_objs.create_date),
+                    'msg': msg,
+                    'count': _count,
+                    'tags_list': tags_list,
+                    'crea_date': time.mktime(info_objs.create_date.timetuple())  # 前端无需引用 时间戳排序用
+                })
+
+            redis_key = 'leida_redis_contact_{user_id}'.format(user_id=user_id)
+            rc.hset('leida_redis_contact', redis_key, str(ret_data_list))
+
+    else:
+
+        data_list = rc.hmget('leida_redis_contact', 'leida_redis_contact_132')
+        print(type(data_list[0]), data_list[0])
+        data_list = eval(data_list[0])
+        count = len(data_list)
+        response.code = 200
+        response.data = {
+            'ret_data': data_list,  # 数据列表
+            'data_count': count,  # 数据总数
+        }
+    return JsonResponse(response.__dict__)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -33,6 +33,7 @@ urlpatterns = [
 
     url(r'^bossLeida_acount_data_and_line_info/(?P<oper_type>\w+)$', mycelery_expand.bossLeida_acount_data_and_line_info),  # 数据【总览】统计 和 数据【客户统计】数据
 
+    url(r'^celery_statistical_content/(?P<oper_type>\w+)$', mycelery.celery_statistical_content),  # celery数据统计 (数据缓存)
 
 
 

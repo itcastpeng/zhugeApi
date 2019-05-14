@@ -269,3 +269,14 @@ def monitor_send_gzh_template_msg(data):
     s.keep_alive = False  # 关闭多余连接
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/common_send_gzh_template_msg'  # 分页 聊天信息记录
     s.get(url, params=get_data)
+
+# 缓存数据 (redis缓存 雷达AI 消息)
+@app.task
+def celery_statistical_content():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/celery_statistical_content/leida_redis_contact'
+    print('-------------------------------------------雷达celery_____记录雷达AI消息缓存')
+    requests.get(url)
+
+
+
+

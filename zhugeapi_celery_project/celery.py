@@ -8,6 +8,7 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import Celery
 from celery.schedules import crontab
+from datetime import timedelta
 
 app = Celery(
     broker='redis://redis_host:6379/2',
@@ -41,6 +42,7 @@ app.conf.beat_schedule = {
         'schedule': crontab("*/30", '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
     },
+
     # 配置每隔一分钟执行一次
     'mallOrderTimeToRefresh': {  # 此处的命名不要用 tasks 开头,否则会报错
         'task': 'zhugeapi_celery_project.tasks.mallOrderTimeToRefresh',  # 要执行的任务函数名
@@ -53,6 +55,12 @@ app.conf.beat_schedule = {
         'task': 'zhugeapi_celery_project.tasks.crontab_batchget_article_material',  # 要执行的任务函数名
         'schedule': crontab('0', '3', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
+    },
+
+    # 缓存数据 (redis缓存 雷达AI 消息) 10秒执行一次
+    'celery_statistical_content': {
+        'task': 'zhugeapi_celery_project.tasks.celery_statistical_content',
+        'schedule': timedelta(seconds=10),
     },
 
 }
