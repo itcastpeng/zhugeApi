@@ -2745,12 +2745,12 @@ def celery_statistical_content(request, oper_type):
             redis_key = 'leida_data_statistics_company_{}'.format(company_id) # 公用key
 
             # ========================**********员工数据分析缓存***************=====================
-            user_objs = models.zgld_userprofile.objects.filter(
-                company_id=company_id,
-            )
-            for user_obj in user_objs:
-                user_id = user_obj.id
-                statistical_obj = statistical_objs(user_id)
+            # user_objs = models.zgld_userprofile.objects.filter(
+            #     company_id=company_id,
+            # )
+            # for user_obj in user_objs:
+            #     user_id = user_obj.id
+                # statistical_obj = statistical_objs(user_id)
 
 
             # ========================*************文章数据分析缓存**************==========================
@@ -2805,7 +2805,6 @@ def celery_statistical_content(request, oper_type):
                     'thumb_up_number': thumb_up_number,                 # 文章点赞总数据
                     'article_comments': article_comments,               # 文章评论总数据
                 })
-            print('article_redis_list---------------=============> ', article_redis_list)
             rc.hset(article_redis_name, redis_key, str(article_redis_list))
 
         response.code = 200
