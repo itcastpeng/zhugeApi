@@ -89,7 +89,8 @@ def data_statistics(request, oper_type):
 
                 start_line = (current_page - 1) * length
                 stop_line = start_line + length
-                objs = objs[start_line: stop_line]
+                if not detail_type:
+                    objs = objs[start_line: stop_line]
 
                 list_num = 0
                 for obj in objs:
@@ -129,7 +130,7 @@ def data_statistics(request, oper_type):
                             video_view_data[0].get('video_view_count')
                         ) + '秒/' + str(video_view_data[0].get('video_average_playing_time')) + '秒'
 
-
+                    print('start_line, stop_line---------. ', start_line, stop_line)
                     ret_data.append({
                         'id': obj.get('article_id'),
                         'article_name': obj.get('article_title'),                         # 文章名称
