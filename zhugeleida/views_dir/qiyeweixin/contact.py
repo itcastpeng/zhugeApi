@@ -33,7 +33,6 @@ def contact(request):
             data_list = rc.hmget('leida_redis_contact', 'leida_redis_contact_{}'.format(user_id))
             data_list = eval(data_list[0])
             count = len(data_list)
-            data_list = data_list[0:10]
             response.code = 200
             response.data = {
                 'ret_data': data_list,  # 数据列表
