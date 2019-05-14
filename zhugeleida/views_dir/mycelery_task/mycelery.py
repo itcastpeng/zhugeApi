@@ -2739,10 +2739,8 @@ def celery_statistical_content(request, oper_type):
             admin_is_hidden=0, # 后台是否显示该公司
             account_expired_time__gte=datetime.datetime.today(),
         )
-        # for company_obj in company_objs:
-        if 1:
-            # company_id = company_obj.id
-            company_id = 1
+        for company_obj in company_objs:
+            company_id = company_obj.id
 
             redis_key = 'leida_data_statistics_company_{}'.format(company_id) # 公用key
 
@@ -2814,9 +2812,9 @@ def celery_statistical_content(request, oper_type):
 
 
     elif oper_type == 'test':
+        company_id = request.GET.get('company_id')
         print('-=----------------------------------------------------------')
-        data = rc.hget('leida_redis_data_statistics_article', 'leida_data_statistics_company_1')
-        print(len(eval(data)))
+        data = rc.hget('leida_redis_data_statistics_article', 'leida_data_statistics_company_{}'.format(company_id))
         print('json.dumps(eval(data))----------> ', json.dumps(eval(data)))
 
     return JsonResponse(response.__dict__)
