@@ -278,5 +278,10 @@ def celery_statistical_content():
     requests.get(url)
 
 
-
+# 缓存数据 (redis缓存 后台数据统计 缓存)
+@app.task
+def celery_data_statistics():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/celery_statistical_content/data_statistics'
+    print('-------------------------------------------雷达celery_____记录数据统计缓存')
+    requests.get(url)
 

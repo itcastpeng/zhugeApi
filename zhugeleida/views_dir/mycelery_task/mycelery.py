@@ -19,7 +19,7 @@ from django.db.models import Q, F
 from zhugeleida.public.common import create_qiyeweixin_access_token
 from publicFunc.base64 import b64decode
 from publicFunc import deal_time
-
+from publicFunc.data_statistics import statistical_objs
 import datetime, json, os, sys, requests, random, redis, time, base64
 
 def action_record(data):
@@ -2640,7 +2640,6 @@ def binding_article_customer_relate(request):
 
 
 
-
 # celery统计数据(缓存)
 @csrf_exempt
 def celery_statistical_content(request, oper_type):
@@ -2733,6 +2732,92 @@ def celery_statistical_content(request, oper_type):
 
             redis_key = 'leida_redis_contact_{user_id}'.format(user_id=user_id)
             rc.hset('leida_redis_contact', redis_key, str(ret_data_list))
+
+    # 雷达后台 数据分析缓存
+    elif oper_type == 'data_statistics':
+        company_objs = models.zgld_company.objects.filter(
+            admin_is_hidden=0, # 后台是否显示该公司
+            account_expired_time__gte=datetime.datetime.today(),
+        )
+        # for company_obj in company_objs:
+        if 1:
+            # company_id = company_obj.id
+            company_id = 1
+
+            redis_key = 'leida_data_statistics_company_{}'.format(company_id) # 公用key
+
+            # ========================**********员工数据分析缓存***************=====================
+            user_objs = models.zgld_userprofile.objects.filter(
+                company_id=company_id,
+            )
+            for user_obj in user_objs:
+                user_id = user_obj.id
+                statistical_obj = statistical_objs(user_id)
+
+
+            # ========================*************文章数据分析缓存**************==========================
+            article_redis_name = 'leida_redis_data_statistics_article'    # 文章数据的name
+            article_objs = models.zgld_article.objects.filter(
+                status=1,
+                title__isnull=False,
+                company_id=company_id
+            ).exclude(status=3)
+            article_redis_list = [] # 总数据
+            for article_obj in article_objs:
+                article_id = article_obj.id
+                statistical_obj = statistical_objs(article_id)
+
+                # ----------------转发量------------------
+                forwarding_article_data = statistical_obj.forwarding_article()
+
+                # -----------------点击量---------------
+                click_the_quantity = statistical_obj.click_the_quantity()
+
+                # ------------------阅读总时长/平均时长---------
+                the_reading_time = statistical_obj.the_reading_time()
+
+                # ------------------视频查看时长------------------
+                video_view_duration = statistical_obj.video_view_duration()
+
+                # ------------------点击对话框------------------
+                click_the_dialog_box = statistical_obj.click_the_dialog_box()
+
+                # ------------------主动发送消息------------------------
+                active_message = statistical_obj.active_message()
+
+                # ------------------拨打电话----------------------
+                call_phone = statistical_obj.call_phone()
+
+                # ------------------文章点赞次数------------------------
+                thumb_up_number = statistical_obj.thumb_up_number()
+
+                # -------------------文章评论---------------------------
+                article_comments = statistical_obj.article_comments()
+
+                article_redis_list.append({
+                    'article_id': article_id,                           # 文章ID
+                    'article_title': article_obj.title,                 # 文章标题
+                    'forwarding_article_data': forwarding_article_data, # 转发量全部数据
+                    'click_the_quantity': click_the_quantity,           # 点击量全部数据
+                    'the_reading_time': the_reading_time,               # 阅读时长总数据
+                    'video_view_duration': video_view_duration,         # 视频时长总数据
+                    'click_the_dialog_box': click_the_dialog_box,       # 点对话框总数据
+                    'active_message': active_message,                   # 主动发送消息总数据
+                    'call_phone': call_phone,                           # 拨打电话总数据
+                    'thumb_up_number': thumb_up_number,                 # 文章点赞总数据
+                    'article_comments': article_comments,               # 文章评论总数据
+                })
+            rc.hset(article_redis_name, redis_key, str(article_redis_list))
+
+        response.code = 200
+        response.msg = '缓存完成'
+
+
+    elif oper_type == 'test':
+        print('-=----------------------------------------------------------')
+        data = rc.hget('leida_redis_data_statistics_article', 'leida_data_statistics_company_1')
+        print(len(eval(data)))
+        print('json.dumps(eval(data))----------> ', json.dumps(eval(data)))
 
     return JsonResponse(response.__dict__)
 

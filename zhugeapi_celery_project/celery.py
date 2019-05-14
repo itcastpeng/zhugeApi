@@ -63,6 +63,11 @@ app.conf.beat_schedule = {
         'schedule': timedelta(seconds=10),
     },
 
+    # 缓存数据 (redis缓存 后台 数据统计) 10分钟执行一次
+    'celery_data_statistics': {
+        'task': 'zhugeapi_celery_project.tasks.celery_data_statistics',
+        'schedule': crontab("*/10", '*', '*', '*', '*'),
+    },
 }
 
 # Optional configuration, see the application user guide.
