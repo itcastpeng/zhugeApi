@@ -30,18 +30,22 @@ def contact(request):
                 is_user_new_msg=True
             ).count() # 未读消息数量
 
-            data_list = rc.hmget('leida_redis_contact', 'leida_redis_contact_{}'.format(user_id))
-            data_list = eval(data_list[0])
-            count = len(data_list)
-            response.code = 200
-            response.data = {
-                'ret_data': data_list,  # 数据列表
-                'data_count': count,  # 数据总数
-            }
-            if length != 0:
-                start_line = (current_page - 1) * length
-                stop_line = start_line + length
-                data_list = data_list[start_line: stop_line]
+            data_list = rc.hget('leida_redis_contact', 'leida_redis_contact_{}'.format(user_id))
+            if data_list:
+                data_list = eval(data_list)
+                count = len(data_list)
+                response.code = 200
+                response.data = {
+                    'ret_data': data_list,  # 数据列表
+                    'data_count': count,  # 数据总数
+                }
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    data_list = data_list[start_line: stop_line]
+            else:
+                data_list = []
+                count = 0
 
             response.code = 200
             response.data = {
