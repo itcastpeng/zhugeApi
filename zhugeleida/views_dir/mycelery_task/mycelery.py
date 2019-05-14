@@ -2646,6 +2646,8 @@ def binding_article_customer_relate(request):
 def celery_statistical_content(request, oper_type):
     response = Response.ResponseObj()
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+
+    # 雷达AI 消息缓存
     if oper_type == 'leida_redis_contact':
         user_objs = models.zgld_userprofile.objects.filter(status=1, company_id__isnull=False)
         for user_obj in user_objs:
@@ -2732,17 +2734,6 @@ def celery_statistical_content(request, oper_type):
             redis_key = 'leida_redis_contact_{user_id}'.format(user_id=user_id)
             rc.hset('leida_redis_contact', redis_key, str(ret_data_list))
 
-    else:
-
-        data_list = rc.hmget('leida_redis_contact', 'leida_redis_contact_132')
-        print(type(data_list[0]), data_list[0])
-        data_list = eval(data_list[0])
-        count = len(data_list)
-        response.code = 200
-        response.data = {
-            'ret_data': data_list,  # 数据列表
-            'data_count': count,  # 数据总数
-        }
     return JsonResponse(response.__dict__)
 
 
