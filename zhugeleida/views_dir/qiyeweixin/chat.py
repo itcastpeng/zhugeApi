@@ -271,7 +271,7 @@ def chat_oper(request, oper_type, o_id):
                 )
 
                 user_type = obj.customer.user_type # 客户类型
-
+                print('user_type, info_type, customer_id, user_id-------------------> ', user_type, customer_id, user_id)
                 if customer_id and user_id and user_type == 2:
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id

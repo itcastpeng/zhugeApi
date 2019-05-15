@@ -11,7 +11,9 @@ from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
 from django.conf import settings
 from selenium import webdriver
 from PIL import Image
-from zhugeapi_celery_project import tasks
+from zhugeapi_celery_project.tasks import create_user_or_customer_small_program_poster, \
+    create_user_or_customer_small_program_poster, monitor_send_gzh_template_msg, user_send_gongzhonghao_template_msg, \
+    user_send_gongzhonghao_template_msg
 from zhugeleida.public import common
 from django.db.models import Sum
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
@@ -445,7 +447,7 @@ def create_user_or_customer_qr_code(request):
 
                 # 一并生成海报
                 data_dict = {'user_id': user_id, 'customer_id': customer_id}
-                tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
             else:  # 没有 customer_id 说明不是在小程序中生成
                 user_obj = models.zgld_userprofile.objects.get(id=user_id)
@@ -560,7 +562,7 @@ def crontab_create_user_to_customer_qrCode_poster(request):
 
                 if not poster_url and qr_code:
                     print('---【定时器生成】 小程序海报: data_dict-->', data_dict)
-                    tasks.create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
+                    create_user_or_customer_small_program_poster.delay(json.dumps(data_dict))
 
         else:
             print('------ 没有符合条件的【定时器刷新】生成二维码或海报 ------->>>')
@@ -1116,7 +1118,7 @@ def user_send_gongzhonghao_template_msg(request):
                 a_data['user_id'] = user_id
                 a_data['type'] = 'gongzhonghao_template_tishi'
                 a_data['content'] = content
-                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
                 print('-----企业用户 再次发送【公众号_模板消息】 json.dumps(a_data)---->>', json.dumps(a_data))
                 response.code = 301
                 response.msg = "企业用户发送客服消息成功失败"
@@ -1635,7 +1637,7 @@ def Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, data):
                     'remark': remark
                 }
                 print('红包发送报错数据 --------->', data_dict)
-                tasks.monitor_send_gzh_template_msg.delay(data_dict)
+                monitor_send_gzh_template_msg.delay(data_dict)
 
     if code != 199:
 
@@ -1729,7 +1731,7 @@ def Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, data):
                     'remark': remark
                 }
                 print('红包发送报错数据 --------->', data_dict)
-                tasks.monitor_send_gzh_template_msg.delay(data_dict)
+                monitor_send_gzh_template_msg.delay(data_dict)
 
     if code == 199:
         a_data = {}
@@ -1739,7 +1741,7 @@ def Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, data):
         a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值，然后再补发哦', 'info_type': 1})
 
         print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
-        tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+        user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
         response.code = code
         response.msg = msg
@@ -2025,7 +2027,7 @@ def bufa_send_activity_redPacket(request):
                                 'remark': ''
                             }
                             print('红包发送报错数据 --------->', data_dict)
-                            tasks.monitor_send_gzh_template_msg.delay(data_dict)
+                            monitor_send_gzh_template_msg.delay(data_dict)
 
 
                 else:
@@ -2155,7 +2157,7 @@ def user_focus_send_activity_redPacket(request):
                                         'remark': remark
                                     }
                                     print('红包发送报错数据 --------->', data_dict)
-                                    tasks.monitor_send_gzh_template_msg.delay(data_dict)
+                                    monitor_send_gzh_template_msg.delay(data_dict)
 
                         ## 说明平台余额充足
                         if code != 199:
@@ -2218,7 +2220,7 @@ def user_focus_send_activity_redPacket(request):
                                         'remark': remark
                                     }
                                     print('红包发送报错数据 --------->', data_dict)
-                                    tasks.monitor_send_gzh_template_msg.delay(data_dict)
+                                    monitor_send_gzh_template_msg.delay(data_dict)
 
                         ## 无论哪个平台发送失败都要发送消息提醒
                         if code == 199:
@@ -2229,7 +2231,7 @@ def user_focus_send_activity_redPacket(request):
                             a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值后再补发哦', 'info_type': 1})
 
                             print('-----企业用户 公众号_模板消息【关注红包 | 余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
-                            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                            user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
 
 
@@ -2250,7 +2252,7 @@ def user_focus_send_activity_redPacket(request):
                         a_data['content'] = json.dumps({'msg': '您好,您已经领取过红包喽,可转发【公众号】给您的好友领取现金红包!', 'info_type': 1})
 
                         print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
-                        tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                        user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
                         response.code = 302
                         response.msg = '没有订阅公众号或者应发过红包'

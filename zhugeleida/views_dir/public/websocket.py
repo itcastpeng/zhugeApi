@@ -396,12 +396,12 @@ def leida_websocket(request, oper_type):
                     # data = uwsgi.websocket_recv()
                     data = uwsgi.websocket_recv_nb()
 
-                    print('------[雷达【消息列表】-非阻塞] websocket_recv_nb ----->>', data)
+                    # print('------[雷达【消息列表】-非阻塞] websocket_recv_nb ----->>', data)
                     if not data:
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
-                    print('------ 【雷达-【消息列表】】发送过来的 数据:  ----->>', _data)
+                    # print('------ 【雷达-【消息列表】】发送过来的 数据:  ----->>', _data)
 
                     login_flag = account.socket_is_token(models.zgld_userprofile, _data)
 
