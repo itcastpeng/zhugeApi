@@ -121,6 +121,7 @@ def create_user_or_customer_small_program_poster(data):
 # 发送模板消息给客户提示。
 @app.task
 def user_send_template_msg_to_customer(data):
+    print("2019-05-15 ------>user_send_template_msg_to_customer ------>", data)
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/user_send_template_msg'
     get_data = {
         'data': data
