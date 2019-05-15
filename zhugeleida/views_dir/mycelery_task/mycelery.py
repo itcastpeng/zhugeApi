@@ -2659,8 +2659,6 @@ def celery_statistical_content(request, oper_type):
         print('q-----------> ', q)
         for user_obj in user_objs:
             user_id = user_obj.id
-            if int(user_id) == 132:
-                print('====@@@@@@@@@@@@@@@@@@@================> ', user_objs)
             chat_info_objs = models.zgld_chatinfo.objects.select_related(
                 'userprofile',
                 'customer'
@@ -2669,6 +2667,8 @@ def celery_statistical_content(request, oper_type):
                 userprofile_id=user_id,
                 is_last_msg=True
             ).order_by('-create_date')
+            if int(user_id) == 132:
+                print('====@@@@@@@@@@@@@@@@@@@================> ', chat_info_objs)
             ret_data_list = []
             customer_id_list = []
             for obj in chat_info_objs:
@@ -2747,6 +2747,8 @@ def celery_statistical_content(request, oper_type):
                 for i in ret_data_list:         # 添加本次获取的数据
                     data.append(i)
                 data_content = data
+                if int(user_id) == 132:
+                    print('data_content------------------> ', data_content)
             else:
                 data_content = ret_data_list
             rc.set('leida_redis_contact_time', now) # 记录本次统计时间
