@@ -12,8 +12,7 @@ from django.conf import settings
 from selenium import webdriver
 from PIL import Image
 from zhugeapi_celery_project.tasks import create_user_or_customer_small_program_poster, \
-    create_user_or_customer_small_program_poster, monitor_send_gzh_template_msg, user_send_gongzhonghao_template_msg, \
-    user_send_gongzhonghao_template_msg
+    create_user_or_customer_small_program_poster, monitor_send_gzh_template_msg, user_send_gongzhonghao_template_msg as user_template_gongzhonghao_msg
 from zhugeleida.public import common
 from django.db.models import Sum
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
@@ -1118,7 +1117,7 @@ def user_send_gongzhonghao_template_msg(request):
                 a_data['user_id'] = user_id
                 a_data['type'] = 'gongzhonghao_template_tishi'
                 a_data['content'] = content
-                user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                user_template_gongzhonghao_msg.delay(a_data)  # 发送【公众号发送模板消息】
                 print('-----企业用户 再次发送【公众号_模板消息】 json.dumps(a_data)---->>', json.dumps(a_data))
                 response.code = 301
                 response.msg = "企业用户发送客服消息成功失败"
@@ -1741,7 +1740,7 @@ def Red_Packet_Sending_Process(activity_objs, activity_redPacket_objs, data):
         a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值，然后再补发哦', 'info_type': 1})
 
         print('-----企业用户 公众号_模板消息【余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
-        user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+        user_template_gongzhonghao_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
         response.code = code
         response.msg = msg
@@ -2231,7 +2230,7 @@ def user_focus_send_activity_redPacket(request):
                             a_data['content'] = json.dumps({'msg': '您好,活动过于火爆,账户被刷爆,已联系管理员进行充值后再补发哦', 'info_type': 1})
 
                             print('-----企业用户 公众号_模板消息【关注红包 | 余额不足提示】 json.dumps(a_data)---->>', json.dumps(a_data))
-                            user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                            user_template_gongzhonghao_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
 
 
@@ -2252,7 +2251,7 @@ def user_focus_send_activity_redPacket(request):
                         a_data['content'] = json.dumps({'msg': '您好,您已经领取过红包喽,可转发【公众号】给您的好友领取现金红包!', 'info_type': 1})
 
                         print('-----企业用户 公众号_模板消息没有订阅公众号或者已经发过红包 json.dumps(a_data)---->>', json.dumps(a_data))
-                        user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                        user_template_gongzhonghao_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
                         response.code = 302
                         response.msg = '没有订阅公众号或者应发过红包'
