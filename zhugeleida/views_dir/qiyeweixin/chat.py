@@ -293,8 +293,8 @@ def chat_oper(request, oper_type, o_id):
                     data['type'] = 'gongzhonghao_send_kefu_msg'
                     data['content'] = data.get('content')
                     print('0------@@@@@@@@@@@@@@@@@@@@@@@@@@---------? ', data)
-                    tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
-
+                    task_return = tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
+                    print('-=-=---task_return------------task_return-> ', task_return)
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
                 # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
