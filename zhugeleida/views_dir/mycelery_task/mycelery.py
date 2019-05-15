@@ -2659,6 +2659,8 @@ def celery_statistical_content(request, oper_type):
         print('q-----------> ', q)
         for user_obj in user_objs:
             user_id = user_obj.id
+            if int(user_id) == 132:
+                print('====@@@@@@@@@@@@@@@@@@@================> ', user_objs)
             chat_info_objs = models.zgld_chatinfo.objects.select_related(
                 'userprofile',
                 'customer'
