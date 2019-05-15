@@ -2650,6 +2650,7 @@ def celery_statistical_content(request, oper_type):
 
     # 雷达AI 消息缓存
     if oper_type == 'leida_redis_contact':
+        now = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
         user_objs = models.zgld_userprofile.objects.filter(status=1, company_id__isnull=False)
         redis_time = rc.get('leida_redis_contact_time') # 上次统计时间
         q = Q()
@@ -2746,7 +2747,6 @@ def celery_statistical_content(request, oper_type):
                 data_content = data
             else:
                 data_content = ret_data_list
-            now = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
             rc.set('leida_redis_contact_time', now) # 记录本次统计时间
             rc.hset('leida_redis_contact', redis_key, str(data_content))
 
