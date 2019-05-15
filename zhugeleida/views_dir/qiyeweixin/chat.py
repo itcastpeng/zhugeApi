@@ -292,6 +292,7 @@ def chat_oper(request, oper_type, o_id):
                     # data['type'] = 'gongzhonghao_template_chat'
                     data['type'] = 'gongzhonghao_send_kefu_msg'
                     data['content'] = data.get('content')
+                    print('0------@@@@@@@@@@@@@@@@@@@@@@@@@@---------? ', data)
                     tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
 
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
