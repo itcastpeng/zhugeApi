@@ -2651,12 +2651,18 @@ def celery_statistical_content(request, oper_type):
     # 雷达AI 消息缓存
     if oper_type == 'leida_redis_contact':
         user_objs = models.zgld_userprofile.objects.filter(status=1, company_id__isnull=False)
+        redis_time = rc.get('leida_redis_contact_time') # 上次统计时间
+        q = Q()
+        if redis_time:
+            q.add(Q(create_date__gte=redis_time), Q.AND)
+        print('q-----------> ', q)
         for user_obj in user_objs:
             user_id = user_obj.id
             chat_info_objs = models.zgld_chatinfo.objects.select_related(
                 'userprofile',
                 'customer'
             ).filter(
+                q,
                 userprofile_id=user_id,
                 is_last_msg=True
             ).order_by('-create_date')
@@ -2733,7 +2739,14 @@ def celery_statistical_content(request, oper_type):
                 })
 
             redis_key = 'leida_redis_contact_{user_id}'.format(user_id=user_id)
-            rc.hset('leida_redis_contact', redis_key, str(ret_data_list))
+            data = rc.hget('leida_redis_contact', redis_key)  # 获取缓存的数据
+            if data:
+                data = eval(data)
+                for i in ret_data_list:         # 添加本次获取的数据
+                    data.append(i)
+            now = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            rc.set('leida_redis_contact_time', now) # 记录本次统计时间
+            rc.hset('leida_redis_contact', redis_key, str(data))
 
     # 雷达后台 数据分析缓存
     elif oper_type == 'data_statistics':
