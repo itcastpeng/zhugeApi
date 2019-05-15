@@ -8,7 +8,7 @@ import time
 import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm
-from zhugeapi_celery_project import tasks
+from zhugeapi_celery_project.tasks import user_send_template_msg_to_customer, user_send_gongzhonghao_template_msg
 from django.db.models import F
 import json
 from django.db.models import Q
@@ -116,7 +116,7 @@ def chat(request):
                 'data_count': count,
                 'company_id' : company_id
             }
-            print('response--------->',response.data)
+            # print('response--------->',response.data)
 
             # _objs.filter(id__in=update_id_list).update(
             #     is_user_new_msg=False
@@ -275,15 +275,16 @@ def chat_oper(request, oper_type, o_id):
                 if customer_id and user_id and user_type == 2:
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
-                    tasks.user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
-
+                    print('=----------------------------------执行celery-------------=======================')
+                    response_celery = user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
+                    print('---------==================response_celery============? ', response_celery)
                 elif  user_type == 1 and info_type ==  6 and customer_id and user_id: # 发送商城 的模板消息,可以点击进去
                     print('--- 【公众号发送（商城）模板消息】 user_send_gongzhonghao_template_msg --->')
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
                     data['type'] = 'gongzhonghao_template_shopping_mall'
                     data['content'] = Content
-                    tasks.user_send_gongzhonghao_template_msg.delay(data)  # 发送【公众号发送模板消息】
+                    user_send_gongzhonghao_template_msg.delay(data)  # 发送【公众号发送模板消息】
 
                 elif  user_type == 1 and customer_id and user_id:
                     print('--- 【公众号发送模板消息】 user_send_gongzhonghao_template_msg')
@@ -292,9 +293,7 @@ def chat_oper(request, oper_type, o_id):
                     # data['type'] = 'gongzhonghao_template_chat'
                     data['type'] = 'gongzhonghao_send_kefu_msg'
                     data['content'] = data.get('content')
-                    print('0------@@@@@@@@@@@@@@@@@@@@@@@@@@---------? ', data)
-                    task_return = tasks.user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
-                    print('-=-=---task_return------------task_return-> ', task_return)
+                    user_send_gongzhonghao_template_msg.delay(data) # 发送【公众号发送模板消息】
                 rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
 
                 # redis_user_id_key = 'message_user_id_{uid}'.format(uid=user_id)
