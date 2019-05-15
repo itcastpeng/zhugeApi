@@ -2767,12 +2767,39 @@ def celery_statistical_content(request, oper_type):
             redis_key = 'leida_data_statistics_company_{}'.format(company_id) # 公用key
 
             # ========================**********员工数据分析缓存***************=====================
-            # user_objs = models.zgld_userprofile.objects.filter(
-            #     company_id=company_id,
-            # )
-            # for user_obj in user_objs:
-            #     user_id = user_obj.id
-                # statistical_obj = statistical_objs(user_id)
+            user_redis_name = 'leida_redis_data_statistics_user'
+            user_objs = models.zgld_userprofile.objects.filter(
+                company_id=company_id,
+            )
+            user_redis_list = []
+            for user_obj in user_objs:
+                user_id = user_obj.id
+
+                statistical_obj = statistical_objs(user_id)
+                # -------------------------复制昵称-----------------------
+                copy_the_nickname = statistical_obj.copy_the_nickname()
+
+                # -------------------------雷达内有效对话---------------------
+                number_valid_conversations = statistical_obj.number_valid_conversations()
+
+                # --------------------------平均回复时长-----------------------
+                average_response_time = statistical_obj.average_response_time()
+
+                # -------------------------发送小程序-----------------------
+                sending_applet = statistical_obj.sending_applet()
+
+                user_redis_list.append({
+                    'user_id': user_id,                                                 # 用户ID
+                    'user_name':user_obj.username,                                      # 用户名称
+                    'copy_the_nickname':copy_the_nickname,                              # 复制昵称数据
+                    'sending_applet':sending_applet,                                    # 发送小程序数据
+                    'number_valid_conversations':number_valid_conversations,            # 雷达内有效对话数据
+                    'average_response_time':average_response_time,                      # 平均回复时长数据
+                })
+            rc.hset(user_redis_name, redis_key, str(user_redis_list))
+
+
+
 
 
             # ========================*************文章数据分析缓存**************==========================

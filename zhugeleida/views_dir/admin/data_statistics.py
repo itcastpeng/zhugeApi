@@ -269,56 +269,84 @@ def data_statistics(request, oper_type):
 
             # 员工数据分析
             elif oper_type == 'employee_data_analysis':
-                id = request.GET.get('id')  # 查询单个员工
-                if id:
-                    public_q.add(Q(id=id), Q.AND)
-                # 获取该公司所有员工信息
-                objs = models.zgld_userprofile.objects.filter(public_q).order_by('-create_date')
-                data_count = objs.count()
-                if not id:
-                    if length != 0:
-                        start_line = (current_page - 1) * length
-                        stop_line = start_line + length
-                        objs = objs[start_line: stop_line]
-                ret_data = []
-                q = Q()
-                q.add(Q(create_date__gte=start_time) & Q(create_date__lte=stop_time), Q.AND)  # 时间筛选
-                for obj in objs:
+                redis_name = 'leida_redis_data_statistics_user'
 
-                    statistical_obj = statistical_objs(q, obj.id, detail_type, current_page, length, start_time,
-                        stop_time)
-                    copy_nickname_data = statistical_obj.copy_the_nickname()  # 复制昵称
-                    effective_dialogue_data = statistical_obj.number_valid_conversations()  # 有效对话
-                    average_response_data = statistical_obj.average_response_time()  # 咨询平均响应时长
-                    sending_applet_data = statistical_obj.sending_applet()  # 发送小程序
+                user_id = request.GET.get('id')  # 区分用户
+
+                redis_user_data = rc.hget(redis_name, redis_key)
+                ret_data = []
+                if not redis_user_data: # 该公司没有数据直接返回
+                    response.code = 200
+                    response.data = {
+                        'red_data': ret_data,
+                        'count': 0
+                    }
+                    return JsonResponse(response.__dict__)
+
+                redis_user_data = eval(redis_user_data)
+                objs = redis_user_data  # 查询全部用户的数据
+                if user_id:  # 查询单个文章数据
+                    for obj in redis_user_data:
+                        if int(obj.get('user_id')) == int(user_id):  # 用户ID
+                            objs = [obj]
+                            break
+
+                data_count = len(objs)  # 列表总数
+
+                start_line = (current_page - 1) * length
+                stop_line = start_line + length
+                if not detail_type:
+                    objs = objs[start_line: stop_line]
+
+                list_num = 0 # 记录第几次
+                for obj in objs:
+                    copy_the_nickname = obj.get('copy_the_nickname')                            # 复制昵称
+                    number_valid_conversations = obj.get('number_valid_conversations')          # 雷达内有效对话数据
+                    average_response_time = obj.get('average_response_time')                    # 平均回复时长数据
+                    sending_applet = obj.get('sending_applet')                                  # 发送小程序
+
+                    copy_the_nickname_len = len(copy_the_nickname)
+                    number_valid_conversations_len = len(number_valid_conversations.get('data_list'))
+                    average_response_time_len = len(average_response_time.get('data_list'))
+                    sending_applet_len = len(sending_applet)
+
+
+                    ret_data.append({
+                        'id': obj.get('user_id'),
+                        'user_name': obj.get('user_name'),  # 员工名称
+
+                        'copy_nickname': str(copy_the_nickname_len) + '次',               # 复制昵称次数
+                        'copy_nickname_data': [],
+
+                        'effective_dialogue_num': str(number_valid_conversations_len) + '次',       # 有效对话数量
+                        'effective_dialogue_data': [],
+
+                        'average_response_avg': str(average_response_time_len) + '秒',   # 平均响应时长
+                        'average_response_data': [],  # 平均响应时长
+
+                        'sending_applet_num': str(sending_applet_len) + '次',            # 发送小程序数量
+                        'sending_applet_data': [],  # 发送小程序数据
+                    })
 
                     count = 0
                     if detail_type == 'copy_the_nickname':
-                        count = copy_nickname_data.get('count')
+                        count = copy_the_nickname_len
+                        ret_data[list_num]['copy_nickname_data'] = copy_the_nickname
+
                     elif detail_type == 'number_valid_conversations':
-                        count = effective_dialogue_data.get('count')
+                        count = number_valid_conversations_len
+                        ret_data[list_num]['effective_dialogue_data'] = number_valid_conversations
+
                     elif detail_type == 'average_response_time':
-                        count = average_response_data.get('count')
+                        count = average_response_time_len
+                        ret_data[list_num]['average_response_data'] = average_response_time
+
                     elif detail_type == 'sending_applet':
-                        count = sending_applet_data.get('count')
+                        count = sending_applet_len
+                        ret_data[list_num]['sending_applet_data'] = sending_applet
 
-                    ret_data.append({
-                        'id': obj.id,
-                        'user_name': obj.username,  # 员工名称
-
-                        'copy_nickname': copy_nickname_data.get('copy_nickname_count'),  # 复制昵称次数
-                        'copy_nickname_data': copy_nickname_data.get('data_list'),  # 复制昵称数据
-
-                        'effective_dialogue_num': effective_dialogue_data.get('effective_dialogue'),  # 有效对话数量
-                        'effective_dialogue_data': effective_dialogue_data.get('data_list'),  # 有效对话数据
-
-                        'average_response_avg': average_response_data.get('average_response'),  # 平均响应时长
-                        'average_response_data': average_response_data.get('data_list'),  # 平均响应时长
-
-                        'sending_applet_num': sending_applet_data.get('sending_applet_num'),  # 发送小程序数量
-                        'sending_applet_data': sending_applet_data.get('data_list'),  # 发送小程序数据
-                        'count': count,
-                    })
+                    ret_data[list_num]['count'] = count
+                    list_num += 1
 
                 response.code = 200
                 response.msg = '查询成功'

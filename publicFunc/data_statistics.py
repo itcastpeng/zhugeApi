@@ -1,7 +1,7 @@
 from zhugeleida import models
 from django.db.models import Q, Count, Sum
 from publicFunc.base64 import b64decode
-
+import json
 
 # 获取 发送的消息
 def get_msg(content):
@@ -14,15 +14,12 @@ def get_msg(content):
         'url': '',
     }
     if content:
-
-        # content = content.replace('null', '\'\'')
         try:
-            content = eval(content)
+            content = json.loads(content)
         except Exception:
             content = content
-
         info_type = int(content.get('info_type'))
-        # print('content----------> ', content)
+
         if content:
             if info_type in [1, 3, 6]:
                 if content.get('msg'):
@@ -49,47 +46,33 @@ class statistical_objs():
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
-            self.q,
             user_id=self.o_id,
             oper_type=1
         ).order_by('-create_date')
-        count = copy_nickname_obj.count()
         data_list = []
-        if self.detail_data_type and self.detail_data_type == 'copy_the_nickname':
-            if self.length != 0:
-                start_line = (self.current_page - 1) * self.length
-                stop_line = start_line + self.length
-                copy_nickname_obj = copy_nickname_obj[start_line: stop_line]
-            for obj in copy_nickname_obj:
-                customer__username = ''
-                if obj.customer:
-                    customer__username = b64decode(obj.customer.username)
-                data_list.append({
-                    'customer__username': customer__username,
-                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
-                })
+        for obj in copy_nickname_obj:
+            customer__username = ''
+            if obj.customer:
+                customer__username = obj.customer.username
+                if customer__username:
+                    customer__username = b64decode(customer__username)
 
-        data = {
-            'copy_nickname_count': str(count) + '次',
-            'data_list': data_list,
-            'count': count
-        }
-        return data
+            data_list.append({
+                'customer__username': customer__username,
+                'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+            })
+
+        return data_list
 
     # 有效对话次数（员工）
     def number_valid_conversations(self):
         data_list = []
         effective_dialogue = 0
-        is_number_valid_conversations = False # 判断是否查询了详情
-        if self.detail_data_type and self.detail_data_type == 'number_valid_conversations':  #
-            is_number_valid_conversations = True
 
         zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(          # 查询出符合条件的用户和客户 已天为单位
             """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
-            from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id} and create_date >= '{start_date}' and create_date <= '{stop_date}' group by cdt, customer_id;""".format(
+            from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id}  group by cdt, customer_id;""".format(
                 userprofile_id=self.o_id,
-                start_date=self.start_date,
-                stop_date=self.stop_date
             )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
@@ -105,11 +88,6 @@ class statistical_objs():
                 create_date__lte=stop_date_time,
             ).order_by('create_date')
             dialogue_count = msg_objs.count()       # 查询出该用户和该客户聊天总数
-            # if is_number_valid_conversations:
-            #     if self.length != 0:
-            #         start_line = (self.current_page - 1) * self.length
-            #         stop_line = start_line + self.length
-            #         msg_objs = msg_objs[start_line: stop_line]
 
             if dialogue_count >= 6:  # 判断该客户在该文章中 对话 低于六次不达有效对话标准
                 send_type_user = 0      # 咨询发送消息
@@ -118,7 +96,6 @@ class statistical_objs():
                 for msg_obj in msg_objs:
 
                     send_type = int(msg_obj.send_type)
-
                     text = get_msg(msg_obj.content) # 获取聊天内容
 
                     if send_type == 1:
@@ -132,19 +109,18 @@ class statistical_objs():
                             name = b64decode(msg_obj.customer.username) # 客户名称
                         avatar = msg_obj.customer.headimgurl     # 头像
 
-                    if is_number_valid_conversations: # 查询详情
-                        result_data.append({
-                            'send_type': send_type,
-                            'avatar': avatar,
-                            'name': name,
-                            'msg': text.get('msg'),
-                            'product_cover_url': text.get('product_cover_url'),
-                            'product_name': text.get('product_name'),
-                            'product_price': text.get('product_price'),
-                            'url': text.get('url'),
-                            'info_type': text.get('info_type'),
-                            'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                        })
+                    result_data.append({
+                        'send_type': send_type,
+                        'avatar': avatar,
+                        'name': name,
+                        'msg': text.get('msg'),
+                        'product_cover_url': text.get('product_cover_url'),
+                        'product_name': text.get('product_name'),
+                        'product_price': text.get('product_price'),
+                        'url': text.get('url'),
+                        'info_type': text.get('info_type'),
+                        'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                    })
                     customer__username = ''
                     if msg_obj.customer.username:
                         customer__username = b64decode(msg_obj.customer.username)
@@ -161,22 +137,21 @@ class statistical_objs():
                 if send_type_user >= 1 and send_type_customer >= 1:
                     effective_num += num
 
-                if is_number_valid_conversations:  # 查询详情
-                    if flag:
-                        data_list.append({
-                            'customer__username': customer__username,
-                            'create_date': result_data[0].get('create_date'),
-                            'result_data':result_data,
-                            'effective_num':effective_num # 单个人 有效次数
-                        })
+
+                if flag:
+                    data_list.append({
+                        'customer__username': customer__username,
+                        'create_date': result_data[0].get('create_date'),
+                        'result_data':result_data,
+                        'effective_num':effective_num # 单个人 有效次数
+                    })
 
             if effective_num >= 1:
                 effective_dialogue += 1
 
         data = {
-            'effective_dialogue': str(effective_dialogue) + '次',
             'data_list': data_list,
-            'count': effective_dialogue,
+            'effective_dialogue': effective_dialogue,
         }
 
         return data
@@ -186,17 +161,10 @@ class statistical_objs():
         average_response = 0
         result_data = []
         info_objs = models.zgld_chatinfo.objects.filter(
-            self.q,
             userprofile_id=self.o_id,
             article_id__isnull=False,
         ).values('customer_id', 'customer__username', 'article_id').distinct()
         data_list = []
-        num = 0
-        start_line = 0
-        stop_line = 9
-        if self.length != 0:
-            start_line = (self.current_page - 1) * self.length
-            stop_line = start_line + self.length
 
         for info_obj in info_objs:
             chatinfo_objs = models.zgld_chatinfo.objects.filter(
@@ -216,22 +184,16 @@ class statistical_objs():
                         if send_type == 1:
                             data_dict['stop_date'] = chatinfo_obj.create_date
                             break                                               # 只统计该用户第一次聊天回应时长
+
                 if data_dict['start_date'] and data_dict['stop_date']:
                     result_data.append(data_dict)
                     date = data_dict['stop_date'] - data_dict['start_date']
-                    if self.detail_data_type and self.detail_data_type == 'average_response_time':
-                        num += 1
-                        data_list.append({
-                            'customer__username': b64decode(info_obj.get('customer__username')),
-                            'start_date': data_dict['start_date'].strftime('%Y-%m-%d %H:%M:%S'),
-                            'stop_date': data_dict['stop_date'].strftime('%Y-%m-%d %H:%M:%S'),
-                            'response_time': date.seconds
-                        })
-            if self.detail_data_type and self.detail_data_type == 'average_response_time':
-                if num >= stop_line:
-                    break
-                elif num <= start_line:
-                    continue
+                    data_list.append({
+                        'customer__username': b64decode(info_obj.get('customer__username')),
+                        'start_date': data_dict['start_date'].strftime('%Y-%m-%d %H:%M:%S'),
+                        'stop_date': data_dict['stop_date'].strftime('%Y-%m-%d %H:%M:%S'),
+                        'response_time': date.seconds
+                    })
 
         num = 0
         len_data = len(result_data)
@@ -240,10 +202,10 @@ class statistical_objs():
             num += date.seconds
         if num != 0 and len_data != 0:
             average_response = int(num / len_data)
+
         data = {
             'average_response': str(average_response) + '秒',
             'data_list': data_list,
-            'count': len_data,
         }
 
         return data
@@ -252,29 +214,17 @@ class statistical_objs():
     def sending_applet(self):
         data_list = []
         objs = models.zgld_accesslog.objects.filter(
-            self.q,
             user_id=self.o_id,
             action=23
         )
-        if self.detail_data_type and self.detail_data_type == 'sending_applet':
-            if self.length != 0:
-                start_line = (self.current_page - 1) * self.length
-                stop_line = start_line + self.length
-                objs = objs[start_line: stop_line]
-            for obj in objs:
-                data_list.append({
-                    'customer__username': b64decode(obj.customer.username),
-                    'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                })
 
-        sending_applet_num = objs.count()
-        data = {
-            'sending_applet_num': str(sending_applet_num) + '次',
-            'data_list': data_list,
-            'count': sending_applet_num,
-        }
+        for obj in objs:
+            data_list.append({
+                'customer__username': b64decode(obj.customer.username),
+                'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+            })
 
-        return data
+        return data_list
 
 
 
