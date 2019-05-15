@@ -2740,7 +2740,8 @@ def celery_statistical_content(request, oper_type):
 
             redis_key = 'leida_redis_contact_{user_id}'.format(user_id=user_id)
             data = rc.hget('leida_redis_contact', redis_key)  # 获取缓存的数据
-            if data != 'None':
+            if data != 'None' and data != None:
+                print('-----------------------> ', data)
                 data = eval(data)
                 print('len(data)----------------> ', len(data))
                 for i in ret_data_list:         # 添加本次获取的数据
