@@ -43,9 +43,9 @@ def leida_websocket(request, oper_type):
             if user_id:
                 rc.set(redis_user_query_info_key, False)
 
-            print('---- 雷达 Flag 循环  uid: %s | customer_id: %s --->>',user_id,customer_id)
+            # print('---- 雷达 Flag 循环  uid: %s | customer_id: %s --->>',user_id,customer_id)
             if redis_user_id_key_flag == 'True' and user_id and customer_id:
-                print('---- 雷达 Flag 为真 --->>', redis_user_id_key_flag)
+                # print('---- 雷达 Flag 为真 --->>', redis_user_id_key_flag)
                 objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
                     userprofile_id=user_id,
                     customer_id=customer_id,
@@ -99,7 +99,7 @@ def leida_websocket(request, oper_type):
                         base_info_dict.update(_content)
                         ret_data_list.append(base_info_dict)
 
-                    print('--- list(msg_obj) -->>', ret_data_list)
+                    # print('--- list(msg_obj) -->>', ret_data_list)
                     ret_data_list.reverse()
                     response_data = {
                         'data': {
@@ -110,7 +110,7 @@ def leida_websocket(request, oper_type):
                         'code': 200
                     }
 
-                    print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
+                    # print('------ 有新消息, 实时推送给【雷达用户】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
                     ## 发送成功 修改 数据库状态值
@@ -120,8 +120,8 @@ def leida_websocket(request, oper_type):
                     rc.set(redis_user_id_key, False)
 
 
-            print('---- 雷达判断公众号[修改] 的值1------->>', rc.get(redis_customer_id_key))
-            print('---- 雷达判断公众号[修改] 的值2------->>', redis_customer_id_flag)
+            # print('---- 雷达判断公众号[修改] 的值1------->>', rc.get(redis_customer_id_key))
+            # print('---- 雷达判断公众号[修改] 的值2------->>', redis_customer_id_flag)
 
             if redis_customer_id_flag == 'False' and user_id and customer_id:
 
@@ -132,7 +132,7 @@ def leida_websocket(request, oper_type):
                     'msg': '实时通知小程序新消息-已读通知',
                     'code': 202
                 }
-                print('------ 小程序新消息-已读, 实时推送给【雷达用户】 flag：---->', response_data)
+                # print('------ 小程序新消息-已读, 实时推送给【雷达用户】 flag：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
 
                 rc.set(redis_customer_id_key, 'Stop')
@@ -148,7 +148,7 @@ def leida_websocket(request, oper_type):
                         continue
 
                     _data = json.loads(data.decode('utf-8'))
-                    print('--- 【雷达用户】发送过来的 数据: --->>', _data)
+                    # print('--- 【雷达用户】发送过来的 数据: --->>', _data)
 
                     login_flag = account.socket_is_token(models.zgld_userprofile,_data)
 
@@ -169,7 +169,7 @@ def leida_websocket(request, oper_type):
                                 'code': 199,
                                 'msg': '注册成功',
                             }
-                            print('------ 注册成功-返回数据---->', response_data)
+                            # print('------ 注册成功-返回数据---->', response_data)
                             uwsgi.websocket_send(json.dumps(response_data))
 
                             continue
@@ -180,7 +180,7 @@ def leida_websocket(request, oper_type):
                                 'code': 270,
                                 'msg': '为了新中国的胜利向我开炮',
                             }
-                            print('------ 成功返回---->', response_data)
+                            # print('------ 成功返回---->', response_data)
                             uwsgi.websocket_send(json.dumps(response_data))
                             continue
 
@@ -210,7 +210,7 @@ def leida_websocket(request, oper_type):
                             'code': 400,
                             'msg': '雷达token验证未通过'
                         }
-                        print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id,_data)
+                        # print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id, customer_id,_data)
                         uwsgi.websocket_send(json.dumps(ret_data))
                         break
 
@@ -221,7 +221,7 @@ def leida_websocket(request, oper_type):
                         'msg': '报错:%s 终止连接' % (e)
                     }
 
-                    print('----  报错:%s [雷达] 终止连接 uid  | customer_id --->>' % e,user_id, customer_id)
+                    # print('----  报错:%s [雷达] 终止连接 uid  | customer_id --->>' % e,user_id, customer_id)
                     uwsgi.websocket_send(json.dumps(ret_data))
                     break
                     # return JsonResponse(ret_data)
@@ -269,7 +269,7 @@ def leida_websocket(request, oper_type):
                         continue
 
                     _data = json.loads(data.decode("utf-8"))
-                    print('------ 【雷达-【消息数量】】发送过来的 数据:  ----->>', _data)
+                    # print('------ 【雷达-【消息数量】】发送过来的 数据:  ----->>', _data)
 
                     login_flag = account.socket_is_token(models.zgld_userprofile,_data)
 
@@ -342,7 +342,7 @@ def leida_websocket(request, oper_type):
                             'msg': '雷达token验证未通过'
                         }
 
-                        print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id,_data)
+                        # print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id,_data)
                         uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
@@ -352,7 +352,7 @@ def leida_websocket(request, oper_type):
                         'code': 400,
                         'msg': '报错:%s 终止连接' % (e)
                     }
-                    print('----  报错:%s [雷达] 终止连接 customer_id | user_id --->>' % e , str(user_id))
+                    # print('----  报错:%s [雷达] 终止连接 customer_id | user_id --->>' % e , str(user_id))
 
                     return JsonResponse(ret_data)
 
@@ -366,9 +366,9 @@ def leida_websocket(request, oper_type):
             time.sleep(1)
 
             redis_user_query_contact_key_flag = rc.get(redis_user_query_contact_key)
-            print('---- 雷达【消息列表】 循环 | uid: %s --->>' % str(user_id))
+            # print('---- 雷达【消息列表】 循环 | uid: %s --->>' % str(user_id))
             if redis_user_query_contact_key_flag == 'True':
-                print('---- 雷达【消息列表】 Flag 为 True  --->>', redis_user_query_contact_key_flag)
+                # print('---- 雷达【消息列表】 Flag 为 True  --->>', redis_user_query_contact_key_flag)
 
                 contact_data = {
                     'current_page': 1,
@@ -387,7 +387,7 @@ def leida_websocket(request, oper_type):
                 }
 
 
-                print('------ 有新消息, 实时推送给【雷达 消息列表】 的数据：---->', response_data)
+                # print('------ 有新消息, 实时推送给【雷达 消息列表】 的数据：---->', response_data)
                 uwsgi.websocket_send(json.dumps(response_data))
                 rc.set(redis_user_query_contact_key, False)
 
@@ -480,7 +480,7 @@ def leida_websocket(request, oper_type):
                             'msg': '雷达token验证未通过'
                         }
 
-                        print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id)
+                        # print('----  【雷达验证未通过】 终止连接 uid  | customer_id --->>', user_id)
                         uwsgi.websocket_send(json.dumps(ret_data))
 
                         return JsonResponse(ret_data)
@@ -491,7 +491,7 @@ def leida_websocket(request, oper_type):
                         'code': 400,
                         'msg': '报错:%s 终止连接' % (e)
                     }
-                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e, str(user_id))
+                    # print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e, str(user_id))
                     uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
@@ -613,7 +613,7 @@ def xiaochengxu_websocket(request, oper_type):
                     # print('------ 有新消息, 实时推送给【小程序】 的数据：---->', response_data)
                     uwsgi.websocket_send(json.dumps(response_data))
 
-                print('--- list(msg_obj) -->>', ret_data_list)
+                # print('--- list(msg_obj) -->>', ret_data_list)
 
                 if customer_id_position_key_flag == 'input':
                     objs.update(
@@ -791,8 +791,8 @@ def xiaochengxu_websocket(request, oper_type):
                         'code': 400,
                         'msg': '报错:%s 终止连接' % (e)
                     }
-                    print('ret_data--------------------> ', type(ret_data), ret_data)
-                    print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
+                    # print('ret_data--------------------> ', type(ret_data), ret_data)
+                    # print('----  报错:%s [小程序] 终止连接 customer_id | user_id --->>' % e,str(customer_id), str(user_id))
                     uwsgi.websocket_send(json.dumps(ret_data))
 
                     return JsonResponse(ret_data)
@@ -846,7 +846,7 @@ def gongzhonghao_websocket(request, oper_type):
 
                         customer_id = obj.customer_id
                         customer_username =obj.customer.username
-                        print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
+                        # print('----- Socket 客户姓名：---->>>',customer_username,"|",customer_id)
                         customer_name = conversion_base64_customer_username_base64(customer_username, customer_id)
 
                         content = obj.content
@@ -900,7 +900,7 @@ def gongzhonghao_websocket(request, oper_type):
                     }
 
                     uwsgi.websocket_send(json.dumps(response_data))
-                    print('--- list(msg_obj) -->>', ret_data_list)
+                    # print('--- list(msg_obj) -->>', ret_data_list)
                     if customer_id_position_key_flag == 'input':
                         objs.update(
                             is_customer_new_msg=False
@@ -1214,7 +1214,7 @@ def public_websocket(request, oper_type):
             try:
                 data = uwsgi.websocket_recv()
                 # data = uwsgi.websocket_recv_nb()
-                print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
+                # print('------[扫码登录验证[auth_code]-非阻塞] websocket_recv_nb ----->>', data)
                 if not data:
 
                     response_data = {
@@ -1225,7 +1225,7 @@ def public_websocket(request, oper_type):
                     return JsonResponse(response_data)
 
                 _data = json.loads(data.decode("utf-8"))
-                print('------ [扫码登录验证[auth_code] 发送过来的 数据:  ----->>', _data)
+                # print('------ [扫码登录验证[auth_code] 发送过来的 数据:  ----->>', _data)
 
                 _type = _data.get('type')
                 auth_code = _data.get('auth_code')
@@ -1269,7 +1269,7 @@ def public_websocket(request, oper_type):
                                 password = ''
                             )
 
-                            print('----- 登录成功 --->>',auth_code,'|','True')
+                            # print('----- 登录成功 --->>',auth_code,'|','True')
                             uwsgi.websocket_send(json.dumps(response_data))
                             return JsonResponse(response_data)
 
@@ -1278,7 +1278,7 @@ def public_websocket(request, oper_type):
                                 'code': 301,
                                 'msg': '登录失败',
                             }
-                            print('----- 登录失败 --->>',auth_code,'|','True')
+                            # print('----- 登录失败 --->>',auth_code,'|','True')
                             uwsgi.websocket_send(json.dumps(response_data))
                             return JsonResponse(response_data)
 
@@ -1287,7 +1287,7 @@ def public_websocket(request, oper_type):
                             'code': 201,
                             'msg': '等待验证中',
                         }
-                        print('----- 等待验证中 --->>',auth_code,'|', 'False')
+                        # print('----- 等待验证中 --->>',auth_code,'|', 'False')
                         uwsgi.websocket_send(json.dumps(response_data))
 
                     else:

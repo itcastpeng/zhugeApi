@@ -763,7 +763,7 @@ def create_poster_process(data):
 @csrf_exempt
 def user_send_template_msg(request):
     response = ResponseObj()
-
+    print('--------------------------------小程序生成token，并然后发送模板消息-------------------------------------')
     print('request -->', request.GET)
     data = json.loads(request.GET.get('data'))
 
