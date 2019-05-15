@@ -125,7 +125,7 @@ def user_send_template_msg_to_customer(data):
     get_data = {
         'data': data
     }
-    print(get_data)
+    print('get_data-----------------------------celery AI用户 给小程序客户发送消息-----------------------------')
 
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
