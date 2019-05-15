@@ -2744,9 +2744,16 @@ def celery_statistical_content(request, oper_type):
             data = rc.hget('leida_redis_contact', redis_key)  # 获取缓存的数据
             if data != 'None' and data != None:
                 data = eval(data)
+
+                customer_id_list = [] # 当前获取的新数据客户ID
                 for i in ret_data_list:         # 添加本次获取的数据
-                    data.append(i)
-                data_content = data
+                    customer_id_list.append(i.get('customer_id'))
+
+                for i in data:
+                    if i.get('customer_id') not in customer_id_list:
+                        ret_data_list.append(i)
+
+                data_content = ret_data_list
                 if int(user_id) == 132:
                     print('data_content------------------> ', data_content)
             else:
