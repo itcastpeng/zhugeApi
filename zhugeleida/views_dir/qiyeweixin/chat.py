@@ -43,7 +43,7 @@ def chat(request):
                 result_data = []
                 redis_data = eval(redis_data)
                 for redis_result in redis_data:
-                    print('redis_result--------> ', redis_result)
+                    # print('redis_result--------> ', redis_result)
                     if int(redis_result.get('customer_id')) == int(customer_id):
                         redis_result['count'] = 0
                     result_data.append(redis_result)
