@@ -27,13 +27,27 @@ def chat(request):
     :param request:
     :return:
     '''
+    response = Response.ResponseObj()
     if request.method == 'GET':
         forms_obj = ChatSelectForm(request.GET)
         if forms_obj.is_valid():
-            response = Response.ResponseObj()
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
-            # send_type = request.GET.get('send_type')
+
+
+            # 查询与个人聊天详情时 清除未读消息数量
+            rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
+            redis_key = 'leida_redis_contact_{}'.format(user_id)
+            redis_data = rc.hget('leida_redis_contact', redis_key)
+            if redis_data != None and redis_data != 'None':
+                result_data = []
+                redis_data = eval(redis_data)
+                for redis_result in redis_data:
+                    print('redis_result--------> ', redis_result)
+                    if int(redis_result.get('customer_id')) == int(customer_id):
+                        redis_result['count'] = 0
+                    result_data.append(redis_result)
+                rc.hset('leida_redis_contact', redis_key, str(result_data))
 
             current_page = forms_obj.cleaned_data['current_page']
             length = forms_obj.cleaned_data['length']
@@ -129,8 +143,13 @@ def chat(request):
             if not ret_data_list:
                 # 没有新消息
                 response.msg = '没有新消息'
-
-            return JsonResponse(response.__dict__)
+        else:
+            response.code = 301
+            response.msg = json.loads(forms_obj.errors.as_json())
+    else:
+        response.code = 402
+        response.msg = '请求异常'
+    return JsonResponse(response.__dict__)
 
 
 # 聊天信息 操作
