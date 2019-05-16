@@ -842,7 +842,7 @@ def article_oper(request, oper_type, o_id):
                         q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
                     else:
                         q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-                    print('查询值 q--->>', q)
+                    # print('查询值 q--->>', q)
                     objs = models.zgld_article_to_customer_belonger.objects.select_related('article').filter(q)
                     if objs:
                         obj = objs[0]
@@ -870,12 +870,12 @@ def article_oper(request, oper_type, o_id):
                             for tag_name in tags_name_list:
 
                                 if tag_name in already_tag_name_list:  # 满足 文章标签已经在 【客户标签列表中】就不用创建
-                                    print('tag_name 文章标签已经在 【客户标签列表中】---------->>', tag_name, "|",
-                                          already_tag_name_list)
+                                    # print('tag_name 文章标签已经在 【客户标签列表中】---------->>', tag_name, "|",
+                                    #       already_tag_name_list)
                                     continue
 
                                 elif not already_tag_list:
-                                    print('值 already_tag_list 为空 ------>>')
+                                    # print('值 already_tag_list 为空 ------>>')
                                     already_tag_list = list(
                                         customer_obj.zgld_tag_set.all().values_list('id', flat=True))
                                     already_company_tags_name_list = list(models.zgld_tag.objects.filter(user_id=uid,
@@ -887,7 +887,7 @@ def article_oper(request, oper_type, o_id):
                                     'user_id': uid,
                                     'tag_type': 1  # (1, '微信公众号'),
                                 }
-                                print('值 already_tag_list-------->', already_tag_list)
+                                # print('值 already_tag_list-------->', already_tag_list)
 
                                 if tag_name not in already_company_tags_name_list:
                                     parent_id = models.zgld_tag.objects.filter(name='自定义')[0].id
@@ -909,7 +909,7 @@ def article_oper(request, oper_type, o_id):
                             if already_tag_list:
                                 now_tag_list = [int(i) for i in already_tag_list]
 
-                                print('值 now_tag_list ----->>', now_tag_list)
+                                # print('值 now_tag_list ----->>', now_tag_list)
 
                                 if customer_obj:
                                     customer_obj.zgld_tag_set = now_tag_list
@@ -940,7 +940,7 @@ def article_oper(request, oper_type, o_id):
                             reach_stay_time = int(reach_stay_time) if reach_stay_time else ''
 
                             if activity_id and is_have_activity == 1 and reach_stay_time != 0:
-                                print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
+                                # print('------- 此文章有【活动开启】并【有时间限制: %s】 ------>>' % (reach_stay_time))
                                 activity_objs = models.zgld_article_activity.objects.filter(
                                     article_id=article_id).exclude(
                                     status=3).order_by('-create_date')
@@ -952,19 +952,19 @@ def article_oper(request, oper_type, o_id):
                                     end_time = activity_obj.end_time
                                     reach_stay_time = activity_obj.reach_stay_time
 
-                                    print('库值 start_time------>>', start_time)
-                                    print('库值 end_time------>>', end_time)
-                                    print('库值 reach_stay_time------>>', reach_stay_time)
+                                    # print('库值 start_time------>>', start_time)
+                                    # print('库值 end_time------>>', end_time)
+                                    # print('库值 reach_stay_time------>>', reach_stay_time)
 
                                     if now_date_time >= start_time and now_date_time <= end_time:
-                                        print('活动开启并活动在进行中 -------->>')
+                                        # print('活动开启并活动在进行中 -------->>')
 
                                         article_access_log_obj = article_access_log_objs[0]
 
                                         if reach_stay_time != 0:  # 0 代表 没有时间限制
                                             stay_time = article_access_log_obj.stay_time
-                                            print('库值 stay_time-------->', stay_time)
-                                            print('库值 reach_stay_time-------->', reach_stay_time)
+                                            # print('库值 stay_time-------->', stay_time)
+                                            # print('库值 reach_stay_time-------->', reach_stay_time)
 
                                             if stay_time >= reach_stay_time:
 
@@ -983,8 +983,8 @@ def article_oper(request, oper_type, o_id):
                                                         'activity_id': activity_id,
                                                         'company_id': company_id,
                                                     }  ## 判断转发后阅读的人数 +转发后阅读时间 此处封装到异步中。
-                                                    print('传输异步数据 tasks json.dumps(_data) --------->>',
-                                                          json.dumps(_data))
+                                                    # print('传输异步数据 tasks json.dumps(_data) --------->>',
+                                                    #       json.dumps(_data))
 
                                                     tasks.user_forward_send_activity_redPacket.delay(_data)
 

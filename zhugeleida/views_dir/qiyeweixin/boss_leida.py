@@ -144,7 +144,7 @@ def deal_line_info(data):
         q1.add(Q(**{'user_id': user_id}), Q.AND)
         q2.add(Q(**{'userprofile_id': user_id}), Q.AND)
 
-    print('---- 【测试】deal_line_info q1 ----->>', q1)
+    # print('---- 【测试】deal_line_info q1 ----->>', q1)
 
     if index_type == 1:  # 客户总数
         if type == 'personal':

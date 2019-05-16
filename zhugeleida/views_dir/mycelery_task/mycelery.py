@@ -776,6 +776,7 @@ def user_send_template_msg(request):
     authorizer_refresh_token = obj.authorizer_refresh_token
     authorizer_appid = obj.authorization_appid
     template_id = obj.template_id
+    three_services_type = obj.three_services_type # 案例版小程序 还是 名片版
 
     rc = redis.StrictRedis(host='redis_host', port=6379, db=8, decode_responses=True)
     customer_obj = models.zgld_customer.objects.filter(id=customer_id)
@@ -785,7 +786,10 @@ def user_send_template_msg(request):
         customer_id=customer_id,
         user_id=user_id
     )
-    exist_formid_json = json.loads(objs[0].customer.formid)
+    exist_formid_json = []
+    if objs[0].customer.formid:
+        exist_formid_json = json.loads(objs[0].customer.formid)
+
     user_name = objs[0].user.username
     flag = True
     i = 0
@@ -823,7 +827,10 @@ def user_send_template_msg(request):
             post_template_data['template_id'] = template_id
 
             # path = 'pages/mingpian/index' % (user_id)
-            path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            if int(three_services_type) == 1: # 名片版 小程序
+                path = 'pages/mingpian/msg?source=template_msg&uid=%s&pid=' % (user_id)
+            else: # 案例版小程序
+                path = 'pages/chat/msg?uid={}&source=template_msg'.format(user_id)
             post_template_data['page'] = path
 
             if len(exist_formid_json) == 0:

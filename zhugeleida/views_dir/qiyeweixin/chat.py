@@ -294,7 +294,7 @@ def chat_oper(request, oper_type, o_id):
                 if customer_id and user_id and user_type == 2:
                     data['customer_id'] = customer_id
                     data['user_id'] = user_id
-                    response_celery = user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
+                    user_send_template_msg_to_customer.delay(json.dumps(data))  # 发送【小程序】模板消息
                 elif  user_type == 1 and info_type ==  6 and customer_id and user_id: # 发送商城 的模板消息,可以点击进去
                     print('--- 【公众号发送（商城）模板消息】 user_send_gongzhonghao_template_msg --->')
                     data['customer_id'] = customer_id
