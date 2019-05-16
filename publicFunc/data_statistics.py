@@ -40,12 +40,16 @@ def get_msg(content):
 # 统计数据 调用类
 class statistical_objs():
 
-    def __init__(self, o_id):
+    def __init__(self, o_id, start_date_time=None, stop_date_time=None):
         self.o_id = o_id
+        self.start_date_time = start_date_time
+        self.stop_date_time = stop_date_time
+        self.q = Q().add(Q(create_date__gte=start_date_time), Q(create_date__lte=stop_date_time), Q.AND)
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
+            self.q,
             user_id=self.o_id,
             oper_type=1
         ).order_by('-create_date')
@@ -71,8 +75,10 @@ class statistical_objs():
 
         zgld_chatinfo_objs = models.zgld_chatinfo.objects.raw(          # 查询出符合条件的用户和客户 已天为单位
             """select id, DATE_FORMAT(create_date, '%%Y-%%m-%%d') as cdt 
-            from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id}  group by cdt, customer_id;""".format(
+            from zhugeleida_zgld_chatinfo where userprofile_id={userprofile_id} and create_date >= '{start_date}' and create_date <= '{stop_date}' group by cdt, customer_id;""".format(
                 userprofile_id=self.o_id,
+                start_date=self.start_date_time,
+                stop_date=self.stop_date_time
             )
         )
         for zgld_chatinfo_obj in zgld_chatinfo_objs:
@@ -161,6 +167,7 @@ class statistical_objs():
         average_response = 0
         result_data = []
         info_objs = models.zgld_chatinfo.objects.filter(
+            self.q,
             userprofile_id=self.o_id,
             article_id__isnull=False,
         ).values('customer_id', 'customer__username', 'article_id').distinct()
@@ -214,6 +221,7 @@ class statistical_objs():
     def sending_applet(self):
         data_list = []
         objs = models.zgld_accesslog.objects.filter(
+            self.q,
             user_id=self.o_id,
             action=23
         )
@@ -231,6 +239,7 @@ class statistical_objs():
     # 转发量(文章)
     def forwarding_article(self):
         objs = models.zgld_accesslog.objects.filter(
+            self.q,
             article_id=self.o_id,
             action__in=[15, 16]
         ).order_by('-create_date')
@@ -247,6 +256,7 @@ class statistical_objs():
     # 点击量（文章）
     def click_the_quantity(self):
         objs = models.zgld_accesslog.objects.filter(
+            self.q,
             article_id=self.o_id,
             action=14
         ).order_by('-create_date')
@@ -265,28 +275,47 @@ class statistical_objs():
 
         data_list = []
         objs = models.ZgldUserOperLog.objects.filter(
+            self.q,
             article_id=self.o_id,
             oper_type=4
         )
 
+        count = objs.count()
+        article_reading_time_count = 0
         for obj in objs:
+            article_reading_time_count += obj.reading_time
+
+        for obj in objs:
+            customer__username = ''
+            if obj.customer:
+                customer__username = obj.customer.username
             data_list.append({
-                'customer__username': b64decode(obj.customer.username),
+                'customer__username': b64decode(customer__username),
                 'reading_time': obj.reading_time,
                 'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
             })
+        avg = 0
+        if int(article_reading_time_count) > 0:
+            avg = int(article_reading_time_count / count)
 
-        return data_list
+        text = str(article_reading_time_count) + '秒/' + str(avg) + '秒'
+        data = {
+            'text': text,
+            'data_list': data_list
+        }
+        return data
 
     # 视频查看时长统计/平均时长（文章）
     def video_view_duration(self):
 
         time_objs = models.ZgldUserOperLog.objects.filter(
+            self.q,
             article_id=self.o_id,
             oper_type=3,
             video_time__isnull=False
         )
         len_video = time_objs.count()
+
         video_view_count = 0
         for time_obj in time_objs:
             video_view_count += time_obj.video_time
@@ -321,18 +350,19 @@ class statistical_objs():
                 'video_time__sum': video_obj.get('video_time__sum'),
                 'avg': avg,
 
-                # 记录后端使用
-                'video_average_playing_time': video_average_playing_time,  # 平均阅读时长
-                'video_view_count': video_view_count,
-                'len_video': len_video,
             })
+        text = str(len_video)+ '次/' + str(video_view_count) + '秒/' + str(video_average_playing_time) + '秒'
+        data = {
+            'data_list': data_list,
+            'text': text
+        }
 
-
-        return data_list
+        return data
 
     # 点击对话框（文章）
     def click_the_dialog_box(self):
         click_dialog_obj = models.ZgldUserOperLog.objects.filter(
+            self.q,
             article_id=self.o_id,
             oper_type=2,
         )
@@ -349,7 +379,7 @@ class statistical_objs():
     def active_message(self):
         result_data = []
         [result_data.append({'customer_id': i.get('customer_id'), 'article_id': i.get('article_id')}) for i in
-         models.zgld_chatinfo.objects.filter(article_id=self.o_id, send_type=2,
+         models.zgld_chatinfo.objects.filter(self.q, article_id=self.o_id, send_type=2,
              article__isnull=False).values(
              'customer_id', 'article_id').distinct()]
 
@@ -384,6 +414,7 @@ class statistical_objs():
     # 拨打电话（文章）
     def call_phone(self):
         objs = models.zgld_accesslog.objects.filter(
+            self.q,
             article_id=self.o_id,
             action=10
         )
@@ -399,6 +430,7 @@ class statistical_objs():
     # 文章点赞次数（文章）
     def thumb_up_number(self):
         objs = models.zgld_article_action.objects.filter(
+            self.q,
             article_id=self.o_id,
             status=1
         )
@@ -414,6 +446,7 @@ class statistical_objs():
     # 文章评论（文章）
     def article_comments(self):
         objs = models.zgld_article_comment.objects.filter(
+            self.q,
             article_id=self.o_id,
         )
         data_list = []

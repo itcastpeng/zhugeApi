@@ -9,6 +9,32 @@ from publicFunc.time_screen import time_screen
 from publicFunc.base64 import b64decode
 import json, datetime, redis
 
+# 获取redis_name
+def get_redis_name(number_days, request_type):
+    if request_type == 'article':
+        if number_days == 'all_days':
+            redis_name = 'leida_redis_data_statistics_article'
+        elif number_days == 'today':
+            redis_name = 'leida_redis_data_statistics_article_today'
+        elif number_days == 'seven_days':
+            redis_name = 'leida_redis_data_statistics_article_seven_days'
+        elif number_days == 'thirty_days':
+            redis_name = 'leida_redis_data_statistics_article_thirty_days'
+        else:
+            redis_name = 'leida_redis_data_statistics_article_yesterday'
+
+    else:
+        if number_days == 'all_days':
+            redis_name = 'leida_redis_data_statistics_user'
+        elif number_days == 'today':
+            redis_name = 'leida_redis_data_statistics_user_today'
+        elif number_days == 'seven_days':
+            redis_name = 'leida_redis_data_statistics_user_seven_days'
+        elif number_days == 'thirty_days':
+            redis_name = 'leida_redis_data_statistics_user_thirty_days'
+        else:
+            redis_name = 'leida_redis_data_statistics_user_yesterday'
+    return redis_name
 
 # 雷达后台首页 数据统计
 @csrf_exempt
@@ -42,11 +68,6 @@ def data_statistics(request, oper_type):
             number_days = request.GET.get('number_days')  # 天数
 
             company_id = request.GET.get('company_id')  # 公司
-            start_time = request.GET.get('start_time')  # 自定义天数 开始时间
-            stop_time = request.GET.get('stop_time')  # 自定义天数 结束时间
-
-            if not start_time and not stop_time:  # 时间筛选
-                start_time, stop_time = time_screen(number_days)
 
             public_q = Q()
             if company_id:
@@ -59,7 +80,7 @@ def data_statistics(request, oper_type):
 
             # 文章数据分析
             if oper_type == 'article_data_analysis':
-                redis_name = 'leida_redis_data_statistics_article'
+                redis_name = get_redis_name(number_days, 'article')
 
                 article_id = request.GET.get('article_id')  # 区分文章
 
@@ -70,6 +91,7 @@ def data_statistics(request, oper_type):
 
                 if not redis_article_data: # 如果该公司没有数据 直接返回
                     response.code = 200
+                    response.msg = '暂无数据'
                     response.data = {
                         'count': data_count,
                         'ret_data': ret_data
@@ -106,31 +128,15 @@ def data_statistics(request, oper_type):
 
                     len_click_quantity_data = len(click_quantity_data)
                     len_forwarding_article_data = len(forwarding_article_data)
-                    len_the_reading_data = len(the_reading_data)
-                    len_video_view_data = len(video_view_data)
+                    len_the_reading_data = len(the_reading_data.get('data_list'))
+                    len_video_view_data = len(video_view_data.get('data_list'))
                     len_click_dialog_data = len(click_dialog_data)
                     len_user_active_send_data = len(user_active_send_data)
                     len_call_phone_data= len(call_phone_data)
                     len_click_thumb_data = len(click_thumb_data)
                     len_article_comments_data = len(article_comments_data)
 
-                    # 阅读总时长和平均时长
-                    article_reading_time_count = 0
-                    avg = 0
-                    for the_reading in the_reading_data:
-                        article_reading_time_count += the_reading.get('reading_time')
-                    if int(article_reading_time_count) > 0:
-                        avg = int(article_reading_time_count / len_the_reading_data)
-                    the_reading_data_text = str(article_reading_time_count) + '秒/' + str(avg) + '秒'
 
-                    # 几次查看视频 / 查看视频总时长 / 查看平均时长
-                    video_view_data_text = '0次/0秒/秒'
-                    if video_view_data:
-                        video_view_data_text = str(video_view_data[0].get('len_video')) + '次/' + str(
-                            video_view_data[0].get('video_view_count')
-                        ) + '秒/' + str(video_view_data[0].get('video_average_playing_time')) + '秒'
-
-                    print('start_line, stop_line---------. ', start_line, stop_line)
                     ret_data.append({
                         'id': obj.get('article_id'),
                         'article_name': obj.get('article_title'),                         # 文章名称
@@ -138,9 +144,9 @@ def data_statistics(request, oper_type):
                         'click_data': [],
                         'forward_num': str(len_forwarding_article_data) + '次',            # 文章转发数量
                         'forward_data': [],
-                        'avg_reading_info': the_reading_data_text,                         # 文章阅读数据
+                        'avg_reading_info': the_reading_data.get('text'),                 # 文章阅读数据
                         'avg_reading_data':[],
-                        'len_video_text': video_view_data_text,                             # 视频信息
+                        'len_video_text': video_view_data.get('text'),                     # 视频信息
                         'len_video_data': [],
                         'click_dialog_num': str(len_click_dialog_data) + '次',             # 点击对话框
                         'click_dialog_data': [],
@@ -154,44 +160,71 @@ def data_statistics(request, oper_type):
                         'article_comments_data': [],
                     })
 
-                    count = 0  #
-                    if detail_type == 'click_the_quantity':  # 点击
+                    count = 0  # 详情总数
+                    key = ''  # 详情键
+                    detail_data = []
+                    article_order_by = 'create_date'
+
+                    # 文章点击数据
+                    if detail_type == 'click_the_quantity':
                         count = len_click_quantity_data
-                        ret_data[list_num]['click_data'] = click_quantity_data[start_line: stop_line]          # 文章点击数据
+                        key = 'click_data'
+                        detail_data = click_quantity_data
 
-                    elif detail_type == 'forwarding_article':  # 转发
+                    # 文章转发数据
+                    elif detail_type == 'forwarding_article':
                         count = len_forwarding_article_data
-                        ret_data[list_num]['forward_data'] = forwarding_article_data[start_line: stop_line]    # 文章转发数据
+                        key = 'forward_data'
+                        detail_data = forwarding_article_data
 
-                    elif detail_type == 'the_reading_time':  # 阅读
+                    # 文章阅读数据
+                    elif detail_type == 'the_reading_time':
                         count = len_the_reading_data
-                        ret_data[list_num]['avg_reading_data'] = the_reading_data[start_line: stop_line]       # 文章阅读数据
+                        key = 'avg_reading_data'
+                        detail_data = the_reading_data.get('data_list')
 
-                    elif detail_type == 'video_view_duration':  # 视频
+                    # 视频数据
+                    elif detail_type == 'video_view_duration': # 排序问题
+                        article_order_by = 'id__count'
                         count = len_video_view_data
-                        ret_data[list_num]['video_view_data'] = video_view_data[start_line: stop_line]          # 视频数据
+                        key = 'video_view_data'
+                        detail_data = video_view_data.get('data_list')
 
-                    elif detail_type == 'click_the_dialog_box':  # 点击对话框
+                    # 点击对话框数据
+                    elif detail_type == 'click_the_dialog_box':
                         count = len_click_dialog_data
-                        ret_data[list_num]['click_dialog_data'] = click_dialog_data[start_line: stop_line]     # 点击对话框数据
+                        key = 'click_dialog_data'
+                        detail_data = click_dialog_data
 
-                    elif detail_type == 'active_message':  # 主动发送消息
+                    # 主动发送消息数据
+                    elif detail_type == 'active_message':
                         count = len_user_active_send_data
-                        ret_data[list_num]['user_active_send_data'] = user_active_send_data[start_line: stop_line] # 主动发送消息数据
+                        key = 'user_active_send_data'
+                        detail_data = user_active_send_data
 
-                    elif detail_type == 'call_phone':  # 拨打电话
+                    # 拨打电话数据
+                    elif detail_type == 'call_phone':
                         count = len_call_phone_data
-                        ret_data[list_num]['call_phone_data'] = call_phone_data[start_line: stop_line]          # 拨打电话数据
+                        key = 'call_phone_data'
+                        detail_data = call_phone_data
 
+                    # 点赞数据
                     elif detail_type == 'thumb_up_number':  # 点赞
                         count = len_click_thumb_data
-                        ret_data[list_num]['click_thumb_data'] = click_thumb_data[start_line: stop_line]          # 点赞数据
+                        key = 'click_thumb_data'
+                        detail_data = click_thumb_data
 
+                    # 查询评论数据
                     elif detail_type == 'article_comments':  # 查询评论
                         count = len_article_comments_data
-                        ret_data[list_num]['article_comments_data'] = article_comments_data[start_line: stop_line]  # 评论数据
+                        key = 'article_comments_data'
+                        detail_data = article_comments_data
 
                     ret_data[list_num]['count'] = count         # 数据总数
+
+                    detail_data = sorted(detail_data, key=lambda x: x[article_order_by], reverse=True)
+                    ret_data[list_num][key] = detail_data[start_line: stop_line]
+
                     list_num += 1
 
                 response.code = 200
@@ -269,7 +302,7 @@ def data_statistics(request, oper_type):
 
             # 员工数据分析
             elif oper_type == 'employee_data_analysis':
-                redis_name = 'leida_redis_data_statistics_user'
+                redis_name = get_redis_name(number_days, 'user')
 
                 user_id = request.GET.get('id')  # 区分用户
 
@@ -277,6 +310,7 @@ def data_statistics(request, oper_type):
                 ret_data = []
                 if not redis_user_data: # 该公司没有数据直接返回
                     response.code = 200
+                    response.msg = '暂无数据'
                     response.data = {
                         'red_data': ret_data,
                         'count': 0
@@ -329,23 +363,39 @@ def data_statistics(request, oper_type):
                     })
 
                     count = 0
+                    key = ''
+                    detail_data = []
+                    user_order_by = 'create_date'
+
+                    #  复制昵称 次数及数据
                     if detail_type == 'copy_the_nickname':
                         count = copy_the_nickname_len
-                        ret_data[list_num]['copy_nickname_data'] = copy_the_nickname
+                        key = 'copy_nickname_data'
+                        detail_data = copy_the_nickname
 
+                    # 有效对话次数
                     elif detail_type == 'number_valid_conversations':
                         count = number_valid_conversations_len
-                        ret_data[list_num]['effective_dialogue_data'] = number_valid_conversations.get('data_list')
+                        key = 'effective_dialogue_data'
+                        detail_data = number_valid_conversations.get('data_list')
 
+                    # 咨询响应平均时长
                     elif detail_type == 'average_response_time':
                         count = average_response_time_len
-                        ret_data[list_num]['average_response_data'] = average_response_time.get('data_list')
+                        key = 'average_response_data'
+                        detail_data = average_response_time.get('data_list')
+                        user_order_by = 'stop_date'
 
+                    # 发送小程序
                     elif detail_type == 'sending_applet':
                         count = sending_applet_len
-                        ret_data[list_num]['sending_applet_data'] = sending_applet
+                        key = 'sending_applet_data'
+                        detail_data = sending_applet
 
                     ret_data[list_num]['count'] = count
+                    detail_data = sorted(detail_data, key=lambda x: x[user_order_by], reverse=True)
+                    ret_data[list_num][key] = detail_data[start_line: stop_line]
+
                     list_num += 1
 
                 response.code = 200
@@ -385,6 +435,9 @@ def data_statistics(request, oper_type):
                     },
                 }
 
+            else:
+                response.code = 402
+                response.msg = '请求异常'
 
         else:
             response.code = 301
@@ -821,7 +874,6 @@ class statistical_objs():
                     'video_time__sum': video_obj.get('video_time__sum'),
                     'avg': avg,
                 })
-
 
         # 几次查看视频 / 查看平均时长 / 查看视频总时长
         text = str(len_video)+ '次/' + str(video_view_count) + '秒/' + str(video_average_playing_time) + '秒'

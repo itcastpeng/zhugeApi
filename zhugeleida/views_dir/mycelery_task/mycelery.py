@@ -21,6 +21,7 @@ from zhugeleida.public.common import create_qiyeweixin_access_token
 from publicFunc.base64 import b64decode
 from publicFunc import deal_time
 from publicFunc.data_statistics import statistical_objs
+from publicFunc.time_screen import time_screen
 import datetime, json, os, sys, requests, random, redis, time, base64
 
 def action_record(data):
@@ -2767,94 +2768,109 @@ def celery_statistical_content(request, oper_type):
             redis_key = 'leida_data_statistics_company_{}'.format(company_id) # 公用key
 
             # ========================**********员工数据分析缓存***************=====================
-            user_redis_name = 'leida_redis_data_statistics_user'
-            user_objs = models.zgld_userprofile.objects.filter(
-                company_id=company_id,
-            )
-            user_redis_list = []
-            for user_obj in user_objs:
-                user_id = user_obj.id
+            for user_time_screen in [
+                {'time': 'all_days', 'redis_key': 'leida_redis_data_statistics_user'},                  # 全部
+                {'time': 'today', 'redis_key': 'leida_redis_data_statistics_user_today'},               # 今天
+                {'time': 'seven_days', 'redis_key': 'leida_redis_data_statistics_user_seven_days'},     # 近七天
+                {'time': 'thirty_days', 'redis_key': 'leida_redis_data_statistics_user_thirty_days'},   # 近三十天
+                {'time': 'yesterday', 'redis_key': 'leida_redis_data_statistics_user_yesterday'},       # 昨天
+            ]:
+                start_time, stop_time = time_screen(user_time_screen.get('time'))
 
-                statistical_obj = statistical_objs(user_id)
-                # -------------------------复制昵称-----------------------
-                copy_the_nickname = statistical_obj.copy_the_nickname()
+                user_objs = models.zgld_userprofile.objects.filter(
+                    company_id=company_id,
+                )
+                user_redis_list = []
+                for user_obj in user_objs:
+                    user_id = user_obj.id
 
-                # -------------------------雷达内有效对话---------------------
-                number_valid_conversations = statistical_obj.number_valid_conversations()
+                    statistical_obj = statistical_objs(user_id, start_time, stop_time)
 
-                # --------------------------平均回复时长-----------------------
-                average_response_time = statistical_obj.average_response_time()
+                    # -------------------------复制昵称-----------------------
+                    copy_the_nickname = statistical_obj.copy_the_nickname()
 
-                # -------------------------发送小程序-----------------------
-                sending_applet = statistical_obj.sending_applet()
+                    # -------------------------雷达内有效对话---------------------
+                    number_valid_conversations = statistical_obj.number_valid_conversations()
 
-                user_redis_list.append({
-                    'user_id': user_id,                                                 # 用户ID
-                    'user_name':user_obj.username,                                      # 用户名称
-                    'copy_the_nickname':copy_the_nickname,                              # 复制昵称数据
-                    'sending_applet':sending_applet,                                    # 发送小程序数据
-                    'number_valid_conversations':number_valid_conversations,            # 雷达内有效对话数据
-                    'average_response_time':average_response_time,                      # 平均回复时长数据
-                })
-            rc.hset(user_redis_name, redis_key, str(user_redis_list))
+                    # --------------------------平均回复时长-----------------------
+                    average_response_time = statistical_obj.average_response_time()
 
+                    # -------------------------发送小程序-----------------------
+                    sending_applet = statistical_obj.sending_applet()
 
-
+                    user_redis_list.append({
+                        'user_id': user_id,                                                 # 用户ID
+                        'user_name':user_obj.username,                                      # 用户名称
+                        'copy_the_nickname':copy_the_nickname,                              # 复制昵称数据
+                        'sending_applet':sending_applet,                                    # 发送小程序数据
+                        'number_valid_conversations':number_valid_conversations,            # 雷达内有效对话数据
+                        'average_response_time':average_response_time,                      # 平均回复时长数据
+                    })
+                rc.hset(user_time_screen.get('redis_key'), redis_key, str(user_redis_list))
 
 
             # ========================*************文章数据分析缓存**************==========================
-            article_redis_name = 'leida_redis_data_statistics_article'    # 文章数据的name
-            article_objs = models.zgld_article.objects.filter(
-                status=1,
-                title__isnull=False,
-                company_id=company_id
-            ).exclude(status=3)
-            article_redis_list = [] # 总数据
-            for article_obj in article_objs:
-                article_id = article_obj.id
-                statistical_obj = statistical_objs(article_id)
+            for article_time_screen in [
+                {'time': 'all_days', 'redis_key': 'leida_redis_data_statistics_article'},  # 全部
+                {'time': 'today', 'redis_key': 'leida_redis_data_statistics_article_today'},  # 今天
+                {'time': 'seven_days', 'redis_key': 'leida_redis_data_statistics_article_seven_days'},  # 近七天
+                {'time': 'thirty_days', 'redis_key': 'leida_redis_data_statistics_article_thirty_days'},  # 近三十天
+                {'time': 'yesterday', 'redis_key': 'leida_redis_data_statistics_article_yesterday'},  # 昨天
+            ]:
 
-                # ----------------转发量------------------
-                forwarding_article_data = statistical_obj.forwarding_article()
+                article_objs = models.zgld_article.objects.filter(
+                    status=1,
+                    title__isnull=False,
+                    company_id=company_id
+                ).exclude(status=3)
 
-                # -----------------点击量---------------
-                click_the_quantity = statistical_obj.click_the_quantity()
+                start_time, stop_time = time_screen(article_time_screen.get('time'))
+                article_redis_list = [] # 总数据
+                for article_obj in article_objs:
+                    article_id = article_obj.id
+                    statistical_obj = statistical_objs(article_id, start_time, stop_time)
 
-                # ------------------阅读总时长/平均时长---------
-                the_reading_time = statistical_obj.the_reading_time()
+                    # ----------------转发量------------------
+                    forwarding_article_data = statistical_obj.forwarding_article()
 
-                # ------------------视频查看时长------------------
-                video_view_duration = statistical_obj.video_view_duration()
+                    # -----------------点击量---------------
+                    click_the_quantity = statistical_obj.click_the_quantity()
 
-                # ------------------点击对话框------------------
-                click_the_dialog_box = statistical_obj.click_the_dialog_box()
+                    # ------------------阅读总时长/平均时长---------
+                    the_reading_time = statistical_obj.the_reading_time()
 
-                # ------------------主动发送消息------------------------
-                active_message = statistical_obj.active_message()
+                    # ------------------视频查看时长------------------
+                    video_view_duration = statistical_obj.video_view_duration()
 
-                # ------------------拨打电话----------------------
-                call_phone = statistical_obj.call_phone()
+                    # ------------------点击对话框------------------
+                    click_the_dialog_box = statistical_obj.click_the_dialog_box()
 
-                # ------------------文章点赞次数------------------------
-                thumb_up_number = statistical_obj.thumb_up_number()
+                    # ------------------主动发送消息------------------------
+                    active_message = statistical_obj.active_message()
 
-                # -------------------文章评论---------------------------
-                article_comments = statistical_obj.article_comments()
+                    # ------------------拨打电话----------------------
+                    call_phone = statistical_obj.call_phone()
 
-                article_redis_list.append({
-                    'article_id': article_id,                           # 文章ID
-                    'article_title': article_obj.title,                 # 文章标题
-                    'forwarding_article_data': forwarding_article_data, # 转发量全部数据
-                    'click_the_quantity': click_the_quantity,           # 点击量全部数据
-                    'the_reading_time': the_reading_time,               # 阅读时长总数据
-                    'video_view_duration': video_view_duration,         # 视频时长总数据
-                    'click_the_dialog_box': click_the_dialog_box,       # 点对话框总数据
-                    'active_message': active_message,                   # 主动发送消息总数据
-                    'call_phone': call_phone,                           # 拨打电话总数据
-                    'thumb_up_number': thumb_up_number,                 # 文章点赞总数据
-                    'article_comments': article_comments,               # 文章评论总数据
-                })
-            rc.hset(article_redis_name, redis_key, str(article_redis_list))
+                    # ------------------文章点赞次数------------------------
+                    thumb_up_number = statistical_obj.thumb_up_number()
+
+                    # -------------------文章评论---------------------------
+                    article_comments = statistical_obj.article_comments()
+
+                    article_redis_list.append({
+                        'article_id': article_id,                           # 文章ID
+                        'article_title': article_obj.title,                 # 文章标题
+                        'forwarding_article_data': forwarding_article_data, # 转发量全部数据
+                        'click_the_quantity': click_the_quantity,           # 点击量全部数据
+                        'the_reading_time': the_reading_time,               # 阅读时长总数据
+                        'video_view_duration': video_view_duration,         # 视频时长总数据
+                        'click_the_dialog_box': click_the_dialog_box,       # 点对话框总数据
+                        'active_message': active_message,                   # 主动发送消息总数据
+                        'call_phone': call_phone,                           # 拨打电话总数据
+                        'thumb_up_number': thumb_up_number,                 # 文章点赞总数据
+                        'article_comments': article_comments,               # 文章评论总数据
+                    })
+                rc.hset(article_time_screen.get('redis_key'), redis_key, str(article_redis_list))
 
         response.code = 200
         response.msg = '缓存完成'
