@@ -335,11 +335,11 @@ def data_statistics(request, oper_type):
 
                     elif detail_type == 'number_valid_conversations':
                         count = number_valid_conversations_len
-                        ret_data[list_num]['effective_dialogue_data'] = number_valid_conversations
+                        ret_data[list_num]['effective_dialogue_data'] = number_valid_conversations.get('data_list')
 
                     elif detail_type == 'average_response_time':
                         count = average_response_time_len
-                        ret_data[list_num]['average_response_data'] = average_response_time
+                        ret_data[list_num]['average_response_data'] = average_response_time.get('data_list')
 
                     elif detail_type == 'sending_applet':
                         count = sending_applet_len
