@@ -70,12 +70,11 @@ def customer(request):
                 birthday = info_obj.birthday if info_obj else ''
                 mem = info_obj.mem if info_obj else ''
                 sex = info_obj.sex if info_obj else ''
-                note_name = info_obj.note_name if info_obj else ''
+                note_name = b64encode(info_obj.note_name) if info_obj else ''
 
                 belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
                 day_interval =  datetime.datetime.today() - obj.create_date
 
-                note_name = b64encode(note_name)
                 username = b64encode(obj.username)
 
                 expedted_pr = belonger_obj.expedted_pr
