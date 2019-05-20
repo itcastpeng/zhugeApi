@@ -120,14 +120,6 @@ def customer(request):
 
                 ret_data.append(
                     data
-                    # 'memo_name': note_name,  # 备注名
-                    # 'sex':  sex,
-                    # 'email': email,              # email
-                    # 'company': company,                # 公司
-                    # 'position':position,  # 位置
-                    # 'address': address,  # 地址
-                    # 'birthday': birthday,  # 生日
-                    # 'mem': mem,  # 备注
                 )
 
             response.code = 200
