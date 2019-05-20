@@ -82,6 +82,7 @@ def customer(request):
                     mem = info_obj.mem
                     sex = info_obj.sex
                     note_name = info_obj.note_name
+                    phone = info_obj.phone
 
 
                     if email:
@@ -100,6 +101,8 @@ def customer(request):
                         data['sex'] = sex
                     if note_name:
                         data['memo_name'] = b64decode(note_name)
+                    if phone:
+                        data['phone'] = phone  # 手机号
 
 
                 belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
@@ -116,7 +119,6 @@ def customer(request):
                 data['ai_pr'] =  expedted_pr  # AI 预计成交概率
                 data['user_type'] =  obj.user_type
                 data['source'] =  belonger_obj.get_source_display()  # 来源
-                data['phone'] =  obj.phone  # 手机号
                 data['tag'] =  tag_list
                 data['day_interval'] = day_interval.days
 
