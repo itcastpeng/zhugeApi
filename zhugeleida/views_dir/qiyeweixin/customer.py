@@ -4,13 +4,12 @@ from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.customer_verify import  Customer_information_UpdateForm,Customer_UpdateExpectedTime_Form ,Customer_UpdateExpedtedPr_Form, CustomerSelectForm
-import json
 from django.db.models import Q
-import base64
+from publicFunc.base64 import b64encode
+import base64, json, datetime, time
+
 
 # cerf  token验证
 # 查询客户详细信息
@@ -34,7 +33,6 @@ def customer(request):
                 'belonger__username': '__contains',   #归属人
                 'superior__username': '__contains',   #上级人
                 'expected_time': '__contains',     #预测成交时间
-                # 'expedted_pr' : '__contains',      #预测成交概率
                 'source'  : '',
                 'create_date': '',
             }
@@ -52,66 +50,67 @@ def customer(request):
 
             # 返回的数据
             ret_data = []
-            if objs:
-                for obj in objs:
+            for obj in objs:
 
-                    tag_list = []
-                    tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
+                tag_list = []
+                tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
 
-                    for t_obj in tag_obj:
-                        tag_list.append(t_obj.name)
+                for t_obj in tag_obj:
+                    tag_list.append(t_obj.name)
 
-                    info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
+                info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
+                if info_obj:
+                    info_obj = info_obj[0]
 
-                    phone = obj.phone
-                    email = info_obj[0].email if info_obj else ''
-                    company = info_obj[0].company if info_obj else ''
-                    position = info_obj[0].position if info_obj else ''
-                    address = info_obj[0].address if info_obj else ''
-                    birthday = info_obj[0].birthday if info_obj else ''
-                    mem = info_obj[0].mem if info_obj else ''
-                    sex = info_obj[0].sex if info_obj else ''
+                phone = obj.phone
+                email = info_obj.email if info_obj else ''
+                company = info_obj.company if info_obj else ''
+                position = info_obj.position if info_obj else ''
+                address = info_obj.address if info_obj else ''
+                birthday = info_obj.birthday if info_obj else ''
+                mem = info_obj.mem if info_obj else ''
+                sex = info_obj.sex if info_obj else ''
+                note_name = info_obj.note_name if info_obj else ''
 
-                    belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
-                    # print('datetime.date.today()',datetime.datetime.today(),obj.create_date)
-                    day_interval =  datetime.datetime.today() - obj.create_date
+                belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
+                day_interval =  datetime.datetime.today() - obj.create_date
 
-                    encodestr = base64.b64decode(obj.username)
-                    customer_name = str(encodestr, 'utf-8')
+                note_name = b64encode(note_name)
+                username = b64encode(obj.username)
 
-                    expedted_pr = belonger_obj.expedted_pr
-                    expected_time = belonger_obj.expected_time
+                expedted_pr = belonger_obj.expedted_pr
+                expected_time = belonger_obj.expected_time
 
-                    ret_data.append({
-                        'id': obj.id,
-                        'username': customer_name,
-                        'headimgurl': obj.headimgurl,
-                        'expected_time': expected_time,  # 预计成交时间
-                        'expedted_pr': expedted_pr,  # 预计成交概率
-                        'ai_pr':  expedted_pr,  # AI 预计成交概率
+                ret_data.append({
+                    'id': obj.id,
+                    'username': username,
+                    'headimgurl': obj.headimgurl,
+                    'expected_time': expected_time,  # 预计成交时间
+                    'expedted_pr': expedted_pr,  # 预计成交概率
+                    'ai_pr':  expedted_pr,  # AI 预计成交概率
 
-                        'user_type' : obj.user_type,
+                    'user_type' : obj.user_type,
 
-                        'source': belonger_obj.get_source_display(),  # 来源
-                        'memo_name': customer_name,  # 备注名
-                        'phone': phone,              # 手机号
-                        'sex':  sex,
-                        'day_interval': day_interval.days,
-                        'email': email,              # email
-                        'company': company,                # 公司
-                        'position':position,  # 位置
-                        'address': address,  # 地址
-                        'birthday': birthday,  # 生日
-                        'mem': mem,  # 备注
-                        'tag': tag_list
-                    })
+                    'source': belonger_obj.get_source_display(),  # 来源
+                    'memo_name': note_name,  # 备注名
+                    'phone': phone,              # 手机号
+                    'sex':  sex,
+                    'day_interval': day_interval.days,
+                    'email': email,              # email
+                    'company': company,                # 公司
+                    'position':position,  # 位置
+                    'address': address,  # 地址
+                    'birthday': birthday,  # 生日
+                    'mem': mem,  # 备注
+                    'tag': tag_list
+                })
 
-                response.code = 200
-                response.msg = '查询成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'data_count': count,
-                }
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': ret_data,
+                'data_count': count,
+            }
 
         else:
             response.code = 402
@@ -127,6 +126,7 @@ def customer(request):
 @account.is_token(models.zgld_userprofile)
 def customer_oper(request, oper_type, o_id):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
     if request.method == "POST":
 
         # # 删除客户
@@ -246,39 +246,40 @@ def customer_oper(request, oper_type, o_id):
             # 更新客户表的具体信息
             form_data = {
                 'id': int(o_id),
-                # 'source': request.POST.get('source'),
-                'sex': request.POST.get('sex'),
-                'memo_name': request.POST.get('username'),
-                'phone': request.POST.get('phone'),
-                'email': request.POST.get('email'),
-                'company': request.POST.get('company'),
-                'position': request.POST.get('position'),
-                'address': request.POST.get('address'),
-                'birthday': request.POST.get('birthday'),
-                'mem': request.POST.get('mem'),
+                'sex': request.POST.get('sex'),             # 性别
+                'note_name': request.POST.get('username'),  # 备注名称
+                'phone': request.POST.get('phone'),         # 电话
+                'email': request.POST.get('email'),         # 邮箱
+                'company': request.POST.get('company'),     # 在职公司
+                'position': request.POST.get('position'),   # 职位
+                'address': request.POST.get('address'),     # 地址
+                'birthday': request.POST.get('birthday'),   # 生日
+                'mem': request.POST.get('mem'),             # 备注
             }
 
             #  创建 form验证 实例（参数默认转成字典）
             forms_obj = Customer_information_UpdateForm(form_data)
-
             if forms_obj.is_valid():
-                memo_name = forms_obj.cleaned_data.get('memo_name')
+                note_name = forms_obj.cleaned_data.get('note_name')
+                note_name = b64encode(note_name)
 
-                encodestr = base64.b64encode(memo_name.encode('utf-8'))
-                memo_name = str(encodestr, 'utf-8')
+                # encodestr = base64.b64encode(memo_name.encode('utf-8'))
+                # memo_name = str(encodestr, 'utf-8')
+                # print("----验证通过--->", forms_obj.cleaned_data,memo_name)
+                # customer_obj = models.zgld_customer.objects.filter(id=o_id)
+                # customer_obj.update(
+                #     username = memo_name
+                # )
 
-                print("----验证通过--->", forms_obj.cleaned_data,memo_name)
-
-                customer_obj = models.zgld_customer.objects.filter(id=o_id)
-                customer_obj.update(
-                    username = memo_name
+                information_obj = models.zgld_information.objects.filter(
+                    customer_id=o_id,
+                    user_id=user_id
                 )
 
-                information_obj = models.zgld_information.objects.filter(customer_id=o_id)
                 if information_obj:
-
                     information_obj.update(
                         customer_id =  o_id,
+                        user_id=user_id,
                         sex = forms_obj.cleaned_data.get('sex'),
                         company = forms_obj.cleaned_data.get('company'),
                         phone = forms_obj.cleaned_data.get('phone'),
@@ -286,14 +287,17 @@ def customer_oper(request, oper_type, o_id):
                         position = forms_obj.cleaned_data.get('position'),
                         address =  forms_obj.cleaned_data.get('address'),
                         birthday = forms_obj.cleaned_data.get('birthday'),
-                        mem =  forms_obj.cleaned_data.get('mem')
+                        mem =  forms_obj.cleaned_data.get('mem'),
+                        note_name=note_name,
                     )
                     response.code = 200
-                    response.msg = '添加成功'
-                else:
+                    response.msg = '修改成功'
 
+                else:
                     models.zgld_information.objects.create(
                         customer_id =  o_id,
+                        user_id=user_id,
+                        note_name=note_name,
                         sex= int(forms_obj.cleaned_data.get('sex')),
                         company = forms_obj.cleaned_data.get('company'),
                         phone=forms_obj.cleaned_data.get('phone'),

@@ -817,7 +817,8 @@ class zgld_information(models.Model):
         (2, "女"),
     )
     sex = models.IntegerField(choices=sex_choices, blank=True, null=True)
-    customer = models.ForeignKey('zgld_customer', verbose_name='客户表', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='客户', null=True)
+    user = models.ForeignKey('zgld_userprofile', verbose_name='哪个用户备注', null=True)
     phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     email = models.EmailField(u'常用邮箱', blank=True, null=True)
     company = models.CharField(u'在职公司', max_length=256, blank=True, null=True)
@@ -826,6 +827,7 @@ class zgld_information(models.Model):
     birthday = models.DateField(u'出生日期', max_length=64, blank=True, null=True, help_text='格式yyyy-mm-dd')
     mem = models.TextField(u'备注', help_text='客户个人信息备注等')
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+    note_name = models.CharField(verbose_name='备注名称', max_length=128, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "资料详情表"

@@ -106,18 +106,12 @@ class Customer_information_UpdateForm(forms.Form):
         validators=[mobile_validate, ],        # 应用咱们自己定义的规则
     )
 
-    memo_name = forms.CharField(
+    note_name = forms.CharField(
         required=True,
         error_messages={
             'required': "备注名不能为空"
         }
     )
-
-    # source = forms.IntegerField(
-    #     required=True,
-    #     error_messages={
-    #         'required': '客户来源不能为空'
-    #     })
 
     company = forms.CharField(
         required=False,
