@@ -60,7 +60,7 @@ def customer(request):
                     'birthday':'',      # 生日
                     'mem':'',           # 备注
                     'sex':'',           # 性别
-                    'note_name':'',     # 备注名称
+                    'memo_name':'',     # 备注名称
                 }
                 tag_list = []
                 tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
@@ -96,19 +96,18 @@ def customer(request):
                     if sex:
                         data['sex'] = sex
                     if note_name:
-                        data['note_name'] = b64decode(note_name)
+                        data['username'] = b64decode(note_name)
 
 
                 belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
                 day_interval =  datetime.datetime.today() - obj.create_date
 
-                username = b64encode(obj.username)
+                # username = b64encode(obj.username)
 
                 expedted_pr = belonger_obj.expedted_pr
                 expected_time = belonger_obj.expected_time
 
                 data['id'] =  obj.id
-                data['username'] =  username
                 data['headimgurl'] =  obj.headimgurl
                 data['expected_time'] =  expected_time # 预计成交时间
                 data['expedted_pr'] =  expedted_pr  # 预计成交概率
