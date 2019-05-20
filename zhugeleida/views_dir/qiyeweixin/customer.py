@@ -96,18 +96,17 @@ def customer(request):
                     if sex:
                         data['sex'] = sex
                     if note_name:
-                        data['username'] = b64decode(note_name)
+                        data['memo_name'] = b64decode(note_name)
 
 
                 belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
                 day_interval =  datetime.datetime.today() - obj.create_date
 
-                # username = b64encode(obj.username)
-
                 expedted_pr = belonger_obj.expedted_pr
                 expected_time = belonger_obj.expected_time
 
                 data['id'] =  obj.id
+                data['username'] =  b64encode(obj.username)
                 data['headimgurl'] =  obj.headimgurl
                 data['expected_time'] =  expected_time # 预计成交时间
                 data['expedted_pr'] =  expedted_pr  # 预计成交概率
