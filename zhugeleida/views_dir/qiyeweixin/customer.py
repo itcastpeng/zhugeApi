@@ -73,29 +73,29 @@ def customer(request):
                 sex = info_obj.sex if info_obj else ''
                 note_name = b64decode(info_obj.note_name) if info_obj.note_name else ''
 
-                # belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
-                # day_interval =  datetime.datetime.today() - obj.create_date
-                #
-                # username = b64encode(obj.username)
-                #
-                # expedted_pr = belonger_obj.expedted_pr
-                # expected_time = belonger_obj.expected_time
+                belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
+                day_interval =  datetime.datetime.today() - obj.create_date
+
+                username = b64encode(obj.username)
+
+                expedted_pr = belonger_obj.expedted_pr
+                expected_time = belonger_obj.expected_time
 
                 ret_data.append({
                     'id': obj.id,
-                    # 'username': username,
-                    # 'headimgurl': obj.headimgurl,
-                    # 'expected_time': expected_time,  # 预计成交时间
-                    # 'expedted_pr': expedted_pr,  # 预计成交概率
-                    # 'ai_pr':  expedted_pr,  # AI 预计成交概率
+                    'username': username,
+                    'headimgurl': obj.headimgurl,
+                    'expected_time': expected_time,  # 预计成交时间
+                    'expedted_pr': expedted_pr,  # 预计成交概率
+                    'ai_pr':  expedted_pr,  # AI 预计成交概率
 
                     'user_type' : obj.user_type,
 
-                    # 'source': belonger_obj.get_source_display(),  # 来源
+                    'source': belonger_obj.get_source_display(),  # 来源
                     'memo_name': note_name,  # 备注名
                     'phone': phone,              # 手机号
                     'sex':  sex,
-                    # 'day_interval': day_interval.days,
+                    'day_interval': day_interval.days,
                     'email': email,              # email
                     'company': company,                # 公司
                     'position':position,  # 位置
