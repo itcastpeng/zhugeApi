@@ -68,7 +68,10 @@ def customer(request):
                 for t_obj in tag_obj:
                     tag_list.append(t_obj.name)
 
-                info_objs = models.zgld_information.objects.filter(customer_id=obj.id)
+                info_objs = models.zgld_information.objects.filter(
+                    customer_id=obj.id,
+                    user_id=user_id
+                )
                 if info_objs:
                     info_obj = info_objs[0]
                     email = info_obj.email
