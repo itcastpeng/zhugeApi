@@ -106,7 +106,7 @@ def customer(request):
                 expected_time = belonger_obj.expected_time
 
                 data['id'] =  obj.id
-                data['username'] =  b64encode(obj.username)
+                data['username'] =  b64decode(obj.username)
                 data['headimgurl'] =  obj.headimgurl
                 data['expected_time'] =  expected_time # 预计成交时间
                 data['expedted_pr'] =  expedted_pr  # 预计成交概率
