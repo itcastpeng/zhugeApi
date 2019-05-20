@@ -353,7 +353,11 @@ def login_oper(request, oper_type):
                     language=language,
                 )
 
-                models.zgld_information.objects.create(sex=gender, customer_id=objs[0].id)
+                models.zgld_information.objects.create(
+                    user_id=uid,
+                    sex=gender,
+                    customer_id=customer_id
+                )
 
                 # (1, '查看名片详情'),
                 # (2, '查看产品列表'),
