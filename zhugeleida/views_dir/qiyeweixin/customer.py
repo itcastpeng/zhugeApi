@@ -52,58 +52,85 @@ def customer(request):
             # 返回的数据
             ret_data = []
             for obj in objs:
-
+                data = {
+                    'email':'',         # 邮箱
+                    'company':'',       # 公司
+                    'position':'',      # 职位
+                    'address':'',       # 地址
+                    'birthday':'',      # 生日
+                    'mem':'',           # 备注
+                    'sex':'',           # 性别
+                    'note_name':'',     # 备注名称
+                }
                 tag_list = []
                 tag_obj = models.zgld_customer.objects.get(id=obj.id).zgld_tag_set.all()
 
                 for t_obj in tag_obj:
                     tag_list.append(t_obj.name)
 
-                info_obj = models.zgld_information.objects.filter(customer_id=obj.id)
-                if info_obj:
-                    info_obj = info_obj[0]
+                info_objs = models.zgld_information.objects.filter(customer_id=obj.id)
+                if info_objs:
+                    info_obj = info_objs[0]
+                    email = info_obj.email
+                    company = info_obj.company
+                    position = info_obj.position
+                    address = info_obj.address
+                    birthday = info_obj.birthday
+                    mem = info_obj.mem
+                    sex = info_obj.sex
+                    note_name = info_obj.note_name
 
-                phone = obj.phone
-                email = info_obj.email if info_obj else ''
-                company = info_obj.company if info_obj else ''
-                position = info_obj.position if info_obj else ''
-                address = info_obj.address if info_obj else ''
-                birthday = info_obj.birthday if info_obj else ''
-                mem = info_obj.mem if info_obj else ''
-                sex = info_obj.sex if info_obj else ''
-                note_name = b64decode(info_obj.note_name) if info_obj.note_name else ''
 
-                belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
-                day_interval =  datetime.datetime.today() - obj.create_date
+                    if email:
+                        data['email'] = email
+                    if company:
+                        data['company'] = company
+                    if position:
+                        data['position'] = position
+                    if address:
+                        data['address'] = address
+                    if birthday:
+                        data['birthday'] = birthday
+                    if mem:
+                        data['mem'] = mem
+                    if sex:
+                        data['sex'] = sex
+                    if note_name:
+                        data['note_name'] = b64decode(note_name)
 
-                username = b64encode(obj.username)
 
-                expedted_pr = belonger_obj.expedted_pr
-                expected_time = belonger_obj.expected_time
+                # belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
+                # day_interval =  datetime.datetime.today() - obj.create_date
+                #
+                # username = b64encode(obj.username)
+                #
+                # expedted_pr = belonger_obj.expedted_pr
+                # expected_time = belonger_obj.expected_time
 
-                ret_data.append({
-                    'id': obj.id,
-                    'username': username,
-                    'headimgurl': obj.headimgurl,
-                    'expected_time': expected_time,  # 预计成交时间
-                    'expedted_pr': expedted_pr,  # 预计成交概率
-                    'ai_pr':  expedted_pr,  # AI 预计成交概率
+                # data['id'] =  obj.id
+                # data['username'] =  username
+                # data['headimgurl'] =  obj.headimgurl
+                # data['expected_time'] =  expected_time # 预计成交时间
+                # data['expedted_pr'] =  expedted_pr  # 预计成交概率
+                # data['ai_pr'] =  expedted_pr  # AI 预计成交概率
+                # data['user_type'] =  obj.user_type
+                # data['source'] =  belonger_obj.get_source_display()  # 来源
+                # data['phone'] =  obj.phone  # 手机号
+                # data['tag'] =  tag_list
 
-                    'user_type' : obj.user_type,
 
-                    'source': belonger_obj.get_source_display(),  # 来源
-                    'memo_name': note_name,  # 备注名
-                    'phone': phone,              # 手机号
-                    'sex':  sex,
-                    'day_interval': day_interval.days,
-                    'email': email,              # email
-                    'company': company,                # 公司
-                    'position':position,  # 位置
-                    'address': address,  # 地址
-                    'birthday': birthday,  # 生日
-                    'mem': mem,  # 备注
-                    'tag': tag_list
-                })
+                ret_data.append(
+                    data
+                    # 'day_interval': day_interval.days,
+                    # 'memo_name': note_name,  # 备注名
+                    # 'sex':  sex,
+                    # 'email': email,              # email
+                    # 'company': company,                # 公司
+                    # 'position':position,  # 位置
+                    # 'address': address,  # 地址
+                    # 'birthday': birthday,  # 生日
+                    # 'mem': mem,  # 备注
+                )
 
             response.code = 200
             response.msg = '查询成功'
