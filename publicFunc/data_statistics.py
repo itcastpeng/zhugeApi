@@ -51,7 +51,8 @@ class statistical_objs():
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
             self.q,
             user_id=self.o_id,
-            oper_type=1
+            oper_type=1,
+            customer__user_type=1
         ).order_by('-create_date')
         data_list = []
         for obj in copy_nickname_obj:
