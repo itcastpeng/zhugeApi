@@ -121,47 +121,67 @@ def deal_line_info(data):
     company_id = data.get('company_id')
 
     q1 = Q()
-    q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
-    q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
+    # q1.add(Q(**{'create_date__gte': start_time}), Q.AND)  # 大于等于
+    # q1.add(Q(**{'create_date__lt': stop_time}), Q.AND)  # 小于
+    q1.add(Q(create_date__contains=start_time), Q.AND)
 
-    if index_type == 1:  # 客户总数
-
-        customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(
-            q1).values_list('customer_id').distinct().count()  # 已获取客户数
+    # 客户总数
+    if index_type == 1:
+        customer_num = models.zgld_user_customer_belonger.objects.filter(
+            q1,
+            user__company_id=company_id
+        ).values_list('customer_id').distinct().count()  # 已获取客户数
         return customer_num
 
-    elif index_type == 2:  # 跟进总数  last_follow_time__isnull
+    # 跟进总数  last_follow_time__isnull
+    elif index_type == 2:
         follow_num = models.zgld_follow_info.objects.select_related('user_customer_flowup').filter(
-            user_customer_flowup__user__company=company_id).filter(q1).count()
+            q1,
+            user_customer_flowup__user__company=company_id
+        ).count()
 
         return follow_num
 
-    elif index_type == 3:  # 浏览总数
-        browse_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                                 action=1).filter(
-            q1).count()  # 浏览名片的总数(包含着保存名片)
+    # 浏览总数
+    elif index_type == 3:
+        browse_num = models.zgld_accesslog.objects.select_related('user').filter(
+            q1,
+            user__company_id=company_id,
+            action=1
+        ).count()  # 浏览名片的总数(包含着保存名片)
         return browse_num
 
-    elif index_type == 4:  # 被转发总数
-        forward_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                                  action=6).filter(q1).count()  # 被转发的总数-不包括转发产品
+    # 被转发总数
+    elif index_type == 4:
+        forward_num = models.zgld_accesslog.objects.select_related('user').filter(
+            q1,
+            user__company_id=company_id,
+            action=6
+        ).count()  # 被转发的总数-不包括转发产品
         return forward_num
 
-    elif index_type == 5:  # 被保存总数
-        saved_total_num = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                                      action=8).filter(
-            q1).count()  # 保存手机号
+    # 被保存总数
+    elif index_type == 5:
+        saved_total_num = models.zgld_accesslog.objects.select_related('user').filter(
+            q1,
+            user__company_id=company_id,
+            action=8
+        ).count()  # 保存手机号
         return saved_total_num
 
-    elif index_type == 6:  # 被赞总数
+    # 被赞总数
+    elif index_type == 6:
         # objs = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q1).values('company_id').annotate(
         #     Sum('praise'))
         # praise__sum = 0
         # if objs:
         #     obj = objs[0]
         #     praise__sum = obj.get('praise__sum')
-        praise__sum = models.zgld_accesslog.objects.select_related('user').filter(user__company_id=company_id,
-                                                                                  action__in=[9, 19]).filter(q1).count()  # 被转发的总数-不包括转发产品
+        praise__sum = models.zgld_accesslog.objects.select_related('user').filter(
+            q1,
+            user__company_id=company_id,
+            action__in=[9, 19]
+        ).count()  # 被转发的总数-不包括转发产品
 
         return praise__sum
 
@@ -173,10 +193,8 @@ def home_page_oper(request, oper_type):
     if request.method == "POST":
         # 统计-数据概览
         if oper_type == "line_info":
-            print('request.POST', request.POST)
             forms_obj = homepage_verify.LineInfoForm(request.POST)
             if forms_obj.is_valid():
-
                 user_id = request.GET.get('user_id')
                 user_obj = models.zgld_admin_userprofile.objects.select_related('company').filter(id=user_id)
                 company_id = user_obj[0].company_id
@@ -187,9 +205,11 @@ def home_page_oper(request, oper_type):
 
                 ret_data = []
                 for day in range(int(days), 0, -1):
+                    print('day-------> ', day)
                     now_time = datetime.datetime.now()
                     start_time = (now_time - timedelta(days=day)).strftime("%Y-%m-%d")
                     stop_time = (now_time - timedelta(days=day - 1)).strftime("%Y-%m-%d")
+                    print('start_time, stop_time--------> ', start_time, stop_time)
                     # stop_time = now_time.strftime("%Y-%m-%d")
                     data['start_time'] = start_time
                     data['stop_time'] = stop_time
