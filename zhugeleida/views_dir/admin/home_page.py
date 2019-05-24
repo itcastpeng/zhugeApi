@@ -132,11 +132,6 @@ def deal_line_info(data):
             user__company_id=company_id,
             customer__create_date__contains=start_time
         ).values('customer_id').distinct()  # 已获取客户数
-
-        for obj in customer_num:
-            print(obj)
-
-
         return customer_num.count()
 
     # 跟进总数  last_follow_time__isnull
