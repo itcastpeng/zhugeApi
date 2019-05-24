@@ -129,9 +129,15 @@ def deal_line_info(data):
     if index_type == 1:
         customer_num = models.zgld_user_customer_belonger.objects.filter(
             q1,
-            user__company_id=company_id
-        ).values_list('customer_id').distinct().count()  # 已获取客户数
-        return customer_num
+            user__company_id=company_id,
+            customer__create_date__contains=start_time
+        ).values('customer_id').distinct()  # 已获取客户数
+
+        for obj in customer_num:
+            print(obj)
+
+
+        return customer_num.count()
 
     # 跟进总数  last_follow_time__isnull
     elif index_type == 2:
