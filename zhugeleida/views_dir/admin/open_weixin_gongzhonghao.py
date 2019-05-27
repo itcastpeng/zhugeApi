@@ -874,15 +874,16 @@ def open_weixin_gongzhonghao_oper(request, oper_type, app_id):
                             action_record(data, remark)  # 此步骤封装到 异步中。
 
                         if user_id and  is_subscribe == 0: #没有订阅该公众号
-                            a_data = {}
-                            a_data['customer_id'] = customer_id
-                            a_data['user_id'] = user_id
-                            a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
-                            a_data['content'] = json.dumps(
-                                {'msg': '终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' ,'info_type': 1})
+                            if int(company_id) != 15:
+                                a_data = {}
+                                a_data['customer_id'] = customer_id
+                                a_data['user_id'] = user_id
+                                a_data['type'] = 'gongzhonghao_template_tishi'  # 简单的公众号模板消息提示。
+                                a_data['content'] = json.dumps(
+                                    {'msg': '终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复~' ,'info_type': 1})
 
-                            print('-----企业用户 公众号_模板消息 订阅公众号 json.dumps(a_data)---->>', json.dumps(a_data))
-                            tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
+                                print('-----企业用户 公众号_模板消息 订阅公众号 json.dumps(a_data)---->>', json.dumps(a_data))
+                                tasks.user_send_gongzhonghao_template_msg.delay(a_data)  # 发送【公众号发送模板消息】
 
                         objs.update(
                             is_subscribe=1,  # 改为关注状态
