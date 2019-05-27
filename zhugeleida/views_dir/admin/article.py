@@ -1747,7 +1747,7 @@ def deal_gzh_picture_url(leixing, url):
 
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
-
+    print('body-----------> ', body.find_all('video'))
     for iframe_tag in iframe:
         data_cover_url = iframe_tag.get('data-cover')
         shipin_url = iframe_tag.get('data-src')
