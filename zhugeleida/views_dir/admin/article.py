@@ -1755,11 +1755,14 @@ def deal_gzh_picture_url(leixing, url):
         if data_cover_url:
             data_cover_url = unquote(data_cover_url, 'utf-8')
 
+        if 'https://mp.weixin.qq.com/mp/readtemplate?t=pages/video_player_tmpl&amp;auto=0&amp;vid=wxv_800489262956412928' in shipin_url:
+            shipin_url =  iframe_tag.get('src')
+
         if '&' in shipin_url and 'vid=' in shipin_url:
             vid_num = shipin_url.split('vid=')[1]
             _url = shipin_url.split('?')[0]
             shipin_url = _url + '?vid=' + vid_num
-            # data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
+
         if 'http' not in shipin_url:
             shipin_url = 'https://mp.weixin.qq.com' + shipin_url
             # print('视频链接 shipin_url----->>\n', shipin_url)
