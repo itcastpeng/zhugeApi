@@ -1754,9 +1754,9 @@ def deal_gzh_picture_url(leixing, url):
         shipin_url = iframe_tag.get('data-src')
         if data_cover_url:
             data_cover_url = unquote(data_cover_url, 'utf-8')
+        print('shipin_url--==========----------> ', shipin_url)
 
-        if 'https://mp.weixin.qq.com/mp/readtemplate?t=pages/video_player_tmpl&amp;auto=0&amp;vid=wxv_800489262956412928' in shipin_url:
-            shipin_url =  iframe_tag.get('src')
+        print('iframe_tag.find()---------> ', iframe_tag.find('div', _class='js_inner inner not_fullscreen'))
 
         if '&' in shipin_url and 'vid=' in shipin_url:
             vid_num = shipin_url.split('vid=')[1]
