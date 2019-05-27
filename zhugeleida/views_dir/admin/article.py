@@ -1757,6 +1757,12 @@ def deal_gzh_picture_url(leixing, url):
             shipin_url.split('vid=')[1])
         ret = requests.get(iframe_url)
 
+        video_tag = '<video width="100%" id="videoBox" src="{}" poster="{}" controls="controls"></video>'.format(
+            ret.json().get('url_info')[0].get('url'),
+            data_cover_url
+        )
+
+        body = str(body).replace(str(iframe_tag), video_tag)
 
         # if '&' in shipin_url and 'vid=' in shipin_url:
         #     vid_num = shipin_url.split('vid=')[1]
@@ -1764,11 +1770,11 @@ def deal_gzh_picture_url(leixing, url):
         #     shipin_url = _url + '?vid=' + vid_num
 
 
-        iframe_tag.attrs['data-src'] = ret.json().get('url_info')[0].get('url')
-        iframe_tag.attrs['allowfullscreen'] = True
-        iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
+        # iframe_tag.attrs['data-src'] = ret.json().get('url_info')[0].get('url')
+        # iframe_tag.attrs['allowfullscreen'] = True
+        # iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
-    content = str(style) + str(body)
+    content = str(style) + body
     # print('最后的html---->>', content)
 
     # dict = {'data-src': 'src' }
