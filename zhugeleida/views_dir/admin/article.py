@@ -1748,29 +1748,25 @@ def deal_gzh_picture_url(leixing, url):
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
     for iframe_tag in iframe:
-        print("iframe_tag.find('div', id='page-content')-----------------------> ", iframe_tag.body)
-        print("iframe_tag.find('div', id='page-content')-----------------------> ", iframe_tag.contents())
-        print("iframe_tag.find('div', id='page-content')-----------------------> ", iframe_tag.contents)
-        print("iframe_tag.find('div', id='page-content')-----------------------> ", iframe_tag.content())
-        print("iframe_tag.find('div', id='page-content')-----------------------> ", iframe_tag.content)
-        print("iframe_tag.find('div', id='page-content')-----------------------> ", iframe_tag.attrs.get('document'))
-        # data_cover_url = iframe_tag.get('data-cover')
-        # shipin_url = iframe_tag.get('data-src')
-        # if data_cover_url:
-        #     data_cover_url = unquote(data_cover_url, 'utf-8')
-        # if shipin_url not in [
-        #     'https://mp.weixin.qq.com/mp/readtemplate?t=pages/video_player_tmpl&action=mpvideo&auto=0&vid=wxv_800489262956412928',
-        # ]:
-        #
-        #     if '&' in shipin_url and 'vid=' in shipin_url:
-        #         vid_num = shipin_url.split('vid=')[1]
-        #         _url = shipin_url.split('?')[0]
-        #         shipin_url = _url + '?vid=' + vid_num
-        #
-        #
-        # iframe_tag.attrs['data-src'] = shipin_url
-        # iframe_tag.attrs['allowfullscreen'] = True
-        # iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
+        data_cover_url = iframe_tag.get('data-cover')
+        shipin_url = iframe_tag.get('data-src')
+        if data_cover_url:
+            data_cover_url = unquote(data_cover_url, 'utf-8')
+
+        iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(
+            shipin_url.split('vid=')[1])
+        ret = requests.get(iframe_url)
+
+
+        # if '&' in shipin_url and 'vid=' in shipin_url:
+        #     vid_num = shipin_url.split('vid=')[1]
+        #     _url = shipin_url.split('?')[0]
+        #     shipin_url = _url + '?vid=' + vid_num
+
+
+        iframe_tag.attrs['data-src'] = ret.json().get('url_info')[0].get('url')
+        iframe_tag.attrs['allowfullscreen'] = True
+        iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
     content = str(style) + str(body)
     # print('最后的html---->>', content)
