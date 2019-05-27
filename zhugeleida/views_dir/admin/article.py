@@ -1769,11 +1769,14 @@ def deal_gzh_picture_url(leixing, url):
             shipin_url.split('vid=')[1])
         ret = requests.get(iframe_url)
 
-        video_tag = '<video width="100%" id="videoBox" src="{}" poster="{}" controls="controls" width="{}" height="{}" ></video>'.format(
+        # width = ret.json().get('url_info')[0].get('width')
+        # height = ret.json().get('url_info')[0].get('height')
+
+        video_tag = '<video width="100%" id="videoBox" src="{}" poster="{}" controls="controls"></video>'.format(
             ret.json().get('url_info')[0].get('url'),
             'http://api.zhugeyingxiao.com/' + file_dir,
-            ret.json().get('url_info')[0].get('width'),
-            ret.json().get('url_info')[0].get('height'),
+            # width,
+            # height,
         )
 
         body = str(body).replace(str(iframe_tag), video_tag)
