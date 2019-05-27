@@ -1771,7 +1771,7 @@ def deal_gzh_picture_url(leixing, url):
 
         video_tag = '<video width="100%" id="videoBox" src="{}" poster="{}" controls="controls"></video>'.format(
             ret.json().get('url_info')[0].get('url'),
-            filename
+            'http://api.zhugeyingxiao.com' + filename
         )
 
         body = str(body).replace(str(iframe_tag), video_tag)
