@@ -2665,7 +2665,7 @@ def celery_statistical_content(request, oper_type):
             q.add(Q(create_date__gte=redis_time), Q.AND)
         for user_obj in user_objs:
             user_id = user_obj.id
-            print('-------------> ', user_id)
+            # print('-------------> ', user_id)
             chat_info_objs = models.zgld_chatinfo.objects.select_related(
                 'userprofile',
                 'customer'
@@ -2676,7 +2676,7 @@ def celery_statistical_content(request, oper_type):
             ).order_by('-create_date')
             ret_data_list = []
             customer_id_list = []
-            print('chat_info_objs----------> ', chat_info_objs)
+            # print('chat_info_objs----------> ', chat_info_objs)
             for obj in chat_info_objs:
                 customer_id = obj.customer_id
                 if customer_id in customer_id_list:

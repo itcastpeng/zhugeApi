@@ -1696,7 +1696,7 @@ def deal_gzh_picture_url(leixing, url):
         file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
         with open(file_dir, 'wb') as file:
             file.write(html.content)
-        print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
+        # print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
         #######
         cover_url = file_dir # 封面图片
 
@@ -1704,7 +1704,7 @@ def deal_gzh_picture_url(leixing, url):
 
     style = ""
     for style_tag in style_tags:
-        print('style_tag -->', style_tag)
+        # print('style_tag -->', style_tag)
         style += str(style_tag)
 
     body = soup.find('div', id="js_content")
@@ -1738,22 +1738,24 @@ def deal_gzh_picture_url(leixing, url):
             file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
             with open(file_dir, 'wb') as file:
                 file.write(html.content)
-            print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
+            # print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
             #######
 
             img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
-            print('data_src ----->', data_src)
+            # print('data_src ----->', data_src)
 
     ### 处理视频的URL
+    print('#######################==============处理视频开始> ')
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
 
+    print('iframe--------> ', iframe)
     for iframe_tag in iframe:
         shipin_url = iframe_tag.get('data-src')
         data_cover_url = iframe_tag.get('data-cover')
         if data_cover_url:
             data_cover_url = unquote(data_cover_url, 'utf-8')
 
-        print('封面URL data_cover_url ------->>', data_cover_url)
+        # print('封面URL data_cover_url ------->>', data_cover_url)
 
         if '&' in shipin_url and 'vid=' in shipin_url:
             vid_num = shipin_url.split('vid=')[1]
@@ -1761,16 +1763,16 @@ def deal_gzh_picture_url(leixing, url):
             shipin_url = _url + '?vid=' + vid_num
             # data-src="https://v.qq.com/iframe/preview.html?width=500&amp;height=375&amp;auto=0&amp;vid=z08202kwzjw"
 
-        print('视频链接 shipin_url----->>\n', shipin_url)
+        # print('视频链接 shipin_url----->>\n', shipin_url)
         iframe_tag.attrs['data-src'] = shipin_url
         iframe_tag.attrs['allowfullscreen'] = True
         iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
-    print('组合样式 style ------>>', style)
-    print('组合身体 body ------>>', body)
+    # print('组合样式 style ------>>', style)
+    # print('组合身体 body ------>>', body)
 
     content = str(style) + str(body)
-    print('最后的html---->>', content)
+    # print('最后的html---->>', content)
 
     # dict = {'data-src': 'src' }
     # for key, value in dict.items():
@@ -1787,13 +1789,13 @@ def deal_gzh_picture_url(leixing, url):
             pattern2 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+', re.I)
             results_url_list_1 = pattern1.findall(content)
             results_url_list_2 = pattern2.findall(content)
-            print(' 匹配的微信图片链接 results_url_list_1 ---->', json.dumps(results_url_list_1))
-            print(' 匹配的微信图片链接 results_url_list_2 ---->', json.dumps(results_url_list_2))
+            # print(' 匹配的微信图片链接 results_url_list_1 ---->', json.dumps(results_url_list_1))
+            # print(' 匹配的微信图片链接 results_url_list_2 ---->', json.dumps(results_url_list_2))
             results_url_list_1.extend(results_url_list_2)
             # print('合并的 results_url_list ----->>',results_url_list_1)
 
             for pattern_url in results_url_list_1:
-                print('匹配的url--------<<', pattern_url)
+                # print('匹配的url--------<<', pattern_url)
                 now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
                 ## 把图片下载到本地
                 html = s.get(pattern_url)
@@ -1805,7 +1807,7 @@ def deal_gzh_picture_url(leixing, url):
                 file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
                 with open(file_dir, 'wb') as file:
                     file.write(html.content)
-                print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
+                # print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
                 #######
                 sub_url = 'http://statics.api.zhugeyingxiao.com/' + file_dir
                 content = content.replace(pattern_url, sub_url)
