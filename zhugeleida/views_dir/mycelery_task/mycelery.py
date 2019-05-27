@@ -2376,9 +2376,7 @@ def get_customer_gongzhonghao_userinfo(request):
                 msg = '终于等到你🌹，我是您的专属客服代表【%s - %s】。   如需沟通，您可在此或扫码关注【公众号】, 并在公众号内进行回复(支持语音、图片、文字)' % (
                     company_objs[0].name, user_objs[0].username)
                 if int(company_id) == 15:
-                    msg = '终于等到您，我是您的专属咨询代表{}-{}，有什么问题您可以致电或留言，我随时帮您解答！'.format(
-                        company_objs[0].name, user_objs[0].username
-                    )
+                    msg = '感谢您的关注，有什么问题可以直接留言！'
 
                 # models.zgld_chatinfo.objects.create(send_type=1, userprofile_id=user_id, customer_id=customer_id,
                 #                                     msg=msg)
