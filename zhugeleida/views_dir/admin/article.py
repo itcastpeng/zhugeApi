@@ -1772,7 +1772,7 @@ def deal_gzh_picture_url(leixing, url):
         # width = ret.json().get('url_info')[0].get('width')
         # height = ret.json().get('url_info')[0].get('height')
 
-        video_tag = """<div style="width: 100%; position:relative; height: 0; padding-bottom:75%;">
+        video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
                         <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
                     </div>""".format(
             ret.json().get('url_info')[0].get('url'),
