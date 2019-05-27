@@ -2373,7 +2373,7 @@ def get_customer_gongzhonghao_userinfo(request):
                 user_objs = models.zgld_userprofile.objects.filter(id=user_id)
 
                 # 插入第一条用户和客户的对话信息 终于等到你🌹，感谢您的关注，我是您的专属咨询代表,您现在可以直接给我发消息哦，期待您的回复
-                msg = '终于等到你🌹，我是您的专属咨询代表【%s - %s】。   如需沟通，您可在此或扫码关注【公众号】, 并在公众号内进行回复(支持语音、图片、文字)' % (
+                msg = '终于等到你🌹，我是您的专属客服代表【%s - %s】。   如需沟通，您可在此或扫码关注【公众号】, 并在公众号内进行回复(支持语音、图片、文字)' % (
                     company_objs[0].name, user_objs[0].username)
                 if int(company_id) == 15:
                     msg = '终于等到您，我是您的专属咨询代表{}-{}，有什么问题您可以致电或留言，我随时帮您解答！'.format(
