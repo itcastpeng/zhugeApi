@@ -1748,10 +1748,22 @@ def deal_gzh_picture_url(leixing, url):
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
     for iframe_tag in iframe:
-        data_cover_url = iframe_tag.get('data-cover')
+        data_src = iframe_tag.get('data-cover')
         shipin_url = iframe_tag.get('data-src')
-        if data_cover_url:
-            data_cover_url = unquote(data_cover_url, 'utf-8')
+        if data_src:
+            data_src = unquote(data_src, 'utf-8')
+
+        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+        html = s.get(data_src)
+        if 'wx_fmt=gif' in data_src:
+            filename = "/gzh_article_img_%s.gif" % (now_time)
+        else:
+
+            filename = "/gzh_article_img_%s.jpg" % (now_time)
+
+        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+        with open(file_dir, 'wb') as file:
+            file.write(html.content)
 
         iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(
             shipin_url.split('vid=')[1])
@@ -1759,7 +1771,7 @@ def deal_gzh_picture_url(leixing, url):
 
         video_tag = '<video width="100%" id="videoBox" src="{}" poster="{}" controls="controls"></video>'.format(
             ret.json().get('url_info')[0].get('url'),
-            data_cover_url
+            filename
         )
 
         body = str(body).replace(str(iframe_tag), video_tag)
