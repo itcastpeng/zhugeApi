@@ -232,8 +232,9 @@ def batchget_article_material(request):
             }
 
             user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-
+            print('user_obj_cla-------===========>', user_obj_cla)
             material_count_response = user_obj_cla.get_material_count()
+            print('material_count_response-========================> ', material_count_response)
             news_count = material_count_response.data.get('news_count')
 
 
