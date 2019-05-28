@@ -232,11 +232,8 @@ def batchget_article_material(request):
             }
 
             user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-            print('user_obj_cla-------===========>', user_obj_cla)
             material_count_response = user_obj_cla.get_material_count()
-            print('material_count_response-========================> ', material_count_response)
             news_count = material_count_response.data.get('news_count')
-
 
             if news_count > 0:
                 media_id_list = list(models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list('media_id', flat=True).distinct())  # 已经入模板库的 文章列表
