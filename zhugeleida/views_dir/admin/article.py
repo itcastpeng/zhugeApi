@@ -1793,7 +1793,7 @@ def deal_gzh_picture_url(leixing, url):
             iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
     try:
-        content = str(style) + body
+        content = str(style) + str(body)
     except Exception as e:
         print('e-------e--------e-------------e---------e------> ', e)
         content = style + body
