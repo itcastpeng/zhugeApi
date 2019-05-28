@@ -1790,8 +1790,10 @@ def deal_gzh_picture_url(leixing, url):
         # iframe_tag.attrs['data-src'] = ret.json().get('url_info')[0].get('url')
         # iframe_tag.attrs['allowfullscreen'] = True
         # iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
-
-    content = str(style) + body
+    try:
+        content = str(style) + body
+    except Exception :
+        content = style + body
     # print('最后的html---->>', content)
 
     # dict = {'data-src': 'src' }
