@@ -13,10 +13,6 @@ import requests
 from django.http import JsonResponse, HttpResponse
 
 from publicFunc import account
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
-            create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
-
-
 
 def action_record(data,remark):
     #response = Response.ResponseObj()
@@ -451,6 +447,8 @@ class get_customer_gongzhonghao_userinfo(object):
             'app_id':  self.app_id, #'wx6ba07e6ddcdc69b3',  # 查看诸葛雷达_公众号的 appid
             'app_secret': self.app_secret ,#'0bbed534062ceca2ec25133abe1eecba'  # 查看诸葛雷达_公众号的AppSecret
         }
+        from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
+            create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
 
         authorizer_access_token_ret = create_gongzhonghao_authorizer_access_token(_data)
         authorizer_access_token = authorizer_access_token_ret.data
