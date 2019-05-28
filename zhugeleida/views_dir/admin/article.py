@@ -1650,7 +1650,8 @@ def article_oper(request, oper_type, o_id):
 
 
 def deal_gzh_picture_url(leixing, url):
-    '''
+    print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_-----------------------> ', datetime.datetime.today())
+    ''' 
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
     http://mmbiz.qpic.cn/mmbiz_jpg/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7lBRILWoKKVuvdHe4BmVxhiclQnYo2F1TDU7CcibXawl9E2n1MOicTkt6w/0?wx_fmt=jpeg
 
@@ -1764,35 +1765,37 @@ def deal_gzh_picture_url(leixing, url):
         file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
         with open(file_dir, 'wb') as file:
             file.write(html.content)
+        data_cover_url = 'http://api.zhugeyingxiao.com/' + file_dir
 
         iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(
             shipin_url.split('vid=')[1])
         ret = requests.get(iframe_url)
 
-        # width = ret.json().get('url_info')[0].get('width')
-        # height = ret.json().get('url_info')[0].get('height')
+        try:
+            url = ret.json().get('url_info')[0].get('url')
 
-        video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
-                        <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
-                    </div>""".format(
-            ret.json().get('url_info')[0].get('url'),
-            'http://api.zhugeyingxiao.com/' + file_dir,
-        )
+            video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
+                            <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
+                        </div>""".format(
+                url,
+                data_cover_url,
+            )
 
-        body = str(body).replace(str(iframe_tag), video_tag)
+            body = str(body).replace(str(iframe_tag), video_tag)
+        except Exception:
+            if '&' in shipin_url and 'vid=' in shipin_url:
+                vid_num = shipin_url.split('vid=')[1]
+                _url = shipin_url.split('?')[0]
+                shipin_url = _url + '?vid=' + vid_num
 
-        # if '&' in shipin_url and 'vid=' in shipin_url:
-        #     vid_num = shipin_url.split('vid=')[1]
-        #     _url = shipin_url.split('?')[0]
-        #     shipin_url = _url + '?vid=' + vid_num
+            iframe_tag.attrs['data-src'] = shipin_url
+            iframe_tag.attrs['allowfullscreen'] = True
+            iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
-
-        # iframe_tag.attrs['data-src'] = ret.json().get('url_info')[0].get('url')
-        # iframe_tag.attrs['allowfullscreen'] = True
-        # iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
     try:
         content = str(style) + body
-    except Exception :
+    except Exception as e:
+        print('e-------e--------e-------------e---------e------> ', e)
         content = style + body
     # print('最后的html---->>', content)
 
@@ -1838,7 +1841,7 @@ def deal_gzh_picture_url(leixing, url):
             content = content.replace(key, value)
         # print(url)
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
-
+    print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_结束-----------------------> ',datetime.datetime.today())
     if leixing == 'only_url':
 
         return msg_title, msg_desc, cover_url, content
