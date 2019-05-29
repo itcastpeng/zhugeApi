@@ -301,17 +301,14 @@ def batchget_article_material(request):
                     if _response.code == 200:
                         item_list = _response.data.get('item')  # 获取的素材文章列表
                         # print('---- 接口返回-获取素材列表 item_list ------->>', item_list)
-                        print('media_id_list--------------> ', media_id_list)
                         for item in item_list:
-                            print('item---------------------[> ', item)
                             media_id = item.get('content').get('news_item')
-                            title = item.get('title')
+                            title = item.get('content').get('news_item')[0].get('title')
                             update_time = item.get('update_time')
 
                             if title in media_id_list:
                                 #status_text = '已同步'
                                 #status = 1
-                                print('media_id: %s 已同步至模板库,直接pass -------->>' % title)
                                 continue
 
                             else:
@@ -329,7 +326,7 @@ def batchget_article_material(request):
                                     'media_id': media_id,
                                     'source_url': item.get('content').get('news_item')[0].get('url'),
 
-                                    'title': item.get('content').get('news_item')[0].get('title'),
+                                    'title': title,
                                     'cover_picture': thumb_url,
                                     'summary': item.get('content').get('news_item')[0].get('digest'),  #图文消息的摘要
                                     'content': item.get('content').get('news_item')[0].get('content'),
