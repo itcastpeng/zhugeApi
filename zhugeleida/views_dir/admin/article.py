@@ -495,7 +495,7 @@ def article(request, oper_type):
 
         # 同步公众号文章入库
         if oper_type == 'sync_gzh_article':
-
+            print('=====================同步公众号文章入库')
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
             media_id_list = request.POST.get('media_id_list')
@@ -536,6 +536,7 @@ def article(request, oper_type):
                     )
 
                     if article_objs:
+                        print('=====================同步公众号文章入库', dict_data)
                         article_objs.update(**dict_data)
                         response.code = 200
                         response.msg = '覆盖修改文章成功'
