@@ -314,7 +314,7 @@ def batchget_article_material(request):
                                 source_url = content.get('url')
                                 summary = content.get('digest')
                                 content = content.get('content')
-                                if title not in title_list and media_id not in media_id_list: # 如果不存在创建
+                                if title not in title_list or media_id not in media_id_list: # 如果不存在创建
 
                                     data = {
                                         'company_id' : company_id,
