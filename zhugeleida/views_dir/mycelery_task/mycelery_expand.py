@@ -287,8 +287,11 @@ def batchget_article_material(request):
                         }]
                     }    
                     '''
-                    if _response.code == 200:
+                    if _response.code != 200:
+                        response.code = _response.code
+                        response.msg = _response.msg
 
+                    else:
                         title_list = list(
                             models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
                                 'title', flat=True).distinct())  # 已经入模板库的 文章列表
@@ -301,7 +304,7 @@ def batchget_article_material(request):
                             media_id = item.get('content').get('news_item')
                             update_time = item.get('update_time')
                             content_list = item.get('content').get('news_item') # 嵌套的小列表
-
+                            print('update_time---------------> ', update_time)
                             for content in content_list:
                                 ltime = time.localtime(update_time)
                                 update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
@@ -335,10 +338,6 @@ def batchget_article_material(request):
 
                                 else: # 已存在
                                     continue
-                        else:
-                            response.code = _response.code
-                            response.msg =  _response.msg
-                            print('获取素材报错: %s | %s  ------------>>' % (_response.code,_response.msg))
 
             else:
                 print('----------->>')
