@@ -235,19 +235,9 @@ def batchget_article_material(request):
             material_count_response = user_obj_cla.get_material_count()
             news_count = material_count_response.data.get('news_count')
             if news_count > 0:
-                media_id_list = list(models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list('title', flat=True).distinct())  # 已经入模板库的 文章列表
-
-                # if news_count == len(media_id_list):
-                #     response.code = 301
-                #     response.msg = '微信文章数据源和本地数据一致'
-                #     print('公司ID: %s | 微信文章数据源和本地数据一致 news_count:%s ------------>>' % (company_id,news_count))
-                #     return JsonResponse(response.__dict__)
-
                 divmod_ret = divmod(news_count, length)
                 shoudle_page_num = divmod_ret[0] + 1  # 总共的页数
-                yushu = divmod_ret[1]
 
-                print('数值 shoudle_page_num ------>>',shoudle_page_num)
                 for current_page in range(shoudle_page_num):
 
                     _data = {
@@ -297,53 +287,54 @@ def batchget_article_material(request):
                         }]
                     }    
                     '''
-
                     if _response.code == 200:
+
+                        title_list = list(
+                            models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
+                                'title', flat=True).distinct())  # 已经入模板库的 文章列表
+                        media_id_list = list(
+                            models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
+                                'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
+
                         item_list = _response.data.get('item')  # 获取的素材文章列表
-                        print('---- 接口返回-获取素材列表 item_list ------->>', item_list)
-                        for item in item_list:
+                        for item in item_list: # 大列表
                             media_id = item.get('content').get('news_item')
-                            title = item.get('content').get('news_item')[0].get('title')
                             update_time = item.get('update_time')
-                            print('title==============================> ', title)
-                            if title in media_id_list:
-                                print('=---------continue')
-                                #status_text = '已同步'
-                                #status = 1
-                                continue
+                            content_list = item.get('content').get('news_item') # 嵌套的小列表
 
-                            else:
-                                #status_text = '未同步'
-                                #status = 0
-
-                                thumb_url = item.get('content').get('news_item')[0].get('thumb_url')
-                                cover_picture = deal_gzh_picUrl_to_local(thumb_url)
-
+                            for content in content_list:
                                 ltime = time.localtime(update_time)
                                 update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
 
-                                data = {
-                                    'company_id' : company_id,
-                                    'media_id': media_id,
-                                    'source_url': item.get('content').get('news_item')[0].get('url'),
+                                title = content.get('title')
+                                thumb_url = content.get('thumb_url')
+                                source_url = content.get('url')
+                                summary = content.get('digest')
+                                content = content.get('content')
+                                if title not in title_list and media_id not in media_id_list: # 如果不存在创建
 
-                                    'title': title,
-                                    'cover_picture': thumb_url,
-                                    'summary': item.get('content').get('news_item')[0].get('digest'),  #图文消息的摘要
-                                    'content': item.get('content').get('news_item')[0].get('content'),
-                                    'update_time': update_time,
+                                    data = {
+                                        'company_id' : company_id,
+                                        'media_id': media_id,
+                                        'source_url': source_url,
+                                        'title': title,
+                                        'cover_picture': thumb_url,
+                                        'summary': summary,  #图文消息的摘要
+                                        'content': content,
+                                        'update_time': update_time,
+                                        'source': 1  # (1, '同步[公众号文章]到模板库')
+                                    }
+                                    template_article_objs = models.zgld_template_article.objects.filter(company_id=1,source=1,media_id=media_id)
+                                    if template_article_objs:
+                                        template_article_objs.update(**data)
+                                    else:
+                                        models.zgld_template_article.objects.create(**data)
 
-                                    'source': 1  # (1, '同步[公众号文章]到模板库')
-                                }
-                                template_article_objs = models.zgld_template_article.objects.filter(company_id=1,source=1,media_id=media_id)
-                                if template_article_objs:
-                                    template_article_objs.update(**data)
-                                else:
-                                    models.zgld_template_article.objects.create(**data)
+                                    media_id_list.append(media_id)
+                                    title_list.append(title)
 
-                                media_id_list.append(media_id)
-                                print('media_id: %s 新增同步至模板库,创建成功 -------->>' % media_id)
-
+                                else: # 已存在
+                                    continue
                         else:
                             response.code = _response.code
                             response.msg =  _response.msg
