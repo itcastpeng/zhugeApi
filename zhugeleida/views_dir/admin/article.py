@@ -586,7 +586,9 @@ def article(request, oper_type):
                                 'content': content,
                                 'cover_picture': cover_picture,
                                 'media_id': media_id,
-                                'source_url': url
+                                'source_url': url,
+                                'insert_ads': '{"mingpian":true,"type":"mingpian"}',
+                                'status': 1
                             }
                             article_objs = models.zgld_article.objects.filter(media_id=media_id)
 
