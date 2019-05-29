@@ -303,6 +303,7 @@ def batchget_article_material(request):
                         # print('---- 接口返回-获取素材列表 item_list ------->>', item_list)
                         print('media_id_list--------------> ', media_id_list)
                         for item in item_list:
+                            media_id = item.get('media_id')
                             title = item.get('title')
                             print('v================@@@@@@@@@@==============. ', title)
                             update_time = item.get('update_time')
