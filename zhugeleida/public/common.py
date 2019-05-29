@@ -643,8 +643,8 @@ class get_customer_gongzhonghao_userinfo(object):
 
         ret.encoding = 'utf-8'
         ret_json = ret.json()
-        print('----------- 【公众号】获取素材列表 接口返回 ---------->>', json.dumps(ret_json))
-
+        # print('----------- 【公众号】获取素材列表 接口返回 ---------->>', json.dumps(ret_json))
+        #
         if 'errcode' not in ret_json:
 
             response.data = ret_json
