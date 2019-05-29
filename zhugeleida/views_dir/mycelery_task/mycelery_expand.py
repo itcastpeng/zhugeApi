@@ -301,7 +301,7 @@ def batchget_article_material(request):
 
                         item_list = _response.data.get('item')  # 获取的素材文章列表
                         for item in item_list: # 大列表
-                            media_id = item.get('content').get('news_item')
+                            media_id = item.get('media_id')
                             update_time = item.get('update_time')
                             content_list = item.get('content').get('news_item') # 嵌套的小列表
                             ltime = time.localtime(int(update_time))
