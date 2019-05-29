@@ -235,7 +235,7 @@ def batchget_article_material(request):
             material_count_response = user_obj_cla.get_material_count()
             news_count = material_count_response.data.get('news_count')
             if news_count > 0:
-                media_id_list = list(models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list('media_id', flat=True).distinct())  # 已经入模板库的 文章列表
+                media_id_list = list(models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list('title', flat=True).distinct())  # 已经入模板库的 文章列表
 
                 # if news_count == len(media_id_list):
                 #     response.code = 301
@@ -303,14 +303,14 @@ def batchget_article_material(request):
                         # print('---- 接口返回-获取素材列表 item_list ------->>', item_list)
                         print('media_id_list--------------> ', media_id_list)
                         for item in item_list:
-                            media_id = item.get('media_id')
-                            print('v================@@@@@@@@@@==============. ', media_id)
+                            title = item.get('title')
+                            print('v================@@@@@@@@@@==============. ', title)
                             update_time = item.get('update_time')
 
-                            if media_id in media_id_list:
+                            if title in media_id_list:
                                 #status_text = '已同步'
                                 #status = 1
-                                print('media_id: %s 已同步至模板库,直接pass -------->>' % media_id)
+                                print('media_id: %s 已同步至模板库,直接pass -------->>' % title)
                                 continue
 
                             else:
