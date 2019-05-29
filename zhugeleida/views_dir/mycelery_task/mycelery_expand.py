@@ -306,9 +306,10 @@ def batchget_article_material(request):
                             content_list = item.get('content').get('news_item') # 嵌套的小列表
                             ltime = time.localtime(int(update_time))
                             update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
+                            print('title_list-============> ', title_list, media_id_list)
                             for content in content_list:
-
                                 title = content.get('title')
+                                print('title-------------> ', title, media_id)
                                 thumb_url = content.get('thumb_url')
                                 source_url = content.get('url')
                                 summary = content.get('digest')
@@ -336,6 +337,7 @@ def batchget_article_material(request):
                                     title_list.append(title)
 
                                 else: # 已存在
+                                    print('-=-!!!!!!!!!!!!!!!!!!continue')
                                     continue
 
             else:
