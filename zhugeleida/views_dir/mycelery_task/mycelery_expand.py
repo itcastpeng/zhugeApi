@@ -304,10 +304,9 @@ def batchget_article_material(request):
                             media_id = item.get('content').get('news_item')
                             update_time = item.get('update_time')
                             content_list = item.get('content').get('news_item') # 嵌套的小列表
-                            print('update_time---------------> ', update_time, type(update_time))
+                            ltime = time.localtime(int(update_time))
+                            update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
                             for content in content_list:
-                                ltime = time.localtime(int(update_time))
-                                update_time = time.strftime('%Y-%m-%d %H:%M:%S', ltime)
 
                                 title = content.get('title')
                                 thumb_url = content.get('thumb_url')
