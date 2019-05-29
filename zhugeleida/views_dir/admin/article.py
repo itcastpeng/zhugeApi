@@ -527,7 +527,8 @@ def article(request, oper_type):
                         'source_url': source_url,
                         'content': content,
                         'source': 2,  # (2,'转载')
-                        'status': 1  # 默认已发状态
+                        'status': 1,  # 默认已发状态
+                        'insert_ads': '{"mingpian":true,"type":"mingpian"}'
                     }
                     article_objs = models.zgld_article.objects.filter(
                         source_url=source_url,
