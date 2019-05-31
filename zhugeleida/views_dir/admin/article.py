@@ -1773,7 +1773,7 @@ def deal_gzh_picture_url(leixing, url):
             src_url = ret.json().get('url_info')[0].get('url')
             video_path = account.randon_str() + '.mp4'   # 生成七牛KEY
             qiniu_celery_upload_video.delay(url, video_path)  # 异步下载视频
-            src_url = 'http://tianyan.zhugeyingxiao.com/' + video_path,
+            src_url = 'http://tianyan.zhugeyingxiao.com/' + video_path
 
             video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
                             <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
