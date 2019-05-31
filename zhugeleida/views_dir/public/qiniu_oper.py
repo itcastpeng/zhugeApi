@@ -15,10 +15,10 @@ def qiniu_get_token(img_path, key=None):
     AccessKey = 'a1CqK8BZm94zbDoOrIyDlD7_w7O8PqJdBHK-cOzz'
     q = qiniu.Auth(AccessKey, SecretKey)
     bucket_name = 'bjhzkq_tianyan'
-    key = randon_str()
-    policy = {  # 指定上传文件的格式 等
-
-    }
+    # key = randon_str()
+    # policy = {  # 指定上传文件的格式 等
+    #
+    # }
     if not key:
         token = q.upload_token(bucket_name)  # 可以指定key 图片名称
         data = {
