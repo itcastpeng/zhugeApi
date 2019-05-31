@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
@@ -7,10 +6,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
     ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm, \
     GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm,LocalArticleAddForm,SyncTemplateArticleForm,SelectForm
-
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
-import datetime
-import json, base64
 from django.db.models import Q, Count
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import create_qrcode
@@ -18,12 +14,10 @@ from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gong
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.public.common import action_record
 from zhugeleida.public.common import get_customer_gongzhonghao_userinfo
-
 from bs4 import BeautifulSoup
-import time
-import requests
-import re, os
 from urllib.parse import unquote
+from zhugeapi_celery_project.tasks import qiniu_celery_upload_video
+import re, os, requests, time, json, base64, datetime
 
 
 def init_data(article_id, user_id, pid=None, level=1):
@@ -1776,23 +1770,31 @@ def deal_gzh_picture_url(leixing, url):
         ret = requests.get(iframe_url)
 
         try:
-            url = ret.json().get('url_info')[0].get('url')
+            src_url = ret.json().get('url_info')[0].get('url')
+            video_path = account.randon_str() + '.mp4'   # 生成七牛KEY
+            qiniu_celery_upload_video.delay(url, video_path)  # 异步下载视频
+            src_url = 'http://tianyan.zhugeyingxiao.com/' + video_path,
 
             video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
                             <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
                         </div>""".format(
-                url,
+                src_url,
                 data_cover_url,
             )
 
             body = str(body).replace(str(iframe_tag), video_tag)
         except Exception:
+            vid_num = ''
             if '&' in shipin_url and 'vid=' in shipin_url:
                 vid_num = shipin_url.split('vid=')[1]
                 _url = shipin_url.split('?')[0]
                 shipin_url = _url + '?vid=' + vid_num
 
-            iframe_tag.attrs['data-src'] = shipin_url
+            data_src = shipin_url
+            if vid_num:
+                data_src = 'https://v.qq.com/txp/iframe/player.html?origin=https%3A%2F%2Fmp.weixin.qq.com&vid={}&autoplay=false&full=true&show1080p=false&isDebugIframe=false'.format(
+                    vid_num)
+            iframe_tag.attrs['data-src'] = data_src
             iframe_tag.attrs['allowfullscreen'] = True
             iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 

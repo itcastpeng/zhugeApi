@@ -166,7 +166,7 @@ def yuZhiFu(request):
         phoneNumber = request.POST.get('phoneNumber')  # 电话号码
         forms_obj = yuzhifu_verify.yuZhiFu(request.POST)
         if forms_obj.is_valid():
-            print('=======================================userid================userid-------------------> ', user_id, u_id)
+            print('=======================================userid================userid-------------------> ', user_id, u_id, datetime.datetime.today())
 
             company_id = ''
             u_idObjs = models.zgld_userprofile.objects.filter(id=u_id)
@@ -243,13 +243,16 @@ def yuZhiFu(request):
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
             # print('xml_data----------------> ',xml_data)
+            print('---------------------------------请求微信--------------------------> ', datetime.datetime.today())
             ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
+            print('---------------------------------请求微信--------------------------> ', datetime.datetime.today())
             ret.encoding = 'utf8'
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
             data = ['return_code', 'return_msg']
             resultData = xmldom_parsing.xmldom(collection, data)
             # print('return_code-------------------> ',return_code)
+            print('---------------------------------请求微信--------------------------> ', datetime.datetime.today())
             if resultData['return_code'] == 'SUCCESS':        # 判断预支付返回参数 是否正确
                 data = ['prepay_id']
                 resultData = xmldom_parsing.xmldom(collection, data)

@@ -12,6 +12,8 @@ import psutil
 import os
 import signal
 import json
+from zhugeleida.views_dir.public.qiniu_oper import qiniu_get_token, requests_video_download
+
 
 #  小程序访问动作日志的发送到企业微信
 @app.task
@@ -285,4 +287,24 @@ def celery_data_statistics():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/celery_statistical_content/data_statistics'
     print('-------------------------------------------雷达celery_____记录数据统计缓存')
     requests.get(url)
+
+# 异步下载视频
+@app.task
+def qiniu_celery_upload_video(url, video_path):
+    print('-----------------------------celery--------------------下载视频=-----------> ', datetime.datetime.today())
+    url = requests_video_download(url)  # 下载到本地
+    qiniu_get_token(url, video_path)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
