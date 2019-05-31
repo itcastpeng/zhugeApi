@@ -243,16 +243,16 @@ def yuZhiFu(request):
             result_data['sign'] = md5(stringSignTemp).upper()
             xml_data = toXml(result_data)
             # print('xml_data----------------> ',xml_data)
-            print('---------------------------------请求微信--------------------------> ', datetime.datetime.today())
+            print('-----------------------1111----------请求微信--------------------------> ', datetime.datetime.today())
             ret = requests.post(url, data=xml_data, headers={'Content-Type': 'text/xml'})
-            print('---------------------------------请求微信--------------------------> ', datetime.datetime.today())
+            print('------------------------2222---------请求微信--------------------------> ', datetime.datetime.today())
             ret.encoding = 'utf8'
             DOMTree = xmldom.parseString(ret.text)
             collection = DOMTree.documentElement
             data = ['return_code', 'return_msg']
             resultData = xmldom_parsing.xmldom(collection, data)
             # print('return_code-------------------> ',return_code)
-            print('---------------------------------请求微信--------------------------> ', datetime.datetime.today())
+            print('------------------------3333---------请求微信--------------------------> ', datetime.datetime.today())
             if resultData['return_code'] == 'SUCCESS':        # 判断预支付返回参数 是否正确
                 data = ['prepay_id']
                 resultData = xmldom_parsing.xmldom(collection, data)
