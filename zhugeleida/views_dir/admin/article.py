@@ -530,7 +530,7 @@ def article(request, oper_type):
                     )
 
                     if article_objs:
-                        print('=====================同步公众号文章入库', dict_data)
+                        # print('=====================同步公众号文章入库', dict_data)
                         article_objs.update(**dict_data)
                         response.code = 200
                         response.msg = '覆盖修改文章成功'
@@ -1770,6 +1770,7 @@ def deal_gzh_picture_url(leixing, url):
         ret = requests.get(iframe_url)
 
         try:
+            print('----------新> ')
             src_url = ret.json().get('url_info')[0].get('url')
             video_path = account.randon_str() + '.mp4'   # 生成七牛KEY
             qiniu_celery_upload_video.delay(url, video_path)  # 异步下载视频
@@ -1783,7 +1784,8 @@ def deal_gzh_picture_url(leixing, url):
             )
 
             body = str(body).replace(str(iframe_tag), video_tag)
-        except Exception:
+        except Exception as e:
+            print('------------旧>', e)
             vid_num = ''
             if '&' in shipin_url and 'vid=' in shipin_url:
                 vid_num = shipin_url.split('vid=')[1]
