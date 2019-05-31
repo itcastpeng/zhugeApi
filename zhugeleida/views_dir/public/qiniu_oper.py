@@ -75,7 +75,7 @@ def requests_video_download(url):
     img_save_path = randon_str() + '.mp4'
     # img_save_path = '2.mp4'
     r = requests.get(url, stream=True)
-    print('r----> ', r.text)
+    # print('r----> ', r.text)
     with open(img_save_path, "wb") as mp4:
         for chunk in r.iter_content(chunk_size=1024 * 1024):
             if chunk:
