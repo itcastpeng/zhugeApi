@@ -72,6 +72,7 @@ def qiniu_oper(request, oper_type):
 
 
 def requests_video_download(url):
+    print('----------下载视频-------------> ', url)
     img_save_path = randon_str() + '.mp4'
     # img_save_path = '2.mp4'
     r = requests.get(url, stream=True)

@@ -1774,7 +1774,7 @@ def deal_gzh_picture_url(leixing, url):
             src_url = ret.json().get('url_info')[0].get('url')
             video_path = account.randon_str() + '.mp4'   # 生成七牛KEY
             print('src_url---------------> ', src_url, video_path)
-            qiniu_celery_upload_video.delay(src_url, video_path)  # 异步下载视频
+            qiniu_celery_upload_video.delay(url=src_url, video_path=video_path)  # 异步下载视频
             src_url = 'http://tianyan.zhugeyingxiao.com/' + video_path
 
             video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
