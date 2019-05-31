@@ -1687,7 +1687,9 @@ def deal_gzh_picture_url(leixing, url):
 
         ## 把封面图片下载到本地
         now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+        print('------------请求1=================> ', datetime.datetime.today())
         html = s.get(cover_url)
+        print('------------请求1=================> ', datetime.datetime.today())
         if 'wx_fmt=gif' in cover_url:
             filename = "/gzh_article_%s.gif" % (now_time)
         else:
