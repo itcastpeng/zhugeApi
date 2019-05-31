@@ -1743,7 +1743,7 @@ def deal_gzh_picture_url(leixing, url):
 
             img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
             # print('data_src ----->', data_src)
-
+    print('-=----------------------------> ', datetime.datetime.today())
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
     for iframe_tag in iframe:

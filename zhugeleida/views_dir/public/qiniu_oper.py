@@ -48,7 +48,7 @@ def qiniu_get_token(img_path, key=None):
         'file': open(img_path, 'rb')
     }
     ret = requests.post(qiniu_url, data=data, files=files, headers=headers)
-    print('###############@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#################_------------> ', ret.text)
+    print('###############@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#################_------------> ', ret.text, data)
     if 'http://tianyan.zhugeyingxiao.com/' not in img_path and os.path.exists(img_path):
         os.remove(img_path)  # 删除本地图片
     return ret
