@@ -291,8 +291,8 @@ def celery_data_statistics():
 # 异步下载视频
 @app.task
 def qiniu_celery_upload_video(url, video_path):
-    print('-----------------------------celery--------------------下载视频=-----------> ', datetime.datetime.today())
     url = requests_video_download(url)  # 下载到本地
+    print('-----------------------------celery--------------------下载视频=-----------> ', datetime.datetime.today(), url)
     qiniu_get_token(url, video_path)
 
 
