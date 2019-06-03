@@ -13,6 +13,7 @@ from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.public.common import action_record
+from zhugeleida.public.common import get_customer_gongzhonghao_userinfo
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
 from zhugeapi_celery_project.tasks import qiniu_celery_upload_video
@@ -548,90 +549,95 @@ def article(request, oper_type):
                 # 同步微信公众号的图文素材到本地正式文章库
                 else:
                     id_list = json.loads(id_list)
-                    company_id = forms_obj.cleaned_data.get('company_id')
-                    for _id in id_list:
-                        article_obj = models.zgld_template_article.objects.get(id=_id)
-                        title = article_obj.title
-                        media_id = article_obj.media_id
-                        cover_picture = article_obj.cover_picture
-                        cover_picture = requests_img_download(cover_picture) # 下载到本地
-                        cover_picture = qiniu_get_token(cover_picture) # 上传到七牛云
+                    objs = models.zgld_template_article.objects.filter(id__in=id_list)
+                    for obj in objs:
+                        media_id = obj.media_id
+                        media_level = obj.media_level
+                        objs = models.zgld_gongzhonghao_app.objects.filter(
+                            company_id=company_id
+                        )
+                        authorization_appid = objs[0].authorization_appid
 
-                        dict_data = {
-                            'user_id': user_id,
+                        _data = {
+                            'authorizer_appid': authorization_appid,
                             'company_id': company_id,
-                            'title': article_obj.title,
-                            'summary': article_obj.summary,
-                            'content': article_obj.content,
-                            'cover_picture': cover_picture,
-                            'media_id': media_id,
-                            'source_url': article_obj.source_url,
-                            'insert_ads': '{"mingpian":true,"type":"mingpian"}',
-                            'status': 1
+                            'media_id': media_id
                         }
 
-                        article_objs = models.zgld_article.objects.filter(
-                            media_id=media_id,
-                            title=title
-                        )
+                        user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
+                        _response = user_obj_cla.get_material()
 
-                        if article_objs:
-                            article_objs.update(**dict_data)
-                            response.code = 200
-                            response.msg = '覆盖修改文章成功'
+                        if _response.code == 200:
+                            article_data_dict = _response.data
+                            news_item_dict = article_data_dict.get('news_item')[media_level]
+
+                            title = news_item_dict.get('title')
+                            summary = news_item_dict.get('digest')  # 摘要
+                            content = news_item_dict.get('content')  # 封面图
+                            cover_picture = news_item_dict.get('thumb_url')  # 封面图
+                            url = news_item_dict.get('url')  # 原文链接
+                            if cover_picture:
+                                cover_picture = deal_gzh_picUrl_to_local(cover_picture)
+
+                            if url:
+                                content = deal_gzh_picture_url('', url)
+
+                            dict_data = {
+                                'user_id': user_id,
+                                'company_id': company_id,
+                                'title': title,
+                                'summary': summary,
+                                'content': content,
+                                'cover_picture': cover_picture,
+                                'media_id': media_id,
+                                'source_url': url,
+                                'insert_ads': '{"mingpian":true,"type":"mingpian"}',
+                                'status': 1
+                            }
+                            print('-----------------------------------title-------title----> ', title, media_id)
+                            article_objs = models.zgld_article.objects.filter(
+                                media_id=media_id,
+                                title=title
+                            )
+
+                            if article_objs:
+                                article_objs.update(**dict_data)
+                                response.code = 200
+                                response.msg = '覆盖修改文章成功'
+
+                            else:
+                                models.zgld_article.objects.create(**dict_data)
+                                response.code = 200
+                                response.msg = '新建文章成功'
+
+                            models.zgld_template_article.objects.filter(media_id=media_id).update(status=1)
 
                         else:
-                            models.zgld_article.objects.create(**dict_data)
-                            response.code = 200
-                            response.msg = '新建文章成功'
-
-                        article_obj.status=1
-                        article_obj.save()
+                            response = _response
 
 
-
-                        # objs = models.zgld_gongzhonghao_app.objects.filter(
-                        #     company_id=company_id
-                        # )
-                        # authorization_appid = objs[0].authorization_appid
-
-                        # _data = {
-                        #     'authorizer_appid': authorization_appid,
-                        #     'company_id': company_id,
-                        #     'media_id': media_id
-                        # }
-                        #
-                        # user_obj_cla = get_customer_gongzhonghao_userinfo(_data)
-                        # _response = user_obj_cla.get_material()
-                        #
-                        # if _response.code == 200:
-                        #     article_data_dict = _response.data
-                        #     news_item_dict = article_data_dict.get('news_item')[0]
-                        #
-                        #     title = news_item_dict.get('title')
-                        #     summary = news_item_dict.get('digest')  # 摘要
-                        #     content = news_item_dict.get('content')  # 封面图
-                        #     cover_picture = news_item_dict.get('thumb_url')  # 封面图
-                        #     url = news_item_dict.get('url')  # 原文链接
-                        #     if cover_picture:
-                        #         cover_picture = deal_gzh_picUrl_to_local(cover_picture)
-                        #
-                        #     if url:
-                        #         content = deal_gzh_picture_url('', url)
+                        # company_id = forms_obj.cleaned_data.get('company_id')
+                        # for _id in id_list:
+                        #     article_obj = models.zgld_template_article.objects.get(id=_id)
+                        #     title = article_obj.title
+                        #     media_id = article_obj.media_id
+                        #     cover_picture = article_obj.cover_picture
+                        #     cover_picture = requests_img_download(cover_picture) # 下载到本地
+                        #     cover_picture = qiniu_get_token(cover_picture) # 上传到七牛云
                         #
                         #     dict_data = {
                         #         'user_id': user_id,
                         #         'company_id': company_id,
-                        #         'title': title,
-                        #         'summary': summary,
-                        #         'content': content,
+                        #         'title': article_obj.title,
+                        #         'summary': article_obj.summary,
+                        #         'content': article_obj.content,
                         #         'cover_picture': cover_picture,
                         #         'media_id': media_id,
-                        #         'source_url': url,
+                        #         'source_url': article_obj.source_url,
                         #         'insert_ads': '{"mingpian":true,"type":"mingpian"}',
                         #         'status': 1
                         #     }
-                        #     print('-----------------------------------title-------title----> ', title, media_id)
+                        #
                         #     article_objs = models.zgld_article.objects.filter(
                         #         media_id=media_id,
                         #         title=title
@@ -647,11 +653,8 @@ def article(request, oper_type):
                         #         response.code = 200
                         #         response.msg = '新建文章成功'
                         #
-                        #     models.zgld_template_article.objects.filter(media_id=media_id).update(status=1)
-                        #
-                        # else:
-                        #     response = _response
-
+                        #     article_obj.status=1
+                        #     article_obj.save()
 
 
             else:

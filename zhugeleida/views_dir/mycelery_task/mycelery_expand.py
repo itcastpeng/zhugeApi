@@ -300,6 +300,7 @@ def batchget_article_material(request):
                                 'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
 
                         item_list = _response.data.get('item')  # 获取的素材文章列表
+                        level = 0
                         for item in item_list: # 大列表
                             media_id = item.get('media_id')
                             update_time = item.get('update_time')
@@ -323,7 +324,8 @@ def batchget_article_material(request):
                                         'summary': summary,  #图文消息的摘要
                                         'content': content,
                                         'update_time': update_time,
-                                        'source': 1  # (1, '同步[公众号文章]到模板库')
+                                        'source': 1,  # (1, '同步[公众号文章]到模板库')
+                                        'media_level': level,  # (1, '同步[公众号文章]到模板库')
                                     }
                                     template_article_objs = models.zgld_template_article.objects.filter(company_id=1,source=1,media_id=media_id)
                                     if template_article_objs:
@@ -337,7 +339,7 @@ def batchget_article_material(request):
                                 else: # 已存在
                                     print('-=-!!!!!!!!!!!!!!!!!!continue')
                                     continue
-
+                            level += 1
             else:
                 print('----------->>')
                 response.code = 302

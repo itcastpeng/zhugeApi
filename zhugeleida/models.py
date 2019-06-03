@@ -948,6 +948,7 @@ class  zgld_template_article(models.Model):
     tags = models.ManyToManyField('zgld_template_article_tag',verbose_name="模板文章关联的标签")
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    media_level = models.IntegerField(verbose_name='模板位置', default=0)
     class Meta:
         verbose_name_plural = "模板文章表"
         app_label = "zhugeleida"
