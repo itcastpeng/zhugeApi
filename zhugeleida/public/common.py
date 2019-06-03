@@ -716,11 +716,13 @@ class get_customer_gongzhonghao_userinfo(object):
 
         s = requests.session()
         s.keep_alive = False  # 关闭多余连接
+        print('-===============开始请求微信接口> ', datetime.datetime.today())
         ret = s.post(get_material_url, params=get_material_data, data=json.dumps(post_material_data))
+        print('-===============结束请求微信接口> ', datetime.datetime.today())
 
         ret.encoding = 'utf-8'
         ret_json = ret.json()
-        print('----------- 【公众号】获取永久素材 接口返回 ---------->>', json.dumps(ret_json))
+        # print('----------- 【公众号】获取永久素材 接口返回 ---------->>', json.dumps(ret_json))
 
 
         if 'errcode' not in ret_json:

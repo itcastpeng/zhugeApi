@@ -35,7 +35,7 @@ def init_data(article_id, user_id, pid=None, level=1):
         level=level
     )
     for obj in objs:
-        print('pid------------> ', pid)
+        # print('pid------------> ', pid)
         print('customer_parent_id------------> ', obj.customer_parent_id, obj.customer_id)
         if obj.customer_parent_id == obj.customer_id:
             continue
@@ -57,7 +57,7 @@ def init_data(article_id, user_id, pid=None, level=1):
 
         result_data.append(current_data)
 
-    print('result_data -->', result_data)
+    # print('result_data -->', result_data)
     return result_data
 
 
@@ -89,17 +89,17 @@ def mailuotu(article_id, q):
     for obj in count_objs:
         user_id = obj['user_id']
         username = obj['user__username']
-        print('user_id -->', user_id)
-        print('username -->', username)
+        # print('user_id -->', user_id)
+        # print('username -->', username)
 
         children_data = init_data(article_id, user_id)
-        print('children_data------> ', children_data)
+        # print('children_data------> ', children_data)
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
         result_data.append(tmp)
 
-    print('result_data -->', result_data)
+    # print('result_data -->', result_data)
 
     article_title = count_objs[0]['article__title']
     return article_title, result_data, max_person_num
@@ -119,7 +119,7 @@ def article(request, oper_type):
 
             forms_obj = ArticleSelectForm(request.GET)
             if forms_obj.is_valid():
-                print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
+                # print('forms_obj.cleaned_data -->', forms_obj.cleaned_data)
                 user_id = request.GET.get('user_id')
                 _type = request.GET.get('type')
 
@@ -165,7 +165,7 @@ def article(request, oper_type):
                 count = objs.count()
 
                 if length != 0:
-                    print('current_page -->', current_page)
+                    # print('current_page -->', current_page)
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
@@ -260,7 +260,7 @@ def article(request, oper_type):
 
                     total_count = objs.count()
                     if length != 0:
-                        print('current_page -->', current_page)
+                        # print('current_page -->', current_page)
                         start_line = (current_page - 1) * length
                         stop_line = start_line + length
                         objs = objs[start_line: stop_line]
@@ -346,7 +346,7 @@ def article(request, oper_type):
                     if _objs:
                         _objs = _objs.values('article_id').annotate(Sum('stay_time'))
                         stay_time = _objs[0].get('stay_time__sum')
-                        print('stay_time -------->',stay_time)
+                        # print('stay_time -------->',stay_time)
 
                     _objs = objs.values('media_id').annotate(Sum('read_count'))
                     read_count = _objs[0].get('read_count__sum')
@@ -413,7 +413,7 @@ def article(request, oper_type):
 
                     total_count = objs.count()
                     if length != 0:
-                        print('current_page -->', current_page)
+                        # print('current_page -->', current_page)
                         start_line = (current_page - 1) * length
                         stop_line = start_line + length
                         objs = objs[start_line: stop_line]
@@ -495,7 +495,7 @@ def article(request, oper_type):
 
         # 同步公众号文章入库
         if oper_type == 'sync_gzh_article':
-            print('=====================同步公众号文章入库')
+            # print('=====================同步公众号文章入库')
             user_id = request.GET.get('user_id')
             company_id = request.GET.get('company_id')
             id_list = request.POST.get('id_list')
@@ -548,6 +548,7 @@ def article(request, oper_type):
 
                 # 同步微信公众号的图文素材到本地正式文章库
                 else:
+                    print('--=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@--------> ', datetime.datetime.today())
                     id_list = json.loads(id_list)
                     objs = models.zgld_template_article.objects.filter(id__in=id_list)
                     for obj in objs:
@@ -594,7 +595,7 @@ def article(request, oper_type):
                                 'insert_ads': '{"mingpian":true,"type":"mingpian"}',
                                 'status': 1
                             }
-                            print('-----------------------------------title-------title----> ', title, media_id)
+                            # print('-----------------------------------title-------title----> ', title, media_id)
                             article_objs = models.zgld_article.objects.filter(
                                 media_id=media_id,
                                 title=title
@@ -656,7 +657,7 @@ def article(request, oper_type):
                         #     article_obj.status=1
                         #     article_obj.save()
 
-
+                    print('-@@@@@@@@@@@@@@+====================++++++++++++>', datetime.datetime.today())
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
@@ -1702,7 +1703,7 @@ def article_oper(request, oper_type, o_id):
 
 
 def deal_gzh_picture_url(leixing, url):
-    print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_-----------------------> ', datetime.datetime.today())
+    # print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_-----------------------> ', datetime.datetime.today())
     ''' 
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
     http://mmbiz.qpic.cn/mmbiz_jpg/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7lBRILWoKKVuvdHe4BmVxhiclQnYo2F1TDU7CcibXawl9E2n1MOicTkt6w/0?wx_fmt=jpeg
@@ -1716,8 +1717,9 @@ def deal_gzh_picture_url(leixing, url):
 
     # 移除非数字的内容
     # url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
-
+    print('---------------请求微信链接------------> ', datetime.datetime.today())
     ret = requests.get(url)
+    print('---------------结束请求微信链接------------> ', datetime.datetime.today())
 
     ret.encoding = 'utf8'
 
@@ -1799,7 +1801,7 @@ def deal_gzh_picture_url(leixing, url):
 
             img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
             # print('data_src ----->', data_src)
-    print('-=----------------------------> ', datetime.datetime.today())
+    # print('-=----------------------------> ', datetime.datetime.today())
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
     for iframe_tag in iframe:
@@ -1826,10 +1828,10 @@ def deal_gzh_picture_url(leixing, url):
         ret = requests.get(iframe_url)
 
         try:
-            print('----------新> ')
+            # print('----------新> ')
             src_url = ret.json().get('url_info')[0].get('url')
             video_path = account.randon_str() + '.mp4'   # 生成七牛KEY
-            print('src_url---------------> ', src_url, video_path)
+            # print('src_url---------------> ', src_url, video_path)
             qiniu_celery_upload_video.delay(url=src_url, video_path=video_path)  # 异步下载视频
             src_url = 'http://tianyan.zhugeyingxiao.com/' + video_path
 
@@ -1842,7 +1844,7 @@ def deal_gzh_picture_url(leixing, url):
 
             body = str(body).replace(str(iframe_tag), video_tag)
         except Exception as e:
-            print('------------旧>', e)
+            # print('------------旧>', e)
             vid_num = ''
             if '&' in shipin_url and 'vid=' in shipin_url:
                 vid_num = shipin_url.split('vid=')[1]
@@ -1906,7 +1908,7 @@ def deal_gzh_picture_url(leixing, url):
             content = content.replace(key, value)
         # print(url)
     # print('----- 此图片来自微信公众平台 替换为 ----->',content)
-    print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_结束-----------------------> ',datetime.datetime.today())
+    # print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_结束-----------------------> ',datetime.datetime.today())
     if leixing == 'only_url':
 
         return msg_title, msg_desc, cover_url, content
@@ -1917,7 +1919,7 @@ def deal_gzh_picture_url(leixing, url):
 
 
 def deal_gzh_picUrl_to_local(url):
-    print('-----【公众号】 发送的图片 PicUrl ---->>', url)
+    # print('-----【公众号】 发送的图片 PicUrl ---->>', url)
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
     html = s.get(url)

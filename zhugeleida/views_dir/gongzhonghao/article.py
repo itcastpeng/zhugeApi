@@ -989,7 +989,8 @@ def article_oper(request, oper_type, o_id):
                                                     tasks.user_forward_send_activity_redPacket.delay(_data)
 
                     else:
-                        print('无关系 article_to_customer_belonger -------->>', q)
+                        pass
+                        # print('无关系 article_to_customer_belonger -------->>', q)
 
                     response.code = 200
                     response.msg = "记录客户查看文章时间成功"
