@@ -213,7 +213,11 @@ def article(request, oper_type):
                 company_id = forms_obj.cleaned_data.get('company_id')
                 status = request.GET.get('status')
 
-                objs = models.zgld_template_article.objects.filter(company_id=company_id, source=1, status=status)
+                objs = models.zgld_template_article.objects.filter(
+                    company_id=company_id,
+                    source=1,
+                    status=status,
+                ).order_by('-create_date')
 
                 if objs:
 
