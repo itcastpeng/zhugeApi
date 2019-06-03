@@ -339,7 +339,7 @@ class MyarticleForm(forms.Form):
 
 
 class SyncMyarticleForm(forms.Form):
-    media_id_list = forms.CharField(
+    id_list = forms.CharField(
         required=False,
         error_messages={
             'required': '素材列表不能为空'
