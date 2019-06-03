@@ -533,7 +533,7 @@ def article(request, oper_type):
                     article_objs = models.zgld_article.objects.filter(
                         title=msg_title,
                         company_id=company_id
-                    )
+                    ).exclude(status=3)
 
                     if article_objs:
                         # print('=====================同步公众号文章入库', dict_data)
