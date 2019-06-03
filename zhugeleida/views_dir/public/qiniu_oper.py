@@ -83,6 +83,17 @@ def requests_video_download(url):
                 mp4.write(chunk)
 
     return img_save_path
+
+# 请求图片地址保存本地
+def requests_img_download(old_url):
+    ret = requests.get(old_url)
+    path = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', randon_str() + '.png')
+    with open(path, 'wb') as e:
+        e.write(ret.content)
+    return path
+
+
+
 if __name__ == '__main__':
     ret = qiniu_get_token('1.jpg')
     print('ret------> ', ret)

@@ -13,10 +13,10 @@ from zhugeleida.public.common import create_qrcode
 from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
 from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
 from zhugeleida.public.common import action_record
-from zhugeleida.public.common import get_customer_gongzhonghao_userinfo
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
 from zhugeapi_celery_project.tasks import qiniu_celery_upload_video
+from zhugeleida.views_dir.public.qiniu_oper import requests_img_download, qiniu_get_token
 import re, os, requests, time, json, base64, datetime
 
 
@@ -553,13 +553,17 @@ def article(request, oper_type):
                         article_obj = models.zgld_template_article.objects.get(id=_id)
                         title = article_obj.title
                         media_id = article_obj.media_id
+                        cover_picture = article_obj.cover_picture
+                        cover_picture = requests_img_download(cover_picture) # 下载到本地
+                        cover_picture = qiniu_get_token(cover_picture) # 上传到七牛云
+
                         dict_data = {
                             'user_id': user_id,
                             'company_id': company_id,
                             'title': article_obj.title,
                             'summary': article_obj.summary,
                             'content': article_obj.content,
-                            'cover_picture': article_obj.cover_picture,
+                            'cover_picture': cover_picture,
                             'media_id': media_id,
                             'source_url': article_obj.source_url,
                             'insert_ads': '{"mingpian":true,"type":"mingpian"}',
