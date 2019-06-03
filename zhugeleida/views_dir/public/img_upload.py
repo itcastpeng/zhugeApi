@@ -173,7 +173,7 @@ def img_merge(request):
         # 上传到七牛云
         if qiniu and int(qiniu) == 1:
             ret = qiniu_oper.qiniu_get_token(img_path)
-            os.remove(img_path) #删除本地图片
+            # os.remove(img_path) #删除本地图片
             img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
         print('-------------返回图片地址-=----------------------------------', img_path)
         response.data = {
