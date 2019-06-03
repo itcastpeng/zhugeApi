@@ -548,7 +548,9 @@ def article(request, oper_type):
                 else:
                     media_id_list = json.loads(media_id_list)
                     company_id = forms_obj.cleaned_data.get('company_id')
-                    objs = models.zgld_gongzhonghao_app.objects.filter(company_id=company_id)
+                    objs = models.zgld_gongzhonghao_app.objects.filter(
+                        company_id=company_id
+                    )
                     authorization_appid = objs[0].authorization_appid
 
                     for media_id in media_id_list:
@@ -588,7 +590,10 @@ def article(request, oper_type):
                                 'insert_ads': '{"mingpian":true,"type":"mingpian"}',
                                 'status': 1
                             }
-                            article_objs = models.zgld_article.objects.filter(media_id=media_id)
+                            article_objs = models.zgld_article.objects.filter(
+                                media_id=media_id,
+                                title=title
+                            )
 
                             if article_objs:
                                 article_objs.update(**dict_data)
