@@ -51,7 +51,8 @@ def qiniu_get_token(img_path, key=None):
     print('###############@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#################_------------> ', ret.text, data)
     if 'http://tianyan.zhugeyingxiao.com/' not in img_path and os.path.exists(img_path):
         os.remove(img_path)  # 删除本地图片
-    return ret
+    img_path = 'http://tianyan.zhugeyingxiao.com/' + ret.json().get('key')
+    return img_path
 
 # 前端请求
 def qiniu_oper(request, oper_type):
