@@ -549,12 +549,48 @@ def article(request, oper_type):
                 else:
                     id_list = json.loads(id_list)
                     company_id = forms_obj.cleaned_data.get('company_id')
-                    objs = models.zgld_gongzhonghao_app.objects.filter(
-                        company_id=company_id
-                    )
-                    authorization_appid = objs[0].authorization_appid
-                    print('------------------->同步文章 ', id_list)
-                    # for _id in id_list:
+                    for _id in id_list:
+                        article_obj = models.zgld_template_article.objects.get(id=_id)
+                        title = article_obj.title
+                        media_id = article_obj.media_id
+                        dict_data = {
+                            'user_id': user_id,
+                            'company_id': company_id,
+                            'title': article_obj.title,
+                            'summary': article_obj.summary,
+                            'content': article_obj.content,
+                            'cover_picture': article_obj.cover_picture,
+                            'media_id': media_id,
+                            'source_url': article_obj.source_url,
+                            'insert_ads': '{"mingpian":true,"type":"mingpian"}',
+                            'status': 1
+                        }
+
+                        article_objs = models.zgld_article.objects.filter(
+                            media_id=media_id,
+                            title=title
+                        )
+
+                        if article_objs:
+                            article_objs.update(**dict_data)
+                            response.code = 200
+                            response.msg = '覆盖修改文章成功'
+
+                        else:
+                            models.zgld_article.objects.create(**dict_data)
+                            response.code = 200
+                            response.msg = '新建文章成功'
+
+                        article_obj.status=1
+                        article_obj.save()
+
+
+
+                        # objs = models.zgld_gongzhonghao_app.objects.filter(
+                        #     company_id=company_id
+                        # )
+                        # authorization_appid = objs[0].authorization_appid
+
                         # _data = {
                         #     'authorizer_appid': authorization_appid,
                         #     'company_id': company_id,
