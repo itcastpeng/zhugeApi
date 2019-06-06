@@ -327,7 +327,7 @@ def batchget_article_material(request):
                                         'source': 1,  # (1, '同步[公众号文章]到模板库')
                                         'media_level': level,  # (1, '同步[公众号文章]到模板库')
                                     }
-                                    template_article_objs = models.zgld_template_article.objects.filter(company_id=1,source=1,media_id=media_id)
+                                    template_article_objs = models.zgld_template_article.objects.filter(company_id=company_id,source=1,media_id=media_id)
                                     if template_article_objs:
                                         template_article_objs.update(**data)
                                     else:

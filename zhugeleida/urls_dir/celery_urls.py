@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^crontab_create_user_to_customer_qrCode_poster$', mycelery.crontab_create_user_to_customer_qrCode_poster),     # 定时生成海报
 
     url(r'^common_send_gzh_template_msg$', mycelery_expand.common_send_gzh_template_msg),  # 发送公众号模板消息提示到用户
-    url(r'^crontab_batchget_article_material$', mycelery_expand.batchget_article_material),  # 定时器获取微信公众号文章到文章模板库
+    url(r'^crontab_batchget_article_material$', mycelery_expand.crontab_batchget_article_material),  # 定时器获取微信公众号文章到文章模板库
     url(r'^batchget_article_material$', mycelery_expand.batchget_article_material),  # 定时器获取微信公众号文章到文章模板库
     url(r'^record_money_process$', mycelery.record_money_process),                   # 资金流水记录
 
