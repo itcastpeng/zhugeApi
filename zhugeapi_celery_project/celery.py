@@ -53,7 +53,7 @@ app.conf.beat_schedule = {
     # 配置每隔一小时执行一次
     'crontab_batchget_article_material': {  # 此处的命名不要用 tasks 开头,否则会报错
         'task': 'zhugeapi_celery_project.tasks.crontab_batchget_article_material',  # 要执行的任务函数名
-        'schedule': crontab('0', '1', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
+        'schedule': crontab('*/60', '*', '*', '*', '*'),  # 此处跟 linux 中 crontab 的格式一样
         # 'args': (2, 2),                                      # 传递的参数
     },
 
