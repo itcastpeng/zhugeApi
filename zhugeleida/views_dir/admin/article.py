@@ -471,10 +471,10 @@ def article(request, oper_type):
                 objs = models.zgld_article.objects.filter(company_id=company_id)
                 count = objs.count()
                 data_list = []
-                if length != 0:
-                    start_line = (current_page - 1) * length
-                    stop_line = start_line + length
-                    objs = objs[start_line: stop_line]
+                # if length != 0:
+                #     start_line = (current_page - 1) * length
+                #     stop_line = start_line + length
+                #     objs = objs[start_line: stop_line]
                 for obj in objs:
                     data_list.append({
                         'id': obj.id,
