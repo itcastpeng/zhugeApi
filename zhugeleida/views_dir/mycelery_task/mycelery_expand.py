@@ -356,7 +356,8 @@ def data_overview_statistics(request):
     response = ResponseObj()
     if request.method == 'POST':
 
-        company_objs = models.zgld_company.objects.all()
+        # company_objs = models.zgld_company.objects.all()
+        company_objs = models.zgld_company.objects.get(id=2)
         for obj in company_objs:
             company_id =  obj.id
             account_expired_time =  obj.account_expired_time
