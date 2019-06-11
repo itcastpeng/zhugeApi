@@ -69,6 +69,13 @@ app.conf.beat_schedule = {
         'task': 'zhugeapi_celery_project.tasks.celery_data_statistics',
         'schedule': crontab("*/30", '*', '*', '*', '*'),
     },
+
+
+    # boos雷达 刷新数据  60分钟一次
+    'data_overview_statistics': {
+        'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
+        'schedule': crontab("*/60", '*', '*', '*', '*'),
+    },
 }
 
 # Optional configuration, see the application user guide.

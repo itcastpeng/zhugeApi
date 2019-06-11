@@ -476,7 +476,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
             # q4.add(Q(**{'create_date__lt': stop_time}), Q.AND)
             ret_data['nearly_thirty_days'] = deal_search_time(data, q4)
 
-            print('------------####################----------数据统计 -------------》', data)
+            # print('------------####################----------数据统计 -------------》', data)
             company_objs = models.zgld_company.objects.filter(id=company_id)
             if company_objs and  type != 'personal':
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)

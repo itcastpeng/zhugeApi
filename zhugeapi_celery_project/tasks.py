@@ -296,6 +296,11 @@ def qiniu_celery_upload_video(url, video_path):
     qiniu_get_token(url, video_path)
 
 
+# boos 雷达数据统计
+@app.task
+def data_overview_statistics():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/data_overview_statistics'
+    requests.post(url)
 
 
 
