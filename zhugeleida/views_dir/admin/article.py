@@ -1821,55 +1821,35 @@ def deal_gzh_picture_url(leixing, url):
         file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
         with open(file_dir, 'wb') as file:
             file.write(html.content)
-        data_cover_url = 'http://api.zhugeyingxiao.com/' + file_dir
+        data_cover_url = 'http://api.zhugeyingxiao.com/' + file_dir # 封面地址
 
-        iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(
-            shipin_url.split('vid=')[1])
-        ret = requests.get(iframe_url)
+        vid = shipin_url.split('vid=')[1]
 
-        try:
-            # print('----------新> ')
+        if 'wxv' in vid:  # 下载
+            iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(vid)
+            ret = requests.get(iframe_url)
             src_url = ret.json().get('url_info')[0].get('url')
-            video_path = account.randon_str() + '.mp4'   # 生成七牛KEY
-            # print('src_url---------------> ', src_url, video_path)
+            video_path = account.randon_str() + '.mp4'  # 生成七牛KEY
             qiniu_celery_upload_video.delay(url=src_url, video_path=video_path)  # 异步下载视频
-            src_url = 'http://tianyan.zhugeyingxiao.com/' + video_path
+            iframe_tag_new = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
+                                   <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
+                               </div>""".format('http://tianyan.zhugeyingxiao.com/' + video_path, data_cover_url)
 
-            video_tag = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
-                            <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
-                        </div>""".format(
-                src_url,
-                data_cover_url,
-            )
-
-            body = str(body).replace(str(iframe_tag), video_tag)
-        except Exception as e:
-            # print('------------旧>', e)
-            vid_num = ''
+        else:
             if '&' in shipin_url and 'vid=' in shipin_url:
-                vid_num = shipin_url.split('vid=')[1]
                 _url = shipin_url.split('?')[0]
-                shipin_url = _url + '?vid=' + vid_num
-
-            data_src = shipin_url
-            if vid_num:
-                data_src = 'https://v.qq.com/txp/iframe/player.html?origin=https%3A%2F%2Fmp.weixin.qq.com&vid={}&autoplay=false&full=true&show1080p=false&isDebugIframe=false'.format(
-                    vid_num)
-            iframe_tag.attrs['data-src'] = data_src
+                shipin_url = _url + '?vid=' + vid
+            if vid:
+                shipin_url = 'https://v.qq.com/txp/iframe/player.html?origin=https%3A%2F%2Fmp.weixin.qq.com&vid={}&autoplay=false&full=true&show1080p=false&isDebugIframe=false'.format(vid)
+            iframe_tag.attrs['data-src'] = shipin_url
             iframe_tag.attrs['allowfullscreen'] = True
             iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
 
-    try:
-        content = str(style) + str(body)
-    except Exception as e:
-        print('e-------e--------e-------------e---------e------> ', e)
-        content = style + body
-    # print('最后的html---->>', content)
+            iframe_tag_new = str(iframe_tag).replace('></iframe>', ' width="100%" height="300px"></iframe>')
 
-    # dict = {'data-src': 'src' }
-    # for key, value in dict.items():
-    #     content = content.replace(key, value)
-    #     # print(url)
+        body = str(body).replace(str(iframe_tag), iframe_tag_new)
+        body = BeautifulSoup(body, 'html.parser')
+    content = str(style) + str(body)
 
     dict = {'url': '', 'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '', '?wx_fmt=jpeg': '',
             '?wx_fmt=gif': '', }  # wx_fmt=gif
