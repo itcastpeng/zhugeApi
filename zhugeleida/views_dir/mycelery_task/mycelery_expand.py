@@ -487,6 +487,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 )
 
             elif type == 'personal':
+                print('-======================================数据', data)
                 userprofile_objs  = models.zgld_userprofile.objects.filter(id=user_id)
                 data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
                 data_tongji_dict['acount_data'] = ret_data
