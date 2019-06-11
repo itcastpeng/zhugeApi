@@ -693,6 +693,7 @@ def home_page_oper(request, oper_type):
 
             # boos雷达中的数据
             if company_objs and Type != 'personal':
+                print('-----------boos雷达中的数据--------------boos雷达中的数据')
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
                 ret_data = data_tongji_dict.get('acount_data')
@@ -707,6 +708,7 @@ def home_page_oper(request, oper_type):
 
             # 雷达-我-我的报表-个人数据
             elif Type == 'personal':
+                print('# 雷达-我-我的报表-个人数据------------------------# 雷达-我-我的报表-个人数据')
                 userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
                 data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
                 ret_data  = data_tongji_dict.get('acount_data')
@@ -764,7 +766,7 @@ def home_page_oper(request, oper_type):
             # now_time = datetime.now().strftime("%Y-%m-%d")
             # q5.add(Q(**{'create_date__gte': now_time}), Q.AND)
             # ret_data['today_data'] = deal_search_time(data, q5)
-
+            print('ret_data---------------------> ', ret_data)
             #  查询成功 返回200 状态码
             response.code = 200
             response.msg = '查询成功'
