@@ -352,7 +352,7 @@ def batchget_article_material(request):
 
 ## 定时器 ~ 数据【总览】统计 和 数据【客户统计】数据
 @csrf_exempt
-def crontab_batchget_article_material(request):
+def data_overview_statistics(request):
 
     if request.method == 'POST':
 
