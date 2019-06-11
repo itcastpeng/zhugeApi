@@ -353,7 +353,7 @@ def batchget_article_material(request):
 ## 定时器 ~ 数据【总览】统计 和 数据【客户统计】数据
 @csrf_exempt
 def data_overview_statistics(request):
-
+    response = ResponseObj()
     if request.method == 'POST':
 
         company_objs = models.zgld_company.objects.all()
@@ -421,6 +421,8 @@ def data_overview_statistics(request):
             s.keep_alive = False  # 关闭多余连接
             s.get(url_7,params=get_data_7)
 
+
+    return JsonResponse(response.__dict__)
 
 
 
