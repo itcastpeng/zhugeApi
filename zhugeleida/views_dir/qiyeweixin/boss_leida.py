@@ -16,6 +16,7 @@ from django.db.models import Q, Sum
 def deal_search_time(data, q):
     user_id = data.get('user_id')
     type = data.get('type')
+    company_id = data.get('company_id')
 
     start_time = data.get('start_time')
     stop_time = data.get('stop_time')
@@ -33,8 +34,9 @@ def deal_search_time(data, q):
         q2.add(Q(**{'user_id': user_id}), Q.AND)
         q3.add(Q(**{'userprofile_id': user_id}), Q.AND)
 
-    user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
-    company_id = user_obj.company_id
+    if not company_id:
+        user_obj = models.zgld_userprofile.objects.select_related('company').get(id=user_id)
+        company_id = user_obj.company_id
 
     if type == 'personal':
         customer_num = models.zgld_user_customer_belonger.objects.filter(user__company_id=company_id).filter(q).filter(q2).count()  # 已获取客户数
