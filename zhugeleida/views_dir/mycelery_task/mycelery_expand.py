@@ -607,10 +607,17 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 total = sum([view_mingpian, view_product_num, view_website_num])
 
                 # print('--- total ----->', total)
+                view_mingpian = 0
+                view_product_num = 0
+                view_website_num = 0
+                if int(total) == 0:
+                    view_mingpian = view_mingpian / total * 100
+                    view_product_num =  view_product_num / total * 100
+                    view_website_num = view_website_num / total * 100
                 _ret_dict = {
-                    'view_mingpian': '{:.2f}'.format(view_mingpian / total * 100),
-                    'view_product_num': '{:.2f}'.format(view_product_num / total * 100),
-                    'view_website_num': '{:.2f}'.format(view_website_num / total * 100)
+                    'view_mingpian': '{:.2f}'.format(view_mingpian),
+                    'view_product_num': '{:.2f}'.format(view_product_num),
+                    'view_website_num': '{:.2f}'.format(view_website_num)
                 }
 
                 # ret_list.append(_ret_dict)

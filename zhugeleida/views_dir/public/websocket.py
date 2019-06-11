@@ -1412,7 +1412,7 @@ def query_contact_list(data):
             continue
 
         customer_id_list.append(customer_id)
-        print('customer_id--------> ', obj.customer_id)
+        # print('customer_id--------> ', obj.customer_id)
         if not customer_id:  # 没有customer_id
             continue
 
