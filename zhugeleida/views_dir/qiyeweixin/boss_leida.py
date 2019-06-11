@@ -693,10 +693,9 @@ def home_page_oper(request, oper_type):
 
             # boos雷达中的数据
             if company_objs and Type != 'personal':
-                print('------------------------@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@>')
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
 
-                ret_data = data_tongji_dict.get('line_info')
+                ret_data = data_tongji_dict.get('acount_data')
                 date_time =  data_tongji_dict.get('date_time')
                 if today_datetime == date_time:
                     response.code = 200
@@ -708,10 +707,9 @@ def home_page_oper(request, oper_type):
 
             # 雷达-我-我的报表-个人数据
             elif Type == 'personal':
-                print('------------------------@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@**************************>')
                 userprofile_objs = models.zgld_userprofile.objects.filter(id=user_id)
                 data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
-                ret_data  = data_tongji_dict.get('line_info')
+                ret_data  = data_tongji_dict.get('acount_data')
                 date_time =  data_tongji_dict.get('date_time')
 
                 if today_datetime == date_time:
