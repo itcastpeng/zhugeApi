@@ -585,8 +585,6 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 }
 
                 ret_data['index_type_5'] = _ret_dict
-                print('---------------', q1, company_id)
-                print('=================> ', models.zgld_accesslog.objects.filter(user_id=286, action=1).count())
                 view_mingpian = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                                                                      action=1).filter(q1).count()  # 查看名片
 
@@ -599,23 +597,20 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 view_mingpian = int(view_mingpian)
                 view_product_num = int(view_product_num)
                 view_website_num = int(view_website_num)
-                print('view_mingpian======> ', view_mingpian, view_product_num, view_website_num)
                 total = sum([view_mingpian, view_product_num, view_website_num])
 
-                print('--- total ----->', total)
-                view_mingpian = 0
-                view_product_num = 0
-                view_website_num = 0
+                view_mingpian_obj = 0
+                view_product_num_obj = 0
+                view_website_num_obj = 0
                 if int(total) != 0:
-                    view_mingpian = view_mingpian / total * 100
-                    view_product_num =  view_product_num / total * 100
-                    view_website_num = view_website_num / total * 100
+                    view_mingpian_obj = view_mingpian / total * 100
+                    view_product_num_obj =  view_product_num / total * 100
+                    view_website_num_obj = view_website_num / total * 100
                 _ret_dict = {
-                    'view_mingpian': '{:.2f}'.format(view_mingpian), # 保留小数点后两位
-                    'view_product_num': '{:.2f}'.format(view_product_num),
-                    'view_website_num': '{:.2f}'.format(view_website_num)
+                    'view_mingpian': '{:.2f}'.format(view_mingpian_obj), # 保留小数点后两位
+                    'view_product_num': '{:.2f}'.format(view_product_num_obj),
+                    'view_website_num': '{:.2f}'.format(view_website_num_obj)
                 }
-                print('_ret_dict--------------> ', _ret_dict)
                 # ret_list.append(_ret_dict)
                 ret_data['index_type_6'] = _ret_dict
 
