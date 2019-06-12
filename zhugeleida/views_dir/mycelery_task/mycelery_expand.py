@@ -478,7 +478,6 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
 
             company_objs = models.zgld_company.objects.filter(id=company_id)
             if company_objs and  type != 'personal':
-                print('------------####################----------数据统计 -------------》', data)
                 data_tongji_dict = json.loads(company_objs[0].bossleida_data_tongji)
                 data_tongji_dict['acount_data'] = ret_data
                 bossleida_data_tongji = json.dumps(data_tongji_dict)
@@ -487,7 +486,6 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 )
 
             elif type == 'personal':
-                print('-======================================数据', data)
                 userprofile_objs  = models.zgld_userprofile.objects.filter(id=user_id)
                 data_tongji_dict = json.loads(userprofile_objs[0].bossleida_data_tongji)
                 data_tongji_dict['acount_data'] = ret_data
@@ -594,7 +592,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 ret_data['index_type_5'] = _ret_dict
 
                 view_mingpian = models.zgld_accesslog.objects.filter(user__company_id=company_id,
-                                                                     action=1).filter(q1).count()  # 保存电话
+                                                                     action=1).filter(q1).count()  # 查看名片
 
                 view_product_num = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                                                                         action=2).filter(q1).count()  # 咨询产品
@@ -607,7 +605,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 view_website_num = int(view_website_num)
                 total = sum([view_mingpian, view_product_num, view_website_num])
 
-                # print('--- total ----->', total)
+                print('--- total ----->', total)
                 view_mingpian = 0
                 view_product_num = 0
                 view_website_num = 0
