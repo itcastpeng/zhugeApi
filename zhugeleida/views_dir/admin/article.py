@@ -1,24 +1,22 @@
+
 from zhugeleida import models
-from publicFunc import Response
-from publicFunc import account
+from publicFunc import Response, account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.db.models import Q, Count, Sum
+from zhugeleida.public.condition_com import conditionCom
+from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
+
 from zhugeleida.forms.admin.article_verify import ArticleAddForm, ArticleSelectForm, ArticleUpdateForm, MyarticleForm, \
     ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, EffectRankingByTableForm, \
     GzhArticleSelectForm, SyncMyarticleForm, QueryarticleInfoForm,LocalArticleAddForm,SyncTemplateArticleForm,SelectForm
-from django.db.models import Max, Avg, F, Q, Min, Count, Sum
-from django.db.models import Q, Count
-from zhugeleida.public.condition_com import conditionCom
-from zhugeleida.public.common import create_qrcode
-from zhugeleida.views_dir.gongzhonghao.user_gongzhonghao_auth import create_gongzhonghao_yulan_auth_url
-from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64
-from zhugeleida.public.common import action_record
-from zhugeleida.public.common import get_customer_gongzhonghao_userinfo
-from bs4 import BeautifulSoup
-from urllib.parse import unquote
-from zhugeapi_celery_project.tasks import qiniu_celery_upload_video
-from zhugeleida.views_dir.public.qiniu_oper import requests_img_download, qiniu_get_token
-import re, os, requests, time, json, base64, datetime
+
+
+from zhugeleida.public.common import conversion_seconds_hms, conversion_base64_customer_username_base64, \
+    action_record, get_customer_gongzhonghao_userinfo, create_qrcode
+
+from zhugeleida.public import pub
+import os, requests, json, base64, datetime
 
 
 def init_data(article_id, user_id, pid=None, level=1):
@@ -515,7 +513,7 @@ def article(request, oper_type):
                 if source_url:  # 有来源URL
                     source_url = source_url.strip()
 
-                    msg_title, msg_desc, cover_url, content, is_video_original_link = deal_gzh_picture_url('only_url', source_url)
+                    msg_title, msg_desc, cover_url, content, is_video_original_link = pub.deal_gzh_picture_url('only_url', source_url)
 
                     dict_data = {
                         'user_id': user_id,
@@ -583,7 +581,7 @@ def article(request, oper_type):
                                 cover_picture = deal_gzh_picUrl_to_local(cover_picture)
 
                             if url:
-                                content = deal_gzh_picture_url('', url)
+                                content = pub.deal_gzh_picture_url('', url)
 
                             dict_data = {
                                 'user_id': user_id,
@@ -1704,203 +1702,6 @@ def article_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def deal_gzh_picture_url(leixing, article_url):
-    # print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_-----------------------> ', datetime.datetime.today())
-    ''' 
-    ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
-    http://mmbiz.qpic.cn/mmbiz_jpg/icg7bNmmiaWLhUcPY7I4r6wvBFRLSTJ6L7lBRILWoKKVuvdHe4BmVxhiclQnYo2F1TDU7CcibXawl9E2n1MOicTkt6w/0?wx_fmt=jpeg
-
-    '''
-    # content = 'data-src="111?wx_fmt=png data-src="222?wx_fmt=jpg'
-    # phone = "2004-959-559#这是一个电话号码"
-    # # 删除注释
-    # num = re.sub(r'#.*$', "", phone)
-    # print("电话号码 : ", num)
-
-    # 移除非数字的内容
-    # url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
-    print('---------------请求微信链接------------> ', datetime.datetime.today())
-    ret = requests.get(article_url)
-    print('---------------结束请求微信链接------------> ', datetime.datetime.today())
-
-    ret.encoding = 'utf8'
-
-    soup = BeautifulSoup(ret.text, 'lxml')
-
-    msg_title = ''
-    msg_desc = ''
-    cover_url = ''
-    s = requests.session()
-    s.keep_alive = False  # 关闭多余连接
-    is_video_original_link = None  # 是否有视频 如果有则返回原文链接
-    if leixing == 'only_url':
-        ### 匹配出标题 描述 和 封面URL
-        results_url_list_1 = re.compile(r'var msg_title = (.*);').findall(ret.text)   # 标题
-        results_url_list_2 = re.compile(r'var msg_desc = (.*);').findall(ret.text)    # 封面摘要
-        results_url_list_3 = re.compile(r'var msg_cdn_url = (.*);').findall(ret.text) # 封面图片
-
-        msg_title = results_url_list_1[0].replace('"', '')
-        msg_desc = results_url_list_2[0].replace('"', '')
-        cover_url = results_url_list_3[0].replace('"', '')
-
-        ## 把封面图片下载到本地
-        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-        print('------------请求1=================> ', datetime.datetime.today())
-        html = s.get(cover_url)
-        print('------------请求1=================> ', datetime.datetime.today())
-        if 'wx_fmt=gif' in cover_url:
-            filename = "/gzh_article_%s.gif" % (now_time)
-        else:
-            filename = "/gzh_article_%s.jpg" % (now_time)
-
-        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
-        with open(file_dir, 'wb') as file:
-            file.write(html.content)
-        # print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
-        #######
-        cover_url = file_dir # 封面图片
-
-    style_tags = soup.find_all('style')
-
-    style = ""
-    for style_tag in style_tags:
-        # print('style_tag -->', style_tag)
-        style += str(style_tag)
-
-    body = soup.find('div', id="js_content")
-
-    body.attrs['style'] = "padding: 20px 16px 12px;"
-
-    img_tags = soup.find_all('img')
-    for img_tag in img_tags:
-        if img_tag.attrs.get('style'):
-            style_list = img_tag.attrs.get('style').split(';')
-            style_tag = ''
-            for i in style_list:
-                if i and i.split(':')[0] == 'width':
-                    style_tag = i.split(':')[1]
-
-            img_tag.attrs['style'] = style_tag
-
-        data_src = img_tag.attrs.get('data-src')
-        if data_src:
-
-            #######
-            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-            html = s.get(data_src)
-
-            if 'wx_fmt=gif' in data_src:
-                filename = "/gzh_article_%s.gif" % (now_time)
-            else:
-
-                filename = "/gzh_article_%s.jpg" % (now_time)
-
-            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
-            with open(file_dir, 'wb') as file:
-                file.write(html.content)
-            # print('-----公众号 生成 本地文章URL file_dir ---->>', file_dir)
-            #######
-
-            img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
-            # print('data_src ----->', data_src)
-    flag = False
-    ### 处理视频的URL
-    iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
-    for iframe_tag in iframe:
-        data_src = iframe_tag.get('data-cover')
-        shipin_url = iframe_tag.get('data-src')
-        if data_src:
-            data_src = unquote(data_src, 'utf-8')
-
-            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-            html = s.get(data_src)
-            if 'wx_fmt=gif' in data_src:
-                filename = "/gzh_article_img_%s.gif" % (now_time)
-            else:
-
-                filename = "/gzh_article_img_%s.jpg" % (now_time)
-
-            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
-            with open(file_dir, 'wb') as file:
-                file.write(html.content)
-            data_src = 'http://api.zhugeyingxiao.com/' + file_dir # 封面地址
-
-
-        vid = shipin_url.split('vid=')[1]
-
-        if 'wxv' in vid:  # 下载
-            flag = True
-            iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(vid)
-            ret = requests.get(iframe_url)
-            src_url = ret.json().get('url_info')[0].get('url')
-
-            iframe_tag_new = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
-                                   <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
-                               </div>""".format(src_url, data_src)
-
-        else:
-            if '&' in shipin_url and 'vid=' in shipin_url:
-                _url = shipin_url.split('?')[0]
-                shipin_url = _url + '?vid=' + vid
-            if vid:
-                shipin_url = 'https://v.qq.com/txp/iframe/player.html?origin=https%3A%2F%2Fmp.weixin.qq.com&vid={}&autoplay=false&full=true&show1080p=false&isDebugIframe=false'.format(vid)
-            iframe_tag.attrs['data-src'] = shipin_url
-            iframe_tag.attrs['allowfullscreen'] = True
-            iframe_tag.attrs['data-cover'] = data_src
-
-            iframe_tag_new = str(iframe_tag).replace('></iframe>', ' width="100%" height="300px"></iframe>')
-
-        body = str(body).replace(str(iframe_tag), iframe_tag_new)
-        body = BeautifulSoup(body, 'html.parser')
-    content = str(style) + str(body)
-
-    dict = {'url': '', 'data-src': 'src', '?wx_fmt=jpg': '', '?wx_fmt=png': '', '?wx_fmt=jpeg': '',
-            '?wx_fmt=gif': '', }  # wx_fmt=gif
-    for key, value in dict.items():
-
-        if key == 'url':
-
-            pattern1 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+\?\w+=\w+', re.I)  # 通过 re.compile 获得一个正则表达式对象
-            pattern2 = re.compile(r'https:\/\/mmbiz.qpic.cn\/\w+\/\w+\/\w+', re.I)
-            results_url_list_1 = pattern1.findall(content)
-            results_url_list_2 = pattern2.findall(content)
-            # print(' 匹配的微信图片链接 results_url_list_1 ---->', json.dumps(results_url_list_1))
-            # print(' 匹配的微信图片链接 results_url_list_2 ---->', json.dumps(results_url_list_2))
-            results_url_list_1.extend(results_url_list_2)
-            # print('合并的 results_url_list ----->>',results_url_list_1)
-
-            for pattern_url in results_url_list_1:
-                # print('匹配的url--------<<', pattern_url)
-                now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-                ## 把图片下载到本地
-                html = s.get(pattern_url)
-                if 'wx_fmt=gif' in pattern_url:
-                    filename = "/gzh_article_%s.gif" % (now_time)
-                else:
-                    filename = "/gzh_article_%s.jpg" % (now_time)
-
-                file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
-                with open(file_dir, 'wb') as file:
-                    file.write(html.content)
-                # print('-----【正则处理个别】公众号 生成本地文章URL file_dir ---->>', file_dir)
-                #######
-                sub_url = 'http://statics.api.zhugeyingxiao.com/' + file_dir
-                content = content.replace(pattern_url, sub_url)
-
-        else:
-            content = content.replace(key, value)
-        # print(url)
-
-    if flag:
-        is_video_original_link = article_url
-
-    if leixing == 'only_url':
-
-        return msg_title, msg_desc, cover_url, content, is_video_original_link
-
-    else:
-
-        return content
 
 
 def deal_gzh_picUrl_to_local(url):

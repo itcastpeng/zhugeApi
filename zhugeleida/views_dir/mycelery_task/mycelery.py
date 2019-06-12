@@ -1,27 +1,26 @@
-from django.http import HttpResponse
+from zhugeapi_celery_project.tasks import create_user_or_customer_small_program_poster, \
+    create_user_or_customer_small_program_poster, monitor_send_gzh_template_msg, \
+    user_send_gongzhonghao_template_msg as user_template_gongzhonghao_msg
+
+from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
+    create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
+
+from django.http import HttpResponse, JsonResponse
 from zhugeleida import models
 from zhugeleida.views_dir.conf import Conf
 from django.views.decorators.csrf import csrf_exempt
-from publicFunc import Response
-from publicFunc.Response import ResponseObj
-from django.http import JsonResponse
 from zhugeleida.views_dir.admin.dai_xcx import create_authorizer_access_token
-from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
-    create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
 from django.conf import settings
 from selenium import webdriver
 from PIL import Image
-from zhugeapi_celery_project.tasks import create_user_or_customer_small_program_poster, \
-    create_user_or_customer_small_program_poster, monitor_send_gzh_template_msg, user_send_gongzhonghao_template_msg as user_template_gongzhonghao_msg
 from zhugeleida.public import common
-from django.db.models import Sum
+from django.db.models import Sum, Q, F
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
-from django.db.models import Q, F
-from zhugeleida.public.common import create_qiyeweixin_access_token
 from publicFunc.base64 import b64decode
-from publicFunc import deal_time
+from publicFunc import deal_time, Response
 from publicFunc.data_statistics import statistical_objs
 from publicFunc.time_screen import time_screen
+from zhugeleida.public import pub
 import datetime, json, os, sys, requests, random, redis, time, base64
 
 def action_record(data):
@@ -167,7 +166,7 @@ def action_record(data):
 @csrf_exempt
 def user_send_action_log(request):
     print('user_send_action_log-------------------------------小程序访问动作日志的发送到企业微信--', request.GET)
-    response = ResponseObj()
+    response = Response.ResponseObj()
     customer_id = request.GET.get('user_id')  # 客户 id
     user_id = request.GET.get('uid')
     article_id = request.GET.get('article_id')  # 客户 id
@@ -313,7 +312,7 @@ def user_send_action_log(request):
 # 企业用户生成小程序二维码 和 小程序客户生成和自己的企业用户对应的小程序二维码。
 @csrf_exempt
 def create_user_or_customer_qr_code(request):
-    response = ResponseObj()
+    response = Response.ResponseObj()
     print('---- 【生成小程序二维码 celery】 request.GET | data 数据 -->', request.GET, '|', request.GET.get('data'))
 
     data = request.GET.get('data')
@@ -464,7 +463,7 @@ def create_user_or_customer_qr_code(request):
 
 # 获取企业用户信息
 def qiyeweixin_user_get_userinfo(request):
-    response = ResponseObj()
+    response = Response.ResponseObj()
     company_id = request.GET.get('company_id')
     userid = request.GET.get('userid')
 
@@ -482,7 +481,7 @@ def qiyeweixin_user_get_userinfo(request):
                 'corp_id': corp_id,  # 授权方企业corpid
                 'permanent_code': permanent_code,
             }
-            access_token_ret = create_qiyeweixin_access_token(_data)
+            access_token_ret = common.create_qiyeweixin_access_token(_data)
             access_token = access_token_ret.data.get('access_token')
 
             get_code_data = {
@@ -589,7 +588,7 @@ def crontab_create_user_to_customer_qrCode_poster(request):
 # 生成小程序的海报
 @csrf_exempt
 def create_user_or_customer_poster(request):
-    response = ResponseObj()
+    response = Response.ResponseObj()
     # customer_id = request.GET.get('customer_id')
     # user_id = request.GET.get('user_id')
 
@@ -630,7 +629,7 @@ def create_user_or_customer_poster(request):
 
 
 def create_poster_process(data):
-    response = ResponseObj()
+    response = Response.ResponseObj()
 
     user_id = data.get('user_id')
     customer_id = data.get('customer_id', '')
@@ -762,7 +761,7 @@ def create_poster_process(data):
 # 小程序生成token，并然后发送模板消息
 @csrf_exempt
 def user_send_template_msg(request):
-    response = ResponseObj()
+    response = Response.ResponseObj()
     print('--------------------------------小程序生成token，并然后发送模板消息-------------------------------------')
     print('request -->', request.GET)
     data = json.loads(request.GET.get('data'))
@@ -913,7 +912,7 @@ def user_send_template_msg(request):
 ## 发送公众号模板消息
 @csrf_exempt
 def user_send_gongzhonghao_template_msg(request):
-    response = ResponseObj()
+    response = Response.ResponseObj()
 
     print('---发送公众号模板消息request.GET -->', request.GET)
 
@@ -1361,7 +1360,7 @@ def user_send_gongzhonghao_template_msg(request):
 @csrf_exempt
 def get_latest_audit_status_and_release_code(request):
     from zhugeleida.views_dir.admin.dai_xcx import batch_get_latest_audit_status
-    response = ResponseObj()
+    response = Response.ResponseObj()
 
     if request.method == "GET":
         objs = models.zgld_xiapchengxu_upload_audit.objects.filter(audit_result=2, auditid__isnull=False).order_by(
@@ -2892,8 +2891,17 @@ def celery_statistical_content(request, oper_type):
 
 
 
+# 更新文章
+@csrf_exempt
+def celery_regularly_update_articles(request):
+    objs = models.zgld_article.objects.filter(original_link__isnull=False)
+    for obj in objs:
+        original_link = obj.original_link
+        content = pub.deal_gzh_picture_url('', original_link)
+        obj.content = content
+        obj.save()
 
-
+    return HttpResponse('')
 
 
 

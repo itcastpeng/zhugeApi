@@ -302,6 +302,12 @@ def data_overview_statistics():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/data_overview_statistics'
     requests.post(url)
 
+# 更新文章
+@app.task
+def celery_regularly_update_articles():
+    url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/celery_regularly_update_articles'
+    print('------------------------------更新文章-----------------------------> ', datetime.datetime.today())
+    requests.get(url)
 
 
 

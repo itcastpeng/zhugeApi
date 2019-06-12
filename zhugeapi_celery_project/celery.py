@@ -76,6 +76,16 @@ app.conf.beat_schedule = {
         'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
         'schedule': crontab("*/60", '*', '*', '*', '*'),
     },
+
+    # 更新文章 （十分钟一次）
+    'celery_regularly_update_articles': {
+        'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
+        'schedule': timedelta(seconds=10),
+    },
+
+
+
+
 }
 
 # Optional configuration, see the application user guide.
