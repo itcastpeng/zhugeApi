@@ -508,7 +508,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
             forms_obj = LineInfoForm(request.POST)
 
             if forms_obj.is_valid():
-
+                print('-----------------------------数据统计-------------------------------')
 
                 data = request.POST.copy()
 
@@ -521,7 +521,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 data['company_id'] = company_id
                 data['user_id'] = user_id
                 data['type'] = type
-
+                print('-======================================================================')
                 ret_data = {}
                 for index in ['index_type_1', 'index_type_2', 'index_type_3', 'index_type_4']:
                     ret_dict = {}
@@ -561,7 +561,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                             ret_dict['nearly_thirty_days'] = ret_list
 
                     ret_data[index] = ret_dict
-
+                print('------------------------------------------------------')
                 user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q2).values(
                     'company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
                 praise_num = 0
