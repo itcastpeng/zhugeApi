@@ -585,7 +585,8 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 }
 
                 ret_data['index_type_5'] = _ret_dict
-                print('---------------', q1)
+                print('---------------', q1, company_id)
+                print('=================> ', models.zgld_accesslog.objects.filter(user_id=286, action=1).count())
                 view_mingpian = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                                                                      action=1).filter(q1).count()  # 查看名片
 
