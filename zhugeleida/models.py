@@ -1005,6 +1005,7 @@ class zgld_article(models.Model):
 
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
+    original_link = models.TextField(verbose_name="原文链接", null=True)
 
     class Meta:
         verbose_name_plural = "文章表"

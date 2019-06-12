@@ -515,7 +515,7 @@ def article(request, oper_type):
                 if source_url:  # 有来源URL
                     source_url = source_url.strip()
 
-                    msg_title, msg_desc, cover_url, content = deal_gzh_picture_url('only_url', source_url)
+                    msg_title, msg_desc, cover_url, content, is_video_original_link = deal_gzh_picture_url('only_url', source_url)
 
                     dict_data = {
                         'user_id': user_id,
@@ -528,7 +528,8 @@ def article(request, oper_type):
                         'content': content,
                         'source': 2,  # (2,'转载')
                         'status': 1,  # 默认已发状态
-                        'insert_ads': '{"mingpian":true,"type":"mingpian"}'
+                        'insert_ads': '{"mingpian":true,"type":"mingpian"}',
+                        'original_link': is_video_original_link
                     }
                     article_objs = models.zgld_article.objects.filter(
                         title=msg_title,
@@ -1702,7 +1703,7 @@ def article_oper(request, oper_type, o_id):
     return JsonResponse(response.__dict__)
 
 
-def deal_gzh_picture_url(leixing, url):
+def deal_gzh_picture_url(leixing, article_url):
     # print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_-----------------------> ', datetime.datetime.today())
     ''' 
     ata-src 替换为src，将微信尾部?wx_fmt=jpeg去除
@@ -1718,7 +1719,7 @@ def deal_gzh_picture_url(leixing, url):
     # 移除非数字的内容
     # url = 'https://mp.weixin.qq.com/s?__biz=MzA5NzQxODgzNw==&mid=502884331&idx=1&sn=863da48ef5bd01f5ba8ac30d45fea912&chksm=08acecd13fdb65c72e407f973c4db69a988a93a169234d2c4a95c0ca6c97054adff54c48a24f#rd'
     print('---------------请求微信链接------------> ', datetime.datetime.today())
-    ret = requests.get(url)
+    ret = requests.get(article_url)
     print('---------------结束请求微信链接------------> ', datetime.datetime.today())
 
     ret.encoding = 'utf8'
@@ -1730,7 +1731,7 @@ def deal_gzh_picture_url(leixing, url):
     cover_url = ''
     s = requests.session()
     s.keep_alive = False  # 关闭多余连接
-
+    is_video_original_link = None  # 是否有视频 如果有则返回原文链接
     if leixing == 'only_url':
         ### 匹配出标题 描述 和 封面URL
         results_url_list_1 = re.compile(r'var msg_title = (.*);').findall(ret.text)   # 标题
@@ -1801,7 +1802,7 @@ def deal_gzh_picture_url(leixing, url):
 
             img_tag.attrs['data-src'] = 'http://statics.api.zhugeyingxiao.com/' + file_dir
             # print('data_src ----->', data_src)
-    # print('-=----------------------------> ', datetime.datetime.today())
+    flag = False
     ### 处理视频的URL
     iframe = body.find_all('iframe', attrs={'class': 'video_iframe'})
     for iframe_tag in iframe:
@@ -1810,18 +1811,19 @@ def deal_gzh_picture_url(leixing, url):
         if data_src:
             data_src = unquote(data_src, 'utf-8')
 
-        now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
-        html = s.get(data_src)
-        if 'wx_fmt=gif' in data_src:
-            filename = "/gzh_article_img_%s.gif" % (now_time)
-        else:
+            now_time = datetime.datetime.now().strftime('%Y%m%d_%H%M%S%f')
+            html = s.get(data_src)
+            if 'wx_fmt=gif' in data_src:
+                filename = "/gzh_article_img_%s.gif" % (now_time)
+            else:
 
-            filename = "/gzh_article_img_%s.jpg" % (now_time)
+                filename = "/gzh_article_img_%s.jpg" % (now_time)
 
-        file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
-        with open(file_dir, 'wb') as file:
-            file.write(html.content)
-        data_cover_url = 'http://api.zhugeyingxiao.com/' + file_dir # 封面地址
+            file_dir = os.path.join('statics', 'zhugeleida', 'imgs', 'admin', 'article') + filename
+            with open(file_dir, 'wb') as file:
+                file.write(html.content)
+            data_src = 'http://api.zhugeyingxiao.com/' + file_dir # 封面地址
+
 
         vid = shipin_url.split('vid=')[1]
 
@@ -1829,11 +1831,10 @@ def deal_gzh_picture_url(leixing, url):
             iframe_url = 'https://mp.weixin.qq.com/mp/videoplayer?vid={}&action=get_mp_video_play_url'.format(vid)
             ret = requests.get(iframe_url)
             src_url = ret.json().get('url_info')[0].get('url')
-            video_path = account.randon_str() + '.mp4'  # 生成七牛KEY
-            qiniu_celery_upload_video.delay(url=src_url, video_path=video_path)  # 异步下载视频
+
             iframe_tag_new = """<div style="width: 100%; background: #000; position:relative; height: 0; padding-bottom:75%;">
                                    <video style="width: 100%; height: 100%; position:absolute;left:0;top:0;" id="videoBox" src="{}" poster="{}" controls="controls"></video>
-                               </div>""".format('http://tianyan.zhugeyingxiao.com/' + video_path, data_cover_url)
+                               </div>""".format(src_url, data_src)
 
         else:
             if '&' in shipin_url and 'vid=' in shipin_url:
@@ -1843,7 +1844,7 @@ def deal_gzh_picture_url(leixing, url):
                 shipin_url = 'https://v.qq.com/txp/iframe/player.html?origin=https%3A%2F%2Fmp.weixin.qq.com&vid={}&autoplay=false&full=true&show1080p=false&isDebugIframe=false'.format(vid)
             iframe_tag.attrs['data-src'] = shipin_url
             iframe_tag.attrs['allowfullscreen'] = True
-            iframe_tag.attrs['data-cover'] = data_cover_url  # 'http://statics.api.zhugeyingxiao.com/' + data_cover_url
+            iframe_tag.attrs['data-cover'] = data_src
 
             iframe_tag_new = str(iframe_tag).replace('></iframe>', ' width="100%" height="300px"></iframe>')
 
@@ -1887,11 +1888,12 @@ def deal_gzh_picture_url(leixing, url):
         else:
             content = content.replace(key, value)
         # print(url)
-    # print('----- 此图片来自微信公众平台 替换为 ----->',content)
-    # print('---------------------@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_结束-----------------------> ',datetime.datetime.today())
+
+    if flag:
+        is_video_original_link = article_url
     if leixing == 'only_url':
 
-        return msg_title, msg_desc, cover_url, content
+        return msg_title, msg_desc, cover_url, content, is_video_original_link
 
     else:
 

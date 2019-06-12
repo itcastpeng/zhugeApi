@@ -8,7 +8,6 @@ from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
 
 from zhugeleida.public.common import get_customer_gongzhonghao_userinfo, create_qrcode
 import json, datetime, redis, base64, requests, time
-from zhugeleida.views_dir.admin.article import deal_gzh_picture_url,deal_gzh_picUrl_to_local
 from django.utils.timezone import now, timedelta
 from django.db.models import Q, Sum
 from zhugeleida.forms.boosleida.boos_leida_verify import QueryHaveCustomerDetailForm, \
