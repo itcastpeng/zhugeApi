@@ -611,11 +611,11 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                     view_product_num =  view_product_num / total * 100
                     view_website_num = view_website_num / total * 100
                 _ret_dict = {
-                    'view_mingpian': '{:.2f}'.format(view_mingpian),
+                    'view_mingpian': '{:.2f}'.format(view_mingpian), # 保留小数点后两位
                     'view_product_num': '{:.2f}'.format(view_product_num),
                     'view_website_num': '{:.2f}'.format(view_website_num)
                 }
-
+                print('_ret_dict--------------> ', _ret_dict)
                 # ret_list.append(_ret_dict)
                 ret_data['index_type_6'] = _ret_dict
 
