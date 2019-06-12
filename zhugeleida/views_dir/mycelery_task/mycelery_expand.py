@@ -428,6 +428,7 @@ def data_overview_statistics(request):
 
 
 ##  数据【总览】统计 和 数据【客户统计】数据
+@csrf_exempt
 def bossLeida_acount_data_and_line_info(request,oper_type):
 
     response = ResponseObj()
