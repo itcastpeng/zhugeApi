@@ -531,6 +531,7 @@ def article(request, oper_type):
                         'insert_ads': '{"mingpian":true,"type":"mingpian"}',
                         'original_link': is_video_original_link
                     }
+                    print('-********************************************创建文章**> ', dict_data)
                     article_objs = models.zgld_article.objects.filter(
                         title=msg_title,
                         company_id=company_id
@@ -1891,6 +1892,7 @@ def deal_gzh_picture_url(leixing, article_url):
 
     if flag:
         is_video_original_link = article_url
+    print('flag, article_url------------> ', flag, article_url)
     if leixing == 'only_url':
 
         return msg_title, msg_desc, cover_url, content, is_video_original_link
