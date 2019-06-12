@@ -431,7 +431,6 @@ def data_overview_statistics(request):
 @csrf_exempt
 def bossLeida_acount_data_and_line_info(request,oper_type):
     response = ResponseObj()
-    print('=***************************************************************')
     if request.method == 'GET':
         company_id = request.GET.get('company_id')
         user_id = request.GET.get('user_id')
@@ -503,12 +502,8 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
 
         ## 数据【客户统计】数据
         elif oper_type == "line_info":
-            print('-===========================================================>')
             forms_obj = LineInfoForm(request.POST)
-
             if forms_obj.is_valid():
-                print('-----------------------------数据统计-------------------------------')
-
                 data = request.POST.copy()
 
                 q1 = Q()
@@ -520,7 +515,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 data['company_id'] = company_id
                 data['user_id'] = user_id
                 data['type'] = type
-                print('-======================================================================')
+
                 ret_data = {}
                 for index in ['index_type_1', 'index_type_2', 'index_type_3', 'index_type_4']:
                     ret_dict = {}
@@ -560,7 +555,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                             ret_dict['nearly_thirty_days'] = ret_list
 
                     ret_data[index] = ret_dict
-                print('------------------------------------------------------')
+
                 user_pop_queryset = models.zgld_userprofile.objects.filter(company_id=company_id).filter(q2).values(
                     'company_id').annotate(praise_num=Sum('praise'))  # 被点赞总数
                 praise_num = 0
@@ -590,7 +585,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 }
 
                 ret_data['index_type_5'] = _ret_dict
-
+                print('---------------', q1)
                 view_mingpian = models.zgld_accesslog.objects.filter(user__company_id=company_id,
                                                                      action=1).filter(q1).count()  # 查看名片
 
@@ -603,6 +598,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
                 view_mingpian = int(view_mingpian)
                 view_product_num = int(view_product_num)
                 view_website_num = int(view_website_num)
+                print('view_mingpian======> ', view_mingpian, view_product_num, view_website_num)
                 total = sum([view_mingpian, view_product_num, view_website_num])
 
                 print('--- total ----->', total)
@@ -652,7 +648,6 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
 
 
             else:
-                print('-=----------------=验证失败----------------------------')
                 response.code = 303
                 response.msg = "未验证通过"
                 response.data = json.loads(forms_obj.errors.as_json())
