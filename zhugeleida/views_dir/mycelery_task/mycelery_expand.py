@@ -430,9 +430,8 @@ def data_overview_statistics(request):
 ##  数据【总览】统计 和 数据【客户统计】数据
 @csrf_exempt
 def bossLeida_acount_data_and_line_info(request,oper_type):
-
     response = ResponseObj()
-
+    print('=***************************************************************')
     if request.method == 'GET':
         company_id = request.GET.get('company_id')
         user_id = request.GET.get('user_id')
@@ -504,7 +503,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
 
         ## 数据【客户统计】数据
         elif oper_type == "line_info":
-
+            print('-===========================================================>')
             forms_obj = LineInfoForm(request.POST)
 
             if forms_obj.is_valid():
@@ -653,6 +652,7 @@ def bossLeida_acount_data_and_line_info(request,oper_type):
 
 
             else:
+                print('-=----------------=验证失败----------------------------')
                 response.code = 303
                 response.msg = "未验证通过"
                 response.data = json.loads(forms_obj.errors.as_json())
