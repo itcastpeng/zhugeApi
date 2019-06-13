@@ -81,7 +81,7 @@ app.conf.beat_schedule = {
     # 更新文章 （十分钟一次）
     'celery_regularly_update_articles': {
         'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
-        'schedule': crontab(minutes='*/10'),
+        'schedule': crontab(minute='*/10'),
     },
 
 
