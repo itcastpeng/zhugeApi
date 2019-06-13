@@ -313,10 +313,10 @@ def batchget_article_material(request):
                                 source_url = content.get('url')
                                 summary = content.get('digest')
                                 content = content.get('content')
-                                print('-=********************------------> ', title, media_id)
+                                print('-=********************------------> ', title)
                                 # if title not in title_list or media_id not in media_id_list: # 如果不存在创建
                                 if title not in title_list : # 如果不存在创建
-
+                                    print('=-================进入')
                                     data = {
                                         'company_id' : company_id,
                                         'media_id': media_id,
