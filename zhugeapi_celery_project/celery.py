@@ -74,7 +74,8 @@ app.conf.beat_schedule = {
     # boos雷达 刷新数据  60分钟一次
     'data_overview_statistics': {
         'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
-        'schedule': crontab("*/60", '*', '*', '*', '*'),
+        'schedule': timedelta(hours=3),
+        # 'schedule': crontab("*/60", '*', '*', '*', '*'),
     },
 
     # 更新文章 （十分钟一次）
