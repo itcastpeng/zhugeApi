@@ -300,6 +300,7 @@ def celery_data_statistics():
 @app.task
 def data_overview_statistics():
     url = 'http://api.zhugeyingxiao.com/zhugeleida/mycelery/data_overview_statistics'
+    print('-----------------------------------------------boos雷达统计----------------------------> ', datetime.datetime.today())
     requests.post(url)
 
 # 更新文章
