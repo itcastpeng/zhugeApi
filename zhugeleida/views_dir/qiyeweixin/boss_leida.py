@@ -13,7 +13,8 @@ import base64, json
 from django.db.models import Q, Sum
 
 
-def deal_search_time(data, q):
+def deal_search_time(data):
+    q = Q()
     user_id = data.get('user_id')
     type = data.get('type')
     company_id = data.get('company_id')

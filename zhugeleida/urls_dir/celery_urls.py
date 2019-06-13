@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^batchget_article_material$', mycelery_expand.batchget_article_material),                     # 定时器获取微信公众号文章到文章模板库
     url(r'^record_money_process$', mycelery.record_money_process),                                      # 资金流水记录
     url(r'^data_overview_statistics$', mycelery_expand.data_overview_statistics),                       # 更新boos雷达数据
-    url(r'^bossLeida_acount_data_and_line_info/(?P<oper_type>\w+)$', mycelery_expand.bossLeida_acount_data_and_line_info),  # 数据【总览】统计 和 数据【客户统计】数据
+    # url(r'^bossLeida_acount_data_and_line_info/(?P<oper_type>\w+)$', mycelery_expand.bossLeida_acount_data_and_line_info),  # 数据【总览】统计 和 数据【客户统计】数据
     url(r'^celery_statistical_content/(?P<oper_type>\w+)$', mycelery.celery_statistical_content),       # celery数据统计 (数据缓存)
     url(r'^celery_regularly_update_articles$', mycelery.celery_regularly_update_articles),              # 更新文章
 

@@ -64,24 +64,23 @@ app.conf.beat_schedule = {
         # 'schedule': crontab("*/10", '*', '*', '*', '*'),
     },
 
-    # 缓存数据 (redis缓存 后台 数据统计) 10分钟执行一次
+    # 缓存数据 (redis缓存 后台 数据统计) 30分钟执行一次
     'celery_data_statistics': {
         'task': 'zhugeapi_celery_project.tasks.celery_data_statistics',
         'schedule': crontab("*/30", '*', '*', '*', '*'),
     },
 
 
-    # boos雷达 刷新数据  3小时一次
-    # 'data_overview_statistics': {
-    #     'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
-    #     'schedule': crontab(days='*/1'),
-        # 'schedule': crontab("*/60", '*', '*', '*', '*'),
-    # },
+    # boos雷达 刷新数据  一天执行一次
+    'data_overview_statistics': {
+        'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
+        'schedule': crontab("0", '1', '*', '*', '*'),
+    },
 
     # 更新文章 （十分钟一次）
     'celery_regularly_update_articles': {
         'task': 'zhugeapi_celery_project.tasks.data_overview_statistics',
-        'schedule': crontab(minute='*/10'),
+        'schedule': crontab("*/10", '*', '*', '*', '*'),
     },
 
 
