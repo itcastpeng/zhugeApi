@@ -289,11 +289,11 @@ def celery_data_statistics():
     requests.get(url)
 
 # 异步下载视频
-@app.task
-def qiniu_celery_upload_video(url, video_path):
-    url = requests_video_download(url)  # 下载到本地
-    print('-----------------------------celery--------------------下载视频=-----------> ', datetime.datetime.today(), url)
-    qiniu_get_token(url, video_path)
+# @app.task
+# def qiniu_celery_upload_video(url, video_path):
+#     url = requests_video_download(url)  # 下载到本地
+#     print('-----------------------------celery--------------------下载视频=-----------> ', datetime.datetime.today(), url)
+#     qiniu_get_token(url, video_path)
 
 
 # boos 雷达数据统计
