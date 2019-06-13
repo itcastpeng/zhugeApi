@@ -404,12 +404,12 @@ def data_overview_statistics(request):
             'company_id': company_id
         }
         bossLeida_acount_data_and_line_info('expect_chengjiaolv_customer_num', get_data_7)
-        print('******************//////////////////////boos雷达统计完成///////////////****************************************')
+        print('******************//////////////////////boos雷达统计完成///////////////****************************************', company_id)
     return JsonResponse(response.__dict__)
 
 
 
-
+from zhugeapi_celery_project.tasks import data_overview_statistics
 ##  数据【总览】统计 和 数据【客户统计】数据
 @csrf_exempt
 def bossLeida_acount_data_and_line_info(oper_type, data):
