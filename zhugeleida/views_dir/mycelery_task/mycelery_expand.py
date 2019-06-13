@@ -335,7 +335,7 @@ def batchget_article_material(request):
                                     else:
                                         models.zgld_template_article.objects.create(**data)
 
-                                    media_id_list.append(media_id)
+                                    # media_id_list.append(media_id)
                                     title_list.append(title)
 
                                 else: # 已存在
