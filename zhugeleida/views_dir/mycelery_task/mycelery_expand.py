@@ -299,7 +299,7 @@ def batchget_article_material(request):
                                 'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
 
                         item_list = _response.data.get('item')  # 获取的素材文章列表
-                        print('item_list----------------------------------> ', item_list)
+                        # print('item_list----------------------------------> ', item_list)
                         print('title_list-title_list-title_list-title_list-title_list-title_list--------> ', title_list)
                         print('title_list-title_list-title_list-media_id_list-title_list-media_id_list--------> ', media_id_list)
                         for item in item_list: # 大列表
@@ -315,6 +315,7 @@ def batchget_article_material(request):
                                 source_url = content.get('url')
                                 summary = content.get('digest')
                                 content = content.get('content')
+                                print('-=********************------------> ', title, media_id)
                                 if title not in title_list or media_id not in media_id_list: # 如果不存在创建
 
                                     data = {
@@ -339,11 +340,10 @@ def batchget_article_material(request):
                                     title_list.append(title)
 
                                 else: # 已存在
-                                    print('-=-!!!!!!!!!!!!!!!!!!continue')
+                                    # print('-=-!!!!!!!!!!!!!!!!!!continue')
                                     continue
                                 level += 1
             else:
-                print('----------->>')
                 response.code = 302
                 response.msg = '一个素材都没有'
                 print('公司ID: %s | 微信文章【数据源为空】 ------------>>' % (company_id))
