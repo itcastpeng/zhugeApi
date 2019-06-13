@@ -294,14 +294,12 @@ def batchget_article_material(request):
                         title_list = list(
                             models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
                                 'title', flat=True).distinct())  # 已经入模板库的 文章列表
-                        media_id_list = list(
-                            models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
-                                'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
+                        # media_id_list = list(
+                        #     models.zgld_template_article.objects.filter(company_id=company_id, source=1).values_list(
+                        #         'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
 
                         item_list = _response.data.get('item')  # 获取的素材文章列表
-                        # print('item_list----------------------------------> ', item_list)
-                        print('title_list-title_list-title_list-title_list-title_list-title_list--------> ', title_list)
-                        print('title_list-title_list-title_list-media_id_list-title_list-media_id_list--------> ', media_id_list)
+
                         for item in item_list: # 大列表
                             media_id = item.get('media_id')
                             update_time = item.get('update_time')
@@ -316,7 +314,8 @@ def batchget_article_material(request):
                                 summary = content.get('digest')
                                 content = content.get('content')
                                 print('-=********************------------> ', title, media_id)
-                                if title not in title_list or media_id not in media_id_list: # 如果不存在创建
+                                # if title not in title_list or media_id not in media_id_list: # 如果不存在创建
+                                if title not in title_list : # 如果不存在创建
 
                                     data = {
                                         'company_id' : company_id,
