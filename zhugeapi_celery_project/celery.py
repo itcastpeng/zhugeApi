@@ -57,10 +57,10 @@ app.conf.beat_schedule = {
         # 'args': (2, 2),                                      # 传递的参数
     },
 
-    # 缓存数据 (redis缓存 雷达AI 消息) 10秒执行一次
+    # 缓存数据 (redis缓存 雷达AI 消息) 30秒执行一次
     'celery_statistical_content': {
         'task': 'zhugeapi_celery_project.tasks.celery_statistical_content',
-        'schedule': crontab(minute='*/30'),
+        'schedule': timedelta(seconds=30),
         # 'schedule': crontab("*/10", '*', '*', '*', '*'),
     },
 
