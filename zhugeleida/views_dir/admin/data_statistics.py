@@ -341,7 +341,18 @@ def data_statistics(request, oper_type):
 
                     copy_the_nickname_len = len(copy_the_nickname)
                     number_valid_conversations_len = len(number_valid_conversations.get('data_list'))
-                    average_response_time_len = len(average_response_time.get('data_list'))
+
+                    response_time = 0
+                    for i in average_response_time.get('data_list'):
+                        response_time += i.get('response_time')
+                    print('response_time-------------> ', response_time)
+                    average_response_time = len(average_response_time.get('data_list'))
+                    print('average_response_time-------------> ', average_response_time)
+                    average_response_time_len = 0
+                    if average_response_time >= 1:
+                        average_response_time_len = response_time / average_response_time
+                    print('average_response_time_len---------------> ', average_response_time_len)
+
                     sending_applet_len = len(sending_applet)
 
 
