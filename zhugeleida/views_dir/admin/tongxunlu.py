@@ -128,6 +128,7 @@ def tongxunlu(request):
                     'last_activity_time': last_activity_msg,  # 最后活动时间
                     'follow_status': customer_status,  # 跟进状态
                     'create_date': obj.create_date,  # 跟进状态
+                    'phone':obj.customer.phone
                 })
 
 
