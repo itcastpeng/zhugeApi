@@ -110,6 +110,9 @@ def tongxunlu(request):
                 else:
                     source_text = obj.get_source_display()
 
+                phone = ''
+                if obj.customer.phone:
+                    phone = obj.customer.phone
                 ret_data.append({
                     'id': obj.id,
                     'customer_id': obj.customer_id,
@@ -128,7 +131,7 @@ def tongxunlu(request):
                     'last_activity_time': last_activity_msg,  # 最后活动时间
                     'follow_status': customer_status,  # 跟进状态
                     'create_date': obj.create_date,  # 跟进状态
-                    'phone':obj.customer.phone
+                    'phone': phone
                 })
 
 
