@@ -336,23 +336,19 @@ def data_statistics(request, oper_type):
                 for obj in objs:
                     copy_the_nickname = obj.get('copy_the_nickname')                            # 复制昵称
                     number_valid_conversations = obj.get('number_valid_conversations')          # 雷达内有效对话数据
-                    average_response_time = obj.get('average_response_time')                    # 平均回复时长数据
+                    average_response_time_obj = obj.get('average_response_time')                    # 平均回复时长数据
                     sending_applet = obj.get('sending_applet')                                  # 发送小程序
 
                     copy_the_nickname_len = len(copy_the_nickname)
                     number_valid_conversations_len = len(number_valid_conversations.get('data_list'))
-                    print('obj============> ', obj)
-                    print('obj============> ', average_response_time)
                     response_time = 0
-                    for i in average_response_time.get('data_list'):
+                    for i in average_response_time_obj.get('data_list'):
                         response_time += i.get('response_time')
-                    print('response_time-------------> ', response_time)
-                    average_response_time = len(average_response_time.get('data_list'))
-                    print('average_response_time-------------> ', average_response_time)
+                    average_response_time = len(average_response_time_obj.get('data_list'))
                     average_response_time_len = 0
                     if average_response_time >= 1:
-                        average_response_time_len = int(response_time) / int(average_response_time)
-                    print('average_response_time_len---------------> ', average_response_time_len)
+                        average_response_time_len = int(response_time / average_response_time)
+
 
                     sending_applet_len = len(sending_applet)
 
@@ -395,7 +391,7 @@ def data_statistics(request, oper_type):
                     elif detail_type == 'average_response_time':
                         count = average_response_time_len
                         key = 'average_response_data'
-                        detail_data = average_response_time.get('data_list')
+                        detail_data = average_response_time_obj.get('data_list')
                         user_order_by = 'stop_date'
 
                     # 发送小程序
