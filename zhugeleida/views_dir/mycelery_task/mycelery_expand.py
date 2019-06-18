@@ -409,7 +409,7 @@ def data_overview_statistics(request):
 
 
 
-from zhugeapi_celery_project.tasks import data_overview_statistics
+# from zhugeapi_celery_project.tasks import data_overview_statistics
 ##  数据【总览】统计 和 数据【客户统计】数据
 @csrf_exempt
 def bossLeida_acount_data_and_line_info(oper_type, data):
