@@ -134,9 +134,9 @@ class statistical_objs():
                 send_type_user = int(send_type_user / 3)
                 send_type_customer = int(send_type_customer / 3)
                 if send_type_user < send_type_customer:
-                    num = send_type_customer
-                else:
                     num = send_type_user
+                else:
+                    num = send_type_customer
 
                 if num > 0:
                     flag = True
