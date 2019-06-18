@@ -5,7 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.db.models import F,Q
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
-from zhugeapi_celery_project.tasks import celery_data_statistics
+from zhugeapi_celery_project.tasks import celery_statistical_content
 from zhugeleida import models
 from zhugeleida.public.common import action_record
 import json, redis, base64, datetime
@@ -379,7 +379,7 @@ def chat_oper(request, oper_type, o_id):
 
                 response.code = 200
                 response.msg = 'send msg successful'
-                celery_data_statistics.delay()
+                celery_statistical_content.delay()
             else:
                 response.code = 402
                 response.msg = "请求异常"

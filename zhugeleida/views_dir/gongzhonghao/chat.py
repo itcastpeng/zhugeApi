@@ -6,7 +6,7 @@ from zhugeleida.forms.gongzhonghao.chat_verify import ChatSelectForm,ChatGetForm
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
 from zhugeleida import models
 from zhugeleida.public.common import action_record
-from zhugeapi_celery_project.tasks import celery_data_statistics
+from zhugeapi_celery_project.tasks import celery_statistical_content
 import redis, json, base64, time
 
 # 查询全部聊天记录
@@ -224,7 +224,7 @@ def chat_oper(request, oper_type, o_id):
 
                 response.code = 200
                 response.msg = 'send msg successful'
-                celery_data_statistics.delay()
+                celery_statistical_content.delay()
             else:
                 response.code = 402
                 response.msg = "请求异常"
