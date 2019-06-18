@@ -4,7 +4,6 @@ from zhugeapi_celery_project.tasks import create_user_or_customer_small_program_
 
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import \
     create_authorizer_access_token as create_gongzhonghao_authorizer_access_token
-
 from django.http import HttpResponse, JsonResponse
 from zhugeleida import models
 from zhugeleida.views_dir.conf import Conf
@@ -14,7 +13,7 @@ from django.conf import settings
 from selenium import webdriver
 from PIL import Image
 from zhugeleida.public import common
-from django.db.models import Sum, Q, F
+from django.db.models import Sum, Q, F, Count
 from zhugeleida.views_dir.admin.redEnvelopeToIssue import focusOnIssuedRedEnvelope
 from publicFunc.base64 import b64decode
 from publicFunc import deal_time, Response
@@ -2657,14 +2656,27 @@ def celery_statistical_content(request, oper_type):
     # 雷达AI 消息缓存
     if oper_type == 'leida_redis_contact':
         now = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        user_objs = models.zgld_userprofile.objects.filter(status=1, company_id__isnull=False)
         redis_time = rc.get('leida_redis_contact_time') # 上次统计时间
         q = Q()
         if redis_time:
             q.add(Q(create_date__gte=redis_time), Q.AND)
+
+        print('q-=------> ', q)
+        user_obj_list = models.zgld_chatinfo.objects.filter( # 需要统计的用户
+            q,
+            send_type__in=[2, 3, 4],
+        ).values('userprofile_id').distinct()
+
+        user_obj_list = [i.get('userprofile_id') for i in user_obj_list]
+
+        user_objs = models.zgld_userprofile.objects.filter(
+            status=1,
+            company_id__isnull=False,
+            id__in=user_obj_list
+        )
         for user_obj in user_objs:
             user_id = user_obj.id
-            # print('-------------> ', user_id)
+
             chat_info_objs = models.zgld_chatinfo.objects.select_related(
                 'userprofile',
                 'customer'

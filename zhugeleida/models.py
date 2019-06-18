@@ -1759,5 +1759,3 @@ class zgld_editor_diary(models.Model):
 
 
 
-
-
