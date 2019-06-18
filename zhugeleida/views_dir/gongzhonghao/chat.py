@@ -1,23 +1,13 @@
-from django.shortcuts import render
-from zhugeleida import models
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
-from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.gongzhonghao.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
-import base64
-from django.db.models import F
-import json
-from django.db.models import Q
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
-
-import json
 from zhugeleida import models
 from zhugeleida.public.common import action_record
-import redis
+from zhugeapi_celery_project.tasks import celery_data_statistics
+import redis, json, base64, time
 
 # 查询全部聊天记录
 @csrf_exempt
@@ -234,7 +224,7 @@ def chat_oper(request, oper_type, o_id):
 
                 response.code = 200
                 response.msg = 'send msg successful'
-
+                celery_data_statistics.delay()
             else:
                 response.code = 402
                 response.msg = "请求异常"

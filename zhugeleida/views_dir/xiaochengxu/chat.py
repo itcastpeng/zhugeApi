@@ -1,22 +1,14 @@
-from django.shortcuts import render
-from zhugeleida import models
+from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
 from publicFunc import Response
 from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import time
-import datetime
-from publicFunc.condition_com import conditionCom
-from zhugeleida.forms.xiaochengxu.chat_verify import ChatSelectForm,ChatGetForm,ChatPostForm,EncryptedPhoneNumberForm
-import base64
 from django.db.models import F,Q
-
 from zhugeleida.public.WXBizDataCrypt import WXBizDataCrypt
-
-import json
-import redis
+from zhugeapi_celery_project.tasks import celery_data_statistics
 from zhugeleida import models
 from zhugeleida.public.common import action_record
+import json, redis, base64, datetime
 
 @csrf_exempt
 @account.is_token(models.zgld_customer)
@@ -387,7 +379,7 @@ def chat_oper(request, oper_type, o_id):
 
                 response.code = 200
                 response.msg = 'send msg successful'
-
+                celery_data_statistics.delay()
             else:
                 response.code = 402
                 response.msg = "请求异常"
