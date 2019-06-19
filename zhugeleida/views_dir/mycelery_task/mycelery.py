@@ -2771,7 +2771,8 @@ def celery_statistical_content(request, oper_type):
                     customer_id_list.append(i.get('customer_id'))
 
                 for i in data:
-                    if i.get('customer_id') not in customer_id_list:
+                    customer_id = i.get('customer_id')
+                    if customer_id not in customer_id_list and models.zgld_customer.objects.filter(id=customer_id):
                         ret_data_list.append(i)
 
                 data_content = ret_data_list
