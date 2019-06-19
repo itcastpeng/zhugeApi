@@ -299,7 +299,7 @@ def batchget_article_material(request):
                         #         'media_id', flat=True).distinct())  # 已经入模板库的 文章列表
 
                         item_list = _response.data.get('item')  # 获取的素材文章列表
-                        print('item_list----------------------------------> ', item_list)
+                        print('item_list----------------------------------> ', json.dumps(item_list))
                         for item in item_list: # 大列表
                             media_id = item.get('media_id')
                             update_time = item.get('update_time')
