@@ -256,7 +256,7 @@ def plugin_report_oper(request, oper_type, o_id):
                     'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
                     'is_get_phone_code': request.POST.get('is_get_phone_code'),  # 是否获取手机验证码
                     'skip_link': forms_obj.cleaned_data['skip_link'],
-                    'leave_message': request.POST.get('leave_message')  # 留言
+                    'leave_message': request.POST.get('leave_message'),  # 留言
                 }
 
 
@@ -284,7 +284,8 @@ def plugin_report_oper(request, oper_type, o_id):
                         'introduce': forms_obj.cleaned_data['introduce'],  # 活动说明
 
                         'skip_link': forms_obj.cleaned_data['skip_link'],
-                        'create_date': obj.create_date.strftime("%Y-%m-%d %H:%M")
+                        'type': 'baoming',
+                        'create_date': obj.create_date.strftime("%Y-%m-%d %H:%M"),
                     }
 
                     article_objs.update(
