@@ -954,16 +954,19 @@ def article_oper(request, oper_type, o_id):
                     id=article_id
                 )
                 objs.update(**dict_data)
-
                 insert_ads = request.POST.get('insert_ads')  # 是否显示名片 显示报名
+                obj = objs[0]
                 if insert_ads:
-                    obj = objs[0]
                     insert_ads = json.loads(insert_ads)
                     title = insert_ads.get('title')
                     plugin_id = insert_ads.get('id')
                     if title and plugin_id:
                         obj.plugin_report_id = plugin_id
-                        obj.save()
+                else:
+                    obj.plugin_report_id = ''
+
+                obj.save()
+
 
                 # 标签列表
                 tags_id_list = json.loads(request.POST.get('tags_id_list')) if request.POST.get('tags_id_list') else []
