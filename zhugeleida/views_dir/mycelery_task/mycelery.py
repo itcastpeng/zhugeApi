@@ -2896,7 +2896,7 @@ def celery_statistical_content(request, oper_type):
                         'article_comments': article_comments,               # 文章评论总数据
                     })
                 rc.hset(article_time_screen.get('redis_key'), redis_key, str(article_redis_list))
-
+            print('-***************************--------------------雷达后台数据缓存完成-----************-> ', company_id)
         response.code = 200
         response.msg = '缓存完成'
 
