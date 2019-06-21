@@ -317,7 +317,11 @@ class ReportUpdateForm(forms.Form):
         if not objs:
             self.add_error('id', '报名活动不存在')
         else:
-            return id
+            article_objs = models.zgld_article.objects.filter(plugin_report_id=id)
+            if article_objs:
+                self.add_error('id', '当前报名插件不可修改')
+            else:
+                return id
 
 
 # 判断是否是数字

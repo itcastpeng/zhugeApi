@@ -268,6 +268,7 @@ def plugin_report_oper(request, oper_type, o_id):
 
                 article_objs = models.zgld_article.objects.filter(plugin_report_id=report_id)
                 if article_objs:
+                    article_obj = article_objs[0]
                     obj = objs[0]
                     insert_ads =  {
                         'id': report_id,
@@ -288,9 +289,8 @@ def plugin_report_oper(request, oper_type, o_id):
                         'create_date': obj.create_date.strftime("%Y-%m-%d %H:%M"),
                     }
 
-                    article_objs.update(
-                        insert_ads= json.dumps(insert_ads)
-                    )
+                    article_obj.insert_ads = json.dumps(insert_ads)
+                    article_obj.sava()
 
                 response.code = 200
                 response.msg = "修改成功"
