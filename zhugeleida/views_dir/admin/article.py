@@ -961,10 +961,13 @@ def article_oper(request, oper_type, o_id):
                     title = insert_ads.get('title')
                     plugin_id = insert_ads.get('id')
                     if title and plugin_id:
-                        obj.plugin_report_id = plugin_id
+                        plugin_id = plugin_id
+                    else:
+                        plugin_id = ''
                 else:
-                    obj.plugin_report_id = ''
+                    plugin_id = ''
 
+                obj.plugin_report_id = plugin_id
                 obj.save()
 
 
