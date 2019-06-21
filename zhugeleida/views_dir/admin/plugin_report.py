@@ -56,6 +56,9 @@ def plugin_report(request, oper_type):
 
                 # 获取第几页的数据
                 for obj in objs:
+                    is_update_plugin = True  # 是否可以修改报名插件
+                    if obj.zgld_article_set.all(): # 如果有文章使用了报名插件 则不能修改
+                        is_update_plugin = False
 
                     read_count = obj.read_count
                     report_customer_objs = models.zgld_report_to_customer.objects.select_related('user',
@@ -84,6 +87,7 @@ def plugin_report(request, oper_type):
                         'introduce': obj.introduce,  # 活动说明
                         'is_get_phone_code': obj.is_get_phone_code,  # 是否获取手机验证码
                         'skip_link': obj.skip_link,  # 跳转链接
+                        'is_update_plugin': is_update_plugin,  # 是否可以修改报名插件
                         'create_date': obj.create_date.strftime("%Y-%m-%d %H:%M")
                     })
 
