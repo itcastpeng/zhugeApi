@@ -44,15 +44,17 @@ class statistical_objs():
         self.o_id = o_id
         self.start_date_time = start_date_time
         self.stop_date_time = stop_date_time
-        self.q = Q().add(Q(create_date__gte=start_date_time), Q(create_date__lte=stop_date_time), Q.AND)
+        self.q = Q()
+        self.q.add(Q(create_date__gte=start_date_time) & Q(create_date__lte=stop_date_time), Q.AND)
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
+        print('self.q-------> ', self.q)
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
             self.q,
             user_id=self.o_id,
             oper_type=1,
-            customer__user_type=1
+            # customer__user_type=1
         ).order_by('-create_date')
         data_list = []
         for obj in copy_nickname_obj:
@@ -66,7 +68,7 @@ class statistical_objs():
                 'customer__username': customer__username,
                 'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
             })
-
+        # print('data_list=> ', data_list)
         return data_list
 
     # 有效对话次数（员工）

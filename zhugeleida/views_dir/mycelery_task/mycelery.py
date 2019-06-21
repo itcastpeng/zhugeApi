@@ -2792,7 +2792,7 @@ def celery_statistical_content(request, oper_type):
 
             redis_key = 'leida_data_statistics_company_{}'.format(company_id) # 公用key
 
-            print('========================**********员工数据分析缓存***************=====================')
+            # print('========================**********员工数据分析缓存***************=====================')
             for user_time_screen in [
                 {'time': 'all_days', 'redis_key': 'leida_redis_data_statistics_user'},                  # 全部
                 {'time': 'today', 'redis_key': 'leida_redis_data_statistics_user_today'},               # 今天
@@ -2808,7 +2808,7 @@ def celery_statistical_content(request, oper_type):
                 user_redis_list = []
                 for user_obj in user_objs:
                     user_id = user_obj.id
-
+                    print('user_id----------> ', user_id, start_time, stop_time)
                     statistical_obj = statistical_objs(user_id, start_time, stop_time)
 
                     # -------------------------复制昵称-----------------------
@@ -2834,7 +2834,7 @@ def celery_statistical_content(request, oper_type):
                 rc.hset(user_time_screen.get('redis_key'), redis_key, str(user_redis_list))
 
 
-            print('========================*************文章数据分析缓存**************==========================')
+            # print('========================*************文章数据分析缓存**************==========================')
             for article_time_screen in [
                 {'time': 'all_days', 'redis_key': 'leida_redis_data_statistics_article'},  # 全部
                 {'time': 'today', 'redis_key': 'leida_redis_data_statistics_article_today'},  # 今天
