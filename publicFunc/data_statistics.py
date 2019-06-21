@@ -49,7 +49,7 @@ class statistical_objs():
 
     # 复制昵称 次数及数据（员工）
     def copy_the_nickname(self):
-        print('self.q-------> ', self.q)
+        # print('self.q-------> ', self.q)
         copy_nickname_obj = models.ZgldUserOperLog.objects.filter(
             self.q,
             user_id=self.o_id,

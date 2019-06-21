@@ -2808,7 +2808,7 @@ def celery_statistical_content(request, oper_type):
                 user_redis_list = []
                 for user_obj in user_objs:
                     user_id = user_obj.id
-                    print('user_id----------> ', user_id, start_time, stop_time)
+                    # print('user_id----------> ', user_id, start_time, stop_time)
                     statistical_obj = statistical_objs(user_id, start_time, stop_time)
 
                     # -------------------------复制昵称-----------------------
