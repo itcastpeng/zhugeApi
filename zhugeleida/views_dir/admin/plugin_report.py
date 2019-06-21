@@ -56,6 +56,9 @@ def plugin_report(request, oper_type):
 
                 # 获取第几页的数据
                 for obj in objs:
+                    print('vobj.zgld_article_set------------> ', obj.zgld_article_set)
+                    print('vobj.zgld_article_set------------> ', obj.zgld_article_set.all())
+                    print('vobj.zgld_article_set------------> ', obj.zgld_article_set.filter(plugin_report_id=obj.id))
                     is_update_plugin = True  # 是否可以修改报名插件
                     if obj.zgld_article_set.filter(plugin_report_id=obj.id): # 如果有文章使用了报名插件 则不能修改
                         is_update_plugin = False
