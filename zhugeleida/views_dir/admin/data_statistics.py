@@ -389,7 +389,7 @@ def data_statistics(request, oper_type):
 
                     # 咨询响应平均时长
                     elif detail_type == 'average_response_time':
-                        count = average_response_time_len
+                        count = len(average_response_time_obj.get('data_list'))
                         key = 'average_response_data'
                         detail_data = average_response_time_obj.get('data_list')
                         user_order_by = 'stop_date'
