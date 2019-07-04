@@ -106,33 +106,39 @@ class statistical_objs():
 
                     send_type = int(msg_obj.send_type)
                     text = get_msg(msg_obj.content) # 获取聊天内容
+                    send_type_flag = False
 
                     if send_type == 1:
+                        send_type_flag = True
                         send_type_user += 1
                         name = msg_obj.userprofile.username     # 咨询名称
                         avatar = msg_obj.userprofile.avatar     # 头像
-                    else:
+                    elif send_type ==2:
+                        send_type_flag = True
                         send_type_customer += 1
                         name = ''
                         if msg_obj.customer.username:
                             name = b64decode(msg_obj.customer.username) # 客户名称
                         avatar = msg_obj.customer.headimgurl     # 头像
 
-                    result_data.append({
-                        'send_type': send_type,
-                        'avatar': avatar,
-                        'name': name,
-                        'msg': text.get('msg'),
-                        'product_cover_url': text.get('product_cover_url'),
-                        'product_name': text.get('product_name'),
-                        'product_price': text.get('product_price'),
-                        'url': text.get('url'),
-                        'info_type': text.get('info_type'),
-                        'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    })
                     customer__username = ''
-                    if msg_obj.customer.username:
-                        customer__username = b64decode(msg_obj.customer.username)
+                    if send_type_flag:
+                        result_data.append({
+                            'send_type': send_type,
+                            'avatar': avatar,
+                            'name': name,
+                            'msg': text.get('msg'),
+                            'product_cover_url': text.get('product_cover_url'),
+                            'product_name': text.get('product_name'),
+                            'product_price': text.get('product_price'),
+                            'url': text.get('url'),
+                            'info_type': text.get('info_type'),
+                            'create_date': msg_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                        })
+                        if msg_obj.customer.username:
+                            customer__username = b64decode(msg_obj.customer.username)
+
+
                 send_type_user = int(send_type_user / 3)
                 send_type_customer = int(send_type_customer / 3)
                 if send_type_user < send_type_customer:
