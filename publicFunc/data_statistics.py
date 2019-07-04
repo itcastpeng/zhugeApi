@@ -122,7 +122,7 @@ class statistical_objs():
                         avatar = msg_obj.customer.headimgurl     # 头像
 
                     customer__username = ''
-                    if send_type_flag:
+                    if send_type_flag and text.get('msg'):
                         result_data.append({
                             'send_type': send_type,
                             'avatar': avatar,
