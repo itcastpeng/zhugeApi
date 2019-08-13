@@ -32,7 +32,7 @@ def plugin_report_oper(request, oper_type, o_id):
             }
 
             forms_obj = ReportSignUpAddForm(report_data)
-
+            print('address--------------------------------------------------> ', address)
             if forms_obj.is_valid():
                 uid = request.POST.get('uid')
                 activity_id =  o_id  # 广告语
