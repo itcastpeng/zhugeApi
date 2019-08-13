@@ -125,8 +125,7 @@ def plugin_report(request, oper_type):
 
                     for obj in objs:
                         name_list_data.append({
-
-                            'address': obj.address,
+                            'address': obj.address, # 地址
                             'customer_name': obj.customer_name,
                             'customer_phone': obj.phone,
                             'sign_up_time': obj.create_date,
