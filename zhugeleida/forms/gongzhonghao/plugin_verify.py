@@ -392,6 +392,12 @@ class ReportSignUpAddForm(forms.Form):
             'required': "留言"
         }
     )
+    address = forms.CharField(
+        required=False,
+        error_messages={
+            'required': "地址"
+        }
+    )
 
 
     # 查询用户名判断是否存在

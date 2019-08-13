@@ -26,6 +26,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 'activity_id': o_id,      # 活动ID
                 'customer_name': request.POST.get('customer_name'),  # 客户姓名
                 'phone': request.POST.get('phone'),                  # 客户报名手机号
+                'address': request.POST.get('address'),              # 地址
                 # 'phone_verify_code': request.POST.get('phone_verify_code'),        #客户报名手机号发送的验证码。
                 'leave_message': request.POST.get('leave_message'),  #留言
             }
@@ -37,6 +38,7 @@ def plugin_report_oper(request, oper_type, o_id):
                 activity_id =  o_id  # 广告语
                 customer_id =  forms_obj.cleaned_data.get('customer_id')   # 报名按钮
                 customer_name =  forms_obj.cleaned_data.get('customer_name')   # 报名按钮
+                address =  forms_obj.cleaned_data.get('address')   # 地址
                 # 报名页
                 phone = forms_obj.cleaned_data['phone']                    # 活动说明
 
@@ -45,11 +47,11 @@ def plugin_report_oper(request, oper_type, o_id):
 
                 obj = models.zgld_report_to_customer.objects.filter(
                     activity_id=activity_id,
-                    phone = phone
+                    phone = phone,
                 )
 
                 if obj:
-                    obj.update(customer_name =  customer_name,leave_message=leave_message)
+                    obj.update(customer_name =  customer_name,leave_message=leave_message, address=address)
 
                 else:
                     models.zgld_report_to_customer.objects.create(
@@ -58,6 +60,7 @@ def plugin_report_oper(request, oper_type, o_id):
                         leave_message =  leave_message,  #
                         user_id = uid,
                         phone = phone,
+                        address=address
                     )
 
 

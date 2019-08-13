@@ -1236,7 +1236,7 @@ class zgld_report_to_customer(models.Model):
     customer_name = models.CharField(verbose_name="报名的客户", null=True,max_length=64)
     phone = models.CharField(verbose_name='手机号', max_length=20, blank=True, null=True)
     leave_message = models.TextField(verbose_name="客户留言", null=True)
-
+    address = models.TextField(verbose_name='地址', null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 
