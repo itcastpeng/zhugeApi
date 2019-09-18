@@ -1745,8 +1745,32 @@ class zgld_editor_diary(models.Model):
 
 
 
+# ===============================录播视频功能==========================
+# 视频分类
+class zgld_recorded_video_classification(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
+    company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
+    classification_name = models.CharField(verbose_name='分类名称', max_length=128)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
+# 视频
+class zgld_recorded_video(models.Model):
+    user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
+    company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
+    classification = models.ForeignKey('zgld_recorded_video_classification', verbose_name='分类', null=True)
+    title = models.CharField(verbose_name='标题', max_length=128)
+    abstract = models.TextField(verbose_name='摘要', null=True)
+    cover_photo = models.CharField(verbose_name='封面图片', max_length=256, null=True)
+    expert_introduction = models.TextField(verbose_name='专家介绍', null=True)
+    textual_interpretation = models.TextField(verbose_name='文字解读', null=True)
 
+    whether_writer_number = models.BooleanField(verbose_name='是否写手机号', default=0)
+    whether_verify_phone = models.BooleanField(verbose_name='是否验证短信', default=0)
+    whether_consult_online = models.BooleanField(verbose_name='是否打开在线咨询', default=0)
+    whether_authority_expert = models.BooleanField(verbose_name='是否打开权威专家', default=0)
+    whether_text_interpretation = models.BooleanField(verbose_name='是否打开文字解读', default=0)
+    whether_previous_video = models.BooleanField(verbose_name='是否打开往期视频', default=0)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 
 

@@ -5,7 +5,8 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     plugin_report, plugin_goods, open_weixin, dai_xcx, xcx_app, open_weixin_gongzhonghao, talkGroupManagement, \
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi, open_qiyeweixin, \
     theOrderManagement, tuiKuanDingDan, employeesOrders, activity_manage, tongxunlu, money_manage, case_tag, \
-    case_manage, diary_manage, comment_manage, data_statistics, editor, editor_article, editor_case, editor_diary
+    case_manage, diary_manage, comment_manage, data_statistics, editor, editor_article, editor_case, editor_diary, \
+    record_video_classification, record_video
 
 urlpatterns = [
 
@@ -196,5 +197,13 @@ urlpatterns = [
 
     url(r'^editor_diary/(?P<oper_type>\w+)/(?P<o_id>\d+)$', editor_diary.editor_diary_oper),            # 员工操作日记
     url(r'^editor_diary$', editor_diary.editor_diary),                                                  # 员工查询日记
+
+    # 录播视频
+    url(r'^record_video_classification/(?P<oper_type>\w+)/(?P<o_id>\d+)$', record_video_classification.record_video_classification_oper), # 录播视频分类操作
+    url(r'^record_video_classification$', record_video_classification.record_video_classification),                                       # 录播视频分类查询
+
+    url(r'^record_video/(?P<oper_type>\w+)/(?P<o_id>\d+)$', record_video.record_video_oper),            # 录播视频操作
+    url(r'^record_video$', record_video.record_video),                                                  # 录播视频查询
+
 
 ]
