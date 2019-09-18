@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from zhugeleida.views_dir.qiyeweixin import user, quanxian, action, tag_customer, user_weixin_auth, customer, tongxunlu, \
-    qr_code_auth, follow_language, follow_info, tag_list, article, talkGroupManagement, speechDetailsManagement, oper_log
+    qr_code_auth, follow_language, follow_info, tag_list, article, talkGroupManagement, speechDetailsManagement, oper_log, \
+    record_video
 
 from zhugeleida.views_dir.qiyeweixin import chat, contact, search, mingpian, tag_user, product, theOrderManagement
 from zhugeleida.views_dir.public import websocket
@@ -11,11 +12,17 @@ urlpatterns = [
     # # 权限操作
     # url(r'^quanxian/(?P<oper_type>\w+)/(?P<o_id>\d+)$', quanxian.quanxian_oper),
     # url(r'^quanxian$', quanxian.quanxian),
-    #
-    #
+
     # # 用户操作
     # url(r'^user/(?P<oper_type>\w+)/(?P<o_id>\d+)$', user.user_oper),
     # url(r'^user$', user.user),
+
+    # # 标签 和 标签用户的操作
+    # url(r'^tag_user/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
+    # url(r'^tag_user$', tag_user.tag_user),
+
+    # # 搜索(客户\标签)
+    # url(r'^search/(?P<oper_type>\w+)$', search.search),
 
     # 通讯录-公众号标签
     url(r'^tag_customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tag_customer.tag_customer_oper),
@@ -25,12 +32,6 @@ urlpatterns = [
     url(r'^tag_list/(?P<oper_type>\w+)/(?P<o_id>\d+)$', tag_list.tag_list_oper),
     url(r'^tag_list$', tag_list.tag_list),
 
-    # # 标签 和 标签用户的操作
-    # url(r'^tag_user/(?P<oper_type>\w+)$', tag_user.tag_user_oper),
-    # url(r'^tag_user$', tag_user.tag_user),
-
-    # # 搜索(客户\标签)
-    # url(r'^search/(?P<oper_type>\w+)$', search.search),
 
     # 修改客户详情和客户关联信息表
     url(r'^customer/(?P<oper_type>\w+)/(?P<o_id>\d+)$', customer.customer_oper),
@@ -91,10 +92,13 @@ urlpatterns = [
 
     # 聊天页-话术库-详情
     url(r'^speechDetailsManage$', speechDetailsManagement.speechDetailsManage),
-    # url(r'^speechDetailsManageOper/(?P<oper_type>\w+)/(?P<o_id>\d+)$', speechDetailsManagement.speechDetailsManageOper),
 
     # 记录用户(咨询)操作日志
     url(r'^oper_log/(?P<oper_type>\w+)/(?P<o_id>\d+)$', oper_log.oper_log_oper),
     url(r'^customer_oper_article/(?P<oper_type>\w+)$', oper_log.update_click_dialog_num), # 记录客户点击咨询对话框 次数(文章分享里)
-    # url(r'^oper_log$', oper_log.oper_log),
+
+    # 录播视频
+    url(r'^record_video/(?P<oper_type>\w+)/(?P<o_id>\d+)$', record_video.record_video_oper),            # 视频操作
+    url(r'^record_video$', record_video.record_video),                                                  # 视频查询
+
 ]

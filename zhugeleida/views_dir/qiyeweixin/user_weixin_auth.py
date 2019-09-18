@@ -1,25 +1,16 @@
 from django.shortcuts import render, redirect
 from zhugeleida import models
-from publicFunc import Response
-from publicFunc import account
-from django.http import JsonResponse
+from publicFunc import Response, account
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.role_verify import RoleAddForm, RoleUpdateForm, RoleSelectForm
-import datetime
-import json
-import requests
 from zhugeleida.forms.qiyeweixin.qiyeweixin_auth_verify import CreateShareUrl
 from ..conf import *
-
-import redis
-from django.http import HttpResponse
-
-import random
-import string
-import time
+from urllib.parse import quote
 from  publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
+
+import string, random, time, redis, json, requests, datetime
 
 # 雷达用户登录
 @csrf_exempt
@@ -227,7 +218,6 @@ def work_weixin_auth_oper(request,oper_type):
 
                 share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (appid,redirect_uri,scope,state,component_appid)
 
-                from urllib.parse import quote
                 bianma_share_url = quote(share_url, 'utf-8')
 
                 three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
@@ -367,7 +357,60 @@ def work_weixin_auth_oper(request,oper_type):
                 response.code = 301
                 response.msg = "没有公众号app"
 
-    return JsonResponse(response.__dict__)
+        # 创建录播视频 转发链接
+        elif oper_type == 'create_link_repost_video':
+            user_id = request.GET.get('user_id')        # 用户ID
+            video_id = request.GET.get('video_id')      # 视频ID
+            user_obj = models.zgld_userprofile.objects.get(id=user_id)
+            company_id = user_obj.company_id
+
+            gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
+            authorization_appid = gongzhonghao_app_obj.authorization_appid
+
+            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+            qywx_config_dict = ''
+            if three_service_objs:
+                three_service_obj = three_service_objs[0]
+                if three_service_obj.config:
+                    qywx_config_dict = json.loads(three_service_obj.config)
+
+            api_url = qywx_config_dict.get('api_url')
+            component_appid = qywx_config_dict.get('app_id')
+            leida_http_url = qywx_config_dict.get('authorization_url')
+
+            scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+            state = 'snsapi_base'
+            redirect_uri = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate={}'.format(
+                api_url,
+                str(company_id) + '|' + str(video_id)
+            )
+
+            share_url = """
+                https://open.weixin.qq.com/connect/oauth2/authorize?
+                appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}
+                #wechat_redirect
+                """.format(
+                    authorization_appid,
+                    redirect_uri,
+                    scope,
+                    state,
+                    component_appid
+                )
+
+            bianma_share_url = quote(share_url, 'utf-8')
+
+            share_url = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(
+                leida_http_url,
+                bianma_share_url
+            )
+
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'share_url': share_url
+            }
+
+        return JsonResponse(response.__dict__)
 
 
 # 企业微信 生成JS-SDK使用权限签名算法。

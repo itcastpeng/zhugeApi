@@ -26,6 +26,9 @@ urlpatterns = [
     url(r'^article/(?P<oper_type>\w+)/(?P<o_id>\d+)$', article.article_oper),
 
     # 插件活动报名
-    url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_report.plugin_report_oper)
+    url(r'^plugin_report/(?P<oper_type>\w+)/(?P<o_id>\d+)', plugin_report.plugin_report_oper),
+
+    # 转发出去的录播视频 跳转地址
+    url(r'^forwarding_video_jump_address$', user_gongzhonghao_auth.forwarding_video_jump_address),
 
 ]
