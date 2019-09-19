@@ -81,14 +81,13 @@ def record_video_settings_oper(request, oper_type, o_id):
 
         # 修改基本设置
         if oper_type == 'update':
-            turn_on_or_off = request.POST.get('turn_on_or_off')         # 开关 广告/商务通
+            whether_turn_on_advertisement = request.POST.get('whether_turn_on_advertisement')       # 开关 广告
+            whether_business_communication = request.POST.get('whether_business_communication')       # 开关 商务通
             ad_wallpaper = request.POST.get('ad_wallpaper')             # 广告壁纸
             business_address = request.POST.get('business_address')     # 商务通
             code = 200
             msg = '修改成功'
-
             objs = models.zgld_recorded_video_settings.objects.filter(company_id=company_id)
-
 
             if objs:
                 obj = objs[0]
@@ -98,11 +97,22 @@ def record_video_settings_oper(request, oper_type, o_id):
                     company_id=company_id
                 )
 
-            if turn_on_or_off: # 开关 commerce_link商务通  ads广告
-                if turn_on_or_off == 'commerce_link':
-                    obj.whether_business_communication = bool(1 - obj.whether_business_communication)
+            if whether_turn_on_advertisement: # 操作广告开关
+                whether_turn_on_advertisement = bool(1 - obj.whether_turn_on_advertisement)
+                if whether_turn_on_advertisement and ad_wallpaper:
+                    code = 301
+                    msg = '请上传广告图片'
                 else:
-                    obj.whether_turn_on_advertisement = bool(1 - obj.whether_turn_on_advertisement)
+                    obj.whether_turn_on_advertisement = whether_turn_on_advertisement
+
+            if whether_business_communication: # 操作商务通开关
+                whether_business_communication = bool(1 - obj.whether_business_communication)
+                if whether_business_communication and business_address:
+                    code = 301
+                    msg = '请上传商务通地址'
+                else:
+                    obj.whether_business_communication = whether_business_communication
+
 
             if ad_wallpaper:
                 if obj.whether_turn_on_advertisement:
