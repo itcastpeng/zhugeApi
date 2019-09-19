@@ -61,6 +61,7 @@ def record_video_oper(request, oper_type):
 
                 data_list = []
                 for obj in objs:
+
                     data_list.append({
                         'id': obj.id,
                         'classification_id': obj.classification_id,  # 分类ID
