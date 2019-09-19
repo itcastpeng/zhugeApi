@@ -79,58 +79,44 @@ def record_video_settings_oper(request, oper_type, o_id):
 
     if request.method == "POST":
 
-        objs = models.zgld_recorded_video_settings.objects.filter(company_id=company_id)
-
-        # 打开/关闭 广告
-        if oper_type == "turn_ads_on_or_off":
-            if objs:
-                obj = objs[0]
-                obj.whether_turn_on_advertisement = bool(1 - obj.whether_turn_on_advertisement)
-                obj.save()
-            else:
-                models.zgld_recorded_video_settings.objects.create(
-                    company_id=company_id,
-                    whether_turn_on_advertisement=1
-                )
-            response.code = 200
-            response.msg = '设置完成'
-
-        # 打开/关闭 商务通
-        elif oper_type == 'turn_on_or_off_commerce_link':
-            if objs:
-                obj = objs[0]
-                obj.whether_business_communication = bool(1 - obj.whether_business_communication)
-                obj.save()
-            else:
-                models.zgld_recorded_video_settings.objects.create(
-                    company_id=company_id,
-                    whether_business_communication=1
-                )
-            response.code = 200
-            response.msg = '设置完成'
-
         # 修改基本设置
-        elif oper_type == 'update':
+        if oper_type == 'update':
             turn_on_or_off = request.POST.get('turn_on_or_off')         # 开关 广告/商务通
             ad_wallpaper = request.POST.get('ad_wallpaper')             # 广告壁纸
             business_address = request.POST.get('business_address')     # 商务通
             code = 200
             msg = '修改成功'
 
+            objs = models.zgld_recorded_video_settings.objects.filter(company_id=company_id)
+
+
+            if objs:
+                obj = objs[0]
+
+            else:
+                obj = models.zgld_recorded_video_settings.objects.create(
+                    company_id=company_id
+                )
+
+            if turn_on_or_off: # 开关 commerce_link商务通  ads广告
+                if turn_on_or_off == 'commerce_link':
+                    obj.whether_business_communication = bool(1 - obj.whether_business_communication)
+                else:
+                    obj.whether_turn_on_advertisement = bool(1 - obj.whether_turn_on_advertisement)
+
             if ad_wallpaper:
-                if objs[0].whether_turn_on_advertisement:
-                    objs.update(ad_wallpaper=ad_wallpaper)
+                if obj.whether_turn_on_advertisement:
+                    objs.ad_wallpaper=ad_wallpaper
                 else:
                     code = 301
                     msg = '请先打开广告'
 
             if business_address:
-                if objs[0].whether_business_communication:
-                    objs.update(business_address=business_address)
+                if obj.whether_business_communication:
+                    obj.business_address=business_address
                 else:
                     code = 301
                     msg = '请先打开商务通'
-
 
             response.code = code
             response.msg = msg
