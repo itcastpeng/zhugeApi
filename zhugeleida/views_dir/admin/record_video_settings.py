@@ -112,7 +112,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                     msg = '请上传商务通地址'
                 else:
                     obj.whether_business_communication = whether_business_communication
-
+            obj.save()
 
             if ad_wallpaper:
                 if obj.whether_turn_on_advertisement:
@@ -127,7 +127,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 else:
                     code = 301
                     msg = '请先打开商务通'
-
+            obj.save()
             response.code = code
             response.msg = msg
 
