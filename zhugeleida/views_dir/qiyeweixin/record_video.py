@@ -12,7 +12,7 @@ import json, datetime
 @account.is_token(models.zgld_userprofile)
 def record_video(request):
     user_id = request.GET.get('user_id')
-    company_id = models.zgld_admin_userprofile.objects.get(id=user_id).company_id
+    company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
     response = Response.ResponseObj()
     forms_obj = SelectForm(request.GET)
     if forms_obj.is_valid():

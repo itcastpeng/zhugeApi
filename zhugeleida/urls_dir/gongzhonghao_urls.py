@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article,chat,plugin_report
+from zhugeleida.views_dir.gongzhonghao import user_gongzhonghao_auth,article,chat,plugin_report, record_video
 
 from zhugeleida.views_dir.public import  websocket
 urlpatterns = [
@@ -30,5 +30,9 @@ urlpatterns = [
 
     # 转发出去的录播视频 跳转地址
     url(r'^forwarding_video_jump_address$', user_gongzhonghao_auth.forwarding_video_jump_address),
+
+    # 客户查询视频
+    url(r'^record_video/(?P<oper_type>\w+)', record_video.record_video_oper),
+
 
 ]
