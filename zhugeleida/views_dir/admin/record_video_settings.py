@@ -2,6 +2,7 @@ from zhugeleida import models
 from publicFunc import Response, account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from zhugeleida.forms.admin.record_video_verify import SelectForm
 from publicFunc.condition_com import conditionCom
 import json, base64
 
@@ -20,16 +21,11 @@ def record_video_settings(request):
         order = request.GET.get('order', '-create_date')
         field_dict = {
             'id': '',
-            'company_id': '',
-            'classification_id': '',
-            'user_id': '',
-            'title': '__contains',
-            'abstract': '__contains',
         }
         q = conditionCom(request, field_dict)
-        objs = models.zgld_recorded_video.objects.filter(
+        objs = models.zgld_recorded_video_settings.objects.filter(
             q,
-            company_id=company_id,
+            company_id=company_id
         ).order_by(order)
         count = objs.count()
 
@@ -42,25 +38,11 @@ def record_video_settings(request):
         for obj in objs:
             data_list.append({
                 'id': obj.id,
-                'classification_id': obj.classification_id,                         # 分类ID
-                'classification_name': obj.classification.classification_name,      # 分类名称
-                'company_id': obj.company_id,                                       # 公司ID
-                'company_name': obj.company.name,                                   # 公司名称
-                'user_id': obj.user_id,                                             # 创建人ID
-                'user_name': obj.user.login_user,                                   # 创建人名称
-                'title': obj.title,                                                 # 视频标题
-                'abstract': obj.abstract,                                           # 视频摘要
-                'cover_photo': obj.cover_photo,                                     # 封面图片
-                'expert_introduction': obj.expert_introduction,                     # 专家介绍
-                'textual_interpretation': obj.textual_interpretation,               # 文字解读
-
-                'whether_authority_expert': obj.whether_authority_expert,           # 是否打开权威专家
-                'whether_consult_online': obj.whether_consult_online,               # 是否打开在线咨询
-                'whether_previous_video': obj.whether_previous_video,               # 是否打开往期视频
-                'whether_text_interpretation': obj.whether_text_interpretation,     # 是否打开文字解读
-                'whether_verify_phone': obj.whether_verify_phone,                   # 是否验证短信
-                'whether_writer_number': obj.whether_writer_number,                 # 是否写手机号
-                'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),       # 文章创建时间
+                'whether_turn_on_advertisement': obj.whether_turn_on_advertisement,         # 是否打开 广告
+                'ad_wallpaper': obj.ad_wallpaper,                                           # 广告图片
+                'whether_business_communication': obj.whether_business_communication,       # 是否打开 商务通
+                'business_address': obj.business_address,                                   # 商务通地址
+                'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),               # 文章创建时间
             })
 
         response.code = 200
@@ -70,24 +52,12 @@ def record_video_settings(request):
             'data_list': data_list,
         }
         response.note = {
-            'classification_id': '分类ID',
-            'classification_name': '分类名称',
-            'company_id': '公司ID',
-            'company_name': '公司名称',
-            'user_id': '创建人ID',
-            'user_name': '创建人名称',
-            'title': '视频标题',
-            'abstract': '视频摘要',
-            'cover_photo': '封面图片',
-            'expert_introduction': '专家介绍',
-            'textual_interpretation': '文字解读',
-            'whether_authority_expert':'是否打开权威专家',
-            'whether_consult_online': '是否打开在线咨询',
-            'whether_previous_video': '是否打开往期视频',
-            'whether_text_interpretation': '是否打开文字解读',
-            'whether_verify_phone': '是否验证短信',
-            'whether_writer_number': '是否写手机号',
-            'create_date': '文章创建时间'
+            'id': 'id',
+            'whether_turn_on_advertisement': '是否打开 广告',
+            'ad_wallpaper': '广告图片',
+            'whether_business_communication': '是否打开 商务通',
+            'business_address': '商务通地址',
+            'create_date': '文章创建时间',
         }
 
     else:
