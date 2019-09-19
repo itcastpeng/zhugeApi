@@ -85,6 +85,7 @@ def record_video_settings_oper(request, oper_type, o_id):
             whether_business_communication = request.POST.get('whether_business_communication')       # 开关 商务通
             ad_wallpaper = request.POST.get('ad_wallpaper')             # 广告壁纸
             business_address = request.POST.get('business_address')     # 商务通
+
             code = 200
             msg = '修改成功'
             objs = models.zgld_recorded_video_settings.objects.filter(company_id=company_id)
@@ -97,9 +98,13 @@ def record_video_settings_oper(request, oper_type, o_id):
                     company_id=company_id
                 )
 
+            whether_turn_on_advertisement_flag = True  # 是否判断广告图片
+            whether_business_communication_flag = True # 是否判断商务通链接
             if whether_turn_on_advertisement: # 操作广告开关
                 whether_turn_on_advertisement = bool(1 - obj.whether_turn_on_advertisement)
-                if whether_turn_on_advertisement and ad_wallpaper:
+                if not whether_turn_on_advertisement:
+                    whether_turn_on_advertisement_flag = False
+                if whether_turn_on_advertisement and not ad_wallpaper:
                     code = 301
                     msg = '请上传广告图片'
                 else:
@@ -107,26 +112,31 @@ def record_video_settings_oper(request, oper_type, o_id):
 
             if whether_business_communication: # 操作商务通开关
                 whether_business_communication = bool(1 - obj.whether_business_communication)
-                if whether_business_communication and business_address:
+                if not whether_business_communication: # 不开商务通
+                    whether_business_communication_flag = False
+                if whether_business_communication and not business_address:
                     code = 301
                     msg = '请上传商务通地址'
                 else:
                     obj.whether_business_communication = whether_business_communication
+
             obj.save()
 
-            if ad_wallpaper:
-                if obj.whether_turn_on_advertisement:
-                    objs.ad_wallpaper=ad_wallpaper
-                else:
-                    code = 301
-                    msg = '请先打开广告'
+            if whether_business_communication_flag:
+                if business_address:
+                    if obj.whether_business_communication:
+                        obj.business_address=business_address
+                    else:
+                        code = 301
+                        msg = '请先打开商务通'
+            if whether_turn_on_advertisement_flag:
+                if ad_wallpaper:
+                    if obj.whether_turn_on_advertisement:
+                        obj.ad_wallpaper=ad_wallpaper
+                    else:
+                        code = 301
+                        msg = '请先打开广告'
 
-            if business_address:
-                if obj.whether_business_communication:
-                    obj.business_address=business_address
-                else:
-                    code = 301
-                    msg = '请先打开商务通'
             obj.save()
             response.code = code
             response.msg = msg
