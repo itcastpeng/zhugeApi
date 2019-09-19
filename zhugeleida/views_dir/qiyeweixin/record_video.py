@@ -21,6 +21,7 @@ def record_video(request):
         order = request.GET.get('order', '-create_date')
         field_dict = {
             'id': '',
+            'classification_id': '',
         }
         q = conditionCom(request, field_dict)
         objs = models.zgld_recorded_video.objects.filter(
@@ -134,8 +135,65 @@ def record_video_oper(request, oper_type, o_id):
             pass
 
     else:
-        response.code = 402
-        response.msg = '请求异常'
+
+        # 查询视频分类
+        if oper_type == 'get_video_tags':
+            user_id = request.GET.get('user_id')
+            company_id = models.zgld_userprofile.objects.get(id=user_id).company_id
+            response = Response.ResponseObj()
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+                field_dict = {
+                    'id': '',
+                }
+                q = conditionCom(request, field_dict)
+                objs = models.zgld_recorded_video_classification.objects.filter(
+                    q,
+                    company_id=company_id,
+                ).order_by(order)
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                data_list = []
+                for obj in objs:
+                    data_list.append({
+                        'id': obj.id,
+                        'classification_name': obj.classification_name,  # 分类名称
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
+                    })
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'count': count,
+                    'data_list': data_list,
+                }
+                response.note = {
+                    'data_list': [
+                        {
+                            'classification_name': '分类名称',
+                            'create_date': '文章创建时间',
+                        }
+                    ],
+                    'count': '总数',
+                }
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+
+        else:
+            response.code = 402
+            response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
 
