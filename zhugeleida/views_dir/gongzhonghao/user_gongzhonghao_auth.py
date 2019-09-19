@@ -767,7 +767,7 @@ def forwarding_video_jump_address(request):
             client_id = obj.id
             token = obj.token
 
-        redirect_url = '{url}/zhugeleidaArticleShare#{video_id}?token={token}&user_id={client_id}&company_id={company_id}'.format(
+        redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?token={token}&user_id={client_id}&company_id={company_id}'.format(
             url=url,
             video_id=video_id,
             token=token,

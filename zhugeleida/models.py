@@ -1746,6 +1746,15 @@ class zgld_editor_diary(models.Model):
 
 
 # ===============================录播视频功能==========================
+# 基础设置
+class zgld_recorded_video_settings(models.Model):
+    whether_turn_on_advertisement = models.BooleanField(verbose_name='是否开启广告', default=0) # 默认关闭
+    ad_wallpaper = models.CharField(verbose_name='广告壁纸', max_length=256)
+    whether_business_communication = models.BooleanField(verbose_name='是否开启商务通', default=0) # 默认开启雷达聊天功能 否则开启客户商务通
+    business_address = models.CharField(verbose_name='商务通地址', max_length=256)
+    company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
+
 # 视频分类
 class zgld_recorded_video_classification(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
@@ -1758,6 +1767,7 @@ class zgld_recorded_video(models.Model):
     user = models.ForeignKey('zgld_admin_userprofile', verbose_name='文章作者', null=True)
     company = models.ForeignKey('zgld_company', verbose_name='文章所属公司', null=True)
     classification = models.ForeignKey('zgld_recorded_video_classification', verbose_name='分类', null=True)
+    video_url = models.CharField(verbose_name='视频链接', max_length=256)
     title = models.CharField(verbose_name='标题', max_length=128)
     abstract = models.TextField(verbose_name='摘要', null=True)
     cover_photo = models.CharField(verbose_name='封面图片', max_length=256, null=True)

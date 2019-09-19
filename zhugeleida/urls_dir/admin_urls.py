@@ -6,7 +6,7 @@ from zhugeleida.views_dir.admin import role, company, login, user, department, w
     speechDetailsManagement, mallManagement, goodsClassification, shangchengjichushezhi, open_qiyeweixin, \
     theOrderManagement, tuiKuanDingDan, employeesOrders, activity_manage, tongxunlu, money_manage, case_tag, \
     case_manage, diary_manage, comment_manage, data_statistics, editor, editor_article, editor_case, editor_diary, \
-    record_video_classification, record_video
+    record_video_classification, record_video, record_video_settings
 
 urlpatterns = [
 
@@ -204,6 +204,9 @@ urlpatterns = [
 
     url(r'^record_video/(?P<oper_type>\w+)/(?P<o_id>\d+)$', record_video.record_video_oper),            # 录播视频操作
     url(r'^record_video$', record_video.record_video),                                                  # 录播视频查询
+
+    url(r'^record_video_settings/(?P<oper_type>\w+)/(?P<o_id>\d+)$', record_video_settings.record_video_settings_oper), # 视频基础设置操作
+    url(r'^record_video_settings$', record_video_settings.record_video_settings),                                       # 视频基础设置查询
 
 
 ]

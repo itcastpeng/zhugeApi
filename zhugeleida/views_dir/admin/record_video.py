@@ -52,6 +52,7 @@ def record_video(request):
                 'user_name': obj.user.login_user,                                   # 创建人名称
                 'title': obj.title,                                                 # 视频标题
                 'abstract': obj.abstract,                                           # 视频摘要
+                'video_url': obj.video_url,                                         # 封面链接
                 'cover_photo': obj.cover_photo,                                     # 封面图片
                 'expert_introduction': obj.expert_introduction,                     # 专家介绍
                 'textual_interpretation': obj.textual_interpretation,               # 文字解读
@@ -79,6 +80,7 @@ def record_video(request):
             'user_id': '创建人ID',
             'user_name': '创建人名称',
             'title': '视频标题',
+            'video_url': '视频链接',
             'abstract': '视频摘要',
             'cover_photo': '封面图片',
             'expert_introduction': '专家介绍',
@@ -117,6 +119,7 @@ def record_video_oper(request, oper_type, o_id):
             'o_id': o_id,
 
             'classification': request.POST.get('classification'),                                   # 分类ID
+            'video_url':request.POST.get('video_url'),                                              # 视频链接
             'title':request.POST.get('title'),                                                      # 标题
             'abstract':request.POST.get('abstract'),                                                # 摘要
             'cover_photo':request.POST.get('cover_photo'),                                          # 封面图片
@@ -140,6 +143,7 @@ def record_video_oper(request, oper_type, o_id):
                     company_id=company_id,
                     user_id=user_id,
                     classification_id=form_clean_data.get('classification'),
+                    video_url=form_clean_data.get('video_url'),
                     title = form_clean_data.get('title'),
                     abstract = form_clean_data.get('abstract'),
                     cover_photo = form_clean_data.get('cover_photo'),
@@ -169,6 +173,7 @@ def record_video_oper(request, oper_type, o_id):
                 objs = models.zgld_recorded_video.objects.filter(id=o_id)
                 objs.update(
                     classification_id=form_clean_data.get('classification'),
+                    video_url=form_clean_data.get('video_url'),
                     title=form_clean_data.get('title'),
                     abstract=form_clean_data.get('abstract'),
                     cover_photo=form_clean_data.get('cover_photo'),

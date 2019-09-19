@@ -47,6 +47,7 @@ def record_video(request):
                 'title': obj.title,                                             # 视频标题
                 'abstract': obj.abstract,                                       # 视频摘要
                 'cover_photo': obj.cover_photo,                                 # 封面图片
+                'video_url': obj.video_url,                                     # 封面链接
 
                 'expert_introduction': obj.expert_introduction,                 # 专家介绍
                 'textual_interpretation': obj.textual_interpretation,           # 文字解读
