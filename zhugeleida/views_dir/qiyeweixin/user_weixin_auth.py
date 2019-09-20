@@ -386,9 +386,7 @@ def work_weixin_auth_oper(request,oper_type):
             )
 
             share_url = """
-                https://open.weixin.qq.com/connect/oauth2/authorize?
-                appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}
-                #wechat_redirect
+                https://open.weixin.qq.com/connect/oauth2/authorize?appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}#wechat_redirect
                 """.format(
                     authorization_appid,
                     redirect_uri,
