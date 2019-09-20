@@ -382,7 +382,7 @@ def work_weixin_auth_oper(request,oper_type):
             state = 'snsapi_base'
             redirect_uri = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate={}'.format(
                 api_url,
-                str(company_id) + '|' + str(video_id)
+                str(company_id) + '_' + str(video_id)
             )
 
             share_url = """

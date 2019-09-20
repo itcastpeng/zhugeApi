@@ -690,8 +690,8 @@ def forwarding_video_jump_address(request):
         appid = request.GET.get('appid')
         relate = request.GET.get('relate')
 
-        company_id = relate.split('|')[0]
-        video_id = relate.split('|')[1]
+        company_id = relate.split('_')[0]
+        video_id = relate.split('_')[1]
 
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
