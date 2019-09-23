@@ -496,6 +496,7 @@ def user_gongzhonghao_auth_oper(request, oper_type):
         url = qywx_config_dict.get('authorization_url')
         api_url = qywx_config_dict.get('api_url')
 
+        # 二次分享文章
         if oper_type == 'create_gongzhonghao_share_auth_url':
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
@@ -548,6 +549,58 @@ def user_gongzhonghao_auth_oper(request, oper_type):
                 print('---------- 生成 分享的公众号文章链接 未通过验证 --------->>', forms_obj.errors)
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
+
+        # 二次分享视频
+        elif oper_type == 'retransmit_video':
+            forms_obj = CreateShareUrl(request.GET)
+            if forms_obj.is_valid():
+                customer_id = request.GET.get('user_id')
+                uid = forms_obj.cleaned_data.get('uid')                 # 用户ID
+                level = forms_obj.cleaned_data.get('level')
+                video_id = forms_obj.cleaned_data.get('video_id')
+                company_id = forms_obj.cleaned_data.get('company_id')
+
+                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
+                authorization_appid = gongzhonghao_app_obj.authorization_appid
+
+                level += 1
+                pid = customer_id
+                appid = authorization_appid
+                relate_params = str(company_id) + '_' + str(video_id) + '_' + str(uid)
+                redirect_uri = '%s/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate=%s' % (
+                    api_url,
+                    relate_params
+                )
+
+                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+                qywx_config_dict = ''
+                if three_service_objs and three_service_objs[0].config:
+                    qywx_config_dict = json.loads(three_service_objs[0].config)
+
+                component_appid = qywx_config_dict.get('app_id')
+
+                print('--------  嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
+                scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+                state = 'snsapi_base'
+                # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
+
+                share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
+                appid, redirect_uri, scope, state, component_appid)
+
+                bianma_share_url = quote(share_url, 'utf-8')
+
+                share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (api_url,bianma_share_url)
+                print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>', share_url)
+
+                response.data = {'share_url': share_url}
+                response.code = 200
+                response.msg = "返回成功"
+
+            else:
+                print('---------- 生成 分享的公众号文章链接 未通过验证 --------->>', forms_obj.errors)
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
 
         ##生成公众号JS-SDK使用权限签名算法
         elif oper_type == 'gongzhonghao_share_sign':
@@ -692,7 +745,7 @@ def forwarding_video_jump_address(request):
 
         company_id = relate.split('_')[0]
         video_id = relate.split('_')[1]
-        u_id = relate.split('_')[2]
+        uid = relate.split('_')[2]
 
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
@@ -768,11 +821,11 @@ def forwarding_video_jump_address(request):
             client_id = obj.id
             token = obj.token
 
-        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&u_id={u_id}'.format(
+        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}'.format(
             token=token,
             client_id=client_id,
             company_id=company_id,
-            u_id=u_id
+            uid=uid
         )
         redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?{redirect_url_params}'.format(
             url=url,
