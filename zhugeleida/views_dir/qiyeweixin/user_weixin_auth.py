@@ -380,7 +380,7 @@ def work_weixin_auth_oper(request,oper_type):
 
             scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
             state = 'snsapi_base'
-            redirect_uri = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth?relate={}'.format(
+            redirect_uri = '{}/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate={}'.format(
                 api_url,
                 str(company_id) + '_' + str(video_id)
             )
@@ -398,10 +398,6 @@ def work_weixin_auth_oper(request,oper_type):
             bianma_share_url = quote(share_url, 'utf-8')
             share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (
             leida_http_url, bianma_share_url)
-            # share_url = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(
-            #     leida_http_url,
-            #     bianma_share_url
-            # )
             print('share_url--------share_url----------share_url-----------share_url---------share_url--------> ', share_url)
             response.code = 200
             response.msg = '查询成功'
