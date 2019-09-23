@@ -11,7 +11,7 @@ from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorize
     create_component_access_token
 
 from urllib.parse import unquote,quote
-import base64, random, json, string, redis, requests, time
+import base64, random, json, string, redis, requests, time, datetime
 
 # 获取用户信息
 def get_user_info(access_token, openid):
@@ -731,7 +731,7 @@ def user_gongzhonghao_redirect_share_url(request):
 # 转发出去的录播视频 跳转地址
 def forwarding_video_jump_address(request):
     print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
-
+    print('*************************------------------------>跳转链接开始计时----------》', datetime.datetime.today())
     js_code = request.GET.get('code')
     code_objs = models.save_code.objects.filter(code=js_code)
     if not code_objs:
@@ -820,19 +820,20 @@ def forwarding_video_jump_address(request):
             )
             client_id = obj.id
             token = obj.token
-
-        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}'.format(
+        obj = models.zgld_recorded_video.objects.get(id=video_id)
+        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}'.format(
             token=token,
             client_id=client_id,
             company_id=company_id,
-            uid=uid
+            uid=uid,
+            classification_id=obj.classification_id
         )
         redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?{redirect_url_params}'.format(
             url=url,
             video_id=video_id,
             redirect_url_params=redirect_url_params
         )
-
+        print('*************************------------------------>跳转链接结束计时----------》', datetime.datetime.today())
         return redirect(redirect_url)
 
 
