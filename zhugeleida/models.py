@@ -1785,12 +1785,12 @@ class zgld_recorded_video(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 # 转发视频关系表
-# class zgld_video_to_customer_belonger(models.Model):
-#     user = models.ForeignKey('zgld_userprofile', verbose_name='用户转发', null=True)
-#     customer = models.ForeignKey('zgld_customer', verbose_name='查看客户')
-#     parent_customer = models.ForeignKey('zgld_customer', verbose_name='转发客户', null=True)
-#
-#     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
+class zgld_video_to_customer_belonger(models.Model):
+    user = models.ForeignKey('zgld_userprofile', verbose_name='用户转发', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='查看客户', null=True, related_name='zgld_video_to_customer_belonger_customer')
+    parent_customer = models.ForeignKey('zgld_customer', verbose_name='转发客户', null=True)
+    video = models.ForeignKey('zgld_recorded_video', verbose_name='对应视频', null=True)
+    create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 
 

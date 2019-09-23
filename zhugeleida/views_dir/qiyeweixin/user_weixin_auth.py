@@ -363,7 +363,7 @@ def work_weixin_auth_oper(request,oper_type):
             video_id = request.GET.get('video_id')      # 视频ID
             user_obj = models.zgld_userprofile.objects.get(id=user_id)
             company_id = user_obj.company_id
-            share_url = pub_create_link_repost_video(user_id, video_id, company_id)
+            share_url = pub_create_link_repost_video(user_id, video_id, company_id, '')
 
             response.code = 200
             response.msg = '查询成功'

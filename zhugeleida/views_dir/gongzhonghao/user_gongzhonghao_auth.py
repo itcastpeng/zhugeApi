@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect,HttpResponse
 from zhugeleida import models
-from publicFunc import Response
-from publicFunc import account
+from publicFunc import Response, account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.gongzhonghao.gongzhonghao_verify import GongzhonghaoAddForm, LoginBindingForm, CreateShareUrl
@@ -9,7 +8,7 @@ from zhugeapi_celery_project import tasks
 from publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token, \
     create_component_access_token
-
+from zhugeleida.public.pub import pub_create_link_repost_video
 from urllib.parse import unquote,quote
 import base64, random, json, string, redis, requests, time, datetime
 
@@ -554,44 +553,12 @@ def user_gongzhonghao_auth_oper(request, oper_type):
         elif oper_type == 'retransmit_video':
             forms_obj = CreateShareUrl(request.GET)
             if forms_obj.is_valid():
-                customer_id = request.GET.get('user_id')
+                customer_id = request.GET.get('user_id')                # 客户ID
                 uid = forms_obj.cleaned_data.get('uid')                 # 用户ID
-                # level = forms_obj.cleaned_data.get('level')
                 video_id = forms_obj.cleaned_data.get('video_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
 
-                gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
-                authorization_appid = gongzhonghao_app_obj.authorization_appid
-
-                # level += 1
-                pid = customer_id
-                appid = authorization_appid
-                relate_params = str(company_id) + '_' + str(video_id) + '_' + str(uid)
-                redirect_uri = '%s/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate=%s' % (
-                    api_url,
-                    relate_params
-                )
-
-                three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-                qywx_config_dict = ''
-                if three_service_objs and three_service_objs[0].config:
-                    qywx_config_dict = json.loads(three_service_objs[0].config)
-
-                component_appid = qywx_config_dict.get('app_id')
-
-                print('--------  嵌入创建【分享链接】的 redirect_uri ------->', redirect_uri)
-                scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-                state = 'snsapi_base'
-                # component_appid = 'wx6ba07e6ddcdc69b3' # 三方平台-AppID
-
-                share_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&component_appid=%s#wechat_redirect' % (
-                appid, redirect_uri, scope, state, component_appid)
-
-                bianma_share_url = quote(share_url, 'utf-8')
-
-                share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (api_url,bianma_share_url)
-                print('------ 客户正在触发【创建分享链接】 静默方式的 snsapi_base URL：------>>', share_url)
-
+                share_url = pub_create_link_repost_video(uid, video_id, company_id, customer_id)
                 response.data = {'share_url': share_url}
                 response.code = 200
                 response.msg = "返回成功"
@@ -745,7 +712,8 @@ def forwarding_video_jump_address(request):
 
         company_id = relate.split('_')[0]
         video_id = relate.split('_')[1]
-        uid = relate.split('_')[2]
+        uid = relate.split('_')[2]          # 用户ID
+        pid = relate.split('_')[3]          # 客户ID
 
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
@@ -820,13 +788,28 @@ def forwarding_video_jump_address(request):
             )
             client_id = obj.id
             token = obj.token
+
+        # ==================记录分享的视频===================
+
+        video_belonger_data = {
+            'video_id':video_id,
+            'user_id':uid,
+            'customer_id':client_id,
+        }
+        if pid:
+            video_belonger_data['parent_customer_id'] = pid
+        models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+
+
+
         obj = models.zgld_recorded_video.objects.get(id=video_id)
-        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}'.format(
+        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}&pid={pid}'.format(
             token=token,
             client_id=client_id,
             company_id=company_id,
             uid=uid,
-            classification_id=obj.classification_id
+            classification_id=obj.classification_id,
+            pid=pid
         )
         redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?{redirect_url_params}'.format(
             url=url,

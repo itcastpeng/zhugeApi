@@ -211,7 +211,7 @@ def deal_gzh_picture_url(leixing, article_url):
 
 
 # 创建 分享 转播视频链接
-def pub_create_link_repost_video(user_id, video_id, company_id):
+def pub_create_link_repost_video(user_id, video_id, company_id, pid):
 
     gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
     authorization_appid = gongzhonghao_app_obj.authorization_appid
@@ -230,7 +230,7 @@ def pub_create_link_repost_video(user_id, video_id, company_id):
     state = 'snsapi_base'
     redirect_uri = '{}/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate={}'.format(
         api_url,
-        str(company_id) + '_' + str(video_id) + '_' + str(user_id)
+        str(company_id) + '_' + str(video_id) + '_' + str(user_id) + '_' + str(pid)
     )
 
     share_url = """https://open.weixin.qq.com/connect/oauth2/authorize?appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}#wechat_redirect
