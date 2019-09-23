@@ -692,6 +692,7 @@ def forwarding_video_jump_address(request):
 
         company_id = relate.split('_')[0]
         video_id = relate.split('_')[1]
+        u_id = relate.split('_')[2]
 
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
@@ -767,12 +768,16 @@ def forwarding_video_jump_address(request):
             client_id = obj.id
             token = obj.token
 
-        redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?token={token}&user_id={client_id}&company_id={company_id}'.format(
-            url=url,
-            video_id=video_id,
+        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&u_id={u_id}'.format(
             token=token,
             client_id=client_id,
             company_id=company_id,
+            u_id=u_id
+        )
+        redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?{redirect_url_params}'.format(
+            url=url,
+            video_id=video_id,
+            redirect_url_params=redirect_url_params
         )
 
         return redirect(redirect_url)
