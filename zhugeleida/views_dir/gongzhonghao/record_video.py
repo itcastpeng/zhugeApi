@@ -33,6 +33,7 @@ def record_video_oper(request, oper_type):
         # 查询录播视频
         if oper_type == 'get_video':
             uid = request.GET.get('uid')  # 用户ID
+            is_previous_video = request.GET.get('is_previous_video')  # 是否为往期视频
             user_id = request.GET.get('user_id')
             company_id = models.zgld_customer.objects.get(id=user_id).company_id
             response = Response.ResponseObj()
@@ -45,6 +46,7 @@ def record_video_oper(request, oper_type):
                     'id': '',
                     'classification_id': '',
                 }
+                video_id = request.GET.get('id')
                 q = conditionCom(request, field_dict)
                 objs = models.zgld_recorded_video.objects.filter(
                     q,
@@ -101,12 +103,21 @@ def record_video_oper(request, oper_type):
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
                     }
                     is_phone = False
-                    if request.GET.get('id'):
+                    if video_id:
                         if models.zgld_customer.objects.get(id=user_id).video_phone_num:
                             is_phone = True
 
                     data['is_phone'] = is_phone
                     data_list.append(data)
+
+                if is_previous_video and video_id: # 记录转载
+                    video_belonger_data = {
+                        'video_id': video_id,
+                        'user_id': uid,
+                        'customer_id': user_id,
+                    }
+                    models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
