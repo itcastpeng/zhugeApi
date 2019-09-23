@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.gongzhonghao.record_video_verify import SelectForm
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from zhugeleida.public.pub import pub_create_link_repost_video, verify_phone_number
 import json, datetime
 
 
@@ -13,10 +14,20 @@ import json, datetime
 @account.is_token(models.zgld_customer)
 def record_video_oper(request, oper_type):
     response = Response.ResponseObj()
+    user_id = request.GET.get('user_id')
 
     if request.method == "POST":
-        pass
 
+        # 更新手机号
+        if oper_type == 'update_phone':
+            phone_num = request.POST.get('phone_num')
+            if verify_phone_number(phone_num):
+                models.zgld_customer.objects.filter(id=user_id).update(phone=phone_num)
+                response.code = 200
+                response.msg = '更新手机号完成'
+            else:
+                response.code = 301
+                response.msg = '手机号验证失败'
     else:
 
         # 查询录播视频
@@ -31,6 +42,7 @@ def record_video_oper(request, oper_type):
                 order = request.GET.get('order', '-create_date')
                 field_dict = {
                     'id': '',
+                    'classification_id': '',
                 }
                 q = conditionCom(request, field_dict)
                 objs = models.zgld_recorded_video.objects.filter(
@@ -61,6 +73,7 @@ def record_video_oper(request, oper_type):
 
                 data_list = []
                 for obj in objs:
+                    share_url = pub_create_link_repost_video(user_id, obj.id, company_id)
 
                     data_list.append({
                         'id': obj.id,
@@ -83,6 +96,7 @@ def record_video_oper(request, oper_type):
                         'whether_text_interpretation': obj.whether_text_interpretation,  # 是否打开文字解读
                         'whether_verify_phone': obj.whether_verify_phone,  # 是否验证短信
                         'whether_writer_number': obj.whether_writer_number,  # 是否写手机号
+                        'share_url': share_url,  # 转发链接
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
                     })
 

@@ -1,9 +1,9 @@
 
 from bs4 import BeautifulSoup
 from urllib.parse import unquote
+from zhugeleida import models
 import re, os, requests, time, json, base64, datetime
-
-
+from urllib.parse import quote
 
 
 
@@ -207,3 +207,57 @@ def deal_gzh_picture_url(leixing, article_url):
     else:
 
         return content
+
+
+
+# 创建 分享 转播视频链接
+def pub_create_link_repost_video(user_id, video_id, company_id):
+
+    gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
+    authorization_appid = gongzhonghao_app_obj.authorization_appid
+    three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
+    qywx_config_dict = ''
+    if three_service_objs:
+        three_service_obj = three_service_objs[0]
+        if three_service_obj.config:
+            qywx_config_dict = json.loads(three_service_obj.config)
+
+    api_url = qywx_config_dict.get('api_url')
+    component_appid = qywx_config_dict.get('app_id')
+    leida_http_url = qywx_config_dict.get('authorization_url')
+
+    scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    state = 'snsapi_base'
+    redirect_uri = '{}/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate={}'.format(
+        api_url,
+        str(company_id) + '_' + str(video_id) + '_' + str(user_id)
+    )
+
+    share_url = """https://open.weixin.qq.com/connect/oauth2/authorize?appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}#wechat_redirect
+                   """.format(
+        authorization_appid,
+        redirect_uri,
+        scope,
+        state,
+        component_appid
+    )
+
+    bianma_share_url = quote(share_url, 'utf-8')
+    share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (
+        leida_http_url, bianma_share_url)
+    print('share_url--------share_url----------share_url-----------share_url---------share_url--------> ', share_url)
+    return share_url
+
+
+# 验证手机号
+def verify_phone_number(phone_number):
+    phone_pat = re.compile('^(13\d|14[5|7]|15\d|166|17[3|6|7]|18\d)\d{8}$')
+    res = re.search(phone_pat, phone_number)
+    flag = False
+    if res:
+        flag = True
+    return flag
+
+
+
+

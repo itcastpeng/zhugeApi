@@ -9,7 +9,7 @@ from urllib.parse import quote
 from  publicFunc.account import str_sha_encrypt
 from zhugeleida.views_dir.admin.open_weixin_gongzhonghao import create_authorizer_access_token
 from zhugeleida.public.common import jianrong_create_qiyeweixin_access_token
-
+from zhugeleida.public.pub import pub_create_link_repost_video
 import string, random, time, redis, json, requests, datetime
 
 # 雷达用户登录
@@ -363,41 +363,8 @@ def work_weixin_auth_oper(request,oper_type):
             video_id = request.GET.get('video_id')      # 视频ID
             user_obj = models.zgld_userprofile.objects.get(id=user_id)
             company_id = user_obj.company_id
+            share_url = pub_create_link_repost_video(user_id, video_id, company_id)
 
-            gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
-            authorization_appid = gongzhonghao_app_obj.authorization_appid
-
-            three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
-            qywx_config_dict = ''
-            if three_service_objs:
-                three_service_obj = three_service_objs[0]
-                if three_service_obj.config:
-                    qywx_config_dict = json.loads(three_service_obj.config)
-
-            api_url = qywx_config_dict.get('api_url')
-            component_appid = qywx_config_dict.get('app_id')
-            leida_http_url = qywx_config_dict.get('authorization_url')
-
-            scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-            state = 'snsapi_base'
-            redirect_uri = '{}/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate={}'.format(
-                api_url,
-                str(company_id) + '_' + str(video_id) + '_' + str(user_id)
-            )
-
-            share_url = """https://open.weixin.qq.com/connect/oauth2/authorize?appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}#wechat_redirect
-                """.format(
-                    authorization_appid,
-                    redirect_uri,
-                    scope,
-                    state,
-                    component_appid
-                )
-
-            bianma_share_url = quote(share_url, 'utf-8')
-            share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (
-            leida_http_url, bianma_share_url)
-            print('share_url--------share_url----------share_url-----------share_url---------share_url--------> ', share_url)
             response.code = 200
             response.msg = '查询成功'
             response.data = {
