@@ -76,7 +76,7 @@ def record_video_oper(request, oper_type):
                 for obj in objs:
                     share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
 
-                    data_list.append({
+                    data = {
                         'id': obj.id,
                         'classification_id': obj.classification_id,  # 分类ID
                         'classification_name': obj.classification.classification_name,  # 分类名称
@@ -99,8 +99,14 @@ def record_video_oper(request, oper_type):
                         'whether_writer_number': obj.whether_writer_number,  # 是否写手机号
                         'share_url': share_url,  # 转发链接
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
-                    })
+                    }
+                    is_phone = False
+                    if request.GET.get('id'):
+                        if models.zgld_customer.objects.get(id=user_id).video_phone_num:
+                            is_phone = True
 
+                    data['is_phone'] = is_phone
+                    data_list.append(data)
                 response.code = 200
                 response.msg = '查询成功'
                 response.data = {
