@@ -32,6 +32,7 @@ def record_video_oper(request, oper_type):
 
         # 查询录播视频
         if oper_type == 'get_video':
+            uid = request.GET.get('uid')  # 用户ID
             user_id = request.GET.get('user_id')
             company_id = models.zgld_customer.objects.get(id=user_id).company_id
             response = Response.ResponseObj()
@@ -73,7 +74,7 @@ def record_video_oper(request, oper_type):
 
                 data_list = []
                 for obj in objs:
-                    share_url = pub_create_link_repost_video(user_id, obj.id, company_id)
+                    share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
 
                     data_list.append({
                         'id': obj.id,

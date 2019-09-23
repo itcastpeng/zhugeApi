@@ -803,13 +803,12 @@ def forwarding_video_jump_address(request):
 
 
         obj = models.zgld_recorded_video.objects.get(id=video_id)
-        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}&pid={pid}'.format(
+        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}'.format(
             token=token,
             client_id=client_id,
             company_id=company_id,
             uid=uid,
             classification_id=obj.classification_id,
-            pid=pid
         )
         redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?{redirect_url_params}'.format(
             url=url,
