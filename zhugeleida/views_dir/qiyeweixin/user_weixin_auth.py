@@ -396,12 +396,13 @@ def work_weixin_auth_oper(request,oper_type):
                 )
 
             bianma_share_url = quote(share_url, 'utf-8')
-
-            share_url = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(
-                leida_http_url,
-                bianma_share_url
-            )
-
+            share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (
+            leida_http_url, bianma_share_url)
+            # share_url = '{}/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url={}'.format(
+            #     leida_http_url,
+            #     bianma_share_url
+            # )
+            print('share_url--------share_url----------share_url-----------share_url---------share_url--------> ', share_url)
             response.code = 200
             response.msg = '查询成功'
             response.data = {
