@@ -32,7 +32,6 @@ def record_video_oper(request, oper_type):
 
         # 查询录播视频
         if oper_type == 'get_video':
-            print('-=-=--------------------> 查询视频开始时间', datetime.datetime.today())
             user_id = request.GET.get('user_id')
             company_id = models.zgld_customer.objects.get(id=user_id).company_id
             response = Response.ResponseObj()
@@ -139,7 +138,6 @@ def record_video_oper(request, oper_type):
                         'business_address': '商务通图片'
                     }
                 }
-                print('-=-=--------------------> 查询视频结束时间', datetime.datetime.today())
             else:
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())

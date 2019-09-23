@@ -757,14 +757,14 @@ def forwarding_video_jump_address(request):
         component_appid = qywx_config_dict.get('app_id')
         app_secret = qywx_config_dict.get('app_secret')
         url = qywx_config_dict.get('authorization_url')
-
+        print('----------------------获取component_access_token------> ', datetime.datetime.today())
         data_dict = {
             'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
             'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
         }
         component_access_token_ret = create_component_access_token(data_dict)
         component_access_token = component_access_token_ret.data.get('component_access_token')
-
+        print('----------------获取客户openid信息------------> ', datetime.datetime.today())
         get_token_data = {
             'appid': appid,
             'code': js_code,
@@ -778,7 +778,7 @@ def forwarding_video_jump_address(request):
         access_token = ret_data['access_token']
 
 
-
+        print('--------------------------获取用户信息---> ', datetime.datetime.today())
         # 获取用户信息
         ret_json = get_user_info(access_token, openid)
         nickname = ret_json['nickname']  # 客户名称
@@ -791,7 +791,7 @@ def forwarding_video_jump_address(request):
         headimgurl = ret_json['headimgurl']  # 客户头像
 
         customer_objs = models.zgld_customer.objects.filter(openid=openid)
-
+        print('----------------------更新客户信息-------------------------》', datetime.datetime.today())
         # 更新客户基本信息
         if customer_objs:
             customer_objs.update(
