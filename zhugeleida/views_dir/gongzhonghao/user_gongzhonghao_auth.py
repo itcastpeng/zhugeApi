@@ -556,14 +556,14 @@ def user_gongzhonghao_auth_oper(request, oper_type):
             if forms_obj.is_valid():
                 customer_id = request.GET.get('user_id')
                 uid = forms_obj.cleaned_data.get('uid')                 # 用户ID
-                level = forms_obj.cleaned_data.get('level')
+                # level = forms_obj.cleaned_data.get('level')
                 video_id = forms_obj.cleaned_data.get('video_id')
                 company_id = forms_obj.cleaned_data.get('company_id')
 
                 gongzhonghao_app_obj = models.zgld_gongzhonghao_app.objects.get(company_id=company_id)
                 authorization_appid = gongzhonghao_app_obj.authorization_appid
 
-                level += 1
+                # level += 1
                 pid = customer_id
                 appid = authorization_appid
                 relate_params = str(company_id) + '_' + str(video_id) + '_' + str(uid)
