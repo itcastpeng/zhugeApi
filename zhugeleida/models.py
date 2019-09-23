@@ -720,6 +720,8 @@ class zgld_customer(models.Model):
     subscribe_time = models.DateTimeField(verbose_name='用户关注时间', blank=True, null=True)
     create_date = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+    video_phone_num = models.CharField(verbose_name='视频获取的手机号', max_length=32, null=True)
+
     def __str__(self):
         return 'Custer: %s ' % (self.username)
 
@@ -1782,8 +1784,13 @@ class zgld_recorded_video(models.Model):
     whether_previous_video = models.BooleanField(verbose_name='是否打开往期视频', default=0)
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
-
-
+# 转发视频关系表
+# class zgld_video_to_customer_belonger(models.Model):
+#     user = models.ForeignKey('zgld_userprofile', verbose_name='用户转发', null=True)
+#     customer = models.ForeignKey('zgld_customer', verbose_name='查看客户')
+#     parent_customer = models.ForeignKey('zgld_customer', verbose_name='转发客户', null=True)
+#
+#     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 
 

@@ -22,7 +22,7 @@ def record_video_oper(request, oper_type):
         if oper_type == 'update_phone':
             phone_num = request.POST.get('phone_num')
             if verify_phone_number(phone_num):
-                models.zgld_customer.objects.filter(id=user_id).update(phone=phone_num)
+                models.zgld_customer.objects.filter(id=user_id).update(video_phone_num=phone_num)
                 response.code = 200
                 response.msg = '更新手机号完成'
             else:
