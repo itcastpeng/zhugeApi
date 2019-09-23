@@ -139,27 +139,11 @@ class CreateShareUrl(forms.Form):
     )
 
 
-    pid = forms.IntegerField(
-        # 客户上级对应的用户
-        required=False,
-        error_messages={
-            'required': "用户ID不能为空"
-        }
 
-    )
-
-    level = forms.IntegerField(
-        # 客户上级对应的用户
+    video_id = forms.CharField(
         required=True,
         error_messages={
-            'required': "层级不能为空"
-        }
-    )
-
-    article_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': "article_id 不能为空"
+            'required': "video_id 不能为空"
         }
     )
 
