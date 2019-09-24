@@ -30,6 +30,7 @@ def action_record(data):
     article_id = data.get('article_id')  # 文章 id
     action = data.get('action')
     diary_id = data.get('diary_id') # 日记ID
+    video_id = data.get('video_id') # 日记ID
     if action:
         action = int(action)
 
@@ -136,6 +137,7 @@ def action_record(data):
             remark=remark,
             action=action,
             diary_id=diary_id,
+            video_id=video_id,
         )
         content = '%s%s' % (customer_name, remark)
         print('------ 客户姓名 + 访问日志信息------->>', customer_name, '+', 'action:', action, content)
@@ -172,6 +174,7 @@ def user_send_action_log(request):
     action = request.GET.get('action')
     remark = request.GET.get('remark')
     diary_id = request.GET.get('diary_id') # 日记ID
+    video_id = request.GET.get('video_id') # 视频ID
 
     # objs = models.zgld_user_customer_belonger.objects.select_related('user').filter(
     #     customer_id=customer_id,user_id=user_id).order_by('create_date')
@@ -206,6 +209,7 @@ def user_send_action_log(request):
             'remark': remark,
             'agent_id': agent_id,
             'diary_id': diary_id, # 日记ID
+            'video_id': video_id, # 视频ID
         }
         response_ret = action_record(_data) # 发送消息
         content = response_ret.data.get('content')

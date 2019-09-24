@@ -5,6 +5,7 @@ from publicFunc.condition_com import conditionCom
 from zhugeleida.forms.gongzhonghao.record_video_verify import SelectForm
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.public.pub import pub_create_link_repost_video, verify_phone_number
+from zhugeleida.public.common import action_record
 import json, datetime
 
 
@@ -105,6 +106,12 @@ def record_video_oper(request, oper_type):
                     }
                     is_phone = False
                     if video_id:
+                        # 创建推送日志
+                        remark = '{}》, 尽快追踪!!'.format('正在查看视频《' + obj.title)
+                        data = request.GET.copy()
+                        data['action'] = 24
+                        data['video_id'] = video_id
+                        action_record(data, remark)  # 此步骤封装到 异步中。
                         if models.zgld_customer.objects.get(id=user_id).video_phone_num:
                             is_phone = True
 
