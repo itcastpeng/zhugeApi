@@ -846,57 +846,57 @@ class zgld_photo(models.Model):
         app_label = "zhugeleida"
 
 
-# # 访问动能日志记录表
-# class zgld_accesslog(models.Model):
-#     """Store Schedule run logs """
-#
-#     action_choices = (
-#         (1, '查看名片'),  # 查看了名片第XXX次。
-#         (2, '查看产品'),  # 查看您的产品; 查看竞价排名; 转发了竞价排名。
-#         (3, '查看动态'),  # 查看了公司的动态。 评论了您的企业动态。
-#         (4, '查看官网'),  # 查看了您的官网 , 转发了您官网。
-#
-#         (5, '复制微信'),
-#         (6, '转发名片'),  #
-#         (7, '咨询产品'),
-#         (8, '保存电话'),
-#         (9, '觉得靠谱'),  # 取消了对您的靠谱
-#         (10, '拨打电话'),
-#         (11, '播放语音'),
-#         (12, '复制邮箱'),
-#         (13, '授权访问'),
-#
-#         (14,'查看文章'),
-#         (15,'转发文章到朋友'),
-#         (16,'转发文章到朋友圈'),
-#         (17,'报名活动'),
-#         (18,'下单成功'),
-#         (19, '点赞文章'),  # 取消了对您的靠谱
-#         (20, '取消订单'),  # 取消了对您的靠谱
-#
-#         (21, '查看日记首页'),  # 记录查看日记首页
-#         (22, '查看日记详情'),  # 记录查看日记列表页
-#         (23, '发送小程序'),  # 点击发送小程序
-#
-#         # (24, '查看视频'),
-#     )
-#
-#     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
-#     user = models.ForeignKey('zgld_userprofile', verbose_name=' 被访问的用户',null=True)
-#     article = models.ForeignKey('zgld_article', verbose_name='文章',null=True)
-#
-#     customer = models.ForeignKey('zgld_customer', verbose_name='访问的客户',null=True)
-#     remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
-#     # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='accesslog', verbose_name='活动时间(客户活动)',null=True)  # 代表客户活动日志最后一条记录的时间
-#     is_new_msg = models.BooleanField(default=True, verbose_name='是否为新日志')
-#     create_date = models.DateTimeField(auto_now_add=True)
-#
-#     diary = models.ForeignKey('zgld_diary', verbose_name='日记', null=True)
-#     # video = models.ForeignKey('zgld_recorded_video', verbose_name='视频', null=True)
-#
-#     class Meta:
-#         verbose_name_plural = "访问动能日志记录表"
-#         app_label = "zhugeleida"
+# 访问动能日志记录表
+class zgld_accesslog(models.Model):
+    """Store Schedule run logs """
+
+    action_choices = (
+        (1, '查看名片'),  # 查看了名片第XXX次。
+        (2, '查看产品'),  # 查看您的产品; 查看竞价排名; 转发了竞价排名。
+        (3, '查看动态'),  # 查看了公司的动态。 评论了您的企业动态。
+        (4, '查看官网'),  # 查看了您的官网 , 转发了您官网。
+
+        (5, '复制微信'),
+        (6, '转发名片'),  #
+        (7, '咨询产品'),
+        (8, '保存电话'),
+        (9, '觉得靠谱'),  # 取消了对您的靠谱
+        (10, '拨打电话'),
+        (11, '播放语音'),
+        (12, '复制邮箱'),
+        (13, '授权访问'),
+
+        (14,'查看文章'),
+        (15,'转发文章到朋友'),
+        (16,'转发文章到朋友圈'),
+        (17,'报名活动'),
+        (18,'下单成功'),
+        (19, '点赞文章'),  # 取消了对您的靠谱
+        (20, '取消订单'),  # 取消了对您的靠谱
+
+        (21, '查看日记首页'),  # 记录查看日记首页
+        (22, '查看日记详情'),  # 记录查看日记列表页
+        (23, '发送小程序'),  # 点击发送小程序
+
+        # (24, '查看视频'),
+    )
+
+    action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
+    user = models.ForeignKey('zgld_userprofile', verbose_name=' 被访问的用户',null=True)
+    article = models.ForeignKey('zgld_article', verbose_name='文章',null=True)
+
+    customer = models.ForeignKey('zgld_customer', verbose_name='访问的客户',null=True)
+    remark = models.TextField(verbose_name='备注', help_text='访问信息备注')
+    # activity_time = models.ForeignKey('zgld_user_customer_flowup', related_name='accesslog', verbose_name='活动时间(客户活动)',null=True)  # 代表客户活动日志最后一条记录的时间
+    is_new_msg = models.BooleanField(default=True, verbose_name='是否为新日志')
+    create_date = models.DateTimeField(auto_now_add=True)
+
+    diary = models.ForeignKey('zgld_diary', verbose_name='日记', null=True)
+    # video = models.ForeignKey('zgld_recorded_video', verbose_name='视频', null=True)
+
+    class Meta:
+        verbose_name_plural = "访问动能日志记录表"
+        app_label = "zhugeleida"
 
 
 # 聊天室记录表
