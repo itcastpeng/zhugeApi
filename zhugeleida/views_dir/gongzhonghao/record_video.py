@@ -33,7 +33,8 @@ def record_video_oper(request, oper_type):
         # 查询录播视频
         if oper_type == 'get_video':
             uid = request.GET.get('uid')  # 用户ID
-            is_previous_video = request.GET.get('is_previous_video')  # 是否为往期视频
+            exclude_id = request.GET.get('exclude_id')                  # 排除ID
+            is_previous_video = request.GET.get('is_previous_video')    # 是否为往期视频
             user_id = request.GET.get('user_id')
             company_id = models.zgld_customer.objects.get(id=user_id).company_id
             response = Response.ResponseObj()
@@ -51,7 +52,7 @@ def record_video_oper(request, oper_type):
                 objs = models.zgld_recorded_video.objects.filter(
                     q,
                     company_id=company_id,
-                ).order_by(order)
+                ).exclude(id=exclude_id).order_by(order)
                 count = objs.count()
 
                 if length != 0:
