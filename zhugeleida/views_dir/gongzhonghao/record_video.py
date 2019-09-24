@@ -76,31 +76,31 @@ def record_video_oper(request, oper_type):
 
                 data_list = []
                 for obj in objs:
-                    share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
+                    # share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
 
                     data = {
                         'id': obj.id,
-                        'classification_id': obj.classification_id,  # 分类ID
+                        'classification_id': obj.classification_id,                     # 分类ID
                         'classification_name': obj.classification.classification_name,  # 分类名称
-                        'company_id': obj.company_id,  # 公司ID
-                        'company_name': obj.company.name,  # 公司名称
-                        'user_id': obj.user_id,  # 创建人ID
-                        'user_name': obj.user.login_user,  # 创建人名称
-                        'title': obj.title,  # 视频标题
-                        'abstract': obj.abstract,  # 视频摘要
-                        'cover_photo': obj.cover_photo,  # 封面图片
-                        'video_url': obj.video_url,  # 封面链接
+                        'company_id': obj.company_id,                                   # 公司ID
+                        'company_name': obj.company.name,                               # 公司名称
+                        'user_id': obj.user_id,                                         # 创建人ID
+                        'user_name': obj.user.login_user,                               # 创建人名称
+                        'title': obj.title,                                             # 视频标题
+                        'abstract': obj.abstract,                                       # 视频摘要
+                        'cover_photo': obj.cover_photo,                                 # 封面图片
+                        'video_url': obj.video_url,                                     # 封面链接
 
-                        'expert_introduction': obj.expert_introduction,  # 专家介绍
-                        'textual_interpretation': obj.textual_interpretation,  # 文字解读
-                        'whether_authority_expert': obj.whether_authority_expert,  # 是否打开权威专家
-                        'whether_consult_online': obj.whether_consult_online,  # 是否打开在线咨询
-                        'whether_previous_video': obj.whether_previous_video,  # 是否打开往期视频
-                        'whether_text_interpretation': obj.whether_text_interpretation,  # 是否打开文字解读
-                        'whether_verify_phone': obj.whether_verify_phone,  # 是否验证短信
-                        'whether_writer_number': obj.whether_writer_number,  # 是否写手机号
-                        'share_url': share_url,  # 转发链接
-                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
+                        'expert_introduction': obj.expert_introduction,                 # 专家介绍
+                        'textual_interpretation': obj.textual_interpretation,           # 文字解读
+                        'whether_authority_expert': obj.whether_authority_expert,       # 是否打开权威专家
+                        'whether_consult_online': obj.whether_consult_online,           # 是否打开在线咨询
+                        'whether_previous_video': obj.whether_previous_video,           # 是否打开往期视频
+                        'whether_text_interpretation': obj.whether_text_interpretation, # 是否打开文字解读
+                        'whether_verify_phone': obj.whether_verify_phone,               # 是否验证短信
+                        'whether_writer_number': obj.whether_writer_number,             # 是否写手机号
+                        # 'share_url': share_url,                                         # 转发链接
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),   # 文章创建时间
                     }
                     is_phone = False
                     if video_id:

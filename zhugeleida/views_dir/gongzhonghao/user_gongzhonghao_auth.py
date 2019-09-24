@@ -697,8 +697,6 @@ def user_gongzhonghao_redirect_share_url(request):
 
 # 转发出去的录播视频 跳转地址
 def forwarding_video_jump_address(request):
-    print('-------- 公众号-登录验证 request.GET 数据 -->', request.GET)
-    print('*************************------------------------>跳转链接开始计时----------》', datetime.datetime.today())
     js_code = request.GET.get('code')
     code_objs = models.save_code.objects.filter(code=js_code)
     if not code_objs:
@@ -713,7 +711,12 @@ def forwarding_video_jump_address(request):
         company_id = relate.split('_')[0]
         video_id = relate.split('_')[1]
         uid = relate.split('_')[2]          # 用户ID
-        pid = relate.split('_')[3]          # 客户ID
+
+        pid = ''          # 客户ID
+        try:
+            pid = relate.split('_')[3]
+        except Exception:
+            pass
 
         three_service_objs = models.zgld_three_service_setting.objects.filter(three_services_type=2)  # 公众号
         qywx_config_dict = ''
@@ -725,14 +728,12 @@ def forwarding_video_jump_address(request):
         component_appid = qywx_config_dict.get('app_id')
         app_secret = qywx_config_dict.get('app_secret')
         url = qywx_config_dict.get('authorization_url')
-        print('----------------------获取component_access_token------> ', datetime.datetime.today())
         data_dict = {
             'app_id': component_appid,  # 查看诸葛雷达_公众号的 appid
             'app_secret': app_secret  # 查看诸葛雷达_公众号的AppSecret
         }
         component_access_token_ret = create_component_access_token(data_dict)
         component_access_token = component_access_token_ret.data.get('component_access_token')
-        print('----------------获取客户openid信息------------> ', datetime.datetime.today())
         get_token_data = {
             'appid': appid,
             'code': js_code,
@@ -745,8 +746,6 @@ def forwarding_video_jump_address(request):
         openid = ret_data['openid']
         access_token = ret_data['access_token']
 
-
-        print('--------------------------获取用户信息---> ', datetime.datetime.today())
         # 获取用户信息
         ret_json = get_user_info(access_token, openid)
         nickname = ret_json['nickname']  # 客户名称
@@ -759,7 +758,6 @@ def forwarding_video_jump_address(request):
         headimgurl = ret_json['headimgurl']  # 客户头像
 
         customer_objs = models.zgld_customer.objects.filter(openid=openid)
-        print('----------------------更新客户信息-------------------------》', datetime.datetime.today())
         # 更新客户基本信息
         if customer_objs:
             customer_objs.update(
@@ -815,7 +813,6 @@ def forwarding_video_jump_address(request):
             video_id=video_id,
             redirect_url_params=redirect_url_params
         )
-        print('*************************------------------------>跳转链接结束计时----------》', datetime.datetime.today())
         return redirect(redirect_url)
 
 

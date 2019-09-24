@@ -24,7 +24,6 @@ def record_video(request):
             'id': '',
             'company_id': '',
             'classification_id': '',
-            'user_id': '',
             'title': '__contains',
             'abstract': '__contains',
         }

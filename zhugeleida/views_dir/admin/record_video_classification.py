@@ -25,10 +25,9 @@ def record_video_classification(request):
             'id': '',
             'classification_name': '__contains',
             'company_id': '',
-            'user_id': '',
         }
         q = conditionCom(request, field_dict)
-
+        print(q)
         objs = models.zgld_recorded_video_classification.objects.filter(
             q,
             company_id=company_id
