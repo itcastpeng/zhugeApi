@@ -878,7 +878,7 @@ class zgld_accesslog(models.Model):
         (22, '查看日记详情'),  # 记录查看日记列表页
         (23, '发送小程序'),  # 点击发送小程序
 
-        # (24, '查看视频'),
+        (24, '查看视频'),
     )
 
     action = models.SmallIntegerField(verbose_name="访问的功能动作", choices=action_choices)
@@ -892,7 +892,7 @@ class zgld_accesslog(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
 
     diary = models.ForeignKey('zgld_diary', verbose_name='日记', null=True)
-    # video = models.ForeignKey('zgld_recorded_video', verbose_name='视频', null=True)
+    video = models.ForeignKey('zgld_recorded_video', verbose_name='视频', null=True)
 
     class Meta:
         verbose_name_plural = "访问动能日志记录表"
