@@ -80,7 +80,7 @@ def record_video_oper(request, oper_type):
                 for obj in objs:
                     # share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
 
-                    data = {
+                    result_data = {
                         'id': obj.id,
                         'classification_id': obj.classification_id,                     # 分类ID
                         'classification_name': obj.classification.classification_name,  # 分类名称
@@ -115,8 +115,8 @@ def record_video_oper(request, oper_type):
                         if models.zgld_customer.objects.get(id=user_id).video_phone_num:
                             is_phone = True
 
-                    data['is_phone'] = is_phone
-                    data_list.append(data)
+                    result_data['is_phone'] = is_phone
+                    data_list.append(result_data)
 
                 if is_previous_video and video_id: # 记录转载
                     video_belonger_data = {

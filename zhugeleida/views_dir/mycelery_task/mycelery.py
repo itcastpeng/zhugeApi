@@ -137,7 +137,7 @@ def action_record(data):
             remark=remark,
             action=action,
             diary_id=diary_id,
-            # video_id=video_id,
+            video_id=video_id,
         )
         content = '%s%s' % (customer_name, remark)
         print('------ 客户姓名 + 访问日志信息------->>', customer_name, '+', 'action:', action, content)
