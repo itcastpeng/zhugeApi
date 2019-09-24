@@ -298,9 +298,9 @@ class VideoUpdateForm(forms.Form):
     )
 
     textual_interpretation = forms.CharField(
-        required=True,
+        required=False,
         error_messages={
-            'required': '文字介绍不能为空'
+            'required': '文字介绍类型错误'
         }
     )
     user_id = forms.CharField(
