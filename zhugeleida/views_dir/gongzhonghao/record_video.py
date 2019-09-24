@@ -79,6 +79,11 @@ def record_video_oper(request, oper_type):
                 data_list = []
                 for obj in objs:
                     # share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
+                    expert_introduction = obj.expert_introduction
+                    try:
+                        expert_introduction = json.loads(expert_introduction)
+                    except Exception:
+                        pass
 
                     result_data = {
                         'id': obj.id,
@@ -93,7 +98,7 @@ def record_video_oper(request, oper_type):
                         'cover_photo': obj.cover_photo,                                 # 封面图片
                         'video_url': obj.video_url,                                     # 封面链接
 
-                        'expert_introduction': obj.expert_introduction,                 # 专家介绍
+                        'expert_introduction': expert_introduction,                 # 专家介绍
                         'textual_interpretation': obj.textual_interpretation,           # 文字解读
                         'whether_authority_expert': obj.whether_authority_expert,       # 是否打开权威专家
                         'whether_consult_online': obj.whether_consult_online,           # 是否打开在线咨询
