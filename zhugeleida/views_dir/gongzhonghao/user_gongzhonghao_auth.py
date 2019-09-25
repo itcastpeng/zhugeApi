@@ -796,8 +796,8 @@ def forwarding_video_jump_address(request):
         }
         if pid:
             video_belonger_data['parent_customer_id'] = pid
-        log_id = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
-
+        video_log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+        log_id = video_log_obj.id
 
         obj = models.zgld_recorded_video.objects.get(id=video_id)
         redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}&log_id={log_id}'.format(
