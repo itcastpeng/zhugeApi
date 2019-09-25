@@ -1792,6 +1792,8 @@ class zgld_video_to_customer_belonger(models.Model):
     customer = models.ForeignKey('zgld_customer', verbose_name='查看客户', null=True, related_name='zgld_video_to_customer_belonger_customer')
     parent_customer = models.ForeignKey('zgld_customer', verbose_name='转发客户', null=True)
     video = models.ForeignKey('zgld_recorded_video', verbose_name='对应视频', null=True)
+    video_view_duration = models.CharField(verbose_name='视频查看时长', max_length=128, default='0')
+    video_duration_stay = models.CharField(verbose_name='视频停留时长', max_length=128, default='0')
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 

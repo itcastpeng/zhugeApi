@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.record_video_verify import SelectForm
 from publicFunc.condition_com import conditionCom
+from publicFunc.base64 import b64decode
 import json, base64
 
 
@@ -130,8 +131,125 @@ def record_video_settings_oper(request, oper_type, o_id):
 
 
     else:
-        response.code = 402
-        response.msg = '请求异常'
+
+        # 查询所有视频名称
+        if oper_type == 'query_all_video_names':
+            objs = models.zgld_recorded_video.objects.filter(
+                company_id=company_id
+            )
+            count = objs.count()
+            data_list = []
+            for obj in objs:
+                data_list.append({
+                    'id': obj.id,
+                    'title': obj.title
+                })
+
+            response.code = 200
+            response.msg = '查询完成'
+            response.data = {
+                'data_list': data_list,
+                'count': count,
+            }
+
+        # 查询所有视频分类名称
+        elif oper_type == 'query_all_video_category_names':
+            objs = models.zgld_recorded_video_classification.objects.filter(
+                company_id=company_id
+            )
+            count = objs.count()
+            data_list = []
+            for obj in objs:
+                data_list.append({
+                    'id': obj.id,
+                    'classification_name': obj.classification_name
+                })
+
+            response.code = 200
+            response.msg = '查询完成'
+            response.data = {
+                'data_list': data_list,
+                'count': count,
+            }
+
+        # 查询视频数据管理
+        elif oper_type == 'query_video_data_management':
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+                field_dict = {
+                    'id': '',
+                }
+                q = conditionCom(request, field_dict)
+                objs = models.zgld_video_to_customer_belonger.objects.filter(
+                    q,
+                    user__company_id=company_id,
+                    video__user__company_id=company_id,
+                ).order_by(order)
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                data_list = []
+                for obj in objs:
+
+                    if obj.parent_customer: #
+                        phone = obj.parent_customer.video_phone_num
+                        customer_id = obj.parent_customer_id
+                        customer_name = b64decode(obj.parent_customer.username)
+
+                    else:
+                        phone = obj.customer.video_phone_num
+                        customer_id = obj.customer_id
+                        customer_name = b64decode(obj.customer.username)
+
+                    data_list.append({
+                        'id': obj.id,
+                        'phone': phone,
+                        'belong_id': obj.user_id,
+                        'belong_name': obj.user.username,
+                        'customer_id': customer_id,
+                        'customer_name': customer_name,
+                        'video_id': obj.video_id,
+                        'video_name': obj.video.title,
+                        'video_view_duration': obj.video_view_duration,
+                        'video_duration_stay': obj.video_duration_stay,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 查看时间
+                    })
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'count': count,
+                    'data_list': data_list,
+                }
+                response.note = {
+                    'id': 'ID',
+                    'phone': '电话',
+                    'belong_id': '归属人ID',
+                    'belong_name': '归属人名称',
+                    'customer_id': '查看人ID',
+                    'customer_name': '查看人名称',
+                    'video_id': '查看视频ID',
+                    'video_name': '查看视频名称',
+                    'video_view_duration': '视频查看时长',
+                    'video_duration_stay': '视频停留时长',
+                    'create_date': '查看时间',
+                }
+
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
+
+
+        else:
+            response.code = 402
+            response.msg = '请求异常'
 
     return JsonResponse(response.__dict__)
 

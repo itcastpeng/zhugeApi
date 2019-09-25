@@ -29,6 +29,30 @@ def record_video_oper(request, oper_type):
             else:
                 response.code = 301
                 response.msg = '手机号验证失败'
+
+        # 记录 视频停留时长/视频观看时长
+        elif oper_type == 'record_length':
+            log_id = request.POST.get('log_id')
+            log_type = request.POST.get('log_type') # 记录日志类型  查看view /停留stay
+            objs = models.zgld_video_to_customer_belonger.objects.filter(id=log_id)
+            if objs:
+                obj = objs[0]
+                if log_type == 'view': # 视频查看时长
+                    obj.video_view_duration = int(obj.video_view_duration) + 5
+                else: # 视频停留时长
+                    obj.video_duration_stay = int(obj.video_duration_stay) + 5
+                obj.save()
+
+                code = 200
+                msg = '已记录'
+
+            else:
+                code = 301
+                msg = '暂无此日志'
+
+            response.code = code
+            response.msg = msg
+
     else:
 
         # 查询录播视频
@@ -76,6 +100,7 @@ def record_video_oper(request, oper_type):
                     setting_data['whether_business_communication'] = settings_obj.whether_business_communication
                     setting_data['business_address'] = settings_obj.business_address
 
+
                 data_list = []
                 for obj in objs:
                     # share_url = pub_create_link_repost_video(uid, obj.id, company_id, user_id)
@@ -120,16 +145,19 @@ def record_video_oper(request, oper_type):
                         if models.zgld_customer.objects.get(id=user_id).video_phone_num:
                             is_phone = True
 
-                    result_data['is_phone'] = is_phone
-                    data_list.append(result_data)
+                    log_id = ''
+                    if is_previous_video and video_id:  # 记录转载
+                        video_belonger_data = {
+                            'video_id': video_id,
+                            'user_id': uid,
+                            'customer_id': user_id,
+                        }
+                        log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+                        log_id = log_obj.id
 
-                if is_previous_video and video_id: # 记录转载
-                    video_belonger_data = {
-                        'video_id': video_id,
-                        'user_id': uid,
-                        'customer_id': user_id,
-                    }
-                    models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+                    result_data['is_phone'] = is_phone
+                    result_data['log_id'] = log_id
+                    data_list.append(result_data)
 
                 response.code = 200
                 response.msg = '查询成功'
@@ -173,6 +201,49 @@ def record_video_oper(request, oper_type):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 查询数据管理
+        elif oper_type == '':
+            user_id = request.GET.get('user_id')
+            company_id = models.zgld_customer.objects.get(id=user_id).company_id
+            response = Response.ResponseObj()
+            forms_obj = SelectForm(request.GET)
+            if forms_obj.is_valid():
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
+                order = request.GET.get('order', '-create_date')
+                field_dict = {
+                    'id': '',
+                }
+                q = conditionCom(request, field_dict)
+
+                objs = ''
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+
+                data_list = []
+                for obj in objs:
+                    result_data = {
+                        'id': obj.id,
+                        'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),  # 文章创建时间
+                    }
+                    data_list.append(result_data)
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'count': count,
+                    'data_list': data_list,
+                }
+                response.note = {
+
+                }
+            else:
+                response.code = 301
+                response.msg = json.loads(forms_obj.errors.as_json())
 
 
         else:
