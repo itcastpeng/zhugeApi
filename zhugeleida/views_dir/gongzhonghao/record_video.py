@@ -146,7 +146,7 @@ def record_video_oper(request, oper_type):
                             is_phone = True
 
                     log_id = ''
-                    if is_previous_video and video_id:  # 记录转载
+                    if video_id:  # 记录转载
                         video_belonger_data = {
                             'video_id': video_id,
                             'user_id': uid,

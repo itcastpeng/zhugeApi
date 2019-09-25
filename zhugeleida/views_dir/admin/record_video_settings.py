@@ -134,9 +134,14 @@ def record_video_settings_oper(request, oper_type, o_id):
 
         # 查询所有视频名称
         if oper_type == 'query_all_video_names':
+            classification_id = request.GET.get('classification_id')
+
             objs = models.zgld_recorded_video.objects.filter(
                 company_id=company_id
             )
+            if classification_id:
+                objs = objs.filter(classification_id=classification_id)
+
             count = objs.count()
             data_list = []
             for obj in objs:
@@ -181,6 +186,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 order = request.GET.get('order', '-create_date')
                 field_dict = {
                     'id': '',
+                    'video_id': '',
                 }
                 q = conditionCom(request, field_dict)
                 objs = models.zgld_video_to_customer_belonger.objects.filter(
