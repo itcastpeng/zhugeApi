@@ -60,6 +60,7 @@ def record_video_oper(request, oper_type):
             uid = request.GET.get('uid')  # 用户ID
             exclude_id = request.GET.get('exclude_id')                  # 排除ID
             is_previous_video = request.GET.get('is_previous_video')    # 是否为往期视频
+            log_id = request.GET.get('log_id')                          # 日志ID
             user_id = request.GET.get('user_id')
             company_id = models.zgld_customer.objects.get(id=user_id).company_id
             response = Response.ResponseObj()
@@ -145,15 +146,16 @@ def record_video_oper(request, oper_type):
                         if models.zgld_customer.objects.get(id=user_id).video_phone_num:
                             is_phone = True
 
-                    log_id = ''
                     if video_id:  # 记录转载
-                        video_belonger_data = {
-                            'video_id': video_id,
-                            'user_id': uid,
-                            'customer_id': user_id,
-                        }
-                        log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
-                        log_id = log_obj.id
+                        if is_previous_video:
+                            video_belonger_data = {
+                                'video_id': video_id,
+                                'user_id': uid,
+                                'customer_id': user_id,
+                            }
+                            log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+                            log_id = log_obj.id
+
 
                     result_data['is_phone'] = is_phone
                     result_data['log_id'] = log_id

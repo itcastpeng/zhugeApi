@@ -796,17 +796,17 @@ def forwarding_video_jump_address(request):
         }
         if pid:
             video_belonger_data['parent_customer_id'] = pid
-        models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
-
+        log_id = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
 
 
         obj = models.zgld_recorded_video.objects.get(id=video_id)
-        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}'.format(
+        redirect_url_params = 'token={token}&user_id={client_id}&company_id={company_id}&uid={uid}&classification_id={classification_id}&log_id={log_id}'.format(
             token=token,
             client_id=client_id,
             company_id=company_id,
             uid=uid,
             classification_id=obj.classification_id,
+            log_id=log_id
         )
         redirect_url = '{url}/zhugeleidaArticleShare#/gongzhonghao/leidashipin/{video_id}?{redirect_url_params}'.format(
             url=url,
