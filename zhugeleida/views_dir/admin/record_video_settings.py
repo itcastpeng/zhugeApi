@@ -204,15 +204,15 @@ def record_video_settings_oper(request, oper_type, o_id):
                 data_list = []
                 for obj in objs:
 
-                    if obj.parent_customer: #
-                        phone = obj.parent_customer.video_phone_num
-                        customer_id = obj.parent_customer_id
-                        customer_name = b64decode(obj.parent_customer.username)
-
-                    else:
+                    if obj.customer: #
                         phone = obj.customer.video_phone_num
                         customer_id = obj.customer_id
                         customer_name = b64decode(obj.customer.username)
+
+                    else:
+                        phone = obj.parent_customer.video_phone_num
+                        customer_id = obj.parent_customer_id
+                        customer_name = b64decode(obj.parent_customer.username)
 
                     data_list.append({
                         'id': obj.id,
