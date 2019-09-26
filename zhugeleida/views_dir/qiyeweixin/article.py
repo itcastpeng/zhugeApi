@@ -427,6 +427,7 @@ def article_oper(request, oper_type, o_id):
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
                     code = 200
+                    msg = '查询成功'
                     data = {
                         'article_num': article_num,
                         'ret_data': ret_data
