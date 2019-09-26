@@ -6,17 +6,15 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.qiyeweixin.article_verify import ArticleAddForm, ArticleSelectForm, \
     ArticleUpdateForm, MyarticleForm, ThreadPictureForm, EffectRankingByLevelForm, QueryCustomerTransmitForm, \
-    HideCustomerDataForm, ArticleAccessLogForm, ArticleForwardInfoForm,EffectRankingByTableForm
+    HideCustomerDataForm, ArticleAccessLogForm, ArticleForwardInfoForm,EffectRankingByTableForm, VideoForm
 from zhugeleida.public.common import action_record
 from django.db.models import Max, Avg, F, Q, Min, Count, Sum
 from zhugeleida.views_dir.admin.article import mailuotu
-import time
-import datetime
-import json
+from zhugeleida.public.pub import get_min_s
 from django.db.models import Q
 from zhugeleida.public.condition_com import conditionCom
 from zhugeleida.public.common import conversion_seconds_hms
-import base64
+import json, datetime, time, base64
 
 
 # 企业微信端文章查询
@@ -363,6 +361,7 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'customer_read_info':  # 脉络图
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
+            log_type = request.GET.get('log_type')   # log_type 为1 为文章 2为录播视频
 
 
             current_page = request.GET.get('current_page')
@@ -381,59 +380,108 @@ def article_oper(request, oper_type, o_id):
                 q1.children.append(('customer_id', customer_id))
                 q1.children.append(('user_id', user_id))
 
-                objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
-                                                                                       'customer').filter(q1)
-                if objs:
-                    _objs = objs.values('article_id', 'article__title').annotate(Sum('stay_time'), Sum('read_count'),
-                                                                                 Sum('forward_count'))
+                current_page = forms_obj.cleaned_data['current_page']
+                length = forms_obj.cleaned_data['length']
 
-                    article_num = _objs.count()
-                    current_page = forms_obj.cleaned_data['current_page']
-                    length = forms_obj.cleaned_data['length']
+                code = 302
+                msg = '返回为空'
+                data = {}
 
+                # 录播视频
+                if log_type in [2, '2']:
+                    objs = models.zgld_video_to_customer_belonger.objects.select_related(
+                        'video',
+                        'user',
+                        'customer'
+                    ).filter(q1)
 
+                    article_num = objs.count()
                     ret_data = []
                     if length != 0:
                         start_line = (current_page - 1) * length
                         stop_line = start_line + length
-                        _objs = _objs[start_line: stop_line]
+                        objs = objs[start_line: stop_line]
 
-
-                    for _obj in _objs:
-                        article_id = _obj.get('article_id')
-                        last_access_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
-                                                                                         customer_id=customer_id).order_by('-last_access_date')
-                        print('v-last_access_objs--------------------> ', last_access_objs)
-                        if last_access_objs:
-                            last_access_date = last_access_objs[0].last_access_date.strftime('%Y-%m-%d %H:%M:%S')
-                        else:
-                            last_access_date = '00:00:00 00:00:00'
-
-                        level = list(objs.filter(article_id=article_id).values_list('level', flat=True).distinct())
-                        print('--- last_access_date ---->>',last_access_date)
-                        stay_time = _obj.get('stay_time__sum')
-                        stay_time = conversion_seconds_hms(stay_time)
+                    for obj in objs:
+                        belonger_objs_one = models.zgld_video_to_customer_belonger.objects.filter(
+                            user_id=user_id,
+                            customer_id=obj.customer_id,
+                            video_id=obj.video_id,
+                            parent_customer__isnull=True
+                        ).count()
+                        belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
+                            user_id=user_id,
+                            parent_customer_id=obj.parent_customer_id,
+                            video_id=obj.video_id,
+                            parent_customer__isnull=False
+                        ).count()
+                        belonger_data = belonger_objs_one + belonger_objs_two
+                        stay_time = get_min_s(int(obj.video_duration_stay))
                         ret_data.append({
-
-                            'article_id': article_id,
-                            'article_title': _obj.get('article__title'),
+                            'article_id': obj.video_id,
+                            'article_title': obj.video.title,
                             'stay_time': stay_time,
-                            'read_count': _obj.get('read_count__sum'),
-                            'forward_count': _obj.get('forward_count__sum'),
-                            'level': sorted(level),
-                            'create_date': last_access_date,
+                            'read_count': belonger_data,
+                            'forward_count': belonger_data,
+                            'level': 0,
+                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
-
-                    response.code = 200
-                    response.msg = '返回成功'
-                    response.data = {
-                        'ret_data': ret_data,
+                    data = {
                         'article_num': article_num,
+                        'ret_data': ret_data
                     }
 
                 else:
-                    response.code = 302
-                    response.msg = '返回为空'
+                    objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
+                        'customer').filter(q1)
+                    if objs:
+                        _objs = objs.values('article_id', 'article__title').annotate(Sum('stay_time'),
+                            Sum('read_count'),
+                            Sum('forward_count'))
+                        article_num = _objs.count()
+
+                        ret_data = []
+                        if length != 0:
+                            start_line = (current_page - 1) * length
+                            stop_line = start_line + length
+                            _objs = _objs[start_line: stop_line]
+
+                        for _obj in _objs:
+                            article_id = _obj.get('article_id')
+                            last_access_objs = models.zgld_article_access_log.objects.filter(article_id=article_id,
+                                customer_id=customer_id).order_by('-last_access_date')
+                            print('v-last_access_objs--------------------> ', last_access_objs)
+                            if last_access_objs:
+                                last_access_date = last_access_objs[0].last_access_date.strftime('%Y-%m-%d %H:%M:%S')
+                            else:
+                                last_access_date = '00:00:00 00:00:00'
+
+                            level = list(objs.filter(article_id=article_id).values_list('level', flat=True).distinct())
+                            print('--- last_access_date ---->>', last_access_date)
+                            stay_time = _obj.get('stay_time__sum')
+                            stay_time = conversion_seconds_hms(stay_time)
+                            ret_data.append({
+
+                                'article_id': article_id,
+                                'article_title': _obj.get('article__title'),
+                                'stay_time': stay_time,
+                                'read_count': _obj.get('read_count__sum'),
+                                'forward_count': _obj.get('forward_count__sum'),
+                                'level': sorted(level),
+                                'create_date': last_access_date,
+                            })
+
+                        code = 200
+                        msg = '返回成功'
+                        data = {
+                            'ret_data': ret_data,
+                            'article_num': article_num,
+                        }
+
+                response.code = code
+                response.msg = msg
+                response.data = data
+
 
             else:
                 print('------- 未能通过------->>', forms_obj.errors)
@@ -752,7 +800,7 @@ def article_oper(request, oper_type, o_id):
 
         # 获取文章访问日志
         elif oper_type == 'get_article_access_log':
-
+            log_type = request.GET.get('log_type')  # log_type 为1 为文章 2为录播视频
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
             parent_id = request.GET.get('pid')
@@ -760,88 +808,134 @@ def article_oper(request, oper_type, o_id):
             length = request.GET.get('length')
             type =  request.GET.get('type')
 
-            request_data_dict = {
-                'article_id': o_id,
-                'customer_id': customer_id,
-                'user_id': user_id,  # 文章所属用户的ID
-                'current_page': current_page,
-                'length': length,
-            }
-
-            forms_obj = ArticleAccessLogForm(request_data_dict)
-            if forms_obj.is_valid():
-                article_id = o_id
-
-                q = Q()
-                q.add(Q(**{'article_id': article_id}), Q.AND)
-                q.add(Q(**{'customer_id': customer_id}), Q.AND)
-                q.add(Q(**{'user_id': user_id}), Q.AND)
-
-                if not type:
-                    if parent_id:
-                        q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
-                    else:
-                        q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
-
-                print('---- 获取文章访问日志 q------>>',q)
-
-                objs = models.zgld_article_access_log.objects.filter(q).order_by('-last_access_date')
-                count = objs.count()
-                if objs:
-                    current_page = forms_obj.cleaned_data['current_page']
-                    length = forms_obj.cleaned_data['length']
-
-                    ret_data = []
+            if log_type in [2, '2']:
+                form_objs = VideoForm(request.GET)
+                if form_objs.is_valid():
+                    q_video = Q()
+                    q_video.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(parent_customer_id=customer_id), Q.AND)
+                    objs = models.zgld_video_to_customer_belonger.objects.filter(
+                        q_video,
+                        user_id=user_id,
+                    )
+                    count = objs.count()
                     if objs:
+                        obj = objs[0]
 
-                        if length != 0:
-                            start_line = (current_page - 1) * length
-                            stop_line = start_line + length
-                            objs = objs[start_line: stop_line]
+                        result_data = []
+                        q_video_1 = Q()
+                        q_video_1.add(Q(customer_id=customer_id) | Q(parent_customer_id=customer_id), Q.AND)
+                        belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(q_video_1, user_id=user_id).order_by('-create_date')
+                        for belonger_obj in belonger_objs:
+                            result_data.append({
+                                'article_access_log_id': belonger_obj.id,
+                                'last_read_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                'stay_time': get_min_s(int(obj.video_duration_stay)),  # 停留时间
+                            })
 
-                        for obj in objs:
-                            stay_time = obj.stay_time
-                            stay_time = conversion_seconds_hms(stay_time)
-
-                            last_access_date = obj.last_access_date.strftime('%Y-%m-%d %H:%M:%S')
-                            data_dict = {
-                                'article_access_log_id': obj.id,
-                                'last_read_time': last_access_date,
-                                'stay_time': stay_time,  # 停留时间
-                            }
-
-                            # level_ret_data.append(data_dict)
-                            # print('----- level_ret_data --------->?',level_ret_data)
-
-                            ret_data.append(data_dict)
-
-                        area = objs[0].customer.province + objs[0].customer.city
-                        username = objs[0].customer.username
-                        username = base64.b64decode(username)
-                        # print('------- jie -------->>', str(username, 'utf-8'))
-                        username = str(username, 'utf-8')
-
+                        area = obj.customer.province + obj.customer.city
+                        username = ''
                         response.code = 200
+                        response.msg = '查询成功'
                         response.data = {
-                            'customer_id': objs[0].customer_id,  # 客户ID
+                            'customer_id': obj.customer_id,  # 客户ID
                             'customer_name': username,  # 客户姓名
-                            'customer_headimgurl': objs[0].customer.headimgurl,  # 客户头像
-                            'sex_text': objs[0].customer.get_sex_display(),  # 性别
-                            'sex': objs[0].customer.sex,  # 性别
-                            'pid': objs[0].customer_parent_id,  # 父级Id
+                            'customer_headimgurl': obj.customer.headimgurl,  # 客户头像
+                            'sex_text': obj.customer.get_sex_display(),  # 性别
+                            'sex': obj.customer.sex,  # 性别
+                            'pid': obj.parent_customer_id,  # 父级Id
                             'area': area,  # 地区
 
-                            'ret_data': ret_data,
+                            'ret_data': result_data,
                             'data_count': count,
                         }
 
-                        print('------ ret_data ------->>', ret_data)
+                else:
+                    response.code = 301
+                    response.msg = json.loads(form_objs.errors.as_json())
 
             else:
-                # print("验证不通过")
-                print(forms_obj.errors)
-                response.code = 301
-                response.msg = json.loads(forms_obj.errors.as_json())
+                request_data_dict = {
+                    'article_id': o_id,
+                    'customer_id': customer_id,
+                    'user_id': user_id,  # 文章所属用户的ID
+                    'current_page': current_page,
+                    'length': length,
+                }
+
+                forms_obj = ArticleAccessLogForm(request_data_dict)
+                if forms_obj.is_valid():
+                    article_id = o_id
+
+                    q = Q()
+                    q.add(Q(**{'article_id': article_id}), Q.AND)
+                    q.add(Q(**{'customer_id': customer_id}), Q.AND)
+                    q.add(Q(**{'user_id': user_id}), Q.AND)
+
+                    if not type:
+                        if parent_id:
+                            q.add(Q(**{'customer_parent_id': parent_id}), Q.AND)
+                        else:
+                            q.add(Q(**{'customer_parent_id__isnull': True}), Q.AND)
+
+                    print('---- 获取文章访问日志 q------>>',q)
+
+                    objs = models.zgld_article_access_log.objects.filter(q).order_by('-last_access_date')
+                    count = objs.count()
+                    if objs:
+                        current_page = forms_obj.cleaned_data['current_page']
+                        length = forms_obj.cleaned_data['length']
+
+                        ret_data = []
+                        if objs:
+
+                            if length != 0:
+                                start_line = (current_page - 1) * length
+                                stop_line = start_line + length
+                                objs = objs[start_line: stop_line]
+
+                            for obj in objs:
+                                stay_time = obj.stay_time
+                                stay_time = conversion_seconds_hms(stay_time)
+
+                                last_access_date = obj.last_access_date.strftime('%Y-%m-%d %H:%M:%S')
+                                data_dict = {
+                                    'article_access_log_id': obj.id,
+                                    'last_read_time': last_access_date,
+                                    'stay_time': stay_time,  # 停留时间
+                                }
+
+                                # level_ret_data.append(data_dict)
+                                # print('----- level_ret_data --------->?',level_ret_data)
+
+                                ret_data.append(data_dict)
+
+                            area = objs[0].customer.province + objs[0].customer.city
+                            username = objs[0].customer.username
+                            username = base64.b64decode(username)
+                            # print('------- jie -------->>', str(username, 'utf-8'))
+                            username = str(username, 'utf-8')
+
+                            response.code = 200
+                            response.data = {
+                                'customer_id': objs[0].customer_id,  # 客户ID
+                                'customer_name': username,  # 客户姓名
+                                'customer_headimgurl': objs[0].customer.headimgurl,  # 客户头像
+                                'sex_text': objs[0].customer.get_sex_display(),  # 性别
+                                'sex': objs[0].customer.sex,  # 性别
+                                'pid': objs[0].customer_parent_id,  # 父级Id
+                                'area': area,  # 地区
+
+                                'ret_data': ret_data,
+                                'data_count': count,
+                            }
+
+                            print('------ ret_data ------->>', ret_data)
+
+                else:
+                    # print("验证不通过")
+                    print(forms_obj.errors)
+                    response.code = 301
+                    response.msg = json.loads(forms_obj.errors.as_json())
 
         #
         elif oper_type == 'get_article_forward_info':

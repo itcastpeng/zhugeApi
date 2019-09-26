@@ -232,7 +232,9 @@ def action(request, oper_type):
                 ret_data = []
                 for obj in objs:
                     username = b64decode(obj.customer.username)
-
+                    log_type = 1
+                    if '视频' in obj.remark:
+                        log_type = 2
                     ret_data.append({
                         'user_id': obj.user_id,
                         'customer_username': username,
@@ -241,6 +243,7 @@ def action(request, oper_type):
                         'customer_source': obj.customer.user_type,
                         'customer_source_text': obj.customer.get_user_type_display(),
                         'log': username + obj.remark,
+                        'log_type': log_type,
                         'create_date': obj.create_date,
                     })
 

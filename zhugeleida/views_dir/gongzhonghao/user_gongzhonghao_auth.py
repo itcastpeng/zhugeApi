@@ -816,12 +816,11 @@ def forwarding_video_jump_address(request):
 
 
         # ====================判断是否有关系
-        customer_belong_objs = models.zgld_user_customer_belonger.objects.filter(source=5, user_id=uid, customer_id=client_id)
+        customer_belong_objs = models.zgld_user_customer_belonger.objects.filter(user_id=uid, customer_id=client_id)
         if not customer_belong_objs:
             models.zgld_user_customer_belonger.objects.create(
                 user_id=uid,
                 customer_id=client_id,
-                source=5,
             )
 
 

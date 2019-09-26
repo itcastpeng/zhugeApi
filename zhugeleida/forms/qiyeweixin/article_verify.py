@@ -193,7 +193,7 @@ class ThreadPictureForm(forms.Form):
     customer_id = forms.CharField(
         required=True,
         error_messages={
-            'required': '文章ID不能为空'
+            'required': '客户ID不能为空'
         }
     )
 
@@ -204,12 +204,6 @@ class ThreadPictureForm(forms.Form):
         }
     )
 
-    article_id = forms.CharField(
-        required=True,
-        error_messages={
-            'required': '文章ID不能为空'
-        }
-    )
 
     current_page = forms.IntegerField(
         required=False,
@@ -602,5 +596,40 @@ class ArticleForwardInfoForm(forms.Form):
             length = 10
         else:
             length = int(self.data['length'])
+        return length
+
+
+# 视频验证
+class VideoForm(forms.Form):
+    current_page = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页码数据类型错误"
+        }
+    )
+
+    length = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': "页显示数量类型错误"
+        }
+    )
+
+
+
+    def clean_current_page(self):
+        if not self.data.get('current_page'):
+            current_page = 1
+        else:
+            current_page = int(self.data['current_page'])
+        return current_page
+
+
+    def clean_length(self):
+        if not self.data.get('length'):
+            length = 10
+        else:
+            length = int(self.data['length'])
+
         return length
 

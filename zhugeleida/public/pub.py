@@ -259,5 +259,27 @@ def verify_phone_number(phone_number):
     return flag
 
 
+#
+def get_min_s(seconds):
+    date_time = datetime.timedelta(seconds=seconds)
 
+    day = date_time.days
+    hour, date_time = divmod(date_time.seconds, 3600)
+    min, date_time = divmod(date_time, 60)
+    second = date_time
+    days = ''
+    hours = ''
+    mins = ''
+    seconds = ''
+    if day:
+        days = str(day) + '天'
+    if hour:
+        hours = str(hour) + '小时'
+    if min:
+        mins = str(min) + '分钟'
+        if second:
+            mins = str(min) + '分'
+    if second:
+        seconds = str(second) + '秒'
 
+    return days + hours + mins + seconds
