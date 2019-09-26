@@ -426,6 +426,7 @@ def article_oper(request, oper_type, o_id):
                             'level': 0,
                             'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                         })
+                    code = 200
                     data = {
                         'article_num': article_num,
                         'ret_data': ret_data
