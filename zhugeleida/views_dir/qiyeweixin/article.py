@@ -398,27 +398,26 @@ def article_oper(request, oper_type, o_id):
                     customer_id_list = []
                     for obj in objs:
                         customer_id = obj.customer_id
-                        print(obj.id, customer_id)
 
                         pinjie_panduan = str(customer_id) + '_' + str(obj.video_id)
                         if pinjie_panduan not in customer_id_list:
                             customer_id_list.append(pinjie_panduan)
 
-                            # belonger_objs_one = models.zgld_video_to_customer_belonger.objects.filter(
-                            #     user_id=user_id,
-                            #     customer_id=obj.customer_id,
-                            #     video_id=obj.video_id,
-                            #     parent_customer__isnull=True
-                            # ).count()
-                            belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
+                            print(obj.id, customer_id, obj.video_id, obj.customer_id)
+                            belonger_data = models.zgld_video_to_customer_belonger.objects.filter(
                                 user_id=user_id,
-                                parent_customer_id=obj.parent_customer_id,
+                                customer_id=obj.customer_id,
                                 video_id=obj.video_id,
-                                parent_customer__isnull=False
                             ).count()
+                            # belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
+                            #     user_id=user_id,
+                            #     parent_customer_id=obj.parent_customer_id,
+                            #     video_id=obj.video_id,
+                            #     parent_customer__isnull=False
+                            # ).count()
 
                             # belonger_data = belonger_objs_one + belonger_objs_two
-                            belonger_data =  belonger_objs_two
+                            # belonger_data =  belonger_objs_one
                             stay_time = get_min_s(int(obj.video_duration_stay))
                             ret_data.append({
                                 'article_id': obj.video_id,
