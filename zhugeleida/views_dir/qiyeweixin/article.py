@@ -834,7 +834,7 @@ def article_oper(request, oper_type, o_id):
                         result_data = []
                         for obj in objs:
                             video_duration_stay = '0秒'
-                            if obj.video_duration_stay >= 1:
+                            if int(obj.video_duration_stay) >= 1:
                                 video_duration_stay = get_min_s(int(obj.video_duration_stay))
 
                             result_data.append({
