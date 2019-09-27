@@ -409,16 +409,17 @@ def article_oper(request, oper_type, o_id):
                                 customer_id=obj.customer_id,
                                 video_id=obj.video_id,
                             ).count()
-                            # belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
-                            #     user_id=user_id,
-                            #     parent_customer_id=obj.parent_customer_id,
-                            #     video_id=obj.video_id,
-                            #     parent_customer__isnull=False
-                            # ).count()
 
-                            # belonger_data = belonger_objs_one + belonger_objs_two
-                            # belonger_data =  belonger_objs_one
-                            stay_time = get_min_s(int(obj.video_duration_stay))
+                            belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(
+                                user_id=user_id,
+                                customer_id=customer_id,
+                                video_id=obj.video_id
+                            )
+                            video_duration_stay = 0
+                            for i in belonger_objs:
+                                video_duration_stay += int(i.video_duration_stay)
+
+                            stay_time = get_min_s(video_duration_stay)
                             ret_data.append({
                                 'article_id': obj.video_id,
                                 'article_title': obj.video.title,
