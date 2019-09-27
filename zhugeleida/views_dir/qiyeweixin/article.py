@@ -403,31 +403,38 @@ def article_oper(request, oper_type, o_id):
                         start_line = (current_page - 1) * length
                         stop_line = start_line + length
                         objs = objs[start_line: stop_line]
-
+                    customer_id_list = []
                     for obj in objs:
-                        belonger_objs_one = models.zgld_video_to_customer_belonger.objects.filter(
-                            user_id=user_id,
-                            customer_id=obj.customer_id,
-                            video_id=obj.video_id,
-                            parent_customer__isnull=True
-                        ).count()
-                        belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
-                            user_id=user_id,
-                            parent_customer_id=obj.parent_customer_id,
-                            video_id=obj.video_id,
-                            parent_customer__isnull=False
-                        ).count()
-                        belonger_data = belonger_objs_one + belonger_objs_two
-                        stay_time = get_min_s(int(obj.video_duration_stay))
-                        ret_data.append({
-                            'article_id': obj.video_id,
-                            'article_title': obj.video.title,
-                            'stay_time': stay_time,
-                            'read_count': belonger_data,
-                            'forward_count': belonger_data,
-                            'level': 0,
-                            'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                        })
+                        customer_id = obj.customer_id
+                        if obj.parent_customer:
+                            customer_id = obj.parent_customer_id
+                        pinjie_panduan = str(customer_id) + '_' + str(obj.video_id)
+                        if pinjie_panduan not in customer_id_list:
+                            customer_id_list.append(pinjie_panduan)
+
+                            belonger_objs_one = models.zgld_video_to_customer_belonger.objects.filter(
+                                user_id=user_id,
+                                customer_id=obj.customer_id,
+                                video_id=obj.video_id,
+                                parent_customer__isnull=True
+                            ).count()
+                            belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
+                                user_id=user_id,
+                                parent_customer_id=obj.parent_customer_id,
+                                video_id=obj.video_id,
+                                parent_customer__isnull=False
+                            ).count()
+                            belonger_data = belonger_objs_one + belonger_objs_two
+                            stay_time = get_min_s(int(obj.video_duration_stay))
+                            ret_data.append({
+                                'article_id': obj.video_id,
+                                'article_title': obj.video.title,
+                                'stay_time': stay_time,
+                                'read_count': belonger_data,
+                                'forward_count': belonger_data,
+                                'level': 0,
+                                'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                            })
                     code = 200
                     msg = '查询成功'
                     data = {
