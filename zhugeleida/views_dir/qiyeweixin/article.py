@@ -821,13 +821,14 @@ def article_oper(request, oper_type, o_id):
             if log_type in [2, '2']:
                 form_objs = VideoForm(request.GET)
                 if form_objs.is_valid():
+                    current_page = form_objs.cleaned_data['current_page']
+                    length = form_objs.cleaned_data['length']
                     q_video = Q()
                     q_video.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(parent_customer_id=customer_id), Q.AND)
                     objs = models.zgld_video_to_customer_belonger.objects.filter(
                         q_video,
                         user_id=user_id,
                     )
-                    count = objs.count()
                     if objs:
                         obj = objs[0]
 
@@ -841,6 +842,10 @@ def article_oper(request, oper_type, o_id):
                                 'last_read_time': belonger_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                 'stay_time': get_min_s(int(belonger_obj.video_duration_stay)),  # 停留时间
                             })
+                        if length != 0:
+                            start_line = (current_page - 1) * length
+                            stop_line = start_line + length
+                            result_data = result_data[start_line: stop_line]
 
                         area = obj.customer.province + obj.customer.city
                         username = ''
@@ -856,7 +861,7 @@ def article_oper(request, oper_type, o_id):
                             'area': area,  # 地区
 
                             'ret_data': result_data,
-                            'data_count': count,
+                            'data_count': len(result_data),
                         }
 
                 else:
