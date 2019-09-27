@@ -375,10 +375,7 @@ def article_oper(request, oper_type, o_id):
 
             forms_obj = ThreadPictureForm(request_data_dict)
             if forms_obj.is_valid():
-                q1 = Q()
-                q1.connector = 'AND'
-                q1.children.append(('customer_id', customer_id))
-                q1.children.append(('user_id', user_id))
+
 
                 current_page = forms_obj.cleaned_data['current_page']
                 length = forms_obj.cleaned_data['length']
@@ -389,14 +386,10 @@ def article_oper(request, oper_type, o_id):
 
                 # 录播视频
                 if log_type in [2, '2']:
-                    q1.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(
-                        parent_customer_id=customer_id), Q.AND)
                     objs = models.zgld_video_to_customer_belonger.objects.select_related(
-                        'video',
-                        'user',
-                        'customer'
-                    ).filter(q1)
-
+                        'user'
+                    ).filter(customer_id=customer_id, user_id=user_id)
+                    print('objs-----> ', objs)
                     ret_data = []
                     if length != 0:
                         start_line = (current_page - 1) * length
@@ -405,8 +398,8 @@ def article_oper(request, oper_type, o_id):
                     customer_id_list = []
                     for obj in objs:
                         customer_id = obj.customer_id
-                        if obj.parent_customer:
-                            customer_id = obj.parent_customer_id
+                        print(obj.id, customer_id)
+
                         pinjie_panduan = str(customer_id) + '_' + str(obj.video_id)
                         if pinjie_panduan not in customer_id_list:
                             customer_id_list.append(pinjie_panduan)
@@ -442,6 +435,10 @@ def article_oper(request, oper_type, o_id):
                     }
 
                 else:
+                    q1 = Q()
+                    q1.connector = 'AND'
+                    q1.children.append(('customer_id', customer_id))
+                    q1.children.append(('user_id', user_id))
                     objs = models.zgld_article_to_customer_belonger.objects.select_related('article', 'user',
                         'customer').filter(q1)
                     if objs:
