@@ -821,6 +821,7 @@ def forwarding_video_jump_address(request):
             models.zgld_user_customer_belonger.objects.create(
                 user_id=uid,
                 customer_id=client_id,
+                source=5
             )
 
 
