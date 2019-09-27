@@ -404,19 +404,21 @@ def article_oper(request, oper_type, o_id):
                         if pinjie_panduan not in customer_id_list:
                             customer_id_list.append(pinjie_panduan)
 
-                            belonger_objs_one = models.zgld_video_to_customer_belonger.objects.filter(
-                                user_id=user_id,
-                                customer_id=obj.customer_id,
-                                video_id=obj.video_id,
-                                parent_customer__isnull=True
-                            ).count()
+                            # belonger_objs_one = models.zgld_video_to_customer_belonger.objects.filter(
+                            #     user_id=user_id,
+                            #     customer_id=obj.customer_id,
+                            #     video_id=obj.video_id,
+                            #     parent_customer__isnull=True
+                            # ).count()
                             belonger_objs_two = models.zgld_video_to_customer_belonger.objects.filter(
                                 user_id=user_id,
                                 parent_customer_id=obj.parent_customer_id,
                                 video_id=obj.video_id,
                                 parent_customer__isnull=False
                             ).count()
-                            belonger_data = belonger_objs_one + belonger_objs_two
+
+                            # belonger_data = belonger_objs_one + belonger_objs_two
+                            belonger_data =  belonger_objs_two
                             stay_time = get_min_s(int(obj.video_duration_stay))
                             ret_data.append({
                                 'article_id': obj.video_id,
@@ -820,41 +822,36 @@ def article_oper(request, oper_type, o_id):
                 if form_objs.is_valid():
                     current_page = form_objs.cleaned_data['current_page']
                     length = form_objs.cleaned_data['length']
-                    q_video = Q()
-                    q_video.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(parent_customer_id=customer_id), Q.AND)
                     objs = models.zgld_video_to_customer_belonger.objects.filter(
-                        q_video,
                         user_id=user_id,
-                    )
+                        customer_id=customer_id,
+                        video_id=o_id
+                    ).order_by('-create_date')
                     if objs:
-                        obj = objs[0]
-
                         result_data = []
-                        q_video_1 = Q()
-                        q_video_1.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(parent_customer_id=customer_id), Q.AND)
-                        belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(q_video_1, user_id=user_id, video_id=o_id).order_by('-create_date')
-                        for belonger_obj in belonger_objs:
+                        for obj in objs:
                             result_data.append({
-                                'article_access_log_id': belonger_obj.id,
-                                'last_read_time': belonger_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                'stay_time': get_min_s(int(belonger_obj.video_duration_stay)),  # 停留时间
+                                'article_access_log_id': obj.id,
+                                'last_read_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                'stay_time': get_min_s(int(obj.video_duration_stay)),  # 停留时间
                             })
+
                         if length != 0:
                             start_line = (current_page - 1) * length
                             stop_line = start_line + length
                             result_data = result_data[start_line: stop_line]
 
-                        area = obj.customer.province + obj.customer.city
+                        area = objs[0].customer.province + objs[0].customer.city
                         username = ''
                         response.code = 200
                         response.msg = '查询成功'
                         response.data = {
-                            'customer_id': obj.customer_id,  # 客户ID
+                            'customer_id': objs[0].customer_id,  # 客户ID
                             'customer_name': username,  # 客户姓名
-                            'customer_headimgurl': obj.customer.headimgurl,  # 客户头像
-                            'sex_text': obj.customer.get_sex_display(),  # 性别
-                            'sex': obj.customer.sex,  # 性别
-                            'pid': obj.parent_customer_id,  # 父级Id
+                            'customer_headimgurl': objs[0].customer.headimgurl,  # 客户头像
+                            'sex_text': objs[0].customer.get_sex_display(),  # 性别
+                            'sex': objs[0].customer.sex,  # 性别
+                            'pid': objs[0].parent_customer_id,  # 父级Id
                             'area': area,  # 地区
 
                             'ret_data': result_data,
