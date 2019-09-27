@@ -397,7 +397,6 @@ def article_oper(request, oper_type, o_id):
                         'customer'
                     ).filter(q1)
 
-                    article_num = objs.count()
                     ret_data = []
                     if length != 0:
                         start_line = (current_page - 1) * length
@@ -438,7 +437,7 @@ def article_oper(request, oper_type, o_id):
                     code = 200
                     msg = '查询成功'
                     data = {
-                        'article_num': article_num,
+                        'article_num': len(customer_id_list),
                         'ret_data': ret_data
                     }
 
@@ -839,8 +838,8 @@ def article_oper(request, oper_type, o_id):
                         for belonger_obj in belonger_objs:
                             result_data.append({
                                 'article_access_log_id': belonger_obj.id,
-                                'last_read_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                'stay_time': get_min_s(int(obj.video_duration_stay)),  # 停留时间
+                                'last_read_time': belonger_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                'stay_time': get_min_s(int(belonger_obj.video_duration_stay)),  # 停留时间
                             })
 
                         area = obj.customer.province + obj.customer.city
