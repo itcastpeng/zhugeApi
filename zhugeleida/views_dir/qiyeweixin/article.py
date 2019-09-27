@@ -419,7 +419,10 @@ def article_oper(request, oper_type, o_id):
                             for i in belonger_objs:
                                 video_duration_stay += int(i.video_duration_stay)
 
-                            stay_time = get_min_s(video_duration_stay)
+                            stay_time = '0秒'
+                            if video_duration_stay >= 1:
+                                stay_time = get_min_s(video_duration_stay)
+
                             ret_data.append({
                                 'article_id': obj.video_id,
                                 'article_title': obj.video.title,
@@ -830,10 +833,14 @@ def article_oper(request, oper_type, o_id):
                     if objs:
                         result_data = []
                         for obj in objs:
+                            video_duration_stay = '0秒'
+                            if obj.video_duration_stay >= 1:
+                                video_duration_stay = get_min_s(int(obj.video_duration_stay))
+
                             result_data.append({
                                 'article_access_log_id': obj.id,
                                 'last_read_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                'stay_time': get_min_s(int(obj.video_duration_stay)),  # 停留时间
+                                'stay_time': video_duration_stay,  # 停留时间
                             })
 
                         if length != 0:
