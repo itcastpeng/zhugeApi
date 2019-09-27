@@ -389,6 +389,8 @@ def article_oper(request, oper_type, o_id):
 
                 # 录播视频
                 if log_type in [2, '2']:
+                    q1.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(
+                        parent_customer_id=customer_id), Q.AND)
                     objs = models.zgld_video_to_customer_belonger.objects.select_related(
                         'video',
                         'user',
