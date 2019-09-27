@@ -833,8 +833,8 @@ def article_oper(request, oper_type, o_id):
 
                         result_data = []
                         q_video_1 = Q()
-                        q_video_1.add(Q(customer_id=customer_id) | Q(parent_customer_id=customer_id), Q.AND)
-                        belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(q_video_1, user_id=user_id).order_by('-create_date')
+                        q_video_1.add(Q(customer_id=customer_id) & Q(parent_customer__isnull=True) | Q(parent_customer_id=customer_id), Q.AND)
+                        belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(q_video_1, user_id=user_id, video_id=o_id).order_by('-create_date')
                         for belonger_obj in belonger_objs:
                             result_data.append({
                                 'article_access_log_id': belonger_obj.id,
