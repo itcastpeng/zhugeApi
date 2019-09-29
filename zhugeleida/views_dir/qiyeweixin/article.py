@@ -388,8 +388,7 @@ def article_oper(request, oper_type, o_id):
                 if log_type in [2, '2']:
                     objs = models.zgld_video_to_customer_belonger.objects.select_related(
                         'user'
-                    ).filter(customer_id=customer_id, user_id=user_id)
-                    print('objs-----> ', objs)
+                    ).filter(customer_id=customer_id, user_id=user_id).order_by('-create_date')
                     ret_data = []
                     if length != 0:
                         start_line = (current_page - 1) * length
