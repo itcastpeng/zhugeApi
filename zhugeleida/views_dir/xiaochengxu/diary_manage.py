@@ -340,7 +340,6 @@ def diary_manage(request):
                         'cover_picture': cover_picture,
                         'diary_date': obj.diary_date.strftime('%Y-%m-%d'), # 发布时间
                         'summary': summary,
-                        'case_name': obj.case.case_name,
                         'title': obj.title,
                         'diary_give_like': diary_give_like,     # 点赞数量
                         'diary_read_num': obj.read_count,       # 阅读数量
@@ -355,6 +354,7 @@ def diary_manage(request):
                     'tag_list': tag_list,
                     'create_date': create_date,
                     'is_collection': is_collection,
+                    'case_name': objs[0].case.case_name,
                     'customer_headimgurl': customer_headimgurl,
                     'count': count,
                 }
