@@ -401,8 +401,6 @@ def article_oper(request, oper_type, o_id):
                         pinjie_panduan = str(customer_id) + '_' + str(obj.video_id)
                         if pinjie_panduan not in customer_id_list:
                             customer_id_list.append(pinjie_panduan)
-
-                            print(obj.id, customer_id, obj.video_id, obj.customer_id)
                             belonger_data = models.zgld_video_to_customer_belonger.objects.filter(
                                 user_id=user_id,
                                 customer_id=obj.customer_id,
