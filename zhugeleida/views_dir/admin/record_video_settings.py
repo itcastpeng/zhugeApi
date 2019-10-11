@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.record_video_verify import SelectForm
 from publicFunc.condition_com import conditionCom
 from publicFunc.base64 import b64decode
+
+from django.db.models import Q
 import json, base64
 
 
@@ -252,6 +254,41 @@ def record_video_settings_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(forms_obj.errors.as_json())
 
+        # 查询视频 脉络图
+        elif oper_type == 'query_video_context_diagram':
+            q = Q()
+            uid = request.GET.get('uid')  # 视频所属用户ID
+            q.add(Q(video_id=o_id), Q.AND)
+            if uid:
+                q.add(Q(user_id=uid), Q.AND)
+
+            objs = models.zgld_video_to_customer_belonger.objects.filter(q)
+            if objs:
+                video_title = objs[0].video.title
+                result_data = []
+                belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(q, level=0) # 首级
+                count_num = 0
+                for belonger_obj in belonger_objs:
+                    tmp = {}
+                    tmp['name'] = belonger_obj.user.username
+                    tmp['children'] = init_data(o_id, q)
+                    result_data.append(tmp)
+
+                dataList = {  # 顶端 首级
+                    'name': video_title,
+                    'children': result_data
+                }
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'dataList': dataList,
+                    'video_title': video_title, # 视频标题
+                    # 'max_person_num': max_person_num
+                }
+            else:
+                response.code = 301
+                response.msg = '该文章无查看'
+                response.data = {}
 
         else:
             response.code = 402
@@ -261,8 +298,23 @@ def record_video_settings_oper(request, oper_type, o_id):
 
 
 
-
-
+# 脉络图查询 调用init_data
+def init_data(article_id, q, user_id=None):
+    objs = models.zgld_video_to_customer_belonger.objects.select_related('user', 'video').filter(q)
+    if user_id:
+        objs = objs.filter(parent_customer_id=user_id)
+    else:
+        objs = objs.filter(parent_customer__isnull=True)
+    result_data = []
+    for obj in objs:
+        user_id = obj.customer_id
+        username = b64decode(obj.customer.username)
+        children_data = init_data(article_id, q, user_id)
+        tmp = {'name': username}
+        if children_data:
+            tmp['children'] = children_data
+        result_data.append(tmp)
+    return result_data
 
 
 
