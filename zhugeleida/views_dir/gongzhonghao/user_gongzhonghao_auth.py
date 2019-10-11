@@ -794,8 +794,18 @@ def forwarding_video_jump_address(request):
             'user_id':uid,
             'customer_id':client_id,
         }
-        if pid:
+        level = 0 # 层级
+        if pid: # 转发视频 父级 的客户
             video_belonger_data['parent_customer_id'] = pid
+            belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(
+                user_id=uid,
+                customer_id=pid,
+                video_id=video_id
+            ).order_by('-create_date')
+            if belonger_objs:
+                level = int(belonger_objs[0].level) + 1
+
+        video_belonger_data['level'] = level
         video_log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
         log_id = video_log_obj.id
 
