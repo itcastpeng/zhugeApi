@@ -269,14 +269,15 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                 belonger_objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'user'
-                ).filter(q, level=0).values('user', 'user__username').annotate(Count('id')) # 首级
+                ).filter(q, level=0).values('user_id', 'user__username').annotate(Count('id')) # 首级
                 count_num = 0
                 for belonger_obj in belonger_objs:
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
-                    tmp['children'] = init_data(o_id, q)
+                    children_data = init_data(belonger_obj['user_id'], o_id, q)
+                    tmp['children'] = children_data
                     result_data.append(tmp)
-
+                    count_num += len(children_data)
                 dataList = {  # 顶端 首级
                     'name': video_title,
                     'children': result_data
@@ -286,7 +287,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 response.data = {
                     'dataList': dataList,
                     'video_title': video_title, # 视频标题
-                    # 'max_person_num': max_person_num
+                    'max_person_num': count_num
                 }
             else:
                 response.code = 301
@@ -302,10 +303,10 @@ def record_video_settings_oper(request, oper_type, o_id):
 
 
 # 脉络图查询 调用init_data
-def init_data(article_id, q, user_id=None):
+def init_data(uid, article_id, q, user_id=None):
     objs = models.zgld_video_to_customer_belonger.objects.select_related(
         'user', 'video', 'customer'
-    ).filter(q).values(
+    ).filter(q, user_id=uid).values(
         'customer_id',
         'customer__username'
     ).annotate(Count('id'))
@@ -318,7 +319,7 @@ def init_data(article_id, q, user_id=None):
     for obj in objs:
         user_id = obj['customer_id']
         username = b64decode(obj['customer__username'])
-        children_data = init_data(article_id, q, user_id)
+        children_data = init_data(uid, article_id, q, user_id)
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
