@@ -52,6 +52,8 @@ def customer(request):
             # 返回的数据
             ret_data = []
             for obj in objs:
+
+                print('obj.phone---------> ', obj.phone)
                 data = {
                     'email':'',         # 邮箱
                     'company':'',       # 公司
