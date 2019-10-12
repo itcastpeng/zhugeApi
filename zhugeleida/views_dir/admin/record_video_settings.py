@@ -364,6 +364,57 @@ def record_video_settings_oper(request, oper_type, o_id):
                 response.code = 301
                 response.msg = json.loads(form_obj.errors.as_json())
 
+        # 查询该视频的所有用户
+        elif oper_type == 'query_all_users_video':
+            uid = request.GET.get('uid')            # 用户ID
+            q = Q()
+            q.add(Q(video_id=o_id), Q.AND)
+
+            if uid:
+                q.add(Q(user_id=uid), Q.AND)
+
+            objs = models.zgld_video_to_customer_belonger.objects.filter(
+                q,
+            ).order_by('-create_date')
+
+            user_list = []
+            for obj in objs:
+                user_list.append({
+                    'uid': obj.id,
+                    'user_name': obj.user.username,
+                })
+
+            ret_data ={}
+            if objs:
+                obj = objs[0]
+                num = 0
+                result_data, num = init_video_table_context_diagram(obj.user_id, o_id, num)
+                len_result_data = len(result_data)
+
+                ret_data['forward_friend_circle_count'] = len_result_data            # 转发朋友圈次数
+                ret_data['forward_friend_count'] = len_result_data                   # 转发好友次数
+                ret_data['level'] = obj.level                                        # 当前级别
+                ret_data['lower_level'] = int(obj.level) + 1                         # 下级层数
+                ret_data['lower_people_count'] = len_result_data                     # 下级人数
+                ret_data['read_count'] = len_result_data                             # 阅读次数
+                ret_data['sex'] = obj.user.gender                                    # 性别
+                ret_data['uid'] = obj.user_id                                        # ID
+                ret_data['user_name'] = obj.user.username                            # 用户名
+
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'user_list': user_list,
+                    'article_title': obj.video.title,
+                    'article_id': obj.video_id,
+                }
+
+            else:
+                response.code = 301
+                response.msg = '未找到记录'
+
         else:
             response.code = 402
             response.msg = '请求异常'
