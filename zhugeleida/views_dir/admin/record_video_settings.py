@@ -384,17 +384,7 @@ def record_video_settings_oper(request, oper_type, o_id):
 
             if uid:
                 q.add(Q(user_id=uid), Q.AND)
-            ret_data ={
-                'forward_friend_circle_count':'',
-                'forward_friend_count':'',
-                'level':'',
-                'lower_level':'',
-                'lower_people_count':'',
-                'read_count':'',
-                'sex':'',
-                'uid':'',
-                'user_name':'',
-            }
+            ret_data ={}
             objs = models.zgld_video_to_customer_belonger.objects.filter(
                 q,
             ).order_by('-create_date')
