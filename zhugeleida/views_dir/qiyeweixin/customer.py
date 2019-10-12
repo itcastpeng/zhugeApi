@@ -82,7 +82,7 @@ def customer(request):
                     mem = info_obj.mem
                     sex = info_obj.sex
                     note_name = info_obj.note_name
-                    phone = info_obj.phone
+                    phone = obj.phone
 
 
                     if email:
