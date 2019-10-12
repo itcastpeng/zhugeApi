@@ -296,7 +296,7 @@ def record_video_settings_oper(request, oper_type, o_id):
 
         # 视频表格脉络图
         elif oper_type == 'video_table_context_diagram':
-            level = request.GET.get('level')    # 层级
+            level = request.GET.get('level', 0)    # 层级
             uid = request.GET.get('uid')        # 用户ID
             form_data = {
                 'level': level,
@@ -369,20 +369,23 @@ def record_video_settings_oper(request, oper_type, o_id):
             uid = request.GET.get('uid')            # 用户ID
             q = Q()
             q.add(Q(video_id=o_id), Q.AND)
-            objs = models.zgld_video_to_customer_belonger.objects.filter(
+            objs = models.zgld_video_to_customer_belonger.objects.select_related('user').filter(
                 q,
-            ).order_by('-create_date')
+            ).values('user_id','user__username').annotate(Count('id'))
 
             user_list = []
             for obj in objs:
                 user_list.append({
-                    'uid': obj.user_id,
-                    'user_name': obj.user.username,
+                    'uid': obj['user_id'],
+                    'user_name': obj['user__username'],
                 })
 
             if uid:
                 q.add(Q(user_id=uid), Q.AND)
             ret_data ={}
+            objs = models.zgld_video_to_customer_belonger.objects.filter(
+                q,
+            ).order_by('-create_date')
             if objs:
                 obj = objs[0]
                 num = 0
