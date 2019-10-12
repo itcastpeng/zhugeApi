@@ -426,7 +426,7 @@ def article_oper(request, oper_type, o_id):
                                 'stay_time': stay_time,
                                 'read_count': belonger_data,
                                 'forward_count': belonger_data,
-                                'level': 0,
+                                'level': obj.level,
                                 'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                             })
                     code = 200

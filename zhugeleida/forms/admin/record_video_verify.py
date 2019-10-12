@@ -442,7 +442,26 @@ class SelectForm(forms.Form):
             length = int(self.data['length'])
         return length
 
-
+# 脉络图 表格
+class VideoTableContextDiagramForm(forms.Form):
+    o_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '视频ID不能为空'
+        }
+    )
+    level = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': '层级不能为空'
+        }
+    )
+    uid = forms.IntegerField(
+        required=False,
+        error_messages={
+            'required': '用户ID类型错误'
+        }
+    )
 
 
 

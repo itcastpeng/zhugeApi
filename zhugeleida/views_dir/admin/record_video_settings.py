@@ -2,10 +2,10 @@ from zhugeleida import models
 from publicFunc import Response, account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from zhugeleida.forms.admin.record_video_verify import SelectForm
+from zhugeleida.forms.admin.record_video_verify import SelectForm, VideoTableContextDiagramForm
 from publicFunc.condition_com import conditionCom
 from publicFunc.base64 import b64decode
-
+from zhugeleida.public.common import conversion_seconds_hms
 from django.db.models import Q, Count
 import json, base64
 
@@ -294,6 +294,76 @@ def record_video_settings_oper(request, oper_type, o_id):
                 response.msg = '该文章无查看'
                 response.data = {}
 
+        # 视频表格脉络图
+        elif oper_type == 'video_table_context_diagram':
+            level = request.GET.get('level')    # 层级
+            uid = request.GET.get('uid')        # 用户ID
+            form_data = {
+                'level': level,
+                'uid': uid,
+                'o_id': o_id,
+            }
+            form_obj = VideoTableContextDiagramForm(form_data)
+            if form_obj.is_valid():
+                q = Q()
+                objs = models.zgld_video_to_customer_belonger.objects.select_related(
+                    'video', 'user', 'customer'
+                ).filter(
+                    video_id=form_obj.cleaned_data.get('o_id'),
+                ).order_by('-create_date')
+                total_level_num = objs.order_by('-level')[0].level
+
+                data_list = []
+                for obj in objs:
+                    num = 0
+                    result_data, num = init_video_table_context_diagram(obj.user_id, o_id, num)
+                    len_result_data = len(result_data)
+
+                    is_have_child = False
+                    if len_result_data > 0: # 是否有下级
+                        is_have_child = True
+
+                    area = ''
+                    if obj.customer.province and obj.customer.city:
+                        area = obj.customer.province + obj.customer.city
+
+                    sex = '未知'
+                    if obj.customer.sex:
+                        sex = obj.customer.get_sex_display()
+
+                    data_list.append({
+                        "stay_time": conversion_seconds_hms(int(obj.video_duration_stay)),
+                        "read_count": len_result_data,                       # 阅读数量
+
+                        "forward_friend_circle_count": len_result_data,       # 转发到朋友圈
+                        "forward_friend_count": len_result_data,              # 转发给好友
+                        "lower_people_count": len_result_data,  # 下级人数
+                        "is_have_child": is_have_child,         # 是否有下级
+                        "lower_level": int(obj.level) + 1,      # 下级层数
+                        "level": obj.level,                     # 所在层级
+                        "customer_name": b64decode(obj.customer.username),
+
+                        "uid": obj.user_id,
+                        "user_name": obj.user.username,         # 用户昵称
+                        "customer_headimgurl": obj.customer.headimgurl, # 客户头像
+                        "area":  area,                          # 地址
+                        "customer_id": obj.customer_id,         # 客户ID
+                        "sex": sex,  # 性别
+                        "id": obj.id,
+                    })
+
+                response.code = 200
+                response.data = {
+                    'video_id': objs[0].video_id,
+                    'video_title': objs[0].video.title,
+                    'total_level_num': total_level_num, # 总共层级
+                    'ret_data': data_list
+                }
+
+            else:
+                response.code = 301
+                response.msg = json.loads(form_obj.errors.as_json())
+
         else:
             response.code = 402
             response.msg = '请求异常'
@@ -328,7 +398,32 @@ def init_data(uid, article_id, q, user_id=None):
 
 
 
+# 脉络图查询 调用init_data
+def init_video_table_context_diagram(uid, article_id, num, user_id=None):
+    objs = models.zgld_video_to_customer_belonger.objects.select_related(
+        'user', 'video', 'customer'
+    ).filter(user_id=uid).values(
+        'customer_id',
+        'customer__username'
+    ).annotate(Count('id'))
 
+    if user_id:
+        objs = objs.filter(parent_customer_id=user_id)
+    else:
+        objs = objs.filter(parent_customer__isnull=True)
+    result_data = []
+    for obj in objs:
+        user_id = obj['customer_id']
+        username = b64decode(obj['customer__username'])
+        children_data, num = init_video_table_context_diagram(uid, article_id, num, user_id)
+        num += len(children_data)
+
+        tmp = {'name': username}
+        if children_data:
+            tmp['children'] = children_data
+        result_data.append(tmp)
+
+    return result_data, num
 
 
 
