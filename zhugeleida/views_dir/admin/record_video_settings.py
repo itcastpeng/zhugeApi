@@ -425,7 +425,6 @@ def record_video_settings_oper(request, oper_type, o_id):
                 'video_title': video_title,
                 'video_id': video_id,
             }
-            print(response.data)
 
         else:
             response.code = 402
