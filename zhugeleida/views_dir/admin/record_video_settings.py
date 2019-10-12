@@ -382,10 +382,23 @@ def record_video_settings_oper(request, oper_type, o_id):
 
             if uid:
                 q.add(Q(user_id=uid), Q.AND)
-            ret_data ={}
+            ret_data ={
+                'forward_friend_circle_count':'',
+                'forward_friend_count':'',
+                'level':'',
+                'lower_level':'',
+                'lower_people_count':'',
+                'read_count':'',
+                'sex':'',
+                'uid':'',
+                'user_name':'',
+            }
             objs = models.zgld_video_to_customer_belonger.objects.filter(
                 q,
             ).order_by('-create_date')
+            video_title = ''
+            video_id = ''
+
             if objs:
                 obj = objs[0]
                 num = 0
@@ -401,20 +414,18 @@ def record_video_settings_oper(request, oper_type, o_id):
                 ret_data['sex'] = obj.user.gender                                    # 性别
                 ret_data['uid'] = obj.user_id                                        # ID
                 ret_data['user_name'] = obj.user.username                            # 用户名
+                video_title = obj.video
+                video_id = obj.video_id
 
+            response.code = 200
+            response.msg = '查询成功'
+            response.data = {
+                'ret_data': ret_data,
+                'user_list': user_list,
+                'video_title': video_title,
+                'video_id': video_id,
+            }
 
-                response.code = 200
-                response.msg = '查询成功'
-                response.data = {
-                    'ret_data': ret_data,
-                    'user_list': user_list,
-                    'article_title': obj.video.title,
-                    'article_id': obj.video_id,
-                }
-
-            else:
-                response.code = 301
-                response.msg = '未找到记录'
 
         else:
             response.code = 402
