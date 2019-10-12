@@ -352,10 +352,12 @@ def record_video_settings_oper(request, oper_type, o_id):
                         "id": obj.id,
                     })
 
+                video_obj = models.zgld_recorded_video.objects.get(id=o_id)
+
                 response.code = 200
                 response.data = {
-                    'video_id': objs[0].video_id,
-                    'video_title': objs[0].video.title,
+                    'video_id': video_obj.id,
+                    'video_title': video_obj.title,
                     'total_level_num': total_level_num, # 总共层级
                     'ret_data': data_list
                 }
@@ -396,8 +398,6 @@ def record_video_settings_oper(request, oper_type, o_id):
             objs = models.zgld_video_to_customer_belonger.objects.filter(
                 q,
             ).order_by('-create_date')
-            video_title = ''
-            video_id = ''
 
             if objs:
                 obj = objs[0]
@@ -414,16 +414,16 @@ def record_video_settings_oper(request, oper_type, o_id):
                 ret_data['sex'] = obj.user.gender                                    # 性别
                 ret_data['uid'] = obj.user_id                                        # ID
                 ret_data['user_name'] = obj.user.username                            # 用户名
-                video_title = obj.video.title
-                video_id = obj.video_id
+
+            video_obj = models.zgld_recorded_video.objects.get(id=o_id)
 
             response.code = 200
             response.msg = '查询成功'
             response.data = {
                 'ret_data': ret_data,
                 'user_list': user_list,
-                'video_title': video_title,
-                'video_id': video_id,
+                'video_title': video_obj.title,
+                'video_id': video_obj.id,
             }
 
         else:
