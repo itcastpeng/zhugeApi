@@ -369,10 +369,6 @@ def record_video_settings_oper(request, oper_type, o_id):
             uid = request.GET.get('uid')            # 用户ID
             q = Q()
             q.add(Q(video_id=o_id), Q.AND)
-
-            if uid:
-                q.add(Q(user_id=uid), Q.AND)
-
             objs = models.zgld_video_to_customer_belonger.objects.filter(
                 q,
             ).order_by('-create_date')
@@ -380,10 +376,12 @@ def record_video_settings_oper(request, oper_type, o_id):
             user_list = []
             for obj in objs:
                 user_list.append({
-                    'uid': obj.id,
+                    'uid': obj.user_id,
                     'user_name': obj.user.username,
                 })
 
+            if uid:
+                q.add(Q(user_id=uid), Q.AND)
             ret_data ={}
             if objs:
                 obj = objs[0]
