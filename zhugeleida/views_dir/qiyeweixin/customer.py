@@ -53,7 +53,6 @@ def customer(request):
             ret_data = []
             for obj in objs:
 
-                print('obj.phone---------> ', obj.phone)
                 data = {
                     'email':'',         # 邮箱
                     'company':'',       # 公司
@@ -84,7 +83,6 @@ def customer(request):
                     mem = info_obj.mem
                     sex = info_obj.sex
                     note_name = info_obj.note_name
-                    phone = obj.phone
 
 
                     if email:
@@ -103,8 +101,6 @@ def customer(request):
                         data['sex'] = sex
                     if note_name:
                         data['memo_name'] = b64decode(note_name)
-                    if phone:
-                        data['phone'] = phone  # 手机号
 
 
                 belonger_obj = models.zgld_user_customer_belonger.objects.get(customer_id=obj.id,user_id=user_id)
@@ -113,6 +109,7 @@ def customer(request):
                 expedted_pr = belonger_obj.expedted_pr
                 expected_time = belonger_obj.expected_time
 
+                data['phone'] = obj.phone  # 手机号
                 data['id'] =  obj.id
                 data['username'] =  b64decode(obj.username)
                 data['headimgurl'] =  obj.headimgurl
