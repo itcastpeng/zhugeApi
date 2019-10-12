@@ -414,7 +414,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 ret_data['sex'] = obj.user.gender                                    # 性别
                 ret_data['uid'] = obj.user_id                                        # ID
                 ret_data['user_name'] = obj.user.username                            # 用户名
-                video_title = obj.video
+                video_title = obj.video.title
                 video_id = obj.video_id
 
             response.code = 200
@@ -425,7 +425,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 'video_title': video_title,
                 'video_id': video_id,
             }
-
+            print(response.data)
 
         else:
             response.code = 402
