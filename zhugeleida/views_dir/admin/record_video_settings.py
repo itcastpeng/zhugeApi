@@ -306,17 +306,30 @@ def record_video_settings_oper(request, oper_type, o_id):
             form_obj = VideoTableContextDiagramForm(form_data)
             if form_obj.is_valid():
                 q = Q()
+                video_id = form_obj.cleaned_data.get('o_id')
                 objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'video', 'user', 'customer'
                 ).filter(
-                    video_id=form_obj.cleaned_data.get('o_id'),
-                ).order_by('-create_date')
-                total_level_num = objs.order_by('-level')[0].level
+                    video_id=video_id
+                ).values(
+                    'level', 'customer', 'customer__username', 'customer__province', 'customer__city', 'customer__sex', 'user_id', 'user__username', 'customer__headimgurl'
+                ).annotate(Count('id'))
+
+                total_level_num = objs.order_by('-level')[0]['level']
 
                 data_list = []
                 for obj in objs:
+                    belonger_objs = models.zgld_video_to_customer_belonger.objects.filter(
+                        customer_id=obj['customer'],
+                        user_id=obj['user_id'],
+                        video_id=video_id,
+                        level=obj['level'],
+                    )
+                    video_duration_stay = 0
+                    for belonger_obj in belonger_objs:
+                        video_duration_stay += int(belonger_obj.video_duration_stay)
                     num = 0
-                    result_data, num = init_video_table_context_diagram(obj.user_id, o_id, num)
+                    result_data, num = init_video_table_context_diagram(obj['user_id'], o_id, num)
                     len_result_data = len(result_data)
 
                     is_have_child = False
@@ -324,32 +337,33 @@ def record_video_settings_oper(request, oper_type, o_id):
                         is_have_child = True
 
                     area = ''
-                    if obj.customer.province and obj.customer.city:
-                        area = obj.customer.province + obj.customer.city
+                    if obj['customer__province'] and obj['customer__city']:
+                        area = obj['customer__province'] + obj['customer__city']
 
                     sex = '未知'
-                    if obj.customer.sex:
-                        sex = obj.customer.get_sex_display()
+                    if obj['customer__sex'] in ['1', 1]:
+                        sex = '男'
+                    elif obj['customer__sex'] in ['2', 2]:
+                        sex = '女'
 
                     data_list.append({
-                        "stay_time": conversion_seconds_hms(int(obj.video_duration_stay)),
+                        "stay_time": conversion_seconds_hms(int(video_duration_stay)),
                         "read_count": len_result_data,                       # 阅读数量
 
                         "forward_friend_circle_count": len_result_data,       # 转发到朋友圈
                         "forward_friend_count": len_result_data,              # 转发给好友
                         "lower_people_count": len_result_data,  # 下级人数
                         "is_have_child": is_have_child,         # 是否有下级
-                        "lower_level": int(obj.level) + 1,      # 下级层数
-                        "level": obj.level,                     # 所在层级
-                        "customer_name": b64decode(obj.customer.username),
+                        "lower_level": int(obj['level']) + 1,      # 下级层数
+                        "level": obj['level'],                     # 所在层级
+                        "customer_name": b64decode(obj['customer__username']),
 
-                        "uid": obj.user_id,
-                        "user_name": obj.user.username,         # 用户昵称
-                        "customer_headimgurl": obj.customer.headimgurl, # 客户头像
+                        "uid": obj['user_id'],
+                        "user_name": obj['user__username'],         # 用户昵称
+                        "customer_headimgurl": obj['customer__headimgurl'], # 客户头像
                         "area":  area,                          # 地址
-                        "customer_id": obj.customer_id,         # 客户ID
+                        "customer_id": obj['customer'],         # 客户ID
                         "sex": sex,  # 性别
-                        "id": obj.id,
                     })
 
                 video_obj = models.zgld_recorded_video.objects.get(id=o_id)
