@@ -307,12 +307,28 @@ def record_video_settings_oper(request, oper_type, o_id):
             if form_obj.is_valid():
                 q = Q()
                 video_id = form_obj.cleaned_data.get('o_id')
+
+                query_customer_id = request.GET.get('query_customer_id')
+                if query_customer_id:
+                    q.add(Q(parent_customer_id=query_customer_id), Q.AND)
+                else:
+                    q.add(Q(parent_customer__isnull=True), Q.AND)
+
                 objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'video', 'user', 'customer'
                 ).filter(
-                    video_id=video_id
+                    q, video_id=video_id,
                 ).values(
-                    'level', 'customer', 'customer__username', 'customer__province', 'customer__city', 'customer__sex', 'user_id', 'user__username', 'customer__headimgurl'
+                    'level', 'customer',
+                    'customer__username',
+                    'customer__province',
+                    'customer__city',
+                    'customer__sex',
+                    'user_id',
+                    'user__username',
+                    'customer__headimgurl',
+                    'parent_customer_id',
+                    'parent_customer__username'
                 ).annotate(Count('id'))
 
                 total_level_num = objs.order_by('-level')[0]['level']
@@ -325,6 +341,13 @@ def record_video_settings_oper(request, oper_type, o_id):
                         video_id=video_id,
                         level=obj['level'],
                     )
+                    forward_count = models.zgld_video_to_customer_belonger.objects.filter(
+                        user_id=obj['user_id'],
+                        video_id=video_id,
+                        level=obj['level'],
+                        parent_customer_id=obj['customer']
+                    ).count()
+
                     video_duration_stay = 0
                     for belonger_obj in belonger_objs:
                         video_duration_stay += int(belonger_obj.video_duration_stay)
@@ -346,24 +369,29 @@ def record_video_settings_oper(request, oper_type, o_id):
                     elif obj['customer__sex'] in ['2', 2]:
                         sex = '女'
 
+                    uid = obj['user_id']
+                    user_name = obj['user__username']
+                    if query_customer_id:
+                        uid = obj['parent_customer_id']
+                        user_name = b64decode(obj['parent_customer__username'])
+
                     data_list.append({
                         "stay_time": conversion_seconds_hms(int(video_duration_stay)),
-                        "read_count": len_result_data,                       # 阅读数量
+                        "read_count": forward_count,                       # 阅读数量
 
-                        "forward_friend_circle_count": len_result_data,       # 转发到朋友圈
-                        "forward_friend_count": len_result_data,              # 转发给好友
-                        "lower_people_count": len_result_data,  # 下级人数
-                        "is_have_child": is_have_child,         # 是否有下级
-                        "lower_level": int(obj['level']) + 1,      # 下级层数
-                        "level": obj['level'],                     # 所在层级
-                        "customer_name": b64decode(obj['customer__username']),
-
-                        "uid": obj['user_id'],
-                        "user_name": obj['user__username'],         # 用户昵称
+                        "forward_friend_circle_count": forward_count,       # 转发到朋友圈
+                        "forward_friend_count": forward_count,              # 转发给好友
+                        "lower_people_count": forward_count,                # 下级人数
+                        "is_have_child": is_have_child,                     # 是否有下级
+                        "lower_level": int(obj['level']) + 1,               # 下级层数
+                        "level": obj['level'],                              # 所在层级
+                        "customer_name": b64decode(obj['customer__username']),  # 客户名称
+                        "uid": uid,                                         # 用户ID
+                        "user_name": user_name,                             # 用户昵称
                         "customer_headimgurl": obj['customer__headimgurl'], # 客户头像
-                        "area":  area,                          # 地址
-                        "customer_id": obj['customer'],         # 客户ID
-                        "sex": sex,  # 性别
+                        "area":  area,                                      # 地址
+                        "customer_id": obj['customer'],                     # 客户ID
+                        "sex": sex,                                         # 性别
                     })
 
                 video_obj = models.zgld_recorded_video.objects.get(id=o_id)
