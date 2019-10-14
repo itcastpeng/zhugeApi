@@ -331,7 +331,9 @@ def record_video_settings_oper(request, oper_type, o_id):
                     'parent_customer__username'
                 ).annotate(Count('id'))
 
-                total_level_num = objs.order_by('-level')[0]['level']
+                total_level_num = 0
+                if objs:
+                    total_level_num = objs.order_by('-level')[0]['level']
 
                 data_list = []
                 for obj in objs:
@@ -353,10 +355,11 @@ def record_video_settings_oper(request, oper_type, o_id):
                         video_duration_stay += int(belonger_obj.video_duration_stay)
                     num = 0
                     result_data, num = init_video_table_context_diagram(obj['user_id'], o_id, num)
+                    print('result_data------> ', result_data)
                     len_result_data = len(result_data)
 
                     is_have_child = False
-                    if len_result_data > 0: # 是否有下级
+                    if len_result_data > 1: # 是否有下级
                         is_have_child = True
 
                     area = ''
