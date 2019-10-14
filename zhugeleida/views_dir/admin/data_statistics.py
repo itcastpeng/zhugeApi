@@ -4,8 +4,9 @@ from publicFunc import account
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.user_verify import UserSelectForm
+from publicFunc.base64 import b64decode
 from django.db.models import Q, Count, Sum
-import json, datetime, redis
+import json, datetime, redis, time
 
 # 获取redis_name
 def get_redis_name(number_days, request_type):
@@ -535,7 +536,193 @@ def xcx_data_statistics(request, oper_type):
 
         # 文章数据分析(案例版)
         elif oper_type == 'xcx_al_article_data_analysis':
-            pass
+            uid = request.GET.get('uid') # 查询单个人
+            task_type = request.GET.get('task_type', 0) # 查询类型 1复制昵称 2雷达内有效对话 3响应时长 4订单数量
+
+            detail_current_page = request.GET.get('detail_current_page', 1)# 详情分页
+            detail_length = request.GET.get('detail_length', 10)            # 详情分页
+            detail_start_line = (detail_current_page - 1) * detail_length
+            detail_stop_line = detail_start_line + detail_length
+
+            response.note = {
+                'user_id': '用户ID',
+                'user_name': '用户昵称',
+                'copy_nickname': '复制昵称',
+                'order_number': '订单数量',
+                'effective_radar_communication': '雷达内有效对话',
+                'average_response_time_consultation': '咨询平均响应时长',
+                'detail_data': '详情数据',
+                'detail_count': '详情总数',
+            }
+            form_obj = UserSelectForm(request.GET)
+            if form_obj.is_valid():
+                current_page = form_obj.cleaned_data['current_page']
+                length = form_obj.cleaned_data['length']
+                q = Q()
+                if uid and task_type:
+                    q.add(Q(id=uid), Q.AND)
+                user_objs = models.zgld_userprofile.objects.filter(q).order_by('-create_date')
+                count = user_objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    user_objs = user_objs[start_line: stop_line]
+
+                ret_data = []
+                for obj in user_objs:
+
+                    oper_log_objs = models.ZgldUserOperLog.objects.filter(oper_type=1, user_id=obj.id)
+                    dingdan_objs = models.zgld_shangcheng_dingdan_guanli.objects.select_related('shangpinguanli', 'shouHuoRen').filter(yewuUser_id=obj.id)
+
+                    # ====================================================响应平均时长-=========================================
+                    chatinfo_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(send_type__in=[1, 2], userprofile_id=obj.id)
+                    average_response_time_consultation_list = []
+                    is_customer = False
+                    zong_avg_time = 0 # 总平均响应时长
+                    for chatinfo_obj in chatinfo_objs.order_by('create_date'):
+                        create_date = chatinfo_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                        customer_name = chatinfo_obj.customer.username
+                        if chatinfo_obj.send_type in [2, '2'] and not is_customer: # 客户发给用户
+                            average_response_time_consultation_list.append({
+                                'jisuan_create_date': chatinfo_obj.create_date,
+                                'create_date': create_date,
+                                'customer_name': customer_name,
+                            })
+                            is_customer = True
+                        if is_customer:
+                            if chatinfo_obj.send_type in [1, '1']:
+                                is_customer = False
+                                average_response_time_consultation_list[-1]['recovery_time'] = create_date
+                                average_response_time_consultation_list[-1]['jisuan_recovery_time'] = chatinfo_obj.create_date
+                                zong_avg_time += (
+                                        chatinfo_obj.create_date - average_response_time_consultation_list[-1]['jisuan_create_date']
+                                ).seconds # 单次响应时间
+                    if zong_avg_time and len(average_response_time_consultation_list):
+                        zong_avg_time = zong_avg_time / len(average_response_time_consultation_list) # 总平均值
+
+                    # ===========================================有效对话======================================
+                    effective_radar_communication_num = 0 # 总有效对话次数
+                    effective_radar_objs = models.zgld_chatinfo.objects.select_related('userprofile', 'customer').filter(
+                        send_type__in=[1, 2], userprofile_id=obj.id)
+
+                    customers_objs = effective_radar_objs.values('customer').annotate(Count('id')) # 查询全部客户
+                    effective_radar_list = []
+                    customer_num = 0
+                    user_num = 0
+                    effective_dict = []
+                    for customers_obj in customers_objs:
+                        objs = effective_radar_objs.filter(customer_id=customers_obj['customer']) # 查询单个客户
+
+                        for radar_obj in objs:
+                            if objs.count() >= 6:
+
+                                send_type = radar_obj.send_type # 发送类型
+                                text = get_msg(radar_obj.content)
+
+                                if send_type in [1, '1']: # 用户发给客户
+                                    customer_num += 1
+                                    effective_dict.append({
+                                        'send_type': send_type,
+                                        'avatar': radar_obj.userprofile.avatar,     # 头像
+                                        'name': radar_obj.userprofile.username,
+                                        'msg': text.get('msg'),
+                                        'product_cover_url': text.get('product_cover_url'),
+                                        'product_name': text.get('product_name'),
+                                        'product_price': text.get('product_price'),
+                                        'url': text.get('url'),
+                                        'info_type': text.get('info_type'),
+                                        'create_date': radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    })
+
+                                elif send_type in [2, '2']: # 客户发给用户
+                                    user_num += 1
+                                    effective_dict.append({
+                                        'send_type': send_type,
+                                        'avatar': radar_obj.customer.headimgurl,  # 头像
+                                        'name': b64decode(radar_obj.customer.username),
+                                        'msg': text.get('msg'),
+                                        'product_cover_url': text.get('product_cover_url'),
+                                        'product_name': text.get('product_name'),
+                                        'product_price': text.get('product_price'),
+                                        'url': text.get('url'),
+                                        'info_type': text.get('info_type'),
+                                        'create_date': radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    })
+
+                            if customer_num >= 3 and user_num >= 3:
+                                customer_num = 0
+                                user_num = 0
+                                effective_radar_list.append({
+                                    'effective_dict': effective_dict,
+                                    'user_name':b64decode(radar_obj.customer.username),
+                                    'create_date':radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                 })
+                                effective_dict = []
+                                effective_radar_communication_num += 1
+
+                    detail_data = [] # 详情数据
+                    detail_count = 0 # 详情总数
+                    if uid and task_type in [1, '1']: # 查询详情复制昵称
+                        detail_count = oper_log_objs.count()
+                        for oper_log_obj in oper_log_objs[detail_start_line: detail_stop_line]:
+                            detail_data.append({
+                                'customer_name': b64decode(oper_log_obj.customer.username),
+                                'create_date': oper_log_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                            })
+
+                    elif uid and task_type in [2, '2']: # 查询详情雷达内有效对话
+                        detail_count = effective_radar_communication_num
+                        detail_data = effective_radar_list[detail_start_line: detail_stop_line]
+
+                    elif uid and task_type in [3, '3']: # 查询详情 响应时长
+                        detail_count = len(average_response_time_consultation_list)
+                        for time_list in average_response_time_consultation_list[detail_start_line: detail_stop_line]:
+                            response_time = (time_list.get('jisuan_recovery_time') - time_list.get('jisuan_create_date')).seconds
+                            detail_data.append({
+                                'customer_name': b64decode(time_list.get('customer_name')),
+                                'create_date': time_list.get('create_date'),
+                                'recovery_time': time_list.get('recovery_time'),
+                                'response_time': response_time,
+                            })
+
+                    elif uid and task_type in [4, '4']: # 订单数量
+                        detail_count = dingdan_objs.count()
+                        for dingdan_obj in dingdan_objs[detail_start_line: detail_stop_line]:
+                            goods_name = ''
+                            if dingdan_obj.shangpinguanli:
+                                goods_name = dingdan_obj.shangpinguanli.goodsName
+                            detail_data.append({
+                                'unitRiceNum': dingdan_obj.unitRiceNum,
+                                'goods_name': goods_name,
+                                'customer_name': b64decode(dingdan_obj.shouHuoRen.username),
+                                'create_date': dingdan_obj.createDate.strftime('%Y-%m-%d %H:%M:%S')
+                            })
+
+
+                    ret_data.append({
+                        'user_id': obj.id,
+                        'user_name': obj.username,
+                        'copy_nickname': oper_log_objs.count(),
+                        'order_number': dingdan_objs.count(),
+                        'effective_radar_communication': effective_radar_communication_num,
+                        'average_response_time_consultation': zong_avg_time,
+                        'detail_data':detail_data,
+                        'detail_count':detail_count,
+                    })
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'ret_data': ret_data,
+                    'count': count,
+                }
+
+
+            else:
+                response.code = 301
+                response.msg = form_obj.errors.as_json()
+
 
         else:
             pass
@@ -548,7 +735,39 @@ def xcx_data_statistics(request, oper_type):
 
 
 
+# 获取 发送的消息
+def get_msg(content):
+    # print('content-----content---------------content---> ', content)
+    data = {
+        'msg': '',
+        'product_cover_url': '',
+        'product_name': '',
+        'product_price': '',
+        'url': '',
+    }
+    if content:
+        try:
+            content = json.loads(content)
+        except Exception:
+            content = content
+        info_type = int(content.get('info_type'))
 
+        if content:
+            if info_type in [1, 3, 6]:
+                if content.get('msg'):
+                    data['msg'] = b64decode(content.get('msg'))
+
+            elif info_type in [2]:
+                # print('content---> ', content)
+                # print("content.get('product_cover_url')-------> ", content.get('product_cover_url'))
+                data['product_cover_url'] = content.get('product_cover_url')
+                data['product_name'] = content.get('product_name')
+                data['product_price'] = content.get('product_price')
+
+            elif info_type in [4, 5]:
+                data['url'] = content.get('url')
+        data['info_type'] = info_type
+    return data
 
 
 

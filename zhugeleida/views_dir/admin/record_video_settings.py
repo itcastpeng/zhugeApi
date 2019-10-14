@@ -354,8 +354,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                     for belonger_obj in belonger_objs:
                         video_duration_stay += int(belonger_obj.video_duration_stay)
                     num = 0
-                    result_data, num = init_video_table_context_diagram(obj['user_id'], o_id, num)
-                    print('result_data------> ', result_data)
+                    result_data, num = init_video_table_context_diagram(obj['user_id'], o_id, num, obj['customer'])
                     len_result_data = len(result_data)
 
                     is_have_child = False
