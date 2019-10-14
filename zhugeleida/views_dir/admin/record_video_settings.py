@@ -291,7 +291,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 }
             else:
                 response.code = 301
-                response.msg = '该文章无查看'
+                response.msg = '该文章暂无脉络图'
                 response.data = {}
 
         # 视频表格脉络图
@@ -392,6 +392,7 @@ def record_video_settings_oper(request, oper_type, o_id):
             if objs:
                 obj = objs[0]
                 num = 0
+                print('obj.user_id, o_id, num--------------> ', obj.user_id, o_id, num, obj.user)
                 result_data, num = init_video_table_context_diagram(obj.user_id, o_id, num)
                 len_result_data = len(result_data)
 
@@ -454,7 +455,7 @@ def init_data(uid, article_id, q, user_id=None):
 def init_video_table_context_diagram(uid, article_id, num, user_id=None):
     objs = models.zgld_video_to_customer_belonger.objects.select_related(
         'user', 'video', 'customer'
-    ).filter(user_id=uid).values(
+    ).filter(user_id=uid, video_id=article_id).values(
         'customer_id',
         'customer__username'
     ).annotate(Count('id'))
@@ -466,7 +467,11 @@ def init_video_table_context_diagram(uid, article_id, num, user_id=None):
     result_data = []
     for obj in objs:
         user_id = obj['customer_id']
-        username = b64decode(obj['customer__username'])
+        try:
+            username = b64decode(obj['customer__username'])
+        except Exception:
+            username = obj['customer__username']
+
         children_data, num = init_video_table_context_diagram(uid, article_id, num, user_id)
         num += len(children_data)
 
