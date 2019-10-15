@@ -272,10 +272,9 @@ def record_video_settings_oper(request, oper_type, o_id):
                 ).filter(q, level=0).values('user_id', 'user__username').annotate(Count('id')) # 首级
                 max_person_num = 0
                 for belonger_obj in belonger_objs:
-                    print('belonger_obj-----> ', belonger_obj)
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
-                    children_data, num = init_data(belonger_obj['user_id'], q, 0, 0)
+                    children_data, num = init_data(q, 0, 0)
                     tmp['children'] = children_data
                     result_data.append(tmp)
                     max_person_num+=num
@@ -475,29 +474,30 @@ def record_video_settings_oper(request, oper_type, o_id):
 
 
 # 脉络图查询 调用init_data
-def init_data(uid, q, level, num):
+def init_data(q, level, num, parent_id=None):
+
     objs = models.zgld_video_to_customer_belonger.objects.select_related(
         'user', 'video', 'customer'
     ).filter(
         q,
-        user_id=uid,
         level=level
     )
-
+    if parent_id:
+        objs = objs.filter(parent_customer_id=parent_id)
+    else:
+        objs = objs.filter(parent_customer__isnull=True)
     objs = objs.values(
         'customer_id',
         'customer__username',
-        'parent_customer_id'
     ).annotate(Count('id'))
-
     result_data = []
+    level += 1
     for obj in objs:
-        print(obj)
         num += 1
         user_id = obj['customer_id']
         username = b64decode(obj['customer__username'])
-        level += 1
-        children_data, num = init_data(uid, q, level, num)
+        parent_id = obj['customer_id']
+        children_data, num = init_data(q, level, num, parent_id)
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
