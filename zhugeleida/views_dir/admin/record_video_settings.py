@@ -274,7 +274,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 for belonger_obj in belonger_objs:
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
-                    children_data = init_data(belonger_obj['user_id'], q, level=0)
+                    children_data = init_data(belonger_obj['user_id'], q, 0, 0)
                     tmp['children'] = children_data
                     result_data.append(tmp)
                     count_num += len(children_data)
@@ -305,24 +305,23 @@ def record_video_settings_oper(request, oper_type, o_id):
             }
             form_obj = VideoTableContextDiagramForm(form_data)
             if form_obj.is_valid():
+                pub_q = Q()
                 q = Q()
                 video_id = form_obj.cleaned_data.get('o_id')
-                q.add(Q(video_id=o_id), Q.AND)
+                pub_q.add(Q(video_id=o_id), Q.AND)
                 q.add(Q(level=level), Q.AND)
                 if uid:
-                    q.add(Q(user_id=uid), Q.AND)
+                    pub_q.add(Q(user_id=uid), Q.AND)
 
                 if query_customer_id:
                     q.add(Q(parent_customer_id=query_customer_id), Q.AND)
-
+                print(q, pub_q)
                 objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'video',
                     'user',
                     'customer'
                 ).filter(
-                    q,
-                    video_id=video_id,
-
+                    q,pub_q,
                 ).values(
                     'level', 'customer',
                     'customer__username',
@@ -335,10 +334,6 @@ def record_video_settings_oper(request, oper_type, o_id):
                     'parent_customer_id',
                     'parent_customer__username'
                 ).annotate(Count('id'))
-
-                total_level_num = 0
-                if objs:
-                    total_level_num = objs.order_by('-level')[0]['level']
 
                 data_list = []
                 for obj in objs:
@@ -359,7 +354,9 @@ def record_video_settings_oper(request, oper_type, o_id):
                     for belonger_obj in belonger_objs:
                         video_duration_stay += int(belonger_obj.video_duration_stay)
 
-                    result_data, num = init_data(obj['user_id'], q, 0, 0)
+                    print('pub_q---> ', pub_q)
+                    result_data, num = init_data(obj['user_id'], pub_q, 0, 0)
+                    print(num, result_data)
                     is_have_child = False
                     if num >= 1: # 是否有下级
                         is_have_child = True
@@ -376,7 +373,7 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                     data_list.append({
                         "stay_time": conversion_seconds_hms(int(video_duration_stay)),
-                        "read_count": forward_count,                        # 阅读数量
+                        "read_count": forward_count,                       # 阅读数量
 
                         "forward_friend_circle_count": forward_count,       # 转发到朋友圈
                         "forward_friend_count": forward_count,              # 转发给好友
@@ -395,6 +392,7 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                 video_obj = models.zgld_recorded_video.objects.get(id=o_id)
 
+                total_level_num = ''
                 response.code = 200
                 response.data = {
                     'video_id': video_obj.id,
@@ -467,16 +465,19 @@ def record_video_settings_oper(request, oper_type, o_id):
 
 
 # 脉络图查询 调用init_data
-def init_data(uid, q, level, num=None):
+def init_data(uid, q, level, num):
     objs = models.zgld_video_to_customer_belonger.objects.select_related(
         'user', 'video', 'customer'
     ).filter(
         q,
         user_id=uid,
         level=level
-    ).values(
+    )
+
+    objs = objs.values(
         'customer_id',
-        'customer__username'
+        'customer__username',
+        'parent_customer_id'
     ).annotate(Count('id'))
 
     result_data = []
@@ -484,12 +485,48 @@ def init_data(uid, q, level, num=None):
         num += 1
         user_id = obj['customer_id']
         username = b64decode(obj['customer__username'])
-        children_data, num = init_data(uid, q, level + 1, num)
+        level += 1
+        children_data, num = init_data(uid, q, level, num)
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
         result_data.append(tmp)
     return result_data, num
+
+
+
+# 脉络图查询 调用init_data
+def init_video_table_context_diagram(uid, article_id, num, level):
+    objs = models.zgld_video_to_customer_belonger.objects.select_related(
+        'user', 'video', 'customer'
+    ).filter(
+        user_id=uid,
+        video_id=article_id,
+        level=level
+    ).values(
+        'customer_id',
+        'customer__username'
+    ).annotate(Count('id'))
+    result_data = []
+    for obj in objs:
+        user_id = obj['customer_id']
+        try:
+            username = b64decode(obj['customer__username'])
+        except Exception:
+            username = obj['customer__username']
+
+        children_data, num = init_video_table_context_diagram(uid, article_id, num, level+1)
+        num += len(children_data)
+
+        tmp = {'name': username}
+        if children_data:
+            tmp['children'] = children_data
+        result_data.append(tmp)
+
+    return result_data, num
+
+
+
 
 
 
