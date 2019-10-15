@@ -361,7 +361,7 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                     result_data, num = init_data(obj['user_id'], q, 0, 0)
                     is_have_child = False
-                    if num > 1: # 是否有下级
+                    if num >= 1: # 是否有下级
                         is_have_child = True
 
                     area = ''
@@ -376,7 +376,7 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                     data_list.append({
                         "stay_time": conversion_seconds_hms(int(video_duration_stay)),
-                        "read_count": forward_count,                       # 阅读数量
+                        "read_count": forward_count,                        # 阅读数量
 
                         "forward_friend_circle_count": forward_count,       # 转发到朋友圈
                         "forward_friend_count": forward_count,              # 转发给好友
@@ -490,41 +490,6 @@ def init_data(uid, q, level, num=None):
             tmp['children'] = children_data
         result_data.append(tmp)
     return result_data, num
-
-
-
-# 脉络图查询 调用init_data
-def init_video_table_context_diagram(uid, article_id, num, level):
-    objs = models.zgld_video_to_customer_belonger.objects.select_related(
-        'user', 'video', 'customer'
-    ).filter(
-        user_id=uid,
-        video_id=article_id,
-        level=level
-    ).values(
-        'customer_id',
-        'customer__username'
-    ).annotate(Count('id'))
-    result_data = []
-    for obj in objs:
-        user_id = obj['customer_id']
-        try:
-            username = b64decode(obj['customer__username'])
-        except Exception:
-            username = obj['customer__username']
-
-        children_data, num = init_video_table_context_diagram(uid, article_id, num, level+1)
-        num += len(children_data)
-
-        tmp = {'name': username}
-        if children_data:
-            tmp['children'] = children_data
-        result_data.append(tmp)
-
-    return result_data, num
-
-
-
 
 
 
