@@ -530,12 +530,149 @@ def xcx_data_statistics(request, oper_type):
         elif oper_type == 'xcx_ld_article_data_analysis':
             pass
 
+        # 案例数据分析(案例版)
+        elif oper_type == 'xcx_al_article_data_analysis':
+            case_id = request.GET.get('case_id')  # 查询单日记
+            task_type = request.GET.get('task_type', 0)
+            """查询类型 1点击量 2转发次数 3案例查看时长 4视频查看时长 5主动点击对话框 6主动发送消息次数 7用户拨打电话次数 8点赞数 9评论数 0默认列表页"""
+
+            detail_current_page = request.GET.get('detail_current_page', 1)  # 详情分页
+            detail_length = request.GET.get('detail_length', 10)  # 详情分页
+            detail_start_line = (detail_current_page - 1) * detail_length
+            detail_stop_line = detail_start_line + detail_length
+
+            form_obj = UserSelectForm(request.GET)
+            if form_obj.is_valid():
+                current_page = form_obj.cleaned_data['current_page']
+                length = form_obj.cleaned_data['length']
+                q = Q()
+                if case_id:
+                    q.add(Q(id=case_id), Q.AND)
+                objs = models.zgld_case.objects.filter(pub_q, q).order_by('-create_date')
+                count = objs.count()
+
+                if length != 0:
+                    start_line = (current_page - 1) * length
+                    stop_line = start_line + length
+                    objs = objs[start_line: stop_line]
+                ret_data = []
+                for obj in objs:
+                    print(obj.id)
+                    # ===========================点击量=========================
+                    click_the_quantity_objs = models.zgld_accesslog.objects.filter(action=22, diary__case_id=obj.id)
+
+                    # =========================用户主动发送消息==================
+                    user_actively_clicks_dialog_box_objs = models.zgld_chatinfo.objects.select_related(
+                        'userprofiles'
+                    ).filter(
+                        send_type__in=[1,  2],
+                        userprofile__company_id=admin_user_obj.company_id,
+                    ).values(
+                        'userprofile_id', 'userprofile__username', 'customer_id', 'customer__username'
+                    ).annotate(Count('id'))
+                    user_actively_clicks_dialog_box_list = []
+                    for user_actively_clicks_dialog_box_obj in user_actively_clicks_dialog_box_objs:
+                        user_actively_clicks_objs = models.zgld_chatinfo.objects.select_related(
+                            'userprofile', 'customer'
+                        ).filter(
+                            send_type__in=[1, 2],
+                            userprofile_id=user_actively_clicks_dialog_box_obj['userprofile_id'],
+                            customer_id=user_actively_clicks_dialog_box_obj['customer_id'],
+                        )
+                        if user_actively_clicks_objs:
+                            user_actively_clicks_obj = user_actively_clicks_objs[0]
+                            user_actively_clicks_dialog_box_list.append({
+                                'customer__username': user_actively_clicks_obj.customer.username,
+                                'content': user_actively_clicks_obj.content,
+                            })
+
+
+                            # ==========================点赞数============================
+                    thumb_up_for_objs = models.zgld_diary_action.objects.filter(action=1, case_id=case_id)
+
+                    # ==========================评论数==========================
+                    comments_num_objs = models.zgld_diary_action.objects.filter(action=2, case_id=case_id)
+
+                    # ==========================拨打电话数======================
+                    user_calls_num_objs = models.zgld_accesslog.objects.filter(
+                        action=10,
+                        user__company=admin_user_obj.company_id
+                    ) # 拨打电话
+
+                    detail_data = []
+                    detail_count = 0
+                    if case_id and task_type:
+                        if task_type in [1, '1']: # 1点击量
+                            detail_count = click_the_quantity_objs.count()
+                            click_the_quantity_objs = click_the_quantity_objs[detail_start_line: detail_stop_line]
+                            for click_the_quantity_obj in click_the_quantity_objs:
+                                detail_data.append({
+                                    'user_name': click_the_quantity_obj.user.username,
+                                    'customer_name': click_the_quantity_obj.customer.username,
+                                })
+
+
+                        elif task_type in [2, '2']: # 2转发次数
+                            pass
+
+                        elif task_type in [3, '3']: #3案例查看时长
+                            pass
+
+                        elif task_type in [4, '4']: # 4视频查看时长
+                            pass
+
+                        elif task_type in [5, '5']: # 5主动点击对话框
+                            pass
+
+                        elif task_type in [6, '6']: # 6主动发送消息次数
+                            pass
+
+                        elif task_type in [7, '7']: # 7用户拨打电话次数
+                            pass
+
+                        elif task_type in [8, '8']: # 8点赞数
+                            pass
+
+                        elif task_type in [9, '9']: # 9评论数
+                            pass
+
+
+                    ret_data.append({
+                        'case_id': obj.id,                       # 案例ID
+                        'case_name': obj.case_name,                  # 案例名称
+
+                        'click_the_quantity': click_the_quantity_objs.count(),              # 点击量
+                        'user_sends_message': len(user_actively_clicks_dialog_box_list),    # 用户主动发送消息
+                        'thumb_up_for': thumb_up_for_objs.count(),                          # 点赞数
+                        'comments_num': comments_num_objs.count(),                          # 评论数
+                        'user_calls_num': user_calls_num_objs.count(),                      # 用户拨打电话
+
+                        'amount_of_forwarding': '',                 # 转发量
+
+                        'case_view_total_average_duration': '',     # 案例查看 总/平均时长
+                        'video_view_total_average_duration': '',    # 视频查看 次数 总/平均时长
+                        'user_actively_clicks_dialog_box': '',      # 用户主动点击对话框
+
+                        'detail_data': detail_data,                                         # 详情数据
+                        'detail_count': detail_count,                                       # 详情总数
+                    })
+
+
+
+                response.code = 200
+                response.msg = '查询成功'
+                response.data = {
+                    'count': count,
+                    'ret_data': ret_data,
+                }
+
+            else:
+                response.code = 301
+                response.msg = form_obj.errors.as_json()
+
+
         # 员工数据分析(案例版)
         elif oper_type == 'xcx_al_employee_data_analysis':
-            pass
-
-        # 文章数据分析(案例版)
-        elif oper_type == 'xcx_al_article_data_analysis':
             uid = request.GET.get('uid') # 查询单个人
             task_type = request.GET.get('task_type', 0) # 查询类型 1复制昵称 2雷达内有效对话 3响应时长 4订单数量
 
@@ -559,9 +696,9 @@ def xcx_data_statistics(request, oper_type):
                 current_page = form_obj.cleaned_data['current_page']
                 length = form_obj.cleaned_data['length']
                 q = Q()
-                if uid and task_type:
+                if uid:
                     q.add(Q(id=uid), Q.AND)
-                user_objs = models.zgld_userprofile.objects.filter(q).order_by('-create_date')
+                user_objs = models.zgld_userprofile.objects.filter(q, pub_q).order_by('-create_date')
                 count = user_objs.count()
 
                 if length != 0:
@@ -725,7 +862,8 @@ def xcx_data_statistics(request, oper_type):
 
 
         else:
-            pass
+            response.code = 402
+            response.msg = '请求异常'
 
     else:
         response.code = 402

@@ -437,7 +437,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 obj = objs[0]
                 num = 0
                 print('obj.user_id, o_id, num--------------> ', obj.user_id, o_id, num, obj.user)
-                result_data, num = init_video_table_context_diagram(obj.user_id, o_id, num)
+                result_data, num = init_video_table_context_diagram(obj.user_id, o_id, num, level=0)
                 len_result_data = len(result_data)
 
                 ret_data['forward_friend_circle_count'] = len_result_data            # 转发朋友圈次数
