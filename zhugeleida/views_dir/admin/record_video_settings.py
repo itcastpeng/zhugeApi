@@ -274,7 +274,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 for belonger_obj in belonger_objs:
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
-                    children_data = init_data(belonger_obj['user_id'], o_id, q)
+                    children_data = init_data(belonger_obj['user_id'], q, level=0)
                     tmp['children'] = children_data
                     result_data.append(tmp)
                     count_num += len(children_data)
@@ -354,7 +354,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                     for belonger_obj in belonger_objs:
                         video_duration_stay += int(belonger_obj.video_duration_stay)
                     num = 0
-                    result_data, num = init_video_table_context_diagram(obj['user_id'], o_id, num, obj['customer'])
+                    result_data, num = init_video_table_context_diagram(obj['user_id'], o_id, num, level=0)
                     len_result_data = len(result_data)
 
                     is_have_child = False
@@ -470,23 +470,23 @@ def record_video_settings_oper(request, oper_type, o_id):
 
 
 # 脉络图查询 调用init_data
-def init_data(uid, article_id, q, user_id=None):
+def init_data(uid, q, level):
     objs = models.zgld_video_to_customer_belonger.objects.select_related(
         'user', 'video', 'customer'
-    ).filter(q, user_id=uid).values(
+    ).filter(
+        q,
+        user_id=uid,
+        level=level
+    ).values(
         'customer_id',
         'customer__username'
     ).annotate(Count('id'))
 
-    if user_id:
-        objs = objs.filter(parent_customer_id=user_id)
-    else:
-        objs = objs.filter(parent_customer__isnull=True)
     result_data = []
     for obj in objs:
         user_id = obj['customer_id']
         username = b64decode(obj['customer__username'])
-        children_data = init_data(uid, article_id, q, user_id)
+        children_data = init_data(uid, q, level + 1)
         tmp = {'name': username}
         if children_data:
             tmp['children'] = children_data
@@ -496,18 +496,17 @@ def init_data(uid, article_id, q, user_id=None):
 
 
 # 脉络图查询 调用init_data
-def init_video_table_context_diagram(uid, article_id, num, user_id=None):
+def init_video_table_context_diagram(uid, article_id, num, level):
     objs = models.zgld_video_to_customer_belonger.objects.select_related(
         'user', 'video', 'customer'
-    ).filter(user_id=uid, video_id=article_id).values(
+    ).filter(
+        user_id=uid,
+        video_id=article_id,
+        level=level
+    ).values(
         'customer_id',
         'customer__username'
     ).annotate(Count('id'))
-
-    if user_id:
-        objs = objs.filter(parent_customer_id=user_id)
-    else:
-        objs = objs.filter(parent_customer__isnull=True)
     result_data = []
     for obj in objs:
         user_id = obj['customer_id']
@@ -516,7 +515,7 @@ def init_video_table_context_diagram(uid, article_id, num, user_id=None):
         except Exception:
             username = obj['customer__username']
 
-        children_data, num = init_video_table_context_diagram(uid, article_id, num, user_id)
+        children_data, num = init_video_table_context_diagram(uid, article_id, num, level+1)
         num += len(children_data)
 
         tmp = {'name': username}
