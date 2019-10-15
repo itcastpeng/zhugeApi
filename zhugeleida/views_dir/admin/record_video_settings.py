@@ -315,7 +315,6 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                 if query_customer_id:
                     q.add(Q(parent_customer_id=query_customer_id), Q.AND)
-                print(q, pub_q)
                 objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'video',
                     'user',
@@ -343,23 +342,24 @@ def record_video_settings_oper(request, oper_type, o_id):
                         video_id=video_id,
                         level=obj['level'],
                     )
-                    forward_count = models.zgld_video_to_customer_belonger.objects.filter(
-                        user_id=obj['user_id'],
-                        video_id=video_id,
-                        level=obj['level'],
-                        parent_customer_id=obj['customer']
-                    ).count()
-
                     video_duration_stay = 0
                     for belonger_obj in belonger_objs:
                         video_duration_stay += int(belonger_obj.video_duration_stay)
 
-                    print('pub_q---> ', pub_q)
-                    result_data, num = init_data(obj['user_id'], pub_q, 0, 0)
-                    print(num, result_data)
+                    is_have_child_objs = models.zgld_video_to_customer_belonger.objects.filter(
+                        parent_customer_id=obj['customer'],
+                        user_id=obj['user_id'],
+                        video_id=video_id,
+                        level=int(level)+1,
+                    )
+
+                    # print(obj['customer'], level, 'p-----> ', p)
+                    # result_data, num = init_data(obj['user_id'], pub_q, int(level), 0)
+                    # print(num, result_data)
                     is_have_child = False
-                    if num >= 1: # 是否有下级
+                    if is_have_child_objs: # 是否有下级
                         is_have_child = True
+                    num = is_have_child_objs.count()
 
                     area = ''
                     if obj['customer__province'] and obj['customer__city']:
@@ -373,11 +373,11 @@ def record_video_settings_oper(request, oper_type, o_id):
 
                     data_list.append({
                         "stay_time": conversion_seconds_hms(int(video_duration_stay)),
-                        "read_count": forward_count,                       # 阅读数量
+                        "read_count": num,                                  # 阅读数量
 
-                        "forward_friend_circle_count": forward_count,       # 转发到朋友圈
-                        "forward_friend_count": forward_count,              # 转发给好友
-                        "lower_people_count": forward_count,                # 下级人数
+                        "forward_friend_circle_count": num,                 # 转发到朋友圈
+                        "forward_friend_count": num,                        # 转发给好友
+                        "lower_people_count": num,                          # 下级人数
                         "is_have_child": is_have_child,                     # 是否有下级
                         "lower_level": int(obj['level']) + 1,               # 下级层数
                         "level": obj['level'],                              # 所在层级
@@ -393,6 +393,14 @@ def record_video_settings_oper(request, oper_type, o_id):
                 video_obj = models.zgld_recorded_video.objects.get(id=o_id)
 
                 total_level_num = ''
+                total_level_num_objs = models.zgld_video_to_customer_belonger.objects.select_related(
+                    'video'
+                ).filter(
+                    video_id=video_id
+                ).order_by('-level')
+                if total_level_num_objs:
+                    total_level_num = total_level_num_objs[0].level
+
                 response.code = 200
                 response.data = {
                     'video_id': video_obj.id,
