@@ -270,14 +270,16 @@ def record_video_settings_oper(request, oper_type, o_id):
                 belonger_objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'user'
                 ).filter(q, level=0).values('user_id', 'user__username').annotate(Count('id')) # 首级
-                count_num = 0
+                max_person_num = 0
                 for belonger_obj in belonger_objs:
+                    print('belonger_obj-----> ', belonger_obj)
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
-                    children_data = init_data(belonger_obj['user_id'], q, 0, 0)
+                    children_data, num = init_data(belonger_obj['user_id'], q, 0, 0)
                     tmp['children'] = children_data
                     result_data.append(tmp)
-                    count_num += len(children_data)
+                    max_person_num+=num
+
                 dataList = {  # 顶端 首级
                     'name': video_title,
                     'children': result_data
@@ -287,7 +289,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 response.data = {
                     'dataList': dataList,
                     'video_title': video_title, # 视频标题
-                    'max_person_num': count_num
+                    'max_person_num': max_person_num
                 }
             else:
                 response.code = 301
@@ -490,6 +492,7 @@ def init_data(uid, q, level, num):
 
     result_data = []
     for obj in objs:
+        print(obj)
         num += 1
         user_id = obj['customer_id']
         username = b64decode(obj['customer__username'])
