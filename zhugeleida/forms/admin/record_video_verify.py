@@ -450,12 +450,6 @@ class VideoTableContextDiagramForm(forms.Form):
             'required': '视频ID不能为空'
         }
     )
-    level = forms.IntegerField(
-        required=True,
-        error_messages={
-            'required': '层级不能为空'
-        }
-    )
     uid = forms.IntegerField(
         required=False,
         error_messages={
