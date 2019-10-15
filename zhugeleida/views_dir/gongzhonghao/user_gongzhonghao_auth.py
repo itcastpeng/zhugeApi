@@ -806,7 +806,12 @@ def forwarding_video_jump_address(request):
                 level = int(belonger_objs[0].level) + 1
 
         video_belonger_data['level'] = level
-        video_log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+        video_log_objs = models.zgld_video_to_customer_belonger.objects.filter(**video_belonger_data)
+        if video_log_objs:
+            video_log_obj = video_log_objs[0]
+        else:
+            video_log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
+
         log_id = video_log_obj.id
 
         obj = models.zgld_recorded_video.objects.get(id=video_id)
