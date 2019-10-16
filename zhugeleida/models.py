@@ -1650,13 +1650,15 @@ class zgld_record_view_case_diary_video(models.Model):
     diary = models.ForeignKey('zgld_diary', verbose_name='日记', null=True)
     log_type_choices = (
         (1, '查看日记'),
-        (2, '查看视频')
+        (2, '查看视频'),
+        (3, '转发日记'),
     )
     log_type = models.SmallIntegerField(verbose_name='日志类型', choices=log_type_choices, default=1)
     see_time = models.IntegerField(verbose_name='查看时长', default=0)
     time_stamp = models.IntegerField(verbose_name='唯一识别', null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='查看客户')
     create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
+    user = models.ForeignKey('zgld_userprofile', verbose_name='用戶', null=True)
 
 # ============================================公司后台编辑 后台管理员自行开户================================================
 class zgld_editor(models.Model):

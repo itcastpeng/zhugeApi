@@ -821,7 +821,7 @@ class RecordViewLogForm(forms.Form):
         }
     )
     time_stamp = forms.IntegerField(
-        required=True,
+        required=False,
         error_messages={
             'required': "唯一标识不能为空"
         }

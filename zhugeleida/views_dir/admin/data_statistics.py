@@ -625,6 +625,21 @@ def xcx_data_statistics(request, oper_type):
                         view_video_avg_count = int(view_video_total_count / view_video_count)
                     video_view_total_average_duration = str(view_video_count) + '/' + str(view_video_total_count) + '/' + str(view_video_avg_count)
 
+                    # ============================转发===========================
+                    amount_of_forwarding_q = Q()
+                    amount_of_forwarding_q.add(
+                        Q(diary__case__user__company_id=admin_user_obj.company_id) | Q(
+                            case__user__company_id=admin_user_obj.company_id) , Q.AND
+                    )
+                    amount_of_forwarding_q.add(Q(diary__case_id=obj.id) | Q(case_id=obj.id), Q.AND)
+                    amount_of_forwarding_objs = models.zgld_record_view_case_diary_video.objects.select_related(
+                        'customer', 'diary', 'case'
+                    ).filter(
+                        amount_of_forwarding_q,
+                        log_type=3,
+                    )
+
+
                     detail_data = []
                     detail_count = 0
                     if case_id and task_type:
@@ -641,7 +656,16 @@ def xcx_data_statistics(request, oper_type):
 
                         # 2转发次数
                         elif task_type in [2, '2']:
-                            pass
+                            detail_count = amount_of_forwarding_objs.count()
+                            amount_of_forwarding_objs = amount_of_forwarding_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for amount_of_forwarding_obj in amount_of_forwarding_objs:
+                                detail_data.append({
+                                    'user_name': amount_of_forwarding_obj.user.username,
+                                    'create_date': amount_of_forwarding_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    'customer_name': b64decode(amount_of_forwarding_obj.customer.username),
+                                })
 
                         # 3案例查看时长
                         elif task_type in [3, '3']:
@@ -759,9 +783,7 @@ def xcx_data_statistics(request, oper_type):
                         'user_actively_clicks_dialog_box': click_on_dialog_box_objs.count(),    # 用户主动点击对话框
                         'case_view_total_average_duration': case_view_total_average_duration,   # 案例查看 总/平均时长
                         'video_view_total_average_duration': video_view_total_average_duration, # 视频查看 次数 总/平均时长
-
-                        'amount_of_forwarding': '0',                 # 转发量
-
+                        'amount_of_forwarding': amount_of_forwarding_objs.count(),                 # 转发量
                         'detail_data': detail_data,                                         # 详情数据
                         'detail_count': detail_count,                                       # 详情总数
                     })
