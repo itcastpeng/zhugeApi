@@ -5,7 +5,7 @@ from publicFunc import account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.admin.diary_manage_verify import PraiseDiaryForm, diarySelectForm, \
-    ReviewDiaryForm, DiaryReviewSelectForm, SelectForm, CollectionDiaryForm
+    ReviewDiaryForm, DiaryReviewSelectForm, SelectForm, CollectionDiaryForm, RecordViewLogForm
 from django.db.models import F, Q
 import json, datetime, base64,requests
 from publicFunc.condition_com import conditionCom
@@ -1159,5 +1159,42 @@ def diary_manage_oper(request, oper_type, o_id):
             }
             response.code = 200
             response.msg = "返回成功"
+
+        # 记录查看日志
+        elif oper_type == 'record_view_log':
+            case_type = request.GET.get('case_type') # 案例类型  1普通 2时间轴
+            case_id = request.GET.get('case_id') # 日记ID
+            log_type = request.GET.get('log_type') # 日志类型  1查看日记 2查看视频
+            time_stamp = request.GET.get('time_stamp') # 唯一识别
+
+            form_objs = RecordViewLogForm(request.GET)
+            if form_objs.is_valid():
+                select_data = {
+                    'time_stamp': time_stamp,
+                    'log_type': log_type,
+                    'customer_id': customer_id,
+                }
+
+                if case_type in [1, '1']: # 普通案例
+                    select_data['diary_id'] = case_id
+
+                else: # 时间轴案例
+                    select_data['case_id'] = case_id
+
+                objs = models.zgld_record_view_case_diary_video.objects.filter(**select_data)
+                if objs:
+                    obj = objs[0]
+
+                else:
+                    obj = models.zgld_record_view_case_diary_video.objects.create(**select_data)
+
+                obj.see_time = obj.see_time + 5
+                obj.save()
+
+                response.code = 200
+                response.msg = '记录成功'
+            else:
+                response.code = 301
+                response.msg = json.loads(form_objs.errors.as_json())
 
     return JsonResponse(response.__dict__)

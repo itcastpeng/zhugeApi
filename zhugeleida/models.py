@@ -1644,6 +1644,19 @@ class save_code(models.Model):
     code = models.CharField(verbose_name='存在的code', max_length=128, null=True, blank=True)
     create_datetime = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+# 记录 查看 (案例/日记) / 视频
+class zgld_record_view_case_diary_video(models.Model):
+    case = models.ForeignKey('zgld_case', verbose_name='案例', null=True)
+    diary = models.ForeignKey('zgld_diary', verbose_name='日记', null=True)
+    log_type_choices = (
+        (1, '查看日记'),
+        (2, '查看视频')
+    )
+    log_type = models.SmallIntegerField(verbose_name='日志类型', choices=log_type_choices, default=1)
+    see_time = models.IntegerField(verbose_name='查看时长', default=0)
+    time_stamp = models.IntegerField(verbose_name='唯一识别', null=True)
+    customer = models.ForeignKey('zgld_customer', verbose_name='查看客户')
+    create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
 # ============================================公司后台编辑 后台管理员自行开户================================================
 class zgld_editor(models.Model):
@@ -1799,7 +1812,15 @@ class zgld_video_to_customer_belonger(models.Model):
     create_date = models.DateTimeField(verbose_name="创建时间",auto_now_add=True)
 
 
-
+# 点击对话框
+class zgld_click_on_the_dialog_box(models.Model):
+    customer = models.ForeignKey('zgld_customer', verbose_name='点击对话框客户')
+    xcx_type_choices = (
+        (1, '案例版'),
+        (2, '雷达版'),
+    )
+    xcx_type = models.SmallIntegerField(verbose_name='小程序类型', choices=xcx_type_choices, default=1)
+    create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
 
 
 

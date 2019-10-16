@@ -311,6 +311,24 @@ def chat_oper(request, oper_type, o_id):
             response.code = 200
             response.msg = '成功'
 
+
+        # 记录客户点击对话框 小程序
+        elif oper_type == 'record_customer_click_dialog_box':
+            cid = request.GET.get('cid')
+            if cid:
+
+                xcx_type = request.GET.get('xcx_type', 1) # 小程序类型 1案例版 2雷达版
+                models.zgld_click_on_the_dialog_box.objects.create(
+                    customer_id=cid,
+                    xcx_type=xcx_type
+                )
+                response.code = 200
+                response.msg = '记录成功'
+
+            else:
+                response.code = 301
+                response.msg = '客户ID不能为空'
+
         return JsonResponse(response.__dict__)
 
     elif request.method == 'POST':

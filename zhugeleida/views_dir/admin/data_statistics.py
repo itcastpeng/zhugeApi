@@ -555,9 +555,10 @@ def xcx_data_statistics(request, oper_type):
                     start_line = (current_page - 1) * length
                     stop_line = start_line + length
                     objs = objs[start_line: stop_line]
+
                 ret_data = []
                 for obj in objs:
-                    print(obj.id)
+
                     # ===========================点击量=========================
                     click_the_quantity_objs = models.zgld_accesslog.objects.filter(action=22, diary__case_id=obj.id)
 
@@ -570,39 +571,66 @@ def xcx_data_statistics(request, oper_type):
                     ).values(
                         'userprofile_id', 'userprofile__username', 'customer_id', 'customer__username'
                     ).annotate(Count('id'))
-                    user_actively_clicks_dialog_box_list = []
-                    for user_actively_clicks_dialog_box_obj in user_actively_clicks_dialog_box_objs:
-                        user_actively_clicks_objs = models.zgld_chatinfo.objects.select_related(
-                            'userprofile', 'customer'
-                        ).filter(
-                            send_type__in=[1, 2],
-                            userprofile_id=user_actively_clicks_dialog_box_obj['userprofile_id'],
-                            customer_id=user_actively_clicks_dialog_box_obj['customer_id'],
-                        )
-                        if user_actively_clicks_objs:
-                            user_actively_clicks_obj = user_actively_clicks_objs[0]
-                            user_actively_clicks_dialog_box_list.append({
-                                'customer__username': user_actively_clicks_obj.customer.username,
-                                'content': user_actively_clicks_obj.content,
-                            })
+                    user_sends_message = user_actively_clicks_dialog_box_objs.count()
 
-
-                            # ==========================点赞数============================
-                    thumb_up_for_objs = models.zgld_diary_action.objects.filter(action=1, case_id=case_id)
+                    # ===========================点赞数===========================
+                    thumb_up_for_objs = models.zgld_diary_action.objects.select_related(
+                        'customer'
+                    ).filter(action=1, case_id=case_id)
 
                     # ==========================评论数==========================
-                    comments_num_objs = models.zgld_diary_action.objects.filter(action=2, case_id=case_id)
+                    comments_num_objs = models.zgld_diary_comment.objects.select_related(
+                        'from_customer', 'diary'
+                    ).filter(diary__case_id=case_id)
 
                     # ==========================拨打电话数======================
-                    user_calls_num_objs = models.zgld_accesslog.objects.filter(
+                    user_calls_num_objs = models.zgld_accesslog.objects.select_related(
+                        'customer'
+                    ).filter(
                         action=10,
                         user__company=admin_user_obj.company_id
-                    ) # 拨打电话
+                    )
+
+                    #=========================点击对话框==============================
+                    click_on_dialog_box_objs = models.zgld_click_on_the_dialog_box.objects.select_related(
+                        'customer'
+                    ).filter(
+                        xcx_type=1, customer__company_id=admin_user_obj.company_id
+                    )
+
+                    # ========================案例查看时长=========================
+                    view_case_diary_objs = models.zgld_record_view_case_diary_video.objects.select_related(
+                        'customer'
+                    ).filter(
+                        log_type=1, customer__company_id=admin_user_obj.company_id
+                    )
+                    view_case_diary_total_length = 0 # 总时长
+                    view_case_diary_avg_length = 0 # 平均时长
+                    for view_case_diary_obj in view_case_diary_objs:
+                        view_case_diary_total_length += view_case_diary_obj.see_time
+                    if view_case_diary_objs.count() > 0:
+                        view_case_diary_avg_length = int(view_case_diary_total_length / view_case_diary_objs.count())
+                    case_view_total_average_duration = str(view_case_diary_total_length) + '/' + str(view_case_diary_avg_length)
+
+                    # =========================视频查看时长=====================
+                    view_video_objs = models.zgld_record_view_case_diary_video.objects.filter(
+                        log_type=2, customer__company_id=admin_user_obj.company_id
+                    )
+                    view_video_count = view_video_objs.count()   # 查看视频次数
+                    view_video_total_count = 0 # 查看视频总时长
+                    view_video_avg_count = 0 # 查看视频平均时长
+                    for view_video_obj in view_video_objs:
+                        view_video_total_count += view_video_obj.see_time
+                    if view_video_count > 0:
+                        view_video_avg_count = int(view_video_total_count / view_video_count)
+                    video_view_total_average_duration = str(view_video_count) + '/' + str(view_video_total_count) + '/' + str(view_video_avg_count)
 
                     detail_data = []
                     detail_count = 0
                     if case_id and task_type:
-                        if task_type in [1, '1']: # 1点击量
+
+                        # 1点击量
+                        if task_type in [1, '1']:
                             detail_count = click_the_quantity_objs.count()
                             click_the_quantity_objs = click_the_quantity_objs[detail_start_line: detail_stop_line]
                             for click_the_quantity_obj in click_the_quantity_objs:
@@ -611,47 +639,128 @@ def xcx_data_statistics(request, oper_type):
                                     'customer_name': click_the_quantity_obj.customer.username,
                                 })
 
-
-                        elif task_type in [2, '2']: # 2转发次数
+                        # 2转发次数
+                        elif task_type in [2, '2']:
                             pass
 
-                        elif task_type in [3, '3']: #3案例查看时长
-                            pass
+                        # 3案例查看时长
+                        elif task_type in [3, '3']:
+                            detail_count = view_case_diary_objs.count()
+                            view_case_diary_objs = view_case_diary_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for view_case_diary_obj in view_case_diary_objs:
+                                try:
+                                    customer_name = b64decode(view_case_diary_obj.customer.username)
+                                except Exception:
+                                    customer_name = view_case_diary_obj.customer.username
 
-                        elif task_type in [4, '4']: # 4视频查看时长
-                            pass
+                                detail_data.append({
+                                    'customer_name': customer_name,
+                                    'create_date': view_case_diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    'see_time': view_case_diary_obj.see_time,
+                                })
 
-                        elif task_type in [5, '5']: # 5主动点击对话框
-                            pass
+                        # 4视频查看时长
+                        elif task_type in [4, '4']:
+                            detail_count = view_video_objs.count()
+                            view_video_objs = view_video_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for view_video_obj in view_video_objs:
+                                try:
+                                    customer_name = b64decode(view_video_obj.customer.username)
+                                except Exception:
+                                    customer_name = view_video_obj.customer.username
 
-                        elif task_type in [6, '6']: # 6主动发送消息次数
-                            pass
+                                detail_data.append({
+                                    'customer_name': customer_name,
+                                    'create_date': view_video_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    'see_time': view_video_obj.see_time,
+                                })
 
-                        elif task_type in [7, '7']: # 7用户拨打电话次数
-                            pass
+                        # 5主动点击对话框
+                        elif task_type in [5, '5']:
+                            detail_count = click_on_dialog_box_objs.count()
+                            click_on_dialog_box_objs = click_on_dialog_box_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for click_on_dialog_box_obj in click_on_dialog_box_objs:
+                                detail_data.append({
+                                    'customer_name': b64decode(click_on_dialog_box_obj.customer.username),
+                                    'create_date': click_on_dialog_box_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                                })
 
-                        elif task_type in [8, '8']: # 8点赞数
-                            pass
+                        # 6主动发送消息次数
+                        elif task_type in [6, '6']:
+                            detail_count = user_actively_clicks_dialog_box_objs.count()
+                            for user_actively_clicks_dialog_box_obj in user_actively_clicks_dialog_box_objs[detail_start_line: detail_stop_line]:
+                                user_actively_clicks_objs = models.zgld_chatinfo.objects.select_related(
+                                    'userprofile', 'customer'
+                                ).filter(
+                                    send_type__in=[2],
+                                    userprofile_id=user_actively_clicks_dialog_box_obj['userprofile_id'],
+                                    customer_id=user_actively_clicks_dialog_box_obj['customer_id'],
+                                ).order_by('create_date')
+                                user_actively_clicks_obj = user_actively_clicks_objs[0]
+                                detail_data.append({
+                                    'customer__username': b64decode(user_actively_clicks_obj.customer.username),
+                                    'content': json.loads(user_actively_clicks_obj.content),
+                                })
 
-                        elif task_type in [9, '9']: # 9评论数
-                            pass
+                        # 7用户拨打电话次数
+                        elif task_type in [7, '7']:
+                            detail_count = user_calls_num_objs.count()
+                            user_calls_num_objs = user_calls_num_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for user_calls_num_obj in user_calls_num_objs:
+                                detail_data.append({
+                                    'customer_name': b64decode(user_calls_num_obj.customer.username),
+                                    'create_date': user_calls_num_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                })
+
+                        # 8点赞数
+                        elif task_type in [8, '8']:
+                            detail_count = thumb_up_for_objs.count()
+                            thumb_up_for_objs = thumb_up_for_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for thumb_up_for_obj in thumb_up_for_objs:
+                                detail_data.append({
+                                    'customer_name': b64decode(thumb_up_for_obj.customer.username),
+                                    'create_date': thumb_up_for_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
+                                })
+
+                        # 9评论数
+                        elif task_type in [9, '9']:
+                            detail_count = comments_num_objs.count()
+                            comments_num_objs = comments_num_objs.order_by(
+                                '-create_date'
+                            )[detail_start_line: detail_stop_line]
+                            for comments_num_obj in comments_num_objs:
+                                detail_data.append({
+                                    'customer_name': b64decode(comments_num_obj.from_customer.username),
+                                    'create_date': comments_num_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    'content': b64decode(comments_num_obj.content),
+                                    'is_audit_pass': comments_num_obj.get_is_audit_pass_display()
+                                })
 
 
                     ret_data.append({
-                        'case_id': obj.id,                       # 案例ID
-                        'case_name': obj.case_name,                  # 案例名称
+                        'case_id': obj.id,                          # 案例ID
+                        'case_name': obj.case_name,                 # 案例名称
 
                         'click_the_quantity': click_the_quantity_objs.count(),              # 点击量
-                        'user_sends_message': len(user_actively_clicks_dialog_box_list),    # 用户主动发送消息
+                        'user_sends_message': user_sends_message,                           # 用户主动发送消息
                         'thumb_up_for': thumb_up_for_objs.count(),                          # 点赞数
                         'comments_num': comments_num_objs.count(),                          # 评论数
                         'user_calls_num': user_calls_num_objs.count(),                      # 用户拨打电话
+                        'user_actively_clicks_dialog_box': click_on_dialog_box_objs.count(),    # 用户主动点击对话框
+                        'case_view_total_average_duration': case_view_total_average_duration,   # 案例查看 总/平均时长
+                        'video_view_total_average_duration': video_view_total_average_duration, # 视频查看 次数 总/平均时长
 
-                        'amount_of_forwarding': '',                 # 转发量
-
-                        'case_view_total_average_duration': '',     # 案例查看 总/平均时长
-                        'video_view_total_average_duration': '',    # 视频查看 次数 总/平均时长
-                        'user_actively_clicks_dialog_box': '',      # 用户主动点击对话框
+                        'amount_of_forwarding': '0',                 # 转发量
 
                         'detail_data': detail_data,                                         # 详情数据
                         'detail_count': detail_count,                                       # 详情总数

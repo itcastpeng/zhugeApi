@@ -810,3 +810,40 @@ class  PosterSettingForm(forms.Form):
             return poster_cover
         else:
             self.add_error('poster_cover', '请控制图片 在1张 2张 9张')
+
+
+#
+class RecordViewLogForm(forms.Form):
+    log_type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "日记类型不能为空"
+        }
+    )
+    time_stamp = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "唯一标识不能为空"
+        }
+    )
+    case_id = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "案例ID不能为空"
+        }
+    )
+    case_type = forms.IntegerField(
+        required=True,
+        error_messages={
+            'required': "案例类型不能为空"
+        }
+    )
+
+
+
+
+
+
+
+
+
