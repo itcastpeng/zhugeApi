@@ -951,8 +951,8 @@ def xcx_data_statistics(request, oper_type):
                                 response_time = (time_list.get('jisuan_recovery_time') - time_list.get('jisuan_create_date')).seconds
                             detail_data.append({
                                 'customer__username': b64decode(time_list.get('customer_name')),
-                                'create_date': time_list.get('create_date'),
-                                'recovery_time': time_list.get('recovery_time'),
+                                'start_date': time_list.get('create_date'),
+                                'stop_date': time_list.get('recovery_time'),
                                 'response_time': response_time,
                             })
 
