@@ -576,12 +576,12 @@ def xcx_data_statistics(request, oper_type):
                     # ===========================点赞数===========================
                     thumb_up_for_objs = models.zgld_diary_action.objects.select_related(
                         'customer'
-                    ).filter(action=1, case_id=case_id)
+                    ).filter(action=1, case_id=obj.id)
 
                     # ==========================评论数==========================
                     comments_num_objs = models.zgld_diary_comment.objects.select_related(
                         'from_customer', 'diary'
-                    ).filter(diary__case_id=case_id)
+                    ).filter(diary__case_id=obj.id)
 
                     # ==========================拨打电话数======================
                     user_calls_num_objs = models.zgld_accesslog.objects.select_related(
