@@ -923,7 +923,7 @@ def xcx_data_statistics(request, oper_type):
                                 user_num = 0
                                 effective_radar_list.append({
                                     'effective_dict': effective_dict,
-                                    'user_name':b64decode(radar_obj.customer.username),
+                                    'customer__username':b64decode(radar_obj.customer.username),
                                     'create_date':radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                  })
                                 effective_dict = []
