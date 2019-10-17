@@ -730,6 +730,7 @@ def xcx_data_statistics(request, oper_type):
                                 detail_data.append({
                                     'customer__username': b64decode(user_actively_clicks_obj.customer.username),
                                     'content': json.loads(user_actively_clicks_obj.content),
+                                    'create_date': user_actively_clicks_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                 })
 
                         # 7用户拨打电话次数
