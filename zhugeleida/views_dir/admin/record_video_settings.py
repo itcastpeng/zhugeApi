@@ -256,12 +256,11 @@ def record_video_settings_oper(request, oper_type, o_id):
 
         # 查询视频 脉络图
         elif oper_type == 'query_video_context_diagram':
-            q = Q()
             uid = request.GET.get('uid')  # 视频所属用户ID
+            # if uid:
+            #     q.add(Q(user_id=uid), Q.AND)
+            q = Q()
             q.add(Q(video_id=o_id), Q.AND)
-            if uid:
-                q.add(Q(user_id=uid), Q.AND)
-
             objs = models.zgld_video_to_customer_belonger.objects.filter(q)
             if objs:
                 video_title = objs[0].video.title
@@ -272,11 +271,14 @@ def record_video_settings_oper(request, oper_type, o_id):
                 ).filter(q, level=0).values('user_id', 'user__username').annotate(Count('id')) # 首级
                 max_person_num = 0
                 for belonger_obj in belonger_objs:
-                    q.add(Q(user_id=belonger_obj['user_id']), Q.AND)
+                    init_q = Q()
+                    init_q.add(Q(video_id=o_id), Q.AND)
+                    init_q.add(Q(user_id=belonger_obj['user_id']), Q.AND)
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
-                    children_data, num = init_data(q, 0, 0)
+                    children_data, num = init_data(init_q, 0, 0)
                     tmp['children'] = children_data
+                    print('children_data------> ', children_data)
                     result_data.append(tmp)
                     max_person_num+=num
 
@@ -483,6 +485,7 @@ def init_data(q, level, num, parent_id=None):
         q,
         level=level
     )
+    print(q, objs)
     if parent_id:
         objs = objs.filter(parent_customer_id=parent_id)
     else:
