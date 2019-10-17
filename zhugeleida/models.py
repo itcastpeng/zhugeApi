@@ -1655,7 +1655,7 @@ class zgld_record_view_case_diary_video(models.Model):
     )
     log_type = models.SmallIntegerField(verbose_name='日志类型', choices=log_type_choices, default=1)
     see_time = models.IntegerField(verbose_name='查看时长', default=0)
-    time_stamp = models.IntegerField(verbose_name='唯一识别', null=True)
+    time_stamp = models.CharField(verbose_name='唯一识别', max_length=256, null=True)
     customer = models.ForeignKey('zgld_customer', verbose_name='查看客户')
     create_date = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     user = models.ForeignKey('zgld_userprofile', verbose_name='用戶', null=True)

@@ -1169,7 +1169,7 @@ def diary_manage_oper(request, oper_type, o_id):
             log_type = request.GET.get('log_type')      # 日志类型  1查看日记 2查看视频
             time_stamp = request.GET.get('time_stamp')  # 唯一识别
             uid = request.GET.get('uid')
-
+            print('time_stamp-------> ', time_stamp, type(time_stamp), len(time_stamp))
             form_objs = RecordViewLogForm(request.GET)
             if form_objs.is_valid():
                 select_data = {
@@ -1186,16 +1186,17 @@ def diary_manage_oper(request, oper_type, o_id):
 
 
                 select_data['user_id'] = uid
+                print('select_data--------> ', select_data)
 
                 objs = models.zgld_record_view_case_diary_video.objects.filter(**select_data)
                 if objs:
                     obj = objs[0]
+                    obj.see_time = obj.see_time + 5
+                    obj.save()
 
                 else:
-                    obj = models.zgld_record_view_case_diary_video.objects.create(**select_data)
+                    models.zgld_record_view_case_diary_video.objects.create(**select_data)
 
-                obj.see_time = obj.see_time + 5
-                obj.save()
 
                 response.code = 200
                 response.msg = '记录成功'

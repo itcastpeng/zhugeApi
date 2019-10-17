@@ -59,7 +59,7 @@ def is_token(table_obj):
             objs = table_obj.objects.filter(id=user_id)
             if objs:
                 obj = objs[0]
-                # print('str_encrypt(timestamp + obj.token) -->', str_encrypt(timestamp + obj.token))
+                print('str_encrypt(timestamp + obj.token) -->', str_encrypt(timestamp + obj.token))
                 # print('rand_str -->', rand_str)
                 if str_encrypt(timestamp + obj.token) == rand_str:
                     # print("已经登录")
