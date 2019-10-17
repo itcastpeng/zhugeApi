@@ -647,7 +647,6 @@ def xcx_data_statistics(request, oper_type):
                         log_type=3,
                     )
 
-
                     detail_data = []
                     detail_count = 0
                     if case_id and task_type:
