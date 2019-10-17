@@ -658,7 +658,8 @@ def xcx_data_statistics(request, oper_type):
                             for click_the_quantity_obj in click_the_quantity_objs:
                                 detail_data.append({
                                     'user_name': click_the_quantity_obj.user.username,
-                                    'customer__username': click_the_quantity_obj.customer.username,
+                                    'customer__username': b64decode(click_the_quantity_obj.customer.username),
+                                    'create_date': click_the_quantity_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                                 })
 
                         # 2转发次数
