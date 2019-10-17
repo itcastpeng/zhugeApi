@@ -272,6 +272,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 ).filter(q, level=0).values('user_id', 'user__username').annotate(Count('id')) # 首级
                 max_person_num = 0
                 for belonger_obj in belonger_objs:
+                    q.add(Q(user_id=belonger_obj['user_id']), Q.AND)
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
                     children_data, num = init_data(q, 0, 0)
