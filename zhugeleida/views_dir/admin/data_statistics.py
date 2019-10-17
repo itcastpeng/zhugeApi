@@ -463,6 +463,9 @@ def xcx_data_statistics(request, oper_type):
     admin_user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
     pub_q = Q() # 公共Q 条件
     pub_q.add(Q(company_id=admin_user_obj.company_id), Q.AND)
+    company_id = request.GET.get('company_id')
+    if not company_id:
+        company_id = admin_user_obj.company_id
 
     if request.method == 'GET':
 
@@ -567,7 +570,7 @@ def xcx_data_statistics(request, oper_type):
                         'userprofiles'
                     ).filter(
                         send_type__in=[1,  2],
-                        userprofile__company_id=admin_user_obj.company_id,
+                        userprofile__company_id=company_id,
                     ).values(
                         'userprofile_id', 'userprofile__username', 'customer_id', 'customer__username'
                     ).annotate(Count('id'))
@@ -588,21 +591,21 @@ def xcx_data_statistics(request, oper_type):
                         'customer'
                     ).filter(
                         action=10,
-                        user__company=admin_user_obj.company_id
+                        user__company=company_id
                     )
 
                     #=========================点击对话框==============================
                     click_on_dialog_box_objs = models.zgld_click_on_the_dialog_box.objects.select_related(
                         'customer'
                     ).filter(
-                        xcx_type=1, customer__company_id=admin_user_obj.company_id
+                        xcx_type=1, customer__company_id=company_id
                     )
 
                     # ========================案例查看时长=========================
                     view_case_diary_objs = models.zgld_record_view_case_diary_video.objects.select_related(
                         'customer'
                     ).filter(
-                        log_type=1, customer__company_id=admin_user_obj.company_id
+                        log_type=1, customer__company_id=company_id
                     )
                     view_case_diary_total_length = 0 # 总时长
                     view_case_diary_avg_length = 0 # 平均时长
@@ -614,7 +617,7 @@ def xcx_data_statistics(request, oper_type):
 
                     # =========================视频查看时长=====================
                     view_video_objs = models.zgld_record_view_case_diary_video.objects.filter(
-                        log_type=2, customer__company_id=admin_user_obj.company_id
+                        log_type=2, customer__company_id=company_id
                     )
                     view_video_count = view_video_objs.count()   # 查看视频次数
                     view_video_total_count = 0 # 查看视频总时长
@@ -628,8 +631,8 @@ def xcx_data_statistics(request, oper_type):
                     # ============================转发===========================
                     amount_of_forwarding_q = Q()
                     amount_of_forwarding_q.add(
-                        Q(diary__case__user__company_id=admin_user_obj.company_id) | Q(
-                            case__user__company_id=admin_user_obj.company_id) , Q.AND
+                        Q(diary__case__user__company_id=company_id) | Q(
+                            case__user__company_id=company_id) , Q.AND
                     )
                     amount_of_forwarding_q.add(Q(diary__case_id=obj.id) | Q(case_id=obj.id), Q.AND)
                     amount_of_forwarding_objs = models.zgld_record_view_case_diary_video.objects.select_related(
