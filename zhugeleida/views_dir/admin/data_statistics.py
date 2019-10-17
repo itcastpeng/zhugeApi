@@ -561,6 +561,8 @@ def xcx_data_statistics(request, oper_type):
 
                 ret_data = []
                 for obj in objs:
+                    view_diary_public_q = Q()
+                    view_diary_public_q.add(Q(diary__case_id=obj.id) | Q(case_id=obj.id), Q.AND)
 
                     # ===========================点击量=========================
                     click_the_quantity_objs = models.zgld_accesslog.objects.filter(action=22, diary__case_id=obj.id)
@@ -579,7 +581,7 @@ def xcx_data_statistics(request, oper_type):
                     # ===========================点赞数===========================
                     thumb_up_for_objs = models.zgld_diary_action.objects.select_related(
                         'customer'
-                    ).filter(action=1, case_id=obj.id)
+                    ).filter(view_diary_public_q, action=1, case_id=obj.id)
 
                     # ==========================评论数==========================
                     comments_num_objs = models.zgld_diary_comment.objects.select_related(
@@ -605,7 +607,7 @@ def xcx_data_statistics(request, oper_type):
                     view_case_diary_objs = models.zgld_record_view_case_diary_video.objects.select_related(
                         'customer'
                     ).filter(
-                        log_type=1, user__company_id=company_id
+                        view_diary_public_q, log_type=1, user__company_id=company_id
                     )
                     view_case_diary_total_length = 0 # 总时长
                     view_case_diary_avg_length = 0 # 平均时长
@@ -617,7 +619,7 @@ def xcx_data_statistics(request, oper_type):
 
                     # =========================视频查看时长=====================
                     view_video_objs = models.zgld_record_view_case_diary_video.objects.filter(
-                        log_type=2, user__company_id=company_id
+                        view_diary_public_q, log_type=2, user__company_id=company_id
                     )
                     view_video_count = view_video_objs.count()   # 查看视频次数
                     view_video_total_count = 0 # 查看视频总时长
@@ -634,11 +636,11 @@ def xcx_data_statistics(request, oper_type):
                         Q(diary__case__user__company_id=company_id) | Q(
                             case__user__company_id=company_id) , Q.AND
                     )
-                    amount_of_forwarding_q.add(Q(diary__case_id=obj.id) | Q(case_id=obj.id), Q.AND)
                     amount_of_forwarding_objs = models.zgld_record_view_case_diary_video.objects.select_related(
                         'customer', 'diary', 'case'
                     ).filter(
                         amount_of_forwarding_q,
+                        view_diary_public_q,
                         log_type=3,
                     )
 

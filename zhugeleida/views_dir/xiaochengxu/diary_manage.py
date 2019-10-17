@@ -1169,7 +1169,6 @@ def diary_manage_oper(request, oper_type, o_id):
             log_type = request.GET.get('log_type')      # 日志类型  1查看日记 2查看视频
             time_stamp = request.GET.get('time_stamp')  # 唯一识别
             uid = request.GET.get('uid')
-            print('time_stamp-------> ', time_stamp, type(time_stamp), len(time_stamp))
             form_objs = RecordViewLogForm(request.GET)
             if form_objs.is_valid():
                 select_data = {
