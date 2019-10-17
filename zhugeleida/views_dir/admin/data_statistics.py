@@ -462,10 +462,10 @@ def xcx_data_statistics(request, oper_type):
     user_id = request.GET.get('user_id')
     admin_user_obj = models.zgld_admin_userprofile.objects.get(id=user_id)
     pub_q = Q() # 公共Q 条件
-    pub_q.add(Q(company_id=admin_user_obj.company_id), Q.AND)
     company_id = request.GET.get('company_id')
     if not company_id:
         company_id = admin_user_obj.company_id
+    pub_q.add(Q(company_id=company_id), Q.AND)
 
     if request.method == 'GET':
 
@@ -551,7 +551,7 @@ def xcx_data_statistics(request, oper_type):
                 q = Q()
                 if case_id:
                     q.add(Q(id=case_id), Q.AND)
-                objs = models.zgld_case.objects.filter(pub_q, q).order_by('-create_date')
+                objs = models.zgld_case.objects.filter(pub_q, q, status=1).order_by('-create_date')
                 count = objs.count()
 
                 if length != 0:
@@ -565,7 +565,10 @@ def xcx_data_statistics(request, oper_type):
                     view_diary_public_q.add(Q(diary__case_id=obj.id) | Q(case_id=obj.id), Q.AND)
 
                     # ===========================点击量=========================
-                    click_the_quantity_objs = models.zgld_accesslog.objects.filter(action=22, diary__case_id=obj.id)
+                    click_the_quantity_objs = models.zgld_record_view_case_diary_video.objects.select_related(
+                        'user').filter(
+                        view_diary_public_q, log_type=1, user__company_id=company_id
+                    )
 
                     # =========================用户主动发送消息==================
                     user_actively_clicks_dialog_box_objs = models.zgld_chatinfo.objects.select_related(
@@ -605,7 +608,7 @@ def xcx_data_statistics(request, oper_type):
 
                     # ========================案例查看时长=========================
                     view_case_diary_objs = models.zgld_record_view_case_diary_video.objects.select_related(
-                        'customer'
+                        'user'
                     ).filter(
                         view_diary_public_q, log_type=1, user__company_id=company_id
                     )
