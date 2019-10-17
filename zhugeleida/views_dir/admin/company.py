@@ -725,7 +725,8 @@ def company_oper(request, oper_type, o_id):
             for obj in objs:
                 data_list.append({
                     'id':obj.id,
-                    'name':obj.name
+                    'name':obj.name,
+                    'product_function_type':obj.product_function_type
                 })
             response.code = 200
             response.msg = '查询成功'
