@@ -536,8 +536,8 @@ def xcx_data_statistics(request, oper_type):
             task_type = request.GET.get('task_type', 0)
             """查询类型 1点击量 2转发次数 3案例查看时长 4视频查看时长 5主动点击对话框 6主动发送消息次数 7用户拨打电话次数 8点赞数 9评论数 0默认列表页"""
 
-            detail_current_page = request.GET.get('detail_current_page', 1)  # 详情分页
-            detail_length = request.GET.get('detail_length', 10)  # 详情分页
+            detail_current_page = int(request.GET.get('detail_current_page', 1))  # 详情分页
+            detail_length = int(request.GET.get('detail_length', 10))  # 详情分页
             detail_start_line = (detail_current_page - 1) * detail_length
             detail_stop_line = detail_start_line + detail_length
 
@@ -807,8 +807,8 @@ def xcx_data_statistics(request, oper_type):
             uid = request.GET.get('uid') # 查询单个人
             task_type = request.GET.get('task_type', 0) # 查询类型 1复制昵称 2雷达内有效对话 3响应时长 4订单数量
 
-            detail_current_page = request.GET.get('detail_current_page', 1)# 详情分页
-            detail_length = request.GET.get('detail_length', 10)            # 详情分页
+            detail_current_page = int(request.GET.get('detail_current_page', 1))# 详情分页
+            detail_length = int(request.GET.get('detail_length', 10))            # 详情分页
             detail_start_line = (detail_current_page - 1) * detail_length
             detail_stop_line = detail_start_line + detail_length
 
