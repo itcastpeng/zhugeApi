@@ -605,7 +605,7 @@ def xcx_data_statistics(request, oper_type):
                     view_case_diary_objs = models.zgld_record_view_case_diary_video.objects.select_related(
                         'customer'
                     ).filter(
-                        log_type=1, customer__company_id=company_id
+                        log_type=1, user__company_id=company_id
                     )
                     view_case_diary_total_length = 0 # 总时长
                     view_case_diary_avg_length = 0 # 平均时长
@@ -617,7 +617,7 @@ def xcx_data_statistics(request, oper_type):
 
                     # =========================视频查看时长=====================
                     view_video_objs = models.zgld_record_view_case_diary_video.objects.filter(
-                        log_type=2, customer__company_id=company_id
+                        log_type=2, user__company_id=company_id
                     )
                     view_video_count = view_video_objs.count()   # 查看视频次数
                     view_video_total_count = 0 # 查看视频总时长
@@ -677,10 +677,7 @@ def xcx_data_statistics(request, oper_type):
                                 '-create_date'
                             )[detail_start_line: detail_stop_line]
                             for view_case_diary_obj in view_case_diary_objs:
-                                try:
-                                    customer_name = b64decode(view_case_diary_obj.customer.username)
-                                except Exception:
-                                    customer_name = view_case_diary_obj.customer.username
+                                customer_name = b64decode(view_case_diary_obj.customer.username)
 
                                 detail_data.append({
                                     'customer__username': customer_name,
@@ -690,20 +687,22 @@ def xcx_data_statistics(request, oper_type):
 
                         # 4视频查看时长
                         elif task_type in [4, '4']:
-                            detail_count = view_video_objs.count()
-                            view_video_objs = view_video_objs.order_by(
-                                '-create_date'
-                            )[detail_start_line: detail_stop_line]
-                            for view_video_obj in view_video_objs:
-                                try:
-                                    customer_name = b64decode(view_video_obj.customer.username)
-                                except Exception:
-                                    customer_name = view_video_obj.customer.username
+                            view_video_objs = view_video_objs.values(
+                                'customer__username', 'case', 'diary', 'user'
+                            ).annotate(
+                                Count('id'), Sum('see_time'))[detail_start_line: detail_stop_line]
 
+                            detail_count = view_video_objs.count()
+                            for view_video_obj in view_video_objs:
+                                avg_see_time = 0
+                                if view_video_obj['see_time__sum'] and view_video_obj['id__count']:
+                                    avg_see_time = int(view_video_obj['see_time__sum'] / view_video_obj['id__count'])
+                                customer_name = b64decode(view_video_obj['customer__username'])
                                 detail_data.append({
                                     'customer__username': customer_name,
-                                    'create_date': view_video_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                    'see_time': view_video_obj.see_time,
+                                    'see_count': view_video_obj['id__count'],
+                                    'see_time__sum': view_video_obj['see_time__sum'],
+                                    'avg_see_time': avg_see_time
                                 })
 
                         # 5主动点击对话框
@@ -729,12 +728,13 @@ def xcx_data_statistics(request, oper_type):
                                     userprofile_id=user_actively_clicks_dialog_box_obj['userprofile_id'],
                                     customer_id=user_actively_clicks_dialog_box_obj['customer_id'],
                                 ).order_by('create_date')
-                                user_actively_clicks_obj = user_actively_clicks_objs[0]
-                                detail_data.append({
-                                    'customer__username': b64decode(user_actively_clicks_obj.customer.username),
-                                    'content': json.loads(user_actively_clicks_obj.content),
-                                    'create_date': user_actively_clicks_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                })
+                                if user_actively_clicks_objs:
+                                    user_actively_clicks_obj = user_actively_clicks_objs[0]
+                                    detail_data.append({
+                                        'customer__username': b64decode(user_actively_clicks_obj.customer.username),
+                                        'content': json.loads(user_actively_clicks_obj.content),
+                                        'create_date': user_actively_clicks_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                    })
 
                         # 7用户拨打电话次数
                         elif task_type in [7, '7']:

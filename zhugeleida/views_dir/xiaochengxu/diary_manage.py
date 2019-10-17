@@ -1184,20 +1184,18 @@ def diary_manage_oper(request, oper_type, o_id):
                 else: # 时间轴案例
                     select_data['case_id'] = case_id
 
-                if log_type in [3, '3']:
-                    select_data['user_id'] = uid
-                    models.zgld_record_view_case_diary_video.objects.create(**select_data)
+
+                select_data['user_id'] = uid
+
+                objs = models.zgld_record_view_case_diary_video.objects.filter(**select_data)
+                if objs:
+                    obj = objs[0]
 
                 else:
-                    objs = models.zgld_record_view_case_diary_video.objects.filter(**select_data)
-                    if objs:
-                        obj = objs[0]
+                    obj = models.zgld_record_view_case_diary_video.objects.create(**select_data)
 
-                    else:
-                        obj = models.zgld_record_view_case_diary_video.objects.create(**select_data)
-
-                    obj.see_time = obj.see_time + 5
-                    obj.save()
+                obj.see_time = obj.see_time + 5
+                obj.save()
 
                 response.code = 200
                 response.msg = '记录成功'
