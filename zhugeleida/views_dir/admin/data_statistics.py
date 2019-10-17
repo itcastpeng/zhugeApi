@@ -946,7 +946,9 @@ def xcx_data_statistics(request, oper_type):
                     elif uid and task_type in [3, '3']: # 查询详情 响应时长
                         detail_count = len(average_response_time_consultation_list)
                         for time_list in average_response_time_consultation_list[detail_start_line: detail_stop_line]:
-                            response_time = (time_list.get('jisuan_recovery_time') - time_list.get('jisuan_create_date')).seconds
+                            response_time = 0
+                            if time_list.get('jisuan_recovery_time') and time_list.get('jisuan_create_date'):
+                                response_time = (time_list.get('jisuan_recovery_time') - time_list.get('jisuan_create_date')).seconds
                             detail_data.append({
                                 'customer_name': b64decode(time_list.get('customer_name')),
                                 'create_date': time_list.get('create_date'),
