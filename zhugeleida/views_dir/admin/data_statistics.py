@@ -885,14 +885,14 @@ def xcx_data_statistics(request, oper_type):
 
                     customers_objs = effective_radar_objs.values('customer').annotate(Count('id')) # 查询全部客户
                     effective_radar_list = []
-                    customer_num = 0
-                    user_num = 0
-                    effective_dict = []
                     for customers_obj in customers_objs:
                         objs = effective_radar_objs.filter(customer_id=customers_obj['customer']) # 查询单个客户
 
-                        for radar_obj in objs:
-                            if objs.count() >= 6:
+                        if objs.count() >= 6:
+                            effective_dict = []
+                            customer_num = 0
+                            user_num = 0
+                            for radar_obj in objs:
 
                                 send_type = radar_obj.send_type # 发送类型
                                 text = get_msg(radar_obj.content)
@@ -927,16 +927,16 @@ def xcx_data_statistics(request, oper_type):
                                         'create_date': radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                     })
 
-                            if customer_num >= 3 and user_num >= 3:
-                                customer_num = 0
-                                user_num = 0
-                                effective_radar_list.append({
-                                    'effective_dict': effective_dict,
-                                    'customer__username':b64decode(radar_obj.customer.username),
-                                    'create_date':radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                 })
-                                effective_dict = []
-                                effective_radar_communication_num += 1
+                                if customer_num >= 3 and user_num >= 3:
+                                    customer_num = 0
+                                    user_num = 0
+                                    effective_radar_list.append({
+                                        'effective_dict': effective_dict,
+                                        'customer__username':b64decode(radar_obj.customer.username),
+                                        'create_date':radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                     })
+                                    effective_dict = []
+                                    effective_radar_communication_num += 1
 
                     detail_data = [] # 详情数据
                     detail_count = 0 # 详情总数
