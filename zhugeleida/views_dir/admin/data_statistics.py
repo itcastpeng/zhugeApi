@@ -704,8 +704,8 @@ def xcx_data_statistics(request, oper_type):
                                 customer_name = b64decode(view_video_obj['customer__username'])
                                 detail_data.append({
                                     'customer__username': customer_name,
-                                    'see_count': get_min_s(view_video_obj['id__count']),
-                                    'see_time__sum': view_video_obj['see_time__sum'],
+                                    'see_count': view_video_obj['id__count'],
+                                    'see_time__sum': get_min_s(view_video_obj['see_time__sum']),
                                     'avg_see_time': avg_see_time
                                 })
 
