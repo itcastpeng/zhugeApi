@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from zhugeleida.forms.user_verify import UserSelectForm
 from publicFunc.base64 import b64decode
 from django.db.models import Q, Count, Sum
+from zhugeleida.public.pub import get_min_s
 import json, datetime, redis, time
 
 # 获取redis_name
@@ -685,7 +686,7 @@ def xcx_data_statistics(request, oper_type):
                                 detail_data.append({
                                     'customer__username': change_customer_name(view_case_diary_obj.customer.username),
                                     'create_date': view_case_diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                    'see_time': view_case_diary_obj.see_time,
+                                    'see_time': get_min_s(view_case_diary_obj.see_time),
                                 })
 
                         # 4视频查看时长
@@ -703,7 +704,7 @@ def xcx_data_statistics(request, oper_type):
                                 customer_name = b64decode(view_video_obj['customer__username'])
                                 detail_data.append({
                                     'customer__username': customer_name,
-                                    'see_count': view_video_obj['id__count'],
+                                    'see_count': get_min_s(view_video_obj['id__count']),
                                     'see_time__sum': view_video_obj['see_time__sum'],
                                     'avg_see_time': avg_see_time
                                 })
@@ -874,7 +875,7 @@ def xcx_data_statistics(request, oper_type):
                                         chatinfo_obj.create_date - average_response_time_consultation_list[-1]['jisuan_create_date']
                                 ).seconds # 单次响应时间
                     if zong_avg_time and len(average_response_time_consultation_list):
-                        zong_avg_time = zong_avg_time / len(average_response_time_consultation_list) # 总平均值
+                        zong_avg_time = int(zong_avg_time / len(average_response_time_consultation_list)) # 总平均值
 
                     # ===========================================有效对话======================================
                     effective_radar_communication_num = 0 # 总有效对话次数
@@ -963,7 +964,7 @@ def xcx_data_statistics(request, oper_type):
                                 'customer__username': b64decode(time_list.get('customer_name')),
                                 'start_date': time_list.get('create_date'),
                                 'stop_date': time_list.get('recovery_time'),
-                                'response_time': response_time,
+                                'response_time': get_min_s(response_time),
                             })
 
                     elif uid and task_type in [4, '4']: # 订单数量
