@@ -941,8 +941,11 @@ def xcx_data_statistics(request, oper_type):
                     if uid and task_type in [1, '1']: # 查询详情复制昵称
                         detail_count = oper_log_objs.count()
                         for oper_log_obj in oper_log_objs[detail_start_line: detail_stop_line]:
+                            customer__username = ''
+                            if oper_log_obj.customer:
+                                customer__username = change_customer_name(oper_log_obj.customer.username)
                             detail_data.append({
-                                'customer__username': change_customer_name(oper_log_obj.customer.username),
+                                'customer__username': customer__username,
                                 'create_date': oper_log_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                             })
 
