@@ -658,7 +658,7 @@ def xcx_data_statistics(request, oper_type):
                             for click_the_quantity_obj in click_the_quantity_objs:
                                 detail_data.append({
                                     'user_name': click_the_quantity_obj.user.username,
-                                    'customer__username': b64decode(click_the_quantity_obj.customer.username),
+                                    'customer__username': change_customer_name(click_the_quantity_obj.customer.username),
                                     'create_date': click_the_quantity_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                                 })
 
@@ -672,7 +672,7 @@ def xcx_data_statistics(request, oper_type):
                                 detail_data.append({
                                     'user_name': amount_of_forwarding_obj.user.username,
                                     'create_date': amount_of_forwarding_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                    'customer__username': b64decode(amount_of_forwarding_obj.customer.username),
+                                    'customer__username': change_customer_name(amount_of_forwarding_obj.customer.username),
                                 })
 
                         # 3案例查看时长
@@ -682,10 +682,8 @@ def xcx_data_statistics(request, oper_type):
                                 '-create_date'
                             )[detail_start_line: detail_stop_line]
                             for view_case_diary_obj in view_case_diary_objs:
-                                customer_name = b64decode(view_case_diary_obj.customer.username)
-
                                 detail_data.append({
-                                    'customer__username': customer_name,
+                                    'customer__username': change_customer_name(view_case_diary_obj.customer.username),
                                     'create_date': view_case_diary_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                     'see_time': view_case_diary_obj.see_time,
                                 })
@@ -718,7 +716,7 @@ def xcx_data_statistics(request, oper_type):
                             )[detail_start_line: detail_stop_line]
                             for click_on_dialog_box_obj in click_on_dialog_box_objs:
                                 detail_data.append({
-                                    'customer__username': b64decode(click_on_dialog_box_obj.customer.username),
+                                    'customer__username': change_customer_name(click_on_dialog_box_obj.customer.username),
                                     'create_date': click_on_dialog_box_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                                 })
 
@@ -736,7 +734,7 @@ def xcx_data_statistics(request, oper_type):
                                 if user_actively_clicks_objs:
                                     user_actively_clicks_obj = user_actively_clicks_objs[0]
                                     detail_data.append({
-                                        'customer__username': b64decode(user_actively_clicks_obj.customer.username),
+                                        'customer__username': change_customer_name(user_actively_clicks_obj.customer.username),
                                         'content': json.loads(user_actively_clicks_obj.content),
                                         'create_date': user_actively_clicks_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                     })
@@ -749,7 +747,7 @@ def xcx_data_statistics(request, oper_type):
                             )[detail_start_line: detail_stop_line]
                             for user_calls_num_obj in user_calls_num_objs:
                                 detail_data.append({
-                                    'customer__username': b64decode(user_calls_num_obj.customer.username),
+                                    'customer__username': change_customer_name(user_calls_num_obj.customer.username),
                                     'create_date': user_calls_num_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                 })
 
@@ -761,7 +759,7 @@ def xcx_data_statistics(request, oper_type):
                             )[detail_start_line: detail_stop_line]
                             for thumb_up_for_obj in thumb_up_for_objs:
                                 detail_data.append({
-                                    'customer__username': b64decode(thumb_up_for_obj.customer.username),
+                                    'customer__username': change_customer_name(thumb_up_for_obj.customer.username),
                                     'create_date': thumb_up_for_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                                 })
 
@@ -773,7 +771,7 @@ def xcx_data_statistics(request, oper_type):
                             )[detail_start_line: detail_stop_line]
                             for comments_num_obj in comments_num_objs:
                                 detail_data.append({
-                                    'customer__username': b64decode(comments_num_obj.from_customer.username),
+                                    'customer__username': change_customer_name(comments_num_obj.from_customer.username),
                                     'create_date': comments_num_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                     'content': b64decode(comments_num_obj.content),
                                     'is_audit_pass': comments_num_obj.get_is_audit_pass_display()
@@ -917,7 +915,7 @@ def xcx_data_statistics(request, oper_type):
                                     effective_dict.append({
                                         'send_type': send_type,
                                         'avatar': radar_obj.customer.headimgurl,  # 头像
-                                        'customer__username': b64decode(radar_obj.customer.username),
+                                        'customer__username': change_customer_name(radar_obj.customer.username),
                                         'msg': text.get('msg'),
                                         'product_cover_url': text.get('product_cover_url'),
                                         'product_name': text.get('product_name'),
@@ -932,7 +930,7 @@ def xcx_data_statistics(request, oper_type):
                                     user_num = 0
                                     effective_radar_list.append({
                                         'effective_dict': effective_dict,
-                                        'customer__username':b64decode(radar_obj.customer.username),
+                                        'customer__username':change_customer_name(radar_obj.customer.username),
                                         'create_date':radar_obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
                                      })
                                     effective_dict = []
@@ -944,7 +942,7 @@ def xcx_data_statistics(request, oper_type):
                         detail_count = oper_log_objs.count()
                         for oper_log_obj in oper_log_objs[detail_start_line: detail_stop_line]:
                             detail_data.append({
-                                'customer__username': b64decode(oper_log_obj.customer.username),
+                                'customer__username': change_customer_name(oper_log_obj.customer.username),
                                 'create_date': oper_log_obj.create_date.strftime('%Y-%m-%d %H:%M:%S')
                             })
 
@@ -1049,6 +1047,13 @@ def get_msg(content):
         data['info_type'] = info_type
     return data
 
+# 转换客户名称
+def change_customer_name(customer_name):
+    try:
+        customer_name = b64decode(customer_name)
+    except Exception:
+        customer_name = ''
+    return customer_name
 
 
 
