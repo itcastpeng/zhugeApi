@@ -96,7 +96,7 @@ def case_manage_public(request, tag_list=None): # is_search 是否为搜索 如�
                 cover_picture = []
                 if obj.cover_picture:
                     cover_picture = json.loads(obj.cover_picture)
-                diary_give_like = models.zgld_diary_action.objects.filter(case_id=obj.id).count()
+                diary_give_like = models.zgld_diary_action.objects.filter(action=1, case_id=obj.id).count()
 
                 is_give_like = False
                 # 判断是否点赞
@@ -138,7 +138,7 @@ def case_manage_public(request, tag_list=None): # is_search 是否为搜索 如�
                 cover_picture = []
                 if diary_obj.cover_picture:  # 封面（取第一张）
                     cover_picture = json.loads(diary_obj.cover_picture)
-                diary_give_like = models.zgld_diary_action.objects.filter(diary_id=diary_obj.id).count()
+                diary_give_like = models.zgld_diary_action.objects.filter(action=1, diary_id=diary_obj.id).count()
                 diary_list_id = diary_obj.id
                 case_name = diary_obj.title
                 customer = diary_obj.case.customer_name
