@@ -585,7 +585,7 @@ def xcx_data_statistics(request, oper_type):
                     # ===========================点赞数===========================
                     thumb_up_for_objs = models.zgld_diary_action.objects.select_related(
                         'customer'
-                    ).filter(view_diary_public_q, action=1, case_id=obj.id)
+                    ).filter(view_diary_public_q, action=1)
 
                     # ==========================评论数==========================
                     comments_num_objs = models.zgld_diary_comment.objects.select_related(
