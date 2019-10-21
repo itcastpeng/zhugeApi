@@ -233,8 +233,10 @@ def action(request, oper_type):
                 for obj in objs:
                     username = b64decode(obj.customer.username)
                     log_type = 1
-                    if '视频' in obj.remark:
+                    if obj.action in [24, '24']: # 查看视频 日志
                         log_type = 2
+                    elif obj.action in [21, '21', 22, '22']:  # 查看日记 日志
+                        log_type = 3
                     ret_data.append({
                         'user_id': obj.user_id,
                         'customer_username': username,

@@ -361,7 +361,7 @@ def article_oper(request, oper_type, o_id):
         elif oper_type == 'customer_read_info':  # 脉络图
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
-            log_type = request.GET.get('log_type')   # log_type 为1 为文章 2为录播视频
+            log_type = request.GET.get('log_type')   # log_type 为1 为文章 2为录播视频 3日记
 
 
             current_page = request.GET.get('current_page')
@@ -436,6 +436,65 @@ def article_oper(request, oper_type, o_id):
                         'ret_data': ret_data
                     }
 
+                # 日记
+                elif log_type in [3, '3']:
+                    q = Q()
+                    q.add(Q(case__isnull=False) | Q(diary__isnull=False), Q.AND)
+                    objs = models.zgld_record_view_case_diary_video.objects.select_related(
+                        'user'
+                    ).filter(
+                        q,
+                        log_type__in=[1, 3],
+                        customer_id=customer_id,
+                        user_id=user_id
+                    ).values('case', 'case__case_name', 'diary', 'diary__title').annotate(Count('id'))
+
+                    if length != 0:
+                        start_line = (current_page - 1) * length
+                        stop_line = start_line + length
+                        objs = objs[start_line: stop_line]
+                    ret_data = []
+                    for obj in objs:
+                        detail_objs = models.zgld_record_view_case_diary_video.objects.filter(
+                            log_type__in=[1, 3],
+                            customer_id=customer_id,
+                            user_id=user_id
+                        ).order_by('-create_date')
+
+                        if obj['diary']:
+                            case_id = obj['diary']
+                            case_name = obj['diary__title']
+                            detail_objs = detail_objs.filter(diary_id=case_id)
+                        else:
+                            case_id = obj['case']
+                            case_name = obj['case__case_name']
+                            detail_objs = detail_objs.filter(case_id=case_id)
+
+                        stay_time = 0
+                        read_count_objs = detail_objs.filter(log_type=1)
+                        for read_count_obj in read_count_objs:
+                            stay_time += int(read_count_obj.see_time)
+
+                        forward_count = detail_objs.filter(log_type=3).count() # 转发
+
+                        read_count = read_count_objs.count() # 阅读
+
+                        ret_data.append({
+                            'article_id': case_id,                  # 日记ID
+                            'article_title': case_name,             # 日记名称
+                            'stay_time': stay_time,                 # 停留时间
+                            'read_count': read_count,               # 阅读次数
+                            'forward_count': forward_count,         # 转发次数
+                            'level': 0,                             # 层级
+                            'create_date': detail_objs[0].create_date.strftime('%Y-%m-%d %H:%M:%S'), # 创建时间
+                        })
+                    code = 200
+                    msg = '查询成功'
+                    data = {
+                        'article_num': objs.count(),
+                        'ret_data': ret_data
+                    }
+                # 文章
                 else:
                     q1 = Q()
                     q1.connector = 'AND'
@@ -809,7 +868,7 @@ def article_oper(request, oper_type, o_id):
 
         # 获取文章访问日志
         elif oper_type == 'get_article_access_log':
-            log_type = request.GET.get('log_type')  # log_type 为1 为文章 2为录播视频
+            log_type = request.GET.get('log_type')  # log_type 为1 为文章 2为录播视频 3为日记
             user_id = request.GET.get('user_id')
             customer_id = request.GET.get('customer_id')
             parent_id = request.GET.get('pid')
@@ -817,6 +876,7 @@ def article_oper(request, oper_type, o_id):
             length = request.GET.get('length')
             type =  request.GET.get('type')
 
+            # 视频
             if log_type in [2, '2']:
                 form_objs = VideoForm(request.GET)
                 if form_objs.is_valid():
@@ -865,6 +925,58 @@ def article_oper(request, oper_type, o_id):
                 else:
                     response.code = 301
                     response.msg = json.loads(form_objs.errors.as_json())
+
+            # 日记
+            elif log_type in [3, '3']:
+                form_objs = VideoForm(request.GET)
+                if form_objs.is_valid():
+                    current_page = form_objs.cleaned_data['current_page']
+                    length = form_objs.cleaned_data['length']
+                    q = Q()
+                    q.add(Q(case_id=o_id) | Q(diary_id=o_id), Q.AND)
+                    objs = models.zgld_record_view_case_diary_video.objects.filter(
+                        q,
+                        user_id=user_id,
+                        customer_id=customer_id,
+                    ).order_by('-create_date')
+                    if objs:
+                        result_data = []
+                        for obj in objs:
+                            video_duration_stay = '0秒'
+                            if int(obj.see_time) >= 1:
+                                video_duration_stay = get_min_s(int(obj.see_time))
+
+                            result_data.append({
+                                'article_access_log_id': obj.id,
+                                'last_read_time': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                'stay_time': video_duration_stay,  # 停留时间
+                            })
+
+                        if length != 0:
+                            start_line = (current_page - 1) * length
+                            stop_line = start_line + length
+                            result_data = result_data[start_line: stop_line]
+
+                        area = objs[0].customer.province + objs[0].customer.city
+                        username = ''
+                        response.code = 200
+                        response.msg = '查询成功'
+                        response.data = {
+                            'customer_id': objs[0].customer_id,  # 客户ID
+                            'customer_name': username,  # 客户姓名
+                            'customer_headimgurl': objs[0].customer.headimgurl,  # 客户头像
+                            'sex_text': objs[0].customer.get_sex_display(),  # 性别
+                            'sex': objs[0].customer.sex,  # 性别
+                            'area': area,  # 地区
+
+                            'ret_data': result_data,
+                            'data_count': len(result_data),
+                        }
+
+                else:
+                    response.code = 301
+                    response.msg = json.loads(form_objs.errors.as_json())
+
 
             else:
                 request_data_dict = {
