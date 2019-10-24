@@ -74,7 +74,7 @@ class zgld_company(models.Model):
         app_label = "zhugeleida"
 
 
-# 公司管理
+# 三方平台管理
 class zgld_three_service_setting(models.Model):
     # company = models.ForeignKey('zgld_company', verbose_name='所属企业')
     type_choice = (

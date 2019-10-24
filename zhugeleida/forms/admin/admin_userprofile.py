@@ -40,9 +40,15 @@ class AddForm(forms.Form):
         required=True,
         error_messages = {
         'required': "用户角色不能为空"
-    }
+        }
 
     )
+    token = forms.IntegerField(
+        required=False
+    )
+    def clean_token(self):
+        password = self.data['password']
+        return account.get_token(password + str(int(time.time()) * 1000))
 
     # 查询名称是否存在
     def clean_login_user(self):
