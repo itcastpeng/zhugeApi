@@ -43,12 +43,12 @@ class AddForm(forms.Form):
         }
 
     )
-    token = forms.IntegerField(
-        required=False
-    )
-    def clean_token(self):
-        password = self.data['password']
-        return account.get_token(password + str(int(time.time()) * 1000))
+    # token = forms.IntegerField(
+    #     required=False
+    # )
+    # def clean_token(self):
+    #     password = self.data['password']
+    #     return account.get_token(password + str(int(time.time()) * 1000))
 
     # 查询名称是否存在
     def clean_login_user(self):
