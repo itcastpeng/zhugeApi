@@ -242,7 +242,7 @@ def pub_create_link_repost_video(user_id, video_id, company_id, pid):
         state,
         component_appid
     )
-
+    print('share_url============> ', share_url)
     bianma_share_url = quote(share_url, 'utf-8')
     share_url = '%s/zhugeleida/gongzhonghao/work_gongzhonghao_auth/redirect_share_url?share_url=%s' % (
         leida_http_url, bianma_share_url)
