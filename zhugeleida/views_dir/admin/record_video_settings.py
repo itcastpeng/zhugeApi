@@ -313,7 +313,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                 pub_q = Q()
                 q = Q()
                 video_id = form_obj.cleaned_data.get('o_id')
-                pub_q.add(Q(video_id=o_id), Q.AND)
+                pub_q.add(Q(video_id=o_id), Q(is_applicable_context_diagram=1), Q.AND)
                 q.add(Q(level=level), Q.AND)
                 if uid:
                     pub_q.add(Q(user_id=uid), Q.AND)
@@ -346,6 +346,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                         user_id=obj['user_id'],
                         video_id=video_id,
                         level=obj['level'],
+                        is_applicable_context_diagram=1
                     )
                     video_duration_stay = 0
                     for belonger_obj in belonger_objs:
@@ -356,6 +357,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                         user_id=obj['user_id'],
                         video_id=video_id,
                         level=int(level)+1,
+                        is_applicable_context_diagram=1
                     )
 
                     # print(obj['customer'], level, 'p-----> ', p)
@@ -401,7 +403,8 @@ def record_video_settings_oper(request, oper_type, o_id):
                 total_level_num_objs = models.zgld_video_to_customer_belonger.objects.select_related(
                     'video'
                 ).filter(
-                    video_id=video_id
+                    video_id=video_id,
+                    is_applicable_context_diagram=1
                 ).order_by('-level')
                 if total_level_num_objs:
                     total_level_num = total_level_num_objs[0].level
@@ -422,7 +425,7 @@ def record_video_settings_oper(request, oper_type, o_id):
         elif oper_type == 'query_all_users_video':
             uid = request.GET.get('uid')            # 用户ID
             q = Q()
-            q.add(Q(video_id=o_id), Q.AND)
+            q.add(Q(video_id=o_id), Q(is_applicable_context_diagram=1), Q.AND)
             objs = models.zgld_video_to_customer_belonger.objects.select_related('user').filter(
                 q,
             ).values('user_id','user__username').annotate(Count('id'))
