@@ -260,7 +260,7 @@ def record_video_settings_oper(request, oper_type, o_id):
             # if uid:
             #     q.add(Q(user_id=uid), Q.AND)
             q = Q()
-            q.add(Q(video_id=o_id), Q.AND)
+            q.add(Q(video_id=o_id), Q(is_applicable_context_diagram=1), Q.AND)
             objs = models.zgld_video_to_customer_belonger.objects.filter(q)
             if objs:
                 video_title = objs[0].video.title
@@ -274,6 +274,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                     init_q = Q()
                     init_q.add(Q(video_id=o_id), Q.AND)
                     init_q.add(Q(user_id=belonger_obj['user_id']), Q.AND)
+                    init_q.add(Q(is_applicable_context_diagram=1), Q.AND)
                     tmp = {}
                     tmp['name'] = belonger_obj['user__username']
                     children_data, num = init_data(init_q, 0, 0)
