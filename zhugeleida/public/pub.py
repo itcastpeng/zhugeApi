@@ -226,8 +226,9 @@ def pub_create_link_repost_video(user_id, video_id, company_id, pid):
     component_appid = qywx_config_dict.get('app_id')
     leida_http_url = qywx_config_dict.get('authorization_url')
 
-    scope = 'snsapi_userinfo'  # snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
-    state = 'snsapi_base'
+    # （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且， 即使在未关注的情况下，只要用户授权，也能获取其信息 ）
+    scope = 'snsapi_userinfo'  # snsapi_base
+    state = ''      # 自定义参数
     redirect_uri = '{}/zhugeleida/gongzhonghao/forwarding_video_jump_address?relate={}'.format(
         api_url,
         str(company_id) + '_' + str(video_id) + '_' + str(user_id) + '_' + str(pid)
