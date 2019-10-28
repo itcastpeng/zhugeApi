@@ -684,7 +684,7 @@ def user_gongzhonghao_redirect_share_url(request):
     if request.method == "GET":
         share_url = request.GET.get('share_url')
 
-        redirect_url = unquote(share_url, 'utf-8')
+        redirect_url = unquote(share_url.strip(), 'utf-8')
         print('-----------  文章分享之后, 客户打开让其跳转的 share_url是： -------->>', redirect_url)
         return redirect(redirect_url)
 
