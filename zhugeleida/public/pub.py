@@ -234,8 +234,7 @@ def pub_create_link_repost_video(user_id, video_id, company_id, pid):
         str(company_id) + '_' + str(video_id) + '_' + str(user_id) + '_' + str(pid)
     )
 
-    share_url = """https://open.weixin.qq.com/connect/oauth2/authorize?appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}#wechat_redirect
-                   """.format(
+    share_url = """https://open.weixin.qq.com/connect/oauth2/authorize?appid={}&redirect_uri={}&response_type=code&scope={}&state={}&component_appid={}#wechat_redirect""".format(
         authorization_appid,
         redirect_uri,
         scope,
