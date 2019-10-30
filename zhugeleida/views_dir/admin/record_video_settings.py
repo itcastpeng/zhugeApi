@@ -346,7 +346,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                         user_id=obj['user_id'],
                         video_id=video_id,
                         level=obj['level'],
-                        is_applicable_context_diagram=1
+                        # is_applicable_context_diagram=1
                     )
                     video_duration_stay = 0
                     for belonger_obj in belonger_objs:
@@ -379,7 +379,7 @@ def record_video_settings_oper(request, oper_type, o_id):
                         sex = '女'
 
                     data_list.append({
-                        "stay_time": conversion_seconds_hms(int(video_duration_stay)),
+                        "stay_time": conversion_seconds_hms(int(video_duration_stay)), # 阅读时长
                         "read_count": num,                                  # 阅读数量
 
                         "forward_friend_circle_count": num,                 # 转发到朋友圈
