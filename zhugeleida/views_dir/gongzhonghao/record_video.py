@@ -136,10 +136,10 @@ def record_video_oper(request, oper_type):
                         'create_date': obj.create_date.strftime('%Y-%m-%d %H:%M:%S'),   # 文章创建时间
                     }
                     is_phone = False
+                    data = request.GET.copy()
                     if video_id:
                         # 创建推送日志
                         remark = '{}》, 尽快追踪!!'.format('正在查看视频《' + obj.title)
-                        data = request.GET.copy()
                         data['action'] = 24
                         data['video_id'] = video_id
                         action_record(data, remark)  # 此步骤封装到 异步中。
@@ -155,6 +155,8 @@ def record_video_oper(request, oper_type):
                             }
                             log_obj = models.zgld_video_to_customer_belonger.objects.create(**video_belonger_data)
                             log_id = log_obj.id
+                            remark = '您好，很高兴为您服务，请问有什么可以帮您的呢？'
+                            action_record(data, remark)
 
 
                     result_data['is_phone'] = is_phone

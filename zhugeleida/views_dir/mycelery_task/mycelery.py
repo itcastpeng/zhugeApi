@@ -20,6 +20,7 @@ from publicFunc import deal_time, Response
 from publicFunc.data_statistics import statistical_objs
 from publicFunc.time_screen import time_screen
 from zhugeleida.public import pub
+from zhugeleida.public.common import action_record as action_record_send_user
 import datetime, json, os, sys, requests, random, redis, time, base64
 
 def action_record(data):
@@ -2542,6 +2543,21 @@ def binding_article_customer_relate(request):
                             customer_parent_id=parent_id,
                             level=level,
                         )
+                        # remark = '您好，很高兴为您服务，请问有什么可以帮您的呢？'
+                        # data = {
+                        #     'customer_id': customer_id,
+                        #     'user_id':user_id,
+                        #     'article_id':article_id,
+                        #     'action':action,
+                        # }
+                        # customer_id = request.GET.get('user_id')  # 客户 id
+                        # user_id = request.GET.get('uid')
+                        # article_id = request.GET.get('article_id')  # 客户 id
+                        # action = request.GET.get('action')
+                        # remark = request.GET.get('remark')
+                        # diary_id = request.GET.get('diary_id')  # 日记ID
+                        # video_id = request.GET.get('video_id')  # 视频ID
+                        # action_record_send_user(data, remark)
 
                 else:
 
@@ -2564,7 +2580,8 @@ def binding_article_customer_relate(request):
                                 customer_parent_id=parent_id,
                                 level=level,
                             )
-
+                            # remark = '您好，很高兴为您服务，请问有什么可以帮您的呢？'
+                            # action_record_send_user(data, remark)
                     else:
                         print('------- 创建[通讯录]关系 [zgld_user_customer_belonger]:customer_id|user_id  ------>>',
                               customer_id, "|", user_id)
